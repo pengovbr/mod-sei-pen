@@ -1,0 +1,254 @@
+<?xml version='1.0' encoding='UTF-8'?><schema xmlns:dig="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/componente-digital" xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/componente-digital">
+
+  <complexType name="cadeiaDoCertificado">
+    <annotation>
+      <documentation>
+        Cadeia do certificado da chave privada que gerou
+        a assinatura. Essa cadeia pode ser enviada nos
+        formatos PEM, DER, PKCS7, PKCS12 ou PFX.
+      </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="formato" use="required">
+          <simpleType>
+            <restriction base="string">
+              <enumeration value="PEM"/>
+              <enumeration value="DER"/>
+              <enumeration value="PKCS7"/>
+              <enumeration value="PKCS12"/>
+              <enumeration value="PFX"/>
+            </restriction>
+          </simpleType>
+        </attribute>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="hashDeAssinatura">
+    <annotation>
+      <documentation>
+        Hash gerado a partir do algoritmo informado
+        no atributo correspondente, codificado em Base64. Ex:
+        Input: 123456
+        Output: ujJTh2rta8ItSm/1PYQGxq2GQZXtFEq1yHYhtsIz
+        tUi66uaVbfNG7IwX9eoQ817jy8UUeX7X3dMUVGTioLq0Ew==
+      </documentation>
+    </annotation>
+    <simpleContent>
+	    <extension base="string">
+	      <attribute name="algoritmo" use="required">
+	        <simpleType>
+	          <restriction base="string">
+	            <enumeration value="NONEwithRSA"/>
+	            <enumeration value="MD2withRSA"/>
+	            <enumeration value="MD5withRSA"/>
+	            <enumeration value="SHA1withRSA"/>
+	            <enumeration value="SHA256withRSA"/>
+                <enumeration value="SHA384withRSA"/>
+                <enumeration value="SHA512withRSA"/>
+                <enumeration value="NONEwithDSA"/>
+                <enumeration value="SHA1withDSA"/>
+                <enumeration value="NONEwithECDSA"/>
+                <enumeration value="SHA1withECDSA"/>
+                <enumeration value="SHA256withECDSA"/>
+                <enumeration value="SHA384withECDSA"/>
+                <enumeration value="SHA512withECDSA"/>
+	          </restriction>
+	        </simpleType>
+	      </attribute>
+	    </extension>
+    </simpleContent>
+  </complexType>
+  
+  <simpleType name="tipoDeConteudo">
+    <annotation>
+      <documentation>
+        Define as categorias de conteúdo
+        de componente digital. Opções:
+        textual, imagem, audio, video e outro.
+      </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="txt"><annotation><documentation>Textual</documentation></annotation></enumeration>
+      <enumeration value="img"><annotation><documentation>Imagem</documentation></annotation></enumeration>
+      <enumeration value="aud"><annotation><documentation>Áudio</documentation></annotation></enumeration>
+      <enumeration value="vid"><annotation><documentation>Vídeo</documentation></annotation></enumeration>
+      <enumeration value="out"><annotation><documentation>Outro</documentation></annotation></enumeration>
+    </restriction>
+  </simpleType>
+  
+  <simpleType name="mimeType">
+    <annotation>
+      <documentation>
+        Enumera os tipos MIME permitidos.
+        Essa lista foi extraída dos tipos
+        permitidos do e-PING, para as
+        categorias aplicáveis ao trâmite
+        de processos administrativos.
+      </documentation>
+    </annotation>
+    <restriction base="string">
+      <enumeration value="application/pdf"/>
+      <enumeration value="application/vnd.oasis.opendocument.text"/>
+      <enumeration value="application/vnd.oasis.opendocument.formula"/>
+      <enumeration value="application/vnd.oasis.opendocument.spreadsheet"/>
+      <enumeration value="application/vnd.oasis.opendocument.presentation"/>
+      <enumeration value="text/xml"/>
+      <enumeration value="text/rtf"/>
+      <enumeration value="text/html"/>
+      <enumeration value="text/plain"/>
+      <enumeration value="text/csv"/>
+      <enumeration value="image/gif"/>
+      <enumeration value="image/jpeg"/>
+      <enumeration value="image/png"/>
+      <enumeration value="image/svg+xml"/>
+      <enumeration value="image/tiff"/>
+      <enumeration value="image/bmp"/>
+      <enumeration value="audio/mp4"/>
+      <enumeration value="audio/midi"/>
+      <enumeration value="audio/ogg"/>
+      <enumeration value="audio/vnd.wave"/>
+      <enumeration value="video/avi"/>
+      <enumeration value="video/mpeg"/>
+      <enumeration value="video/mp4"/>
+      <enumeration value="video/ogg"/>
+      <enumeration value="video/webm"/>
+      <enumeration value="outro">
+        <annotation>
+          <documentation>
+            Deve ser usado apenas para componentes que
+            não se encaixem em nenhum outro mimeType dessa
+            lista. A utilização desse item obriga o
+            preenchimento do campo 'dadosComplementaresDoTipoDeArquivo'.
+          </documentation>
+        </annotation>
+      </enumeration>
+    </restriction>
+  </simpleType>
+  
+  <simpleType name="dadosComplementaresDoTipoDeArquivo">
+  	<annotation>
+  	  <documentation>
+  	    Instruções para garantir que o receptor do
+  	    componente digital consiga acessar o conteúdo
+  	    do artefato. Pode conter versões e nomes de
+  	    softwares, bem como configurações ou plugins
+  	    específicos, caso aplicável. Pode ser informado
+  	    em complemento ao 'mimeType', se este for
+  	    um dos tipos previstos na solução, ou deve ser
+  	    obrigatoriamente informado se o 'mimeType'
+  	    for identificado como 'outro'.
+  	  </documentation>
+  	</annotation>
+  	<restriction base="string">
+  	  <minLength value="1"/>
+  	  <maxLength value="1000"/>
+  	</restriction>
+  </simpleType>
+
+  <complexType name="hash">
+    <annotation>
+      <documentation>
+        Hash gerado a partir do algoritmo informado
+        no atributo correspndente, codificado em Base64. Ex:
+        Input: 123456
+        Output: ujJTh2rta8ItSm/1PYQGxq2GQZXtFEq1yHYhtsIz
+        tUi66uaVbfNG7IwX9eoQ817jy8UUeX7X3dMUVGTioLq0Ew==
+      </documentation>
+    </annotation>
+    <simpleContent>
+      <extension base="string">
+        <attribute name="algoritmo" use="required">
+          <simpleType>
+            <restriction base="string">
+              <enumeration value="SHA256"/>
+            </restriction>
+          </simpleType>
+        </attribute>
+      </extension>
+    </simpleContent>
+  </complexType>
+
+  <complexType name="componenteDigital">
+    <annotation>
+      <documentation>
+        Representa um arquivo binário. Normalmente
+        este arquivo binário está atrelado a um
+        documento, que pode, por sua vez, ser uma
+        peça de um processo ou um documento avulso.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="nome">
+        <simpleType>
+          <restriction base="string">
+            <minLength value="1"/>
+            <maxLength value="100"/>
+          </restriction>
+        </simpleType>
+      </element>
+      <element name="hash" type="dig:hash"/>
+      <element name="tipoDeConteudo" type="dig:tipoDeConteudo"/>
+      <element name="mimeType" type="dig:mimeType"/>
+      <element minOccurs="0" name="dadosComplementaresDoTipoDeArquivo" type="dig:dadosComplementaresDoTipoDeArquivo"/>
+      <element name="tamanhoEmBytes" type="long"/>
+      <element name="ordem" type="integer">
+        <annotation>
+          <documentation>
+            Ordem desse componente digital dentro
+            do artefato que o contém.
+          </documentation>
+        </annotation>
+      </element>
+      <element maxOccurs="unbounded" minOccurs="0" name="assinaturaDigital" type="dig:assinaturaDigital"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="assinaturaDigital">
+    <annotation>
+      <documentation>
+        Dados que certificam que uma determinada entidade
+        assinou digitalmente alguma cadeia binária, que
+        deve estar presente no contexto deste elemento.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element minOccurs="0" name="dataHora" type="dateTime"/>
+      <element name="cadeiaDoCertificado" type="dig:cadeiaDoCertificado"/>
+      <element name="hash" type="dig:hashDeAssinatura"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="parteDeComponenteDigital">
+    <annotation>
+      <documentation>
+        Representa uma faixa de bytes, por exemplo: 10-50.
+        O primeiro valor é o início da faixa, e o segundo,
+        o fim. Considera-se índices iniciados em zero, ou seja,
+        0-10 significa os primeiros 10 bytes do componente.
+        Essa definição também indica que o segundo número é
+        exclusivo, ou seja, o byte representado pelo seu valor
+        *não* é retornado: a faixa 0-1 traz apenas 1 byte, e não
+        2. Exemplo utilizando notação matemática: "[0-1[".
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="inicio">
+        <simpleType>
+          <restriction base="integer">
+            <minInclusive value="0"/>
+          </restriction>
+        </simpleType>
+      </element>
+      <element name="fim">
+        <simpleType>
+          <restriction base="integer">
+            <minInclusive value="0"/>
+          </restriction>
+        </simpleType>
+      </element>
+    </sequence>
+  </complexType>
+
+</schema>

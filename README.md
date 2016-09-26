@@ -1,24 +1,24 @@
-# Command line instructions
+# Módulo de Integração do SEI com o Barramento de Serviços do PEN
 
-Git global setup
+Procedimentos para colaborar com o desenvolvimento do módulo.
 
-	git config --global user.name "seu nome"
-	git config --global user.email "seu email"
+1. Baixe os códigos-fontes do SEI na versão compatível com o módulo
+2. Crie o diretório sei/institucional, caso ainda não exista, para receber os códigos do módulo
+3. No diretório sei/institucional faça o clone do projeto
+4. Configure o módulo nos arquivos de configuração do SEI, seção SEI > Modulos
+```php
+    'Modulos' => array('PEN' => dirname(__FILE__).'/institucional/mod-sei-barramento')
+```
+5. Copie os arquivos de atualização do banco de dados do módulos para os devidos sistemas.
+    * Copiar o arquivo "sei_atualizar_versao_modulo_pen.php" para a pasta sei
+    * Copiar o arquivo "sip_atualizar_versao_modulo_pen.php" para a pasta sip
 
-Create a new repository
-
-	git clone http://git.planejamento.gov.br/<nome_do_grupo>/<nome_repositorio>
-	cd <nome_repositorio>
-	touch README.md
-	git add README.md
-	git commit -m "add README"
-	git push -u origin <nome_da_branch>
-
-Existing folder or Git repository
-
-	cd existing_folder
-	git init
-	git remote add origin http://git.planejamento.gov.br/<nome_do_grupo>/<nome_repositorio>
-	git add .
-	git commit
-	git push -u origin <nome_da_branch>
+6. Execute a atualização do banco de dados do SEI e SIP
+* Executar o script "sip_atualizar_versao_modulo_pen.php" para atualizar o banco de dados do SIP para o funcionamento do módulo:
+```bash
+    php sip_atualizar_versao_modulo_pen.php
+```
+* Executar o script "sei_atualizar_versao_modulo_pen.php" para inserção de dados no banco do SEI referente as funcionalidades desenvolvidas no módulo.
+```bash
+	php sei_atualizar_versao_modulo_pen.php
+```

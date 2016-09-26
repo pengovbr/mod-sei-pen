@@ -1,0 +1,151 @@
+========================================================================================================================================
+Módulo PEN 
+Data de criação: 27/05/2016
+Data de atualizaçao: 20/07/2016
+Desenvolvimento: Join Tecnologia 
+Versão: 0.0.3
+=======================================================================================================================================
+
+========================================================================================================================================
+PROCEDIMENTOS PARA INSTALAÇÃO:
+========================================================================================================================================
+
+REQUISITOS PARA INSTALAÇÂO:
+	- SEI 2.6.0.A9 instalada (verificar valor da constante de versão do SEI no arquivo sei/SEI.php).
+	- O usuário de acesso ao banco de dados do SEI e SIP, constante nos arquivos ConfiguracaoSEI.php e ConfiguracaoSip.php, deverá ter permissão de acesso total ao banco de dados, permitindo, por exemplo, criação e exclusão de tabelas.
+	- *** Até que as alterações realizadas no CORE do SEI sejam incluídas na versão de referencia (TRF4), os arquivos de codigo-fonte enviados juntamente com este modulo (arquivos_core_sei.tar.gz) deverão sobrescrever os arquivos existentes. Portanto, comece realizando este passo. ***
+	
+
+PROCEDIMENTOS PARA INSTALAÇÂO:
+
+	1) Fazer backup dos banco de dados do SEI e SIP e do filesystem.
+	
+	2) Instalar o gearmand e o supervisord no servidor que será responsável por tratar o agendamento de tarefas no sistema. É recomendado que seja no mesmo nó em que está configurado o CRON de agendamento principal do SEI.
+				
+		# Pre-requisito. Caso contrario, os demais pacotes nao sao encontrados no CentOS7		
+		yum install epel-release
+
+		# Instalação do Gearman e supervisord		
+		yum install supervisor gearmand libgearman libgearman-devel php-pecl-gearman
+		
+	3) Configuração do supervisor. No parametro 'user' abaixo deve ser configurado o usuario que executa o servidor web (verifique no seu servidor qual é o usuario. Ex.: apache)
+
+		vi /etc/supervisord.conf
+
+		# Adicione no final do arquivo
+
+		[program:sei_processar_pendencias]
+		command=/usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/ProcessarPendenciasRN.php
+		numprocs=1
+		directory=/var/www/html/sei/
+		user=XXXXX
+		autostart=true
+		autorestart=true
+		stdout_logfile=/tmp/sei.log
+		stdout_logfile_maxbytes=1MB
+		stderr_logfile=/tmp/sei_error.log
+		stderr_logfile_maxbytes=1MB
+
+		[program:sei_monitorar_pendencias]
+		command=/usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/PendenciasTramiteRN.php
+		numprocs=1
+		directory=/var/www/html/sei/
+		user=XXXXX
+		autostart=true
+		autorestart=true
+		stdout_logfile=/tmp/sei.log
+		stdout_logfile_maxbytes=1MB
+		stderr_logfile=/tmp/sei_error.log
+
+	4) Editar o arquivo "sei/ConfiguracaoSEI.php", tomando o cuidado de usar editor que não altere o charset do arquivo, para adicionar a referência ao módulo PEN na chave 'Modulos' abaixo da chave 'SEI': 	Atenção para as virgulas nos finais das linhas
+
+		'SEI' => array(
+			'URL' => 'http://[servidor sei]/sei',
+			'Producao' => true,
+			'RepositorioArquivos' => '/var/sei/arquivos',
+			'Modulos' => array(),
+			),
+		
+		Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acima:
+			
+			'Modulos' => array('PEN' => dirname(__FILE__).'/institucional/pen'),
+		
+
+	5) Criar o diretório "sei/institucional" (caso ainda não exista) e mover todo o diretório "pen" para dentro de "sei/institucional".
+
+	6) Colocar o arquivo do certificado digital no diretorio "sei/institucional/pen/"
+		- Na fase de homologação o certificado que deve ser usado é o ORGAOall.pem.
+
+	7) Copiar o arquivo "sei_atualizar_versao_modulo_pen.php" para a pasta sei
+
+	8) Copiar o arquivo "sip_atualizar_versao_modulo_pen.php" para a pasta sip 
+	 	
+	9) Executar o script "sip_atualizar_versao_modulo_pen.php" para atualizar o banco de dados do SIP para o funcionamento do módulo:
+            
+		php sip_atualizar_versao_modulo_pen.php
+            
+	10) Executar o script "sei_atualizar_versao_modulo_pen.php" para inserção de dados no banco do SEI referente as funcionalidades desenvolvidas no módulo.
+		
+		php sei_atualizar_versao_modulo_pen.php
+        
+		
+	11) CONFIGURAR OS PARÂMETROS DO MÓDULO PEN (Menu: Infra > Parametros)
+	
+		=> PEN_ENDERECO_WEBSERVICE:  Endereço do WebService do barramento 
+			- Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v1_1/
+
+		=> PEN_ENDERECO_WEBSERVICE_PENDENCIAS: Endereço da api de pendências do barramento
+			- Homologação: https://homolog.pen.pendencias.trafficmanager.net/
+
+		=> PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO: Padrão N
+			
+
+		=> PEN_ID_REPOSITORIO_ORIGEM: ID do repositório de origem do órgão na estrutura organizacional (ID gerado pelo Barramento)
+			- Homologação: SIORG = 1
+
+		=> PEN_LOCALIZACAO_CERTIFICADO_DIGITAL: Localização do certificado digital o órgão 
+			- Arquivo do passo 6
+			
+		=> PEN_SENHA_CERTIFICADO_DIGITAL: Senha do certificado digital 
+			- Na fase de homologação a senha padrão do certificado é 1234
+
+		=> PEN_TIPO_PROCESSO_EXTERNO: Id do tipo de documento externo 
+			- Criar um Tipo de Processo (Administraçao > Tipos de Processo > Novo) externo genérico e OBRIGATORIAMENTE incluir uma Sugestão de Assunto (ex.: 900-Assuntos Diversos).
+
+		=> PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO: Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão. 
+
+		
+	12) Certificar se o SEI está habilitado para permitir criação de processo com numeração informada. Esta configuração é obrigatória para o funcionamento do módulo PEN.
+	    
+		=> SEI_HABILITAR_NUMERO_PROCESSO_INFORMADO: 2
+		
+
+        13) Realizar o mapeamento de tipos de documentos do SEI com as especies documentais do Barramento, tanto de envio quanto de recebimento. Esta configuração deve ser feita antes de começar a utilização do módulo.
+		"Administração" => "Tipos de Documentos" => "Mapeamento de Tipos de Documento" => "Recebimento" => "Cadastrar".
+		"Administração" => "Tipos de Documentos" => "Mapeamento de Tipos de Documento" => "Envio" => "Cadastrar".
+
+	Obs.: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
+
+
+	14) Atualizar a tabela pen_unidade com os seus respectivos valores do campo "id_unidade_rh".
+		- Esses ID's de unidades são gerenciados pelo próprio orgão no Portal do Barramento: http://homolog.pen.portal.trafficmanager.net/
+		- Na fase de homologação esses valores serão passados pela DTI/MP
+
+
+	15) Iniciar Gearman e Supervisor
+		service gearmand start && service supervisord start
+
+		* Executar o comando "ps -ef" e verificar se os dois processos seguintes estão em execução: 
+		- /usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/PendenciasTramiteRN.php
+		- /usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/ProcessarPendenciasRN.php
+		Caso não esteja houve algum problema de configuração e a expedição de processos não irá funcionar. 
+		
+		* Importante colocar o serviço para ser iniciado automaticamente juntamente com o servidor. 
+		
+	16) Dentro da pasta sei/institucional/pen existe um arquivo chamado "verificar-servicos.sh" que faz a verificação dos serviços do gearmand e do supervisord. 
+	    Sugerimos que seja cadastrado um agendamento no CRON para rodar esse serviço periodicamente.
+
+	17) O Barramento de PEN ao calcular os hashs para gerar recibos de tramite, leva em consideração a data/horário. Portanto é importante que todos os nós da aplicação esteja sincronizados com o NTP.br.
+		Este link pode ajudar a configurar conforme o SO utilizado: https://www.vivaolinux.com.br/artigo/Servidor-NTP-Configuracao-e-ajuste-de-data-e-hora
+
+

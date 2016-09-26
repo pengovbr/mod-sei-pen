@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?><schema xmlns:pro="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/processo" xmlns:doc="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/documento" xmlns:com="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/comum" xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/processo">
+
+  <import namespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/comum" schemaLocation="comum.xsd"/>
+  <import namespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/documento" schemaLocation="documento.xsd"/>
+
+  <complexType name="processo">
+    <annotation>
+      <documentation>
+        Processo administrativo. Objeto que pode ser
+        tramitado pelo serviço. Encapsula todos os
+        dados estruturados de acordo com este modelo.
+      </documentation>
+    </annotation>
+    <sequence>
+    
+      <element name="protocolo" type="com:protocolo"/>
+      <element name="nivelDeSigilo" type="com:nivelDeSigilo"/>
+      <element name="produtor" type="com:produtor"/>
+      <element minOccurs="0" name="processoDeNegocio" type="com:processoDeNegocio"/>
+      <element name="descricao" type="com:descricao"/>
+      <element name="dataHoraDeProducao" type="dateTime"/>
+      <element name="dataHoraDeRegistro" type="dateTime"/>
+      <element minOccurs="0" name="dataHoraDeEncerramento" type="dateTime"/>
+    
+      <element maxOccurs="unbounded" minOccurs="0" name="processoApensado" type="pro:processo">
+        <annotation>
+          <documentation>
+            Lista de processos apensados ao processo principal.
+            É uma recursão ao tipo do processo principal, garantindo
+            assim um comportamento hierárquico.
+          </documentation>
+        </annotation>
+      </element>
+      
+      <element maxOccurs="unbounded" name="documento" type="doc:documentoDoProcesso">
+        <annotation>
+          <documentation>
+            São as peças do processo. Cada documento é representado
+            pelos seus metadados e pelo conjunto de componentes digitais.
+            Cada componente digital representa um arquivo binário
+            que compõe o documento, e que, por decorrência, precisa ser
+            enviado ao destinatário.
+          </documentation>
+        </annotation>
+      </element>
+      
+      <element maxOccurs="unbounded" minOccurs="0" name="protocoloAnterior" type="com:protocoloAnterior"/>
+      <element minOccurs="0" name="historico" type="com:historico"/>
+      <element maxOccurs="unbounded" name="interessado" type="com:interessado"/>
+      
+    </sequence>
+  </complexType>
+  
+</schema>

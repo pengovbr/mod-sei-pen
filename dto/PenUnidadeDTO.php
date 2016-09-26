@@ -1,0 +1,50 @@
+<?php
+
+require_once dirname(__FILE__) . '/../../../SEI.php';
+
+/**
+ * Cria uma tabela de relação 1 para 1 para unidade com o intuito de adicionar
+ * novos campos de configuração para cada unidade utilizado somente pelo módulo
+ * PEN
+ * 
+ * Crio a classe com extendida de UnidadeDTO em função dos métodos de UnidadeRN,
+ * que força o hinting para UnidadeDTO, então não gera erro usar PenUnidadeDTO
+ * com o UnidadeBD e UnidadeRN
+ * 
+ * @author Join Tecnologia
+ * @see http://php.net/manual/pt_BR/language.oop5.typehinting.php
+ */
+class PenUnidadeDTO extends UnidadeDTO {
+
+    public function getStrNomeTabela() {
+        return 'md_pen_unidade';
+    }
+    
+    public function montar() {
+        
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade'); 
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh'); 
+        $this->configurarPK('IdUnidade',InfraDTO::$TIPO_PK_INFORMADO);
+        
+        // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
+        // esta na InfraDTO e ela confunde em função do extends, então tenho que 
+        // criar uma nova instância
+        $objDTO = new UnidadeDTO();
+        $objDTO->retTodos();
+        
+        foreach($objDTO->getArrAtributos() as $arrAtrib) {
+            
+            if($arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO] != 'IdUnidade') {
+            
+                $this->adicionarAtributoTabelaRelacionada(
+                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO], 
+                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_NOME], 
+                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_CAMPO_SQL], 
+                    $objDTO->getStrNomeTabela()
+                );
+            }
+        }     
+
+        $this->configurarFK('IdUnidade', 'unidade', 'id_unidade');  
+    }
+}

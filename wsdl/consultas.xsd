@@ -1,0 +1,245 @@
+<?xml version='1.0' encoding='UTF-8'?><schema xmlns:cons="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/consultas" xmlns:com="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/comum" xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/consultas">
+  
+  <import namespace="http://pen.planejamento.gov.br/interoperabilidade/soap/v1_1/comum" schemaLocation="comum.xsd"/>
+  
+  <complexType name="filtroDeConsultaDeTramites">
+    <annotation>
+      <documentation>
+        Usado para filtrar os trâmites buscados
+        no serviço correspondente.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element minOccurs="0" name="IDT" type="com:IDT"/>
+      <element minOccurs="0" name="NRE" type="com:NRE"/>
+      <element minOccurs="0" name="remetente" type="com:estruturaOrganizacional"/>
+      <element minOccurs="0" name="destinatario" type="com:estruturaOrganizacional"/>
+      <element minOccurs="0" name="situacaoAtual" type="integer"/>
+      <element minOccurs="0" name="periodo" type="com:periodo"/>
+      <element minOccurs="0" name="protocolo" type="com:protocolo"/>
+      <element minOccurs="0" name="paginacao" type="com:paginacao"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="tramitesEncontrados">
+    <annotation>
+      <documentation>
+        Objeto usado na resposta da consulta de trâmites.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element maxOccurs="unbounded" minOccurs="0" name="tramite">
+        <complexType>
+         <sequence>
+          <element name="IDT" type="com:IDT"/>
+          <element name="NRE" type="com:NRE"/>
+	        <element minOccurs="0" name="remetente" type="com:estruturaOrganizacional"/>
+	        <element minOccurs="0" name="destinatario" type="com:estruturaOrganizacional"/>
+	        <element minOccurs="0" name="situacaoAtual" type="integer"/>
+	        <element name="protocolo" type="com:protocolo"/>
+	        <element minOccurs="0" name="justificativaDaRecusa" type="com:justificativaDaRecusaDeTramite"/>
+	        <element minOccurs="0" name="motivoDaRecusa" type="com:motivoDaRecusaDeTramite"/>
+	        <element minOccurs="0" name="historico">
+	          <complexType>
+	            <sequence>
+	              <element maxOccurs="unbounded" minOccurs="0" name="operacao">
+	                <complexType>
+	                  <sequence>
+                      <element name="situacao" type="integer"/>
+                      <element name="dataHora" type="dateTime"/> 
+	                  </sequence>
+	                </complexType>
+                </element>
+	            </sequence>
+	          </complexType>
+	        </element>
+            <element maxOccurs="unbounded" minOccurs="0" name="componenteDigitalPendenteDeEnvio" type="string"/>
+            <element maxOccurs="unbounded" minOccurs="0" name="componenteDigitalPendenteDeRecebimento" type="string"/>
+         </sequence>
+        </complexType>
+      </element>
+      <element name="totalDeRegistros" type="long"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="filtroDeConsultaDeRepositoriosDeEstrutura">
+    <annotation>
+      <documentation>
+        Objeto usado no serviço de consulta de
+        repositórios de estruturas.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element minOccurs="0" name="ativos" type="boolean">
+        <annotation>
+          <documentation>
+            Indica se os repositórios inativos devem ser retornados.
+            Por padrão, eles não aparecem no retorno dessa consulta.
+          </documentation>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="repositoriosEncontrados">
+    <annotation>
+      <documentation>
+        Retorno do serviço de busca de
+        repositórios de estruturas.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element maxOccurs="unbounded" minOccurs="0" name="repositorio">
+        <complexType>
+          <sequence>
+           <element name="id" type="string"/>
+           <element name="nome" type="string"/>
+           <element name="ativo" type="boolean"/>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="filtroDeEstruturasPorEstruturaPai">
+    <annotation>
+      <documentation>
+        Objeto usado para filtrar estruturas organizacionai
+        na consulta hierárquica.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="identificacaoDoRepositorioDeEstruturas" type="com:identificacaoDoRepositorioDeEstruturas"/>
+      <element minOccurs="0" name="numeroDeIdentificacaoDaEstrutura" type="com:numeroDeIdentificacaoDaEstrutura">
+        <annotation>
+          <documentation>
+            Estrutura organizacional a ser considerada como filtro.
+            Se informada, o serviço retorna todas as estruturas
+            diretamente filhas. Se não informada, as estruturas raíz
+            do repositório são retornadas. 
+          </documentation>
+        </annotation>
+      </element>
+      <element minOccurs="0" name="apenasAtivas" type="boolean">
+        <annotation>
+          <documentation>
+            Indica se as estruturas inativas devem ser suprimidas da resposta.
+            Por padrão, elas não aparecem no retorno da consulta.
+          </documentation>
+        </annotation>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="estruturasEncontradasNoFiltroPorEstruturaPai">
+    <annotation>
+      <documentation>
+        Coleção de estruturas organizacionais encontradas
+        na consulta de estruturas por estrutura pai.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element maxOccurs="unbounded" minOccurs="0" name="estrutura">
+        <complexType>
+          <sequence>
+            <element name="numeroDeIdentificacaoDaEstrutura" type="com:numeroDeIdentificacaoDaEstrutura"/>
+            <element name="nome" type="string"/>
+            <element name="sigla" type="string"/>
+            <element name="ativo" type="boolean"/>
+            <element name="aptoParaReceberTramites" type="boolean"/>
+            <element minOccurs="0" name="codigoNoOrgaoEntidade" type="string"/>
+          </sequence>
+        </complexType>
+      </element>
+    </sequence>
+  </complexType>
+  
+  <complexType name="filtroDeEstruturas">
+    <annotation>
+      <documentation>
+        Opções de filtro para o serviço de busca
+        de estruturas dentro dos repositórios.
+        O intuito desse serviço é ser utilizado
+        como backend de grade com formulário de filtro.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element name="identificacaoDoRepositorioDeEstruturas" type="com:identificacaoDoRepositorioDeEstruturas"/>
+      <element minOccurs="0" name="numeroDeIdentificacaoDaEstrutura" type="com:numeroDeIdentificacaoDaEstrutura"/>
+      <element minOccurs="0" name="nome" type="string"/>
+      <element minOccurs="0" name="sigla" type="string"/>
+      <element minOccurs="0" name="numeroDeIdentificacaoDaEstruturaRaizDaConsulta" type="com:numeroDeIdentificacaoDaEstrutura">
+        <annotation>
+          <documentation>
+            Se um número de identificação for informado nessa
+            opção de filtro, o serviço irá considerar na sua 
+            busca apenas as estruturas que estão em níveis 
+            inferiores a estrutura correspondente. Essa funcionalidade
+            é útil para que seja possível utilizar um componente
+            do tipo "árvore" para permitir que o usuário defina
+            o "escopo" da busca por nome e sigla.
+          </documentation>
+        </annotation>
+      </element>
+      <element minOccurs="0" name="apenasAtivas" type="boolean">
+        <annotation>
+          <documentation>
+            Indica se as estruturas inativas devem ser suprimidas da resposta.
+            Por padrão, elas não aparecem no retorno da consulta.
+          </documentation>
+        </annotation>
+      </element>
+      <element minOccurs="0" name="paginacao" type="com:paginacao"/>
+    </sequence>
+  </complexType>
+  
+  <complexType name="estruturasEncontradas">
+    <annotation>
+      <documentation>
+        Objeto que encapsula o conjunto de estruturas
+        organizacionais encontradas no filtro.
+      </documentation>
+    </annotation>
+    <sequence>
+      <element maxOccurs="unbounded" minOccurs="0" name="estrutura">
+        <complexType>
+          <sequence>
+            <element name="numeroDeIdentificacaoDaEstrutura" type="com:numeroDeIdentificacaoDaEstrutura"/>
+            <element name="nome" type="string"/>
+            <element name="sigla" type="string"/>
+            <element name="ativo" type="boolean"/>
+            <element name="aptoParaReceberTramites" type="boolean"/>
+            <element minOccurs="0" name="codigoNoOrgaoEntidade" type="string"/>
+            <element minOccurs="0" name="hierarquia">
+              <annotation>
+                <documentation>
+                  Representa os níveis hierárquicos que estão
+                  acima da estrutura encontrada. É útil para 
+                  discernir departamentos com nomes e siglas
+                  iguais ou bem similares. Essa lista é ordenada
+                  de baixo para cima, do nível imediatamente
+                  superior a estrutura até a raíz do repositório.
+                </documentation>
+              </annotation>
+              <complexType>
+                <sequence>
+                  <element maxOccurs="unbounded" minOccurs="0" name="nivel">
+                    <complexType>
+                      <sequence>
+                        <element name="numeroDeIdentificacaoDaEstrutura" type="com:numeroDeIdentificacaoDaEstrutura"/>
+                        <element name="nome" type="string"/>
+                        <element name="sigla" type="string"/>
+                      </sequence>
+                    </complexType>
+                  </element>
+                </sequence>
+              </complexType>
+            </element>
+          </sequence>
+        </complexType>
+      </element>
+      <element name="totalDeRegistros" type="long"/>
+    </sequence>
+  </complexType>
+  
+</schema>
