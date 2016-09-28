@@ -77,7 +77,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'dth_recebimento' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
-                'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
+                'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO)
             ),
             'pk' => array('numero_registro', 'id_tramite')   
         ));
@@ -125,7 +125,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_registro' => array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'dth_recebimento' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
-                'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
+                'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO),
                 'cadeia_certificado' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
             'pk' => array('numero_registro', 'id_tramite'),
@@ -140,7 +140,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'dth_recebimento'=> array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
-                'hash_assinatura'=> array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
+                'hash_assinatura'=> array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO),
                 'cadeia_certificado ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
             'pk' => array('numero_registro', 'id_tramite'),
@@ -155,7 +155,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'dth_recebimento'=> array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
-                'hash_assinatura'=> array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
+                'hash_assinatura'=> array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO)
             ),
             'pk' => array('numero_registro', 'id_tramite', 'hash_assinatura'),
             'fks' => array(
