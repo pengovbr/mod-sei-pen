@@ -1069,7 +1069,7 @@ class ProcessoEletronicoRN extends InfraRN {
         }
     }
 
-    public function enviarReciboDeTramite($parNumIdTramite, $parDthRecebimento, $parStrReciboTramite) 
+  public function enviarReciboDeTramite($parNumIdTramite, $parDthRecebimento, $parStrReciboTramite) 
   {
     try
     {    
@@ -1080,8 +1080,6 @@ class ProcessoEletronicoRN extends InfraRN {
         throw new InfraException("Erro ao obter chave privada do certificado digital.");                
       }
 
-    //  $recibo =  $parStrReciboTramite;
-      
       
       openssl_sign($parStrReciboTramite, $strHashAssinatura, $objPrivatekey, 'sha256');    
       $strHashDaAssinaturaBase64 = base64_encode($strHashAssinatura);
@@ -1092,9 +1090,10 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametro->dadosDoReciboDeTramite->dataDeRecebimento = $parDthRecebimento;
       $parametro->dadosDoReciboDeTramite->hashDaAssinatura = $strHashDaAssinaturaBase64;
       
-     // throw new InfraException('TESTE '.var_export($parametro, true)." DELIMITADOR ".$recibo);
       
-      return $this->getObjPenWs()->enviarReciboDeTramite($parametro);
+      $this->getObjPenWs()->enviarReciboDeTramite($parametro);
+      
+      return $strHashDaAssinaturaBase64;
 
     } catch (\SoapFault $fault) {
         

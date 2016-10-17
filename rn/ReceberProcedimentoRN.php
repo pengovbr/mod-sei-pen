@@ -887,7 +887,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objInteressado = $arrObjInteressados[$i];
           $objParticipanteDTO  = new ParticipanteDTO();
           $objParticipanteDTO->setStrSiglaContato($objInteressado->numeroDeIdentificacao);
-          $objParticipanteDTO->setStrNomeContato($objInteressado->nome);
+          $objParticipanteDTO->setStrNomeContato(utf8_decode($objInteressado->nome));
           $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_INTERESSADO);
           $objParticipanteDTO->setNumSequencia($i);
           $arrObjParticipantesDTO[] = $objParticipanteDTO;
@@ -1102,7 +1102,7 @@ class ReceberProcedimentoRN extends InfraRN
               $objProtocoloDTO->setStrDescricao(utf8_decode($objDocumento->descricao));
               $objDocumentoDTO->setStrNumero(utf8_decode($objDocumento->descricao));
           }else{
-               $objProtocoloDTO->setStrDescricao("");
+              $objProtocoloDTO->setStrDescricao("");
               $objDocumentoDTO->setStrNumero("");
           }
             //TODO: Avaliar regra de formação do número do documento

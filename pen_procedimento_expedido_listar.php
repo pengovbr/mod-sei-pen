@@ -20,7 +20,7 @@ try {
     $objFiltroDTO = new ProtocoloDTO();
     $objFiltroDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
     $objFiltroDTO->setNumIdTarefaAtividade(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
-    $objFiltroDTO->setDistinct(true);
+   // $objFiltroDTO->setDistinct(true);
     $objFiltroDTO->retDblIdProtocolo();
     $objFiltroDTO->retStrProtocoloFormatado();
     
@@ -53,7 +53,7 @@ try {
         if(!empty($arrObjProcessoExpedidoDTO)) {
             
             $arrObjProcessoExpedidoDTO = InfraArray::distinctArrInfraDTO($arrObjProcessoExpedidoDTO, 'IdProtocolo');
-            
+
             $numRegistros = count($arrObjProcessoExpedidoDTO);
         } 
     }

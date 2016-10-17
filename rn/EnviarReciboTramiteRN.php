@@ -94,9 +94,6 @@ class EnviarReciboTramiteRN extends InfraRN
     if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
       return;
     }
-    
-    
-
 
     //TODO: Verificar necessidade de dessa validação
     //Verificar se todos os componentes digitais foram obtidos e validados
@@ -119,94 +116,10 @@ class EnviarReciboTramiteRN extends InfraRN
     //}
 
     //TODO: Analisar necessidade do tratamento de datas abaixo já que todos os servidores que integrarem ao PEN deverão estar sincronizados 
-    //com o 
     $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);    
     $dthRecebimentoComponentesDigitais = $dthRecebimentoComponentesDigitais ?: date();
     $dthRecebimento = gmdate("Y-m-d\TH:i:s.000\Z", InfraData::getTimestamp($dthRecebimentoComponentesDigitais));
 
-//    if($parArrObjComponenteDigitalDTO == null) { 
-//      $parArrObjComponenteDigitalDTO = $this->listarComponenteDigitalDTO($parNumIdTramite);
-//    }
-//    $arrHashConteudo = InfraArray::converterArrInfraDTO($parArrObjComponenteDigitalDTO, 'HashConteudo', null);
-//    sort($arrHashConteudo);
-//
-//    // @join_tec US008.11 (#23092)
-//    if(empty($arrHashConteudo)) {
-//        // Caso de retrasmição os componentes digitais não são reenviados, então
-//        // não é gravado o recibo. Adicionamos alguma possição no array para 
-//        // gravar pelo menos um recibo.
-//        $arrHashConteudo[] = '';
-//    }   
-    
-    //Busca os metadados do processo
-   /* $objMetaRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
-    
-    //Obtem os dados necessários para consultar os trâmites relacionados a unidade destinatário e ao processo recebido    
-    $parProtocolo = $objMetaRetorno->metadados->processo->protocolo;
-    $parNumeroUnidadeDestino = $objMetaRetorno->metadados->destinatario->numeroDeIdentificacaoDaEstrutura;
-    $parNumeroRepositorioEstruturas = $objMetaRetorno->metadados->destinatario->identificacaoDoRepositorioDeEstruturas;
-        
-    //Consulta os trâmites relacionados
-    $arrObjTramites = new $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite, null, null, $parNumeroUnidadeDestino, $parProtocolo, $parNumeroRepositorioEstruturas);
-    $arrObjTramites = is_array($arrObjTramites->tramitesEncontrados->tramite) ? $arrObjTramites->tramitesEncontrados->tramite : array($arrObjTramites->tramitesEncontrados->tramite); 
-    
-    $arrTramitesAnteriores = array();
-    
-    foreach($arrObjTramite as $tramiteAntigo){
-        if($tramiteAntigo->IDT != $parNumIdTramite){
-            $arrTramitesAnteriores[] = $tramiteAntigo;
-        }
-    }
-    
-    $arrHashTramitesAnteriores = array();
-    
-    foreach($arrTramitesAnteriores as $tramiteAntigo){
-        
-        //Solicita os metadados desse trâmite
-        $objMetaTramiteAntigo = $this->objProcessoEletronicoRN->solicitarMetadados($tramiteAntigo);
-        
-        //Transforma os documento em um array
-        $arrDocumentosTramiteAntigo = is_array($objMetaTramiteAntigo->metadados->processo->documento) ? $objMetaTramiteAntigo->metadados->processo->documento : array($objMetaTramiteAntigo->metadados->processo->documento);
-        
-        
-    }
-    
-    
-    */
-    
-    /*
-     $arrStrHashConteudo = array();
-        
-        $objMetaRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
-        
-        $objMetaProcesso = $objMetaRetorno->metadados->processo;
-
-        $arrObjMetaDocumento = is_array($objMetaProcesso->documento) ? $objMetaProcesso->documento : array($objMetaProcesso->documento);
-        
-        $objDTO = new ComponenteDigitalDTO();
-        $objBD = new ComponenteDigitalBD($this->inicializarObjInfraIBanco());
-        
-        foreach($arrObjMetaDocumento as $objMetaDocumento) {
-            
-            $strHashConteudo = ProcessoEletronicoRN::getHashFromMetaDados($objMetaDocumento->componenteDigital->hash);
-            
-            $objDTO->setStrHashConteudo($strHashConteudo);
-            
-            if($objBD->contar($objDTO) > 0) {
-                
-                $arrStrHashConteudo[] = $strHashConteudo;
-            }
-        }
-        
-        return $arrStrHashConteudo;*/
-    
-    //$arrHashConteudo = $this->gerarReciboTramite($parNumIdTramite);
-    
-   /* foreach($parArrayHash as $strHashConteudo) {
-        
-        // @join_tec R003 S001 US036 (#3869)
-        $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $strHashConteudo);
-    }*/
     
     $strReciboTramite  = "<recibo>";
     $strReciboTramite .= "<IDT>$parNumIdTramite</IDT>";
@@ -221,8 +134,10 @@ class EnviarReciboTramiteRN extends InfraRN
     }        
     $strReciboTramite  .= "</recibo>";
         
+    //Envia o Recibo de salva no banco
+    $hashAssinatura = $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
+    $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura);
     
-    $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
   }    
 
   private function obterDataRecebimentoComponentesDigitais($parObjTramite){

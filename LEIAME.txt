@@ -147,5 +147,6 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 
 	17) O Barramento de PEN ao calcular os hashs para gerar recibos de tramite, leva em consideração a data/horário. Portanto é importante que todos os nós da aplicação esteja sincronizados com o NTP.br.
 		Este link pode ajudar a configurar conforme o SO utilizado: https://www.vivaolinux.com.br/artigo/Servidor-NTP-Configuracao-e-ajuste-de-data-e-hora
-
+        
+        18) É altamente aconselhável deixar o arquivo .pem do certificado digital fora do path do apache (var/www/html)
 
