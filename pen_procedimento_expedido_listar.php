@@ -25,7 +25,7 @@ try {
     $objFiltroDTO->retStrProtocoloFormatado();
     
     // Verificar no DTO sobre funções de agragação para clausula DISTINCT
-    if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySql') {
+    if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
         $objFiltroDTO->retDthConclusaoAtividade();
     }
     $objPaginaSEI->prepararPaginacao($objFiltroDTO, 10);

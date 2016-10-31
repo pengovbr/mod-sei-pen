@@ -30,7 +30,7 @@ class PenMetaBD extends InfraMetaBD {
         
         switch($strTableDrive) {
 
-            case 'InfraMySql':
+            case 'InfraMySqli':
                 $strQuery = sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
                 break;
                 
@@ -82,7 +82,7 @@ class PenMetaBD extends InfraMetaBD {
             
         switch($strTableDrive) {
 
-            case 'InfraMySql':
+            case 'InfraMySqli':
                 // Fix para bug de MySQL versão inferior ao 5.5 o default engine
                 // é MyISAM e não tem suporte a FOREING KEYS
                 $this->getObjInfraIBanco()->executarSql('SET STORAGE_ENGINE=InnoDB');  
@@ -130,7 +130,7 @@ class PenMetaBD extends InfraMetaBD {
 
             switch($strTableDrive) {
 
-                case 'InfraMySql':
+                case 'InfraMySqli':
                     $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP PRIMARY KEY');
                     break;
 
@@ -152,7 +152,7 @@ class PenMetaBD extends InfraMetaBD {
             
         switch($strTableDrive) {
 
-            case 'InfraMySql':
+            case 'InfraMySqli':
                 $strSql = " SELECT COUNT(CONSTRAINT_NAME) AS EXISTE
                             FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
                             WHERE CONSTRAINT_SCHEMA = '".$objInfraBanco->getBanco()."'
@@ -197,7 +197,7 @@ class PenMetaBD extends InfraMetaBD {
 
             switch ($strTableDrive) {
 
-                    case 'InfraMySql':
+                    case 'InfraMySqli':
                         $strQuery = sprintf("ALTER TABLE `%s` RENAME TO `%s`", $strNomeTabelaAtual, $strNomeTabelaNovo);
                         break;
 
@@ -227,7 +227,7 @@ class PenMetaBD extends InfraMetaBD {
             
         switch($strTableDrive) {
 
-            case 'InfraMySql':
+            case 'InfraMySqli':
                 $strSql = "SELECT COUNT(TABLE_NAME) AS EXISTE
                             FROM INFORMATION_SCHEMA.TABLES
                             WHERE TABLE_SCHEMA = '".$objInfraBanco->getBanco()."'
@@ -260,7 +260,7 @@ class PenMetaBD extends InfraMetaBD {
             
         switch($strTableDrive) {
 
-            case 'InfraMySql':
+            case 'InfraMySqli':
                 $strSql = "SELECT COUNT(TABLE_NAME) AS EXISTE
                             FROM INFORMATION_SCHEMA.COLUMNS
                             WHERE TABLE_SCHEMA = '".$objInfraBanco->getBanco()."'

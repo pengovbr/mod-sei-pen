@@ -13,7 +13,7 @@
 
 try {
 
-    require_once dirname(__FILE__).'/SEI.php';
+    require_once dirname(__FILE__).'/../../SEI.php';
         
     $objPenConsoleRN = new PenConsoleRN();
     $arrArgs = $objPenConsoleRN->getTokens();

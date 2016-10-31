@@ -196,7 +196,7 @@ class ReceberProcedimentoRN extends InfraRN
     
     
     // @join_tec US008.08 (#23092)
-      $this->objProcedimentoAndamentoRN->setOpts($objProcedimentoDTO->getDblIdProcedimento(), $parNumIdentificacaoTramite, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO);
+      $this->objProcedimentoAndamentoRN->setOpts($objProcedimentoDTO->getDblIdProcedimento(), $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
       $this->objProcedimentoAndamentoRN->cadastrar('Obtendo metadados do processo', 'S');  
 
       //Verificar se procedimento já existia na base de dados do sistema
@@ -488,9 +488,6 @@ class ReceberProcedimentoRN extends InfraRN
         //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
     $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
-        // Registrar andamentos do Recebimento do processo
-    $this->atribuirDadosAndamento($objProcedimentoDTO, $objProcesso->historico, $objUnidadeDTO);
-
     $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento, $objUnidadeDTO);
     $this->atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $objMetadadosProcedimento); 
     $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
@@ -602,9 +599,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTOGerado = $objProcedimentoRN->gerarRN0156($objProcedimentoDTO);
         $objProcedimentoDTO->setDblIdProcedimento($objProcedimentoDTOGerado->getDblIdProcedimento());
 
-        // Registrar andamentos do Recebimento do processo
-        $this->atribuirDadosAndamento($objProcedimentoDTO, $objProcesso->historico, $objUnidadeDTO);
-
         $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento, $objUnidadeDTO);
         $this->atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $objMetadadosProcedimento);        
         $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTOGerado);
@@ -628,130 +622,7 @@ class ReceberProcedimentoRN extends InfraRN
         return $objProcedimentoDTO;
       }
 
-      private function atribuirDadosAndamento(ProcedimentoDTO $parObjProcedimentoDTO, $objHistorico, $objUnidadeDTO)
-      {
-        if(isset($objHistorico) && isset($objHistorico->operacao)){
-
-          if (!is_array($objHistorico->operacao)) {
-            $objHistorico->operacao = array($objHistorico->operacao);
-          }
-
-          $objAtividadeRN = new AtividadeRN();
-          $objAtualizarAndamentoDTO = new AtualizarAndamentoDTO();
-
-            //Variáveis disponíveis na tarefa de andamento externo
-            //@OPERACAO@
-            //@DATA_HORA@
-            //@COMPLEMENTO@
-            //@PESSOA_NOME@
-            //@PESSOA_IDENTIFICACAO@
-
-            //Buscar último andamento registrado do processo
-          $objAtividadeDTO = new AtividadeDTO();
-          $objAtividadeDTO->retDthAbertura();
-          $objAtividadeDTO->retNumIdAtividade();
-          $objAtividadeDTO->setDblIdProtocolo($parObjProcedimentoDTO->getDblIdProcedimento());
-          $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-
-          $objAtividadeRN = new AtividadeRN();
-          $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);            
-
-            //TODO: Avaliar com TRF4 a necessidade de fazer o mapeamento correto para os tipos de operação
-          $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-          /*foreach ($objHistorico->operacao as $objOperacao) {
-
-            $objDthAberturaOperacao = $objProcessoEletronicoRN->converterDataSEI($objOperacao->dataHora);
-            if(isset($objOperacao->dataHora) && isset($objAtividadeDTO)) {
-
-              if(InfraData::compararDataHora($objAtividadeDTO->getDthAbertura(), $objDthAberturaOperacao) > 0){
-                continue;                            
-              }
-
-              //TODO: Validar dados recebidos do histórico
-
-              $arrObjAtributoAndamentoDTO = array();
-
-              $objOperacaoDTO = $this->objProcessoEletronicoRN->converterOperacaoDTO($objOperacao);
-              $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-              $objAtributoAndamentoDTO->setStrNome('OPERACAO');
-
-              $objAtributoAndamentoDTO->setStrValor($objOperacaoDTO->getStrNome());
-              $objAtributoAndamentoDTO->setStrValor($objOperacaoDTO->getDthOperacao());
-              $objAtributoAndamentoDTO->setStrIdOrigem(null);
-              $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-
-              $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-              $objAtributoAndamentoDTO->setStrNome('COMPLEMENTO');
-              $objAtributoAndamentoDTO->setStrValor($objOperacaoDTO->getStrComplemento());
-              $objAtributoAndamentoDTO->setStrIdOrigem(null);
-              $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-
-              $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-              $objAtributoAndamentoDTO->setStrNome('PESSOA_NOME');
-              $objAtributoAndamentoDTO->setStrValor($objOperacaoDTO->getStrIdentificacaoPessoaOrigem());
-              $objAtributoAndamentoDTO->setStrIdOrigem($objOperacaoDTO->getStrIdentificacaoPessoaOrigem());
-              $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-
-              $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-              $objAtributoAndamentoDTO->setStrNome('PESSOA_IDENTIFICACAO');
-              $objAtributoAndamentoDTO->setStrValor($objOperacaoDTO->getStrNomePessoaOrigem());
-              $objAtributoAndamentoDTO->setStrIdOrigem($objOperacaoDTO->getStrIdentificacaoPessoaOrigem());
-              $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-
-
-                    //TODO: Implementar tarefa específica para registrar andamentos gerados em processos externos
-                    // $strOperacao = "Registro";
-
-                    // $dthOperacao = $this->objProcessoEletronicoRN->converterDataSEI($objOperacao->dataHora);
-                    // $strDescricao = $strOperacao . " em " . $dthOperacao;
-
-                    // if(isset($objOperacao->complemento)) {
-                    //     $strDescricao .= ':' . utf8_decode($objOperacao->complemento);
-                    // }
-
-                    //TODO: Atribuir dados da pessoa relacionada à operação
-                    //...
-
-                    //TODO: Salvar os dados da operação em campo próprio das tabelas do barramento
-                    //...
-
-              $objAtividadeDTO = new AtividadeDTO();
-              $objAtividadeDTO->setDblIdProtocolo($parObjProcedimentoDTO->getDblIdProcedimento());
-              $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-              $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-              $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO);
-              $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
-
-                    //TODO: Avaliar com TRF4 a possibilidade de permitir a indicação de uma data específica para
-                    //o andamento. Utilizada para registrar andamentos ocorridos externamente, antes do seu registro no sistema
-              $objAtividadeRN = new AtividadeRN();
-              $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
-
-
-                    // $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
-                    // $objPesquisaPendenciaDTO->setDblIdProtocolo(array($parObjProcedimentoDTO->getDblIdProcedimento()));
-                    // $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-                    // $objPesquisaPendenciaDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
-                    // $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
-
-                    // $arrObjAtividadeDTO = array();
-                    // foreach($arrObjProcedimentoDTO as $objProcedimentoDTO){
-                    //     $arrObjAtividadeDTO = array_merge($arrObjAtividadeDTO,$objProcedimentoDTO->getArrObjAtividadeDTO()); 
-                    // }
-
-                    // $arrStrIdAtividade = InfraArray::converterArrInfraDTO($arrObjAtividadeDTO,'IdAtividade');
-
-                    // $objAtualizarAndamentoDTO->setStrDescricao($strDescricao); 
-                    // $objAtualizarAndamentoDTO->setArrObjProtocoloDTO(InfraArray::gerarArrInfraDTO('ProtocoloDTO','IdProtocolo',array($parObjProcedimentoDTO->getDblIdProcedimento())));
-                    // $objAtualizarAndamentoDTO->setArrObjAtividadeDTO(InfraArray::gerarArrInfraDTO('AtividadeDTO','IdAtividade',$arrStrIdAtividade));
-
-                    // $objAtividadeRN->atualizarAndamento($objAtualizarAndamentoDTO);
-            }
-          }*/
-        }
-      }
-
+   
       private function removerAndamentosProcedimento($parObjProtocoloDTO) 
       {
         //TODO: Remover apenas as atividades geradas pelo recebimento do processo, não as atividades geradas anteriormente

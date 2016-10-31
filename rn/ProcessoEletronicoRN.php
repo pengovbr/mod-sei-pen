@@ -1,25 +1,25 @@
 <?php
+//@TODOJOIN: VERIFICAR SE NÃO EXISTEM TRY CATCH QUE OCULTAM ERROS. CASO EXISTAM CATCH COM EXEPTION DO PHP, RETIRALOS 
 class ProcessoEletronicoRN extends InfraRN {
 
     //const PEN_WEBSERVICE_LOCATION = 'https://desenv-api-pen.intra.planejamento/interoperabilidade/soap/v1_1/';
     
   /* TAREFAS DE EXPEDIÇÃO DE PROCESSOS */
   //Está definindo o comportamento para a tarefa $TI_PROCESSO_EM_PROCESSAMENTO
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 501;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 502;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_RETRANSMITIDO = 503;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 504;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 505;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 506;
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 507;
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 'PEN_PROCESSO_EXPEDIDO';
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 'PEN_PROCESSO_RECEBIDO';
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 'PEN_PROCESSO_CANCELADO';
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 'PEN_PROCESSO_RECUSADO';
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
+  public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
 
   /* TAREFAS DE EXPEDIÇÃO DE DOCUMENTOS */
   //Está definindo o comportamento para a tarefa $TI_PROCESSO_BLOQUEADO
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_EXPEDIDO = 506;
+  /*public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_EXPEDIDO = 506;
   public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_RECEBIDO = 507;
   public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_RETRANSMITIDO = 508;
   public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_TRAMITE_CANCELADO = 509;
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_TRAMITE_RECUSADO = 510;
+  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_TRAMITE_RECUSADO = 510;*/
 
   /* NÍVEL DE SIGILO DE PROCESSOS E DOCUMENTOS */
   public static $STA_SIGILO_PUBLICO = '1';
@@ -102,7 +102,7 @@ class ProcessoEletronicoRN extends InfraRN {
       'soap_version' => SOAP_1_1
       , 'local_cert' => $this->strLocalCert
       , 'passphrase' => $this->strLocalCertPassword
-      , 'resolve_wsdl_remote_includes' => false
+      , 'resolve_wsdl_remote_includes' => true
       , 'trace' => true
       , 'encoding' => 'UTF-8'
       , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
@@ -147,7 +147,7 @@ class ProcessoEletronicoRN extends InfraRN {
       
     if($this->objPenWs == null) { 
       $this->testaUrl($this->strWSDL, $this->options['local_cert']);
-      try {
+     // try {
         
         $objConfig = ConfiguracaoSEI::getInstance();
           
@@ -156,12 +156,15 @@ class ProcessoEletronicoRN extends InfraRN {
             $this->objPenWs = new LogPenWs($objConfig->getValor('SEI', 'LogPenWs'), $this->strWSDL, $this->options);
         }
         else {
-            
+         
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
-      } catch (Exception $e) {
+    /*  } catch (Exception $e) {
+          echo "<pre>";
+          var_dump($e->getMessage());
+          die("</pre>");
         throw new InfraException('Erro acessando serviço.', $e);
-      }
+      }*/
     }
 
     return $this->objPenWs;
@@ -543,6 +546,23 @@ class ProcessoEletronicoRN extends InfraRN {
 
     return $resultado;
   }
+  
+  public static function obterIdTarefaModulo($strIdTarefaModulo)
+  {
+      $objTarefaDTO = new TarefaDTO();
+      $objTarefaDTO->retNumIdTarefa();
+      $objTarefaDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+
+      $objTarefaRN = new TarefaRN();
+      $objTarefaDTO = $objTarefaRN->consultar($objTarefaDTO);
+
+      if($objTarefaDTO){
+          return $objTarefaDTO->getNumIdTarefa();
+      }else{
+          return false;
+      }
+      
+  }
 
   public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parDthRegistroTramite, $parObjProcesso, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null)
   {
@@ -782,13 +802,15 @@ class ProcessoEletronicoRN extends InfraRN {
       //Registrar componente digital necessita ser enviado pelo trâmite espefífico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui       
       if(isset($parObjComponentesDigitaisSolicitados)){
         $arrObjItensSolicitados = is_array($parObjComponentesDigitaisSolicitados->processo) ? $parObjComponentesDigitaisSolicitados->processo : array($parObjComponentesDigitaisSolicitados->processo);
+
         foreach ($arrObjItensSolicitados as $objItemSolicitado) {
+            if(!is_null($objItemSolicitado)){
+                $objItemSolicitado->hash = is_array($objItemSolicitado->hash) ? $objItemSolicitado->hash : array($objItemSolicitado->hash);
 
-          $objItemSolicitado->hash = is_array($objItemSolicitado->hash) ? $objItemSolicitado->hash : array($objItemSolicitado->hash);
-
-          if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash)) {
-            $objComponenteDigitalDTO->setStrSinEnviar("S");        
-          }
+                if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash)) {
+                  $objComponenteDigitalDTO->setStrSinEnviar("S");        
+                }
+            }
         }        
       }
 
@@ -1280,6 +1302,7 @@ class ProcessoEletronicoRN extends InfraRN {
    */
   public function cancelarTramite($idTramite) {
 
+      //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->filtroDeConsultaDeTramites = new stdClass()
       //Faz a consulta do tramite
       $paramConsultaTramite = new stdClass();
       $paramConsultaTramite->filtroDeConsultaDeTramites->IDT = $idTramite;
@@ -1308,7 +1331,8 @@ class ProcessoEletronicoRN extends InfraRN {
    */
   public function recusarTramite($idTramite, $justificativa, $motivo) {
         try {
-
+            
+            //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->recusaDeTramite = new stdClass()
             $parametros = new stdClass();
             $parametros->recusaDeTramite->IDT = $idTramite;
             $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
@@ -1401,13 +1425,3 @@ class ProcessoEletronicoRN extends InfraRN {
 }
 
 
-
-/*
-
-        -- $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 501
-        DELETE FROM tarefa where id_tarefa = 501;
-        INSERT INTO tarefa (id_tarefa, nome, sin_historico_resumido, sin_historico_completo, sin_fechar_andamentos_abertos, sin_lancar_andamento_fechado, sin_permite_processo_fechado)
-        values(501, 'Processo expedido para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N');
-
-
- */

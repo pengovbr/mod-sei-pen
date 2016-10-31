@@ -20,24 +20,24 @@ class ReceberReciboTramiteRN extends InfraRN
     return BancoSEI::getInstance();
   }
   
-    protected function mudarEstadoProcedimentoBloqueado($objProcesso) {
+  protected function registrarRecebimentoRecibo($numIdProcedimento, $strProtocoloFormatado, $numIdTramite) {
         
-        $objProtocoloDTO = new ProtocoloDTO();    	
-        $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-        $objProtocoloDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);    	
-            
-        $objProtocoloRN = new ProtocoloRN();
-        $objProtocoloRN->alterarRN0203($objProtocoloDTO);
+        //REALIZA A CONCLUSÃO DO PROCESSO
+        $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+        $objEntradaConcluirProcessoAPI->setIdProcedimento($numIdProcedimento);
+        
+        $objSeiRN = new SeiRN();
+        $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
 
         $arrObjAtributoAndamentoDTO = array();
 
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
         $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
-        $objAtributoAndamentoDTO->setStrValor($objProcesso->strProtocoloFormatado);
-        $objAtributoAndamentoDTO->setStrIdOrigem($objProcesso->idProcedimentoSEI);
+        $objAtributoAndamentoDTO->setStrValor($strProtocoloFormatado);
+        $objAtributoAndamentoDTO->setStrIdOrigem($numIdProcedimento);
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
-        $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($objProcesso->idTramite);
+        $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($numIdTramite);
         
         $objTramite = array_pop($arrObjTramite);
         
@@ -99,12 +99,11 @@ class ReceberReciboTramiteRN extends InfraRN
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
         }
         
-        // Tramitação externa do processo @processo@ concluída com sucesso. Recebido na @UnidadeDestino@ - @hierarquia_superior@ -@repositório_de_estruturas@
         $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);
+        $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO);
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO));
         $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
 
         $objAtividadeRN = new AtividadeRN();
@@ -167,18 +166,11 @@ class ReceberReciboTramiteRN extends InfraRN
                     $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
                     $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-                    //$objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-                    //$objProtocoloBD->alterar($objProtocoloDTO);
-                    // @join_tec US008.12 (#23092)
-                    $this->objProcedimentoAndamentoRN->setOpts($objProcessoEletronicoDTO->getDblIdProcedimento(), $parNumIdTramite, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+                    $this->objProcedimentoAndamentoRN->setOpts($objProcessoEletronicoDTO->getDblIdProcedimento(), $parNumIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
                     $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S');
-
-                    $objProcesso = new stdClass();
-                    $objProcesso->idProcedimentoSEI = $objProtocoloDTO->getDblIdProtocolo();
-                    $objProcesso->strProtocoloFormatado = $objProtocoloDTO->getStrProtocoloFormatado();
-                    $objProcesso->idTramite = $parNumIdTramite;
                     
-                    $this->mudarEstadoProcedimentoBloqueado($objProcesso);
+                    //Registra o recbimento do recibo no histórico e realiza a conclusão do processo
+                    $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $parNumIdTramite);
                     
                 } catch (Exception $e) {
 

@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__FILE__) . '/../../../SEI.php';
 
-//error_reporting(E_ALL);
+error_reporting(E_ALL);
 
 //TODO: Modificar nome da classe e método para outro mais apropriado
 class PendenciasTramiteRN extends InfraRN {
@@ -24,9 +24,10 @@ class PendenciasTramiteRN extends InfraRN {
   }  
 
   public function __construct() {
-
-    $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      
+    $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
     $this->strLocalizacaoCertificadoDigital = $objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+  
     $this->strEnderecoServicoPendencias = $objInfraParametro->getValor('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
     //TODO: Urgente - Remover senha do certificado de autenticação dos serviços do PEN da tabela de parâmetros
     $this->strSenhaCertificadoDigital = $objInfraParametro->getValor('PEN_SENHA_CERTIFICADO_DIGITAL');    

@@ -27,7 +27,7 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');    
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'TicketEnvioComponentes', 'ticket_envio_componentes', 'md_pen_tramite');
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ConteudoAssinaturaDocumento', 'conteudo_assinatura', 'documento');    
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ConteudoAssinaturaDocumento', 'conteudo_assinatura', 'documento_conteudo');    
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ProtocoloDocumentoFormatado', 'protocolo_formatado', 'protocolo');
 
     $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
@@ -37,5 +37,6 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OBRIGATORIA);  
     $this->configurarFK('IdDocumento', 'documento', 'id_documento', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdDocumento', 'protocolo', 'id_protocolo', InfraDTO::$TIPO_FK_OBRIGATORIA);
+    $this->configurarFK('IdDocumento', 'documento_conteudo', 'id_documento', InfraDTO::$TIPO_FK_OBRIGATORIA);
   }
 }

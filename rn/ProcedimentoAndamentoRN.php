@@ -12,7 +12,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
     protected $isSetOpts = false;
     protected $dblIdProcedimento;
     protected $dblIdTramit;
-    protected $numTarefa = 501;    
+    protected $numTarefa;    
 
     /**
      * Instância do driver de conexão com o banco de dados
@@ -47,7 +47,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
     }
     
     
-    public function setOpts($dblIdProcedimento = 0, $dblIdTramit = 0, $numTarefa = 501){
+    public function setOpts($dblIdProcedimento = 0, $dblIdTramit = 0, $numTarefa){
         
         $this->dblIdProcedimento = $dblIdProcedimento;
         $this->dblIdTramit = $dblIdTramit;

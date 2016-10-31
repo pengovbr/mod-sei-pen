@@ -482,229 +482,43 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar(176,'Resultado','Podendo ser complementado: de Exame Médico; de Contestação');
         $fnCadastrar(177,'Vídeo','Podendo ser complementado: de Reunião');
         
-//        $objDTO = new PenRelTipoDocMapEnviadoDTO();
-//        
-//        $fnCadastrar = function($numCodigoEspecie, $numIdSerie) use($objDTO, $objBD){
-//            
-//            $objDTO->unSetTodos();
-//            $objDTO->setNumCodigoEspecie($numCodigoEspecie);
-//            $objDTO->setNumIdSerie($numIdSerie);
-//            
-//            if($objBD->contar($objDTO) == 0){   
-//                //$objDTO->strStrSinPadrao('S');
-//                $objBD->cadastrar($objDTO); 
-//            }   
-//        };
-        //----------------------------------------------------------------------
-        // Especie de Documento por Série
-        //----------------------------------------------------------------------
-//        $fnCadastrar(1, 46);// Abaixo-assinado;
-//        $fnCadastrar(2, 8);// Acordao;
-//        $fnCadastrar(3, 106);// Acordo;
-//        $fnCadastrar(4, 48);// Alvara;
-//        $fnCadastrar(5, 116);// Anais;
-//        $fnCadastrar(6, 117);// Anteprojeto;
-//        $fnCadastrar(7, 118);// Apolice;
-//        $fnCadastrar(8, 119);// Apostila;
-//        $fnCadastrar(9, 67);// Ata;
-//        $fnCadastrar(10, 74);// Atestado;
-//        $fnCadastrar(11, 3);// Ato;
-//        $fnCadastrar(12, 120);// Auto;
-//        $fnCadastrar(13, 121);// Aviso;
-//        $fnCadastrar(14, 32);// Balancete;
-//        $fnCadastrar(15, 33);// Balanco;
-//        $fnCadastrar(16, 122);// Bilhete;
-//        $fnCadastrar(17, 97);// Boletim;
-//        $fnCadastrar(18, 80);// Carta;
-//        $fnCadastrar(19, 123);// Cartaz;
-//        $fnCadastrar(20, 124);// Cedula;
-//        $fnCadastrar(21, 81);// Certidao;
-//        $fnCadastrar(22, 82);// Certificado;
-//        $fnCadastrar(23, 125);// Cheque;
-//        $fnCadastrar(24, 35);// Comprovante;
-//        $fnCadastrar(25, 14);// Comunicado;
-//        $fnCadastrar(26, 197);// Consulta;
-//        $fnCadastrar(27, 126);// Contracheque;
-//        $fnCadastrar(28, 37);// Contrato;
-//        $fnCadastrar(29, 232);// Convenio;
-//        $fnCadastrar(30, 127);// Convite;
-//        $fnCadastrar(31, 105);// Convencao;
-//        $fnCadastrar(32, 128);// Cracha;
-//        $fnCadastrar(33, 129);// Cronograma;
-//        $fnCadastrar(34, 130);// Curriculo;
-//        $fnCadastrar(35, 198);// Debenture;
-//        $fnCadastrar(36, 41);// Decisao;
-//        $fnCadastrar(37, 83);// Declaracao;
-//        $fnCadastrar(38, 131);// Decreto;
-//        $fnCadastrar(39, 132);// Deliberacao;
-//        $fnCadastrar(40, 133);// Demonstrativo;
-//        $fnCadastrar(41, 134);// Depoimento;
-//        $fnCadastrar(42, 5);// Despacho;
-//        $fnCadastrar(43, 135);// Diario;
-//        $fnCadastrar(44, 77);// Diploma;
-//        $fnCadastrar(45, 199);// Diretriz;
-//        $fnCadastrar(46, 136);// Dissertacao;
-//        $fnCadastrar(47, 137);// Dossie;
-//        $fnCadastrar(48, 68);// Edital;
-//        $fnCadastrar(49, 30);// E-mail;
-//        $fnCadastrar(50, 138);// Embargos;
-//        $fnCadastrar(51, 139);// Emenda;
-//        $fnCadastrar(52, 140);// Escala;
-//        $fnCadastrar(53, 141);// Escritura;
-//        $fnCadastrar(54, 50);// Estatuto;
-//        $fnCadastrar(55, 142);// Exposicao de Motivos;
-//        $fnCadastrar(56, 51);// Extrato;
-//        $fnCadastrar(57, 84);// Fatura;
-//        $fnCadastrar(58, 143);// Ficha;
-//        $fnCadastrar(59, 144);// Fluxograma;
-//        $fnCadastrar(60, 99);// Folha;
-//        $fnCadastrar(61, 200);// Folheto/Folder;
-//        $fnCadastrar(62, 145);// Formulario;
-//        $fnCadastrar(63, 201);// Grade Curricular;
-//        $fnCadastrar(64, 146);// Guia;
-//        $fnCadastrar(65, 79);// Historico;
-//        $fnCadastrar(66, 202);// Indicacao;
-//        $fnCadastrar(67, 16);// Informe;
-//        $fnCadastrar(68, 203);// Instrucao;
-//        $fnCadastrar(69, 147);// Inventario;
-//        $fnCadastrar(70, 54);// Laudo;
-//        $fnCadastrar(71, 148);// Lei;
-//        $fnCadastrar(72, 100);// Lista/Listagem;
-//        $fnCadastrar(73, 56);// Livro;
-//        $fnCadastrar(74, 69);// Mandado;
-//        $fnCadastrar(75, 149);// Manifesto;
-//        $fnCadastrar(76, 113);// Manual;
-//        $fnCadastrar(77, 150);// Mapa;
-//        $fnCadastrar(78, 151);// Medida Provisoria;
-//        $fnCadastrar(79, 12);// Memorando;
-//        $fnCadastrar(80, 13);// Memorando-circular;
-//        $fnCadastrar(81, 152);// Memorial;
-//        $fnCadastrar(82, 153);// Mensagem;
-//        $fnCadastrar(83, 204);// Minuta;
-//        $fnCadastrar(84, 235);// Mocao;
-//        $fnCadastrar(85, 58);// Norma;
-//        $fnCadastrar(86, 91);// Nota;
-//        $fnCadastrar(87, 59);// Notificacao;
-//        $fnCadastrar(88, 11);// Oficio;
-//        $fnCadastrar(89, 205);// Oficio-Circular;
-//        $fnCadastrar(90, 206);// Orcamento;
-//        $fnCadastrar(91, 207);// Ordem;
-//        $fnCadastrar(92, 155);// Organograma;
-//        $fnCadastrar(93, 156);// Orientacao;
-//        $fnCadastrar(94, 157);// Panfleto;
-//        $fnCadastrar(95, 191);// Parecer;
-//        $fnCadastrar(96, 158);// Passaporte;
-//        $fnCadastrar(97, 159);// Pauta;
-//        $fnCadastrar(98, 160);// Peticao;
-//        $fnCadastrar(99, 104);// Planilha;
-//        $fnCadastrar(100, 73);// Plano;
-//        $fnCadastrar(101, 161);// Planta;
-//        $fnCadastrar(102, 10);// Portaria;
-//        $fnCadastrar(103, 162);// Precatorio;
-//        $fnCadastrar(104, 71);// Processo;
-//        $fnCadastrar(105, 60);// Procuracao;
-//        $fnCadastrar(106, 163);// Programa;
-//        $fnCadastrar(107, 101);// Projeto;
-//        $fnCadastrar(108, 75);// Prontuario;
-//        $fnCadastrar(109, 208);// Pronunciamento;
-//        $fnCadastrar(110, 85);// Proposta;
-//        $fnCadastrar(111, 164);// Prospecto;
-//        $fnCadastrar(112, 165);// Protocolo;
-//        $fnCadastrar(113, 166);// Prova;
-//        $fnCadastrar(114, 167);// Questionario;
-//        $fnCadastrar(115, 168);// Receita;
-//        $fnCadastrar(116, 169);// Recibo;
-//        $fnCadastrar(117, 111);// Recurso;
-//        $fnCadastrar(118, 170);// Regimento;
-//        $fnCadastrar(119, 62);// Registro;
-//        $fnCadastrar(120, 171);// Regulamento;
-//        $fnCadastrar(121, 102);// Relacao;
-//        $fnCadastrar(122, 63);// Relatorio;
-//        $fnCadastrar(123, 172);// Release;
-//        $fnCadastrar(124, 173);// Representacao;
-//        $fnCadastrar(125, 64);// Requerimento;
-//        $fnCadastrar(126, 65);// Requisicao;
-//        $fnCadastrar(127, 1);// Resolucao;
-//        $fnCadastrar(128, 174);// Resumo;
-//        $fnCadastrar(129, 175);// Roteiro;
-//        $fnCadastrar(130, 176);// Sentenca;
-//        $fnCadastrar(131, 177);// Sinopse;
-//        $fnCadastrar(132, 178);// Solicitacao;
-//        $fnCadastrar(133, 2);// Sumula;
-//        $fnCadastrar(134, 179);// Tabela;
-//        $fnCadastrar(135, 180);// Telegrama;
-//        $fnCadastrar(136, 90);// Termo;
-//        $fnCadastrar(137, 181);// Tese;
-//        $fnCadastrar(138, 182);// Testamento;
-//        $fnCadastrar(139, 183);// Titulo;
-//        $fnCadastrar(140, 94);// Voto;
-//        $fnCadastrar(141, 87);// Carteira;
-//        $fnCadastrar(142, 209);// Cartao;
-//        $fnCadastrar(143, 88);// CPF/CIC;
-//        $fnCadastrar(144, 201);// CNPJ;
-//        $fnCadastrar(145, 211);// Calendario
-//        $fnCadastrar(147, 89);// RG;
-//        $fnCadastrar(148, 95);// Agenda;
-//        $fnCadastrar(149, 7);// Analise;
-//        $fnCadastrar(150, 96);// Anotacao;
-//        $fnCadastrar(151, 52);// audio;
-//        $fnCadastrar(152, 97);// Boleto;
-//        $fnCadastrar(153, 36);// Conta;
-//        $fnCadastrar(154, 112);// Contrarrazoes;
-//        $fnCadastrar(155, 38);// Correspondencia;
-//        $fnCadastrar(156, 29);// Cota;
-//        $fnCadastrar(157, 98);// Credencial;
-//        $fnCadastrar(158, 39);// Croqui;
-//        $fnCadastrar(159, 42);// Defesa;
-//        $fnCadastrar(160, 44);// Demonstracao;
-//        $fnCadastrar(161, 45);// Denuncia;
-//        $fnCadastrar(162, 108);// Esclarecimento;
-//        $fnCadastrar(163, 49);// Escrituracao
-//        $fnCadastrar(165, 109);// Impugnacao;
-//        $fnCadastrar(166, 92);// Informacao;
-//        $fnCadastrar(167, 110);// Intencao;
-//        $fnCadastrar(168, 55);// Licenca;
-//        $fnCadastrar(169, 212);// Materia;
-//        $fnCadastrar(170, 78);// Material;
-//        $fnCadastrar(171, 57);// Memoria;
-//        $fnCadastrar(172, 213);// Movimentacao;
-//        $fnCadastrar(173, 107);// Pedido;
-//        $fnCadastrar(174, 61);// Reclamacao;
-//        $fnCadastrar(175, 27);// Referendo;
-//        $fnCadastrar(176, 76);// Resultado;
-//        $fnCadastrar(177, 53);// Video
                 
         //----------------------------------------------------------------------
         // Tarefas
         //----------------------------------------------------------------------
         $objDTO = new TarefaDTO();
 
-        $fnCadastrar = function($numIdTarefa, $strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N') use($objDTO, $objBD){
+        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD){
           
             $objDTO->unSetTodos();
-            $objDTO->setNumIdTarefa($numIdTarefa);
+            $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
 
-            if($objBD->contar($objDTO) == 0){   
+            if($objBD->contar($objDTO) == 0){  
                 
+                $objUltimaTarefaDTO = new TarefaDTO();
+                $objUltimaTarefaDTO->retNumIdTarefa();
+                $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+                $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+                
+                $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
                 $objDTO->setStrNome($strNome);
                 $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
                 $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
                 $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
                 $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
                 $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-                
+                $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
                 $objBD->cadastrar($objDTO); 
             }   
         };
         
         
-        $fnCadastrar(22, 'Em processamento. @MOTIVO@', 'S', 'S', 'S', 'N', 'N');
-        $fnCadastrar(23, 'Bloqueado. @MOTIVO@', 'S', 'S', 'S', 'N', 'N');
-        $fnCadastrar(501, 'Processo expedido para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N');
-        $fnCadastrar(502, 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N');
-        $fnCadastrar(505, 'O processo foi recusado pelo orgão @UNIDADE_DESTINO@ pelo seguinte motivo: @MOTIVO@', 'S', 'S', 'N', 'N', 'S');
-        $fnCadastrar(504, 'Expedição do Processo Cancelada em @DATA_HORA@ pelo Usuário @USUARIO@', 'S', 'S', 'N', 'S', 'N');
-        $fnCadastrar(506, 'Operacao externa de @OPERACAO@ registrada em @DATA_HORA@ (@PESSOA_IDENTIFICACAO@ - @PESSOA_NOME@)\n @COMPLEMENTO@', 'S', 'S', 'N', 'S', 'N');
+        $fnCadastrar('Processo expedido para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_EXPEDIDO');
+        $fnCadastrar('Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_RECEBIDO');
+        $fnCadastrar('O processo foi recusado pelo orgão @UNIDADE_DESTINO@ pelo seguinte motivo: @MOTIVO@', 'S', 'S', 'N', 'N', 'S', 'PEN_PROCESSO_RECUSADO');
+        $fnCadastrar('Expedição do Processo Cancelada em @DATA_HORA@ pelo Usuário @USUARIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_CANCELADO');
+        $fnCadastrar('Operacao externa de @OPERACAO@ registrada em @DATA_HORA@ (@PESSOA_IDENTIFICACAO@ - @PESSOA_NOME@)\n @COMPLEMENTO@', 'S', 'S', 'S', 'S', 'N', 'PEN_OPERACAO_EXTERNA');
 
         //----------------------------------------------------------------------
         // Operações por Tarefas
@@ -827,10 +641,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO = new TarefaDTO();
         $objBD = new TarefaBD($objInfraBanco);
         
-        $fnAlterar = function($numIdTarefa, $strNome) use($objDTO, $objBD){
-          
+        $fnAlterar = function($strIdTarefaModulo, $strNome) use($objDTO, $objBD){
+            
             $objDTO->unSetTodos();
-            $objDTO->setNumIdTarefa($numIdTarefa);
+            $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objDTO->setNumMaxRegistrosRetorno(1);
             $objDTO->retStrNome();
             $objDTO->retNumIdTarefa();
@@ -848,7 +662,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }   
         };
         
-        $fnAlterar('502', 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@');
+        $fnAlterar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@');
     }
     
     /**
@@ -1011,25 +825,32 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objDTO = new TarefaDTO();
 
-        $fnCadastrar = function($numIdTarefa, $strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N') use($objDTO, $objBD){
+        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD){
           
             $objDTO->unSetTodos();
-            $objDTO->setNumIdTarefa($numIdTarefa);
+            $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
 
             if($objBD->contar($objDTO) == 0){   
                 
+                $objUltimaTarefaDTO = new TarefaDTO();
+                $objUltimaTarefaDTO->retNumIdTarefa();
+                $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+                $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+                
+                $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
                 $objDTO->setStrNome($strNome);
                 $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
                 $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
                 $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
                 $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
                 $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-                
+                $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
                 $objBD->cadastrar($objDTO); 
             }   
         };
         
-        $fnCadastrar(507, 'Expedição do processo foi abortada manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S');
+        $fnCadastrar('Expedição do processo foi abortada manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
     }
     
         /**
@@ -1049,10 +870,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO->retNumIdTarefa();
         $objDTO->retStrNome();
 
-        $fnAtualizar = function($numIdTarefa, $strNome) use($objDTO, $objBD){
+        $fnAtualizar = function($strIdTarefaModulo, $strNome) use($objDTO, $objBD){
           
             $objDTO->unSetTodos();
-            $objDTO->setNumIdTarefa($numIdTarefa);
+            $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
 
             $objTarefaDTO = $objBD->consultar($objDTO);
             
@@ -1064,8 +885,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             } 
         };
         // Tramitação externa do processo @processo@ concluída com sucesso. Recebido na @UnidadeDestino@ - @hierarquia_superior@ -@repositório_de_estruturas@
-        $fnAtualizar(501, 'Processo em tramitação externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
-        $fnAtualizar(502, 'Processo recebido da unidade externa @ENTIDADE_ORIGEM@ - @ENTIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@');
-        $fnAtualizar(506, 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
+        $fnAtualizar('PEN_PROCESSO_EXPEDIDO', 'Processo em tramitação externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
+        $fnAtualizar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da unidade externa @ENTIDADE_ORIGEM@ - @ENTIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@');
+        $fnAtualizar('PEN_OPERACAO_EXTERNA', 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
     }
 }
