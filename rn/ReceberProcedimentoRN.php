@@ -11,7 +11,6 @@ class ReceberProcedimentoRN extends InfraRN
   private $objInfraParametro;
   private $objProcedimentoAndamentoRN;
   private $documentosRetirados = array();
-  private $flgReaberturaProcesso = false;
 
   public function __construct()
   {
@@ -167,18 +166,6 @@ class ReceberProcedimentoRN extends InfraRN
       if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
             return;
       }
-      
-          // Mudar o estado para normal caso o procedimento seja reenviado para a unidade
-    // que a gerou, pois o procedimento esta como bloqueado e deve voltar a estar
-    // como normal
-    $dblIdProcedimento = $this->consultarProcedimentoExistente($strNumeroRegistro);
-
-    if(!empty($dblIdProcedimento)){
-        $objProcessoRetransmitido = new stdClass();
-        $objProcessoRetransmitido->idProcedimentoSEI = $dblIdProcedimento;
-
-        ExpedirProcedimentoRN::mudarEstadoProcedimentoNormal($objProcessoRetransmitido, ProtocoloRN::$TE_NORMAL);         
-    }
 
     $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
 
@@ -234,7 +221,10 @@ class ReceberProcedimentoRN extends InfraRN
       if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
         return;
       }
-    
+      
+
+            
+    //  throw new InfraException("COMPONENTES DIGITAIS A SEREM ANEXADOS: ".var_export($arrayHash, true));
       if(count($arrayHash) > 0){
           
             //Obter dados dos componetes digitais            
@@ -245,7 +235,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
             $objComponenteDigitalDTO->retDblIdDocumento();
             $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-            $objComponenteDigitalDTO->retStrConteudoAssinaturaDocumento();
+       //     $objComponenteDigitalDTO->retStrConteudoAssinaturaDocumento();
             $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
             $objComponenteDigitalDTO->retStrHashConteudo();
             $objComponenteDigitalDTO->retStrProtocolo();
@@ -255,9 +245,11 @@ class ReceberProcedimentoRN extends InfraRN
 
             $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
             $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-
-          if (isset($arrObjComponentesDigitaisDTO) && count($arrObjComponentesDigitaisDTO) > 0) {
-
+                  
+          //  throw new InfraException('Componentes encontrados: '.var_export($arrObjComponentesDigitaisDTO, true));
+            
+          if ($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
+              
                   $objReceberComponenteDigitalRN = $receberComponenteDigitalRN;
                   
                   foreach($arrObjComponentesDigitaisDTO as $objComponenteDigitalDTOEnviado) {
@@ -279,7 +271,7 @@ class ReceberProcedimentoRN extends InfraRN
           }
     }
     
-    $this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
+    //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
 
    $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
    $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
@@ -475,6 +467,13 @@ class ReceberProcedimentoRN extends InfraRN
         //}
 
         //$objProcedimentoDTO = $arrObjProcedimentoDTO[0];
+    
+    //REALIZA O DESBLOQUEIO DO PROCESSO
+    $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+    $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+    
+    $objSeiRN = new SeiRN();
+    $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
 
     
     $objProcedimentoDTO = new ProcedimentoDTO();
@@ -560,7 +559,7 @@ class ReceberProcedimentoRN extends InfraRN
     $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
     $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($objProcesso->protocolo));
     $objProcedimentoDTO->setStrSinGerarPendencia('S');
-        $objProcedimentoDTO->setNumVersaoLock(0);  //TODO: Avaliar o comportamento desse campo no cadastro do processo
+       // $objProcedimentoDTO->setNumVersaoLock(0);  //TODO: Avaliar o comportamento desse campo no cadastro do processo
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
         
         //TODO: Identificar o tipo de procedimento correto para atribuição ao novo processo
@@ -707,7 +706,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO);
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
         $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
 
         $objAtividadeRN = new AtividadeRN();
@@ -961,8 +960,8 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
           $objDocumentoDTO->setNumIdTipoConferencia(null);
           $objDocumentoDTO->setStrConteudo(null);
-
-          $objDocumentoDTO->setNumVersaoLock(0);
+          $objDocumentoDTO->setStrStaDocumento(DocumentoRN::$TD_EXTERNO);
+         // $objDocumentoDTO->setNumVersaoLock(0);
 
           $objProtocoloDTO = new ProtocoloDTO();
           $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
@@ -1053,7 +1052,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           $strConteudoCodificado = $objDocumentoDTO->getStrConteudo();
           $objDocumentoDTO->setStrConteudo(null);
-          $objDocumentoDTO->setStrSinFormulario('N');
+          //$objDocumentoDTO->setStrSinFormulario('N');
           
             // @join_tec US027 (#3498)
             $numIdUnidadeGeradora = $this->objInfraParametro->getValor('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', false);
@@ -1065,7 +1064,7 @@ class ReceberProcedimentoRN extends InfraRN
             
           //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
           $this->atribuirComponentesDigitais($objDocumentoDTO, $objDocumento->componenteDigital);            
-          $objDocumentoDTOGerado = $objDocumentoRN->receberRN0991($objDocumentoDTO);      
+          $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);      
 
           $objAtividadeDTOVisualizacao = new AtividadeDTO();
           $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());

@@ -146,7 +146,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         
         $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
         $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
-        $objDocumentoDTO = $objDocumentoRN->alterarRecebidoRN0992($objDocumentoDTO);
+        $objDocumentoDTO = $objDocumentoRN->alterarRN0004($objDocumentoDTO);
         
         // @join_tec US029 (#3790)
         /*$objObservacaoDTO = new ObservacaoDTO();

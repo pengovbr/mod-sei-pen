@@ -12,7 +12,7 @@ class PenAtividadeRN extends AtividadeRN {
         
         $this->statusPesquisa = $statusPesquisa;
     }
-    
+   /* 
     protected function listarPendenciasRN0754Conectado(PesquisaPendenciaDTO $objPesquisaPendenciaDTO) {
 
         if ($this->statusPesquisa) {
@@ -333,7 +333,7 @@ class PenAtividadeRN extends AtividadeRN {
                   }
                  */
 
-                foreach ($arrObjAcessoDTO as $objAcessoDTO) {
+          /*      foreach ($arrObjAcessoDTO as $objAcessoDTO) {
                     if ($objAcessoDTO->getStrStaTipo() == AcessoRN::$TA_CREDENCIAL_PROCESSO) {
                         $arr[$objAcessoDTO->getDblIdProtocolo()]->setStrSinCredencialProcesso('S');
                     } else if ($objAcessoDTO->getStrStaTipo() == AcessoRN::$TA_CREDENCIAL_ASSINATURA_PROCESSO) {
@@ -344,7 +344,7 @@ class PenAtividadeRN extends AtividadeRN {
         }
 
         return $arrProcedimentos;
-    }
+    }*/
 
     /**
      * Retorna a atividade da ação do tramite, ou seja, se estava enviando
