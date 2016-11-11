@@ -468,12 +468,33 @@ class ReceberProcedimentoRN extends InfraRN
 
         //$objProcedimentoDTO = $arrObjProcedimentoDTO[0];
     
-    //REALIZA O DESBLOQUEIO DO PROCESSO
+        $objSeiRN = new SeiRN();
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->retDthConclusao();
+        $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+
+        $objAtividadeRN = new AtividadeRN();
+        $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+        $flgReabrir = true;
+        
+        foreach ($arrObjAtividadeDTO as $objAtividadeDTO) {
+            if ($objAtividadeDTO->getDthConclusao() == null) {
+                $flgReabrir = false;
+            }
+        }
+
+      if($flgReabrir){
+            $objEntradaReabrirProcessoAPI = new EntradaReabrirProcessoAPI();
+            $objEntradaReabrirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+            $objSeiRN->reabrirProcesso($objEntradaReabrirProcessoAPI);
+      }
+      
     $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-    $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
-    
-    $objSeiRN = new SeiRN();
+    $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);    
     $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+    
 
     
     $objProcedimentoDTO = new ProcedimentoDTO();
@@ -1462,76 +1483,125 @@ class ReceberProcedimentoRN extends InfraRN
         return $numOrdemDocumento1 - $numOrdemDocumento2;         
       }    
       
-      /**/
-      protected function receberTramitesRecusados($parNumIdentificacaoTramite) {
+      
+    public function receberTramitesRecusados($parNumIdentificacaoTramite) {
 
-        if(empty($parNumIdentificacaoTramite)) {
+        if (empty($parNumIdentificacaoTramite)) {
             throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
         }
-
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $parNumIdRespositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
-        $parNumIdEstrutura = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
         
-        $arrObjTramite = (array)$this->objProcessoEletronicoRN->consultarTramitesRecusados($parNumIdRespositorio, $parNumIdEstrutura);
+        //Busca os dados do trâmite no barramento
+        $tramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
         
-        if(empty($arrObjTramite)) {    
-            return null;
+        if(!isset($tramite[0])){
+            throw new InfraException("Não foi encontrado o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
         }
         
-        foreach($arrObjTramite as $objTramite) {
-                        
-            $strNumeroRegistro = $objTramite->NRE;
-            
-            if(empty($strNumeroRegistro)) {
-                throw new InfraException('Falha ao consultar número do registro na lista de tramites recusados');
-            }
-            
-            $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
-            $objReceberTramiteRecusadoDTO->retTodos();
-            $objReceberTramiteRecusadoDTO->setNumRegistro($strNumeroRegistro);
+        $tramite = $tramite[0];
+        
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objTramiteDTO->retNumIdUnidade();
+        
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+        
+        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
+        
+        //Busca os dados do procedimento
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setStrNumeroRegistro($tramite->NRE);
+        $objProcessoEletronicoDTO->retDblIdProcedimento();
 
-            $objReceberTramiteRecusadoBD = new ReceberTramiteRecusadoBD(BancoSEI::getInstance());
-            if($objReceberTramiteRecusadoBD->contar($objReceberTramiteRecusadoDTO) > 0){
-                // Já foi cadastrado no banco de dados, então já foi modificado para normal
-                continue;
-            }
-            
-            // Muda o estado de em processamento para bloqueado
-            try {
-                $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-                $objProcessoEletronicoDTO->setStrNumeroRegistro($strNumeroRegistro);
-                $objProcessoEletronicoDTO->retDblIdProcedimento();
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
+        
+        //Busca a última atividade de expedição
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->retNumIdAtividade();
 
-                $objProcessoEletronicoDB = new ProcessoEletronicoBD(BancoSEI::getInstance());
-                $objProcessoEletronicoDTO = $objProcessoEletronicoDB->consultar($objProcessoEletronicoDTO);
+        $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+        $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
+        
+        //Busca a unidade de destino
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+        $objAtributoAndamentoDTO->retStrValor();
 
-                $objProtocoloDTO = new ProtocoloDTO();
-                $objProtocoloDTO->retTodos();
-                $objProtocoloDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-
-                $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-                $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
-
-                $objProtocoloDTO->setStrStaProtocolo(ProtocoloRN::$TE_NORMAL);
-                $objProtocoloBD->alterar($objProtocoloDTO);
-                
-                // Cadastra na tabela de histórico de 
-                $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
-                $objReceberTramiteRecusadoDTO->setNumRegistro($strNumeroRegistro);
-                $objReceberTramiteRecusadoDTO->setDblIdTramite($objTramite->IDT);
-
-                $objReceberTramiteRecusadoBD->cadastrar($objReceberTramiteRecusadoDTO);
-            }
-            catch(Exception $e) {
-
-                $strMessage = 'Falha ao mudar o estado do procedimento ao receber a lista de tramites recusados.';
-
-                LogSEI::getInstance()->gravar($strMessage.PHP_EOL.$e->getMessage().PHP_EOL.$e->getTraceAsString());
-                throw new InfraException($strMessage, $e);
-            }
-        }
+        $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
+        $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
+        
+        //Monta o DTO de receber tramite recusado
+        $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
+        $objReceberTramiteRecusadoDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+        $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
+        $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
+        $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(ProcessoEletronicoRN::$MOTIVOS_RECUSA[$tramite->motivoDaRecusa]);
+        $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
+        
+        //Faz o tratamento do processo e do trâmite recusado
+        $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
+        
+        
     }
+
+    protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusadoDTO $objReceberTramiteRecusadoDTO){
+        
+        
+        //Realiza o desbloqueio do processo
+        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+        
+        $objSeiRN = new SeiRN();
+        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+        
+        //Adiciona um andamento para o trâmite recusado
+        $arrObjAtributoAndamentoDTO = array();
+
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setStrNome('MOTIVO');
+        $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrMotivoRecusa());
+        $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
+        $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+        
+   
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+        $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrNomeUnidadeDestino());
+        $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
+        $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+
+        
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdTarefa($objReceberTramiteRecusadoDTO->getNumIdTarefa());
+        $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+        
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+        
+        //Sinaliza na PenProtocolo que o processo obteve recusa
+        $objProtocolo = new PenProtocoloDTO();
+        $objProtocolo->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+        $objProtocolo->setStrSinObteveRecusa('S');
+        
+        $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
+        $objProtocoloBD->alterar($objProtocolo);
+        
+        
+        $this->objProcessoEletronicoRN->cienciaRecusa($objReceberTramiteRecusadoDTO->getNumIdTramite());
+        
+
+    }
+       
+       
     
     /**
      * Método que realiza a validação da extensão dos componentes digitais a serem recebidos 

@@ -28,7 +28,7 @@ class ReceberReciboTramiteRN extends InfraRN
         
         $objSeiRN = new SeiRN();
         $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
-
+        
         $arrObjAtributoAndamentoDTO = array();
 
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -111,7 +111,8 @@ class ReceberReciboTramiteRN extends InfraRN
     }
 
   protected function receberReciboDeTramiteConectado($parNumIdTramite) {
-      
+              
+        
         if (!isset($parNumIdTramite)) {
             throw new InfraException('Parâmetro $parNumIdTramite não informado.');
         }
@@ -125,9 +126,14 @@ class ReceberReciboTramiteRN extends InfraRN
         //Verifica se o trâmite do processo se encontra devidamente registrado no sistema
         $objTramiteDTO = new TramiteDTO();
         $objTramiteDTO->setNumIdTramite($parNumIdTramite);
+        $objTramiteDTO->retNumIdUnidade();
+        
         $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
         if ($objTramiteBD->contar($objTramiteDTO) > 0) {
+            
+            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
             $objReciboTramiteDTOExistente = new ReciboTramiteDTO();
             $objReciboTramiteDTOExistente->setNumIdTramite($parNumIdTramite);
@@ -172,6 +178,9 @@ class ReceberReciboTramiteRN extends InfraRN
                     //Registra o recbimento do recibo no histórico e realiza a conclusão do processo
                     $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $parNumIdTramite);
                     
+                    $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
+                    $objPenTramiteProcessadoRN->setRecebido($parNumIdTramite);
+        
                 } catch (Exception $e) {
 
                     $strMessage = 'Falha o modificar o estado do procedimento para bloqueado.';
@@ -182,7 +191,6 @@ class ReceberReciboTramiteRN extends InfraRN
             }
         }
         
-        $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
-        $objPenTramiteProcessadoRN->setRecebido($parNumIdTramite);
+
     }
 }

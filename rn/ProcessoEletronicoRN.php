@@ -34,7 +34,8 @@ class ProcessoEletronicoRN extends InfraRN {
   public static $STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO = 5;        // Recibo de conclusão do trâmite enviado pelo destinatário do processo
   public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
   public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)     
-  public static $STA_SITUACAO_TRAMITE_RECUSADO = 9;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
+  public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
+  public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                           // Remetente ciente da recusa do trâmite
 
   /* OPERAÇÕES DO HISTÓRICO DO PROCESSO */
   // 02 a 18 estão registrados na tabela rel_tarefa_operacao
@@ -147,7 +148,7 @@ class ProcessoEletronicoRN extends InfraRN {
       
     if($this->objPenWs == null) { 
       $this->testaUrl($this->strWSDL, $this->options['local_cert']);
-     // try {
+      try {
         
         $objConfig = ConfiguracaoSEI::getInstance();
           
@@ -159,12 +160,9 @@ class ProcessoEletronicoRN extends InfraRN {
          
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
-    /*  } catch (Exception $e) {
-          echo "<pre>";
-          var_dump($e->getMessage());
-          die("</pre>");
+     } catch (Exception $e) {
         throw new InfraException('Erro acessando serviço.', $e);
-      }*/
+      } 
     }
 
     return $this->objPenWs;
@@ -611,7 +609,9 @@ class ProcessoEletronicoRN extends InfraRN {
     $objTramiteDTO->setStrNumeroRegistro($parStrNumeroRegistro);
     $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
     $objTramiteDTO->setNumTicketEnvioComponentes($parNumTicketComponentesDigitais);
-    $objTramiteDTO->setDthRegistro($this->converterDataSEI($parDthRegistroTramite));        
+    $objTramiteDTO->setDthRegistro($this->converterDataSEI($parDthRegistroTramite));    
+    $objTramiteDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objTramiteDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
     $objProcessoEletronicoDTO->setArrObjTramiteDTO(array($objTramiteDTO));
 
     //Monta dados dos componentes digitais
@@ -798,7 +798,7 @@ class ProcessoEletronicoRN extends InfraRN {
       $objComponenteDigitalDTO->setStrTipoConteudo($objComponenteDigital->tipoDeConteudo);
       $objComponenteDigitalDTO->setStrMimeType($objComponenteDigital->mimeType);
       $objComponenteDigitalDTO->setStrDadosComplementares($objComponenteDigital->dadosComplementaresDoTipoDeArquivo);
-
+      
       //Registrar componente digital necessita ser enviado pelo trâmite espefífico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui       
       if(isset($parObjComponentesDigitaisSolicitados)){
         $arrObjItensSolicitados = is_array($parObjComponentesDigitaisSolicitados->processo) ? $parObjComponentesDigitaisSolicitados->processo : array($parObjComponentesDigitaisSolicitados->processo);
@@ -910,7 +910,10 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametro = new stdClass();
       $parametro->filtroDeConsultaDeTramites = new stdClass();
       $parametro->filtroDeConsultaDeTramites->IDT = $parNumIdTramite;
-      $parametro->filtroDeConsultaDeTramites->NRE = $parNumeroRegistro;
+      
+      if(!is_null($parNumeroRegistro)){
+        $parametro->filtroDeConsultaDeTramites->NRE = $parNumeroRegistro;
+      }
       
       if(!is_null($parNumeroUnidadeRemetente) && !is_null($parNumeroRepositorioEstruturas)){
           $parametro->filtroDeConsultaDeTramites->remetente->identificacaoDoRepositorioDeEstruturas = $parNumeroRepositorioEstruturas;
@@ -967,6 +970,24 @@ class ProcessoEletronicoRN extends InfraRN {
       }
 
       return $arrObjTramite;
+
+    } catch (\SoapFault $fault) {
+      $mensagem = $this->tratarFalhaWebService($fault);
+      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+
+    } catch (\Exception $e) {
+      throw new InfraException("Error Processing Request", $e);
+    }        
+  }
+  
+  public function cienciaRecusa($parNumIdTramite) 
+  {
+    try
+    {    
+      $parametro = new stdClass();
+      $parametro->IDT = $parNumIdTramite;
+
+      return $this->getObjPenWs()->cienciaRecusa($parametro);
 
     } catch (\SoapFault $fault) {
       $mensagem = $this->tratarFalhaWebService($fault);
@@ -1192,7 +1213,7 @@ class ProcessoEletronicoRN extends InfraRN {
         try {
             $parametro = new stdClass();
             $parametro->IDT = $parNumIdTramite;
-
+            
             $resultado = $this->getObjPenWs()->receberReciboDeEnvio($parametro);
 
             if ($resultado && $resultado->conteudoDoReciboDeEnvio) {
@@ -1305,6 +1326,7 @@ class ProcessoEletronicoRN extends InfraRN {
       //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->filtroDeConsultaDeTramites = new stdClass()
       //Faz a consulta do tramite
       $paramConsultaTramite = new stdClass();
+      $paramConsultaTramite->filtroDeConsultaDeTramites = new stdClass();
       $paramConsultaTramite->filtroDeConsultaDeTramites->IDT = $idTramite;
       $dadosTramite = $this->getObjPenWs()->consultarTramites($paramConsultaTramite);
 
@@ -1334,6 +1356,7 @@ class ProcessoEletronicoRN extends InfraRN {
             
             //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->recusaDeTramite = new stdClass()
             $parametros = new stdClass();
+            $parametros->recusaDeTramite = new stdClass();
             $parametros->recusaDeTramite->IDT = $idTramite;
             $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
             $parametros->recusaDeTramite->motivo = $motivo;
@@ -1416,10 +1439,10 @@ class ProcessoEletronicoRN extends InfraRN {
             return false;
         }
         catch(SoapFault $e) {
-            throw new InfraException($e->getMessage());
+            return false;
         }
         catch(Exception $e) {
-            throw new InfraException($e->getMessage());
+            return false;
         }
     }
 }

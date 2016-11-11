@@ -397,7 +397,7 @@ class PenAtividadeRN extends AtividadeRN {
                 }
                 
                 switch($numIdTarefa){
-                    case ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO:
+                    case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
                         $strMensagem = 'Expedição do Processo %s para %s';
                         $strNome = 'UNIDADE_DESTINO';
                         
@@ -409,7 +409,7 @@ class PenAtividadeRN extends AtividadeRN {
                         $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false; 
                         break;
                             
-                    case ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO:
+                    case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
                         $strMensagem = 'Recebimento do Processo %s remetido por %s';
                         $strNome = 'ENTIDADE_ORIGEM';
                         
@@ -431,7 +431,7 @@ class PenAtividadeRN extends AtividadeRN {
                 $arrAtributoAndamentoDTO = $objAtributoAndamentoBD->listar($objAtributoAndamentoDTO);
 
                 $objAtributoAndamentoDTO = current($arrAtributoAndamentoDTO);
-                
+
                 $obProtocoloDTO = new ProtocoloDTO();
                 $obProtocoloDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
                 $obProtocoloDTO->retStrProtocoloFormatado();

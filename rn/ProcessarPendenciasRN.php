@@ -148,9 +148,10 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa {
     $this->objGearmanWorker->addFunction("receberTramitesRecusados", function ($job) {
       
         InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [receberRecusaTramite] " . $job->workload());
-
+        $numIdentificacaoTramite = intval($job->workload());
+        
         $objReceberProcedimentoRN = new ReceberProcedimentoRN();  
-        $objReceberProcedimentoRN->receberTramitesRecusados();
+        $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
     });
     
     //Processamento de pendências de recebimento dos componentes digitais do processo

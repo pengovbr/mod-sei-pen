@@ -1,18 +1,22 @@
 <?php
 
-require_once dirname(__FILE__).'/../../../SEI.php';
+require_once dirname(__FILE__) . '/../../../SEI.php';
 
 class ReceberTramiteRecusadoDTO extends InfraDTO {
 
     public function getStrNomeTabela() {
-        return 'md_pen_tramite_recusado';
+        return null;
     }
 
     public function montar() {
-        
-        $this->adicionarAtributo(InfraDTO::$PREFIXO_DBL, 'IdTramite', 'id_tramite');
-        $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'Registro', 'numero_registro');
 
-        $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'id_tramite');
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdProtocolo', 'id_protocolo');
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidadeOrigem', 'id_unidade_origem');
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdTarefa', 'id_tarefa');
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'MotivoRecusa', 'motivo_recusa');
+        $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'NomeUnidadeDestino', 'nome_unidade_destino');
+   
     }
+
 }

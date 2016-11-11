@@ -42,12 +42,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_tramite'=> array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'ticket_envio_componentes'=> array($objMetaBD->tipoTextoGrande(), PenMetaBD::SNULLO),
                 'dth_registro'=> array($objMetaBD->tipoDataHora(), PenMetaBD::SNULLO),
-                'id_andamento'=> array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO)
+                'id_andamento'=> array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+                'id_usuario'=> array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+                'id_unidade'=> array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO)
             ),
             'pk' => array('id_tramite'),
             'uk' => array('numero_registro', 'id_tramite'),
             'fks' => array(
-                'md_pen_processo_eletronico' => array('numero_registro', 'numero_registro')
+                'md_pen_processo_eletronico' => array('numero_registro', 'numero_registro'),
+                'usuario' => array('id_usuario', 'id_usuario'),
+                'unidade' => array('id_unidade', 'id_unidade')
             )
         ));
          
@@ -110,14 +114,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             )
         ));
 
-        $objMetaBD->criarTabela(array(
+   /*     $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_tramite_recusado',
             'cols' => array(
                 'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO)
             ),
             'pk' => array('id_tramite')
-        ));
+        ));*/
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_recibo_tramite',

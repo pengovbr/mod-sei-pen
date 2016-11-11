@@ -40,8 +40,8 @@ class ProcessoExpedidoDTO extends InfraDTO {
         $this->configurarFK('IdUsuario', 'usuario', 'id_usuario');
         $this->configurarFK('IdAtividade', 'atributo_andamento', 'id_atividade');
             
-        $this->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-        $this->setNumTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+        //$this->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
+        //$this->setNumTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
         $this->setOrd('Expedido', InfraDTO::$TIPO_ORDENACAO_DESC);
     }
 }

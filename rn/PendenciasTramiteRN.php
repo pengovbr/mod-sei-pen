@@ -74,7 +74,7 @@ class PendenciasTramiteRN extends InfraRN {
           $objPendenciaDTO = $this->obterPendenciasTramite($numIdTramiteRecebido);          
           
           if(isset($objPendenciaDTO)) {
-              
+
               if($numIdTramiteRecebido != $objPendenciaDTO->getNumIdentificacaoTramite()) {
               
                 $numIdTramiteRecebido = $objPendenciaDTO->getNumIdentificacaoTramite();
@@ -133,8 +133,9 @@ class PendenciasTramiteRN extends InfraRN {
     $resultado = null;
     $curl = $this->configurarRequisicao();
     
-    try{
 
+    try{
+        
       if(isset($parNumIdTramiteRecebido)) {
         curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebido=" . $parNumIdTramiteRecebido);     
       }

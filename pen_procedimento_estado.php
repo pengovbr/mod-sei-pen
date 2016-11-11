@@ -211,7 +211,7 @@ try {
             
             // @join_tec US008.03 (#23092) | @join_tec US008.13 (#23092)
            
-            if($numTarefa == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO){
+            if($numTarefa == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
                 $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboEnvio&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_red.png" alt="Recibo de Confirmação de Envio" title="Recibo de Confirmação de Envio" /></a>';
             }
             // @join_tec US008.01 (#23092)

@@ -18,9 +18,7 @@ try {
     $strTitulo = 'Processos Expedidos';
       
     $objFiltroDTO = new ProtocoloDTO();
-    $objFiltroDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-    $objFiltroDTO->setNumIdTarefaAtividade(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
-   // $objFiltroDTO->setDistinct(true);
+    $objFiltroDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
     $objFiltroDTO->retDblIdProtocolo();
     $objFiltroDTO->retStrProtocoloFormatado();
     
@@ -29,38 +27,24 @@ try {
         $objFiltroDTO->retDthConclusaoAtividade();
     }
     $objPaginaSEI->prepararPaginacao($objFiltroDTO, 10);
-    $objPaginaSEI->prepararOrdenacao($objFiltroDTO, 'ConclusaoAtividade', InfraDTO::$TIPO_ORDENACAO_DESC);
     
     BancoSEI::getInstance()->abrirConexao();
     
-    $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-    $arrObjFiltroDTO = $objProtocoloBD->listar($objFiltroDTO);
+    $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+    $arrObjProcessoExpedidoDTO = $objProcessoExpedidoRN->listarProcessoExpedido($objFiltroDTO);
 
-    $arrObjProcessoExpedidoDTO = array();
     $numRegistros = 0;
-    
-    if(!empty($arrObjFiltroDTO)) {
         
-        $arrIdProtocolo = InfraArray::converterArrInfraDTO($arrObjFiltroDTO, 'IdProtocolo');
+    if(!empty($arrObjProcessoExpedidoDTO)) {
 
-        $objProcessoExpedido = new ProcessoExpedidoDTO();
-        $objProcessoExpedido->setDblIdProtocolo($arrIdProtocolo, InfraDTO::$OPER_IN);
-        $objProcessoExpedido->retTodos();
+        $arrObjProcessoExpedidoDTO = InfraArray::distinctArrInfraDTO($arrObjProcessoExpedidoDTO, 'IdProtocolo');
 
-        $objGenericoBD = new ProcessoExpedidoBD(BancoSEI::getInstance());
-        $arrObjProcessoExpedidoDTO = $objGenericoBD->listar($objProcessoExpedido);
-        
-        if(!empty($arrObjProcessoExpedidoDTO)) {
-            
-            $arrObjProcessoExpedidoDTO = InfraArray::distinctArrInfraDTO($arrObjProcessoExpedidoDTO, 'IdProtocolo');
-
-            $numRegistros = count($arrObjProcessoExpedidoDTO);
-        } 
-    }
+        $numRegistros = count($arrObjProcessoExpedidoDTO);
+    } 
     
     $objPaginaSEI->processarPaginacao($objFiltroDTO);
         
-    if (!empty($arrObjProcessoExpedidoDTO)) {
+   if (!empty($arrObjProcessoExpedidoDTO)) {
 
         $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
@@ -84,7 +68,7 @@ try {
             
             $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
             $strResultado .= $strCssTr;
-
+            
             $strResultado .= '<td valign="top">'.$objPaginaSEI->getTrCheck($numIndice,$objProcessoExpedidoDTO->getDblIdProtocolo(),$objProcessoExpedidoDTO->getStrProtocoloFormatado()).'</td>'."\n";
             $strResultado .= '<td width="17%" align="center"><a onclick="abrirProcesso(\'' .$objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objProcessoExpedidoDTO->getDblIdProtocolo())).'\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '" title="" class="protocoloNormal" style="font-size:1em !important;">'.$objProcessoExpedidoDTO->getStrProtocoloFormatado().'</a></td>' . "\n";
             $strResultado .= '<td align="center"><a alt="Teste" title="Teste" class="ancoraSigla">' . $objProcessoExpedidoDTO->getStrNomeUsuario() . '</a></td>';

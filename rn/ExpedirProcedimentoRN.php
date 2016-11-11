@@ -238,9 +238,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->receberReciboDeEnvio($objTramite->IDT);
         } 
         catch (\Exception $e) {
-            echo "<pre>";
-            var_dump($e);
-            die("</pre>");
              $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI);
              $this->registrarAndamentoExpedicaoAbortada($objProtocolo->idProcedimentoSEI);
              
@@ -343,7 +340,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     // Consultar se processo eletrônico existe no PEN algum trâmite CANCELADO, caso
     // sim deve ser gerada uma nova NRE, pois a atual será recusada pelo PEN quando
     // for enviado
-    if(!InfraString::isBolVazia($strNumeroRegistro)) {      
+   /* if(!InfraString::isBolVazia($strNumeroRegistro)) {      
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites(null, $strNumeroRegistro);
         if(!empty($arrObjTramite) && is_array($arrObjTramite) && count($arrObjTramite) === 1) {
             $objTramite = current($arrObjTramite);
@@ -351,8 +348,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strNumeroRegistro = null;
             }  
         }
-    }    
+    }    */
     
+
     return $this->objProcessoEletronicoRN->construirCabecalho(
       //TODO: Desabilitado consulta do NRE para questões de teste
       $strNumeroRegistro, 
@@ -1367,7 +1365,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(!isset($strProtocolo)){
           throw new InfraException('Parâmetro $strProtocolo não informado.');
         }
-
+        
         //Obter dados dos componetes digitais
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1377,7 +1375,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
         $objComponenteDigitalDTO->retDblIdDocumento();
         $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-        $objComponenteDigitalDTO->retStrConteudoAssinaturaDocumento();
+      //  $objComponenteDigitalDTO->retStrConteudoAssinaturaDocumento();
         $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
         $objComponenteDigitalDTO->retStrHashConteudo();
         $objComponenteDigitalDTO->retStrProtocolo();
@@ -1385,11 +1383,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO->retDblIdProcedimento();
 
         $arrComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
- 
+
         if (isset($arrComponentesDigitaisDTO) && count($arrComponentesDigitaisDTO) > 0) {
            
             //TODO: Valida inconsistência da quantidade de documentos solicitados e aqueles cadastrados no SEI
-
+   
+            
             //Construir objeto Componentes digitais                  
           foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
 
@@ -1420,7 +1419,7 @@ class ExpedirProcedimentoRN extends InfraRN {
               $parametros = new stdClass();
               $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
               $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
-
+              
                     //Bloquea documento para atualização, já que ele foi visualizado
               $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
               // @join_tec US008.05 (#23092)
@@ -1571,7 +1570,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 // Se o documento não tem assinatura e não foi cancelado então
                 // cai na regra de validação
-                if($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_CANCELADO){
+                if($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
                     
                     //$bolAssinaturaCorretas = false;
                 }
@@ -2059,7 +2058,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
         
         $numSituacaoAtual = 0;
-        
+
         // Se o barramento possui alguma situação do tramite verificamos se o precedimento
         // já esta em recebimento
         if(!empty($arrObjMetaTramite)) {
@@ -2085,27 +2084,30 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $this->objProcessoEletronicoRN->cancelarTramite($objMetaTramite->IDT);
 
-        // Muda o Status o procedimento para NORMAL
-        $objProcesso = (object)array('idProcedimentoSEI' => $dblIdProcedimento);
-        ExpedirProcedimentoRN::mudarEstadoProcedimentoNormal($objProcesso, ProtocoloRN::$TE_NORMAL);
-
+        //Desbloqueia o processo
+        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);  
+        $objSeiRN = new SeiRN();
+        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+      
         $objDTOFiltro = new TramiteDTO();
         $objDTOFiltro->setNumIdTramite($objMetaTramite->IDT);
         $objDTOFiltro->setNumMaxRegistrosRetorno(1);
         $objDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objDTOFiltro->retTodos();
-
+        $objDTOFiltro->retNumIdTramite();
+        $objDTOFiltro->retStrNumeroRegistro();
+        
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $objTramiteDTO = $objTramiteBD->consultar($objDTOFiltro);
 
         $objTramiteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
-        $objTramiteBD->alterar($objTramiteDTO);
-
+        $objTramiteDTO = $objTramiteBD->alterar($objTramiteDTO);
+      
         //Cria o Objeto que registrará a Atividade de cancelamento
         $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);
+        $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO);
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO));
 
 
         //Seta os atributos do tamplate de descrição dessa atividade
