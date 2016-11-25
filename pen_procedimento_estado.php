@@ -33,7 +33,7 @@ try {
             case 'baixarReciboEnvio':
                 
                 header('Content-Disposition: attachment; filename="recibo_de_envio_do_tramite.xml"');
-                print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
+                // print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
                 $objBancoSEI = BancoSEI::getInstance();
                 $objBancoSEI->abrirConexao();
         
@@ -49,25 +49,23 @@ try {
                             throw new InfraException('O recibo ainda não foi recebido.');
                         }
                         
-                        print '<recibosDeTramites>';
 
                         foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
                             $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
                             
-                            print '<reciboDeTramite>';
-                            print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'<IDT>';
-                            print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'<NRE>';
-                            print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'<dataDeRecebimento>';
+                            print '<recibo>';
+                            print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
+                            print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
+                            print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
                             
                             $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
                             if(!empty($strHashAssinatura)) {
-                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'<hashDoComponenteDigital>';
+                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'</hashDoComponenteDigital>';
                             }
-                            print '</reciboDeTramite>';
+                            print '</recibo>';
                         }
 
-                        print '</recibosDeTramites>';
                     }
                 }
                 catch(InfraException $e){
@@ -84,40 +82,38 @@ try {
             // @join_tec US008.03 (#23092)
             case 'baixarReciboRecebimento':
                 header('Content-Disposition: attachment; filename="recibo_de_conclusao_do_tramite.xml"');
-                print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
+                // print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
                 $objBancoSEI = BancoSEI::getInstance();
                 $objBancoSEI->abrirConexao();
                 
                 try {
-                    
+
                     if(array_key_exists('id_tramite', $_GET) && array_key_exists('id_tarefa', $_GET)) {
                                         
                         $objReciboTramiteRN = new ReciboTramiteRN();
                         $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($_GET['id_tramite'], $_GET['id_tarefa']);
-
+                        
                         if(empty($arrObjReciboTramiteDTO)) {
                             throw new InfraException('O recibo ainda não foi recebido.');
                         }
                         
-                        print '<recibosDeTramites>';
 
                         foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
                             $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
                             
-                            print '<reciboDeTramite>';
-                            print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'<IDT>';
-                            print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'<NRE>';
-                            print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'<dataDeRecebimento>';
+                            print '<recibo>';
+                            print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
+                            print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
+                            print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
                             
                             $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
                             if(!empty($strHashAssinatura)) {
-                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'<hashDoComponenteDigital>';
+                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'</hashDoComponenteDigital>';
                             }
-                            print '</reciboDeTramite>';
+                            print '</recibo>';
                         }
 
-                        print '</recibosDeTramites>';
                     }
                 }
                 catch(InfraException $e){

@@ -82,10 +82,16 @@ class PenMetaBD extends InfraMetaBD {
             
         switch($strTableDrive) {
 
-            case 'InfraMySqli':
+           case 'InfraMySqli':
                 // Fix para bug de MySQL versão inferior ao 5.5 o default engine
                 // é MyISAM e não tem suporte a FOREING KEYS
-                $this->getObjInfraIBanco()->executarSql('SET STORAGE_ENGINE=InnoDB');  
+                $version = $this->getObjInfraIBanco()->consultarSql('SELECT VERSION() as versao');
+                $version = $version[0]['versao'];
+                $arrVersion = explode('.', $version);
+                
+                if($arrVersion[0].$arrVersion[1] < 57){
+                    $this->getObjInfraIBanco()->executarSql('@SET STORAGE_ENGINE=InnoDB'); 
+                }
             case 'InfraSqlServer':
             case 'InfraOracle':
                 break;
@@ -697,7 +703,7 @@ abstract class PenAtualizadorRN extends InfraRN {
      */
     public function atualizarVersao() {
 
-        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
+        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SIP_VERSAO);
 
         try {
 

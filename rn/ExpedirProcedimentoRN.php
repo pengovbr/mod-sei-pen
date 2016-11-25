@@ -393,7 +393,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         //TODO:Adicionar demais informações do processo
         //<protocoloAnterior>
         
-    $this->atribuirDadosHistorico($objProcesso, $dblIdProcedimento);
+   // $this->atribuirDadosHistorico($objProcesso, $dblIdProcedimento);
 
     $objProcesso->idProcedimentoSEI = $dblIdProcedimento;
     return $objProcesso;
@@ -1014,8 +1014,12 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     $arrInformacaoArquivo = array();
     $strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
-
-    if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_GERADO) {
+    
+    $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
+    $idSerieEmail = $objInfraParametro->getValor('ID_SERIE_EMAIL');
+    $docEmailEnviado = $objDocumentoDTO->getNumIdSerie() == $idSerieEmail && $objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_FORMULARIO_AUTOMATICO ? true : false;
+    
+    if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_GERADO && !$docEmailEnviado) {
 
       $objEditorDTO = new EditorDTO();
       $objEditorDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
@@ -1035,7 +1039,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrInformacaoArquivo['MIME_TYPE'] = 'text/html';
       $arrInformacaoArquivo['ID_ANEXO'] = null;
 
-    } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO) {
+    } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO || $docEmailEnviado)  {
 
       $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
@@ -1292,6 +1296,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retStrConteudoAssinatura();
         $documentoDTO->retStrNumero();
         $documentoDTO->retNumIdTipoConferencia();
+        $documentoDTO->retStrStaDocumento();
         $documentoDTO->setOrdStrProtocoloDocumentoFormatado(InfraDTO::$TIPO_ORDENACAO_ASC);
         
         return $this->objDocumentoRN->listarRN0008($documentoDTO);
@@ -1347,6 +1352,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retStrNomeSerie();
         $documentoDTO->retNumIdSerie();
         $documentoDTO->retStrConteudoAssinatura();
+        $documentoDTO->retStrStaDocumento();
         //$documentoDTO->retStrNumero();
         
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
@@ -1414,8 +1420,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             
             
             
-            try {
-                    //Enviar componentes digitais
+            try {               
+              //Enviar componentes digitais
               $parametros = new stdClass();
               $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
               $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);

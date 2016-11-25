@@ -30,7 +30,7 @@ class ReciboTramiteRN extends InfraRN {
         $arrObjDTO = array();
 
         switch ($numIdTarefa) {
-            case ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO:
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
                 $objReciboTramiteDTO = new ReciboTramiteDTO();
                 $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                 $objReciboTramiteDTO->retStrNumeroRegistro();
@@ -42,7 +42,7 @@ class ReciboTramiteRN extends InfraRN {
                 $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
                 break;
 
-            case ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO:
+            case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
                 $objReciboTramiteDTO = new ReciboTramiteRecebidoDTO();
                 $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                 $objReciboTramiteDTO->retStrNumeroRegistro();
