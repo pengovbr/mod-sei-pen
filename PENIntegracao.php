@@ -174,21 +174,12 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public static function getDiretorio() {
-
-//        if (empty(static::$strDiretorio)) {
-//
-//            $arrModulos = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
-//
-//            $strModuloPath = realpath($arrModulos['PENIntegracao']);
-//            
-//
-//            
-//            static::$strDiretorio = str_replace(realpath(__DIR__ . '/../..'), '', $strModuloPath);
-//            static::$strDiretorio = preg_replace('/^\//', '', static::$strDiretorio);
-//        }
-//
-//        return static::$strDiretorio;
-        return "modulos/pen";
+       
+        
+        $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
+        $strModulo = $arrConfig['PENIntegracao'];
+        
+        return "modulos/".$strModulo;
     }
 
     public function processarControlador($strAcao) {
