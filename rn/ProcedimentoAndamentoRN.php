@@ -83,7 +83,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
     
         
         // achou um registro, então atualiza o log
-        if(!empty($objProcedimentoAndamentoDTO)) {
+      /*  if(!empty($objProcedimentoAndamentoDTO)) {
             
             $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
             $objProcedimentoAndamentoDTO->setDthData(date('d/m/Y H:i:s'));            
@@ -91,7 +91,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
             $objProcedimentoAndamentoBD->alterar($objProcedimentoAndamentoDTO);
         }
         // Senão cadastra um novo log
-        else {            
+        else {            */
    
             $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
             $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
@@ -104,7 +104,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
             $objProcedimentoAndamentoDTO->setNumTarefa($this->numTarefa);
             
             $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
-        }
+      //  }
        
         $objInfraIBanco->confirmarTransacao(); 
     }

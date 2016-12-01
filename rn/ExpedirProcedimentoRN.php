@@ -1557,6 +1557,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
        // $objDocumentoDTO->setStrStaEditor(array(EditorRN::$TE_EDOC, EditorRN::$TE_INTERNO), InfraDTO::$OPER_IN);
         $objDocumentoDTO->retDblIdDocumento();
+        $objDocumentoDTO->retStrStaDocumento();
         $objDocumentoDTO->retStrStaEstadoProtocolo();
 
         $objDocumentoRN = new DocumentoRN();
@@ -1576,9 +1577,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 // Se o documento não tem assinatura e não foi cancelado então
                 // cai na regra de validação
-                if($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                if($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO && ($objDocumentoDTO->getStrStaDocumento() != DocumentoRN::$TD_EDITOR_EDOC || $objDocumentoDTO->getStrStaDocumento() != DocumentoRN::$TD_EDITOR_INTERNO) ){
                     
-                    //$bolAssinaturaCorretas = false;
+                    $bolAssinaturaCorretas = false;
                 }
             }
         }
