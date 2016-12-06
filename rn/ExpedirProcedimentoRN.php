@@ -173,12 +173,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         
         $objTramite = $novoTramite->dadosTramiteDeProcessoCriado;
           
-
         $this->objProcedimentoAndamentoRN->setOpts($dblIdProcedimento, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
-        
         try {
               
-          
         $this->objProcedimentoAndamentoRN->cadastrar('Envio do metadados do processo', 'S');
         
         $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
@@ -239,7 +236,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         } 
         catch (\Exception $e) {
              $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI);
-             $this->registrarAndamentoExpedicaoAbortada($objProtocolo->idProcedimentoSEI);
+             $this->registrarAndamentoExpedicaoAbortada($objProcesso->idProcedimentoSEI);
              
              // @join_tec US008.06 (#23092)
              $this->objProcedimentoAndamentoRN->cadastrar('Concluído envio dos componentes do processo', 'N');
@@ -1046,6 +1043,11 @@ class ExpedirProcedimentoRN extends InfraRN {
       if(!isset($objAnexoDTO)){
         throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
       }
+      
+      //VALIDAÇÃO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIÇÃO
+      if($objAnexoDTO->getNumTamanho() > ($objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) ){
+           throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
+      } 
 
             //Obtenção do conteudo do documento externo
             //TODO: Particionar o documento em tamanho menor caso ultrapasse XX megabytes
@@ -1251,6 +1253,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAnexoDTO->retDblIdProtocolo();
         $objAnexoDTO->retDthInclusao();
         $objAnexoDTO->retNumTamanho();
+        $objAnexoDTO->retStrProtocoloFormatadoProtocolo();
         $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
         
         return $this->objAnexoRN->consultarRN0736($objAnexoDTO);
@@ -2024,98 +2027,97 @@ class ExpedirProcedimentoRN extends InfraRN {
      */
     public function cancelarTramite($dblIdProcedimento) {
         
-        $objDTOFiltro = new ProcessoEletronicoDTO();
-        $objDTOFiltro->setDblIdProcedimento($dblIdProcedimento);
-        $objDTOFiltro->retStrNumeroRegistro();
-        $objDTOFiltro->setNumMaxRegistrosRetorno(1);
-        
-        $objBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-        $objProcessoEletronicoDTO = $objBD->consultar($objDTOFiltro);
-     
-        if(empty($objProcessoEletronicoDTO)) {
-            throw new InfraException('Não foi Encontrado o Processo pelo ID '. $dblIdProcedimento);
-        }
-        
+        //Busca os dados do protocolo
         $objDtoProtocolo = new ProtocoloDTO();
         $objDtoProtocolo->retStrProtocoloFormatado();
+        $objDtoProtocolo->retDblIdProtocolo();
         $objDtoProtocolo->setDblIdProtocolo($dblIdProcedimento);
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objDtoProtocolo = $objProtocoloBD->consultar($objDtoProtocolo);
-     
         
-//        $objDTOFiltro = new TramiteDTO();
-//        $objDTOFiltro->setStrNumeroRegistro($objProcessoEletronicoDTO->getStrNumeroRegistro());
-//        $objDTOFiltro->setNumMaxRegistrosRetorno(1);
-//        $objDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
-//        $objDTOFiltro->retTodos();
-//        
-//        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-//        $objTramiteDTO = $objTramiteBD->consultar($objDTOFiltro);
-//        
-//        if(empty($objTramiteDTO)) {
-//            throw new InfraException('Não foi Encontrado Trâmite para Esse Processo!');
-//        }
+        $this->cancelarTramiteInternoControlado($objDtoProtocolo);
         
-
-        $arrObjMetaTramite = $this->objProcessoEletronicoRN->consultarTramitesProtocolo($objDtoProtocolo->getStrProtocoloFormatado());
+    }
+    
+    protected function cancelarTramiteInternoControlado(ProtocoloDTO $objDtoProtocolo) {
         
-        if(empty($arrObjMetaTramite)) {
-            throw new InfraException('Não foi Encontrado Trâmite para Esse Processo!');
-        }
-        
-        $numSituacaoAtual = 0;
+        //Armazena o id do protocolo
+        $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
 
-        // Se o barramento possui alguma situação do tramite verificamos se o precedimento
-        // já esta em recebimento
-        if(!empty($arrObjMetaTramite)) {
+        $tramites = $this->objProcessoEletronicoRN->consultarTramitesProtocolo($objDtoProtocolo->getStrProtocoloFormatado());
+        $tramite = $tramites ? array_pop($tramites) : null;
 
-            $objMetaTramite = array_pop($arrObjMetaTramite);
-
-            switch($objMetaTramite->situacaoAtual) {  
-                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                    throw new InfraException("O sistema destinatário já iniciou o recebimento desse processo, portanto não é possivel realizar o cancelamento");
-                    break;
-                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-                    throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
-                    break; 
-                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
-                    throw new InfraException("O processo já se encontra cancelado");
-                    break; 
-                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                    throw new InfraException("O processo se encontra recusado");
-                    break; 
-            }
-            $numSituacaoAtual = $objMetaTramite->situacaoAtual;
+        if (!$tramite) {
+            throw new InfraException('Trâmite não encontrado para esse processo. ');
         }
 
-        $this->objProcessoEletronicoRN->cancelarTramite($objMetaTramite->IDT);
+        //Verifica se o trâmite está com o status de iniciado
+        if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
+            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
+
+            return true;
+        }
+
+        //Busca o processo eletrônico
+        $objDTOFiltro = new ProcessoEletronicoDTO();
+        $objDTOFiltro->setDblIdProcedimento($dblIdProcedimento);
+        $objDTOFiltro->retStrNumeroRegistro();
+        $objDTOFiltro->setNumMaxRegistrosRetorno(1);
+
+        $objBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        $objProcessoEletronicoDTO = $objBD->consultar($objDTOFiltro);
+
+        if (empty($objProcessoEletronicoDTO)) {
+            throw new InfraException('Não foi Encontrado o Processo pelo ID ' . $dblIdProcedimento);
+        }
+
+        //Armazena a situação atual
+        $numSituacaoAtual = $tramite->situacaoAtual;
+
+        //Valida os status
+        switch ($numSituacaoAtual) {
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+                throw new InfraException("O sistema destinatário já iniciou o recebimento desse processo, portanto não é possivel realizar o cancelamento");
+                break;
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
+                throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
+                break;
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
+                throw new InfraException("O processo já se encontra cancelado");
+                break;
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+                throw new InfraException("O processo se encontra recusado");
+                break;
+        }
+
+        $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
 
         //Desbloqueia o processo
         $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);  
+        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);
+
         $objSeiRN = new SeiRN();
         $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
-      
+
         $objDTOFiltro = new TramiteDTO();
-        $objDTOFiltro->setNumIdTramite($objMetaTramite->IDT);
+        $objDTOFiltro->setNumIdTramite($tramite->IDT);
         $objDTOFiltro->setNumMaxRegistrosRetorno(1);
         $objDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
         $objDTOFiltro->retNumIdTramite();
         $objDTOFiltro->retStrNumeroRegistro();
-        
+
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $objTramiteDTO = $objTramiteBD->consultar($objDTOFiltro);
 
         $objTramiteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
         $objTramiteDTO = $objTramiteBD->alterar($objTramiteDTO);
-      
+
         //Cria o Objeto que registrará a Atividade de cancelamento
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO));
-
 
         //Seta os atributos do tamplate de descrição dessa atividade
         $objAtributoAndamentoDTOHora = new AtributoAndamentoDTO();
@@ -2132,12 +2134,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
-
-        
     }
-
-
-
 
 //   // private function validarStrSinGerarPendenciaRN0901(ProcedimentoDTO $objProcedimentoDTO, InfraException $objInfraException){
 //   //   if (InfraString::isBolVazia($objProcedimentoDTO->getStrSinGerarPendencia())){

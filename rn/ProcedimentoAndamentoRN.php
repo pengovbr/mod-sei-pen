@@ -75,36 +75,17 @@ class ProcedimentoAndamentoRN extends InfraRN {
         $hash = md5($this->dblIdProcedimento.$strMensagem);
         
         $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
+        $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
+        $objProcedimentoAndamentoDTO->setDthData(date('d/m/Y H:i:s'));            
+        $objProcedimentoAndamentoDTO->setDblIdProcedimento($this->dblIdProcedimento);
+        $objProcedimentoAndamentoDTO->setDblIdTramite($this->dblIdTramit);
+        $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
+        $objProcedimentoAndamentoDTO->setStrMensagem($strMensagem);
         $objProcedimentoAndamentoDTO->setStrHash($hash);
-        $objProcedimentoAndamentoDTO->retTodos();
-         
-        $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($objInfraIBanco);
-        $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
-    
+        $objProcedimentoAndamentoDTO->setNumTarefa($this->numTarefa);
         
-        // achou um registro, então atualiza o log
-      /*  if(!empty($objProcedimentoAndamentoDTO)) {
-            
-            $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
-            $objProcedimentoAndamentoDTO->setDthData(date('d/m/Y H:i:s'));            
-          
-            $objProcedimentoAndamentoBD->alterar($objProcedimentoAndamentoDTO);
-        }
-        // Senão cadastra um novo log
-        else {            */
-   
-            $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
-            $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
-            $objProcedimentoAndamentoDTO->setDthData(date('d/m/Y H:i:s'));            
-            $objProcedimentoAndamentoDTO->setDblIdProcedimento($this->dblIdProcedimento);
-            $objProcedimentoAndamentoDTO->setDblIdTramite($this->dblIdTramit);
-            $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
-            $objProcedimentoAndamentoDTO->setStrMensagem($strMensagem);
-            $objProcedimentoAndamentoDTO->setStrHash($hash);
-            $objProcedimentoAndamentoDTO->setNumTarefa($this->numTarefa);
-            
-            $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
-      //  }
+        $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($objInfraIBanco);
+        $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
        
         $objInfraIBanco->confirmarTransacao(); 
     }
