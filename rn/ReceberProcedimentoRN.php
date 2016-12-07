@@ -81,7 +81,9 @@ class ReceberProcedimentoRN extends InfraRN
   protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
   {     
       
-      error_log(__METHOD__.'('.$parNumIdentificacaoTramite.')');
+    $objSeiRN = new SeiRN();
+    
+    error_log(__METHOD__.'('.$parNumIdentificacaoTramite.')');
       
     if (!isset($parNumIdentificacaoTramite)) {
       throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
@@ -172,13 +174,11 @@ class ReceberProcedimentoRN extends InfraRN
     
     foreach($this->documentosRetirados as $documentoCancelado){
         //Instancia o DTO do protocolo
-        $objProtocoloCanceladoDTO = new ProtocoloDTO();
-        $objProtocoloCanceladoDTO->setDblIdProtocolo($documentoCancelado);
-        $objProtocoloCanceladoDTO->setStrMotivoCancelamento('Cancelado pelo remetente');
-
-
-        $objProtocoloRN = new PenProtocoloRN();
-        $objProtocoloRN->cancelar($objProtocoloCanceladoDTO);
+        $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+        $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
+        $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+        
+        $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
     }
     
     

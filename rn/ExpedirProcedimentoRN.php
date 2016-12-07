@@ -1045,7 +1045,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
       
       //VALIDAÇÃO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIÇÃO
-      if($objAnexoDTO->getNumTamanho() > ($objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) ){
+      if($objAnexoDTO->getNumTamanho() > ($objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
            throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
       } 
 
@@ -1356,6 +1356,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retNumIdSerie();
         $documentoDTO->retStrConteudoAssinatura();
         $documentoDTO->retStrStaDocumento();
+        $documentoDTO->retStrStaEstadoProtocolo();
         //$documentoDTO->retStrNumero();
         
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
