@@ -111,7 +111,7 @@ class ReceberProcedimentoRN extends InfraRN
       #############################INICIA O RECEBIMENTO DOS COMPONENTES DIGITAIS US010################################################
       $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
       $objTramite = $arrObjTramite[0];
-      
+             
       //Obtém lista de componentes digitais que precisam ser obtidos
       if(!is_array($objTramite->componenteDigitalPendenteDeRecebimento)){
         $objTramite->componenteDigitalPendenteDeRecebimento = array($objTramite->componenteDigitalPendenteDeRecebimento);
@@ -136,8 +136,8 @@ class ReceberProcedimentoRN extends InfraRN
       
       //Cria o array com a lista de hash
       $arrayHash = array();
-                
-      //Percorre os componentes que precisam ser recebidos
+                 
+     //Percorre os componentes que precisam ser recebidos
       foreach($objTramite->componenteDigitalPendenteDeRecebimento as $componentePendente){
           
           if(!is_null($componentePendente)){
@@ -168,10 +168,10 @@ class ReceberProcedimentoRN extends InfraRN
       if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
             return;
       }
-
+ 
     $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
 
-    
+          
     foreach($this->documentosRetirados as $documentoCancelado){
         //Instancia o DTO do protocolo
         $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
@@ -371,6 +371,8 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProcesso, $parObjMetadadosProcedimento)
   {
+    
+     
     // Validação dos dados do processo recebido
     $objInfraException = new InfraException();
     $this->validarDadosProcesso($objInfraException, $parObjProcesso);
@@ -385,10 +387,12 @@ class ReceberProcedimentoRN extends InfraRN
     $dblIdProcedimento = $this->consultarProcedimentoExistente($parStrNumeroRegistro, $parObjProcesso->protocolo);
 
     if(isset($dblIdProcedimento)){
-      //TODO: Tratar situação em que o processo (NUP) já existia na base do sistema mas não havia nenhum NRE registrado para ele
+         
+     //TODO: Tratar situação em que o processo (NUP) já existia na base do sistema mas não havia nenhum NRE registrado para ele
       $objProcedimentoDTO = $this->atualizarProcedimento($dblIdProcedimento, $parObjMetadadosProcedimento, $parObjProcesso);                
     }
     else {            
+       
       //TODO: Gerar Procedimento com status BLOQUEADO, aguardando o recebimento dos componentes digitais
       $objProcedimentoDTO = $this->gerarProcedimento($parObjMetadadosProcedimento, $parObjProcesso);
     }
@@ -439,8 +443,9 @@ class ReceberProcedimentoRN extends InfraRN
     return $dblIdProcedimento;
   }
 
-  private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $objProcesso){
-
+ private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $objProcesso){
+   
+    
     if(!isset($parDblIdProcedimento)){
       throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
     }        
@@ -467,7 +472,8 @@ class ReceberProcedimentoRN extends InfraRN
         //}
 
         //$objProcedimentoDTO = $arrObjProcedimentoDTO[0];
-    
+     
+
         $objSeiRN = new SeiRN();
 
         $objAtividadeDTO = new AtividadeDTO();
@@ -490,6 +496,8 @@ class ReceberProcedimentoRN extends InfraRN
             $objEntradaReabrirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
             $objSeiRN->reabrirProcesso($objEntradaReabrirProcessoAPI);
       }
+
+     
       
     $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
     $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);    
@@ -505,7 +513,7 @@ class ReceberProcedimentoRN extends InfraRN
     $objProcedimentoRN = new ProcedimentoRN();
     $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
 
-        //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
+       //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
     $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
     $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento, $objUnidadeDTO);
@@ -891,8 +899,10 @@ class ReceberProcedimentoRN extends InfraRN
         $arrStrHashConteudo = InfraArray::converterArrInfraDTO($arrObjComponenteDigitalDTO, 'IdDocumento', 'HashConteudo');
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
-        
+        $objSeiRN = new SeiRN();
+		
         $arrObjDocumentoDTO = array();
+        
         foreach($arrObjDocumentos as $objDocumento){
             
             // @join_tec US027 (#3498)
@@ -910,14 +920,18 @@ class ReceberProcedimentoRN extends InfraRN
                     //Instancia o DTO do protocolo
                     $objProtocoloDTO = new ProtocoloDTO();
                     $objProtocoloDTO->setDblIdProtocolo($dblIdProtocolo);
-                    $objProtocoloDTO->retTodos();
+                    $objProtocoloDTO->retStrStaEstado();
                     
                     $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
                     
-                    if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_CANCELADO){
-                        $objProtocoloDTO->setStrMotivoCancelamento('Cancelado pelo remetente');
-                        $objProtocoloRN = new PenProtocoloRN();
-                        $objProtocoloRN->cancelar($objProtocoloDTO);
+                    if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+						 //Instancia o DTO do protocolo
+						$objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+						$objEntradaCancelarDocumentoAPI->setIdDocumento($dblIdProtocolo);
+						$objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+						
+						$objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+          
                     }
  
                     
