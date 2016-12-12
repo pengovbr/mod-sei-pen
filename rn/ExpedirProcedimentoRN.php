@@ -1016,7 +1016,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     $idSerieEmail = $objInfraParametro->getValor('ID_SERIE_EMAIL');
     $docEmailEnviado = $objDocumentoDTO->getNumIdSerie() == $idSerieEmail && $objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_FORMULARIO_AUTOMATICO ? true : false;
     
-    if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_GERADO && !$docEmailEnviado) {
+    if($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_INTERNO) {
 
       $objEditorDTO = new EditorDTO();
       $objEditorDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
@@ -1036,8 +1036,8 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrInformacaoArquivo['MIME_TYPE'] = 'text/html';
       $arrInformacaoArquivo['ID_ANEXO'] = null;
 
-    } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO || $docEmailEnviado)  {
-
+    } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO)  {
+   
       $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
       if(!isset($objAnexoDTO)){
@@ -1086,8 +1086,23 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrInformacaoArquivo['ID_ANEXO'] = $objAnexoDTO->getNumIdAnexo();
       $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = $strDadosComplementaresDoTipoDeArquivo;
 
-    } else {
-      throw new InfraException('Procedência do documento inválida.');   
+    } 
+    else {
+
+        $objDocumentoDTO2 = new DocumentoDTO();
+        $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objDocumentoDTO2->setObjInfraSessao(SessaoSEI::getInstance());
+        $objDocumentoDTO2->setStrLinkDownload('controlador.php?acao=documento_download_anexo');
+        
+        $objDocumentoRN = new DocumentoRN();
+        $strResultado = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO2);
+        
+        $arrInformacaoArquivo['NOME'] = $strProtocoloDocumentoFormatado . ".html";
+        $arrInformacaoArquivo['CONTEUDO'] = $strResultado;
+        $arrInformacaoArquivo['TAMANHO'] = strlen($strResultado);
+        $arrInformacaoArquivo['MIME_TYPE'] = 'text/html';
+        $arrInformacaoArquivo['ID_ANEXO'] = null;
+
     }
 
     return $arrInformacaoArquivo;
@@ -2043,11 +2058,38 @@ class ExpedirProcedimentoRN extends InfraRN {
     
     protected function cancelarTramiteInternoControlado(ProtocoloDTO $objDtoProtocolo) {
         
+        //Obtem o id_rh que representa a unidade no barramento
+        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
+        $numIdRespositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
+        
+        //Obtem os dados da unidade
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
+                
+        $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objPenUnidadeDTO = $objGenericoBD->consultar($objPenUnidadeDTO);
+        
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->retDblIdProtocolo());
+        $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+        $objTramiteDTO->retNumIdTramite();
+        
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
+                
+        if(!$arrObjTramiteDTO){
+            return false;
+        }
+        
+        $objTramiteDTO = $arrObjTramiteDTO[0];
+        
         //Armazena o id do protocolo
         $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
 
-        $tramites = $this->objProcessoEletronicoRN->consultarTramitesProtocolo($objDtoProtocolo->getStrProtocoloFormatado());
-        $tramite = $tramites ? array_pop($tramites) : null;
+        $tramites = $this->objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, $objPenUnidadeDTO->getNumIdUnidadeRH(), null, null, $numIdRespositorio);
+        $tramite = $tramites ? $tramites[0] : null;
 
         if (!$tramite) {
             throw new InfraException('Trâmite não encontrado para esse processo. ');

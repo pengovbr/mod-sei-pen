@@ -861,46 +861,7 @@ class ProcessoEletronicoRN extends InfraRN {
     }        
   }    
 
-   /**
-    * Consulta os tramites recusados
-    * 
-    * @return array
-    */
-   public function consultarTramitesRecusados($parNumIdRespositorio, $parNumIdEstrutura) {
-        try {
-            
-            $parametro = (object)array(
-                'filtroDeConsultaDeTramites' => (object)array(
-                    'situacaoAtual' => 9,
-                    'remetente' => (object)array(
-                        'identificacaoDoRepositorioDeEstruturas' => $parNumIdRespositorio,
-                        'numeroDeIdentificacaoDaEstrutura' => $parNumIdEstrutura
-                    )
-                )
-            );
-            
-            $objTramitesEncontrados = $this->getObjPenWs()->consultarTramites($parametro);
-            
-            $arrObjTramite = array();
-            
-            if (isset($objTramitesEncontrados->tramitesEncontrados)) {
-
-                $arrObjTramite = $objTramitesEncontrados->tramitesEncontrados->tramite;
-                
-                if(!is_array($arrObjTramite)) {
-                    $arrObjTramite = array($objTramitesEncontrados->tramitesEncontrados->tramite);
-                }
-            }
-
-            return $arrObjTramite; 
-        } 
-        catch (\SoapFault $fault) {
-            throw new InfraException(InfraString::formatarJavaScript($this->tratarFalhaWebService($fault)), $fault);
-        } 
-        catch (\Exception $e) {
-            throw new InfraException("Error Processing Request", $e);
-        }
-    }
+   
 
   public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null) 
   {
@@ -916,11 +877,13 @@ class ProcessoEletronicoRN extends InfraRN {
       }
       
       if(!is_null($parNumeroUnidadeRemetente) && !is_null($parNumeroRepositorioEstruturas)){
+          $parametro->filtroDeConsultaDeTramites->remetente = new stdClass();
           $parametro->filtroDeConsultaDeTramites->remetente->identificacaoDoRepositorioDeEstruturas = $parNumeroRepositorioEstruturas;
           $parametro->filtroDeConsultaDeTramites->remetente->numeroDeIdentificacaoDaEstrutura = $parNumeroUnidadeRemetente;
       }
       
       if(!is_null($parNumeroUnidadeDestino) && !is_null($parNumeroRepositorioEstruturas)){
+          $parametro->filtroDeConsultaDeTramites->destinatario = new stdClass();
           $parametro->filtroDeConsultaDeTramites->destinatario->identificacaoDoRepositorioDeEstruturas = $parNumeroRepositorioEstruturas;
           $parametro->filtroDeConsultaDeTramites->destinatario->numeroDeIdentificacaoDaEstrutura = $parNumeroUnidadeDestino;
       }
@@ -1027,9 +990,24 @@ class ProcessoEletronicoRN extends InfraRN {
             throw new InfraException(utf8_encode('O processo não esta com o estado com "Em Processamento" ou "Bloqueado"'));
         }
 
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdProcedimento($objProtocoloDTO->retDblIdProtocolo());
+        $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+        $objTramiteDTO->retNumIdTramite();
+        
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
+        
+        if(!$arrObjTramiteDTO){
+            throw new InfraException('Trâmite não encontrado');
+        }
+        
+        $objTramiteDTO = $arrObjTramiteDTO[0];
+        
         $objFiltro = new stdClass();
         $objFiltro->filtroDeConsultaDeTramites = new stdClass();
-        $objFiltro->filtroDeConsultaDeTramites->protocolo = $objProtocoloDTO->getStrProtocoloFormatado();
+        $objFiltro->filtroDeConsultaDeTramites->IDT = $objTramiteDTO->getNumIdTramite();
 
         $objResultado = $this->getObjPenWs()->consultarTramites($objFiltro);
 
@@ -1392,9 +1370,11 @@ class ProcessoEletronicoRN extends InfraRN {
 
     public function isDisponivelCancelarTramite($strProtocolo = ''){
 
+        //Obtem o id_rh que representa a unidade no barramento
         $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
         $numIdRespositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
         
+        //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();
         $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objPenUnidadeDTO->retNumIdUnidadeRH();
@@ -1402,15 +1382,38 @@ class ProcessoEletronicoRN extends InfraRN {
         $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objPenUnidadeDTO = $objGenericoBD->consultar($objPenUnidadeDTO);
          
+        //Obtem os dados do último trâmite desse processo no barramento
+        $objProtocoloDTO = new ProtocoloDTO();
+        $objProtocoloDTO->setStrProtocoloFormatado($strProtocolo);
+        $objProtocoloDTO->retDblIdProtocolo();
+        
+        $objProtocoloRN = new ProtocoloRN();
+        $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+        
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdProcedimento($objProtocoloDTO->retDblIdProtocolo());
+        $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+        $objTramiteDTO->retNumIdTramite();
+        
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
+                
+        if(!$arrObjTramiteDTO){
+            return false;
+        }
+        
+        $objTramiteDTO = $arrObjTramiteDTO[0];
+        
         try {
 
             $parametro = (object)array(
                 'filtroDeConsultaDeTramites' => (object)array(
+                    'IDT' => $objTramiteDTO->getNumIdTramite(),
                     'remetente' => (object)array(
                         'identificacaoDoRepositorioDeEstruturas' => $numIdRespositorio,
                         'numeroDeIdentificacaoDaEstrutura' => $objPenUnidadeDTO->getNumIdUnidadeRH()
                     ),
-                    'protocolo' => $strProtocolo
                 )
             );
     
@@ -1422,7 +1425,7 @@ class ProcessoEletronicoRN extends InfraRN {
                 
                 $arrObjMetaTramite = !is_array($objMeta->tramitesEncontrados->tramite) ? array($objMeta->tramitesEncontrados->tramite) : $objMeta->tramitesEncontrados->tramite;
                 
-                $objMetaTramite = array_pop($arrObjMetaTramite);
+                $objMetaTramite = $arrObjMetaTramite[0];
 
                 switch($objMetaTramite->situacaoAtual){
 
