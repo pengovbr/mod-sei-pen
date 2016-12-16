@@ -20,6 +20,7 @@ try {
     
     //$objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao('pen_procedimento_expedir');
+    $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
     
     if(array_key_exists('metodo', $_GET)) {
         
@@ -49,21 +50,33 @@ try {
                             throw new InfraException('O recibo ainda não foi recebido.');
                         }
                         
-
+                        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                        $objReciboTramiteHashDTO->setNumIdTramite($_GET['id_tramite']);
+                        $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
+                        $objReciboTramiteHashDTO->retStrHashComponenteDigital();
+                        
+                        $arrObjReciboTramiteHashDTO = $objGenericoBD->listar($objReciboTramiteHashDTO);
+                        
                         foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
                             $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
                             
-                            print '<recibo>';
+                            print '<reciboDeEnvio>';
                             print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
                             print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
-                            print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
+                            print '<dataDeRecebimentoDoUltimoComponenteDigital>'.date('c', $dthTimeStamp).'</dataDeRecebimentoDoUltimoComponenteDigital>';
                             
-                            $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
-                            if(!empty($strHashAssinatura)) {
-                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'</hashDoComponenteDigital>';
+                            if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)){
+                                $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
+                                ksort($arrObjReciboTramiteHashDTO);
+                                
+                                foreach($arrObjReciboTramiteHashDTO as $hash){
+                                    print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
+                                }
                             }
-                            print '</recibo>';
+                            print '</reciboDeEnvio>';
+                            print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
+                            print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
                         }
 
                     }
@@ -97,6 +110,19 @@ try {
                             throw new InfraException('O recibo ainda não foi recebido.');
                         }
                         
+                        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                        $objReciboTramiteHashDTO->setNumIdTramite($_GET['id_tramite']);
+                        $objReciboTramiteHashDTO->retStrHashComponenteDigital();
+                        
+                        if($_GET['id_tarefa'] == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
+                            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO);
+                            
+                        }else{
+                            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
+                            
+                        }
+                                                
+                        $arrObjReciboTramiteHashDTO = $objGenericoBD->listar($objReciboTramiteHashDTO);
 
                         foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
@@ -108,10 +134,19 @@ try {
                             print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
                             
                             $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
-                            if(!empty($strHashAssinatura)) {
-                                print '<hashDoComponenteDigital>'.$strHashAssinatura.'</hashDoComponenteDigital>';
+                            
+                            if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)){
+                                $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
+                                ksort($arrObjReciboTramiteHashDTO);
+                                
+                                foreach($arrObjReciboTramiteHashDTO as $hash){
+                                    print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
+                                }
                             }
+                            
                             print '</recibo>';
+                            print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
+                            print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
                         }
 
                     }

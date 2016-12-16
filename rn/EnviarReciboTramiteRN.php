@@ -54,7 +54,7 @@ class EnviarReciboTramiteRN extends InfraRN
         return $arrStrHashConteudo;
     }
     
-    protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = ''){
+    protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array()){
       
         $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
       
@@ -69,6 +69,19 @@ class EnviarReciboTramiteRN extends InfraRN
             $objDTO->setDthRecebimento(date('d/m/Y H:i:s'));
             $objBD->cadastrar($objDTO);
         }
+        
+        foreach($parArrayHash as $strHashComponenteDigital){
+            
+            $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+            $objReciboTramiteHashDTO->setStrNumeroRegistro($strNumeroRegistro);
+            $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
+            $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
+
+            $objBD->cadastrar($objReciboTramiteHashDTO);
+        }
+        
+        
     }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash = null, $parDthRecebimento = null)
@@ -136,7 +149,7 @@ class EnviarReciboTramiteRN extends InfraRN
         
     //Envia o Recibo de salva no banco
     $hashAssinatura = $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
-    $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura);
+    $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura, $parArrayHash);
     
   }    
 

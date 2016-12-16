@@ -975,7 +975,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     $strConteudoAssinatura = $arrInformacaoArquivo['CONTEUDO'];
         $hashDoComponenteDigital = hash($strAlgoritmoHash, $strConteudoAssinatura, true);
     $hashDoComponenteDigital = base64_encode($hashDoComponenteDigital);
-    
+        
     $objDocumento->componenteDigital = new stdClass();
     $objDocumento->componenteDigital->ordem = 1;
     $objDocumento->componenteDigital->nome = utf8_encode($arrInformacaoArquivo["NOME"]);
@@ -1092,7 +1092,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objDocumentoDTO2 = new DocumentoDTO();
         $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
         $objDocumentoDTO2->setObjInfraSessao(SessaoSEI::getInstance());
-        $objDocumentoDTO2->setStrLinkDownload('controlador.php?acao=documento_download_anexo');
+       // $objDocumentoDTO2->setStrLinkDownload('controlador.php?acao=documento_download_anexo');
         
         $objDocumentoRN = new DocumentoRN();
         $strResultado = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO2);
@@ -1102,7 +1102,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrInformacaoArquivo['TAMANHO'] = strlen($strResultado);
         $arrInformacaoArquivo['MIME_TYPE'] = 'text/html';
         $arrInformacaoArquivo['ID_ANEXO'] = null;
-
+        
     }
 
     return $arrInformacaoArquivo;
@@ -1793,7 +1793,7 @@ class ExpedirProcedimentoRN extends InfraRN {
      * @param int $parNumIdTramite
      * @return bool
      */
-    private function receberReciboDeEnvio($parNumIdTramite){
+    protected function receberReciboDeEnvioControlado($parNumIdTramite){
         
         if (empty($parNumIdTramite)) {
             return false;
@@ -1808,14 +1808,32 @@ class ExpedirProcedimentoRN extends InfraRN {
             return false;
         }
 
-        $objReciboTramiteEnviadoDTO = $this->objProcessoEletronicoRN->receberReciboDeEnvio($parNumIdTramite);
+        $objReciboEnvio = $this->objProcessoEletronicoRN->receberReciboDeEnvio($parNumIdTramite);
+        $objDateTime = new DateTime($objReciboEnvio->reciboDeEnvio->dataDeRecebimentoDoUltimoComponenteDigital);
 
-        if (empty($objReciboTramiteEnviadoDTO)) {
-            return false;
+        $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
+        $objReciboTramiteDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+        $objReciboTramiteDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+        $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
+        $objReciboTramiteDTO->setStrCadeiaCertificado($objReciboEnvio->cadeiaDoCertificado);
+        $objReciboTramiteDTO->setStrHashAssinatura($objReciboEnvio->hashDaAssinatura);
+        
+        $objGenericoBD->cadastrar($objReciboTramiteDTO);
+        
+        if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
+            
+            foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
+
+                $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+                $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+                $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+                $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
+
+                $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+            }
         }
-        
-        $objGenericoBD->cadastrar($objReciboTramiteEnviadoDTO);
-        
+  
         return true;
     }
     

@@ -13,13 +13,6 @@ class ProcessoEletronicoRN extends InfraRN {
   public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
   public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
 
-  /* TAREFAS DE EXPEDIÇÃO DE DOCUMENTOS */
-  //Está definindo o comportamento para a tarefa $TI_PROCESSO_BLOQUEADO
-  /*public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_EXPEDIDO = 506;
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_RECEBIDO = 507;
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_RETRANSMITIDO = 508;
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_TRAMITE_CANCELADO = 509;
-  public static $TI_PROCESSO_ELETRONICO_DOCUMENTO_TRAMITE_RECUSADO = 510;*/
 
   /* NÍVEL DE SIGILO DE PROCESSOS E DOCUMENTOS */
   public static $STA_SIGILO_PUBLICO = '1';
@@ -37,6 +30,10 @@ class ProcessoEletronicoRN extends InfraRN {
   public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
   public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                           // Remetente ciente da recusa do trâmite
 
+  public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
+  public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
+  public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
+  
   /* OPERAÇÕES DO HISTÓRICO DO PROCESSO */
   // 02 a 18 estão registrados na tabela rel_tarefa_operacao
   public static $OP_OPERACAO_REGISTRO = "01";
@@ -1156,21 +1153,7 @@ class ProcessoEletronicoRN extends InfraRN {
 
       $resultado = $this->getObjPenWs()->receberReciboDeTramite($parametro);
 
-      $objReciboTramiteDTO = null;
-      if(isset($resultado)) {
-        $objConteudoDoReciboDeTramite = $resultado->conteudoDoReciboDeTramite;
-        $objReciboTramiteDTO = new ReciboTramiteDTO();
-        $objReciboTramiteDTO->setStrNumeroRegistro($objConteudoDoReciboDeTramite->recibo->NRE);
-        $objReciboTramiteDTO->setNumIdTramite($objConteudoDoReciboDeTramite->recibo->IDT);
-        $objDateTime = new DateTime($objConteudoDoReciboDeTramite->recibo->dataDeRecebimento);        
-        $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
-        //TODO: Avaliar se o resultado corresponde à uma lista de hashs ou apenas um elemento
-        //$objReciboTramiteDTO->setStrHashComponenteDigital();
-        $objReciboTramiteDTO->setStrCadeiaCertificado($objConteudoDoReciboDeTramite->cadeiaDoCertificado);
-        $objReciboTramiteDTO->setStrHashAssinatura($objConteudoDoReciboDeTramite->hashDaAssinatura);
-      }
-
-      return $objReciboTramiteDTO;
+      return $resultado;
     } 
     catch (\SoapFault $fault) {
       $mensagem = $this->tratarFalhaWebService($fault);
@@ -1194,19 +1177,7 @@ class ProcessoEletronicoRN extends InfraRN {
             
             $resultado = $this->getObjPenWs()->receberReciboDeEnvio($parametro);
 
-            if ($resultado && $resultado->conteudoDoReciboDeEnvio) {
-                
-                $objNodo = $resultado->conteudoDoReciboDeEnvio;
-                $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
-                $objReciboTramiteDTO->setStrNumeroRegistro($objNodo->reciboDeEnvio->NRE);
-                $objReciboTramiteDTO->setNumIdTramite($objNodo->reciboDeEnvio->IDT);
-                $objDateTime = new DateTime($objNodo->reciboDeEnvio->dataDeRecebimento);
-                $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
-                $objReciboTramiteDTO->setStrCadeiaCertificado($objNodo->cadeiaDoCertificado);
-                $objReciboTramiteDTO->setStrHashAssinatura($objNodo->hashDaAssinatura);
-                
-                return $objReciboTramiteDTO;
-            }
+            return $resultado->conteudoDoReciboDeEnvio;
         } 
         catch (\SoapFault $fault) {
             $mensagem = $this->tratarFalhaWebService($fault);

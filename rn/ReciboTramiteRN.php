@@ -37,7 +37,8 @@ class ReciboTramiteRN extends InfraRN {
                 $objReciboTramiteDTO->retNumIdTramite();
                 $objReciboTramiteDTO->retDthRecebimento();
                 $objReciboTramiteDTO->retStrHashAssinatura();
-
+                $objReciboTramiteDTO->retStrCadeiaCertificado();
+                
                 $objReciboTramiteBD = new ReciboTramiteBD($objInfraIBanco);
                 $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
                 break;
@@ -49,7 +50,8 @@ class ReciboTramiteRN extends InfraRN {
                 $objReciboTramiteDTO->retNumIdTramite();
                 $objReciboTramiteDTO->retDthRecebimento();
                 $objReciboTramiteDTO->retStrHashAssinatura();
-
+                $objReciboTramiteDTO->retStrCadeiaCertificado();
+                
                 $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objInfraIBanco);
                 $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
                 break;
@@ -66,6 +68,7 @@ class ReciboTramiteRN extends InfraRN {
         $objReciboTramiteDTO->retNumIdTramite();
         $objReciboTramiteDTO->retDthRecebimento();
         $objReciboTramiteDTO->retStrHashAssinatura();
+        $objReciboTramiteDTO->retStrCadeiaCertificado();
 
         $objReciboTramiteBD = new ReciboTramiteRecebidoBD($this->getObjInfraIBanco());
         $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);

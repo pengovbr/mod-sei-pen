@@ -899,5 +899,29 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametro->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
         
     }
+    
+    protected function instalarV007R004S005WI002() {
+      
+      $objMetaBD = $this->inicializarObjMetaBanco();
+        
+       $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_recibo_tramite_hash',
+            'cols' => array(
+                'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
+                'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'tipo_recibo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO),
+                'hash_componente_digital ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
+            ),
+            'pk' => array('numero_registro', 'id_tramite', 'hash_componente_digital', 'tipo_recibo'),
+            'fks' => array(
+                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+            )
+       ));
+      
+   
+        
+        $objMetaBD->adicionarColuna('md_pen_recibo_tramite_recebido', 'cadeia_certificado', $this->inicializarObjMetaBanco()->tipoTextoGrande(), PenMetaBD::SNULLO);
+        
+    }
 
 }

@@ -117,11 +117,21 @@ class ReceberReciboTramiteRN extends InfraRN
             throw new InfraException('Parâmetro $parNumIdTramite não informado.');
         }
 
-        $objReciboTramiteDTO = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
+        $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
         
-        if (!isset($objReciboTramiteDTO)) {
+        if (!$objReciboTramite) {
             throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
         }
+        
+        $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
+        $objDateTime = new DateTime($objReciboTramite->recibo->dataDeRecebimento);        
+
+        $objReciboTramiteDTO = new ReciboTramiteDTO();
+        $objReciboTramiteDTO->setStrNumeroRegistro($objReciboTramite->recibo->NRE);
+        $objReciboTramiteDTO->setNumIdTramite($objReciboTramite->recibo->IDT);
+        $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
+        $objReciboTramiteDTO->setStrCadeiaCertificado($objReciboTramite->cadeiaDoCertificado);
+        $objReciboTramiteDTO->setStrHashAssinatura($objReciboTramite->hashDaAssinatura);
 
         //Verifica se o trâmite do processo se encontra devidamente registrado no sistema
         $objTramiteDTO = new TramiteDTO();
@@ -144,6 +154,20 @@ class ReceberReciboTramiteRN extends InfraRN
                 
                 //Armazenar dados do recibo de conclusão do trãmite      
                 $objReciboTramiteBD->cadastrar($objReciboTramiteDTO);
+                
+                 if ($objReciboTramite->recibo->hashDoComponenteDigital && is_array($objReciboTramite->recibo->hashDoComponenteDigital)) {
+                    foreach ($objReciboTramite->recibo->hashDoComponenteDigital as $strHashComponenteDigital) {
+
+                        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                        $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboTramite->recibo->NRE);
+                        $objReciboTramiteHashDTO->setNumIdTramite($objReciboTramite->recibo->IDT);
+                        $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+                        $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO);
+
+                        $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
+                        $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+                    }
+                }
 
                 //ALTERA O ESTADO DO PROCEDIMENTO
                 try {
