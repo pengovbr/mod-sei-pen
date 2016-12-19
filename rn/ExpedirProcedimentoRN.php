@@ -70,7 +70,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         "video/ogg",
         "video/webm"
     );
-
+  
   public function __construct() {
     parent::__construct();
 
@@ -116,6 +116,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
   public function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO) {
       
+    $numIdTramite = 0;
+    
     try {            
             //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
@@ -160,7 +162,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
         $param->novoTramiteDeProcesso->processo = $objProcesso;
         $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);  
-
+        $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
+        
       } catch (\Exception $e) {
         throw new InfraException("Error Processing Request", $e);
       }    
@@ -175,7 +178,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           
         $this->objProcedimentoAndamentoRN->setOpts($dblIdProcedimento, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
         try {
-              
+      
         $this->objProcedimentoAndamentoRN->cadastrar('Envio do metadados do processo', 'S');
         
         $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
@@ -192,7 +195,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
         $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
-
+        
                 //error_log('TRAMITE: ' . print_r($objTramite, true));
                 //error_log('before enviarComponentesDigitais');
 
@@ -203,7 +206,6 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //componentes precisam ser baixados, semelhante ao que ocorre no enviarProcesso onde o barramento informa quais os componentes
                 //que precisam ser enviados
         $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $objProcesso->protocolo);                
-
                 //error_log('after enviarComponentesDigitais');
                 //$strNumeroRegistro, $numIdTramite, $strProtocolo
                 //error_log('==========================>>>>' . print_r($objTramite, true));
@@ -235,7 +237,20 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->receberReciboDeEnvio($objTramite->IDT);
         } 
         catch (\Exception $e) {
-             $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI);
+            //@TODO: Melhorar essa estrutura
+            //Realiza o desbloqueio do processo
+            try{
+                $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI);
+            } catch (InfraException $ex) { }  
+            
+            //@TODO: Melhorar essa estrutura
+            //Realiza o cancelamento do tramite
+            try{
+                if($numIdTramite != 0){
+                    $this->objProcessoEletronicoRN->cancelarTramite($numIdTramite);
+                }
+            } catch (InfraException $ex) { }  
+             
              $this->registrarAndamentoExpedicaoAbortada($objProcesso->idProcedimentoSEI);
              
              // @join_tec US008.06 (#23092)
@@ -1004,6 +1019,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
   private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO)
   {
+      
+
 
     if(!isset($objDocumentoDTO)){
       throw new InfraException('Parâmetro $objDocumentoDTO não informado.');

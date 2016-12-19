@@ -1333,7 +1333,7 @@ class ProcessoEletronicoRN extends InfraRN {
             $tramitePendenteBD->cadastrar($tramitePendenteDTO);
             
         } catch (\InfraException $ex) {
-            throw new InfraException($ex->getDescricao());
+            throw new InfraException($ex->getStrDescricao());
         } catch (\Exception $ex) {
             throw new InfraException($ex->getMessage());
         }
