@@ -83,8 +83,7 @@ class PenMetaBD extends InfraMetaBD {
                 $version = $this->getObjInfraIBanco()->consultarSql('SELECT VERSION() as versao');
                 $version = $version[0]['versao'];
                 $arrVersion = explode('.', $version);
-                
-                if($arrVersion[0].$arrVersion[1] < 57){
+                if($arrVersion[0].$arrVersion[1] < 56){
                     $this->getObjInfraIBanco()->executarSql('@SET STORAGE_ENGINE=InnoDB'); 
                 }
             case 'InfraSqlServer':
