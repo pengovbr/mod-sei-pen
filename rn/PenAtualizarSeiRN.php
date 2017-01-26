@@ -912,7 +912,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'tipo_recibo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO),
                 'hash_componente_digital ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_tramite', 'hash_componente_digital', 'tipo_recibo'),
+           // 'pk' => array('numero_registro', 'id_tramite', 'hash_componente_digital', 'tipo_recibo'),
             'fks' => array(
                 'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
             )
