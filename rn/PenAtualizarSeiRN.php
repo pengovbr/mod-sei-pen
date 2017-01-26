@@ -907,12 +907,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
        $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_recibo_tramite_hash',
             'cols' => array(
+                'id_tramite_hash'=> array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'tipo_recibo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO),
                 'hash_componente_digital ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-           // 'pk' => array('numero_registro', 'id_tramite', 'hash_componente_digital', 'tipo_recibo'),
+           'pk' => array('id_tramite_hash'),
             'fks' => array(
                 'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
             )
@@ -922,6 +923,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         
         $objMetaBD->adicionarColuna('md_pen_recibo_tramite_recebido', 'cadeia_certificado', $this->inicializarObjMetaBanco()->tipoTextoGrande(), PenMetaBD::SNULLO);
         
+        $objInfraSequencia = new InfraSequencia($this->getObjInfraIBanco());
+        
+        if(!$objInfraSequencia->verificarSequencia('md_pen_recibo_tramite_hash')){
+            
+            $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
+        }
     }
+    
+  /*  protected function instalarV008R004S006WI001(){
+        $objMetaBD = $this->inicializarObjMetaBanco();
+        
+        $objMetaBD->alterarColuna('md_pen_recibo_tramite', 'dth_recebimento', 'VARCHAR(60)', PenMetaBD::NNULLO);
+        $objMetaBD->alterarColuna('md_pen_recibo_tramite_enviado', 'dth_recebimento', 'VARCHAR(60)', PenMetaBD::NNULLO);
+        $objMetaBD->alterarColuna('md_pen_recibo_tramite_recebido', 'dth_recebimento', 'VARCHAR(60)', PenMetaBD::NNULLO);
+    } */
 
 }
