@@ -50,7 +50,19 @@ class ReceberComponenteDigitalRN extends InfraRN
         
         
         
-        $objAnexoDTO = $this->arrAnexos[$parObjComponenteDigitalDTO->getStrHashConteudo()];
+        $objAnexoDTO = null;
+            
+        foreach($this->arrAnexos as $key => $objAnexo){
+            if(array_key_exists($parObjComponenteDigitalDTO->getStrHashConteudo(), $objAnexo) &&  $objAnexo['recebido'] == false){
+                $objAnexoDTO = $objAnexo[$parObjComponenteDigitalDTO->getStrHashConteudo()];
+                $this->arrAnexos[$key]['recebido'] = true;
+                break;
+            }
+        }
+        
+        if(is_null($objAnexoDTO)){
+            throw new InfraException('Anexo '.$parObjComponenteDigitalDTO->getStrHashConteudo().' não encontrado'.var_export($this->arrAnexos, true));
+        }
         
         //Validar o hash do documento recebido com os dados informados pelo remetente
         //$this->validarIntegridadeDoComponenteDigital($objAnexoDTO, $parObjComponenteDigitalDTO);

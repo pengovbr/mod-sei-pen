@@ -136,9 +136,10 @@ class ReceberProcedimentoRN extends InfraRN
       
       //Cria o array com a lista de hash
       $arrayHash = array();
-                 
+                    
+      
      //Percorre os componentes que precisam ser recebidos
-      foreach($objTramite->componenteDigitalPendenteDeRecebimento as $componentePendente){
+      foreach($objTramite->componenteDigitalPendenteDeRecebimento as $key => $componentePendente){
           
           if(!is_null($componentePendente)){
               
@@ -148,13 +149,14 @@ class ReceberProcedimentoRN extends InfraRN
                 //Obter os dados do componente digital
                 $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
                 //Copia o componente para a pasta temporária
-                $arrAnexosComponentes[$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
+                $arrAnexosComponentes[$key][$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
+                $arrAnexosComponentes[$key]['recebido'] = false;
                 
                 //Valida a integridade do hash
-                $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
+                $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
           }
       }
-      
+           
       if(count($arrAnexosComponentes) > 0){
           
             $receberComponenteDigitalRN->setArrAnexos($arrAnexosComponentes);
