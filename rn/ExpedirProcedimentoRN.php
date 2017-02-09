@@ -1837,20 +1837,22 @@ class ExpedirProcedimentoRN extends InfraRN {
         
         $objGenericoBD->cadastrar($objReciboTramiteDTO);
         
-        $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
-        if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
-            
-            foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
+		if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
+		    $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
+		    if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
+		        
+		        foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
 
-                $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-                $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
-                $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
-                $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
-                $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
+		            $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+		            $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+		            $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+		            $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+		            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
 
-                $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
-            }
-        }
+		            $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+		        }
+		    }
+		}
   
         return true;
     }
