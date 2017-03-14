@@ -141,6 +141,17 @@ class ProcessoEletronicoRN extends InfraRN {
         }
     }
   
+   public function testarDisponibilidade(){
+       
+       try{
+           $this->testaUrl($this->strWSDL, $this->options['local_cert']);
+           return true;
+       } catch (Exception $ex) {
+           return false;
+       }
+        
+   }
+   
   private function getObjPenWs() {
       
     if($this->objPenWs == null) { 

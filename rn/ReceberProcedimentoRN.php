@@ -475,7 +475,24 @@ class ReceberProcedimentoRN extends InfraRN
 
         //$objProcedimentoDTO = $arrObjProcedimentoDTO[0];
      
-
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setStrIdTarefaModuloTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+        $objAtividadeDTO->setDblIdProcedimentoProtocolo($parDblIdProcedimento);
+        $objAtividadeDTO->setOrd('Conclusao', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->retNumIdUnidade();
+        
+        $objAtividadeRN = new AtividadeRN();
+        $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+        $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        
+        if($arrObjAtividadeDTO){
+            $objAtividadeDTO = $arrObjAtividadeDTO[0];
+            $numIdUnidade = $objAtividadeDTO->getNumIdUnidade();
+        }
+        
+        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $numIdUnidade);
+        
         $objSeiRN = new SeiRN();
 
         $objAtividadeDTO = new AtividadeDTO();
@@ -483,7 +500,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
-        $objAtividadeRN = new AtividadeRN();
         $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
         $flgReabrir = true;
         

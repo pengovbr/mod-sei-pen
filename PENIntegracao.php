@@ -32,7 +32,17 @@ class PENIntegracao extends SeiIntegracao {
         $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
         $numIdUsuario = SessaoSEI::getInstance()->getNumIdUsuario();
         $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        
+        if(!file_exists($objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'))){
+            return array("NÃO DISPONÍVEL");
+        } 
+        
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+       
+        if(!$objProcessoEletronicoRN->testarDisponibilidade()){
+            return array();
+        }
         
         //Verifica se o processo encontra-se aberto na unidade atual
         $objAtividadeRN = new AtividadeRN();
