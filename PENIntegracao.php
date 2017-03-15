@@ -34,11 +34,11 @@ class PENIntegracao extends SeiIntegracao {
         $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         
-       /* if(!file_exists($objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'))){
+        if(!file_exists($objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'))){
             return array();
         } 
         
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();*/
+       /* $objProcessoEletronicoRN = new ProcessoEletronicoRN();*/
        
         
         //Verifica se o processo encontra-se aberto na unidade atual
