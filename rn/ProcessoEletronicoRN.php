@@ -54,6 +54,12 @@ class ProcessoEletronicoRN extends InfraRN {
    * Motivo para recusar de tramite de componente digital que não foi enviado
    */
   const MTV_RCSR_TRAM_CD_FALTA = '03';
+  
+  /**
+   * Espécie documentoal não mapeada
+   */
+  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
+  
   /**
    * Motivo para recusar de tramite de componente digital
    */
@@ -63,6 +69,7 @@ class ProcessoEletronicoRN extends InfraRN {
       "01"  => "Formato de componente digital não suportado",
       "02" => "Componente digital corrompido",
       "03" => "Falta de componentes digitais",
+      "04" => "Espécie documental não mapeada no destinatário",
       "99" => "Outro"
   );
     

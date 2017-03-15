@@ -174,14 +174,7 @@ class ReceberProcedimentoRN extends InfraRN
     $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
 
           
-    foreach($this->documentosRetirados as $documentoCancelado){
-        //Instancia o DTO do protocolo
-        $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
-        $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
-        $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
-        
-        $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
-    }
+
     
     
     // @join_tec US008.08 (#23092)
@@ -340,8 +333,8 @@ class ReceberProcedimentoRN extends InfraRN
             // Não achou, ou seja, não esta cadastrado na tabela, então não é
             // aceito nesta unidade como válido
             if($numContador <= 0) {
-                $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('Documento do tipo %s não está mapeado', $objDocument->especie->nomeNoProdutor), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
-                throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO]));
+                $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('Documento do tipo %s não está mapeado', $objDocument->especie->nomeNoProdutor), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+                throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
             } 
         }
 
@@ -1139,6 +1132,15 @@ class ReceberProcedimentoRN extends InfraRN
               $this->documentosRetirados[] = $objDocumento->idDocumentoSEI;
           }
           
+        }
+        
+        foreach($this->documentosRetirados as $documentoCancelado){
+            //Instancia o DTO do protocolo
+            $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+            $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
+            $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+            $objSeiRN = new SeiRN();
+            $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
         }
 
         $objProcedimentoDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);

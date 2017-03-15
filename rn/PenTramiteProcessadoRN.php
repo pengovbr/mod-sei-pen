@@ -80,7 +80,7 @@ class PenTramiteProcessadoRN extends InfraRN {
                 if($objDTO->getStrTipo() == self::STR_TIPO_PROCESSO) {
                     // Recusa o tramite
                     $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-                    $objProcessoEletronicoRN->recusarTramite($dblIdTramite, 'Tramite recusado por falha do destinatário', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
+                    $objProcessoEletronicoRN->recusarTramite($dblIdTramite, 'Tramite recusado por falha do destinatário', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
                 }
                 return true;// Mente que já foi recebido para não executar novamente
             }
