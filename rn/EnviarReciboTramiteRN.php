@@ -105,7 +105,7 @@ class EnviarReciboTramiteRN extends InfraRN
     $strNumeroRegistro = $objTramite->NRE;
 
     if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-      return;
+      throw new InfraException('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite.'); 
     }
 
     //TODO: Verificar necessidade de dessa validação

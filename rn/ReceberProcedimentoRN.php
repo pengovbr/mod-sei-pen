@@ -274,13 +274,13 @@ class ReceberProcedimentoRN extends InfraRN
     }
     
     //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
-
-   $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
+   
+    $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
    $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
    
    $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
    $objPenTramiteProcessadoRN->setRecebido($parNumIdentificacaoTramite);
-            
+   
   }
   
     /**

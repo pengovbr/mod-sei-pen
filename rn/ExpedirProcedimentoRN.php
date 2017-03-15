@@ -2080,7 +2080,7 @@ class ExpedirProcedimentoRN extends InfraRN {
      * @throws InfraException
      */
     public function cancelarTramite($dblIdProcedimento) {
-        
+      
         //Busca os dados do protocolo
         $objDtoProtocolo = new ProtocoloDTO();
         $objDtoProtocolo->retStrProtocoloFormatado();
@@ -2089,7 +2089,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objDtoProtocolo = $objProtocoloBD->consultar($objDtoProtocolo);
-        
+
         $this->cancelarTramiteInternoControlado($objDtoProtocolo);
         
     }
@@ -2116,9 +2116,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
-                
+   
         if(!$arrObjTramiteDTO){
-            return false;
+            throw new InfraException('Trâmite não encontrado para esse processo. ');
         }
         
         $objTramiteDTO = $arrObjTramiteDTO[0];

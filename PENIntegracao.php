@@ -35,14 +35,11 @@ class PENIntegracao extends SeiIntegracao {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         
         if(!file_exists($objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'))){
-            return array("NÃO DISPONÍVEL");
+            return array();
         } 
         
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
        
-        if(!$objProcessoEletronicoRN->testarDisponibilidade()){
-            return array();
-        }
         
         //Verifica se o processo encontra-se aberto na unidade atual
         $objAtividadeRN = new AtividadeRN();
@@ -77,11 +74,11 @@ class PENIntegracao extends SeiIntegracao {
         $strAcoesProcedimento .= '</a>';
        
         //Apresenta o botão de cancelar trâmite
-        if ($objProcessoEletronicoRN->isDisponivelCancelarTramite($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado())) {
+        // if ($objProcessoEletronicoRN->isDisponivelCancelarTramite($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado())) {
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
             $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/sei_desanexar_processo.gif" alt="Cancelar Expedição" title="Cancelar Expedição" />';
             $strAcoesProcedimento .= '</a>';
-        } 
+       // } 
        
         return array($strAcoesProcedimento);
     }
