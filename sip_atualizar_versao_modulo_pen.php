@@ -967,8 +967,8 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         //----------------------------------------------------------------------
         $this->criarRecurso('pen_procedimento_expedir', 'Expedir Procedimento', $numIdSistema);
         $this->criarRecurso('apensados_selecionar_expedir_procedimento', 'Processos Apensados', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Expedidos', $numIdSistema);
-        $this->criarMenu('Processos Expedidos', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
+        $this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
         //----------------------------------------------------------------------
         // Mapeamento de documentos enviados 
         //----------------------------------------------------------------------

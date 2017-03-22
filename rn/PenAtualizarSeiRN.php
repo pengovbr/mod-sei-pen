@@ -518,10 +518,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
         
         
-        $fnCadastrar('Processo expedido para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_EXPEDIDO');
+        $fnCadastrar('Processo trâmitado externamente para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_EXPEDIDO');
         $fnCadastrar('Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_RECEBIDO');
         $fnCadastrar('O processo foi recusado pelo orgão @UNIDADE_DESTINO@ pelo seguinte motivo: @MOTIVO@', 'S', 'S', 'N', 'N', 'S', 'PEN_PROCESSO_RECUSADO');
-        $fnCadastrar('Expedição do Processo Cancelada em @DATA_HORA@ pelo Usuário @USUARIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_CANCELADO');
+        $fnCadastrar('Trâmite externo do processo cancelado em @DATA_HORA@ pelo Usuário @USUARIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_CANCELADO');
         $fnCadastrar('Operacao externa de @OPERACAO@ registrada em @DATA_HORA@ (@PESSOA_IDENTIFICACAO@ - @PESSOA_NOME@)\n @COMPLEMENTO@', 'S', 'S', 'S', 'S', 'N', 'PEN_OPERACAO_EXTERNA');
 
         //----------------------------------------------------------------------
@@ -578,7 +578,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }   
         };
         
-        $fnCadastrar('PENAgendamentoRN::verificarTramitesRecusados', 'Verificação de processos recusados');
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
     
         //----------------------------------------------------------------------
@@ -854,7 +853,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }   
         };
         
-        $fnCadastrar('Expedição do processo foi abortada manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
+        $fnCadastrar('O trâmite externo do processo foi abortado manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
     }
     
         /**

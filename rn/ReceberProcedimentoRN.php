@@ -237,7 +237,8 @@ class ReceberProcedimentoRN extends InfraRN
             $objComponenteDigitalDTO->retStrNumeroRegistro();
             $objComponenteDigitalDTO->retNumIdTramite();
             $objComponenteDigitalDTO->retStrNome();
-
+            $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
+            
             $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
             $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
                   
@@ -248,14 +249,16 @@ class ReceberProcedimentoRN extends InfraRN
                   $objReceberComponenteDigitalRN = $receberComponenteDigitalRN;
                   
                   foreach($arrObjComponentesDigitaisDTO as $objComponenteDigitalDTOEnviado) {
+                        if($objComponenteDigitalDTOEnviado->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                             $strHash = $objComponenteDigitalDTOEnviado->getStrHashConteudo();                        
+                             $strNomeDocumento = (array_key_exists($strHash, $arrStrNomeDocumento)) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
                       
-                        $strHash = $objComponenteDigitalDTOEnviado->getStrHashConteudo();                        
-                        $strNomeDocumento = (array_key_exists($strHash, $arrStrNomeDocumento)) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
-                      
-                        $objReceberComponenteDigitalRN->receberComponenteDigital($objComponenteDigitalDTOEnviado);
+                             $objReceberComponenteDigitalRN->receberComponenteDigital($objComponenteDigitalDTOEnviado);
 
-                        // @join_tec US008.09 (#23092)
-                        $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado()), 'S');
+                             // @join_tec US008.09 (#23092)
+                              $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado()), 'S');
+                        }
+                       
                   }
                   // @join_tec US008.10 (#23092)
                 $this->objProcedimentoAndamentoRN->cadastrar('Todos os componentes digitais foram recebidos', 'S');

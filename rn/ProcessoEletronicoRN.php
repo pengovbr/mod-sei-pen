@@ -89,9 +89,9 @@ class ProcessoEletronicoRN extends InfraRN {
       throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
     }
 
-    if (!@file_get_contents($strLocalizacaoCertificadoDigital)) {
+  /*  if (!@file_get_contents($strLocalizacaoCertificadoDigital)) {
       throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
-    }
+    }*/
 
         //TODO: Urgente - Remover senha do certificado de autenticação dos serviços do PEN da tabela de parâmetros
     if (InfraString::isBolVazia($strSenhaCertificadoDigital)) {
@@ -822,7 +822,7 @@ class ProcessoEletronicoRN extends InfraRN {
             if(!is_null($objItemSolicitado)){
                 $objItemSolicitado->hash = is_array($objItemSolicitado->hash) ? $objItemSolicitado->hash : array($objItemSolicitado->hash);
 
-                if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash)) {
+                if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash) && !$objDocumento->retirado) {
                   $objComponenteDigitalDTO->setStrSinEnviar("S");        
                 }
             }

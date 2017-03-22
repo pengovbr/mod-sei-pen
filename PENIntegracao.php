@@ -32,14 +32,7 @@ class PENIntegracao extends SeiIntegracao {
         $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
         $numIdUsuario = SessaoSEI::getInstance()->getNumIdUsuario();
         $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        
-        if(!file_exists($objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'))){
-            return array();
-        } 
-        
-       /* $objProcessoEletronicoRN = new ProcessoEletronicoRN();*/
-       
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());       
         
         //Verifica se o processo encontra-se aberto na unidade atual
         $objAtividadeRN = new AtividadeRN();
@@ -65,7 +58,7 @@ class PENIntegracao extends SeiIntegracao {
         //Apresenta o botão de expedir processo
         if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
             $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-            $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Expedir Processo" title="Expedir Processo" /></a>';
+            $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Tramitar Externamente" title="Tramitar Externamente" /></a>';
         }
 
         //Apresenta o botão da página de recibos
@@ -74,11 +67,14 @@ class PENIntegracao extends SeiIntegracao {
         $strAcoesProcedimento .= '</a>';
        
         //Apresenta o botão de cancelar trâmite
-        // if ($objProcessoEletronicoRN->isDisponivelCancelarTramite($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado())) {
+        $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
+
+        if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
+
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-            $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/sei_desanexar_processo.gif" alt="Cancelar Expedição" title="Cancelar Expedição" />';
+            $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/sei_desanexar_processo.gif" alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
             $strAcoesProcedimento .= '</a>';
-       // } 
+         } 
        
         return array($strAcoesProcedimento);
     }
@@ -132,51 +128,21 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function montarMensagemProcesso(ProcedimentoAPI $objProcedimentoAPI) {
-        
-        $objProcedimentoDTO = new ProcedimentoDTO();
-        $objProcedimentoDTO->setDblIdProcedimento($objProcedimentoAPI->getIdProcedimento());
-        $objProcedimentoDTO->retStrStaEstadoProtocolo();
-        $objProcedimentoDTO->retDblIdProcedimento();
-                 
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-        
-        if ($objProcedimentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
-            
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-            $objAtividadeDTO->setNumIdTarefa(
-                    array(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), 
-                        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO)), 
-                    InfraDTO::$OPER_IN);
-            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-            $objAtividadeDTO->retNumIdAtividade();
-            $objAtividadeDTO->retNumIdTarefa();
-            
-            $objAtividadeRN = new AtividadeRN();
-            $arrAtividadeDTO = (array) $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
-            if (isset($arrAtividadeDTO[0])) {
-                $objAtividadeDTO = $arrAtividadeDTO[0];
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objProcedimentoAPI->getIdProcedimento());
 
-                if($objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
-                    
-                    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-                    $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
-                    $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-                    $objAtributoAndamentoDTO->retStrValor();
-                    
-                    $objAtributoAndamentoRN = new AtributoAndamentoRN();
-                    $objAtributoAndamentoDTO = $objAtributoAndamentoRN->consultarRN1366($objAtributoAndamentoDTO);
-                    
-                    return sprintf('Processo em trâmite externo para "%s".', $objAtributoAndamentoDTO->getStrValor());
-                    
-                    
-                }
-         
-            }
+        if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
 
+            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+            $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+            $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+            $objAtributoAndamentoDTO->retStrValor();
+
+            $objAtributoAndamentoRN = new AtributoAndamentoRN();
+            $objAtributoAndamentoDTO = $objAtributoAndamentoRN->consultarRN1366($objAtributoAndamentoDTO);
+
+            return sprintf('Processo em trâmite externo para "%s".', $objAtributoAndamentoDTO->getStrValor());
         }
     }
 
