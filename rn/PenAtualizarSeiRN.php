@@ -929,6 +929,23 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
         }
     }
+
+    protected function instalarV008R004S006IW003(){
+        
+        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        
+        $objTarefaDTO = new TarefaDTO();
+        $objTarefaDTO->setStrIdTarefaModulo('PEN_PROCESSO_RECEBIDO');
+        $objTarefaDTO->retNumIdTarefa();
+        
+        $objTarefaDTO = $objBD->consultar($objTarefaDTO);
+        
+        $objTarefaDTO->setStrSinLancarAndamentoFechado('N');
+        $objTarefaDTO->setStrSinPermiteProcessoFechado('S');
+        
+        $objBD->alterar($objTarefaDTO);   
+
+    }
     
   /*  protected function instalarV008R004S006WI001(){
         $objMetaBD = $this->inicializarObjMetaBanco();
