@@ -35,7 +35,7 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 		# Adicione no final do arquivo
 
 		[program:sei_processar_pendencias]
-		command=/usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/ProcessarPendenciasRN.php
+		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/ProcessarPendenciasRN.php
 		numprocs=1
 		directory=/var/www/html/sei/
 		user=XXXXX
@@ -47,7 +47,7 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 		stderr_logfile_maxbytes=1MB
 
 		[program:sei_monitorar_pendencias]
-		command=/usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/PendenciasTramiteRN.php
+		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/PendenciasTramiteRN.php
 		numprocs=1
 		directory=/var/www/html/sei/
 		user=XXXXX
