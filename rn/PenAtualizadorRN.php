@@ -15,6 +15,7 @@ abstract class PenAtualizadorRN extends InfraRN  {
     const VER_006 = '0.0.6';
     const VER_007 = '0.0.7';
     const VER_008 = '0.0.8';
+    const VER_100 = '1.0.0';
     
     protected $sei_versao;
     

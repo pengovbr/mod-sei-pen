@@ -947,6 +947,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     }
     
+    public function instalarV100R004S006IW004(){
+        //Atualiza o parâmetro
+    }
+    
+    
   /*  protected function instalarV008R004S006WI001(){
         $objMetaBD = $this->inicializarObjMetaBanco();
         

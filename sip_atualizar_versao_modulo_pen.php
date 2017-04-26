@@ -430,7 +430,8 @@ abstract class PenAtualizadorRN extends InfraRN {
     const VER_003 = '0.0.3';
     const VER_004 = '0.0.4';
     const VER_005 = '0.0.5';
-
+    const VER_100 = '1.0.0';
+    
     protected $sei_versao;
 
     /**
@@ -1084,6 +1085,10 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
                 $objBD->excluir($objItemMenuDTO);
             }
         }
+    }
+    
+    protected function instalarV005R001S001IW001(){
+        
     }
 
 }
