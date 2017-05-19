@@ -5,7 +5,7 @@
  * @author Join Tecnologia
  */
 class PenAtualizarSeiRN extends PenAtualizadorRN {
-
+    
     protected $versaoMinRequirida = '2.6.0';
     protected $sei_versao = 'PEN_VERSAO_MODULO_SEI';
     
@@ -17,7 +17,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         return $this->objBanco;
     }
     
-    protected function instalarV001(){
+    protected function instalarV100(){
         
         $objInfraBanco = $this->inicializarObjInfraIBanco();
         $objMetaBD = $this->inicializarObjMetaBanco();
@@ -603,6 +603,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }
         }
         //----------------------------------------------------------------------
+        
+        $this->instalarV002R003S000IW001();
+        $this->instalarV002R003S000US024();
+        $this->instalarV002R003S001US035();
+        $this->instalarV003R003S003IW001();
+        $this->instalarV004R003S003IW002();
+        $this->instalarV005R003S005IW018();
+        $this->instalarV005R003S005IW023();
+        $this->instalarV006R004S004WI001();
+        $this->instalarV007R004S005WI002();
+        $this->instalarV008R004S006IW003();
+
     }
     
     /**
@@ -947,9 +959,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     }
     
-    public function instalarV100R004S006IW004(){
-        //Atualiza o parâmetro
-    }
     
     
   /*  protected function instalarV008R004S006WI001(){

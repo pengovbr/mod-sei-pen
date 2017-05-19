@@ -281,6 +281,10 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $this->atribuirPerfil($numIdSistema);
     }
     
+    protected function instalarV002(){
+        
+    }
+    
     protected function instalarV003R003S003IW001(){
         
         
