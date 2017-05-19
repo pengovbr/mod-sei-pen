@@ -1019,8 +1019,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
         //Atribui as permissões aos recursos e menus
         $this->atribuirPerfil($numIdSistema);
-    }
+        
+        $this->instalarV003R003S003IW001();
 
+    }
+    
     protected function instalarV003R003S003IW001() {
 
 
