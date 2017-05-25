@@ -7,14 +7,14 @@
 abstract class PenAtualizadorRN extends InfraRN  {
     
     const VER_NONE = '0.0.0';// Modulo não instalado
-  /*  const VER_001 = '0.0.1';
+    const VER_001 = '0.0.1';
     const VER_002 = '0.0.2';
     const VER_003 = '0.0.3';
     const VER_004 = '0.0.4';
     const VER_005 = '0.0.5';
     const VER_006 = '0.0.6';
     const VER_007 = '0.0.7';
-    const VER_008 = '0.0.8';*/ 
+    const VER_008 = '0.0.8';
     const VER_100 = '1.0.0';
     
     protected $sei_versao;
@@ -242,8 +242,8 @@ abstract class PenAtualizadorRN extends InfraRN  {
             $strPenVersao = $this->setVersao(self::VER_NONE, $objInfraBanco); 
         }
 
-        $numPenVersao = substr($strPenVersao, -1);
-        $numVersaoInstalar = intval(substr($strVersaoInstalar, -1));
+        $numPenVersao = str_replace('.', '', $strPenVersao);
+        $numVersaoInstalar = intval(preg_replace('/\D+/', '', $strVersaoInstalar));
         
         $bolAlgumFiltroUsado = false;
         $strRegexRelease = $this->getStrArg('release', '(R%s)', '(R[0-9]{1,3})?', $bolAlgumFiltroUsado);
@@ -254,7 +254,7 @@ abstract class PenAtualizadorRN extends InfraRN  {
         // Instalar todas atualizações
         if($bolAlgumFiltroUsado === false) {
 
-            $strRegexVersao = sprintf('[%d\-%d]', ($numPenVersao + 1), $numVersaoInstalar); 
+            $strRegexVersao = sprintf('[%d-%d]', ($numPenVersao + 1), $numVersaoInstalar); 
         }
         // Instalar somente a solicitada
         else {
@@ -262,17 +262,23 @@ abstract class PenAtualizadorRN extends InfraRN  {
             $strVersaoInstalar = $strPenVersao;
             $strRegexVersao = intval(substr($strPenVersao, -1) + 1);
         }
-      
+
         // instalarV[0-9]{1,2}[0-9](R[0-9]{1,3})?(S[0-9]{1,3})?(US|IW[0-9]{1,4})?
-        $strRegex = sprintf('/^instalarV[0-9][0-9]%s%s%s%s/i',
-            $strRegexVersao,
-            $strRegexRelease,
-            $strRegexSprint,
-            $strRegexItem
-        );
+           $strRegex = sprintf('/^instalarV%s%s%s%s/i', $strRegexVersao, $strRegexRelease, $strRegexSprint, $strRegexItem);
 
         // Tenta encontrar métodos que iniciem com instalar
         $arrMetodo  = (array)preg_grep ($strRegex, get_class_methods($this)); 
+        
+        $proximaVersao = $numPenVersao + 1;
+        
+        foreach($arrMetodo as $key => $metodo){
+            $vers = str_replace('instalarV', '', $metodo);
+            $vers = (int) substr($vers, 0, 3);
+            
+            if($proximaVersao > $vers){
+                unset($arrMetodo[$key]);
+            }
+        } 
 
         if(empty($arrMetodo)) {
             

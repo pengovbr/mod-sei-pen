@@ -425,6 +425,11 @@ class PenMetaBD extends InfraMetaBD {
 abstract class PenAtualizadorRN extends InfraRN {
 
     const VER_NONE = '0.0.0'; // Modulo não instalado
+    const VER_001 = '0.0.1';
+    const VER_002 = '0.0.2';
+    const VER_003 = '0.0.3';
+    const VER_004 = '0.0.4';
+    const VER_005 = '0.0.5';
     const VER_100 = '1.0.0';
     
     protected $sei_versao;
@@ -651,8 +656,10 @@ abstract class PenAtualizadorRN extends InfraRN {
             $strPenVersao = $this->setVersao(self::VER_NONE, $objInfraBanco);
         }
 
-        $numPenVersao = substr($strPenVersao, -1);
-        $numVersaoInstalar = intval(substr($strVersaoInstalar, -1));
+        $numPenVersao = str_replace('.', '', $strPenVersao);
+        
+        $numVersaoInstalar = intval(preg_replace('/\D+/', '', $strVersaoInstalar));
+    //$numVersaoInstalar = intval(substr($strVersaoInstalar, -1));
 
         $bolAlgumFiltroUsado = false;
         $strRegexRelease = $this->getStrArg('release', '(R%s)', '(R[0-9]{1,3})?', $bolAlgumFiltroUsado);
@@ -662,8 +669,21 @@ abstract class PenAtualizadorRN extends InfraRN {
 
         // Instalar todas atualizações
         if ($bolAlgumFiltroUsado === false) {
+               
+            /*list($v1, $r1, $s1) = explode('.', '1.0.1');
+            list($v2, $r2, $s2) = explode('.', $strVersaoInstalar);
 
-            $strRegexVersao = sprintf('[%d\-%d]', ($numPenVersao + 1), $numVersaoInstalar);
+            $s1 = intval($s1) + 1;
+            $r1 = intval($r1) + 1; */
+
+            // 0.0.5 - 1.5.0
+            // 1.1.1 - 1.5.0
+
+            // (00[6-9]|1[5-9][0-9])
+            // (11[1-9]|1[5-9][0-9])
+           // $strRegexVersao = sprintf('(%s[%s-9][%s-9]|%s[%s-9][%s-9])', $v1, $r1, $s1, $v2, $r2, $s2);
+            
+             $strRegexVersao = sprintf('[%d-%d]', ($numPenVersao + 1), $numVersaoInstalar);
         }
         // Instalar somente a solicitada
         else {
@@ -673,12 +693,25 @@ abstract class PenAtualizadorRN extends InfraRN {
         }
 
         // instalarV[0-9]{1,2}[0-9](R[0-9]{1,3})?(S[0-9]{1,3})?(US|IW[0-9]{1,4})?
-        $strRegex = sprintf('/^instalarV[0-9][0-9]%s%s%s%s/i', $strRegexVersao, $strRegexRelease, $strRegexSprint, $strRegexItem
+        $strRegex = sprintf('/^instalarV%s%s%s%s/i', $strRegexVersao, $strRegexRelease, $strRegexSprint, $strRegexItem
         );
 
+        
+        
         // Tenta encontrar métodos que iniciem com instalar
         $arrMetodo = (array) preg_grep($strRegex, get_class_methods($this));
 
+        $proximaVersao = $numPenVersao + 1;
+        
+        foreach($arrMetodo as $key => $metodo){
+            $vers = str_replace('instalarV', '', $metodo);
+            $vers = (int) substr($vers, 0, 3);
+            
+            if($proximaVersao > $vers){
+                unset($arrMetodo[$key]);
+            }
+        } 
+        
         if (empty($arrMetodo)) {
 
             throw new InfraException(sprintf('NENHUMA ATUALIZACAO FOI ENCONTRADA SUPERIOR A VERSAO %s DO MODULO PEN', $strPenVersao));
@@ -950,16 +983,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $fnCadastrar('BASICO', $numIdSistema);
     }
 
-    public function instalarV100(){
-        $this->instalarV001R001S001IW001();
-        $this->instalarV003R003S003IW001();
-    }
-    
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
-    protected function instalarV001R001S001IW001() {
-        $numIdSistema = $this->getNumIdSistema('SEI');
+    protected function instalarV001() {
+         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
         //----------------------------------------------------------------------
@@ -1017,15 +1045,12 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         //Atribui as permissões aos recursos e menus
-        $this->atribuirPerfil($numIdSistema);
-        
-        $this->instalarV003R003S003IW001();
+        $this->atribuirPerfil($numIdSistema); 
     }
 
-       
     protected function instalarV003R003S003IW001() {
-
-       $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+            
+        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
 
         //----------------------------------------------------------------------
         // Achar o root
@@ -1085,10 +1110,10 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
                 $objBD->excluir($objItemMenuDTO);
             }
-        }
+        } 
     }
     
-    protected function instalarV005R001S001IW001(){
+    protected function instalarV100R001S001IW001(){
         
     }
 
