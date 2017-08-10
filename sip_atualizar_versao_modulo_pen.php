@@ -979,8 +979,8 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             }
         };
 
-        $fnCadastrar('ADMINISTRADOR', $numIdSistema);
-        $fnCadastrar('BASICO', $numIdSistema);
+        //$fnCadastrar('ADMINISTRADOR', $numIdSistema);
+        //$fnCadastrar('BASICO', $numIdSistema);
     }
 
     /**
