@@ -51,8 +51,8 @@ class PendenciasTramiteRN extends InfraRN {
             ini_set('memory_limit','-1');
 
             InfraDebug::getInstance()->setBolLigado(true);
-            InfraDebug::getInstance()->setBolDebugInfra(true);
-            InfraDebug::getInstance()->setBolEcho(true);
+            InfraDebug::getInstance()->setBolDebugInfra(false);
+            InfraDebug::getInstance()->setBolEcho(false);
             InfraDebug::getInstance()->limpar();
 
             $objInfraParametro = new InfraParametro(BancoSEI::getInstance());

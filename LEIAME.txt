@@ -107,7 +107,12 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 	12) Executar o script "sei_atualizar_versao_modulo_pen.php" para inserção de dados no banco do SEI referente ao módulo.
 	# php -c /etc/php.ini /opt/sei/scripts/sei_atualizar_versao_modulo_pen.php
 
-	13) Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo
+	13) Atualizar a tabela [pen_unidade] com os seus respectivos valores do campo "id_unidade_rh".
+		- Esses ID's de unidades são gerenciados pelo próprio orgão no Portal do ConectaGov: http://conectagov.processoeletronico.gov.br
+		- Na fase de homologação do sistema, estes valores serão passados pela SETIC/MP junto com o certificado digital de cliente
+
+
+	14) Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo
 		Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
 
 		14.1) Acessar o SIP e criar uma nova unidade administrativa com as seguintes configurações:
@@ -188,9 +193,6 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 	Obs.: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
 
-	19) Atualizar a tabela [pen_unidade] com os seus respectivos valores do campo "id_unidade_rh".
-		- Esses ID's de unidades são gerenciados pelo próprio orgão no Portal do ConectaGov: http://conectagov.processoeletronico.gov.br
-		- Na fase de homologação do sistema, estes valores serão passados pela SETIC/MP junto com o certificado digital de cliente
 		
 	20) O protocolo de comunicação implementado pelo ConectaGov realiza a geração e assinatura digital de recibos de entraga e conclusão dos trâmites de processo. Para a correta geração dos recibos pelo módulo, é indispensável que todos os nós da aplicação estejam configurados com o serviço de sincronização de relógios oficial NTP.br.
 	
