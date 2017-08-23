@@ -2,7 +2,6 @@
 Módulo PEN 
 Data de criação: 27/05/2016
 Data de atualizaçao: 09/08/2017
-Desenvolvimento: Join Tecnologia 
 Versão: 0.0.3
 =======================================================================================================================================
 
@@ -11,8 +10,8 @@ PROCEDIMENTOS PARA INSTALAÇÃO:
 ========================================================================================================================================
 
 REQUISITOS PARA INSTALAÇÂO:
-	- SEI 3.0.5 instalada (verificar valor da constante de versão do SEI no arquivo sei/SEI.php).
-	- O usuário de acesso ao banco de dados do SEI e SIP com as devidas permissões de acesso total ao banco de dados. Após a instalação do módulo, o usuário de manutenção deverá ser auterado para um contendo apenas as permissões de escrita no banco de dados.
+	- SEI 3.0.5 (ou superior) instalada (verificar valor da constante de versão do SEI no arquivo sei/SEI.php)
+	- Usuário de acesso ao banco de dados do SEI e SIP com as devidas permissões de acesso para modificar estrutuda do banco de dados. Após a instalação, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de escrita no banco de dados.
 
 PROCEDIMENTOS PARA INSTALAÇÂO:
 
@@ -29,22 +28,23 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 	3) Instalar o gearmand e o supervisord no servidor responsável por tratar o agendamento de tarefas do sistema. 
 	   Importante: É imprescindível que seja no mesmo nó em que está configurado o CRON de agendamento principal do SEI.
 				
-		# Pre-requisito. Caso contrario, os demais pacotes nao sao encontrados no CentOS7		
+		# Pre-requisito. Caso contrario, os demais pacotes nao são encontrados no CentOS7		
 		yum install epel-release && yum update
 
 		# Instalação do Gearman e supervisord				
-		yum install supervisor gearmand libgearman libgearman-devel php-pecl-gearman
+		yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 
 	4) Configuração do supervisor. 
-	   No parametro 'user' abaixo deve ser configurado o usuario que executa o servidor web (verifique no seu servidor qual é o usuario. Ex.: apache)
+	   ATENÇÂO: No parametro 'user' abaixo deve ser configurado o usuário que executa o servidor web (verifique no seu servidor qual é o usuario. Ex.: apache)
+           ATENÇÂO: Verifique se a localização dos scripts ProcessarPendenciasRN.php e PendenciasTramiteRN.php estão corretas no parâmetro 'command'
 
 		vi /etc/supervisord.conf
 
 		# Adicione no final do arquivo
 
 		[program:sei_processar_pendencias]
-		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/mod-sei-barramento/rn/ProcessarPendenciasRN.php
+		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/ProcessarPendenciasRN.php
 		numprocs=1
 		directory=/opt/sei/web
 		user=apache
@@ -55,7 +55,7 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 		stderr_logfile=/var/log/supervisor/sei-supervisord-stderr.log
 
 		[program:sei_monitorar_pendencias]
-		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/mod-sei-barramento/rn/PendenciasTramiteRN.php
+		command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/PendenciasTramiteRN.php
 		numprocs=1
 		directory=/opt/sei/web
 		user=apache
@@ -72,11 +72,13 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 	   No mesmo servidor em que está instalado/configurado o supervisor e gearman (passo 3), configurar o script verificar-servicos.sh, localizado na raiz do módulo, no serviço de agendamento CRON. Sugerimos que o tempo de monitoramento e tentativa de reativação seja configurado em 10 minutos.
 
 	   # 1) Copiar script de verificação dos serviços de integração do ConectaGov para a pasta de arquivos binários do SEI 
-	   cp /opt/sei/web/modulos/mod-sei-barramento/verificar-servicos.sh /opt/sei/bin/
+           ps: Altere a referência para <DIRETORIO_RAIZ_INSTALAÇÃO> descrito abaixo
+	   cp <DIRETORIO_RAIZ_INSTALAÇÃO>/sei/web/modulos/pen/verificar-servicos.sh /opt/sei/bin/
 
 	   # 2) Configurar agendamento no cron
+           PS: Altere a referência para <DIRETORIO_RAIZ_INSTALAÇÃO> descrito abaixo
 	   crontab -e 
-	   */10 * * * * /opt/sei/bin/verificar-servicos.sh
+	   */10 * * * * <DIRETORIO_RAIZ_INSTALAÇÃO>/sei/bin/verificar-servicos.sh
 
 	6) Editar o arquivo "sei/ConfiguracaoSEI.php", tomando o cuidado de usar editor que não altere o charset do arquivo, para adicionar a referência ao módulo PEN na chave 'Modulos' abaixo da chave 'SEI': 	Atenção para as virgulas nos finais das linhas
 
@@ -89,11 +91,11 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 		
 		Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acima:
 			
-			'Modulos' => array('PENIntegracao' => 'mod-sei-barramento')
+			'Modulos' => array('PENIntegracao' => 'pen')
 
 	
 
-	7) Mover o diretorio "mod-sei-barramento" para o diretorio sei/web/modulos/.
+	7) Mover o diretorio de arquivos do módulo "pen" para o diretorio sei/web/modulos/.
 
 	8) Colocar o arquivo do certificado digital utilizado para integração com o ConectaGov no diretorio "sei/config/". Este certificado será entregue junto com o pacote de integração.
 
@@ -102,18 +104,25 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 	10) Copiar o arquivo de instalação do módulo no SIP "sip_atualizar_versao_modulo_pen.php" para a pasta sip/scripts
 	 	
 	11) Executar o script "sip_atualizar_versao_modulo_pen.php" para atualizar o banco de dados do SIP para o funcionamento do módulo:    
-	# php -c /etc/php.ini /opt/sip/scripts/sip_atualizar_versao_modulo_pen.php
+        PS: Altere a referência para <DIRETORIO_RAIZ_INSTALAÇÃO> descrito abaixo
+	# php -c /etc/php.ini <DIRETORIO_RAIZ_INSTALAÇÃO>/sip/scripts/sip_atualizar_versao_modulo_pen.php
             
 	12) Executar o script "sei_atualizar_versao_modulo_pen.php" para inserção de dados no banco do SEI referente ao módulo.
-	# php -c /etc/php.ini /opt/sei/scripts/sei_atualizar_versao_modulo_pen.php
+        PS: Altere a referência para <DIRETORIO_RAIZ_INSTALAÇÃO> descrito abaixo
+	# php -c /etc/php.ini <DIRETORIO_RAIZ_INSTALAÇÃO>/sei/scripts/sei_atualizar_versao_modulo_pen.php
 
-	13) Atualizar a tabela [pen_unidade] com os seus respectivos valores do campo "id_unidade_rh".
+	13) Atualizar a tabela [md_pen_unidade] com os seus respectivos valores do campo "id_unidade_rh".
+	PS: Esta configuração será realizada manualmente pela equipe de operações somente nesta primeira versão do módulo
 		- Esses ID's de unidades são gerenciados pelo próprio orgão no Portal do ConectaGov: http://conectagov.processoeletronico.gov.br
 		- Na fase de homologação do sistema, estes valores serão passados pela SETIC/MP junto com o certificado digital de cliente
 
+		Exemplo:
+			update md_pen_unidade set id_unidade_rh = <ID_CONECTAGOV> where id_unidade = <ID_UNIDADE_SEI>;
+
+
 
 	14) Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo
-		Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
+		Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição metadados de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
 
 		14.1) Acessar o SIP e criar uma nova unidade administrativa com as seguintes configurações:
 			sigla: EXTERNO
@@ -124,13 +133,15 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 
 		14.3) Obter o número de identificação da nova unidade para posterior configuração dos parâmetros do módulo de integração. O código da nova unidade pode ser obtido através da funcionalidade SEI >> Administração >> Unidades >> Listar
 
-	14) Configuração de tipo de processo a ser aplicado aos processos recebidos de outras instituições
-	    Como o processo de recebimento de novos processos será feito de forma automática pelo módulo de integração, o sistema precisa atribuir um Tipo de Processo padrão para o novo procedimento recebido. 
+	15) Configuração de tipo de processo a ser aplicado aos processos recebidos de outras instituições
+	    Como o processo de recebimento de novos processos será feito de forma automática pelo módulo de integração, o sistema precisa atribuir um Tipo de Processo padrão para o novo procedimento recebido. Importante lembrar que a criação de um novo tipo de processo não é obrigatório, sendo possível utilizar outro pré-existente. 
+	    Caso a opção for pela criação de um novo tipo de processo específico, segue abaixo sugestão para configuração:
 
 	    15.1) Criar um novo Tipo de Processo pela funcionalidade SEI >> Administração >> Tipo de Processo
-	    Nome: Processo Externo
+	    Nome: Demanda Externa: Outros Órgãos Públicos	    
 	    Descrição: Processos recebidos de outras instituições
-	    Sugestão de Assuntos: <A CLASSIFICAÇÃO DE ASSUNTO DEVE SER DEFINIDO JUNTAMENTE COM A ÁREA DE DOCUMENTAÇÃO>
+	    Sugestão de Assuntos: <A CLASSIFICAÇÃO DE ASSUNTO DEVE SER DEFINIDO JUNTAMENTE COM A ÁREA DE DOCUMENTAÇÃO>	    
+	                          Ex: 019.01 - INFORMAÇÕES SOBRE O ÓRGÃO
 	    Restringir aos Órgãos: <vazio>
 	    Restringir às Unidades: <vazio>
 	    Níveis de Acesso Permitidos: Público
@@ -159,8 +170,15 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 
 		=> PEN_LOCALIZACAO_CERTIFICADO_DIGITAL: Localização do certificado digital o órgão 
 			- Arquivo do passo 6
+
+		=> PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO:
+			- Valor padrão: 3
 			
+		=> PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO:
+			- Valor padrão: 50
+
 		=> PEN_SENHA_CERTIFICADO_DIGITAL: Senha do certificado digital 
+		   PS: Configuração de senha será modificada na próxima versão para utilização de criptografia
 
 		=> PEN_TIPO_PROCESSO_EXTERNO: Id do tipo de documento externo 
 			- Configurar com o ID do Tipo de Processo Externo configurado no passo 15
@@ -169,22 +187,22 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 		  - Configurar com o ID da Unidade criada no passo 14
 
 
+
 	16) Iniciar Gearman e Supervisor
+        PS: Altere a referência para <DIRETORIO_RAIZ_INSTALAÇÃO> descrito abaixo
 		service gearmand start && service supervisord start
 
 		* Executar o comando "ps -ef" e verificar se os dois processos seguintes estão em execução: 
-		- /usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/PendenciasTramiteRN.php
-		- /usr/bin/php -c /etc/php.ini /var/www/html/sei/institucional/pen/rn/ProcessarPendenciasRN.php
+		- /usr/bin/php -c /etc/php.ini <DIRETORIO_RAIZ_INSTALAÇÃO>/sei/modulos/pen/rn/PendenciasTramiteRN.php
+		- /usr/bin/php -c /etc/php.ini <DIRETORIO_RAIZ_INSTALAÇÃO>/sei/modulos/pen/rn/ProcessarPendenciasRN.php
 		Caso não esteja houve algum problema de configuração e a expedição de processos não irá funcionar. 
 		
 		* Importante colocar o serviço para ser iniciado automaticamente juntamente com o servidor. 
 
 
-############################# REVISAR NECESSIDADE DESTA CONFIGURAÇÃO #############################
 	17) Certificar se o SEI está habilitado para permitir criação de processo com numeração informada. Esta configuração é obrigatória para o funcionamento do módulo PEN.
-	    
 		=> SEI_HABILITAR_NUMERO_PROCESSO_INFORMADO: 2
-##################################################################################################		
+
 
     18) Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. Esta configuração deve ser feita antes de começar a utilização do módulo.
 		"Administração" => "Tipos de Documentos" => "Mapeamento de Tipos de Documento" => "Recebimento" => "Cadastrar".
@@ -192,11 +210,11 @@ PROCEDIMENTOS PARA INSTALAÇÂO:
 
 	Obs.: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
-
 		
-	20) O protocolo de comunicação implementado pelo ConectaGov realiza a geração e assinatura digital de recibos de entraga e conclusão dos trâmites de processo. Para a correta geração dos recibos pelo módulo, é indispensável que todos os nós da aplicação estejam configurados com o serviço de sincronização de relógios oficial NTP.br.
-	
-	Este link pode ajudar a configurar conforme o SO utilizado: https://www.vivaolinux.com.br/artigo/Servidor-NTP-Configuracao-e-ajuste-de-data-e-hora
+	19) O protocolo de comunicação implementado pelo ConectaGov realiza a geração e assinatura digital de recibos de entraga e conclusão dos trâmites de processo. Para a correta geração dos recibos pelo módulo, é indispensável que todos os nós da aplicação estejam configurados com o serviço de sincronização de relógios oficial NTP.br.	
+	Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-linux-comum.php
 
 
-	21) Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos no sistema. Por padrão, as funcionalidades estão disponíveis apenas para o peril de usuário Protocolo        
+	20) Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos no sistema. 
+	Por padrão, as funcionalidades (recursos) criados pelo módulo não são atribuídos automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
+	Sugerimos que seja criado um novo perfil de usuário que receberá as permissões aos novos recursos incluidos pelo módulo (pen_*). Este novo perfil deverá ser atribuído aos usuários que podem realizar o trâmite externo de processos para outras instituições.
