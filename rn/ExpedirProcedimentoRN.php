@@ -467,9 +467,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         try {
             
             //muda estado do protocolo
-            $objProtocoloDTO = new ProtocoloDTO();    	
+            $objProtocoloDTO = new ProtocoloDTO();      
             $objProtocoloDTO->setStrStaEstado($strStaEstado);
-            $objProtocoloDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);    	
+            $objProtocoloDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);     
 
             $objProtocoloRN = new ProtocoloRN();
             $objProtocoloRN->alterarRN0203($objProtocoloDTO);
@@ -510,9 +510,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     public static function mudarEstadoProcedimentoNormal($objProcesso, $strStaEstado){
 
         //Muda o estado do Protocolo para normal
-        $objProtocoloDTO = new ProtocoloDTO();    	
+        $objProtocoloDTO = new ProtocoloDTO();      
         $objProtocoloDTO->setStrStaEstado($strStaEstado);
-        $objProtocoloDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);    	
+        $objProtocoloDTO->setDblIdProtocolo($objProcesso->idProcedimentoSEI);     
 
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
@@ -664,9 +664,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAtividadeRN = new AtividadeRN();
         $atividade = $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
         
-        $objProtocoloDTO = new ProtocoloDTO();    	
+        $objProtocoloDTO = new ProtocoloDTO();      
         $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_NORMAL);
-        $objProtocoloDTO->setDblIdProtocolo($idProtocolo);    	
+        $objProtocoloDTO->setDblIdProtocolo($idProtocolo);      
             
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
@@ -1970,22 +1970,22 @@ class ExpedirProcedimentoRN extends InfraRN {
         
         $objGenericoBD->cadastrar($objReciboTramiteDTO);
         
-		if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
-		    $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
-		    if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
-		        
-		        foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
+    if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
+        $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
+        if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
+            
+            foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
 
-		            $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-		            $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
-		            $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
-		            $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
-		            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
+                $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+                $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+                $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+                $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
 
-		            $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
-		        }
-		    }
-		}
+                $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+            }
+        }
+    }
   
         return true;
     }
