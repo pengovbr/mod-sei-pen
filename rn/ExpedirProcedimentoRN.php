@@ -31,6 +31,9 @@ class ExpedirProcedimentoRN extends InfraRN {
   const TE_PROCEDIMENTO_BLOQUEADO = '4';
   const TE_PROCEDIMENTO_EM_PROCESSAMENTO = '5';
 
+  //Versão com mudança na API relacionada à obrigatoriedade do carimbo de publicação
+  const VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO = '3.0.7';
+
   private $objProcessoEletronicoRN;
   private $objParticipanteRN;
   private $objProcedimentoRN;
@@ -1041,6 +1044,12 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objEditorDTO->setStrSinRodape('S');
       $objEditorDTO->setStrSinIdentificacaoVersao('S');
       $objEditorDTO->setStrSinProcessarLinks('S');
+
+      $numVersaoAtual = intval(str_replace('.', '', SEI_VERSAO));
+      $numVersaoCarimboObrigatorio = intval(str_replace('.', '', self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO));      
+      if ($numVersaoAtual >= $numVersaoCarimboObrigatorio) {
+        $objEditorDTO->setStrSinCarimboPublicacao('N');  
+      }          
 
       $objEditorRN = new EditorRN();
       $strConteudoAssinatura = $objEditorRN->consultarHtmlVersao($objEditorDTO);
