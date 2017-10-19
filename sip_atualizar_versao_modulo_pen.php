@@ -424,15 +424,7 @@ class PenMetaBD extends InfraMetaBD {
 
 abstract class PenAtualizadorRN extends InfraRN {
 
-    const VER_NONE = '0.0.0'; // Modulo não instalado
-    const VER_001 = '0.0.1';
-    const VER_002 = '0.0.2';
-    const VER_003 = '0.0.3';
-    const VER_004 = '0.0.4';
-    const VER_005 = '0.0.5';
-    const VER_100 = '1.0.0';
-    
-    protected $sei_versao;
+    protected $sip_versao;
 
     /**
      * @var string Versão mínima requirida pelo sistema para instalação do PEN
@@ -458,11 +450,18 @@ abstract class PenAtualizadorRN extends InfraRN {
      * @var integer Tempo de execução do script
      */
     protected $numSeg = 0;
+    
+    protected $objInfraBanco ;
 
-    /**
-     * @var array Argumentos passados por linha de comando ao script
-     */
-    protected $arrArgs = array();
+    protected function inicializarObjInfraIBanco() {
+        
+        if (empty($this->objInfraBanco)) {
+            $this->objInfraBanco = BancoSip::getInstance();
+            $this->objInfraBanco->abrirConexao();
+        }
+        
+        return $this->objInfraBanco;
+    }
 
     /**
      * Inicia a conexão com o banco de dados
@@ -513,257 +512,20 @@ abstract class PenAtualizadorRN extends InfraRN {
     }
 
     /**
-     * Método criado em função de um bug com a InfraRN na linha 69, onde usamos
-     * uma instância do banco do SIP e a versão esta no banco SEI, essa verificação
-     * e lançamento de uma excessão pelos bancos terem nome diferentes tava o 
-     * atualizado
-     * 
-     * @todo Migrar para classe PenMetaBD
-     * @return null
-     */
-    protected function setVersao($strRegexVersao, $objInfraBanco = null) {
-
-        InfraDebug::getInstance()->gravarInfra(sprintf('[%s->%s]', get_class($this), __FUNCTION__));
-
-
-        if ($this->getVersao($objInfraBanco)) {
-
-            $sql = sprintf("UPDATE infra_parametro SET valor = '%s' WHERE nome = '%s'", $strRegexVersao, $this->sei_versao);
-        } else {
-
-            $sql = sprintf("INSERT INTO infra_parametro(nome, valor) VALUES('%s', '%s')", $this->sei_versao, $strRegexVersao);
-        }
-
-        if (empty($objInfraBanco)) {
-
-            $objInfraBanco = $this->inicializarObjInfraIBanco();
-        }
-
-        $objInfraBanco->executarSql($sql);
-
-        return $strRegexVersao;
-    }
-
-    /**
-     * Retorna a versão atual do modulo, se já foi instalado
-     * 
-     * @todo Migrar para classe PenMetaBD
-     * @param InfraBanco $objInfraBanco Conexão com o banco SEI ou SIP
-     * @return string
-     */
-    protected function getVersao($objInfraBanco = null) {
-
-        InfraDebug::getInstance()->gravarInfra(sprintf('[%s->%s]', get_class($this), __FUNCTION__));
-
-        $sql = sprintf("SELECT valor FROM infra_parametro WHERE nome = '%s'", $this->sei_versao);
-
-        if (empty($objInfraBanco)) {
-
-            $objInfraBanco = $this->inicializarObjInfraIBanco();
-        }
-
-        $arrResultado = $objInfraBanco->consultarSql($sql);
-
-        if (empty($arrResultado)) {
-            return null;
-        }
-
-        $arrLinha = current($arrResultado);
-
-        return $arrLinha['valor'];
-    }
-
-    /**
-     * Verifica se o número da versão é valido
-     * 
-     * @param string $strVersao Versão a ser instalada
-     * @return bool
-     */
-    protected function isVersaoValida($strVersao = self::VER_NONE) {
-
-        if (empty($strVersao)) {
-            return false;
-        }
-
-        // Remove os caracteres não númericos
-        $strVersao = preg_replace('/\D+/', '', $strVersao);
-
-        // Tem que no mínimo 3 digitos
-        if (strlen($strVersao) < 3) {
-            return false;
-        }
-
-        return is_numeric($strVersao) ? true : false;
-    }
-
-    /**
-     * Verifica se um paramêtro existe, caso sim retorna o seu valor, senão
-     * retorna o default especificado.
-     * 
-     * @param string $strChave Nome do paramêtro
-     * @param string $strParam String a ser formatada com o valor do paramêtro
-     * @param string $strParamDefault String que retorna caso o valor do 
-     * paramêtro não exista
-     * @param bool $bolAlgumFiltroUsado Ponteiro de controle para verificar se 
-     * pelo menos um paramêtro foi encontrado
-     * @return string
-     */
-    private function getStrArg($strChave = '', $strParam = '', $strParamDefault = '', &$bolAlgumFiltroUsado) {
-
-        if (array_key_exists($strChave, $this->arrArgs)) {
-            $bolAlgumFiltroUsado = true;
-            return sprintf($strParam, str_pad($this->arrArgs[$strChave], 3, '0', STR_PAD_LEFT));
-        }
-        return $strParamDefault;
-    }
-
-    /**
-     * Retorna a última versão disponivel. Verifica as constantes que iniciam
-     * com VER_
-     */
-    private function getUltimaVersao() {
-
-        $objReflection = new ReflectionClass(__CLASS__);
-        $arrVersao = array_flip(preg_grep('/^VER\_/', array_flip($objReflection->getConstants())));
-        sort($arrVersao);
-        return array_pop($arrVersao);
-    }
-
-    /**
-     * Encontra os métodos com notação para instalar a versão selecionada
-     * 
-     * @return string Número da versão
-     */
-    protected function executarControlado() {
-
-        $this->inicializarObjMetaBanco()
-                ->isDriverSuportado()
-                ->isDriverPermissao();
-                //->isVersaoSuportada(SEI_VERSAO, $this->versaoMinRequirida);
-
-        $arrMetodo = array();
-
-        // Retorna a última versão disponibilizada pelo script. Sempre tenta atualizar
-        // para versão mais antiga
-        $strVersaoInstalar = $this->getUltimaVersao();
-
-        //throw new InfraException($strVersaoInstalar);
-        $objInfraBanco = $this->inicializarObjInfraIBanco();
-        // Versão atual
-        $strPenVersao = $this->getVersao($objInfraBanco);
-        if (!$this->isVersaoValida($strPenVersao)) {
-            // Não instalado
-            $strPenVersao = $this->setVersao(self::VER_NONE, $objInfraBanco);
-        }
-
-        $numPenVersao = str_replace('.', '', $strPenVersao);
-        
-        $numVersaoInstalar = intval(preg_replace('/\D+/', '', $strVersaoInstalar));
-    //$numVersaoInstalar = intval(substr($strVersaoInstalar, -1));
-
-        $bolAlgumFiltroUsado = false;
-        $strRegexRelease = $this->getStrArg('release', '(R%s)', '(R[0-9]{1,3})?', $bolAlgumFiltroUsado);
-        $strRegexSprint = $this->getStrArg('sprint', '(S%s)', '(S[0-9]{1,3})?', $bolAlgumFiltroUsado);
-        $strRegexItem = $this->getStrArg('user-story', '(US%s)', '(US|IW[0-9]{1,3})?', $bolAlgumFiltroUsado);
-        $strRegexItem = $this->getStrArg('item-worker', '(IW%s)', $strRegexItem, $bolAlgumFiltroUsado);
-
-        // Instalar todas atualizações
-        if ($bolAlgumFiltroUsado === false) {
-               
-            /*list($v1, $r1, $s1) = explode('.', '1.0.1');
-            list($v2, $r2, $s2) = explode('.', $strVersaoInstalar);
-
-            $s1 = intval($s1) + 1;
-            $r1 = intval($r1) + 1; */
-
-            // 0.0.5 - 1.5.0
-            // 1.1.1 - 1.5.0
-
-            // (00[6-9]|1[5-9][0-9])
-            // (11[1-9]|1[5-9][0-9])
-           // $strRegexVersao = sprintf('(%s[%s-9][%s-9]|%s[%s-9][%s-9])', $v1, $r1, $s1, $v2, $r2, $s2);
-            
-             $strRegexVersao = sprintf('[%d-%d]', ($numPenVersao + 1), $numVersaoInstalar);
-        }
-        // Instalar somente a solicitada
-        else {
-            // Caso algum paramêtro seja adicionado não deve passar para próxima versão
-            $strVersaoInstalar = $strPenVersao;
-            $strRegexVersao = intval(substr($strPenVersao, -1) + 1);
-        }
-
-        // instalarV[0-9]{1,2}[0-9](R[0-9]{1,3})?(S[0-9]{1,3})?(US|IW[0-9]{1,4})?
-        $strRegex = sprintf('/^instalarV%s%s%s%s/i', $strRegexVersao, $strRegexRelease, $strRegexSprint, $strRegexItem
-        );
-
-        
-        
-        // Tenta encontrar métodos que iniciem com instalar
-        $arrMetodo = (array) preg_grep($strRegex, get_class_methods($this));
-
-        $proximaVersao = $numPenVersao + 1;
-        
-        foreach($arrMetodo as $key => $metodo){
-            $vers = str_replace('instalarV', '', $metodo);
-            $vers = (int) substr($vers, 0, 3);
-            
-            if($proximaVersao > $vers){
-                unset($arrMetodo[$key]);
-            }
-        } 
-        
-        if (empty($arrMetodo)) {
-
-            throw new InfraException(sprintf('NENHUMA ATUALIZACAO FOI ENCONTRADA SUPERIOR A VERSAO %s DO MODULO PEN', $strPenVersao));
-        } else {
-
-            foreach ($arrMetodo as $strMetodo) {
-
-                $this->{$strMetodo}();
-            }
-        }
-        $this->setVersao($strVersaoInstalar, $objInfraBanco);
-
-        return $strVersaoInstalar;
-    }
-
-    /**
-     * Método que inicia o processo
-     */
-    public function atualizarVersao() {
-
-        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SIP_VERSAO);
-
-        try {
-
-            $strRegexVersao = $this->executar();
-            $this->logar('ATUALIZADA VERSAO: ' . $strRegexVersao);
-        } catch (InfraException $e) {
-
-            $this->logar('Erro: ' . $e->getStrDescricao());
-        } catch (\Exception $e) {
-
-            $this->logar('Erro: ' . $e->getMessage());
-        }
-
-        $this->finalizar();
-    }
-
-    /**
      * Construtor
      * 
      * @param array $arrArgs Argumentos enviados pelo script
      */
-    public function __construct($arrArgs = array()) {
-
+    public function __construct() {
+        
+        parent::__construct();
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
         @ini_set('zlib.output_compression', '0');
         @ini_set('implicit_flush', '1');
         ob_implicit_flush();
-
-        $this->arrArgs = $arrArgs;
-
+        
+        $this->inicializarObjInfraIBanco();
         $this->inicializarObjMetaBanco();
 
         $this->objDebug = InfraDebug::getInstance();
@@ -772,27 +534,104 @@ abstract class PenAtualizadorRN extends InfraRN {
         $this->objDebug->setBolEcho(true);
         $this->objDebug->limpar();
     }
-
 }
 
 class PenAtualizarSipRN extends PenAtualizadorRN {
 
     protected $versaoMinRequirida = '1.30.0';
-    protected $sei_versao = 'PEN_VERSAO_MODULO_SIP';
+    protected $sip_versao = 'PEN_VERSAO_MODULO_SIP';
     private $arrRecurso = array();
     private $arrMenu = array();
+    
+    public function atualizarVersao() {
+        try {
+            $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO 1.0.0');
 
-    /**
-     * Retorna/Cria a conexão com o banco de dados
-     * 
-     * @return InfraIBanco
-     */
-    protected function inicializarObjInfraIBanco() {
-        if (empty($this->objBanco)) {
+            //testando versao do framework
+//            $numVersaoInfraRequerida = '1.415';
+//            if (VERSAO_INFRA >= $numVersaoInfraRequerida) {
+//                $this->finalizar('VERSAO DO FRAMEWORK PHP INCOMPATIVEL (VERSAO ATUAL ' . VERSAO_INFRA . ', VERSAO REQUERIDA ' . $numVersaoInfraRequerida . ')', true);
+//            }
 
-            $this->objBanco = BancoSip::getInstance();
+            //testando se esta usando BDs suportados
+            if (!(BancoSip::getInstance() instanceof InfraMySql) &&
+                    !(BancoSip::getInstance() instanceof InfraSqlServer) &&
+                    !(BancoSip::getInstance() instanceof InfraOracle)) {
+
+                $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSip::getInstance()), true);
+            }
+            
+           
+            //testando permissoes de criações de tabelas
+            $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+            
+            if (count($objInfraMetaBD->obterTabelas('pen_sip_teste')) == 0) {
+                BancoSip::getInstance()->executarSql('CREATE TABLE pen_sip_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
+            }
+            BancoSip::getInstance()->executarSql('DROP TABLE pen_sip_teste');
+
+
+            $objInfraParametro = new InfraParametro($this->objInfraBanco);
+
+            //$strVersaoAtual = $objInfraParametro->getValor('SEI_VERSAO', false);
+            $strVersaoModuloPen = $objInfraParametro->getValor($this->sip_versao, false);
+
+            //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
+            if (InfraString::isBolVazia($strVersaoModuloPen)) {
+                //nao tem nenhuma versao ainda, instalar todas
+                $this->instalarV100();
+                $this->instalarV101();
+            } else if ($strVersaoModuloPen == '1.0.0') {
+                $this->instalarV101();
+            }
+
+
+            InfraDebug::getInstance()->setBolDebugInfra(true);
+        } catch (Exception $e) {
+
+            InfraDebug::getInstance()->setBolLigado(false);
+            InfraDebug::getInstance()->setBolDebugInfra(false);
+            InfraDebug::getInstance()->setBolEcho(false);
+            throw new InfraException('Erro atualizando VERSAO.', $e);
         }
-        return $this->objBanco;
+    }
+    
+    /**
+     * Inicia o script criando um contator interno do tempo de execução
+     * 
+     * @return null
+     */
+    protected function inicializar($strTitulo) {
+
+        $this->numSeg = InfraUtil::verificarTempoProcessamento();
+
+        $this->logar($strTitulo);
+    }
+    
+    /**
+     * Finaliza o script informando o tempo de execução.
+     * 
+     * @return null
+     */
+    protected function finalizar() {
+
+        $this->logar('TEMPO TOTAL DE EXECUCAO: ' . InfraUtil::verificarTempoProcessamento($this->numSeg) . ' s');
+
+        $this->objDebug->setBolLigado(false);
+        $this->objDebug->setBolDebugInfra(false);
+        $this->objDebug->setBolEcho(false);
+
+        print PHP_EOL;
+        die();
+    }
+    
+    /**
+     * Adiciona uma mensagem ao output para o usuário
+     * 
+     * @return null
+     */
+    protected function logar($strMsg) {
+        $this->objDebug->gravar($strMsg);
     }
 
     /**
@@ -883,7 +722,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
-        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+        $objBD = new ItemMenuBD($this->objInfraBanco);
         $objDTO = $objBD->consultar($objDTO);
 
         if (empty($objDTO)) {
@@ -917,7 +756,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         if (!empty($this->arrRecurso)) {
 
             $objDTO = new RelPerfilRecursoDTO();
-            $objBD = new RelPerfilRecursoBD($this->inicializarObjInfraIBanco());
+            $objBD = new RelPerfilRecursoBD($this->objInfraBanco);
 
             foreach ($this->arrRecurso as $numIdRecurso) {
 
@@ -937,7 +776,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         if (!empty($this->arrMenu)) {
 
             $objDTO = new RelPerfilItemMenuDTO();
-            $objBD = new RelPerfilItemMenuBD($this->inicializarObjInfraIBanco());
+            $objBD = new RelPerfilItemMenuBD($this->objInfraBanco);
 
             foreach ($this->arrMenu as $array) {
 
@@ -959,7 +798,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
     public function atribuirPerfil($numIdSistema) {
 
         $objDTO = new PerfilDTO();
-        $objBD = new PerfilBD($this->inicializarObjInfraIBanco());
+        $objBD = new PerfilBD($this->objInfraBanco);
         $objRN = $this;
 
         // Vincula a um perfil os recursos e menus adicionados nos métodos criarMenu e criarReturso
@@ -986,8 +825,8 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
-    protected function instalarV001() {
-         $numIdSistema = $this->getNumIdSistema('SEI');
+    protected function instalarV100() {
+        $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
         //----------------------------------------------------------------------
@@ -1010,7 +849,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
         $objItemMenuDTO->retNumIdItemMenu();
 
-        $objItemMenuBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+        $objItemMenuBD = new ItemMenuBD($this->objInfraBanco);
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
         if (empty($objItemMenuDTO)) {
@@ -1045,16 +884,12 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         //Atribui as permissões aos recursos e menus
-        $this->atribuirPerfil($numIdSistema); 
-    }
+        $this->atribuirPerfil($numIdSistema);
+        
+        // ---------- antigo método (instalarV003R003S003IW001) ---------- //
+        $objBD = new ItemMenuBD($this->objInfraBanco);
 
-    protected function instalarV003R003S003IW001() {
-            
-        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
-
-        //----------------------------------------------------------------------
         // Achar o root
-
         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
@@ -1110,165 +945,137 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
                 $objBD->excluir($objItemMenuDTO);
             }
-        } 
-    }
-    
-    protected function instalarV100R001S001IW001(){
-        
-    }
-
-}
-
-class PenConsoleRN extends InfraRN {
-        
-    protected $objRN;
-    protected $strAction;
-    protected $arrTokens = array();
-    protected $objInfraBanco;
-
-    public function __construct($objRN = null, $tokens = array()) {
-        
-        if(!is_null($objRN)) {
-            
-            parent::__construct();
-            
-            if(!is_object($objRN)) {
-                throw new InfraException('Requerido objeto Infra');
-            }
-
-            if(get_parent_class($objRN) !== 'InfraRN') {
-                throw new InfraException('Requerido objeto Infra que seja extendido de InfraRN');
-            }
-
-            $this->objRN = $objRN;
         }
         
-        if(empty($tokens)) {
-            $tokens = $_SERVER['argv'];
-        }
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrValor('1.0.0');
         
-        $this->criarTokens($tokens);
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD->cadastrar($objInfraParametroDTO);
     }
     
     /**
-     * Inicializador o banco de dados
+     * Instala/Atualiza os módulo PEN para versão 1.0.1
      */
-    protected function inicializarObjInfraIBanco() {
-        if(empty($this->objInfraBanco)){
-            $this->objInfraBanco = BancoSEI::getInstance();  
+    protected function instalarV101() {
+        // ---------- antigo método (instalarV006R004S001US039) ---------- //
+        $objItemMenuBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+        $objItemMenuDTO = new ItemMenuDTO();
+        $objItemMenuDTO->setNumIdSistema($numIdSistema);
+        $objItemMenuDTO->setNumIdMenu($numIdMenu);
+        $objItemMenuDTO->setStrRotulo('Processo Eletrnico Nacional');       
+        $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+        $objItemMenuDTO->retNumIdItemMenu();
+
+        $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+        if(empty($objItemMenuDTO)) {
+            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
         }
-        return $this->objInfraBanco;
-    }
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio
+        $numIdItemMenu = $this->criarMenu('Mapeamento de Hipteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);       
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
+        $numIdItemMenu = $this->criarMenu('Envio', 10, $numIdItemMenu, $numIdMenu, null, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
+
+        //Atribui as permisses aos recursos e menus
+        $this->atribuirPerfil($numIdSistema);
     
-    /**
-     * Processa os parâmetros passados ao script pelo cli
-     * 
-     * @param array $arguments
-     * @return null
-     */
-    protected function criarTokens($arguments = array()){
-        
-        if(empty($arguments)) {
-            throw new InfraException('Script não pode ser executado pela web');
+
+        // ---------- antigo método (instalarV006R004S001US040) ---------- //
+        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+
+        //----------------------------------------------------------------------
+        // Achar o root
+
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+        $objDTO = new ItemMenuDTO();
+        $objDTO->setNumIdSistema($numIdSistema);
+        $objDTO->setNumIdMenu($numIdMenu);
+        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setNumMaxRegistrosRetorno(1);
+        $objDTO->retNumIdItemMenu();
+
+        $objDTO = $objBD->consultar($objDTO);
+
+        if(empty($objDTO)) {
+            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
         }
-        
-        $strScript = array_shift($arguments);
 
-        if(!empty($this->objRN)) {
-            
-            $strAction = array_shift($arguments);
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
+        $numIdItemMenu = $this->criarMenu('Recebimento', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alterar de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluir mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
+
+        //Atribui as permisses aos recursos e menus
+        $this->atribuirPerfil($numIdSistema);
         
-            if(substr($strAction, 0, 2) == '--') {
-                throw new InfraException('O primeiro paramêtro deve ser uma action da RN');
-            }
-        
-            $this->strAction = $strAction;
+        // ---------- antigo método (instalarV006R004S001US043) ---------- //
+        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+        $objDTO = new ItemMenuDTO();
+        $objDTO->setNumIdSistema($numIdSistema);
+        $objDTO->setNumIdMenu($numIdMenu);
+        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setNumMaxRegistrosRetorno(1);
+        $objDTO->retNumIdItemMenu();
+
+        $objDTO = $objBD->consultar($objDTO);
+
+        if(empty($objDTO)) {
+            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
         }
-        
-        foreach($arguments as $key => $argument) {
 
-            if(substr($argument, 0, 2) === '--'){
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulrio de cadastro de mapeamento de Hipteses Legais Padro', $numIdSistema);
 
-                $string = preg_replace('/^--/', '', $argument);
-                $array = explode('=', $string);
-
-                $key = array_shift($array);
-                $value = (count($array) > 0) ? array_shift($array) : true;
-
-                $this->arrTokens[$key] = $value;
-            }
-        } 
-    }
-    
-    /**
-     * Retorna os parâmetros
-     */
-    public function getTokens(){
-        return $this->arrTokens;
-    }
-    
-    public function run(){
+        $this->criarMenu('Indicar Hiptese de Restrio Padro', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+        $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Mtodo Cadastrar Padro da RN de mapeamento de Hipteses Legais', $numIdSistema);
+        $this->atribuirPerfil($numIdSistema);
         
-        if(empty($this->objRN)) {
-            throw new InfraException('Nenhuma RN foi adicionada ao console');
-        }
+        /* altera o parâmetro da versão de banco */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->retTodos();
         
-        if(!method_exists($this->objRN, $this->strAction)) {
-            
-            throw new InfraException(sprintf('Nenhuma ação "%s" foi encontrada em %s '.PHP_EOL.$this->objRN->ajuda(), $this->strAction, get_class($this->objRN)));
-        }
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.1');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
         
-        if(array_key_exists('ajuda', $this->arrTokens)) {
-            
-            print $this->objRN->ajuda();
-            return true;
-        }
-        
-        return call_user_func(array($this->objRN, $this->strAction), $this->getTokens());
-    }
-    
-    public static function format($strMensagem = '', $strFonte = '', $bolBold = false){
-        
-       $strBold = ($bolBold !== false) ? '1' : '0';
-        
-       //$strMensagem = escapeshellarg($strMensagem);
-        
-       if(!empty($strFonte)) {
-            
-            switch($strFonte){
-
-                case 'green':  
-                    $strMensagem = "\033[".$strBold.";32m".$strMensagem; 
-                    break;
-                
-                case 'red':  
-                    $strMensagem = "\033[".$strBold.";31m".$strMensagem; 
-                    break;
-                
-                case 'blue':  
-                    $strMensagem = "\033[".$strBold.";34m".$strMensagem; 
-                    break;
-                
-                case 'yellow':
-                    $strMensagem = "\033[".$strBold.";33m".$strMensagem;
-                    break;
-
-            }
-        }
-        return static::resetAfter($strMensagem);
-    }
-    
-    public static function resetAfter($strMensagem = ''){
-        
-        return $strMensagem. "\033[0m";
     }
 }
 
 try {
-
-    $objPenConsoleRN = new PenConsoleRN();
-    $arrArgs = $objPenConsoleRN->getTokens();
-
+ 
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);
     $objAtualizarRN->atualizarVersao();
 
@@ -1278,7 +1085,7 @@ try {
     print InfraException::inspecionar($e);
 
     try {
-        LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+//        LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
     } catch (Exception $e) {
         
     }

@@ -15,10 +15,8 @@ try {
 
     require_once dirname(__FILE__).'/../web/SEI.php';
         
-    $objPenConsoleRN = new PenConsoleRN();
-    $arrArgs = $objPenConsoleRN->getTokens();
     
-    $objAtualizarRN = new PenAtualizarSeiRN($arrArgs);
+    $objAtualizarRN = new PenAtualizarSeiRN();
     $objAtualizarRN->atualizarVersao();
 
     exit(0);

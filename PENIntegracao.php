@@ -206,6 +206,33 @@ class PENIntegracao extends SeiIntegracao {
             case 'pen_procedimento_estado':
                 require_once dirname(__FILE__) . '/pen_procedimento_estado.php';
                 return true;
+            
+            // Mapeamento de Hipóteses Legais de Envio
+            case 'pen_map_hipotese_legal_enviado_cadastrar':
+            case 'pen_map_hipotese_legal_enviado_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_enviado_cadastrar.php';
+                return true;
+            
+            case 'pen_map_hipotese_legal_enviado_listar':
+            case 'pen_map_hipotese_legal_enviado_excluir':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_enviado_listar.php';
+                return true;
+            
+            // Mapeamento de Hipóteses Legais de Recebimento
+            case 'pen_map_hipotese_legal_recebido_cadastrar':
+            case 'pen_map_hipotese_legal_recebido_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebido_cadastrar.php';
+                return true;
+            
+            case 'pen_map_hipotese_legal_recebido_listar':
+            case 'pen_map_hipotese_legal_recebido_excluir':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebido_listar.php';
+                return true;
+            
+            case 'pen_map_hipotese_legal_padrao_cadastrar':
+            case 'pen_map_hipotese_legal_padrao_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
+                return true;
         }
 
         return false;
