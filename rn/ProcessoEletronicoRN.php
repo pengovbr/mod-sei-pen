@@ -1437,6 +1437,19 @@ class ProcessoEletronicoRN extends InfraRN {
             return false;
         }
     }
+    
+    public function consultarHipotesesLegais() {
+        try{
+            $hipoteses = $this->getObjPenWs()->consultarHipotesesLegais();
+            if (empty($hipoteses)) {
+                return [];
+            }
+            return $hipoteses;
+
+        } catch(Exception $e){
+            throw new InfraException("Erro durante obtenção da resposta das hipóteses legais", $e);                        
+        }
+    }
 }
 
 

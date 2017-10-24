@@ -264,6 +264,36 @@ class PENAgendamentoRN extends InfraRN {
             throw new InfraException('Erro ao rodar verificação de status do serviços Gearmand e Supervisord', $e);
         }
     }
+    
+    /**
+     * Atualização das hipóteses legais vindas do barramento
+     * @throws InfraException
+     */
+    public function atualizarHipotesesLegais() {
+        $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
+        $processoEletronicoRN = new ProcessoEletronicoRN();
+        $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
+        
+        //Para cada hipótese vinda do PEN será verificado a existencia.
+        foreach ($hipotesesPen as $hipotese) {
+            $objDTO = new PenHipoteseLegalDTO();
+            $objDTO->setStrNome($hipotese->hipotese->nome);       
+            $objDTO->setNumMaxRegistrosRetorno(1);
+            $objDTO->retNumIdHipoteseLegal();
+            $objConsulta = $objBD->consultar($objDTO);
+            
+            //Caso não exista a hipótese irá cadastra-la no sei.
+            if (empty($objConsulta)) {
+                $objBD->cadastrar($objDTO);
+            }
+        }
+        
+        try {
+            LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.");
+        } catch (Exception $e) {
+            throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
+        }
+    }
 }
 // $client = new GearmanClient();
 // $client->addServer('localhost', 4730);

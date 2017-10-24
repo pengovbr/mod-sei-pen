@@ -53,6 +53,8 @@ try {
                     $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
                     $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
                     
+                    $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
+                    
                     if(is_array($arrParam['hdnInfraItensSelecionados'])) {
                         
                         foreach($arrParam['hdnInfraItensSelecionados'] as $dblIdMap) {
