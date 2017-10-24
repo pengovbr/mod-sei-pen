@@ -199,8 +199,10 @@ $objPaginaSEI->montarStyle();
 #selRepositorioEstruturas {position:absolute;left:0%;top:48%;width:51%;}
 
 #lblUnidades {position:absolute;left:0%;top:10%;}
-#txtUnidade {position:absolute;left:0%;top:48%;width:50%;border:.1em solid #666;}
+#txtUnidade {left:0%;top:48%;width:50%;border:.1em solid #666;}
 #imgLupaUnidades {position:absolute;left:52%;top:48%;}
+.alinhamentoBotaoImput{position:absolute;left:0%;top:48%;width:85%;};
+#hdnIdUnidade2 {float: right;}
 
 #lblProcedimentosApensados {position:absolute;left:0%;top:10%;}
 #txtProcedimentoApensado {position:absolute;left:0%;top:25%;width:50%;border:.1em solid #666;}
@@ -224,12 +226,10 @@ var objLupaProcedimentosApensados = null;
 var objJanelaExpedir = null;
 var evnJanelaExpedir = null;
 
-function inicializar()
-{
-    //avaliarPreCondicoes();
-
+function inicializar() {
+    
     objLupaProcedimentosApensados = new infraLupaSelect('selProcedimentosApensados','hdnProcedimentosApensados','<?=$strLinkProcedimentosApensadosSelecao ?>');
-
+    
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
@@ -246,8 +246,13 @@ function inicializar()
     };
 
     objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
-		window.infraAvisoCancelar();	
+        window.infraAvisoCancelar();	
     };
+    
+    $('#hdnIdUnidade2').click(function() {
+        objAutoCompletarEstrutura.executar();
+        objAutoCompletarEstrutura.procurar();
+    });
 
     objAutoCompletarApensados = new infraAjaxAutoCompletar('hdnIdProcedimentoApensado','txtProcedimentoApensado','<?=$strLinkAjaxProcedimentoApensado?>');
     objAutoCompletarApensados.mostrarAviso = true;
@@ -540,10 +545,15 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	</div>
 
 	<div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
-		<label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label> 
-        <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" /> 
+            <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label> 
+            <div class="alinhamentoBotaoImput">
+                <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                <button id="hdnIdUnidade2" type="button" class="infraText">Pesquisar</button>    
+            </div>
+        
         <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" /> 
         <?php /* ?><img id="imgLupaUnidades" src="/infra_css/imagens/lupa.gif" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" /><?php */ ?>
+        
 	</div>
 
 	<div id="divProcedimentosApensados" class="infraAreaDados" style="height: 12em; display: none; ">
