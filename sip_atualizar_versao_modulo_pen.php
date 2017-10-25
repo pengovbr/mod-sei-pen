@@ -968,30 +968,30 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objItemMenuDTO = new ItemMenuDTO();
         $objItemMenuDTO->setNumIdSistema($numIdSistema);
         $objItemMenuDTO->setNumIdMenu($numIdMenu);
-        $objItemMenuDTO->setStrRotulo('Processo Eletrnico Nacional');       
+        $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');       
         $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
         $objItemMenuDTO->retNumIdItemMenu();
 
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
         if(empty($objItemMenuDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" no foi localizado');
         }
 
         // Administrao > Mapeamento de Hipteses Legais de Envio
-        $numIdItemMenu = $this->criarMenu('Mapeamento de Hipteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);       
+        $numIdItemMenu = $this->criarMenu('Mapeamento de Hipóteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);       
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
         $numIdItemMenu = $this->criarMenu('Envio', 10, $numIdItemMenu, $numIdMenu, null, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipteses Legais de Envio', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipteses Legais de Envio', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipóteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
 
         //Atribui as permisses aos recursos e menus
@@ -1010,27 +1010,27 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->setNumIdMenu($numIdMenu);
-        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');       
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
         $objDTO = $objBD->consultar($objDTO);
 
         if(empty($objDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" no foi localizado');
         }
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
         $numIdItemMenu = $this->criarMenu('Recebimento', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alterar de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alterar de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluir mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluir mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
 
         //Atribui as permisses aos recursos e menus
@@ -1045,20 +1045,20 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->setNumIdMenu($numIdMenu);
-        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');       
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
         $objDTO = $objBD->consultar($objDTO);
 
         if(empty($objDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" no foi localizado');
         }
 
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulrio de cadastro de mapeamento de Hipteses Legais Padro', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
 
         $this->criarMenu('Indicar Hiptese de Restrio Padro', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
-        $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Mtodo Cadastrar Padro da RN de mapeamento de Hipteses Legais', $numIdSistema);
+        $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
         $this->atribuirPerfil($numIdSistema);
         
         /* altera o parâmetro da versão de banco */
