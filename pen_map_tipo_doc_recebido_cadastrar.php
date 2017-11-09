@@ -25,7 +25,7 @@ try {
     switch ($_GET['acao']) {
         case 'pen_map_tipo_doc_recebido_cadastrar':
             $arrComandos[] = '<button type="submit" name="sbmCadastrarSerie" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebido_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton">Cancelar</button>';   
+            $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebido_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
             $bolDesativarCampos = false;
             
             if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){

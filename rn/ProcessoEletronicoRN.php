@@ -79,11 +79,11 @@ class ProcessoEletronicoRN extends InfraRN {
   private $options = null;
 
   public function __construct() {
-    $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-
-    $strEnderecoWebService = $objInfraParametro->getValor('PEN_ENDERECO_WEBSERVICE');
-    $strLocalizacaoCertificadoDigital = $objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
-    $strSenhaCertificadoDigital = $objInfraParametro->getValor('PEN_SENHA_CERTIFICADO_DIGITAL');
+    $objPENParametroRN = new PENParametroRN();
+    
+    $strEnderecoWebService = $objPENParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
+    $strLocalizacaoCertificadoDigital =  $objPENParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+    $strSenhaCertificadoDigital =  $objPENParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
 
     if (InfraString::isBolVazia($strEnderecoWebService)) {
       throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
@@ -112,7 +112,7 @@ class ProcessoEletronicoRN extends InfraRN {
       , 'encoding' => 'UTF-8'
       , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
       , 'ssl' => array(
-        'allow_self_signed' => true
+          'allow_self_signed' => true,
         )
       );
   }
@@ -257,7 +257,7 @@ class ProcessoEletronicoRN extends InfraRN {
             $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
             $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
             $parametros->filtroDeEstruturas->apenasAtivas = false;
-
+            
             $result = $this->getObjPenWs()->consultarEstruturas($parametros);
 
             if ($result->estruturasEncontradas->totalDeRegistros == 1) {
@@ -312,9 +312,13 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametros = new stdClass();
       $parametros->filtroDeEstruturas = new stdClass();
       $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-            //$parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = 218794;//$numeroDeIdentificacaoDaEstrutura;
-      $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
       $parametros->filtroDeEstruturas->apenasAtivas = false;
+      
+      if(is_numeric($nome)) {
+        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
+      } else {
+        $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+      }
 
       $result = $this->getObjPenWs()->consultarEstruturas($parametros);
 
@@ -1041,8 +1045,9 @@ class ProcessoEletronicoRN extends InfraRN {
         $objTramite = array_pop($arrObjTramite);
         
         if (empty($numIdRepositorio)) {
-            $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-            $numIdRepositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
+            $objPENParametroRN = new PENParametroRN();
+            $numIdRepositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+            
         }
 
         if (empty($numIdEstrutura)) {
@@ -1360,8 +1365,8 @@ class ProcessoEletronicoRN extends InfraRN {
     public function isDisponivelCancelarTramite($strProtocolo = ''){
 
         //Obtem o id_rh que representa a unidade no barramento
-        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-        $numIdRespositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
+        $objPENParametroRN = new PENParametroRN();
+        $numIdRespositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         
         //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();

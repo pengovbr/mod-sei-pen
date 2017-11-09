@@ -30,6 +30,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     //Esse estado será utilizado juntamente com os estados da expedição 
   const TE_PROCEDIMENTO_BLOQUEADO = '4';
   const TE_PROCEDIMENTO_EM_PROCESSAMENTO = '5';
+  
+  //Versão com mudança na API relacionada à obrigatoriedade do carimbo de publicação
+  const VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO = '3.0.7';
 
   private $objProcessoEletronicoRN;
   private $objParticipanteRN;
@@ -1041,7 +1044,13 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objEditorDTO->setStrSinRodape('S');
       $objEditorDTO->setStrSinIdentificacaoVersao('S');
       $objEditorDTO->setStrSinProcessarLinks('S');
-
+      
+      $numVersaoAtual = intval(str_replace('.', '', SEI_VERSAO));
+      $numVersaoCarimboObrigatorio = intval(str_replace('.', '', self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO));
+      if ($numVersaoAtual >= $numVersaoCarimboObrigatorio) {
+        $objEditorDTO->setStrSinCarimboPublicacao('N');  
+      }   
+      
       $objEditorRN = new EditorRN();
       $strConteudoAssinatura = $objEditorRN->consultarHtmlVersao($objEditorDTO);
 
@@ -1061,8 +1070,9 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
       
       //VALIDAÇÃO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIÇÃO
-      if($objAnexoDTO->getNumTamanho() > ($objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
-           throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objInfraParametro->getValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
+      $objPENParametroRN = new PENParametroRN();
+      if($objAnexoDTO->getNumTamanho() > ($objPENParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+           throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objPENParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
       } 
 
             //Obtenção do conteudo do documento externo
@@ -2093,9 +2103,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     
     protected function cancelarTramiteInternoControlado(ProtocoloDTO $objDtoProtocolo) {
         
+        
         //Obtem o id_rh que representa a unidade no barramento
-        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-        $numIdRespositorio = $objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
+        $objPENParametroRN = new PENParametroRN();
+        $numIdRespositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         
         //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();

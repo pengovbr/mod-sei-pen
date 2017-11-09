@@ -277,14 +277,30 @@ class PENAgendamentoRN extends InfraRN {
         //Para cada hipótese vinda do PEN será verificado a existencia.
         foreach ($hipotesesPen as $hipotese) {
             $objDTO = new PenHipoteseLegalDTO();
-            $objDTO->setStrNome($hipotese->hipotese->nome);       
+            $objDTO->setNumIdentificacao($hipotese->hipotese->identificacao);      
             $objDTO->setNumMaxRegistrosRetorno(1);
-            $objDTO->retNumIdHipoteseLegal();
+            $objDTO->retStrNome();
             $objConsulta = $objBD->consultar($objDTO);
+            
+            //Caso não haja um nome para a hipótese legal, ele pula para a próxima.
+            if (empty($hipotese->hipotese->nome)) {
+                continue;
+            }
+            
+            $objDTO->setStrNome($hipotese->hipotese->nome);
+            
+            if ($hipotese->hipotese->status) {
+                $objDTO->setStrAtivo('S');
+            } else {
+                $objDTO->setStrAtivo('N');
+            }
             
             //Caso não exista a hipótese irá cadastra-la no sei.
             if (empty($objConsulta)) {
                 $objBD->cadastrar($objDTO);
+            } else {
+                //Caso contrário apenas irá atualizar os dados.
+                $objBD->alterar($objDTO);
             }
         }
         

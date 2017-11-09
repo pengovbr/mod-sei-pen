@@ -208,30 +208,45 @@ class PENIntegracao extends SeiIntegracao {
                 return true;
             
             // Mapeamento de Hipóteses Legais de Envio
-            case 'pen_map_hipotese_legal_enviado_cadastrar':
-            case 'pen_map_hipotese_legal_enviado_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_enviado_cadastrar.php';
+            case 'pen_map_hipotese_legal_envio_cadastrar':
+            case 'pen_map_hipotese_legal_envio_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
                 return true;
             
-            case 'pen_map_hipotese_legal_enviado_listar':
-            case 'pen_map_hipotese_legal_enviado_excluir':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_enviado_listar.php';
+            case 'pen_map_hipotese_legal_envio_listar':
+            case 'pen_map_hipotese_legal_envio_excluir':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
                 return true;
             
             // Mapeamento de Hipóteses Legais de Recebimento
-            case 'pen_map_hipotese_legal_recebido_cadastrar':
-            case 'pen_map_hipotese_legal_recebido_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebido_cadastrar.php';
+            case 'pen_map_hipotese_legal_recebimento_cadastrar':
+            case 'pen_map_hipotese_legal_recebimento_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
                 return true;
             
-            case 'pen_map_hipotese_legal_recebido_listar':
-            case 'pen_map_hipotese_legal_recebido_excluir':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebido_listar.php';
+            case 'pen_map_hipotese_legal_recebimento_listar':
+            case 'pen_map_hipotese_legal_recebimento_excluir':
+                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_listar.php';
                 return true;
             
             case 'pen_map_hipotese_legal_padrao_cadastrar':
             case 'pen_map_hipotese_legal_padrao_visualizar':
                 require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
+                return true;
+                
+            case 'pen_map_unidade_cadastrar':
+            case 'pen_map_unidade_visualizar':
+                require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
+                return true;
+                
+            case 'pen_map_unidade_listar':
+            case 'pen_map_unidade_excluir':
+                require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
+                return true;
+                
+            case 'pen_parametros_configuracao':
+            case 'pen_parametros_configuracao_salvar':
+                require_once dirname(__FILE__) . '/pen_parametros_configuracao.php';
                 return true;
         }
 

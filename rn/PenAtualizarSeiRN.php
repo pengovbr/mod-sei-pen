@@ -51,9 +51,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 //nao tem nenhuma versao ainda, instalar todas
                 $this->instalarV100();
                 $this->instalarV101();
+                $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.0.0') {
                 $this->instalarV101();
             } else if ($strVersaoModuloPen == '1.0.1') {
+                $this->instalarV102();
+            } else if ($strVersaoModuloPen == '1.0.2') {
             }
 
 
@@ -65,6 +68,23 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             InfraDebug::getInstance()->setBolEcho(false);
             throw new InfraException('Erro atualizando VERSAO.', $e);
         }
+    }
+    
+    /**
+     * Cria um novo parâmetro
+     * @return int Código do Parametro gerado
+     */
+    protected function criarParametro($strNome, $strValor, $strDescricao) {
+        $objDTO = new PENParametroDTO();
+        $objDTO->setStrNome($strNome);
+        $objDTO->setStrValor($strValor);
+        $objDTO->setStrDescricao($strDescricao);
+        $objDTO->retStrNome();
+
+        $objBD = new PenParametroBD($this->getObjInfraIBanco());
+        $objDTOCadastrado = $objBD->cadastrar($objDTO);
+
+        return $objDTOCadastrado->getStrNome();
     }
         
     /* Contem atualizações da versao 1.0.0 do modulo */
@@ -1032,19 +1052,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             ),
             'pk' => array('nome')
         ));
-
-        
-        /* altera o parâmetro da versão de banco */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
-        $objInfraParametroDTO->setStrValor('1.0.0');
-        $objInfraParametroDTO->retTodos();
-        
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.1');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
-        
         
         //Agendamento
         $objDTO = new InfraAgendamentoTarefaDTO();
@@ -1067,6 +1074,60 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'Verificação se há novas hipóteses legais do barramento.');
+        
+        /* altera o parâmetro da versão de banco */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
+        $objInfraParametroDTO->setStrValor('1.0.0');
+        $objInfraParametroDTO->retTodos();
+        
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.1');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+    
+    /* Contem atualizações da versao 1.0.2 do modulo */
+    protected function instalarV102() {
+        $objMetaBD = $this->objMeta;
+        
+        //Adiciona a coluna de indentificação nas hipóteses que vem do barramento
+        $objMetaBD->adicionarColuna('md_pen_hipotese_legal', 'identificacao', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
+        
+        //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
+        $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
+        $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
+        $this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de Notificação de Recebimento');
+        $this->criarParametro('PEN_ID_REPOSITORIO_ORIGEM', '1', 'ID do Repositório de Origem');
+        $this->criarParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL', '/opt/sei/web/modulos/mod-sei-barramento/CONITall.pem', 'Localização do Certificado Digital');
+        $this->criarParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3', 'Número Máximo de Tentativas de Recebimento');
+        $this->criarParametro('PEN_SENHA_CERTIFICADO_DIGITAL', '1234', 'Senha do Certificado Digital');
+        $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho Máximo de Documento Expedido');
+        $this->criarParametro('PEN_TIPO_PROCESSO_EXTERNO', '100000320', 'Tipo de Processo Externo');
+        $this->criarParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000001', 'Unidade Geradora de Processo e Documento Recebido');
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new PenParametroDTO();
+        $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
+        $objDTO->retStrNome();
+        $objBD = new PenParametroBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrDescricao('Hipótese Legal Padrão');
+        $objBD->alterar($objDTO);
+        
+        //Adiciona a coluna de descricao nos parâmetros
+        $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
+        
+        /* altera o parâmetro da versão de banco */
+//        $objInfraParametroDTO = new InfraParametroDTO();
+//        $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
+//        $objInfraParametroDTO->setStrValor('1.0.1');
+//        $objInfraParametroDTO->retTodos();
+//        
+//        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+//        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+//        $objInfraParametroDTO->setStrValor('1.0.2');
+//        $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
 }

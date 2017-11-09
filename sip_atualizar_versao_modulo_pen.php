@@ -575,16 +575,28 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
             //$strVersaoAtual = $objInfraParametro->getValor('SEI_VERSAO', false);
             $strVersaoModuloPen = $objInfraParametro->getValor($this->sip_versao, false);
-
+            
             //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
             if (InfraString::isBolVazia($strVersaoModuloPen)) {
-                //nao tem nenhuma versao ainda, instalar todas
                 $this->instalarV100();
                 $this->instalarV101();
-            } else if ($strVersaoModuloPen == '1.0.0') {
-                $this->instalarV101();
-            }
+                $this->instalarV102();
+                $this->instalarV103();
+            } else {
+                switch ($strVersaoModuloPen) {
+                    case '1.0.0':
+                        $this->instalarV101();
+                        break;
 
+                    case '1.0.1':
+                        $this->instalarV102();
+                        break;
+                    
+                    case '1.0.2': //Remover depois de usar
+                        $this->instalarV103();
+                        break;
+                }
+            }
 
             InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
@@ -796,7 +808,6 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
     }
 
     public function atribuirPerfil($numIdSistema) {
-
         $objDTO = new PerfilDTO();
         $objBD = new PerfilBD($this->objInfraBanco);
         $objRN = $this;
@@ -818,7 +829,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             }
         };
 
-        //$fnCadastrar('ADMINISTRADOR', $numIdSistema);
+        $fnCadastrar('ADMINISTRADOR', $numIdSistema);
         //$fnCadastrar('BASICO', $numIdSistema);
     }
 
@@ -968,30 +979,30 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objItemMenuDTO = new ItemMenuDTO();
         $objItemMenuDTO->setNumIdSistema($numIdSistema);
         $objItemMenuDTO->setNumIdMenu($numIdMenu);
-        $objItemMenuDTO->setStrRotulo('Processo Eletrnico Nacional');       
+        $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');       
         $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
         $objItemMenuDTO->retNumIdItemMenu();
 
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
         if(empty($objItemMenuDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
         // Administrao > Mapeamento de Hipteses Legais de Envio
-        $numIdItemMenu = $this->criarMenu('Mapeamento de Hipteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);       
+        $numIdItemMenu = $this->criarMenu('Mapeamento de Hipóteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);       
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
         $numIdItemMenu = $this->criarMenu('Envio', 10, $numIdItemMenu, $numIdMenu, null, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipteses Legais de Envio', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipteses Legais de Envio', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipóteses Legais de Envio', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
 
         //Atribui as permisses aos recursos e menus
@@ -1010,27 +1021,27 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->setNumIdMenu($numIdMenu);
-        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');       
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
         $objDTO = $objBD->consultar($objDTO);
 
         if(empty($objDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" no foi localizado');
         }
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
         $numIdItemMenu = $this->criarMenu('Recebimento', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alterar de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alteração de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluir mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluisão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
 
         //Atribui as permisses aos recursos e menus
@@ -1045,20 +1056,20 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->setNumIdMenu($numIdMenu);
-        $objDTO->setStrRotulo('Mapeamento de Hipteses Legais');       
+        $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');       
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
         $objDTO = $objBD->consultar($objDTO);
 
         if(empty($objDTO)) {
-            throw new InfraException('Menu "Processo Eletrnico Nacional" no foi localizado');
+            throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulrio de cadastro de mapeamento de Hipteses Legais Padro', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
 
-        $this->criarMenu('Indicar Hiptese de Restrio Padro', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
-        $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Mtodo Cadastrar Padro da RN de mapeamento de Hipteses Legais', $numIdSistema);
+        $this->criarMenu('Indicar Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+        $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
         $this->atribuirPerfil($numIdSistema);
         
         /* altera o parâmetro da versão de banco */
@@ -1071,6 +1082,173 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.0.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
         
+    }
+    
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.0.2
+     */
+    protected function instalarV102() {
+    
+        $objBD = new ItemMenuBD($this->inicializarObjInfraIBanco());
+
+        //----------------------------------------------------------------------
+        // Achar o sistema
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+        $objDTO = new ItemMenuDTO();
+        $objDTO->setNumIdSistema($numIdSistema);
+        $objDTO->setNumIdMenu($numIdMenu);
+        $objDTO->setStrRotulo('Processo Eletrônico Nacional');       
+        $objDTO->setNumMaxRegistrosRetorno(1);
+        $objDTO->retNumIdItemMenu();
+
+        $objDTO = $objBD->consultar($objDTO);
+
+        if(empty($objDTO)) {
+            throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        }
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio
+        $numIdItemMenu = $this->criarMenu('Mapeamento de Unidades', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+        
+        // Cadastro do menu de administração parâmetros
+        $numIdRecurso = $this->criarRecurso('pen_parametros_configuracao', 'Parametros de Configuração', $numIdSistema);
+        $this->criarMenu('Parâmetros de Configuração', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Cadastrar
+        $this->criarRecurso('pen_map_unidade_alterar', 'Alteração de mapeamento de Unidades', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_unidade_cadastrar', 'Cadastro de mapeamento de Unidades', $numIdSistema);
+        $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+        // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
+        $this->criarRecurso('pen_map_unidade_excluir', 'Exclusão de mapeamento de Unidades', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_unidade_listar', 'Listagem de mapeamento de Unidades', $numIdSistema);
+        $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
+
+        
+        // ------------------ Atribui as permisses aos recursos e menus ----------------------//
+        $this->atribuirPerfil($numIdSistema);
+       
+        /* altera o parâmetro da versão de banco */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->retTodos();
+        
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.2');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        
+    }
+    
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.0.3
+     */
+    protected function instalarV103() {
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        
+        //Alterar rotulo do menu
+        $objDTO = new ItemMenuDTO();
+        $objDTO->setStrRotulo('Indicar Hiptese de Restrio Padro');
+        $objDTO->retNumIdItemMenu();
+        $objDTO->retNumIdMenu();
+        $objBD = new ItemMenuBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrRotulo('Indicar Hipótese de Restrição Padrão');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebido_listar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_listar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_listar');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebido_excluir');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_excluir');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_excluir');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebido_cadastrar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_cadastrar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_cadastrar');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebido_alterar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_alterar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_alterar');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_enviado_listar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_envio_listar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_listar');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_enviado_excluir');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_envio_excluir');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_excluir');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_enviado_cadastrar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_envio_cadastrar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_cadastrar');
+        $objBD->alterar($objDTO);
+        
+        //Alterar nomeclatura do recurso
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_hipotese_legal_enviado_alterar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        $objDTO->setStrNome('pen_map_hipotese_legal_envio_alterar');
+        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_alterar');
+        $objBD->alterar($objDTO);
+        
+        //Cadastrar recurso de alteração dos parâmetros
+        $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
+        
+        /* altera o parâmetro da versão de banco */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.3');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
 

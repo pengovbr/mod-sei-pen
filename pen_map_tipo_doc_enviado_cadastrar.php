@@ -25,7 +25,7 @@ try {
     switch ($_GET['acao']) {
         case 'pen_map_tipo_doc_enviado_cadastrar':
             $arrComandos[] = '<button type="submit" name="sbmCadastrarSerie" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton">Cancelar</button>';   
+            $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
                         
             if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
                 $strTitulo = 'Editar Mapeamento de Envio';
@@ -36,7 +36,7 @@ try {
             break;
         
         case 'pen_map_tipo_doc_enviado_visualizar':
-            $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
+            $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
             $bolSomenteLeitura = true;
             $strTitulo = 'Consultar Mapeamento de Envio';           
             break;

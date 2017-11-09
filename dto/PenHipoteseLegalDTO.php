@@ -16,6 +16,7 @@ class PenHipoteseLegalDTO extends InfraDTO {
     public function montar() {
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdHipoteseLegal', 'id_hipotese_legal');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Nome', 'nome');
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Identificacao', 'identificacao');  
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');  
         
         $this->configurarPK('IdHipoteseLegal',InfraDTO::$TIPO_PK_SEQUENCIAL);

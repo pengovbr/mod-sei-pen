@@ -15,8 +15,8 @@ require_once dirname(__FILE__) . '/../../SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_recebido_listar');
-define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_recebido');
+define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_recebimento_listar');
+define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_recebimento');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Hipóteses Legais de Recebimento');
 define('PEN_PAGINA_GET_ID', 'id_mapeamento');
 
@@ -121,12 +121,10 @@ try {
     //--------------------------------------------------------------------------
   
     $arrComandos = array();
-    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton">Pesquisar</button>';
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton">Novo</button>';
-    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton">Excluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton">Imprimir</button>';
+    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
     //--------------------------------------------------------------------------
     // DTO de paginao
@@ -251,10 +249,10 @@ $objPagina->montarStyle();
 <style type="text/css">
 
 .input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:15%;width:25%}    
+.input-field-first{position:absolute;left:0%;top:50%;width:25%}    
 
 .input-label-second{position:absolute;left:30%;top:0%;width:25%; color: #666!important}
-.input-field-second{position:absolute;left:30%;top:15%;width:25%;}
+.input-field-second{position:absolute;left:30%;top:50%;width:25%;}
 
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
@@ -365,7 +363,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('12em'); ?>
+    <?php $objPagina->abrirAreaDados('40px'); ?>
         
         <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
         <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>

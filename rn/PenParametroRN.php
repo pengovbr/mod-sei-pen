@@ -141,4 +141,19 @@ class PenParametroRN extends InfraRN {
         
         return $objBD->isSetValor($strNome); 
     }
+    
+    /**
+     * Resgata o valor do parâmetro
+     * @param string $strNome
+     */
+    public function getParametro($strNome) {
+        $objPENParametroDTO = new PENParametroDTO();
+        $objPENParametroDTO->setStrNome($strNome);
+        $objPENParametroDTO->retStrValor();
+
+        if($this->contar($objPENParametroDTO) > 0) {
+            $objPENParametroDTO = $this->consultarControlado($objPENParametroDTO);
+            return $objPENParametroDTO->getStrValor();
+        }
+    }
 }

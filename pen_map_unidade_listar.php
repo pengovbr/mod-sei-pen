@@ -10,10 +10,10 @@ require_once dirname(__FILE__) . '/../../SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_enviado_listar');
-define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_enviado');
-define('PEN_PAGINA_TITULO', 'Mapeamento de Hipóteses Legais de Envio');
-define('PEN_PAGINA_GET_ID', 'id_mapeamento');
+define('PEN_RECURSO_ATUAL', 'pen_map_unidade_listar');
+define('PEN_RECURSO_BASE', 'pen_map_unidade');
+define('PEN_PAGINA_TITULO', 'Mapeamento de Unidade');
+define('PEN_PAGINA_GET_ID', 'id_unidade');
 
 
 $objPagina = PaginaSEI::getInstance();
@@ -46,23 +46,23 @@ try {
                 
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
-                    $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-                    $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+                    $objPenUnidadeDTO = new PenUnidadeDTO();
+                    $objPenUnidadeRN = new PenUnidadeRN();
                     
                     $arrParam['hdnInfraItensSelecionados'] = explode(',',$arrParam['hdnInfraItensSelecionados']);
                     
                     if(is_array($arrParam['hdnInfraItensSelecionados'])) {
                         
-                        foreach($arrParam['hdnInfraItensSelecionados'] as $dblIdMap) {
+                        foreach($arrParam['hdnInfraItensSelecionados'] as $NumIdUnidade) {
                             
-                            $objPenRelHipoteseLegalDTO->setDblIdMap($dblIdMap);
-                            $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+                            $objPenUnidadeDTO->setNumIdUnidade($NumIdUnidade);
+                            $objPenUnidadeRN->excluir($objPenUnidadeDTO);
                         }
                     }
                     else {
                         
-                        $objPenRelHipoteseLegalDTO->setDblIdMap($arrParam['hdnInfraItensSelecionados']);
-                        $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+                        $objPenUnidadeDTO->setNumIdUnidade($arrParam['hdnInfraItensSelecionados']);
+                        $objPenUnidadeRN->excluir($objPenUnidadeDTO);
                     }
                     
                     $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
@@ -80,7 +80,7 @@ try {
                 
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
-                    PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
+                    PenUnidadeRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
                     
                     $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
                     
@@ -96,7 +96,7 @@ try {
             case PEN_RECURSO_BASE.'_ativar':
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
-                    PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
+                    PenUnidadeRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
                     
                     $objPagina->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
                     
@@ -127,96 +127,87 @@ try {
     //--------------------------------------------------------------------------
     // DTO de paginao
     
-    $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-    $objPenRelHipoteseLegalDTO->setStrTipo('E');
-    $objPenRelHipoteseLegalDTO->retTodos();
+    $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+    $objPenUnidadeDTOFiltro->retTodos();
+    
     //--------------------------------------------------------------------------
     // Filtragem 
-    if(array_key_exists('id_barramento', $_POST) && (!empty($_POST['id_barramento']) && $_POST['id_barramento'] !== 'null')) {
-        $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
+    if(array_key_exists('id_unidade_rh', $_POST) && (!empty($_POST['id_unidade_rh']) && $_POST['id_unidade_rh'] !== 'null')) {
+        $objPenUnidadeDTOFiltro->setNumIdUnidadeRH($_POST['id_unidade_rh']);
     }
     
-    if(array_key_exists('id_hipotese_legal', $_POST) && (!empty($_POST['id_hipotese_legal']) && $_POST['id_barramento'] !== 'null')) {
-        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
+    if(array_key_exists('id_unidade', $_POST) && (!empty($_POST['id_unidade']) && $_POST['id_unidade_rh'] !== 'null')) {
+        $objPenUnidadeDTOFiltro->setNumIdUnidade($_POST['id_unidade']);
     } 
     
-    $objFiltroDTO = clone $objPenRelHipoteseLegalDTO;
+    $objFiltroDTO = clone $objPenUnidadeDTOFiltro;
     
-    if(!$objFiltroDTO->isSetNumIdBarramento()) {
-        $objFiltroDTO->setNumIdBarramento('');   
+    if(!$objFiltroDTO->isSetNumIdUnidadeRH()) {
+        $objFiltroDTO->setNumIdUnidadeRH('');   
     }
 
-    if(!$objFiltroDTO->isSetNumIdHipoteseLegal()) {
-        $objFiltroDTO->setNumIdHipoteseLegal('');
+    if(!$objFiltroDTO->isSetNumIdUnidade()) {
+        $objFiltroDTO->setNumIdUnidade('');
     }
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);
     
-    // Mapeamento da hipotese legal remota
-    $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
-    $objPenHipoteseLegalDTO->setDistinct(true);
-    $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
-    $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
-    $objPenHipoteseLegalDTO->retStrNome();
+    // Unidade Local
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->setDistinct(true);
+    $objPenUnidadeDTO->retNumIdUnidade();
+    $objPenUnidadeDTO->retNumIdUnidadeRH();
    
-    $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
-    $arrMapIdBarramento = InfraArray::converterArrInfraDTO($objPenHipoteseLegalRN->listar($objPenHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
-
-    // Mapeamento da hipotese legal local
-    $objHipoteseLegalDTO = new HipoteseLegalDTO();
-    $objHipoteseLegalDTO->setDistinct(true);
-    $objHipoteseLegalDTO->setStrStaNivelAcesso(ProtocoloRN::$NA_RESTRITO); //Restrito
-    $objHipoteseLegalDTO->setStrSinAtivo('S');
-    $objHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
-    $objHipoteseLegalDTO->retNumIdHipoteseLegal();
-    $objHipoteseLegalDTO->retStrNome();
-
-    $objHipoteseLegalRN = new HipoteseLegalRN();
-    $arrMapIdHipoteseLegal = InfraArray::converterArrInfraDTO($objHipoteseLegalRN->listar($objHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
-    //--------------------------------------------------------------------------
-    //
-    //$objPagina->prepararOrdenacao($objPenRelHipoteseLegalDTO, 'IdMapeamento', InfraDTO::$TIPO_ORDENACAO_ASC);
-    $objPagina->prepararPaginacao($objPenRelHipoteseLegalDTO);
+    $objPenUnidadeRN = new PenUnidadeRN();
+    $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidade', 'IdUnidade');
+    $arrMapIdUnidadeRH = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidadeRH', 'IdUnidadeRH');
     
-    $arrObjPenRelHipoteseLegalDTO = $objGenericoBD->listar($objPenRelHipoteseLegalDTO);
     
-    $objPagina->processarPaginacao($objPenRelHipoteseLegalDTO);
-
-    $numRegistros = count($arrObjPenRelHipoteseLegalDTO);
-
-    if(!empty($arrObjPenRelHipoteseLegalDTO)){
+    $objPagina->prepararPaginacao($objPenUnidadeDTOFiltro);
+    $arrObjPenUnidadeDTO = $objGenericoBD->listar($objPenUnidadeDTOFiltro);
+    $objPagina->processarPaginacao($objPenUnidadeDTOFiltro);
+    
+    $numRegistros = count($arrObjPenUnidadeDTO);
+    if(!empty($arrObjPenUnidadeDTO)){
         
         $strResultado = '';
-
+        
         $strResultado .= '<table width="99%" class="infraTable">'."\n";
         $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
 
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal - SEI '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal - Tramitação PEN</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Unidade</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Unidade RH</th>'."\n";
         $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
 
         $index = 0;
-        foreach($arrObjPenRelHipoteseLegalDTO as $objPenRelHipoteseLegalDTO) {
-
+        
+        foreach($arrObjPenUnidadeDTO as $objPenUnidadeDTO) {
             $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+            
+            $objPenUnidadeSiglaDTO = new UnidadeDTO();
+            $objPenUnidadeSiglaDTO->setNumIdUnidade($objPenUnidadeDTO->getNumIdUnidade());
+            $objPenUnidadeSiglaDTO->retStrSigla();
 
+            $objPenUnidadeRN = new UnidadeRN();
+            $objResultadoSigla = $objGenericoBD->consultar($objPenUnidadeSiglaDTO);
+            
             $strResultado .= '<tr class="'.$strCssTr.'">';
-            $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenRelHipoteseLegalDTO->getDblIdMap(), '').'</td>';
-            $strResultado .= '<td>'.$arrMapIdHipoteseLegal[$objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal()].'</td>';
-            $strResultado .= '<td>'.$arrMapIdBarramento[$objPenRelHipoteseLegalDTO->getNumIdBarramento()].'</td>';
+            $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
+            $strResultado .= '<td>'.$objResultadoSigla->getStrSigla().'</td>';
+            $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
             $strResultado .= '<td align="center">';
             
-            //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
-            if($objSessao->verificarPermissao('pen_map_hipotese_legal_enviado_alterar')) {
-                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/alterar.gif" title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+            //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+            if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
+                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/alterar.gif" title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
             }
             
-            if($objSessao->verificarPermissao('pen_map_hipotese_legal_enviado_excluir')) {
-                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src="imagens/excluir.gif" title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+            if($objSessao->verificarPermissao('pen_map_unidade_excluir')) {
+                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src="imagens/excluir.gif" title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
             }
             
             $strResultado .= '</td>';
@@ -285,7 +276,7 @@ function onCLickLinkDelete(url, link) {
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento     = row.find('td:eq(2)').text();
     
-    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){
+    if(confirm('Confirma a exclusão do mapeamento da unidade?')){
         
         window.location = url;
     }
@@ -362,14 +353,14 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     <?php //$objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('12em'); ?>
         
-        <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-        <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
+        <label for="id_unidade" class="infraLabelObrigatorio input-label-first">Unidade:</label>
+        <select name="id_unidade" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
         </select>
         
-        <label for="id_barramento" class="infraLabelObrigatorio input-label-second">Hipótese Legal - Tramitação PEN:</label>
-        <select name="id_barramento" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(),  $arrMapIdBarramento); ?>
+        <label for="id_unidade_rh" class="infraLabelObrigatorio input-label-second">Unidade RH</label>
+        <select name="id_unidade_rh" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdUnidadeRH(),  $arrMapIdUnidadeRH); ?>
         </select> 
         
         

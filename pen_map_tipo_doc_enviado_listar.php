@@ -95,12 +95,12 @@ try {
     $strTitulo = 'Lista dos Mapeamentos de Envio';
         
     $arrComandos = array();
-    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton">Pesquisar</button>';
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton">Novo</button>';
+    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
     //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
     //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton">Excluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton">Imprimir</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
     //--------------------------------------------------------------------------
     // DTO de paginação
@@ -190,10 +190,10 @@ $objPaginaSEI->montarStyle();
 <style type="text/css">
 
 .input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:15%;width:25%}    
+.input-field-first{position:absolute;left:0%;top:50%;width:25%}    
 
 .input-label-second{position:absolute;left:30%;top:0%;width:25%; color: #666!important}
-.input-field-second{position:absolute;left:30%;top:15%;width:25%;}
+.input-field-second{position:absolute;left:30%;top:50%;width:25%;}
 
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
@@ -312,7 +312,7 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
-    <?php $objPaginaSEI->abrirAreaDados('12em'); ?>
+    <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
         
         <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>

@@ -25,12 +25,12 @@ class PendenciasTramiteRN extends InfraRN {
     }  
 
     public function __construct() {
-
-        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-        $this->strLocalizacaoCertificadoDigital = $objInfraParametro->getValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
-        $this->strEnderecoServicoPendencias = $objInfraParametro->getValor('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
+        $objPENParametroRN = new PENParametroRN();
+        
+        $this->strLocalizacaoCertificadoDigital = $objPENParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+        $this->strEnderecoServicoPendencias = $objPENParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
         //TODO: Urgente - Remover senha do certificado de autenticação dos serviços do PEN da tabela de parâmetros
-        $this->strSenhaCertificadoDigital = $objInfraParametro->getValor('PEN_SENHA_CERTIFICADO_DIGITAL');    
+        $this->strSenhaCertificadoDigital = $objPENParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');    
 
         if (InfraString::isBolVazia($this->strEnderecoServicoPendencias)) {
             throw new InfraException('Endereço do serviço de pendências de trâmite do Processo Eletrônico Nacional (PEN) não informado.');
@@ -55,8 +55,8 @@ class PendenciasTramiteRN extends InfraRN {
             InfraDebug::getInstance()->setBolEcho(false);
             InfraDebug::getInstance()->limpar();
 
-            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objInfraParametro->getValor('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            $objPENParametroRN = new PENParametroRN();
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPENParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
             $numSeg = InfraUtil::verificarTempoProcessamento();
             InfraDebug::getInstance()->gravar('MONITORANDO OS TRÂMITES PENDENTES ENVIADOS PARA O ÓRGÃO (PEN)');

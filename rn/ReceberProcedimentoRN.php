@@ -80,9 +80,8 @@ class ReceberProcedimentoRN extends InfraRN
     // TODO: Adicionar comandos de debug. Vide SeiWs.php gerarProcedimento
   protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
   {     
-      
-    $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-    SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objInfraParametro->getValor('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO')); 
+    $objPENParametroRN = new PENParametroRN();  
+    SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPENParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO')); 
     
     $objSeiRN = new SeiRN();
     
@@ -608,7 +607,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
         
         //TODO: Identificar o tipo de procedimento correto para atribuição ao novo processo
-        $numIdTipoProcedimento = $this->objInfraParametro->getValor('PEN_TIPO_PROCESSO_EXTERNO');
+        $objPENParametroRN = new PENParametroRN();
+        $numIdTipoProcedimento = $objPENParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
         $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $objProcesso->processoDeNegocio);        
 
         //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
@@ -1221,7 +1221,9 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
         $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
-        $numIdRepositorioOrigem = $this->objInfraParametro->getValor('PEN_ID_REPOSITORIO_ORIGEM');
+        
+        $objPENParametroRN = new PENParametroRN();
+        $numIdRepositorioOrigem = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
         $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
 
@@ -1504,9 +1506,11 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
         $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));    
-
+        
+        $objPENParametroRN = new PENParametroRN();
+        
         $objEnviarProcessoDTO->setStrSinManterAberto('N');
-        $strEnviaEmailNotificacao = ($this->objInfraParametro->getValor('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', false) == 'S') ? 'S' : 'N';
+        $strEnviaEmailNotificacao = $objPENParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
         $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
         $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
         $objEnviarProcessoDTO->setDtaPrazo(null);

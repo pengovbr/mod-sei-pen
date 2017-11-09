@@ -36,8 +36,8 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa {
       InfraDebug::getInstance()->setBolEcho(false);
       InfraDebug::getInstance()->limpar();
       
-      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-      SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objInfraParametro->getValor('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+      $objPENParametroRN = new PENParametroRN();
+      SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPENParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
       $numSeg = InfraUtil::verificarTempoProcessamento();
       
