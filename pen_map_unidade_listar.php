@@ -177,9 +177,11 @@ try {
 
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Unidade</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Unidade RH</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
 
@@ -190,15 +192,17 @@ try {
             
             $objPenUnidadeSiglaDTO = new UnidadeDTO();
             $objPenUnidadeSiglaDTO->setNumIdUnidade($objPenUnidadeDTO->getNumIdUnidade());
-            $objPenUnidadeSiglaDTO->retStrSigla();
+            $objPenUnidadeSiglaDTO->retTodos();
 
             $objPenUnidadeRN = new UnidadeRN();
             $objResultadoSigla = $objGenericoBD->consultar($objPenUnidadeSiglaDTO);
             
             $strResultado .= '<tr class="'.$strCssTr.'">';
             $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
-            $strResultado .= '<td>'.$objResultadoSigla->getStrSigla().'</td>';
+            $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
             $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
+            $strResultado .= '<td>'.$objResultadoSigla->getStrSigla().'</td>';
+            $strResultado .= '<td>'.$objResultadoSigla->getStrDescricao().'</td>';
             $strResultado .= '<td align="center">';
             
             //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
