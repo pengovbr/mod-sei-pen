@@ -1040,7 +1040,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Excluisão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Exclusão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);  
 
