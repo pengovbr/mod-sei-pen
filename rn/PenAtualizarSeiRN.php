@@ -1116,8 +1116,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO->retStrNome();
         $objBD = new PenParametroBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrDescricao('Hipótese Legal Padrão');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrDescricao('Hipótese Legal Padrão');
+            $objBD->alterar($objDTO);
+        } else {
+            $objDTO->setStrValor(null);
+            $objDTO->setStrDescricao('Hipótese Legal Padrão');
+            $objBD->cadastrar($objDTO);
+        }
         
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
