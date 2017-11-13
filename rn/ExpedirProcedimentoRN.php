@@ -394,15 +394,15 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objProcesso->processoDeNegocio  = utf8_encode($objProcedimentoDTO->getStrNomeTipoProcedimento());
     $objProcesso->descricao          = utf8_encode($objProcedimentoDTO->getStrDescricaoProtocolo());
     $objProcesso->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($objProcedimentoDTO->getDtaGeracaoProtocolo());
-        
-    if($this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
+   
+    if($this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()) == self::$STA_SIGILO_RESTRITO){
         $objProcesso->hipoteseLegal = new stdClass();
         $objProcesso->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
-         $objProcesso->hipoteseLegal->nome = 'Nomee';
+        $objProcesso->hipoteseLegal->nome = 'Nomee';
          $objProcesso->hipoteseLegal->baseLegal = 'Base Legall';
 
     }
-                
+  
     $this->atribuirProdutorProcesso($objProcesso, 
       $objProcedimentoDTO->getNumIdUsuarioGeradorProtocolo(), 
       $objProcedimentoDTO->getNumIdUnidadeGeradoraProtocolo());        
@@ -853,7 +853,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
       $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
       
-     if($this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
+     if($this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo()) == self::$STA_SIGILO_RESTRITO){
         $documento->hipoteseLegal = new stdClass();
         $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
          $documento->hipoteseLegal->nome = 'Nomee';
