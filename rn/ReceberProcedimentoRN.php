@@ -581,7 +581,7 @@ class ReceberProcedimentoRN extends InfraRN
     
     if($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
         $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal);
+        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal->identificacao);
         if (empty($numIdHipoteseLegal)) {
             $objPenParametroRN = new PenParametroRN();
             $objProtocoloDTO->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
@@ -1117,7 +1117,7 @@ class ReceberProcedimentoRN extends InfraRN
           
           if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
             $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal);
+            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal->identificacao);
             if (empty($numIdHipoteseLegal)) {
                 $objPenParametroRN = new PenParametroRN();
                 $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));

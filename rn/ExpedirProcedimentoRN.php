@@ -396,7 +396,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objProcesso->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($objProcedimentoDTO->getDtaGeracaoProtocolo());
         
     if($this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
-        $objProcesso->hipoteseLegal = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
+        $objProcesso->hipoteseLegal = new stdClass();
+        $objProcesso->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
     }
                 
     $this->atribuirProdutorProcesso($objProcesso, 
