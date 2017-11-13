@@ -1124,7 +1124,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
         $objInfraParametroDTO->setStrValor('1.0.1');
         $objInfraParametroDTO->retTodos();
-        
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.0.2');
