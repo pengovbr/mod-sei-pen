@@ -62,8 +62,8 @@ try {
 
             //TODO: Avaliar a necessidade de validar cada um dos parâmetros do PEN exigidos por essa funcionalidade
             //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
-            $objPENParametroRN = new PENParametroRN();
-            $numIdRepositorioOrigem = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+            $objPenParametroRN = new PenParametroRN();
+            $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
             
             //Preparação dos dados para montagem da tela de expedição de processos
             $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();            

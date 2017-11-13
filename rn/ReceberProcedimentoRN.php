@@ -80,8 +80,8 @@ class ReceberProcedimentoRN extends InfraRN
     // TODO: Adicionar comandos de debug. Vide SeiWs.php gerarProcedimento
   protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
   {     
-    $objPENParametroRN = new PENParametroRN();  
-    SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPENParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO')); 
+    $objPenParametroRN = new PenParametroRN();  
+    SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO')); 
     
     $objSeiRN = new SeiRN();
     
@@ -583,8 +583,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
         $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal);
         if (empty($numIdHipoteseLegal)) {
-            $objPENParametroRN = new PENParametroRN();
-            $objProtocoloDTO->setNumIdHipoteseLegal($objPENParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+            $objPenParametroRN = new PenParametroRN();
+            $objProtocoloDTO->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
         } else {
             $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
         }
@@ -621,8 +621,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
         
         //TODO: Identificar o tipo de procedimento correto para atribuição ao novo processo
-        $objPENParametroRN = new PENParametroRN();
-        $numIdTipoProcedimento = $objPENParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
+        $objPenParametroRN = new PenParametroRN();
+        $numIdTipoProcedimento = $objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
         $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $objProcesso->processoDeNegocio);        
 
         //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
@@ -1119,8 +1119,8 @@ class ReceberProcedimentoRN extends InfraRN
             $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
             $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal);
             if (empty($numIdHipoteseLegal)) {
-                $objPENParametroRN = new PENParametroRN();
-                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objPENParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+                $objPenParametroRN = new PenParametroRN();
+                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
             } else {
                 $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
             }
@@ -1247,8 +1247,8 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
         
-        $objPENParametroRN = new PENParametroRN();
-        $numIdRepositorioOrigem = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $objPenParametroRN = new PenParametroRN();
+        $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
         $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
 
@@ -1532,10 +1532,10 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));    
         
-        $objPENParametroRN = new PENParametroRN();
+        $objPenParametroRN = new PenParametroRN();
         
         $objEnviarProcessoDTO->setStrSinManterAberto('N');
-        $strEnviaEmailNotificacao = $objPENParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
+        $strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
         $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
         $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
         $objEnviarProcessoDTO->setDtaPrazo(null);

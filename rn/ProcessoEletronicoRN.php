@@ -79,11 +79,11 @@ class ProcessoEletronicoRN extends InfraRN {
   private $options = null;
 
   public function __construct() {
-    $objPENParametroRN = new PENParametroRN();
+    $objPenParametroRN = new PenParametroRN();
     
-    $strEnderecoWebService = $objPENParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
-    $strLocalizacaoCertificadoDigital =  $objPENParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
-    $strSenhaCertificadoDigital =  $objPENParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
+    $strEnderecoWebService = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
+    $strLocalizacaoCertificadoDigital =  $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+    $strSenhaCertificadoDigital =  $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
 
     if (InfraString::isBolVazia($strEnderecoWebService)) {
       throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
@@ -1045,8 +1045,8 @@ class ProcessoEletronicoRN extends InfraRN {
         $objTramite = array_pop($arrObjTramite);
         
         if (empty($numIdRepositorio)) {
-            $objPENParametroRN = new PENParametroRN();
-            $numIdRepositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+            $objPenParametroRN = new PenParametroRN();
+            $numIdRepositorio = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
             
         }
 
@@ -1365,8 +1365,8 @@ class ProcessoEletronicoRN extends InfraRN {
     public function isDisponivelCancelarTramite($strProtocolo = ''){
 
         //Obtem o id_rh que representa a unidade no barramento
-        $objPENParametroRN = new PENParametroRN();
-        $numIdRespositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $objPenParametroRN = new PenParametroRN();
+        $numIdRespositorio = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         
         //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();

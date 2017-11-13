@@ -1079,9 +1079,9 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
       
       //VALIDAÇÃO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIÇÃO
-      $objPENParametroRN = new PENParametroRN();
-      if($objAnexoDTO->getNumTamanho() > ($objPENParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
-           throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objPENParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
+      $objPenParametroRN = new PenParametroRN();
+      if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+           throw new InfraException("O tamanho do documento {$objAnexoDTO->getStrProtocoloFormatadoProtocolo()} é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
       } 
 
             //Obtenção do conteudo do documento externo
@@ -2141,8 +2141,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         
         
         //Obtem o id_rh que representa a unidade no barramento
-        $objPENParametroRN = new PENParametroRN();
-        $numIdRespositorio = $objPENParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $objPenParametroRN = new PenParametroRN();
+        $numIdRespositorio = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         
         //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();

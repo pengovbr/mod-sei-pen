@@ -586,10 +586,13 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
                 switch ($strVersaoModuloPen) {
                     case '1.0.0':
                         $this->instalarV101();
+                        $this->instalarV102();
+                        $this->instalarV103();
                         break;
 
                     case '1.0.1':
                         $this->instalarV102();
+                        $this->instalarV103();
                         break;
                     
                     case '1.0.2': //Remover depois de usar

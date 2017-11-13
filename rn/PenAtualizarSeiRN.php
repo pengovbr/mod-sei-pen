@@ -54,6 +54,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.0.0') {
                 $this->instalarV101();
+                $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.0.1') {
                 $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.0.2') {
@@ -75,7 +76,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
      * @return int Código do Parametro gerado
      */
     protected function criarParametro($strNome, $strValor, $strDescricao) {
-        $objDTO = new PENParametroDTO();
+        $objDTO = new PenParametroDTO();
         $objDTO->setStrNome($strNome);
         $objDTO->setStrValor($strValor);
         $objDTO->setStrDescricao($strDescricao);
@@ -1119,15 +1120,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
         
         /* altera o parâmetro da versão de banco */
-//        $objInfraParametroDTO = new InfraParametroDTO();
-//        $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
-//        $objInfraParametroDTO->setStrValor('1.0.1');
-//        $objInfraParametroDTO->retTodos();
-//        
-//        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
-//        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-//        $objInfraParametroDTO->setStrValor('1.0.2');
-//        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->nomeParametroModulo);
+        $objInfraParametroDTO->setStrValor('1.0.1');
+        $objInfraParametroDTO->retTodos();
+        
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.2');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
 }

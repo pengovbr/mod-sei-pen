@@ -20,10 +20,10 @@ try {
     
     $objSessao->validarPermissao('pen_parametros_configuracao');
     
-    $objPENParametroDTO = new PenParametroDTO();
-    $objPENParametroDTO->retTodos();
-    $objPENParametroRN = new PENParametroRN();
-    $retParametros = $objPENParametroRN->listar($objPENParametroDTO);
+    $objPenParametroDTO = new PenParametroDTO();
+    $objPenParametroDTO->retTodos();
+    $objPenParametroRN = new PenParametroRN();
+    $retParametros = $objPenParametroRN->listar($objPenParametroDTO);
     
     /* Busca os dados para montar dropdown ( TIPO DE PROCESSO EXTERNO ) */
     $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
@@ -41,24 +41,24 @@ try {
     $objUnidadeRN = new UnidadeRN();
     $arrObjUnidade = $objUnidadeRN->listarRN0127($objUnidadeDTO);
     
-    if ($objPENParametroDTO===null){
+    if ($objPenParametroDTO===null){
         throw new PENException("Registros não encontrados.");
     }
     
     switch ($_GET['acao']) {
         case 'pen_parametros_configuracao_salvar':
             try {
-                $objPENParametroRN = new PENParametroRN();
+                $objPenParametroRN = new PenParametroRN();
             
                 if (!empty(count($_POST['parametro']))) {
                     foreach ($_POST['parametro'] as $nome => $valor) {
-                        $objPENParametroDTO = new PENParametroDTO();
-                        $objPENParametroDTO->setStrNome($nome);
-                        $objPENParametroDTO->retStrNome();
+                        $objPenParametroDTO = new PenParametroDTO();
+                        $objPenParametroDTO->setStrNome($nome);
+                        $objPenParametroDTO->retStrNome();
                         
-                        if($objPENParametroRN->contar($objPENParametroDTO) > 0) {
-                            $objPENParametroDTO->setStrValor($valor);
-                            $objPENParametroRN->alterar($objPENParametroDTO);
+                        if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
+                            $objPenParametroDTO->setStrValor($valor);
+                            $objPenParametroRN->alterar($objPenParametroDTO);
                         }
                     }
                 }

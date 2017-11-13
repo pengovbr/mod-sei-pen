@@ -68,8 +68,8 @@ class PenTramiteProcessadoRN extends InfraRN {
         }
         else {
             
-            $objPENParametroRN = new PENParametroRN();
-            $numTentativas = $objPENParametroRN->getParametro(self::PARAM_NUMERO_TENTATIVAS);
+            $objPenParametroRN = new PenParametroRN();
+            $numTentativas = $objPenParametroRN->getParametro(self::PARAM_NUMERO_TENTATIVAS);
             
             // Verifica o número de tentativas já realizadas é igual ao configurado
             // no parâmetro
