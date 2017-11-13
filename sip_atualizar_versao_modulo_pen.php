@@ -1158,8 +1158,10 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdMenu();
         $objBD = new ItemMenuBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrRotulo('Indicar Hipótese de Restrição Padrão');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrRotulo('Indicar Hipótese de Restrição Padrão');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1167,9 +1169,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_listar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_listar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_listar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_listar');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1177,9 +1181,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_excluir');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_excluir');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_excluir');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_excluir');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1187,9 +1193,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_cadastrar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_cadastrar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_cadastrar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_cadastrar');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1197,9 +1205,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_alterar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_alterar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_recebimento_alterar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_recebimento_alterar');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1207,9 +1217,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_envio_listar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_listar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_envio_listar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_listar');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1217,9 +1229,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_envio_excluir');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_excluir');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_envio_excluir');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_excluir');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1227,9 +1241,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_envio_cadastrar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_cadastrar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_envio_cadastrar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_cadastrar');
+            $objBD->alterar($objDTO);
+        }
         
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
@@ -1237,9 +1253,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
-        $objDTO->setStrNome('pen_map_hipotese_legal_envio_alterar');
-        $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_alterar');
-        $objBD->alterar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_hipotese_legal_envio_alterar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_hipotese_legal_envio_alterar');
+            $objBD->alterar($objDTO);
+        }
         
         //Cadastrar recurso de alteração dos parâmetros
         $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
