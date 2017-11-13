@@ -1122,7 +1122,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         } else {
             $objDTO = new PenParametroDTO();
             $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
-            $objDTO->setStrValor(null);
+            $objDTO->setStrValor(1);
             $objDTO->setStrDescricao('Hipótese Legal Padrão');
             $objBD->cadastrar($objDTO);
         }
