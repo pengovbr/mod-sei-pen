@@ -14,13 +14,32 @@ try {
     $objBanco = BancoSEI::getInstance();
     $objSessao = SessaoSEI::getInstance();
     
+    
+    $o = new PenRelHipoteseLegalEnvioRN();
+    $os = new PenRelHipoteseLegalRecebidoRN();
+    
     $objSessao->validarPermissao('pen_parametros_configuracao');
     
     $objPENParametroDTO = new PenParametroDTO();
     $objPENParametroDTO->retTodos();
-    
     $objPENParametroRN = new PENParametroRN();
     $retParametros = $objPENParametroRN->listar($objPENParametroDTO);
+    
+    /* Busca os dados para montar dropdown ( TIPO DE PROCESSO EXTERNO ) */
+    $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
+    $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
+    $objTipoProcedimentoDTO->retStrNome();
+    $objTipoProcedimentoDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objTipoProcedimentoRN = new TipoProcedimentoRN();
+    $arrObjTipoProcedimentoDTO = $objTipoProcedimentoRN->listarRN0244($objTipoProcedimentoDTO);
+    
+    /* Busca os dados para montar dropdown ( UNIDADE GERADORA DOCUMENTO RECEBIDO ) */
+    $objUnidadeDTO = new UnidadeDTO();
+    $objUnidadeDTO->retNumIdUnidade();
+    $objUnidadeDTO->retStrSigla();
+    $objUnidadeDTO->setOrdStrSigla(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objUnidadeRN = new UnidadeRN();
+    $arrObjUnidade = $objUnidadeRN->listarRN0127($objUnidadeDTO);
     
     if ($objPENParametroDTO===null){
         throw new PENException("Registros não encontrados.");
@@ -131,17 +150,21 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 echo '<select>';
                 break;
             
-//            case 'PEN_TIPO_PROCESSO_EXTERNO':
-//                echo '<select name="PEN_TIPO_PROCESSO_EXTERNO" class="input-field" >';
-//                
-//                echo '<select>';
-//                break;
-//                
-//            case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
-//                echo '<select name="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" class="input-field" >';
-//                
-//                echo '<select>';
-//                break;
+            case 'PEN_TIPO_PROCESSO_EXTERNO':
+                echo '<select name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="input-field" >';
+                foreach ($arrObjTipoProcedimentoDTO as $procedimento) {
+                    echo '<option ' . ($parametro->getStrValor() == $procedimento->getNumIdTipoProcedimento() ? 'selected="selected"' : '') . ' value="'.$procedimento->getNumIdTipoProcedimento().'">'.$procedimento->getStrNome().'</option>';
+                }
+                echo '<select>';
+                break;
+                
+            case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
+                echo '<select name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="input-field" >';
+                foreach ($arrObjUnidade as $unidade) {
+                    echo '<option ' . ($parametro->getStrValor() == $unidade->getNumIdUnidade() ? 'selected="selected"' : '') . ' value="'.$unidade->getNumIdUnidade().'">'.$unidade->getStrSigla().'</option>';
+                }
+                echo '<select>';
+                break;
 
             default:
                 echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';

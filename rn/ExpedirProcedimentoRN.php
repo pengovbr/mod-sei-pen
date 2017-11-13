@@ -386,7 +386,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     
         //TODO: Passar dados do ProcedimentoDTO via parâmetro já carregado anteriormente
     $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
-
+    $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+    
     $objProcesso = new stdClass();
     $objProcesso->protocolo = utf8_encode($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
     $objProcesso->nivelDeSigilo = $this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo());
@@ -394,6 +395,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objProcesso->descricao          = utf8_encode($objProcedimentoDTO->getStrDescricaoProtocolo());
     $objProcesso->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($objProcedimentoDTO->getDtaGeracaoProtocolo());
         
+    if($this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
+        $objProcesso->hipoteseLegal = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
+    }
+                
     $this->atribuirProdutorProcesso($objProcesso, 
       $objProcedimentoDTO->getNumIdUsuarioGeradorProtocolo(), 
       $objProcedimentoDTO->getNumIdUnidadeGeradoraProtocolo());        
@@ -808,7 +813,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             //$protocoloDocumentoDTO = $this->consultarProtocoloDocumento($documeto->getDblIdProcedimento());                        
 
       $documento = new stdClass();
-
+      $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
             //TODO: Atribuir das informações abaixo ao documento
             //<protocoloDoDocumentoAnexado>123</protocoloDoDocumentoAnexado>
             //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>            
@@ -843,7 +848,11 @@ class ExpedirProcedimentoRN extends InfraRN {
       $documento->descricao = utf8_encode($strDescricaoDocumento);
       $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
       $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
-
+      
+     if($this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
+        $documento->hipoteseLegal = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
+      }
+    
       $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
       if(isset($usuarioDTO)) {
         $documento->produtor = new stdClass();
@@ -1250,6 +1259,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objProcedimentoDTO->retDtaGeracaoProtocolo();
     $objProcedimentoDTO->retStrStaEstadoProtocolo();
     $objProcedimentoDTO->retDblIdProcedimento();
+    $objProcedimentoDTO->retNumIdHipoteseLegalProtocolo();
 
     return $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
   }
@@ -1341,6 +1351,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retStrNumero();
         $documentoDTO->retNumIdTipoConferencia();
         $documentoDTO->retStrStaDocumento();
+        $documentoDTO->retNumIdHipoteseLegalProtocolo();
         $documentoDTO->setOrdStrProtocoloDocumentoFormatado(InfraDTO::$TIPO_ORDENACAO_ASC);
         
         return $this->objDocumentoRN->listarRN0008($documentoDTO);
@@ -1398,6 +1409,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retStrConteudoAssinatura();
         $documentoDTO->retStrStaDocumento();
         $documentoDTO->retStrStaEstadoProtocolo();
+        $documentoDTO->retNumIdHipoteseLegalProtocolo();
         //$documentoDTO->retStrNumero();
         
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
@@ -1536,11 +1548,12 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
 
     private function validarDadosDocumentos(InfraException $objInfraException, $arrDocumentoDTO, $strAtributoValidacao = null) {
-
+      
         if(!empty($arrDocumentoDTO)) {
             
             $objDocMapDTO = new PenRelTipoDocMapEnviadoDTO();
             $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
+            $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
             
             foreach($arrDocumentoDTO as $objDocumentoDTO) {
                 
@@ -1556,6 +1569,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                     );
                     
                     $objInfraException->adicionarValidacao($strDescricao, $strAtributoValidacao);
+                }
+                
+                if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) 
+                        && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
+                    
+                    $objInfraException->adicionarValidacao('Hipótese Legal do Documento Não Mapeada', $strAtributoValidacao);
                 }
             }
         }
@@ -1586,10 +1605,26 @@ class ExpedirProcedimentoRN extends InfraRN {
         // $objProcedimentoDTO->retStrStaNivelAcessoGlobalProtocolo();
 
         // $objProcedimentoDTO = $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-
-      if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_PUBLICO) {
-        $objInfraException->adicionarValidacao('Não é possível expedir processo com informações restritas ou sigilosas.', $strAtributoValidacao);
+  
+      if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
+          $objInfraException->adicionarValidacao('Não é possível expedir processo com informações sigilosas.', $strAtributoValidacao);
       }
+    }
+    
+    /**
+     * Valida existência da Hipótese legal de Envio
+     * @param InfraException $objInfraException
+     * @param ProcedimentoDTO $objProcedimentoDTO
+     * @param string $strAtributoValidacao
+     */
+    private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null) {
+        if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_RESTRITO) {
+            
+            if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
+                $objInfraException->adicionarValidacao('Não é possível expedir processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+            }
+            
+        }
     }
 
     private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao = null) {
@@ -1647,6 +1682,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarProcessoAbertoUnidade($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+      $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);        
     }
 

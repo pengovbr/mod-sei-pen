@@ -578,6 +578,18 @@ class ReceberProcedimentoRN extends InfraRN
     $objProtocoloDTO->setDblIdProtocolo(null);
     $objProtocoloDTO->setStrDescricao(utf8_decode($objProcesso->descricao));
     $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo));
+    
+    if($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
+        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal);
+        if (empty($numIdHipoteseLegal)) {
+            $objPENParametroRN = new PENParametroRN();
+            $objProtocoloDTO->setNumIdHipoteseLegal($objPENParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+        } else {
+            $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+        }
+    }
+    
     $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($objProcesso->protocolo));
     $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
     $objProtocoloDTO->setArrObjAnexoDTO(array());
@@ -587,6 +599,8 @@ class ReceberProcedimentoRN extends InfraRN
     $this->atribuirRemetente($objProtocoloDTO, $objRemetente);
     $this->atribuirParticipantes($objProtocoloDTO, $objProcesso->interessado);
      
+  
+    
     $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', utf8_decode($objProcesso->processoDeNegocio)).PHP_EOL;
     $strDescricao .= $objProcesso->observacao;
     
@@ -1100,7 +1114,18 @@ class ReceberProcedimentoRN extends InfraRN
             $objDocumentoDTO->getObjProtocoloDTO()->setStrStaGrauSigilo($objTipoProcedimentoDTO->getStrStaGrauSigiloSugestao());
             $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objTipoProcedimentoDTO->getNumIdHipoteseLegalSugestao());
           }
-
+          
+          if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
+            $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal);
+            if (empty($numIdHipoteseLegal)) {
+                $objPENParametroRN = new PENParametroRN();
+                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objPENParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+            } else {
+                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
+            }
+          }
+          
           $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($this->prepararParticipantes($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO()));
 
           $objDocumentoRN = new DocumentoRN();
