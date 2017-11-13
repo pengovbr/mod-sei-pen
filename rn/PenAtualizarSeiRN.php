@@ -1095,6 +1095,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         //Adiciona a coluna de indentificação nas hipóteses que vem do barramento
         $objMetaBD->adicionarColuna('md_pen_hipotese_legal', 'identificacao', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
         
+        //Adiciona a coluna de descricao nos parâmetros
+        $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
+        
         //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
@@ -1115,9 +1118,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO = $objBD->consultar($objDTO);
         $objDTO->setStrDescricao('Hipótese Legal Padrão');
         $objBD->alterar($objDTO);
-        
-        //Adiciona a coluna de descricao nos parâmetros
-        $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
         
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
