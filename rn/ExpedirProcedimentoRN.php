@@ -398,6 +398,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     if($this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
         $objProcesso->hipoteseLegal = new stdClass();
         $objProcesso->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
+        // $objProcesso->hipoteseLegal->nome = 'Nomee';
+        // $objProcesso->hipoteseLegal->baseLegal = 'Base Legall';
+
     }
                 
     $this->atribuirProdutorProcesso($objProcesso, 
@@ -851,7 +854,10 @@ class ExpedirProcedimentoRN extends InfraRN {
       $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
       
      if($this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo()) == ProtocoloRN::$NA_RESTRITO){
-        $documento->hipoteseLegal = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
+        $documento->hipoteseLegal = new stdClass();
+        $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
+        // $documento->hipoteseLegal->nome = 'Nomee';
+        // $documento->hipoteseLegal->baseLegal = 'Base Legall';
       }
     
       $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
