@@ -1583,7 +1583,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                 if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) 
                         && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
                     
-                    $objInfraException->adicionarValidacao('Hipótese Legal do Documento Não Mapeada', $strAtributoValidacao);
+                    $objHipoteseLegalDTO = new HipoteseLegalDTO();
+                    $objHipoteseLegalDTO->setNumIdHipoteseLegal($objDocumentoDTO->getNumIdHipoteseLegalProtocolo());
+                    $objHipoteseLegalDTO->retStrNome();
+                    $objHipoteseLegalRN = new HipoteseLegalRN();
+                    $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+                    
+                    $objInfraException->adicionarValidacao('Hipótese Legal "'.$dados->getStrNome().'" do Documento Não foi Mapeada', $strAtributoValidacao);
                 }
             }
         }
