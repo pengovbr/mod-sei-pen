@@ -581,12 +581,19 @@ class ReceberProcedimentoRN extends InfraRN
     
     if($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
         $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal->identificacao);
-        if (empty($numIdHipoteseLegal)) {
-            $objPenParametroRN = new PenParametroRN();
-            $objProtocoloDTO->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+        $objPenParametroRN = new PenParametroRN();
+        $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+        
+        if (!isset($objProcesso->hipoteseLegal) || (isset($objProcesso->hipoteseLegal) && empty($objProcesso->hipoteseLegal->identificacao))) {
+            $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
         } else {
-            $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+            
+            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal->identificacao);
+            if (empty($numIdHipoteseLegal)) {
+                $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+            } else {
+                $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+            }
         }
     }
     
@@ -1117,12 +1124,19 @@ class ReceberProcedimentoRN extends InfraRN
           
           if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
             $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal->identificacao);
-            if (empty($numIdHipoteseLegal)) {
-                $objPenParametroRN = new PenParametroRN();
-                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO'));
+            $objPenParametroRN = new PenParametroRN();
+            $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+
+            if (!isset($objDocumento->hipoteseLegal) || (isset($objDocumento->hipoteseLegal) && empty($objDocumento->hipoteseLegal->identificacao))) {
+                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
             } else {
-                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
+                
+                $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal->identificacao);
+                if (empty($numIdHipoteseLegal)) {
+                    $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+                } else {
+                    $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
+                }
             }
           }
           
