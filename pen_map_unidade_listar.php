@@ -117,38 +117,41 @@ try {
     //--------------------------------------------------------------------------
   
     $arrComandos = array();
-    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton">Pesquisar</button>';
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton">Novo</button>';
+    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
     //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
     //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton">Excluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton">Imprimir</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
     //--------------------------------------------------------------------------
     // DTO de paginao
-    
     $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
-    $objPenUnidadeDTOFiltro->retTodos();
+    $objPenUnidadeDTOFiltro->retStrSigla();
+    $objPenUnidadeDTOFiltro->retStrDescricao();
+    $objPenUnidadeDTOFiltro->retNumIdUnidade();
+    $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
     
     //--------------------------------------------------------------------------
     // Filtragem 
-    if(array_key_exists('id_unidade_rh', $_POST) && (!empty($_POST['id_unidade_rh']) && $_POST['id_unidade_rh'] !== 'null')) {
-        $objPenUnidadeDTOFiltro->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+    if(array_key_exists('sigla', $_POST) && (!empty($_POST['sigla']) && $_POST['sigla'] !== 'null')) {
+        $objPenUnidadeDTOFiltro->setStrSigla('%'.$_POST['sigla'].'%', InfraDTO::$OPER_LIKE);
     }
     
-    if(array_key_exists('id_unidade', $_POST) && (!empty($_POST['id_unidade']) && $_POST['id_unidade_rh'] !== 'null')) {
-        $objPenUnidadeDTOFiltro->setNumIdUnidade($_POST['id_unidade']);
+    if(array_key_exists('descricao', $_POST) && (!empty($_POST['descricao']) && $_POST['descricao'] !== 'null')) {
+        $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['descricao'].'%', InfraDTO::$OPER_LIKE);
     } 
     
     $objFiltroDTO = clone $objPenUnidadeDTOFiltro;
     
-    if(!$objFiltroDTO->isSetNumIdUnidadeRH()) {
-        $objFiltroDTO->setNumIdUnidadeRH('');   
+    if(!$objFiltroDTO->isSetStrSigla()) {
+        $objFiltroDTO->setStrSigla('');   
     }
 
-    if(!$objFiltroDTO->isSetNumIdUnidade()) {
-        $objFiltroDTO->setNumIdUnidade('');
+    if(!$objFiltroDTO->isSetStrDescricao()) {
+        $objFiltroDTO->setStrDescricao('');
     }
+    
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);
     
@@ -161,7 +164,6 @@ try {
     $objPenUnidadeRN = new PenUnidadeRN();
     $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidade', 'IdUnidade');
     $arrMapIdUnidadeRH = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidadeRH', 'IdUnidadeRH');
-    
     
     $objPagina->prepararPaginacao($objPenUnidadeDTOFiltro);
     $arrObjPenUnidadeDTO = $objGenericoBD->listar($objPenUnidadeDTOFiltro);
@@ -190,19 +192,12 @@ try {
         foreach($arrObjPenUnidadeDTO as $objPenUnidadeDTO) {
             $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
             
-            $objPenUnidadeSiglaDTO = new UnidadeDTO();
-            $objPenUnidadeSiglaDTO->setNumIdUnidade($objPenUnidadeDTO->getNumIdUnidade());
-            $objPenUnidadeSiglaDTO->retTodos();
-
-            $objPenUnidadeRN = new UnidadeRN();
-            $objResultadoSigla = $objGenericoBD->consultar($objPenUnidadeSiglaDTO);
-            
             $strResultado .= '<tr class="'.$strCssTr.'">';
             $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
             $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
             $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
-            $strResultado .= '<td>'.$objResultadoSigla->getStrSigla().'</td>';
-            $strResultado .= '<td>'.$objResultadoSigla->getStrDescricao().'</td>';
+            $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
+            $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
             $strResultado .= '<td align="center">';
             
             //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
@@ -357,15 +352,11 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     <?php //$objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('40px'); ?>
         
-        <label for="id_unidade" class="infraLabelObrigatorio input-label-first">Unidade:</label>
-        <select name="id_unidade" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
-        </select>
+        <label for="sigla" class="infraLabelObrigatorio input-label-first">Sigla:</label>
+        <input type="text" class="input-field-first" name="sigla" value="<?php echo (isset($_POST['sigla']) ? $_POST['sigla'] : ''); ?>">
         
-        <label for="id_unidade_rh" class="infraLabelObrigatorio input-label-second">Unidade RH</label>
-        <select name="id_unidade_rh" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdUnidadeRH(),  $arrMapIdUnidadeRH); ?>
-        </select> 
+        <label for="descricao" class="infraLabelObrigatorio input-label-second">Descrição:</label>
+        <input type="text" class="input-field-second" name="descricao" value="<?php echo (isset($_POST['descricao']) ? $_POST['descricao'] : ''); ?>">
         
         
     <?php $objPagina->fecharAreaDados(); ?>

@@ -4,7 +4,6 @@
  * @author Join Tecnologia (Thiago Farias)
  * Construção e moldura do arquivo, equivalente a exemplos já existentes no sistema.
  */
-
 require_once dirname(__FILE__) . '/../../SEI.php';
 
 session_start();
@@ -32,7 +31,7 @@ try {
     switch ($_GET['acao']) {
         case PEN_RECURSO_BASE.'_cadastrar':
             $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton">Cancelar</button>';   
+            $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
                         
             if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
                 $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
@@ -131,9 +130,12 @@ try {
             
     $objUnidadeDTO->retNumIdUnidade();
     $objUnidadeDTO->retStrSigla();
-
+    $objUnidadeDTO->retStrDescricao();
+    $arrMapIdUnidade = array();
     $objPenUnidadeRN = new PenUnidadeRN();
-    $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objUnidadeDTO), 'Sigla', 'IdUnidade');
+    foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
+        $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
+    }
 } 
 catch (InfraException $e) {   
     $objPagina->processarExcecao($e);
@@ -174,16 +176,16 @@ function onSubmit() {
     var form = jQuery('#<?php print PEN_RECURSO_BASE; ?>_form');
     var field = jQuery('select[name=id_unidade]', form);
     
-    if(field.val() === 'null'){
-        alert('Nenhuma "Unidade" foi selecionada');
+    if(field.val() === 'null' || field.val() == ''){
+        alert('Nenhuma "Unidades - SEI Anatel" foi selecionada');
         field.focus();
         return false;
     }
    
-    field = jQuery('select[name=id_unidade_rh]', form);
+    field = jQuery('#selUnidadeRh', form);
     
-    if(field.val() === 'null'){
-        alert('Nenhum "Unidade RH" foi selecionada');
+    if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
+        alert('Nenhum "ID da Unidade - PEN" foi selecionada');
         field.focus();
         return false;
     }  
@@ -200,7 +202,7 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('12em'); ?>
     
     <div>
-        <label for="id_unidade" class="infraLabelObrigatorio">Unidade:</label>
+        <label for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI Anatel:</label>
 
         <select name="id_unidade" class="input-field-first" >
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
@@ -208,7 +210,7 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
     </div><br><br><br>
 
     <div class="infraAreaDados">
-        <label for="selUnidadeRh" class="infraLabelObrigatorio">Unidade RH:</label> <br>
+        <label for="selUnidadeRh" class="infraLabelObrigatorio">ID da Unidade - PEN:</label> <br>
         <input type="number" id="selUnidadeRh" value="<?php echo $objPenUnidadeDTO->getNumIdUnidadeRH(); ?>" name="id_unidade_rh" class="infraText"/> 
     </div>
     
