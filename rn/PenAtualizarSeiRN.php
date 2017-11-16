@@ -1020,7 +1020,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objHipoteseLegalDTO->retNumIdHipoteseLegal();
         $objHipoteseLegalDTO->retStrNome();
 
-        $objHipoteseLegalBD = new HipoteseLegalBD($this->inicializarObjInfraIBanco());
+     /*   $objHipoteseLegalBD = new HipoteseLegalBD($this->inicializarObjInfraIBanco());
         $arrMapIdHipoteseLegal = InfraArray::converterArrInfraDTO($objHipoteseLegalBD->listar($objHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
         
         if(!empty($arrMapIdHipoteseLegal)) {
@@ -1045,7 +1045,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 
                 $fnCadastrar($numIdHipoteseLegal, $strNome);
             }
-        }
+        }*/
         
         $objMetaBD = $this->inicializarObjMetaBanco();
 

@@ -177,7 +177,7 @@ function onSubmit() {
     var field = jQuery('select[name=id_unidade]', form);
     
     if(field.val() === 'null' || field.val() == ''){
-        alert('Nenhuma "Unidades - SEI Anatel" foi selecionada');
+        alert('Nenhuma "Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>" foi selecionada');
         field.focus();
         return false;
     }
@@ -202,7 +202,7 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('12em'); ?>
     
     <div>
-        <label for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI Anatel:</label>
+        <label for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
 
         <select name="id_unidade" class="input-field-first" >
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
