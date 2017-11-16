@@ -134,11 +134,20 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
     $objPagina->montarBarraComandosSuperior($arrComandos);
     foreach ($retParametros as $parametro) {
         
-        //Constroi o label
-        ?> <label id="lbl<?php echo $parametro->getStrNome(); ?>" for="txt<?php echo $parametro->getStrNome(); ?>" accesskey="N" class="infraLabelObrigatorio"><?php echo $parametro->getStrDescricao(); ?>:</label><br> <?php
+        //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
+        if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
+            //Constroi o label
+            ?> <label id="lbl<?php echo $parametro->getStrNome(); ?>" for="txt<?php echo $parametro->getStrNome(); ?>" accesskey="N" class="infraLabelObrigatorio"><?php echo $parametro->getStrDescricao(); ?>:</label><br> <?php
+        }
         
         //Constroi o campo de valor
         switch ($parametro->getStrNome()) {
+            
+            //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
+            case 'HIPOTESE_LEGAL_PADRAO':
+                echo '';
+                break;
+            
             case 'PEN_SENHA_CERTIFICADO_DIGITAL':
                 echo '<input type="password" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';
                 break;

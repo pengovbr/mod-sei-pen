@@ -242,10 +242,10 @@ $objPagina->montarStyle();
 <style type="text/css">
 
 .input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:15%;width:25%}    
+.input-field-first{position:absolute;left:0%;top:50%;width:25%}    
 
 .input-label-second{position:absolute;left:30%;top:0%;width:25%; color: #666!important}
-.input-field-second{position:absolute;left:30%;top:15%;width:25%;}
+.input-field-second{position:absolute;left:30%;top:50%;width:25%;}
 
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
@@ -355,7 +355,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('12em'); ?>
+    <?php $objPagina->abrirAreaDados('40px'); ?>
         
         <label for="id_unidade" class="infraLabelObrigatorio input-label-first">Unidade:</label>
         <select name="id_unidade" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>

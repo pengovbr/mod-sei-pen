@@ -7,14 +7,6 @@
 class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     private $nomeParametroModulo = 'PEN_VERSAO_MODULO_SEI';
-//    private $versionFunctions = [
-//        '0' => [
-//            'instalarv100',
-//        ],
-//        '1.0.0' => [
-////            'instalarv101',
-//        ],
-//    ];
 
     public function __construct() {
         parent::__construct();
@@ -45,7 +37,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             //$strVersaoAtual = $objInfraParametro->getValor('SEI_VERSAO', false);
             $strVersaoModuloPen = $objInfraParametro->getValor($this->nomeParametroModulo, false);
-
+            
             //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
             if (InfraString::isBolVazia($strVersaoModuloPen)) {
                 //nao tem nenhuma versao ainda, instalar todas
@@ -86,6 +78,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTOCadastrado = $objBD->cadastrar($objDTO);
 
         return $objDTOCadastrado->getStrNome();
+    }
+    
+    /**
+     * Remove um parâmetro do infra_parametros
+     * @return string Nome do parâmetro
+     */
+    protected function deletaParametroInfra($strNome) {
+        $objDTO = new InfraParametroDTO();
+        $objDTO->setStrNome($strNome);
+
+        $objBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        return $objBD->excluir($objDTO);
     }
         
     /* Contem atualizações da versao 1.0.0 do modulo */
@@ -1109,6 +1113,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho Máximo de Documento Expedido');
         $this->criarParametro('PEN_TIPO_PROCESSO_EXTERNO', '100000320', 'Tipo de Processo Externo');
         $this->criarParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000001', 'Unidade Geradora de Processo e Documento Recebido');
+        
+        //Deleta os parâmetros do infra_parametros
+        $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE');
+        $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
+        $this->deletaParametroInfra('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
+        $this->deletaParametroInfra('PEN_ID_REPOSITORIO_ORIGEM');
+        $this->deletaParametroInfra('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+        $this->deletaParametroInfra('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO');
+        $this->deletaParametroInfra('PEN_SENHA_CERTIFICADO_DIGITAL');
+        $this->deletaParametroInfra('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+        $this->deletaParametroInfra('PEN_TIPO_PROCESSO_EXTERNO', '100000320');
+        $this->deletaParametroInfra('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
         
         //Alterar nomeclatura do recurso
         $objDTO = new PenParametroDTO();
