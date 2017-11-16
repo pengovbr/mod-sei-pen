@@ -24,23 +24,26 @@ class ProcessoEletronicoINT extends InfraINT {
      */
     private static function gerarHierarquiaEstruturas($estruturas = array()){
         
-        if(empty($estruturas)) {
+        if(empty($estruturas)) {            
             return $estruturas;
         }
         
-        foreach($estruturas as &$estrutura) {  
+        foreach($estruturas as &$estrutura) {                    
+            
             if($estrutura->isSetArrHierarquia()) {
-                 $siglas = $estrutura->getArrHierarquia();
-                 $nome  = $estrutura->getStrNome();
-                 $nome .= ' - ';
-                 $array = array($estrutura->getStrSigla());
-                 foreach($estrutura->getArrHierarquia() as $sigla) {
-                     if(trim($sigla) !== '' && !in_array($sigla, array('PR', 'UNIAO'))) {
-                         $array[] = $sigla;
-                     }
-                 }
-                 $nome .= implode(' / ', $array);
-                 $estrutura->setStrNome($nome);
+                $siglas = $estrutura->getArrHierarquia();                
+                $nome  = $estrutura->getStrNome();
+                $nome .= ' - ';
+                
+                $array = array($estrutura->getStrSigla());             
+                foreach($estrutura->getArrHierarquia() as $sigla) {
+                    if(trim($sigla) !== '' && !in_array($sigla, array('PR', 'PE', 'UNIAO'))) {
+                        $array[] = $sigla;
+                    }
+                }
+
+                $nome .= implode(' / ', $array);                
+                $estrutura->setStrNome($nome);
             }
         }
         
