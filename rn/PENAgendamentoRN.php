@@ -130,7 +130,7 @@ class PENAgendamentoRN extends InfraRN {
             $tramitePendenteBD = new TramiteBD($this->getObjInfraIBanco());
             $pendentes = $tramitePendenteBD->listar($tramitePendenteDTO);
 
-            
+
             if ($pendentes) {
 
                 //Instancia a RN de ProcessoEletronico
@@ -140,80 +140,75 @@ class PENAgendamentoRN extends InfraRN {
                 foreach ($pendentes as $tramite) {
                     $objTramite = $processoEletronicoRN->consultarTramites($tramite->getNumIdTramite());
                     $objTramite = $objTramite[0];
-                    
-                    if(isset($arrProtocolos[$objTramite->protocolo])){
-                        if($arrProtocolos[$objTramite->protocolo]['objTramite']->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE || $arrProtocolos[$objTramite->protocolo]['objTramite']->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO ){
+
+                    if (isset($arrProtocolos[$objTramite->protocolo])) {
+                        if ($arrProtocolos[$objTramite->protocolo]['objTramite']->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE || $arrProtocolos[$objTramite->protocolo]['objTramite']->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
                             $tramitePendenteBD->excluir($arrProtocolos[$objTramite->protocolo]['tramitePendente']);
                         }
-                        
                     }
-                            
+
                     $arrProtocolos[$objTramite->protocolo]['objTramite'] = $objTramite;
                     $arrProtocolos[$objTramite->protocolo]['tramitePendente'] = $tramite;
                 }
-                
 
-     
+
+
                 //Percorre as pendências
                 foreach ($arrProtocolos as $protocolo) {
 
-                        //Busca o status do trâmite
-                        $tramite = $protocolo['tramitePendente'];
-                        $objTramite = $protocolo['objTramite'];
-                        $status = $objTramite->situacaoAtual;
-                        
-                        if ($status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
-                            
-                            //Verifica se o processo do trâmite se encontra de fato recusado
-                            
-                            //Busca os dados do procedimento
-                            $processoEletronicoDTO = new ProcessoEletronicoDTO();
-                            $processoEletronicoDTO->setStrNumeroRegistro($objTramite->NRE);
-                            $processoEletronicoDTO->retDblIdProcedimento();
+                    //Busca o status do trâmite
+                    $tramite = $protocolo['tramitePendente'];
+                    $objTramite = $protocolo['objTramite'];
+                    $status = $objTramite->situacaoAtual;
 
-                            $processoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-                            $objProcessoEletronico = $processoEletronicoBD->consultar($processoEletronicoDTO);
- 
-                            if($objProcessoEletronico) {
-                                
-                                //Busca o processo 
-                                $objProtocolo = new PenProtocoloDTO();
-                                $objProtocolo->setDblIdProtocolo($objProcessoEletronico->getDblIdProcedimento());
-                               
-                                $protocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
-                                
-                                //Verifica se o protocolo foi encontrado nessa tabela
-                                if($protocoloBD->contar($objProtocolo) > 0){
-                                    
-                                    //Altera o registro
-                                    $objProtocolo->setStrSinObteveRecusa('S');
-                                    $protocoloBD->alterar($objProtocolo);
-                                    
-                                    //Busca a unidade de destino
-                                    $atributoAndamentoDTO = new AtributoAndamentoDTO();
-                                    $atributoAndamentoDTO->setNumIdAtividade($tramite->getNumIdAtividade());
-                                    $atributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
-                                    $atributoAndamentoDTO->retStrValor();
+                    if ($status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
 
-                                    $atributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
-                                    $atributoAndamento = $atributoAndamentoBD->consultar($atributoAndamentoDTO);
+                        //Verifica se o processo do trâmite se encontra de fato recusado
+                        //Busca os dados do procedimento
+                        $processoEletronicoDTO = new ProcessoEletronicoDTO();
+                        $processoEletronicoDTO->setStrNumeroRegistro($objTramite->NRE);
+                        $processoEletronicoDTO->retDblIdProcedimento();
 
-                                    $motivo = $objTramite->motivoDaRecusa;
-                                    $unidadeDestino = $atributoAndamento->getStrValor();
+                        $processoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+                        $objProcessoEletronico = $processoEletronicoBD->consultar($processoEletronicoDTO);
 
-                                    //Realiza o registro da recusa
-                                    ExpedirProcedimentoRN::receberRecusaProcedimento(ProcessoEletronicoRN::$MOTIVOS_RECUSA[$motivo], $unidadeDestino, null, $objProcessoEletronico->getDblIdProcedimento());
+                        if ($objProcessoEletronico) {
 
-                                    $tramitePendenteBD->excluir($tramite);
-                                }
-                                
+                            //Busca o processo 
+                            $objProtocolo = new PenProtocoloDTO();
+                            $objProtocolo->setDblIdProtocolo($objProcessoEletronico->getDblIdProcedimento());
 
-                             
+                            $protocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
+
+                            //Verifica se o protocolo foi encontrado nessa tabela
+                            if ($protocoloBD->contar($objProtocolo) > 0) {
+
+                                //Altera o registro
+                                $objProtocolo->setStrSinObteveRecusa('S');
+                                $protocoloBD->alterar($objProtocolo);
+
+                                //Busca a unidade de destino
+                                $atributoAndamentoDTO = new AtributoAndamentoDTO();
+                                $atributoAndamentoDTO->setNumIdAtividade($tramite->getNumIdAtividade());
+                                $atributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+                                $atributoAndamentoDTO->retStrValor();
+
+                                $atributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
+                                $atributoAndamento = $atributoAndamentoBD->consultar($atributoAndamentoDTO);
+
+                                $motivo = $objTramite->motivoDaRecusa;
+                                $unidadeDestino = $atributoAndamento->getStrValor();
+
+                                //Realiza o registro da recusa
+                                ExpedirProcedimentoRN::receberRecusaProcedimento(ProcessoEletronicoRN::$MOTIVOS_RECUSA[$motivo], $unidadeDestino, null, $objProcessoEletronico->getDblIdProcedimento());
+
+                                $tramitePendenteBD->excluir($tramite);
                             }
-                        }else if($status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE || $status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO){
-                            
-                            $tramitePendenteBD->excluir($tramite);
                         }
+                    } else if ($status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE || $status == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
+
+                        $tramitePendenteBD->excluir($tramite);
+                    }
                 }
             }
         } catch (Exception $e) {
@@ -224,7 +219,7 @@ class PENAgendamentoRN extends InfraRN {
             throw new InfraException('Erro na Verificação de Processos Recusados.', $e);
         }
     }
-    
+
     public function seiVerificarServicosBarramento() {
         try {
 
@@ -247,7 +242,7 @@ class PENAgendamentoRN extends InfraRN {
                 $cont++;
                 $servico[] = 'ProcessarPendenciasRN.php';
             }
-            
+
             $servicos = implode("\n", $servico);
 
 
@@ -264,53 +259,59 @@ class PENAgendamentoRN extends InfraRN {
             throw new InfraException('Erro ao rodar verificação de status do serviços Gearmand e Supervisord', $e);
         }
     }
-    
+
     /**
-     * Atualização das hipóteses legais vindas do barramento
+     * Atualiza??o das hip?teses legais vindas do barramento
      * @throws InfraException
      */
     public function atualizarHipotesesLegais() {
         $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
         $processoEletronicoRN = new ProcessoEletronicoRN();
         $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
-        
-        //Para cada hipótese vinda do PEN será verificado a existencia.
-        foreach ($hipotesesPen as $hipotese) {
+
+        //Para cada hip?tese vinda do PEN ser? verificado a existencia.
+        foreach ($hipotesesPen->hipotesesLegais->hipotese as $hipotese) {
+
             $objDTO = new PenHipoteseLegalDTO();
-            $objDTO->setNumIdentificacao($hipotese->hipotese->identificacao);      
+            $objDTO->setNumIdentificacao($hipotese->identificacao);
             $objDTO->setNumMaxRegistrosRetorno(1);
             $objDTO->retStrNome();
+            $objDTO->retNumIdHipoteseLegal();
             $objConsulta = $objBD->consultar($objDTO);
-            
-            //Caso não haja um nome para a hipótese legal, ele pula para a próxima.
-            if (empty($hipotese->hipotese->nome)) {
+
+            //Caso n?o haja um nome para a hip?tese legal, ele pula para a pr?xima.
+            if (empty($hipotese->nome)) {
                 continue;
             }
-            
-            $objDTO->setStrNome($hipotese->hipotese->nome);
-            
-            if ($hipotese->hipotese->status) {
+
+            $objDTO->setStrNome($hipotese->nome);
+
+            if ($hipotese->status) {
                 $objDTO->setStrAtivo('S');
             } else {
                 $objDTO->setStrAtivo('N');
             }
-            
-            //Caso não exista a hipótese irá cadastra-la no sei.
+
+            //Caso n?o exista a hip?tese ir? cadastra-la no sei.
             if (empty($objConsulta)) {
+
                 $objBD->cadastrar($objDTO);
             } else {
-                //Caso contrário apenas irá atualizar os dados.
+                //Caso contr?rio apenas ir? atualizar os dados.
+                $objDTO->setNumIdHipoteseLegal($objConsulta->getNumIdHipoteseLegal());
                 $objBD->alterar($objDTO);
             }
         }
-        
+
         try {
             LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.");
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
         }
     }
+
 }
+
 // $client = new GearmanClient();
 // $client->addServer('localhost', 4730);
 // $client->setCreatedCallback("create_change");
