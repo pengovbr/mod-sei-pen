@@ -22,7 +22,7 @@ $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['a
 try {
     
     $objSessaoSEI->validarLink();
-    $objSessaoSEI->validarPermissao('pen_map_tipo_doc_enviado_listar');
+    $objSessaoSEI->validarPermissao('pen_map_tipo_documento_envio_listar');
     
     $objBancoSEI = BancoSEI::getInstance();
     $objBancoSEI->abrirConexao();
@@ -81,7 +81,7 @@ try {
                 }
                 break;
                 
-            case 'pen_map_tipo_doc_enviado_listar':
+            case 'pen_map_tipo_documento_envio_listar':
                 // Ação padrão desta tela
                 break;
                 
@@ -157,16 +157,15 @@ try {
             $strResultado .= '<td>'.$objPenRelTipoDocMapEnviadoDTO->getStrNomeSerie().'</td>';
             $strResultado .= '<td align="center">';
             
-            $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
-            $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src="imagens/alterar.gif" title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
-            
-//            if($objPenRelTipoDocMapEnviadoDTO->getStrPadrao() == 'S'){
-//                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie()).'"><img src="imagens/plugin.png" title="Desativar '.$strTitulo.'" alt="Desativar '.$strTitulo.'" class="infraImg"></a>';
-//            }
-//            else {
-//                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie()).'"><img src="imagens/plugin_disabled.png" title="Ativar '.$strTitulo.'" alt="Ativar '.$strTitulo.'" class="infraImg"></a>';
-//            }
-            $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'\', this)"><img src="imagens/excluir.gif" title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+            if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_visualizar')) {
+                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+            }
+            if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_alterar')) {
+                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src="imagens/alterar.gif" title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+            }
+            if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_excluir')) {
+                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'\', this)"><img src="imagens/excluir.gif" title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+            }
             
             $strResultado .= '</td>';
             $strResultado .= '</tr>'."\n";
@@ -245,7 +244,7 @@ function onCLickLinkDelete(url, link) {
 
 function onClickBtnNovo(){
     
-    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
 }
 <?php /* ?>
 function onClickBtnAtivar(){
@@ -253,7 +252,7 @@ function onClickBtnAtivar(){
    try {
         
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_doc_enviado_listar'); ?>');
+        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -268,7 +267,7 @@ function onClickBtnDesativar(){
     try {
         
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_doc_enviado_listar'); ?>');
+        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -288,7 +287,7 @@ function onClickBtnExcluir(){
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
 
                 var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_doc_enviado_listar'); ?>');
+                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_enviado_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
                 form.submit();
             }
         }

@@ -1627,7 +1627,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
         $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
         $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
-        $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(ProcessoEletronicoRN::$MOTIVOS_RECUSA[$tramite->motivoDaRecusa]);
+        $objReceberTramiteRecusadoDTO->setStrMotivoRecusa($tramite->justificativaDaRecusa);
         $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
         
         //Faz o tratamento do processo e do trâmite recusado

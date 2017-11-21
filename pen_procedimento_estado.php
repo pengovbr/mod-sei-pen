@@ -228,6 +228,7 @@ try {
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
                 
+        $idCount = 1;
         foreach($arrAgruparProcedimentoAndamentoDTO as $key => $arrObjProcedimentoAndamentoDTO) {
             
             
@@ -237,7 +238,9 @@ try {
             
             
             $strResultado .= '<tr>';
-            $strResultado .= '<td valign="middle" colspan="2">'.$objReturn->strMensagem.'</td>';
+            $strResultado .= '<td valign="middle" colspan="2">'
+                . '<img class="imagPlus" align="absbottom" src="/infra_js/arvore/plus.gif" onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
+                . ''.$objReturn->strMensagem.'</td>';
             $strResultado .= '<td valign="middle" align="center">';
             
             // @join_tec US008.03 (#23092) | @join_tec US008.13 (#23092)
@@ -247,7 +250,7 @@ try {
             }
             // @join_tec US008.01 (#23092)
             if($objReturn->bolReciboExiste) {
-                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboRecebimento&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_green.png" alt="Recibo de Conclusão de Trâmite" title="Recibo de Conclusão de Trâmite" /></a>';                           
+                $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboRecebimento&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_green.png" alt="Recibo de Conclusão de Trâmite" title="Recibo de Conclusão de Trâmite" /></a>';
             }
             $strResultado .= '</td>';
             $strResultado .= '<tr>';
@@ -256,7 +259,7 @@ try {
             
                 $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
-                $strResultado .= '<tr class="'.$strCssTr.'">';
+                $strResultado .= '<tr class="'.$strCssTr.' extra_hidden_'.$idCount.'" style="display:none;">';
                 //$strResultado .= '<td>'.$objPaginaSEI->getTrCheck($i, $objProcedimentoAndamentoDTO->getDblIdAndamento(), '').'</td>';
                 $strResultado .= '<td align="center">'.$objProcedimentoAndamentoDTO->getDthData().'</td>';
                 $strResultado .= '<td>'.$objProcedimentoAndamentoDTO->getStrMensagem().'</td>';
@@ -274,6 +277,7 @@ try {
 
                 $i++;
             }
+            $idCount++;
         }
         $strResultado .= '</table>';
     }
@@ -307,6 +311,16 @@ function inicializar(){
   document.getElementById('txtTextoPesquisa').focus();
 
 }
+
+function toggleTr(number, obj) {
+    jQuery('.extra_hidden_'+number).toggle();
+    if (jQuery('.extra_hidden_'+number).is(':hidden')) {
+        jQuery(obj).attr('src', '/infra_js/arvore/plus.gif');
+    } else {
+        jQuery(obj).attr('src', '/infra_js/arvore/minus.gif');
+    }
+}
+
 
 function pesquisar(){
   document.getElementById('frmAcompanharEstadoProcesso').action='<?php print $objSessaoSEI->assinarLink($strProprioLink); ?>';

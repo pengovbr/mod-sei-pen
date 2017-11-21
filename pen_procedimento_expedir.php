@@ -161,9 +161,9 @@ try {
 
                 try {
                     $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
-                    //$objPaginaSEI->adicionarMensagem("Processo $strProtocoloProcedimentoFormatado expedido com sucesso.");
-                    //header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao='.$objPaginaSEI->getAcaoRetorno().'&acao_origem='.$_GET['acao'].$objPaginaSEI->montarAncora($numIdProcedimento)));
-                    //die;                    
+                    
+                    echo '<input type="button" onclick="javascript:window.close()" class="botao_fechar" value="Fechar" '
+                         . 'style="margin-left: 84%; margin-top: 4%;"/>'; //Botão para fechar a janela
                 } catch(\Exception $e) {                    
                     $objPaginaSEI->processarExcecao($e);
                 }
@@ -504,8 +504,6 @@ function enviarForm(el){
                     
                     strRespMensagem += "\n";
                 });
-               
-               
                 alert(strRespMensagem);
                 return false;
             }

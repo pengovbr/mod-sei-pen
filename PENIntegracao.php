@@ -118,6 +118,49 @@ class PENIntegracao extends SeiIntegracao {
 
         return $arrStrIcone;
     }
+    
+    public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP) {
+        $dblIdProcedimento = $objProcedimentoAP->getIdProcedimento();
+
+        $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+        $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+        $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+        $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+        $objArvoreAcaoItemAPI->setTitle('Um trâmite para esse processo foi recusado');
+        $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/pen_tramite_recusado.png');
+
+        $objArvoreAcaoItemAPI->setTarget(null);
+        $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi recusado\');');
+
+        $objArvoreAcaoItemAPI->setSinHabilitado('S');
+        
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objProcedimentoDTO->retDblIdProcedimento();
+        $objProcedimentoDTO->retStrStaEstadoProtocolo();
+        
+        $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
+        $arrObjProcedimentoDTO = $objProcedimentoBD->consultar($objProcedimentoDTO);
+        
+        if (!empty($arrObjProcedimentoDTO)) {
+            $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+            $objPenProtocoloDTO = new PenProtocoloDTO();
+            $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objPenProtocoloDTO->retStrSinObteveRecusa();
+            $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
+            $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+            $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+
+            if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+                $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
+            }
+        } else {
+            return array();
+        }
+
+        return $arrObjArvoreAcaoItemAPI;
+    }
 
     public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO) {
         
@@ -177,26 +220,26 @@ class PENIntegracao extends SeiIntegracao {
                 require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_enviado_listar':
+            case 'pen_map_tipo_documento_envio_listar':
             case 'pen_map_tipo_doc_enviado_excluir':
             case 'pen_map_tipo_doc_enviado_desativar':
             case 'pen_map_tipo_doc_enviado_ativar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_enviado_listar.php';
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_enviado_cadastrar':
+            case 'pen_map_tipo_documento_envio_cadastrar':
             case 'pen_map_tipo_doc_enviado_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_enviado_cadastrar.php';
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_recebido_listar':
+            case 'pen_map_tipo_documento_recebimento_listar':
             case 'pen_map_tipo_doc_recebido_excluir':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebido_listar.php';
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_recebido_cadastrar':
+            case 'pen_map_tipo_documento_recebimento_cadastrar':
             case 'pen_map_tipo_doc_recebido_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebido_cadastrar.php';
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
                 return true;
 
             case 'apensados_selecionar_expedir_procedimento':

@@ -259,22 +259,22 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $numIdItemMenuPai = $this->criarMenu('Envio', 10, $_numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
         
         // Gera o submenu Mapeamento > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_enviado_cadastrar', 'Cadastro de mapeamento de documentos enviados', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_envio_cadastrar', 'Cadastro de mapeamento de documentos enviados', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
         
         // Gera o submenu Mapeamento > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_enviado_listar', 'Listagem de mapeamento de documentos enviados', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_envio_listar', 'Listagem de mapeamento de documentos enviados', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
         
         // Gera o submenu Mapeamento > Recebimento
         $numIdItemMenuPai = $this->criarMenu('Recebimento', 20, $_numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
         
         // Gera o submenu Mapeamento > Recebimento > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_recebido_cadastrar', 'Cadastro de mapeamento de documentos recebidos', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_recebimento_cadastrar', 'Cadastro de mapeamento de documentos recebidos', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Gera o submenu Mapeamento > Recebimento > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_recebido_listar', 'Listagem de mapeamento de documentos recebidos', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_recebimento_listar', 'Listagem de mapeamento de documentos recebidos', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
               
         //Atribui as permissões aos recursos e menus

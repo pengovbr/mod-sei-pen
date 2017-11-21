@@ -582,21 +582,25 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
                 $this->instalarV101();
                 $this->instalarV102();
                 $this->instalarV103();
+                $this->instalarV104();
             } else {
                 switch ($strVersaoModuloPen) {
                     case '1.0.0':
                         $this->instalarV101();
                         $this->instalarV102();
                         $this->instalarV103();
+                        $this->instalarV104();
                         break;
 
                     case '1.0.1':
                         $this->instalarV102();
                         $this->instalarV103();
+                        $this->instalarV104();
                         break;
                     
                     case '1.0.2': //Remover depois de usar
                         $this->instalarV103();
+                        $this->instalarV104();
                         break;
                 }
             }
@@ -879,22 +883,22 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $numIdItemMenuPai = $this->criarMenu('Envio', 10, $_numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
 
         // Gera o submenu Mapeamento > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_enviado_cadastrar', 'Cadastro de mapeamento de documentos enviados', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_envio_cadastrar', 'Cadastro de mapeamento de documentos enviados', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Gera o submenu Mapeamento > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_enviado_listar', 'Listagem de mapeamento de documentos enviados', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_envio_listar', 'Listagem de mapeamento de documentos enviados', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Gera o submenu Mapeamento > Recebimento
         $numIdItemMenuPai = $this->criarMenu('Recebimento', 20, $_numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
 
         // Gera o submenu Mapeamento > Recebimento > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_recebido_cadastrar', 'Cadastro de mapeamento de documentos recebidos', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_recebimento_cadastrar', 'Cadastro de mapeamento de documentos recebidos', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Gera o submenu Mapeamento > Recebimento > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_tipo_doc_recebido_listar', 'Listagem de mapeamento de documentos recebidos', $numIdSistema);
+        $numIdRecurso = $this->criarRecurso('pen_map_tipo_documento_recebimento_listar', 'Listagem de mapeamento de documentos recebidos', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         //Atribui as permissões aos recursos e menus
@@ -1269,6 +1273,85 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.0.3');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+    
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.0.4
+     */
+    protected function instalarV104() {
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        
+        //Cadastrar recurso Mapeamento dos Tipo de documentos enviados
+        $this->criarRecurso('pen_map_tipo_documento_envio_alterar', 'Alteração de mapeamento de documentos enviados', $numIdSistema);
+        $this->criarRecurso('pen_map_tipo_documento_envio_excluir', 'Exclusão de mapeamento de documentos enviados', $numIdSistema);
+        
+        //Cadastrar recurso Mapeamento dos Tipo de documentos recebido
+        $this->criarRecurso('pen_map_tipo_documento_recebimento_alterar', 'Alteração de mapeamento de documentos recebimento', $numIdSistema);
+        $this->criarRecurso('pen_map_tipo_documento_recebimento_excluir', 'Exclusão de mapeamento de documentos recebimento', $numIdSistema);
+        $this->criarRecurso('pen_map_tipo_documento_recebimento_visualizar', 'Visualização de mapeamento de documentos recebimento', $numIdSistema);
+        
+        //Alterar nomeclatura do recurso (recebido)
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_tipo_doc_recebido_cadastrar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_tipo_documento_recebimento_cadastrar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_recebimento_cadastrar');
+            $objBD->alterar($objDTO);
+        }
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_tipo_doc_enviado_visualizar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_tipo_documento_envio_visualizar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_envio_visualizar');
+            $objBD->alterar($objDTO);
+        }
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_tipo_doc_recebido_listar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_tipo_documento_recebimento_listar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_recebimento_listar');
+            $objBD->alterar($objDTO);
+        }
+
+        //Alterar nomeclatura do recurso (envio)
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_tipo_doc_enviado_cadastrar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_tipo_documento_envio_cadastrar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar');
+            $objBD->alterar($objDTO);
+        }
+        $objDTO = new RecursoDTO();
+        $objDTO->setStrNome('pen_map_tipo_doc_enviado_listar');
+        $objDTO->retNumIdRecurso();
+        $objBD = new RecursoBD($this->getObjInfraIBanco());
+        $objDTO = $objBD->consultar($objDTO);
+        if ($objDTO) {
+            $objDTO->setStrNome('pen_map_tipo_documento_envio_listar');
+            $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_envio_listar');
+            $objBD->alterar($objDTO);
+        }
+        
+        /* altera o parâmetro da versão de banco */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.0.4');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

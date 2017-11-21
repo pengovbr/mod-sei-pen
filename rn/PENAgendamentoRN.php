@@ -254,7 +254,8 @@ class PENAgendamentoRN extends InfraRN {
 
             if ($cont > 0) {
                 $msg = "Falha na execução. \n Os seguintes serviços não estão rodando: \n $servicos";
-                LogSEI::getInstance()->gravar($msg);
+//                LogSEI::getInstance()->gravar();
+                throw new InfraException($msg, $e);
             } else {
                 LogSEI::getInstance()->gravar("Todos os serviços estão rodando.");
             }

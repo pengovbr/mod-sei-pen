@@ -25,26 +25,26 @@ class PENControlador implements ISeiControlador {
                 require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
                 return true;     
             
-            case 'pen_map_tipo_doc_enviado_listar':
+            case 'pen_map_tipo_documento_envio_listar':
             case 'pen_map_tipo_doc_enviado_excluir':
             case 'pen_map_tipo_doc_enviado_desativar':
             case 'pen_map_tipo_doc_enviado_ativar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_enviado_listar.php';
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
                 return true;
             
-            case 'pen_map_tipo_doc_enviado_cadastrar':
-            case 'pen_map_tipo_doc_enviado_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_enviado_cadastrar.php';
+            case 'pen_map_tipo_documento_envio_cadastrar':
+            case 'pen_map_tipo_documento_enviador_alterar':
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_recebido_listar':
-            case 'pen_map_tipo_doc_recebido_excluir':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebido_listar.php';
+            case 'pen_map_tipo_documento_recebimento_listar':
+            case 'pen_map_tipo_documento_recebimento_excluir':
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
                 return true;
 
-            case 'pen_map_tipo_doc_recebido_cadastrar':
-            case 'pen_map_tipo_doc_recebido_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebido_cadastrar.php';
+            case 'pen_map_tipo_documento_recebimento_cadastrar':
+            case 'pen_map_tipo_documento_recebimento_alterar':
+                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
                 return true;
                                 
             case 'apensados_selecionar_expedir_procedimento':
