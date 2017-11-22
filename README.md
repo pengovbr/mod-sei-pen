@@ -235,3 +235,14 @@ Por padrão, as funcionalidades (recursos) criados pelo módulo não são atribu
 
 Sugerimos que seja criado um novo perfil de usuário que receberá as permissões aos novos recursos incluidos pelo módulo (pen_*). Este novo perfil deverá ser atribuído aos usuários que podem realizar o trâmite externo de processos para outras instituições.
 
+Sugestão:
+20.1) Criar o novo perfil "Trâmite Externo de Processos" e atribuir os seguintes recursos:
+- pen_procedimento_expedir
+- pen_procedimento_expedido_listar
+
+20.2) Adicionar os seguintes recursos ao perfil "Administrador"
+- pen_map_tipo_doc_recebido_listar
+- pen_map_tipo_doc_recebido_cadastrar
+- pen_map_tipo_doc_enviado_visualizar
+- pen_map_tipo_doc_enviado_listar
+- pen_map_tipo_doc_enviado_cadastrar
