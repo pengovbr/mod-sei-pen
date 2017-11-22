@@ -264,4 +264,3 @@ Sugerimos a configuração dos seguintes recursos no perfil ADMINISTRADOR:
 * pen_map_unidade_listar  
 * pen_parametros_configuracao 
 * pen_parametros_configuracao_alterar 
-
