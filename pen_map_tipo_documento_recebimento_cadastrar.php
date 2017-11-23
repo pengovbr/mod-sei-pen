@@ -36,7 +36,7 @@ try {
             }
             break;
         
-        case 'pen_map_tipo_doc_recebido_visualizar':
+        case 'pen_map_tipo_documento_recebimento_visualizar':
             $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
             $bolSomenteLeitura = true;
             $strTitulo = 'Consultar Mapeamento de Recebimento';           

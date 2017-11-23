@@ -233,7 +233,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         //----------------------------------------------------------------------
         // Mapeamento de documentos enviados 
         //----------------------------------------------------------------------
-        $this->criarRecurso('pen_map_tipo_doc_enviado_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
+        $this->criarRecurso('pen_map_tipo_documento_envio_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
         
         // Acha o menu existente de Tipos de Documento
         $objItemMenuDTO = new ItemMenuDTO();

@@ -26,9 +26,9 @@ class PENControlador implements ISeiControlador {
                 return true;     
             
             case 'pen_map_tipo_documento_envio_listar':
-            case 'pen_map_tipo_doc_enviado_excluir':
-            case 'pen_map_tipo_doc_enviado_desativar':
-            case 'pen_map_tipo_doc_enviado_ativar':
+            case 'pen_map_tipo_documento_envio_excluir':
+            case 'pen_map_tipo_documento_envio_desativar':
+            case 'pen_map_tipo_documento_envio_ativar':
                 require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
                 return true;
             

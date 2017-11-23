@@ -857,7 +857,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         //----------------------------------------------------------------------
         // Mapeamento de documentos enviados 
         //----------------------------------------------------------------------
-        $this->criarRecurso('pen_map_tipo_doc_enviado_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
+        $this->criarRecurso('pen_map_tipo_documento_envio_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
 
         // Acha o menu existente de Tipos de Documento
         $objItemMenuDTO = new ItemMenuDTO();
@@ -1303,7 +1303,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             $objBD->alterar($objDTO);
         }
         $objDTO = new RecursoDTO();
-        $objDTO->setStrNome('pen_map_tipo_doc_enviado_visualizar');
+        $objDTO->setStrNome('pen_map_tipo_documento_envio_visualizar');
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -1325,7 +1325,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
         //Alterar nomeclatura do recurso (envio)
         $objDTO = new RecursoDTO();
-        $objDTO->setStrNome('pen_map_tipo_doc_enviado_cadastrar');
+        $objDTO->setStrNome('pen_map_tipo_documento_envio_cadastrar');
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -1335,7 +1335,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             $objBD->alterar($objDTO);
         }
         $objDTO = new RecursoDTO();
-        $objDTO->setStrNome('pen_map_tipo_doc_enviado_listar');
+        $objDTO->setStrNome('pen_map_tipo_documento_envio_listar');
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
