@@ -52,7 +52,7 @@ try {
                 }
                 break;
             
-            case pen_map_tipo_documento_envio_desativar':
+            case 'pen_map_tipo_documento_envio_desativar':
                 
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
@@ -69,7 +69,7 @@ try {
                 }
                 break;
                 
-            case pen_map_tipo_documento_envio_ativar':
+            case 'pen_map_tipo_documento_envio_ativar':
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
                     PenRelTipoDocMapEnviadoRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
