@@ -58,7 +58,7 @@ class ProcessoEletronicoRN extends InfraRN {
   /**
    * Espécie documentoal não mapeada
    */
-  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
+  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '03';
   
   /**
    * Motivo para recusar de tramite de componente digital
