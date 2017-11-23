@@ -602,6 +602,9 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
                         $this->instalarV103();
                         $this->instalarV104();
                         break;
+                    case '1.0.3': //Remover depois de usar
+                        $this->instalarV104();
+                        break;
                 }
             }
 
