@@ -307,7 +307,7 @@ class PENIntegracao extends SeiIntegracao {
                 if (count($arrObjEstruturaDTO) > 0) {
                     $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
                 } else {
-                    throw new InfraException("Unidade não Encontrada.", $e);
+                    return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
                 }
                 break;
 

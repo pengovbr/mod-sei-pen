@@ -328,6 +328,15 @@ function selecionarUrgencia()
     }
 }
 
+//Caso não tenha unidade encontrada
+$(document).ready(function() {
+    $(document).on('click', '#txtUnidade', function() {
+        if ($(this).val() == "Unidade não Encontrada.") {
+            $(this).val('');
+        }
+    });
+});
+
 function selecionarRepositorio()
 {
     var txtUnidade = $('#txtUnidade');
