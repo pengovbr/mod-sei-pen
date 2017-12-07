@@ -17,7 +17,7 @@ $objInfraException = new InfraException();
 
 
 try {
-
+    
     if(!array_key_exists('id_procedimento', $_GET) || empty($_GET['id_procedimento'])) {
         throw new InfraException('Nenhum procedimento foi informado', 'Desconhecido');
     }
@@ -34,6 +34,35 @@ try {
     // Utilizamos o protocolo para criar um indice para separar os erros entre o
     // processo e os seus processos apensados
     $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+    
+    $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+     
+    //Consulta do ID Pai
+    $objRelProtocoloProtocoloDTO1 = new RelProtocoloProtocoloDTO();
+    $objRelProtocoloProtocoloDTO1->setDblIdProtocolo1($dblIdProcedimento);
+    $objRelProtocoloProtocoloDTO1->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+    $objRelProtocoloProtocoloDTO1->retDblIdProtocolo1();
+    
+    //Consulta do ID Filhos
+    $objRelProtocoloProtocoloDTO2 = new RelProtocoloProtocoloDTO();
+    $objRelProtocoloProtocoloDTO2->setDblIdProtocolo2($dblIdProcedimento);
+    $objRelProtocoloProtocoloDTO2->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+    $objRelProtocoloProtocoloDTO2->retDblIdProtocolo2();
+    
+    $numCount1 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO1);
+    $numCount2 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO2);
+    
+    if ($numCount1 > 0 && $numCount2 > 0) {
+            $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo e possui outros em anexo, portanto não pode ser tramitado.', $strProtocoloFormatado);    
+    } else {
+        if ($numCount1 > 0) {
+            $objInfraException->adicionarValidacao('Esse processo possuí outros em anexo, portanto não pode ser tramitado externamente.', $strProtocoloFormatado);
+        }
+
+        if ($numCount2 > 0) {
+            $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo, portanto não pode ser tramitado.', $strProtocoloFormatado);
+        }
+    }
        
     if(!array_key_exists('txtProtocoloExibir', $_POST) || empty($_POST['txtProtocoloExibir'])) {
         $objInfraException->adicionarValidacao('Informe o Protocolo', $strProtocoloFormatado);

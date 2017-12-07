@@ -108,7 +108,6 @@ class PenTramiteProcessadoRN extends InfraRN {
         $objDTO = $objBD->consultar($objDTO);
 
         if(empty($objDTO)) {
-            
             throw new InfraException(sprintf('ID do tramite %s não foi localizado', $dblIdTramite));
         }
 

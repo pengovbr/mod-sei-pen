@@ -892,7 +892,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Identificação do documento
       $this->atribuirNumeracaoDocumento($documento, $documentoDTO);
 
-      
       if($documento->retirado === true){
           
           $penComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -915,13 +914,22 @@ class ExpedirProcedimentoRN extends InfraRN {
               $documento->componenteDigital->tipoDeConteudo = $componenteDigital->getStrTipoConteudo();
               $documento->componenteDigital->idAnexo = $componenteDigital->getNumIdAnexo();
               
+              
+              
+              // -------------------------- INICIO DA TAREFA US074 -------------------------------//
+              $documento = $this->atribuirDadosAssinaturaDigital($documentoDTO, $documento, $componenteDigital->getStrHashConteudo());
+              // -------------------------- FIM TAREFA US074 -------------------------------//
+              
+              
               if($componenteDigital->getStrMimeType() == 'outro'){
                   $documento->componenteDigital->dadosComplementaresDoTipoDeArquivo = 'outro';
               }
               
           }else{
               $this->atribuirComponentesDigitais($documento, $documentoDTO);
+              
           }
+          
           
       }else{
         $this->atribuirComponentesDigitais($documento, $documentoDTO);
@@ -1021,6 +1029,13 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objDocumento->componenteDigital->mimeType = $arrInformacaoArquivo['MIME_TYPE'];
     $objDocumento->componenteDigital->tipoDeConteudo = $this->obterTipoDeConteudo($arrInformacaoArquivo['MIME_TYPE']);
     
+    
+    // -------------------------- INICIO DA TAREFA US074 -------------------------------/
+
+    $objDocumento = $this->atribuirDadosAssinaturaDigital($objDocumentoDTO, $objDocumento, $hashDoComponenteDigital);
+    // -------------------------- FIM TAREFA US074 -------------------------------//
+    
+    
     if($arrInformacaoArquivo['MIME_TYPE'] == 'outro'){
         $objDocumento->componenteDigital->dadosComplementaresDoTipoDeArquivo = $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'];
     }
@@ -1035,12 +1050,82 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objDocumento->componenteDigital->idAnexo = $arrInformacaoArquivo['ID_ANEXO'];
     return $objDocumento;
   }
+  
+    public function atribuirDadosAssinaturaDigital($objDocumentoDTO, $objDocumento, $strHashDocumento) {
+        //Busca as Tarjas
+        $objDocumentoDTOTarjas = new DocumentoDTO();
+        $objDocumentoDTOTarjas->retDblIdDocumento();
+        $objDocumentoDTOTarjas->retStrNomeSerie();
+        $objDocumentoDTOTarjas->retStrProtocoloDocumentoFormatado();
+        $objDocumentoDTOTarjas->retStrProtocoloProcedimentoFormatado();
+        $objDocumentoDTOTarjas->retStrCrcAssinatura();
+        $objDocumentoDTOTarjas->retStrQrCodeAssinatura();
+        $objDocumentoDTOTarjas->retObjPublicacaoDTO();
+        $objDocumentoDTOTarjas->retNumIdConjuntoEstilos();
+        $objDocumentoDTOTarjas->retStrSinBloqueado();
+        $objDocumentoDTOTarjas->retStrStaDocumento();
+        $objDocumentoDTOTarjas->retStrStaProtocoloProtocolo();
+        $objDocumentoDTOTarjas->retNumIdUnidadeGeradoraProtocolo();
+        $objDocumentoDTOTarjas->retStrDescricaoTipoConferencia();
+        $objDocumentoDTOTarjas->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objDocumentoRN = new DocumentoRN();
+        $objDocumentoDTOTarjas = $objDocumentoRN->consultarRN0005($objDocumentoDTOTarjas);
+        $objAssinaturaRN = new AssinaturaRN();
+        $tarjas = $objAssinaturaRN->montarTarjas($objDocumentoDTOTarjas); 
+
+
+        //Remove todos os 12 espaços padrões após remover as tags.
+        $dataTarjas = explode('            ', strip_tags($tarjas));
+        foreach ($dataTarjas as $key => $content) {
+            $contentTrim = trim($content); //Limpa os espaços no inicio e fim de cada texto.
+            if (empty($contentTrim)) {
+               unset($dataTarjas[$key]);
+            } else {
+                $dataTarjas[$key] = html_entity_decode($contentTrim); //Decodifica por causa do strip_tags
+            }
+        }
+
+        $dataTarjas = array_values($dataTarjas); //Reseta os valores da array
+
+        //Busca data da assinatura
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ASSINATURA_DOCUMENTO);
+        $objAtividadeDTO->retDthAbertura();
+        $objAtividadeDTO->retNumIdAtividade();
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividade = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+        $objDocumento->componenteDigital->assinaturaDigital = array();
+        //Para cada assinatura
+        foreach ($objAtividade as $keyOrder => $atividade) {
+
+            //Busca outros dados da assinatura
+            $objAssinaturaDTO = new AssinaturaDTO();
+            $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+            $objAssinaturaDTO->setNumIdAtividade($atividade->getNumIdAtividade());
+            $objAssinaturaDTO->retStrP7sBase64();
+            $objAssinaturaRN = new AssinaturaRN();
+            $objAssinatura = $objAssinaturaRN->consultarRN1322($objAssinaturaDTO);
+
+            $objAssinaturaDigital = new stdClass();
+
+            $objAssinaturaDigital->dataHora = $this->objProcessoEletronicoRN->converterDataWebService($atividade->getDthAbertura()); 
+           
+            $objAssinaturaDigital->hash =  new SoapVar("<hash algoritmo='".self::ALGORITMO_HASH_ASSINATURA."'>{$strHashDocumento}</hash>", XSD_ANYXML);
+            $objAssinaturaDigital->cadeiaDoCertificado = new SoapVar('<cadeiaDoCertificado formato="PKCS7">'.($objAssinatura->getStrP7sBase64() ? $objAssinatura->getStrP7sBase64() : 'null').'</cadeiaDoCertificado>', XSD_ANYXML);
+            $objAssinaturaDigital->razao = utf8_encode($dataTarjas[$keyOrder]); 
+            $objAssinaturaDigital->observacao = utf8_encode($dataTarjas[count($dataTarjas) - 1]); 
+        
+            $objDocumento->componenteDigital->assinaturaDigital[] = $objAssinaturaDigital;    
+        }
+        
+        return $objDocumento;
+    }
 
   private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO)
   {
       
-
-
     if(!isset($objDocumentoDTO)){
       throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
     }
