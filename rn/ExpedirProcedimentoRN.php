@@ -1015,7 +1015,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         //TODO: Revisar tal implementação para atender a geração de hash de arquivos grandes
     $strAlgoritmoHash = self::ALGORITMO_HASH_DOCUMENTO;
     $strConteudoAssinatura = $arrInformacaoArquivo['CONTEUDO'];
-        $hashDoComponenteDigital = hash($strAlgoritmoHash, $strConteudoAssinatura, true);
+    $hashDoComponenteDigital = hash($strAlgoritmoHash, $strConteudoAssinatura, true);
     $hashDoComponenteDigital = base64_encode($hashDoComponenteDigital);
         
     $objDocumento->componenteDigital = new stdClass();
@@ -1031,7 +1031,6 @@ class ExpedirProcedimentoRN extends InfraRN {
     
     
     // -------------------------- INICIO DA TAREFA US074 -------------------------------/
-
     $objDocumento = $this->atribuirDadosAssinaturaDigital($objDocumentoDTO, $objDocumento, $hashDoComponenteDigital);
     // -------------------------- FIM TAREFA US074 -------------------------------//
     
@@ -1052,6 +1051,8 @@ class ExpedirProcedimentoRN extends InfraRN {
   }
   
     public function atribuirDadosAssinaturaDigital($objDocumentoDTO, $objDocumento, $strHashDocumento) {
+        
+        
         //Busca as Tarjas
         $objDocumentoDTOTarjas = new DocumentoDTO();
         $objDocumentoDTOTarjas->retDblIdDocumento();
@@ -1087,38 +1088,38 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $dataTarjas = array_values($dataTarjas); //Reseta os valores da array
 
-        //Busca data da assinatura
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
-        $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ASSINATURA_DOCUMENTO);
-        $objAtividadeDTO->retDthAbertura();
-        $objAtividadeDTO->retNumIdAtividade();
-        $objAtividadeRN = new AtividadeRN();
-        $objAtividade = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objAssinaturaDTO->retNumIdAtividade();
+        $objAssinaturaDTO->retStrP7sBase64();
+        $objAssinaturaRN = new AssinaturaRN();
+        $resAssinatura = $objAssinaturaRN->listarRN1323($objAssinaturaDTO);
+        
 
         $objDocumento->componenteDigital->assinaturaDigital = array();
         //Para cada assinatura
-        foreach ($objAtividade as $keyOrder => $atividade) {
-
-            //Busca outros dados da assinatura
-            $objAssinaturaDTO = new AssinaturaDTO();
-            $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
-            $objAssinaturaDTO->setNumIdAtividade($atividade->getNumIdAtividade());
-            $objAssinaturaDTO->retStrP7sBase64();
-            $objAssinaturaRN = new AssinaturaRN();
-            $objAssinatura = $objAssinaturaRN->consultarRN1322($objAssinaturaDTO);
-
+        foreach ($resAssinatura as $keyOrder => $assinatura) {
+            
+            //Busca data da assinatura
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade());
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ASSINATURA_DOCUMENTO);
+            $objAtividadeDTO->retDthAbertura();
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividade = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+            
             $objAssinaturaDigital = new stdClass();
-
-            $objAssinaturaDigital->dataHora = $this->objProcessoEletronicoRN->converterDataWebService($atividade->getDthAbertura()); 
-           
+            $objAssinaturaDigital->dataHora = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());
             $objAssinaturaDigital->hash =  new SoapVar("<hash algoritmo='".self::ALGORITMO_HASH_ASSINATURA."'>{$strHashDocumento}</hash>", XSD_ANYXML);
-            $objAssinaturaDigital->cadeiaDoCertificado = new SoapVar('<cadeiaDoCertificado formato="PKCS7">'.($objAssinatura->getStrP7sBase64() ? $objAssinatura->getStrP7sBase64() : 'null').'</cadeiaDoCertificado>', XSD_ANYXML);
-            $objAssinaturaDigital->razao = utf8_encode($dataTarjas[$keyOrder]); 
-            $objAssinaturaDigital->observacao = utf8_encode($dataTarjas[count($dataTarjas) - 1]); 
+            $objAssinaturaDigital->cadeiaDoCertificado = new SoapVar('<cadeiaDoCertificado formato="PKCS7">'.($assinatura->getStrP7sBase64() ? $assinatura->getStrP7sBase64() : 'null').'</cadeiaDoCertificado>', XSD_ANYXML);
+            $objAssinaturaDigital->razao = utf8_encode($dataTarjas[$keyOrder]);
+            $objAssinaturaDigital->observacao = utf8_encode($dataTarjas[count($dataTarjas) - 1]);
         
             $objDocumento->componenteDigital->assinaturaDigital[] = $objAssinaturaDigital;    
         }
+        
+        
         
         return $objDocumento;
     }
