@@ -1651,7 +1651,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
             
             foreach($arrDocumentoDTO as $objDocumentoDTO) {
-                
                 $objDocMapDTO->unSetTodos();
                 $objDocMapDTO->setNumIdSerie($objDocumentoDTO->getNumIdSerie());
                 
@@ -1675,7 +1674,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $objHipoteseLegalRN = new HipoteseLegalRN();
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
                     
-                    $objInfraException->adicionarValidacao('Hipótese Legal "'.$dados->getStrNome().'" do Documento Não foi Mapeada', $strAtributoValidacao);
+                    $objInfraException->adicionarValidacao('Hipótese Legal "'.$dados->getStrNome().'" do Documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' Não foi Mapeada', $strAtributoValidacao);
                 }
             }
         }
@@ -1723,7 +1722,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
                 $objInfraException->adicionarValidacao('Não é possível expedir processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
             }
-            
         }
     }
 
@@ -2309,10 +2307,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                 throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
                 break;
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
-                throw new InfraException("O processo já se encontra cancelado");
+                throw new InfraException("O trâmite externo para esse processo já se encontra cancelado.");
                 break;
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                throw new InfraException("O processo se encontra recusado");
+                throw new InfraException("O trâmite externo para esse processo se encontra recusado.");
                 break;
         }
 

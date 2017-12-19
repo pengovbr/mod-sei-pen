@@ -402,10 +402,13 @@ class ProcessoEletronicoRN extends InfraRN {
             //error_log("PARAMETROS:" . print_r($parametros, true));
       return $this->getObjPenWs()->enviarProcesso($parametros);                    
     } catch (\SoapFault $fault) {
-            //error_log("REQUEST:" . $this->getObjPenWs()->__getLastRequest());
-            //error_log("ERROR:" . print_r($fault, true));
-      $mensagem = $this->tratarFalhaWebService($fault);
-
+            
+        
+        if (!empty($fault->detail->interoperabilidadeException->codigoErro) && $fault->detail->interoperabilidadeException->codigoErro == '0005') {
+            $mensagem = 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+        } else {
+            $mensagem = $this->tratarFalhaWebService($fault);
+        }
             //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
             //relacionado ao a renderização de mensagens de erro na barra de progresso
       error_log($mensagem);

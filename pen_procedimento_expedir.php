@@ -99,7 +99,11 @@ try {
       
             $objUnidadeRN = new UnidadeRN();
             $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
+            
+            if (!$objUnidadeDTO) {
+                throw new InfraException("A unidade atual não foi mapeada.");
+            }
+            
             $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();                        
             $numIdProcedimento = $_POST['hdnIdProcedimento'];
             $strProtocoloProcedimentoFormatado = $_POST['txtProtocoloExibir'];

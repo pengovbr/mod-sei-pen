@@ -11,6 +11,8 @@ class ReceberProcedimentoRN extends InfraRN
   private $objInfraParametro;
   private $objProcedimentoAndamentoRN;
   private $documentosRetirados = array();
+  
+  public $destinatarioReal = null;
 
   public function __construct()
   {
@@ -90,9 +92,16 @@ class ReceberProcedimentoRN extends InfraRN
     if (!isset($parNumIdentificacaoTramite)) {
       throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
     }
-
+    
+    
     //TODO: Urgente: Verificar o status do trâmite e verificar se ele já foi salvo na base de dados
     $objMetadadosProcedimento = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
+    
+    //!Substituir a unidade destinatária para a receptora (!1!)
+    if (isset($objMetadadosProcedimento->metadados->unidadeReceptora)) {
+        $this->destinatarioReal = $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura;
+        $objMetadadosProcedimento->metadados->destinatario = $objMetadadosProcedimento->metadados->unidadeReceptora;
+    }
 
     if (isset($objMetadadosProcedimento)) {
 
@@ -453,8 +462,6 @@ class ReceberProcedimentoRN extends InfraRN
     if(!isset($objMetadadosProcedimento)){
       throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
     }
-    
-    $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
 
         //TODO: Refatorar código para criar método de pesquisa do procedimento e reutilizá-la
 
@@ -488,7 +495,6 @@ class ReceberProcedimentoRN extends InfraRN
             $objAtividadeDTO = $arrObjAtividadeDTO[0];
             $numIdUnidade = $objAtividadeDTO->getNumIdUnidade();
         }
-        
         
         $objSeiRN = new SeiRN();
     
@@ -528,7 +534,7 @@ class ReceberProcedimentoRN extends InfraRN
     $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
     $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);    
     $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
-   
+    
        //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
     $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
@@ -612,9 +618,25 @@ class ReceberProcedimentoRN extends InfraRN
     $strDescricao .= $objProcesso->observacao;
     
     $objObservacaoDTO  = new ObservacaoDTO();
-    $objObservacaoDTO->setStrDescricao($strDescricao);
-    $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
+    
+    //!Criação da observação de aviso para qual é a real unidade emitida (!2!)
+    if ($this->destinatarioReal) {
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->setNumIdUnidadeRH($this->destinatarioReal); 
+        $objUnidadeDTO->setStrSinAtivo('S');
+        $objUnidadeDTO->retStrDescricao();
 
+        $objUnidadeRN = new UnidadeRN();
+        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+        $objObservacaoDTO->setStrDescricao($strDescricao . PHP_EOL .'Processo remetido para a unidade ' . $objUnidadeDTO->getStrDescricao());
+    } else {
+        $objObservacaoDTO->setStrDescricao($strDescricao);
+    }
+    
+    //throw new InfraException(var_export($objObservacaoDTO, true));
+    
+    $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
+    
         //Atribuição de dados do procedimento
         //TODO: Validar cada uma das informações de entrada do webservice
     $objProcedimentoDTO = new ProcedimentoDTO();        
@@ -768,6 +790,7 @@ class ReceberProcedimentoRN extends InfraRN
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
         }
                 
+        
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -780,7 +803,37 @@ class ReceberProcedimentoRN extends InfraRN
         
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
-               
+        
+        
+        //Cadastro das atividades para quando o destinatário é desviado pelo receptor (!3!)
+        if ($this->destinatarioReal) {
+            $objUnidadeDTO = new PenUnidadeDTO();
+            $objUnidadeDTO->setNumIdUnidadeRH($this->destinatarioReal); 
+            $objUnidadeDTO->setStrSinAtivo('S');
+            $objUnidadeDTO->retStrDescricao(); //descricao
+            $objUnidadeRN = new UnidadeRN();
+            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+        
+            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+            $objAtributoAndamentoDTO->setStrNome('DESCRICAO');
+            $objAtributoAndamentoDTO->setStrValor('Processo remetido para a unidade ' . $objUnidadeDTO->getStrDescricao());
+            $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+            
+            $arrObjAtributoAndamentoDTO = array($objAtributoAndamentoDTO);
+
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ATUALIZACAO_ANDAMENTO);
+            $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+            $objAtividadeDTO->setDthConclusao(null);
+            $objAtividadeDTO->setNumIdUsuarioConclusao(null);
+            $objAtividadeDTO->setStrSinInicial('N');
+
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+        }
       }
 
 
@@ -879,7 +932,7 @@ class ReceberProcedimentoRN extends InfraRN
       }
 
       protected function atribuirDadosUnidade(ProcedimentoDTO $objProcedimentoDTO, $objDestinatario){
-
+          
         if(!isset($objDestinatario)){
           throw new InfraException('Parâmetro $objDestinatario não informado.');
         }
