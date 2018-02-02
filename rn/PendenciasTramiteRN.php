@@ -4,7 +4,7 @@ require_once dirname(__FILE__) . '/../../../SEI.php';
 
 error_reporting(E_ALL);
 
-//TODO: Modificar nome da classe e método para outro mais apropriado
+//TODO: Modificar nome da classe e mtodo para outro mais apropriado
 class PendenciasTramiteRN extends InfraRN {
 
     private static $instance = null;
@@ -29,19 +29,19 @@ class PendenciasTramiteRN extends InfraRN {
         
         $this->strLocalizacaoCertificadoDigital = $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
         $this->strEnderecoServicoPendencias = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
-        //TODO: Urgente - Remover senha do certificado de autenticação dos serviços do PEN da tabela de parâmetros
+        //TODO: Urgente - Remover senha do certificado de autenticao dos servios do PEN da tabela de parmetros
         $this->strSenhaCertificadoDigital = $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');    
 
         if (InfraString::isBolVazia($this->strEnderecoServicoPendencias)) {
-            throw new InfraException('Endereço do serviço de pendências de trâmite do Processo Eletrônico Nacional (PEN) não informado.');
+            throw new InfraException('Endereo do servio de pendncias de trmite do Processo Eletrnico Nacional (PEN) no informado.');
         }
 
         if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-            throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
+            throw new InfraException("Certificado digital de autenticao do servio de integrao do Processo Eletrnico Nacional(PEN) no encontrado.");
         }
 
         if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
+            throw new InfraException('Dados de autenticao do servio de integrao do Processo Eletrnico Nacional(PEN) no informados.');
         }
     }
 
@@ -59,17 +59,17 @@ class PendenciasTramiteRN extends InfraRN {
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
             $numSeg = InfraUtil::verificarTempoProcessamento();
-            InfraDebug::getInstance()->gravar('MONITORANDO OS TRÂMITES PENDENTES ENVIADOS PARA O ÓRGÃO (PEN)');
-            echo "[".date("d/m/Y H:i:s")."] Iniciando serviço de monitoramento de pendências de trâmites de processos...\n";
+            InfraDebug::getInstance()->gravar('MONITORANDO OS TRMITES PENDENTES ENVIADOS PARA O RGO (PEN)');
+            echo "[".date("d/m/Y H:i:s")."] Iniciando servio de monitoramento de pendncias de trmites de processos...\n";
 
             try{
                 $numIdTramiteRecebido = 0;
                 $strStatusTramiteRecebido = '';
-                $numQuantidadeErroTrâmite = 0;
+                $numQuantidadeErroTrmite = 0;
                 $arrQuantidadeErrosTramite = array();
 
                 //TODO: Tratar quantidade de erros o sistema consecutivos para um tramite de processo
-                //Alcançado está quantidade, uma pendência posterior deverá ser obtida do barramento
+                //Alcanado est quantidade, uma pendncia posterior dever ser obtida do barramento
                 while (true) {
                     $objPendenciaDTO = $this->obterPendenciasTramite($numIdTramiteRecebido);          
                     if(isset($objPendenciaDTO)) {
@@ -83,9 +83,9 @@ class PendenciasTramiteRN extends InfraRN {
                 sleep(5);
                 }
             }
-            //TODO: Urgente: Tratar erro específico de timeout e refazer a requisição      
+            //TODO: Urgente: Tratar erro especfico de timeout e refazer a requisio      
             catch(Exception $e) {
-                $strAssunto = 'Erro monitorando pendências.';
+                $strAssunto = 'Erro monitorando pendncias.';
                 $strErro = InfraException::inspecionar($e);      
                 LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro); 
             }
@@ -100,7 +100,7 @@ class PendenciasTramiteRN extends InfraRN {
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-            throw new InfraException('Erro processando pendências de integração com o PEN - Processo Eletrônico Nacional.',$e);
+            throw new InfraException('Erro processando pendncias de integrao com o PEN - Processo Eletrnico Nacional.',$e);
         }
     }
 
@@ -129,14 +129,14 @@ class PendenciasTramiteRN extends InfraRN {
                 curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebida=" . $parNumIdTramiteRecebido);     
             }
 
-            //A seguinte requisição irá aguardar a notificação do PEN sobre uma nova pendência
-            //ou até o lançamento da exceção de timeout definido pela infraestrutura da solução
-            //Ambos os comportamentos são esperados para a requisição abaixo.      
+            //A seguinte requisio ir aguardar a notificao do PEN sobre uma nova pendncia
+            //ou at o lanamento da exceo de timeout definido pela infraestrutura da soluo
+            //Ambos os comportamentos so esperados para a requisio abaixo.      
             $strResultadoJSON = curl_exec($curl);
 
             if(curl_errno($curl)) {
                 if (curl_errno($curl) != 28)
-                    throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));        
+                    throw new InfraException("Erro na requisio do servio de monitoramento de pendncias. Curl: " . curl_errno($curl));        
             }
 
             if(!InfraString::isBolVazia($strResultadoJSON)) {
@@ -182,10 +182,10 @@ class PendenciasTramiteRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-                $numTentativas = $objInfraParametro->getValor(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
+                $objPenParametroRN = new PenParametroRN();
+                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
-                // Executa sempre + 1 além do configurado no parâmetro para executar a recusa
+                // Executa sempre + 1 alm do configurado no parmetro para executar a recusa
                 while($numCont <= $numTentativas) {
                     $client->addTaskBackground('receberProcedimento', $strWorkload, null);
                     $numCont++;
@@ -193,8 +193,8 @@ class PendenciasTramiteRN extends InfraRN {
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-                $numTentativas = $objInfraParametro->getValor(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
+                $objPenParametroRN = new PenParametroRN();
+                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
 
                 while($numCont < $numTentativas) {                    
@@ -214,8 +214,8 @@ class PendenciasTramiteRN extends InfraRN {
             break;
 
             default:
-                //TODO: Alterar lógica para não deixar de processar demais pendências retornadas pelo PEN
-                throw new Exception('Situação do trâmite não pode ser identificada.');
+                //TODO: Alterar lgica para no deixar de processar demais pendncias retornadas pelo PEN
+                throw new Exception('Situao do trmite no pode ser identificada.');
                 break;
             }
 
