@@ -1560,7 +1560,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           $objAcessoRN = new AcessoRN();
           if ($objAcessoRN->contar($objAcessoDTO)==0) {
-            $objInfraException->adicionarValidacao('Unidade ['.$objUnidadeDTO->getStrSigla().'] não possui acesso ao processo ['.$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'].');
+          //  AVALIAR $objInfraException->adicionarValidacao('Unidade ['.$objUnidadeDTO->getStrSigla().'] não possui acesso ao processo ['.$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'].');
           }
         }
 
