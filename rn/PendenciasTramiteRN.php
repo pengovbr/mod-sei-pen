@@ -182,8 +182,8 @@ class PendenciasTramiteRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-                $numTentativas = $objInfraParametro->getValor(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
+                $objPenParametroRN = new PenParametroRN();
+                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
                 // Executa sempre + 1 além do configurado no parâmetro para executar a recusa
                 while($numCont <= $numTentativas) {
@@ -193,8 +193,8 @@ class PendenciasTramiteRN extends InfraRN {
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
-                $numTentativas = $objInfraParametro->getValor(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
+                $objPenParametroRN = new PenParametroRN();
+                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
 
                 while($numCont < $numTentativas) {                    

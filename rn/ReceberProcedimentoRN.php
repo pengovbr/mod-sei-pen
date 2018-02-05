@@ -353,8 +353,10 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
 
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+//        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+//        $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+        $objPenParametroRN = new PenParametroRN();
+        $numTamDocExterno = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
 
         foreach($arrObjDocumentos as $objDocument) {
@@ -462,7 +464,14 @@ class ReceberProcedimentoRN extends InfraRN
     if(!isset($objMetadadosProcedimento)){
       throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
     }
-
+    
+    
+    if ($this->destinatarioReal) {
+        $objDestinatario = $this->destinatarioReal;
+    } else {
+        $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
+    }
+    
         //TODO: Refatorar código para criar método de pesquisa do procedimento e reutilizá-la
 
         //$objProcedimentoDTO = new ProcedimentoDTO();
