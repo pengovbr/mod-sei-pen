@@ -1675,7 +1675,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $objHipoteseLegalRN = new HipoteseLegalRN();
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
                     
-                    $objInfraException->adicionarValidacao('Hiptese Legal "'.$dados->getStrNome().'" do Documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' No foi Mapeada', $strAtributoValidacao);
+                    $objInfraException->adicionarValidacao('Hiptese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não foi mapeada', $strAtributoValidacao);
                 }
             }
         }

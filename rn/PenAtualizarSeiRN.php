@@ -49,7 +49,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.0.1') {
                 $this->instalarV102();
-            } else if ($strVersaoModuloPen == '1.0.2') {
+            } else if ($strVersaoModuloPen == '1.1.0') {
             }
 
 
@@ -1092,7 +1092,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
     
-    /* Contem atualizações da versao 1.0.2 do modulo */
+    /* Contem atualizações da versao 1.1.0 do modulo */
     protected function instalarV102() {
         $objMetaBD = $this->objMeta;
         
@@ -1150,7 +1150,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.2');
+        $objInfraParametroDTO->setStrValor('1.1.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 

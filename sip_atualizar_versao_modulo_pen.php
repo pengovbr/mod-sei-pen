@@ -1078,7 +1078,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
         $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
 
-        $this->criarMenu('Indicar Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+        $this->criarMenu('Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
         $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
         $this->atribuirPerfil($numIdSistema);
         
@@ -1095,7 +1095,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
     }
     
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.0.2
+     * Instala/Atualiza os módulo PEN para versão 1.1.0
      */
     protected function instalarV102() {
     
@@ -1147,7 +1147,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.2');
+        $objInfraParametroDTO->setStrValor('1.1.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
         
     }
@@ -1166,7 +1166,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objBD = new ItemMenuBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
         if ($objDTO) {
-            $objDTO->setStrRotulo('Indicar Hipótese de Restrição Padrão');
+            $objDTO->setStrRotulo('Hipótese de Restrição Padrão');
             $objBD->alterar($objDTO);
         }
         

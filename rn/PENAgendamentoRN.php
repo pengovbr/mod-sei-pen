@@ -266,45 +266,50 @@ class PENAgendamentoRN extends InfraRN {
      * @throws InfraException
      */
     public function atualizarHipotesesLegais() {
-        $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
-        $processoEletronicoRN = new ProcessoEletronicoRN();
-        $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
-
-        //Para cada hip?tese vinda do PEN ser? verificado a existencia.
-        foreach ($hipotesesPen->hipotesesLegais->hipotese as $hipotese) {
-
-            $objDTO = new PenHipoteseLegalDTO();
-            $objDTO->setNumIdentificacao($hipotese->identificacao);
-            $objDTO->setNumMaxRegistrosRetorno(1);
-            $objDTO->retStrNome();
-            $objDTO->retNumIdHipoteseLegal();
-            $objConsulta = $objBD->consultar($objDTO);
-
-            //Caso n?o haja um nome para a hip?tese legal, ele pula para a pr?xima.
-            if (empty($hipotese->nome)) {
-                continue;
-            }
-
-            $objDTO->setStrNome($hipotese->nome);
-
-            if ($hipotese->status) {
-                $objDTO->setStrAtivo('S');
-            } else {
-                $objDTO->setStrAtivo('N');
-            }
-
-            //Caso n?o exista a hip?tese ir? cadastra-la no sei.
-            if (empty($objConsulta)) {
-
-                $objBD->cadastrar($objDTO);
-            } else {
-                //Caso contr?rio apenas ir? atualizar os dados.
-                $objDTO->setNumIdHipoteseLegal($objConsulta->getNumIdHipoteseLegal());
-                $objBD->alterar($objDTO);
-            }
-        }
-
         try {
+            $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
+            $processoEletronicoRN = new ProcessoEletronicoRN();
+            $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
+
+            if(empty($hipotesesPen)){
+                throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');    
+            }
+
+            //Para cada hipótese vinda do PEN será verificado a existencia.
+            foreach ($hipotesesPen->hipotesesLegais->hipotese as $hipotese) {
+
+                $objDTO = new PenHipoteseLegalDTO();
+                $objDTO->setNumIdentificacao($hipotese->identificacao);
+                $objDTO->setNumMaxRegistrosRetorno(1);
+                $objDTO->retStrNome();
+                $objDTO->retNumIdHipoteseLegal();
+                $objConsulta = $objBD->consultar($objDTO);
+
+                //Caso não haja um nome para a hipótese legal, ele pula para a próxima.
+                if (empty($hipotese->nome)) {
+                    continue;
+                }
+
+                $objDTO->setStrNome($hipotese->nome);
+
+                if ($hipotese->status) {
+                    $objDTO->setStrAtivo('S');
+                } else {
+                    $objDTO->setStrAtivo('N');
+                }
+
+                //Caso n?o exista a hip?tese ir? cadastra-la no sei.
+                if (empty($objConsulta)) {
+
+                    $objBD->cadastrar($objDTO);
+                } else {
+                    //Caso contr?rio apenas ir? atualizar os dados.
+                    $objDTO->setNumIdHipoteseLegal($objConsulta->getNumIdHipoteseLegal());
+                    $objBD->alterar($objDTO);
+                }
+            }
+
+
             LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.");
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
