@@ -1658,7 +1658,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 if($objGenericoBD->contar($objDocMapDTO) == 0) {  
                      
                     $strDescricao = sprintf(
-                        'No existe mapeamento de envio para %s no documento %s', 
+                        'Não existe mapeamento de envio para %s no documento %s', 
                         $objDocumentoDTO->getStrNomeSerie(),
                         $objDocumentoDTO->getStrProtocoloDocumentoFormatado() 
                     );
