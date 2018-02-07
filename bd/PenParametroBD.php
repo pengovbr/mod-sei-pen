@@ -21,7 +21,7 @@ class PenParametroBD extends InfraBD {
         if ($rs[0]['existe'] == 0) {
 
             if (strlen($strNome) > 100) {
-                throw new InfraException('Nome do parmetro possui tamanho superior a 100 caracteres.');
+                throw new InfraException('Nome do parâmetro possui tamanho superior a 100 caracteres.');
             }
 
             $sql = '';

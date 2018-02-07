@@ -29,19 +29,19 @@ class PendenciasTramiteRN extends InfraRN {
         
         $this->strLocalizacaoCertificadoDigital = $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
         $this->strEnderecoServicoPendencias = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
-        //TODO: Urgente - Remover senha do certificado de autenticao dos servios do PEN da tabela de parmetros
+        //TODO: Urgente - Remover senha do certificado de autenticao dos servios do PEN da tabela de parâmetros
         $this->strSenhaCertificadoDigital = $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');    
 
         if (InfraString::isBolVazia($this->strEnderecoServicoPendencias)) {
-            throw new InfraException('Endereo do servio de pendncias de trmite do Processo Eletrnico Nacional (PEN) no informado.');
+            throw new InfraException('Endereço do serviço de pendências de trâmite do Processo Eletrônico Nacional (PEN) não informado.');
         }
 
         if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-            throw new InfraException("Certificado digital de autenticao do servio de integrao do Processo Eletrnico Nacional(PEN) no encontrado.");
+            throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
         }
 
         if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-            throw new InfraException('Dados de autenticao do servio de integrao do Processo Eletrnico Nacional(PEN) no informados.');
+            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
         }
     }
 
@@ -59,13 +59,13 @@ class PendenciasTramiteRN extends InfraRN {
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
             $numSeg = InfraUtil::verificarTempoProcessamento();
-            InfraDebug::getInstance()->gravar('MONITORANDO OS TRMITES PENDENTES ENVIADOS PARA O RGO (PEN)');
-            echo "[".date("d/m/Y H:i:s")."] Iniciando servio de monitoramento de pendncias de trmites de processos...\n";
+            InfraDebug::getInstance()->gravar('MONITORANDO OS TRÂMITES PENDENTES ENVIADOS PARA O RGO (PEN)');
+            echo "[".date("d/m/Y H:i:s")."] Iniciando serviço de monitoramento de pendências de trâmites de processos...\n";
 
             try{
                 $numIdTramiteRecebido = 0;
                 $strStatusTramiteRecebido = '';
-                $numQuantidadeErroTrmite = 0;
+                $numQuantidadeErroTramite = 0;
                 $arrQuantidadeErrosTramite = array();
 
                 //TODO: Tratar quantidade de erros o sistema consecutivos para um tramite de processo
@@ -85,7 +85,7 @@ class PendenciasTramiteRN extends InfraRN {
             }
             //TODO: Urgente: Tratar erro especfico de timeout e refazer a requisio      
             catch(Exception $e) {
-                $strAssunto = 'Erro monitorando pendncias.';
+                $strAssunto = 'Erro monitorando pendências.';
                 $strErro = InfraException::inspecionar($e);      
                 LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro); 
             }
@@ -100,7 +100,7 @@ class PendenciasTramiteRN extends InfraRN {
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-            throw new InfraException('Erro processando pendncias de integrao com o PEN - Processo Eletrnico Nacional.',$e);
+            throw new InfraException('Erro processando pendências de integração com o PEN - Processo Eletrônico Nacional.',$e);
         }
     }
 
@@ -136,7 +136,7 @@ class PendenciasTramiteRN extends InfraRN {
 
             if(curl_errno($curl)) {
                 if (curl_errno($curl) != 28)
-                    throw new InfraException("Erro na requisio do servio de monitoramento de pendncias. Curl: " . curl_errno($curl));        
+                    throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));        
             }
 
             if(!InfraString::isBolVazia($strResultadoJSON)) {
@@ -185,7 +185,7 @@ class PendenciasTramiteRN extends InfraRN {
                 $objPenParametroRN = new PenParametroRN();
                 $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
-                // Executa sempre + 1 alm do configurado no parmetro para executar a recusa
+                // Executa sempre + 1 alm do configurado no parâmetro para executar a recusa
                 while($numCont <= $numTentativas) {
                     $client->addTaskBackground('receberProcedimento', $strWorkload, null);
                     $numCont++;
@@ -215,7 +215,7 @@ class PendenciasTramiteRN extends InfraRN {
 
             default:
                 //TODO: Alterar lgica para no deixar de processar demais pendncias retornadas pelo PEN
-                throw new Exception('Situao do trmite no pode ser identificada.');
+                throw new Exception('Situação do trâmite não pode ser identificada.');
                 break;
             }
 
