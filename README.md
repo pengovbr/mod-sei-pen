@@ -1,25 +1,24 @@
 Módulo de Integração SEI - PEN
-===================
+======================================
 
 Data de criação: 27/05/2016
-Data de atualizaçao: 12/09/2017
-Versão: 1.0.0
+Data de atualizaçao: 09/02/2018
+Versão: 1.1.0
 
 
 ### REQUISITOS PARA INSTALAÇÂO:
-- SEI 3.0.5 (ou superior) instalada (verificar valor da constante de versão do SEI no arquivo sei/SEI.php)
+* SEI 3.0.5 (ou superior) instalada (verificar valor da constante de versão do SEI no arquivo sei/SEI.php)
 
-- Usuário de acesso ao banco de dados do SEI e SIP com as devidas permissões de acesso para modificar estrutuda do banco de dados. Após a instalação, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de escrita no banco de dados.
-- Caso o ambiente do ConectaGov utilizado nesta configuração esteja utilizando HTTPS com certificado digital do ICP-Brasil, será necessário configurar a cadeia de certificados do ICP-BRASIL como confiáveis nos nós de aplicação do SEI.
-Como todas as comunicações realizadas com o ConectaGov utilizarão conexão segura via HTTPS com certificados digitais emitidos pela cadeia do ICP-Brasil, os servidores de aplicação precisam ser configurados para reconhecer esta cadeia como confiável, o que não é padrão nos sistemas operacionais atuais. Com isto, os seguintes comandos precisam ser executados em cada nós de aplicação do SEI, incluindo aquele responsável pelo tratamento das tarefas agendadas:
- -  Copie o certificado da cadeia de CA utilizado pelo ConectaGov para o diretório /usr/local/share/ca-certificates:
+* Usuário de acesso ao banco de dados do SEI e SIP com as devidas permissões de acesso para modificar a estrutura do banco de dados. Após a instalação, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de leitura e escrita no banco de dados.
+* Caso o ambiente do ConectaGov utilizado nesta configuração esteja utilizando HTTPS com certificado digital do ICP-Brasil, será necessário configurar a cadeia de certificados do ICP-BRASIL como confiáveis nos nós de aplicação do SEI. Como todas as comunicações realizadas com o ConectaGov utilizarão conexão segura via HTTPS com certificados digitais, os servidores de aplicação precisam ser configurados para reconhecer esta cadeia como confiável, o que não é padrão. Com isto, os seguintes comandos precisam ser executados em cada nós de aplicação do SEI, incluindo aquele responsável pelo tratamento das tarefas agendadas:
 
- > cp <CERTIFICADO-CA-ICP-BRASIL> /usr/local/share/ca-certificates
+  --  Copie o certificado da cadeia de CA utilizado pelo ConectaGov para o diretório /usr/local/share/ca-certificates:
+  > cp <CERTIFICADO-CA-ICP-BRASIL> /usr/local/share/ca-certificates
 
- -  Efetue a atualização da lista de certificados confiáveis do SO
-> sudo update-ca-certificates
->
-- Para concluir os procedimentos de configuração do módulo, será necessário registrar no portal do Processo Eletrônico Nacional - PEN as unidades administrativas que poderão realizar trâmites externo ou recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo gestor de protocolo previamente habilitado no portal do PEN. Para maiores informações, acesse o endereço eletrônico http://conectagov.processoeletronico.gov.br/ ou entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
+  --  Efetue a atualização da lista de certificados confiáveis do sistema operacional
+  > sudo update-ca-certificates
+
+* Para concluir os procedimentos de configuração do módulo, será necessário registrar no portal do Processo Eletrônico Nacional - PEN as unidades administrativas que poderão realizar trâmites externo ou recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo gestor de protocolo previamente habilitado no portal do PEN. Para maiores informações, acesse o endereço eletrônico http://conectagov.processoeletronico.gov.br/ ou entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
 
 
 ### PROCEDIMENTOS PARA INSTALAÇÂO:
@@ -73,15 +72,16 @@ No mesmo servidor em que está instalado/configurado o supervisor e gearman (pas
 
 4.1) Copiar script de verificação dos serviços de integração do ConectaGov para a pasta de arquivos binários do SEI 
 Atenção: Altere a referência para [DIRETORIO_RAIZ_INSTALAÇÃO] descrito abaixo
-cp [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/web/modulos/pen/verificar-servicos.sh /opt/sei/bin/
+  cp [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/web/modulos/pen/verificar-servicos.sh /opt/sei/bin/
 
 4.2) Configurar agendamento no cron
 Atenção: Altere a referência para [DIRETORIO_RAIZ_INSTALAÇÃO] descrito abaixo
 
-    # crontab -e 
-    */10 * * * * [DIRETORIO_RAIZ_INSTALAÇÃO]`enter code here`/sei/bin/verificar-servicos.sh
+  # crontab -e 
+  */10 * * * * [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/bin/verificar-servicos.sh
 
-6) Editar o arquivo "sei/ConfiguracaoSEI.php", tomando o cuidado de usar editor que não altere o charset do arquivo, para adicionar a referência ao módulo PEN na chave 'Modulos' abaixo da chave 'SEI':    Atenção para as virgulas nos finais das linhas
+6) Editar o arquivo "sei/ConfiguracaoSEI.php", tomando o cuidado de usar editor que não altere o charset do arquivo, para adicionar a referência ao módulo PEN na chave 'Modulos' abaixo da chave 'SEI':    
+Atenção para as virgulas nos finais das linhas
 
         'SEI' => array(
             'URL' => 'http://[servidor sei]/sei',
@@ -94,15 +94,15 @@ Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acim
             
     'Modulos' => array('PENIntegracao' => 'pen')
     
-7) Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/.
+7) Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/. Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura.
 
-8) Colocar o arquivo do certificado digital utilizado para integração com o ConectaGov no diretório "sei/config/". 
+8) Mover o arquivo do certificado digital utilizado para integração com o ConectaGov para o diretório "sei/config/".
 
 Os certificados digitais necessários para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no paco​te de instalação. Para o ambiente de produção, deverá ser utilizado um certificado digital válido gerado por uma Autoridade de Registro - AR confiável (Exemplo: ICP-Brasil, Certisign, Verisign, etc.).
 
-9) Copiar o arquivo de instalação do módulo no SEI **sei_atualizar_versao_modulo_pen.php** para a pasta sei/scripts
+9) MOVER o arquivo de instalação do módulo no SEI **sei_atualizar_versao_modulo_pen.php** para a pasta sei/scripts. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
-10) Copiar o arquivo de instalação do módulo no SIP **sip_atualizar_versao_modulo_pen.php** para a pasta sip/scripts
+10) MOVER o arquivo de instalação do módulo no SIP **sip_atualizar_versao_modulo_pen.php** para a pasta sip/scripts. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
         
 11) Executar o script "sip_atualizar_versao_modulo_pen.php" para atualizar o banco de dados do SIP para o funcionamento do módulo:    
 Atenção: Altere a referência para [DIRETORIO_RAIZ_INSTALAÇÃO] descrito abaixo
@@ -114,12 +114,11 @@ Atenção: Altere a referência para [DIRETORIO_RAIZ_INSTALAÇÃO] descrito abai
 
     # php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_versao_modulo_pen.php
 
-13) Atualizar a tabela [md_pen_unidade] com os seus respectivos valores do campo "id_unidade_rh".
-
-Atenção: Esta configuração será realizada diretamente no banco de dados somente nesta primeira versão do módulo. Os ID's de unidades são gerenciados pela própria instituiçao no portal do Processo Eletrônico Nacional: http://conectagov.processoeletronico.gov.br. 
+13) Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
+Os ID's de unidades são gerenciados pela própria instituiçao no portal do Processo Eletrônico Nacional: http://conectagov.processoeletronico.gov.br. 
 Na fase de homologação do sistema, estes valores serão passados pela SETIC/MP.
 
-    update md_pen_unidade set id_unidade_rh = [ID_UNIDADE_PEN] where id_unidade = [ID_UNIDADE_SEI];
+Acesse o menu [SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Unidades] e vincule as unidades administrativas com seus respectivos identificadores registrados no portal do Processo Eletrônico Nacional.
 
 14) Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
 
@@ -133,8 +132,6 @@ Esta configuração é necessária para o SEI realizar as devidas regras de regi
 14.2) Configurar a nova unidade na hierarquia do SEI, através da funcionalidade SIP >> Hierarquias >> Montar
 
 Sugerimos que está unidade seja configurada no mesmo nível hierárquico da unidade de teste padrão existente no SEI. Para saber qual é a unidade de testes, basta verificar o parâmetro do SEI chamado **SEI_UNIDADE_TESTE**
-
-14.3) Obter o número de identificação da nova unidade para posterior configuração dos parâmetros do módulo de integração. O código da nova unidade pode ser obtido através da funcionalidade *SEI >> Administração >> Unidades >> Listar*
 
 15) Configuração de tipo de processo a ser aplicado aos processos recebidos de outras instituições.
 
@@ -156,47 +153,40 @@ Caso a opção for pela criação de um novo tipo de processo específico, segue
 > Interessado: Não 
 > Interno do Sistema: Sim
 
-15.2) Obter o número de ID do novo Tipo de Processo para posterior configuração dos parâmetros do módulo de integração. O ID do novo Tipo de Processo pode ser obtido através da funcionalidade *SEI >> Administração >> Tipo de Processo >> Listar*
 
-16) Configurar os parâmetros do Módulo de Integração Pen (Menu: *SEI >> Infra >> Parâmetros*)
+16) Configurar os parâmetros do Módulo de Integração Pen (Menu: *SEI >> Administração >> Processo Eletrônico Nacional >> Parâmetros de Configuração*)
     
-**PEN_ENDERECO_WEBSERVICE:**  [Endereço dos serviços de integração do PEN]
+**Endereço do Web Service:**  [Endereço dos serviços de integração do PEN]
+- Desenvolvimento: https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/
+- Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
+- Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
 
-- Desenvolvimento: 
-https://pen-api.trafficmanager.net/interoperabilidade/soap/v1_1/
-- Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v1_1/
-- Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v1_1/
+**Endereço do Web Service de Pendências**: [Endereço dos serviços de notificação de trâmites de processos]
+- Desenvolvimento: https://pen-pendencias.trafficmanager.net/
+- Homologação: https://homolog.pen.pendencias.trafficmanager.net/
+- Produção: https://pendencias.conectagov.processoeletronico.gov.br/
 
-**=> PEN_ENDERECO_WEBSERVICE_PENDENCIAS**: [Endereço dos serviços de notificação de trâmites de processos]
-
-- Desenvolvimento: 
-                https://pen-pendencias.trafficmanager.net/
-- Homologação: 
-                https://homolog.pen.pendencias.trafficmanager.net/
-- Produção:
-                https://pendencias.conectagov.processoeletronico.gov.br/
-
-**=> PEN_ID_REPOSITORIO_ORIGEM:** 
+**ID do Repositório de Estruturas:** 
 ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.
 Exemplo: 1 (Código de identificação da estrutura organizacional do Poder Executivo [SIORG])
 
-**=> PEN_LOCALIZACAO_CERTIFICADO_DIGITAL:** 
+**Localização do Certificado Digital:** 
 Localização do certificado digital o órgão (arquivo do passo 8)
 
-**=> PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO:**
+**Número Máximo de Tentativas de Recebimento:**
 Valor padrão: 3
             
-**=> PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO:**
+**Tamanho Máximo de Documentos Expedidos:**
 Valor padrão: 50
 
-**=> PEN_SENHA_CERTIFICADO_DIGITAL:** 
+**Senha do Certificado Digital:** 
 Senha do certificado digital 
 Atenção: Configuração de senha será modificada na próxima versão para utilização de criptografia
 
-**=> PEN_TIPO_PROCESSO_EXTERNO:** 
+**Tipo de Processo Externo:** 
 Id do tipo de documento externo. Configurar com o ID do Tipo de Processo Externo configurado no passo 15
 
-**=> PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO:** 
+**Unidade Geradora de Processo e Documento Recebido:** 
 Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão. Configurar com o ID da Unidade criada no passo 14
 
 
@@ -217,9 +207,17 @@ Atenção: Importante colocar o serviço para ser iniciado automaticamente junta
 18) Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. 
 
 Esta configuração deve ser feita antes de começar a utilização do módulo.
+- SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Tipos de Documentos >> Envio >> Cadastrar
+- SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Tipos de Documentos >> Recebimento >> Cadastrar
 
-- "Administração" => "Tipos de Documentos" => "Mapeamento de Tipos de Documento" => "Recebimento" => "Cadastrar"
-- "Administração" => "Tipos de Documentos" => "Mapeamento de Tipos de Documento" => "Envio" => "Cadastrar".
+Obs.: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
+
+19) Realizar o mapeamento das hipóteses legais do SEI com as definidas no PEN para permitir o trâmite externo de processos e documentos restritos.
+Atenção: Antes de iniciar esta configuração, será necessário executar manualmente o agendamento "PENAgendamentoRN::atualizarHipotesesLegais" em [SEI >> Infra >> Agendamentos]. Isto será necessário para atualizar o SEI com a última versão da tabela de hipóteses legais do PEN.
+
+Este mapeamento deve ser feito antes de começar a utilização do módulo e está disponível em 
+- SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Hipóteses Legais >> Envio >> Cadastrar
+- SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Hipóteses Legais >> Recebimento >> Cadastrar
 
 Obs.: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
@@ -234,4 +232,36 @@ Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-l
 Por padrão, as funcionalidades (recursos) criados pelo módulo não são atribuídos automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
 
 Sugerimos que seja criado um novo perfil de usuário que receberá as permissões aos novos recursos incluidos pelo módulo (pen_*). Este novo perfil deverá ser atribuído aos usuários que podem realizar o trâmite externo de processos para outras instituições.
+
+Sugerimos a configuração dos seguintes recursos no novo perfil criado para trâmites de processos externos:
+* pen_procedimento_expedido_listar
+* pen_procedimento_expedir
+
+Sugerimos a configuração dos seguintes recursos no perfil ADMINISTRADOR:
+* pen_map_hipotese_legal_envio_alterar
+* pen_map_hipotese_legal_envio_cadastrar  
+* pen_map_hipotese_legal_envio_excluir    
+* pen_map_hipotese_legal_envio_listar 
+* pen_map_hipotese_legal_padrao   
+* pen_map_hipotese_legal_padrao_cadastrar 
+* pen_map_hipotese_legal_recebimento_alterar  
+* pen_map_hipotese_legal_recebimento_cadastrar    
+* pen_map_hipotese_legal_recebimento_excluir  
+* pen_map_hipotese_legal_recebimento_listar
+* pen_map_tipo_documento_envio_alterar    
+* pen_map_tipo_documento_envio_cadastrar  
+* pen_map_tipo_documento_envio_excluir    
+* pen_map_tipo_documento_envio_listar 
+* pen_map_tipo_documento_envio_visualizar 
+* pen_map_tipo_documento_recebimento_alterar  
+* pen_map_tipo_documento_recebimento_cadastrar    
+* pen_map_tipo_documento_recebimento_excluir  
+* pen_map_tipo_documento_recebimento_listar   
+* pen_map_tipo_documento_recebimento_visualizar   
+* pen_map_unidade_alterar 
+* pen_map_unidade_cadastrar   
+* pen_map_unidade_excluir 
+* pen_map_unidade_listar  
+* pen_parametros_configuracao 
+* pen_parametros_configuracao_alterar 
 
