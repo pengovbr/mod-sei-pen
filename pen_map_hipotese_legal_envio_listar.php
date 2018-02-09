@@ -171,13 +171,10 @@ try {
 
     $objHipoteseLegalRN = new HipoteseLegalRN();
     $arrMapIdHipoteseLegal = InfraArray::converterArrInfraDTO($objHipoteseLegalRN->listar($objHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
-    //--------------------------------------------------------------------------
-    //
-    //$objPagina->prepararOrdenacao($objPenRelHipoteseLegalDTO, 'IdMapeamento', InfraDTO::$TIPO_ORDENACAO_ASC);
+
+    $objPagina->prepararOrdenacao($objPenRelHipoteseLegalDTO, 'IdMap', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPagina->prepararPaginacao($objPenRelHipoteseLegalDTO);
-    
-    $arrObjPenRelHipoteseLegalDTO = $objGenericoBD->listar($objPenRelHipoteseLegalDTO);
-    
+    $arrObjPenRelHipoteseLegalDTO = $objGenericoBD->listar($objPenRelHipoteseLegalDTO);    
     $objPagina->processarPaginacao($objPenRelHipoteseLegalDTO);
 
     $numRegistros = count($arrObjPenRelHipoteseLegalDTO);

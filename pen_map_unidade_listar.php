@@ -164,7 +164,8 @@ try {
     $objPenUnidadeRN = new PenUnidadeRN();
     $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidade', 'IdUnidade');
     $arrMapIdUnidadeRH = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidadeRH', 'IdUnidadeRH');
-    
+        
+    $objPagina->prepararOrdenacao($objPenUnidadeDTOFiltro, 'IdUnidade', InfraDTO::$TIPO_ORDENACAO_ASC);    
     $objPagina->prepararPaginacao($objPenUnidadeDTOFiltro);
     $arrObjPenUnidadeDTO = $objGenericoBD->listar($objPenUnidadeDTOFiltro);
     $objPagina->processarPaginacao($objPenUnidadeDTOFiltro);

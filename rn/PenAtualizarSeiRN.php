@@ -360,7 +360,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametro->setValor('PEN_ENDERECO_WEBSERVICE', '');
         $objInfraParametro->setValor('PEN_SENHA_CERTIFICADO_DIGITAL', '1234');
         $objInfraParametro->setValor('PEN_TIPO_PROCESSO_EXTERNO', '100000320');
-        $objInfraParametro->setValor('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N');
+        //$objInfraParametro->setValor('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N');
         $objInfraParametro->setValor('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', '');
         $objInfraParametro->setValor('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '');
         $objInfraParametro->setValor('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL', '');
@@ -656,28 +656,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
 
-        //----------------------------------------------------------------------
-        // Correções para id_unidade_rh
-        //----------------------------------------------------------------------        
-        $objDTO = new UnidadeDTO();
-        $objDTO->retNumIdUnidade();
-
-        $arrObjDTO = $objBD->listar($objDTO);
-        if (!empty($arrObjDTO)) {
-
-            $objDTO = new PenUnidadeDTO();
-
-            foreach ($arrObjDTO as $objUnidadeDTO) {
-
-                $objDTO->unSetTodos();
-                $objDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
-
-                if ($objBD->contar($objDTO) == 0) {
-                    $objDTO->setNumIdUnidadeRH(0);
-                    $objBD->cadastrar($objDTO);
-                }
-            }
-        }
         
         /* ---------- antigo método (instalarV002R003S000US024) ---------- */
 
@@ -696,9 +674,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametro->setValor('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3');
         
         
-        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */
-        
-        
+        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */      
 
         $objDTO = new TarefaDTO();
         $objBD = new TarefaBD($objInfraBanco);
@@ -1105,7 +1081,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
-        $this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de Notificação de Recebimento');
+        //$this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de Notificação de Recebimento');
         $this->criarParametro('PEN_ID_REPOSITORIO_ORIGEM', '1', 'ID do Repositório de Origem');
         $this->criarParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL', '/opt/sei/web/modulos/mod-sei-barramento/CONITall.pem', 'Localização do Certificado Digital');
         $this->criarParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3', 'Número Máximo de Tentativas de Recebimento');
