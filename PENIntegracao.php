@@ -13,7 +13,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getInstituicao() {
-        return 'TRF4 - Tribunal Regional Federal da 4ª Região';
+        return 'MPDG - Ministério do Planejamento, Desenvolvimento e Gestão';
     }
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) {
