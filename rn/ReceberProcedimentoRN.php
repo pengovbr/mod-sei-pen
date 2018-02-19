@@ -1604,7 +1604,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objPenParametroRN = new PenParametroRN();
         
         $objEnviarProcessoDTO->setStrSinManterAberto('N');
-        //$strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
+        $strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
         $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
         $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
         $objEnviarProcessoDTO->setDtaPrazo(null);
