@@ -270,11 +270,9 @@ class ProcessoEletronicoRN extends InfraRN {
                 
                 if ($bolRetornoRaw !== false) {
                     if (isset($objEstrutura->hierarquia) && isset($objEstrutura->hierarquia->nivel)) {
-                        if (!is_array($objEstrutura->hierarquia->nivel)) {
-                            $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
-                        }
                         
-                        $objEstrutura->hierarquia->nivel = (array) $objEstrutura->hierarquia->nivel;
+                        if (!is_array($objEstrutura->hierarquia->nivel)) $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
+
                         foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
                             $objNivel->nome = utf8_decode($objNivel->nome);
                         }   
