@@ -49,7 +49,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         # instalação do gearman e supervisord               
         yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
 
-3. Configuração dos serviços de recebimento de processos
+3. Configuração dos serviços de recebimento de processos no **supervidor** 
 
     Neste passo será configurado os dois scripts PHP responsáveis por fazer monitoramento de pendências de trâmite no ConectaGov e processar o recebimento de novos processos.
 
@@ -89,7 +89,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Os procedimento descritos abaixo deverão ser executados no mesmo servidor em que está instalado o **supervisor** e o **gearman** (passo 3). 
 
-    Mova o script **verificar-servicos.sh**, localizado na raiz do diretório do módulo, para a pasta de scripts do SEI. 
+    Mova o script **verificar-servicos.sh**, localizado na raiz do diretório do módulo, para a pasta de **sei/bin** do SEI. 
 
         cp [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/web/modulos/pen/verificar-servicos.sh /opt/sei/bin/
 
@@ -100,7 +100,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
 5.  Configurar módulo ConectaGov no arquivo de configuração do SEI
 
-    Editar o arquivo **sei/ConfiguracaoSEI.php**, tomando o cuidado de usar editor que não altere o charset ISO 5589-1 do arquivo, para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
+    Editar o arquivo **sei/config/ConfiguracaoSEI.php**, tomando o cuidado de usar editor que não altere o charset ISO 5589-1 do arquivo, para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
 
         'SEI' => array(
             'URL' => 'http://[servidor sei]/sei',
@@ -117,8 +117,10 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
     Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura.
 
 7. Mover o arquivo do certificado digital utilizado para integração com o **ConectaGov** para o diretório "sei/config/".
-
-    Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no paco​te de instalação disponibilizado pela equipe técnica do Ministério do Planejamento, Desenvolvimento e Gestão - MPDG e são disponibilizados no ato do credenciamento da instituição no ConectaGov. 
+    
+    Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados_mod_conectagov** para adicionar estes arquivos.
+    
+    Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no pacote de instalação disponibilizado pela equipe técnica do Ministério do Planejamento, Desenvolvimento e Gestão - MPDG e são disponibilizados no ato do credenciamento da instituição no ConectaGov. 
 
     Para o ambiente de produção, deverá ser utilizado um certificado digital válido gerado por uma Autoridade de Registro - AR confiável (Exemplo: ICP-Brasil, Certisign, Verisign, etc.).
 
@@ -217,44 +219,36 @@ No credenciamento da instituição, estes valores serão passados pela unidade d
         Interessado: Não 
         Interno do Sistema: Sim
 
+
 17. Configurar os parâmetros do Módulo de Integração Pen
-Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo.
- - **Endereço do Web Service:**  
- *Endereço dos serviços de integração do PEN* 
-    - Desenvolvimento: https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/
-    - Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
-    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
-
-- **Endereço do Web Service de Pendências**: 
-*Endereço dos serviços de notificação de trâmites de processos*
-    - Desenvolvimento: https://pen-pendencias.trafficmanager.net/
-    - Homologação: https://homolog.pen.pendencias.trafficmanager.net/
-    - Produção: https://pendencias.conectagov.processoeletronico.gov.br/
-
-- **ID do Repositório de Estruturas:** 
-*ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*
-
-    Exemplo: 
-    Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo - SIORG)
-
-- **Localização do Certificado Digital:** 
-*Localização do certificado digital o órgão (arquivo do passo 8)*
-
-- **Número Máximo de Tentativas de Recebimento:**
-*Valor padrão: 3*
-            
-- **Tamanho Máximo de Documentos Expedidos:**
-*Valor padrão: 50*
-
-- **Senha do Certificado Digital:** 
-*Senha do certificado digital* 
-**Atenção**: Configuração de senha será modificada na próxima versão para utilização de criptografia
-
-- **Tipo de Processo Externo:** 
-*Id do tipo de documento externo. Configurar com o ID do Tipo de Processo Externo configurado no passo 15*
-
-- **Unidade Geradora de Processo e Documento Recebido:** 
-*Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão. Configurar com o ID da Unidade criada no passo 14*
+Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo:  
+    * **Endereço do Web Service:**  
+    *Endereço dos serviços de integração do PEN* 
+        - Desenvolvimento: https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/
+        - Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
+        - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/  
+    * **Endereço do Web Service de Pendências**:  
+    *Endereço dos serviços de notificação de trâmites de processos*
+        - Desenvolvimento: https://pen-pendencias.trafficmanager.net/
+	    - Homologação: https://homolog.pen.pendencias.trafficmanager.net/
+	    - Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
+    * **ID do Repositório de Estruturas:**   
+    *ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*  
+        - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo - SIORG)*  
+    * **Localização do Certificado Digital:**  
+     - *Localização do certificado digital o órgão (arquivo do passo 8)*  
+    * **Número Máximo de Tentativas de Recebimento:**  
+        - *Valor padrão: 3*  
+    * **Tamanho Máximo de Documentos Expedidos:**  
+        - *Valor padrão: 50*  
+    * **Senha do Certificado Digital:**  
+        - *Senha do certificado digital*  
+    * **Tipo de Processo Externo:**  
+    *Id do tipo de documento externo. *  
+        - *Configurar com o ID do Tipo de Processo Externo configurado no passo 15*  
+    * **Unidade Geradora de Processo e Documento Recebido:**  
+    *Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão.*   
+        - *Configurar com o ID da Unidade criada no passo 14*
 
 
 18. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
