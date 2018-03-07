@@ -41,13 +41,13 @@ Para iniciar os procedimentos de configuração do módulo, será necessário re
 Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
 **Importante:** É imprescindível que os dois sejam instalados no mesmo nó de aplicação em que está configurado o CRON de agendamento principal do SEI.
 
-Exemplo de instalação do German e Supervisor no CentOS:
+    Exemplo de instalação do German e Supervisor no CentOS:
 
-    # pre-requisito
-    yum install epel-release && yum update
+        # pre-requisito
+        yum install epel-release && yum update
 
-    # instalação do gearman e supervisord               
-    yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
+        # instalação do gearman e supervisord               
+        yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 3. Configuração dos serviços de recebimento de processos
 
