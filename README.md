@@ -37,7 +37,7 @@ Para iniciar os procedimentos de configuração do módulo, será necessário re
 
 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema.
  
- 2. Instalar o **gearmand** e o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema.
+2. Instalar o **gearmand** e o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema.
 Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
 **Importante:** É imprescindível que os dois sejam instalados no mesmo nó de aplicação em que está configurado o CRON de agendamento principal do SEI.
 
