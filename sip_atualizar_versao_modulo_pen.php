@@ -492,24 +492,7 @@ abstract class PenAtualizadorRN extends InfraRN {
         $this->numSeg = InfraUtil::verificarTempoProcessamento();
 
         $this->logar($strTitulo);
-    }
-
-    /**
-     * Finaliza o script informando o tempo de execução.
-     * 
-     * @return null
-     */
-    protected function finalizar() {
-
-        $this->logar('TEMPO TOTAL DE EXECUCAO: ' . InfraUtil::verificarTempoProcessamento($this->numSeg) . ' s');
-
-        $this->objDebug->setBolLigado(false);
-        $this->objDebug->setBolDebugInfra(false);
-        $this->objDebug->setBolEcho(false);
-
-        print PHP_EOL;
-        die();
-    }
+    } 
 
     /**
      * Construtor
@@ -608,6 +591,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
                 }
             }
 
+            $this->finalizar('FIM');
             InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
 
@@ -635,17 +619,24 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
      * 
      * @return null
      */
-    protected function finalizar() {
+    protected function finalizar($strMsg=null, $bolErro=false){
+        if (!$bolErro) {
+          $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
+          $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
+        }else{
+          $strMsg = 'ERRO: '.$strMsg;
+        }
 
-        $this->logar('TEMPO TOTAL DE EXECUCAO: ' . InfraUtil::verificarTempoProcessamento($this->numSeg) . ' s');
+        if ($strMsg!=null){
+          $this->logar($strMsg);
+        }
 
-        $this->objDebug->setBolLigado(false);
-        $this->objDebug->setBolDebugInfra(false);
-        $this->objDebug->setBolEcho(false);
-
-        print PHP_EOL;
-        die();
-    }
+        InfraDebug::getInstance()->setBolLigado(false);
+        InfraDebug::getInstance()->setBolDebugInfra(false);
+        InfraDebug::getInstance()->setBolEcho(false);
+        $this->numSeg = 0;
+        die;
+    }  
     
     /**
      * Adiciona uma mensagem ao output para o usuário

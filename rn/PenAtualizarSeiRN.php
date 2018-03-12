@@ -50,9 +50,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             } else if ($strVersaoModuloPen == '1.0.1') {
                 $this->instalarV102();
             } else if ($strVersaoModuloPen == '1.1.0') {
+                
             }
 
-
+            $this->finalizar('FIM');
             InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
 
@@ -62,7 +63,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             throw new InfraException('Erro atualizando VERSAO.', $e);
         }
     }
-    
+
+
     /**
      * Cria um novo parâmetro
      * @return int Código do Parametro gerado
