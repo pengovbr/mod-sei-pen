@@ -242,22 +242,20 @@ class PENAgendamentoRN extends InfraRN {
                 $cont++;
                 $servico[] = 'ProcessarPendenciasRN.php';
             }
-
-            $servicos = implode("\n", $servico);
-
-
+            
+			$strServicos = array_map(function($item){ return "- $item"; }, $servico);
+			$strServicos = implode("\n", $strServicos);
 
             if ($cont > 0) {
-                $msg = "Falha na execução. \n Os seguintes serviços não estão rodando: \n $servicos";
-//                LogSEI::getInstance()->gravar();
+                $msg = "Identificada inconsistência nos serviços de integração com o Processo Eletrônico Nacional - PEN.\n" . 
+               		"Os seguintes serviços necessários para o correto funcionamento da integração não estão ativos: \n $strServicos \n\n" .
+                	"Favor, entrar em contato com a equipe de suporte técnico.";
                 throw new InfraException($msg, $e);
             } else {
                 LogSEI::getInstance()->gravar("Todos os serviços estão rodando.");
             }
-//      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-//      InfraMail::enviarConfigurado(ConfiguracaoSEI::getInstance(), $objInfraParametro->getValor('SEI_EMAIL_SISTEMA'), $objInfraParametro->getValor('SEI_EMAIL_ADMINISTRADOR'), null, null, 'Teste Agendamento SEI', 'Agendamento SEI executado com sucesso.');
         } catch (Exception $e) {
-            throw new InfraException('Erro ao rodar verificação de status do serviços Gearmand e Supervisord', $e);
+            throw new InfraException('Erro ao analisar status do serviços Gearmand e Supervisord', $e);
         }
     }
 
