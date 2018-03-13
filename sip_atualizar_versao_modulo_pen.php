@@ -530,12 +530,6 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO 1.0.0');
 
-            //testando versao do framework
-//            $numVersaoInfraRequerida = '1.415';
-//            if (VERSAO_INFRA >= $numVersaoInfraRequerida) {
-//                $this->finalizar('VERSAO DO FRAMEWORK PHP INCOMPATIVEL (VERSAO ATUAL ' . VERSAO_INFRA . ', VERSAO REQUERIDA ' . $numVersaoInfraRequerida . ')', true);
-//            }
-
             //testando se esta usando BDs suportados
             if (!(BancoSip::getInstance() instanceof InfraMySql) &&
                     !(BancoSip::getInstance() instanceof InfraSqlServer) &&
@@ -556,39 +550,24 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
             $objInfraParametro = new InfraParametro($this->objInfraBanco);
 
-            //$strVersaoAtual = $objInfraParametro->getValor('SEI_VERSAO', false);
-            $strVersaoModuloPen = $objInfraParametro->getValor($this->sip_versao, false);
-            
-            //VERIFICANDO QUAL VERSAO DEVE SER INSTALADA NESTA EXECUCAO
-            if (InfraString::isBolVazia($strVersaoModuloPen)) {
-                $this->instalarV100();
-                $this->instalarV101();
-                $this->instalarV102();
-                $this->instalarV103();
-                $this->instalarV104();
-            } else {
-                switch ($strVersaoModuloPen) {
-                    case '1.0.0':
-                        $this->instalarV101();
-                        $this->instalarV102();
-                        $this->instalarV103();
-                        $this->instalarV104();
-                        break;
 
-                    case '1.0.1':
-                        $this->instalarV102();
-                        $this->instalarV103();
-                        $this->instalarV104();
-                        break;
-                    
-                    case '1.0.2': //Remover depois de usar
-                        $this->instalarV103();
-                        $this->instalarV104();
-                        break;
-                    case '1.0.3': //Remover depois de usar
-                        $this->instalarV104();
-                        break;
-                }
+            // Aplicação de scripts de atualização de forma incremental
+            // Ausência de [break;] proposital para realizar a atualização incremental de versões
+            $strVersaoModuloPen = $objInfraParametro->getValor($this->nomeParametroModulo, false);
+            switch ($strVersaoModuloPen) {
+                //case '' - Nenhuma versão instalada
+                case '':      $this->instalarV100();
+                case '1.0.0': $this->instalarV101();
+                case '1.0.1': $this->instalarV102();
+                case '1.0.2': $this->instalarV103();
+                case '1.0.3': $this->instalarV104();
+                case '1.0.4': $this->instalarV111();
+
+                break;
+                default:
+                    $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
+                    break;
+
             }
 
             $this->finalizar('FIM');
@@ -1346,6 +1325,25 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.0.4');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.1.1
+     */
+    protected function instalarV111() {
+        
+        //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
+        //...
+
+
+        /* Corrigir a versão do módulo no banco de dados */
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.1.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
