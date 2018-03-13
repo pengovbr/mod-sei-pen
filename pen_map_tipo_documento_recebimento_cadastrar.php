@@ -10,6 +10,7 @@ try {
 
     session_start();
 
+	$objSessao = SessaoSEI::getInstance(); 
     $objPaginaSEI = PaginaSEI::getInstance();
 
     SessaoSEI::getInstance()->validarLink();
@@ -175,12 +176,12 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('12em'); ?>
 
-    <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental:</label>
+    <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
     <select name="codigo_especie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumCodigoEspecie(), $arrEspecieDocumental); ?>
     </select>
 
-    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento:</label>
+    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento - SEI <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?> :</label>
     <select name="id_serie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumIdSerie(), $objTipoDocMapRN->listarParesSerie()); ?>
     </select>
