@@ -159,11 +159,11 @@ $objPagina->montarStyle();
 ?>
 <style type="text/css">
 
-.input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:15%;width:25%}    
+.input-label-first{position:absolute;left:0%;top:40%;width:25%; color: #666!important}
+.input-field-first{position:absolute;left:0%;top:55%;width:25%}    
 
-.input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
-.input-field-third {position:absolute;left:0%;top:55%;width:25%;}
+.input-label-third {position:absolute;left:0%;top:00%;width:25%; color:#666!important}
+.input-field-third {position:absolute;left:0%;top:15%;width:25%;}
     
 </style>
 <?php $objPagina->montarJavaScript(); ?>
@@ -204,15 +204,14 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('12em'); ?>
 
-    <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-    
-    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
-        <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
-    </select>
-
     <label for="id_barramento" class="infraLabelObrigatorio input-label-third">Hipótese Legal - Tramitação PEN:</label>
     <select name="id_barramento" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelHipoteseLegalDTO->getNumIdBarramento(),  $arrMapIdBarramento); ?>
+    </select>
+
+    <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>    
+    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+        <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
     </select>
     
     <?php print $objPagina->fecharAreaDados(); ?>

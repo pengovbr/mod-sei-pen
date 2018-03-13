@@ -82,17 +82,24 @@ abstract class PenAtualizadorRN extends InfraRN {
      * 
      * @return null
      */
-    protected function finalizar() {
+    protected function finalizar($strMsg=null, $bolErro=false){
+        if (!$bolErro) {
+          $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
+          $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
+        }else{
+          $strMsg = 'ERRO: '.$strMsg;
+        }
 
-        $this->logar('TEMPO TOTAL DE EXECUCAO: ' . InfraUtil::verificarTempoProcessamento($this->numSeg) . ' s');
+        if ($strMsg!=null){
+          $this->logar($strMsg);
+        }
 
-        $this->objDebug->setBolLigado(false);
-        $this->objDebug->setBolDebugInfra(false);
-        $this->objDebug->setBolEcho(false);
-
-        print PHP_EOL;
-        die();
-    }
+        InfraDebug::getInstance()->setBolLigado(false);
+        InfraDebug::getInstance()->setBolDebugInfra(false);
+        InfraDebug::getInstance()->setBolEcho(false);
+        $this->numSeg = 0;
+        die;
+    }    
 
     /**
      * Construtor

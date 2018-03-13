@@ -242,22 +242,20 @@ class PENAgendamentoRN extends InfraRN {
                 $cont++;
                 $servico[] = 'ProcessarPendenciasRN.php';
             }
-
-            $servicos = implode("\n", $servico);
-
-
+            
+			$strServicos = array_map(function($item){ return "- $item"; }, $servico);
+			$strServicos = implode("\n", $strServicos);
 
             if ($cont > 0) {
-                $msg = "Falha na execução. \n Os seguintes serviços não estão rodando: \n $servicos";
-//                LogSEI::getInstance()->gravar();
+                $msg = "Identificada inconsistência nos serviços de integração com o Processo Eletrônico Nacional - PEN.\n" . 
+               		"Os seguintes serviços necessários para o correto funcionamento da integração não estão ativos: \n $strServicos \n\n" .
+                	"Favor, entrar em contato com a equipe de suporte técnico.";
                 throw new InfraException($msg, $e);
             } else {
                 LogSEI::getInstance()->gravar("Todos os serviços estão rodando.");
             }
-//      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-//      InfraMail::enviarConfigurado(ConfiguracaoSEI::getInstance(), $objInfraParametro->getValor('SEI_EMAIL_SISTEMA'), $objInfraParametro->getValor('SEI_EMAIL_ADMINISTRADOR'), null, null, 'Teste Agendamento SEI', 'Agendamento SEI executado com sucesso.');
         } catch (Exception $e) {
-            throw new InfraException('Erro ao rodar verificação de status do serviços Gearmand e Supervisord', $e);
+            throw new InfraException('Erro ao analisar status do serviços Gearmand e Supervisord', $e);
         }
     }
 
@@ -290,7 +288,7 @@ class PENAgendamentoRN extends InfraRN {
                     continue;
                 }
 
-                $objDTO->setStrNome($hipotese->nome);
+                $objDTO->setStrNome(utf8_decode($hipotese->nome));
 
                 if ($hipotese->status) {
                     $objDTO->setStrAtivo('S');
@@ -298,12 +296,12 @@ class PENAgendamentoRN extends InfraRN {
                     $objDTO->setStrAtivo('N');
                 }
 
-                //Caso n?o exista a hip?tese ir? cadastra-la no sei.
+                //Caso n?o exista a hipótese irá cadastra-la no sei.
                 if (empty($objConsulta)) {
 
                     $objBD->cadastrar($objDTO);
                 } else {
-                    //Caso contr?rio apenas ir? atualizar os dados.
+                    //Caso contrário apenas irá atualizar os dados.
                     $objDTO->setNumIdHipoteseLegal($objConsulta->getNumIdHipoteseLegal());
                     $objBD->alterar($objDTO);
                 }
@@ -315,45 +313,4 @@ class PENAgendamentoRN extends InfraRN {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
         }
     }
-
 }
-
-// $client = new GearmanClient();
-// $client->addServer('localhost', 4730);
-// $client->setCreatedCallback("create_change");
-// $client->setDataCallback("data_change");
-// $client->setStatusCallback("status_change");
-// $client->setCompleteCallback("complete_change");
-// $client->setFailCallback("fail_change");
-// $data_array =array('mydata'=>'task');
-// $task= $client->addTask("reverse", "mydata", $data_array);
-// $task2= $client->addTaskLow("reverse", "task", NULL);
-// //$result = $client->do("reverse", "teste");
-// $client->runTasks();
-// echo "DONE\n" . $result;
-// function create_change($task)
-// {
-//   echo "CREATED: " . $task->jobHandle() . "\n";
-// }
-// function status_change($task)
-// {
-//   echo "STATUS: " . $task->jobHandle() . " - " . $task->taskNumerator() . 
-//   "/" . $task->taskDenominator() . "\n";
-// }
-// function complete_change($task)
-// {
-//   echo "COMPLETE: " . $task->jobHandle() . ", " . $task->data() . "\n";
-// }
-// function fail_change($task)
-// {
-//   echo "FAILED: " . $task->jobHandle() . "\n";
-// }
-// function data_change($task)
-// {
-//   echo "DATA: " . $task->data() . "\n";
-// }
-// Function Client_error()
-// {
-//   if (! $client->runTasks())
-//     return $client->error() ;
-// }

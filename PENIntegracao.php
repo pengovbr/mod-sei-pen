@@ -5,7 +5,7 @@ class PENIntegracao extends SeiIntegracao {
     private static $strDiretorio;
 
     public function getNome() {
-        return 'Módulo de Integração com o Barramento PEN';
+        return 'Integração Processo Eletrônico Nacional - PEN';
     }
 
     public function getVersao() {
@@ -13,7 +13,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getInstituicao() {
-        return 'MPDG - Ministério do Planejamento, Desenvolvimento e Gestão';
+        return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
     }
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) {
@@ -58,7 +58,7 @@ class PENIntegracao extends SeiIntegracao {
         //Apresenta o botão de expedir processo
         if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
             $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-            $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Tramitar Externamente" title="Tramitar Externamente" /></a>';
+            $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
         }
 
         //Apresenta o botão da página de recibos

@@ -69,7 +69,7 @@ try {
     }
 
     if(!array_key_exists('selRepositorioEstruturas', $_POST) || empty($_POST['selRepositorioEstruturas'])) {
-        $objInfraException->adicionarValidacao('Informe o Repositorio de Estruturas Organizacionais', $strProtocoloFormatado);
+        $objInfraException->adicionarValidacao('Informe o Repositório de Estruturas Organizacionais', $strProtocoloFormatado);
     }
     
     if(!array_key_exists('hdnIdUnidade', $_POST) || empty($_POST['hdnIdUnidade'])) {

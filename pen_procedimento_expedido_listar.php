@@ -26,7 +26,7 @@ try {
     if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
         $objFiltroDTO->retDthConclusaoAtividade();
     }
-    $objPaginaSEI->prepararPaginacao($objFiltroDTO, 10);
+    $objPaginaSEI->prepararPaginacao($objFiltroDTO, 50);
     
     BancoSEI::getInstance()->abrirConexao();
     
