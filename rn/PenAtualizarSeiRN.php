@@ -37,7 +37,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
-            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
             switch ($strVersaoModuloPen) {                
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
@@ -1097,10 +1097,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.1.1 do módulo */    
     protected function instalarV111() {
 
+        //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
+        BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);

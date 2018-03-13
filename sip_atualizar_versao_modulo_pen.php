@@ -7,479 +7,20 @@ set_include_path(implode(PATH_SEPARATOR, array(
 )));
 
 
-/**
- * Mapeamento dos metadados sobre a estrutura do banco de dados
- *
- * @author Join Tecnologia
- */
-class PenMetaBD extends InfraMetaBD {
-    
-    const NNULLO = 'NOT NULL';
-    const SNULLO = 'NULL';
+class PenAtualizarSipRN extends InfraRN {
 
-    /**
-     * 
-     * @return string
-     */
-    public function adicionarValorPadraoParaColuna($strNomeTabela, $strNomeColuna, $strValorPadrao, $bolRetornarQuery = false){
-        
-        $objInfraBanco = $this->getObjInfraIBanco();
-        
-        $strTableDrive = get_parent_class($objInfraBanco);
-        $strQuery = '';
-        
-        switch($strTableDrive) {
+    protected $versaoMinRequirida = '1.30.0';
+    const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
+    const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';    
+    private $arrRecurso = array();
+    private $arrMenu = array();
 
-            case 'InfraMySqli':
-                $strQuery = sprintf("ALTER TABLE `%s` ALTER COLUMN `%s` SET DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
-                break;
-                
-            case 'InfraSqlServer':
-                 $strQuery =  sprintf("ALTER TABLE [%s] ADD DEFAULT('%s') FOR [%s]", $strNomeTabela, $strValorPadrao, $strNomeColuna);
-            
-            case 'InfraOracle':
-                break;
-        }
-        
-        if($bolRetornarQuery === false) {
-            
-            $objInfraBanco->executarSql($strQuery);
-        }
-        else {
-        
-            return  $strQuery;
-        }
-    }
-    
-    /**
-     * Verifica se o usuário do drive de conexão possui permissão para criar/ remover
-     * estruturas
-     * 
-     * @return PenMetaBD
-     */
-    public function isDriverPermissao(){
-        
-        $objInfraBanco = $this->getObjInfraIBanco();
-
-        if(count($this->obterTabelas('sei_teste'))==0){
-            $objInfraBanco->executarSql('CREATE TABLE sei_teste (id '.$this->tipoNumero().' NULL)');
-        }
-      
-        $objInfraBanco->executarSql('DROP TABLE sei_teste');
-        
-        return $this;
-    }
-    
-    /**
-     * Verifica se o banco do SEI é suportador pelo atualizador
-     * 
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function isDriverSuportado(){
-        
-        $strTableDrive = get_parent_class($this->getObjInfraIBanco());
-            
-        switch($strTableDrive) {
-
-           case 'InfraMySqli':
-                // Fix para bug de MySQL versão inferior ao 5.5 o default engine
-                // é MyISAM e não tem suporte a FOREING KEYS
-                $version = $this->getObjInfraIBanco()->consultarSql('SELECT VERSION() as versao');
-                $version = $version[0]['versao'];
-                $arrVersion = explode('.', $version);
-                
-                if($arrVersion[0].$arrVersion[1] < 56){
-                    $this->getObjInfraIBanco()->executarSql('@SET STORAGE_ENGINE=InnoDB'); 
-                }
-            case 'InfraSqlServer':
-            case 'InfraOracle':
-                break;
-
-            default:
-                throw new InfraException('BANCO DE DADOS NAO SUPORTADO: ' . $strTableDrive);
-
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Verifica se a versão sistema é compativel com a versão do módulo PEN
-     * 
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function isVersaoSuportada($strRegexVersaoSistema, $strVerMinRequirida){
-        
-        $numVersaoRequerida = intval(preg_replace('/\D+/', '', $strVerMinRequirida));
-        $numVersaoSistema = intval(preg_replace('/\D+/', '', $strRegexVersaoSistema));
-        
-        if($numVersaoRequerida > $numVersaoSistema){
-            throw new InfraException('VERSAO DO FRAMEWORK PHP INCOMPATIVEL (VERSAO ATUAL '.$strRegexVersaoSistema.', VERSAO REQUERIDA '.$strVerMinRequirida.')');
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Apaga a chave primária da tabela
-     * 
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function removerChavePrimaria($strNomeTabela, $strNomeChave){
-        
-        if($this->isChaveExiste($strNomeTabela, $strNomeChave)) {
-        
-            $strTableDrive = get_parent_class($this->getObjInfraIBanco());
-
-            switch($strTableDrive) {
-
-                case 'InfraMySqli':
-                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP PRIMARY KEY');
-                    break;
-
-                case 'InfraSqlServer':
-                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP CONSTRAINT '.$strNomeChave);
-                    break;
-
-                case 'InfraOracle':
-                    break;
-            }
-        }
-        return $this;
-    }
-        
-    public function isChaveExiste($strNomeTabela = '', $strNomeChave = ''){
-        
-        $objInfraBanco = $this->getObjInfraIBanco();
-        $strTableDrive = get_parent_class($objInfraBanco);
-            
-        switch($strTableDrive) {
-
-            case 'InfraMySqli':
-                $strSql = " SELECT COUNT(CONSTRAINT_NAME) AS EXISTE
-                            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                            WHERE CONSTRAINT_SCHEMA = '".$objInfraBanco->getBanco()."'
-                            AND TABLE_NAME = '".$strNomeTabela."'
-                            AND CONSTRAINT_NAME = '".$strNomeChave."'";
-                break;
-            
-            case 'InfraSqlServer':
-                
-                $strSql = " SELECT COUNT(CONSTRAINT_NAME) AS EXISTE 
-                            FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
-                            WHERE CONSTRAINT_CATALOG = '".$objInfraBanco->getBanco()."'
-                            AND TABLE_NAME = '".$strNomeTabela."'
-                            AND CONSTRAINT_NAME = '".$strNomeChave."'";
-                break;
-                
-            case 'InfraOracle':
-                 $strSql = "SELECT 0 AS EXISTE";
-                break;
-        }
-        
-        $strSql = preg_replace('/\s+/', ' ', $strSql);
-        $arrDados = $objInfraBanco->consultarSql($strSql);
-
-        return (intval($arrDados[0]['EXISTE']) > 0) ? true : false;
-    }
-    
-    public function adicionarChaveUnica($strNomeTabela = '', $arrNomeChave = array()){
-        
-        $this->getObjInfraIBanco()
-                ->executarSql('ALTER TABLE '.$strNomeTabela.' ADD CONSTRAINT UK_'.$strNomeTabela.' UNIQUE('.implode(', ', $arrNomeChave).')');
-    }
-    
-    public function renomearTabela($strNomeTabelaAtual, $strNomeTabelaNovo){
-        
-        if($this->isTabelaExiste($strNomeTabelaAtual)) {
-            
-            $objInfraBanco = $this->getObjInfraIBanco();
-        
-            $strTableDrive = get_parent_class($objInfraBanco);
-            $strQuery = '';
-
-            switch ($strTableDrive) {
-
-                    case 'InfraMySqli':
-                        $strQuery = sprintf("ALTER TABLE `%s` RENAME TO `%s`", $strNomeTabelaAtual, $strNomeTabelaNovo);
-                        break;
-
-                    case 'InfraSqlServer':
-                        $strQuery = sprintf("sp_rename '%s', '%s'", $strNomeTabelaAtual, $strNomeTabelaNovo);
-
-                    case 'InfraOracle':
-                        $strQuery = sprintf("RENAME TABLE %s TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
-                        break;
-            }
-            
-            $objInfraBanco->executarSql($strQuery);
-        }
-    }
-    
-    
-    /**
-     * Verifica se uma tabela existe no banco
-     * 
-     * @throws InfraException
-     * @return bool
-     */
-    public function isTabelaExiste($strNomeTabela = ''){
-        
-        $objInfraBanco = $this->getObjInfraIBanco();
-        $strTableDrive = get_parent_class($objInfraBanco);
-            
-        switch($strTableDrive) {
-
-            case 'InfraMySqli':
-                $strSql = "SELECT COUNT(TABLE_NAME) AS EXISTE
-                            FROM INFORMATION_SCHEMA.TABLES
-                            WHERE TABLE_SCHEMA = '".$objInfraBanco->getBanco()."'
-                            AND TABLE_NAME = '".$strNomeTabela."'";
-                break;
-            
-            case 'InfraSqlServer':
-                
-                $strSql = "SELECT COUNT(TABLE_NAME) AS EXISTE 
-                            FROM INFORMATION_SCHEMA.TABLES
-                            WHERE TABLE_CATALOG = '".$objInfraBanco->getBanco()."'
-                            AND TABLE_NAME = '".$strNomeTabela."'";
-                break;
-                
-            case 'InfraOracle':
-                 $strSql = "SELECT 0 AS EXISTE";
-                break;
-        }
-        
-        $strSql = preg_replace('/\s+/', ' ', $strSql);
-        $arrDados = $objInfraBanco->consultarSql($strSql);
-
-        return (intval($arrDados[0]['EXISTE']) > 0) ? true : false;
-    }
-    
-    public function isColuna($strNomeTabela = '', $strNomeColuna = ''){
-              
-        $objInfraBanco = $this->getObjInfraIBanco();
-        $strTableDrive = get_parent_class($objInfraBanco);
-            
-        switch($strTableDrive) {
-
-            case 'InfraMySqli':
-                $strSql = "SELECT COUNT(TABLE_NAME) AS EXISTE
-                            FROM INFORMATION_SCHEMA.COLUMNS
-                            WHERE TABLE_SCHEMA = '".$objInfraBanco->getBanco()."'
-                            AND TABLE_NAME = '".$strNomeTabela."' 
-                            AND COLUMN_NAME = '".$strNomeColuna."'";
-                break;
-            
-            case 'InfraSqlServer':
-                
-                $strSql = "SELECT COUNT(COLUMN_NAME) AS EXISTE
-                           FROM INFORMATION_SCHEMA.COLUMNS
-                           WHERE TABLE_CATALOG = '".$objInfraBanco->getBanco()."'
-                           AND TABLE_NAME = '".$strNomeTabela."' 
-                           AND COLUMN_NAME = '".$strNomeColuna."'";
-                break;
-                
-            case 'InfraOracle':
-                 $strSql = "SELECT 0 AS EXISTE";
-                break;
-        }
-        
-        $strSql = preg_replace('/\s+/', ' ', $strSql);
-        $arrDados = $objInfraBanco->consultarSql($strSql);
-
-        return (intval($arrDados[0]['EXISTE']) > 0) ? true : false;
-        
-        
-    }
-    
-    /**
-     * Cria a estrutura da tabela no padrão ANSI
-     * 
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function criarTabela($arrSchema = array()){
-        
-        $strNomeTabela = $arrSchema['tabela'];
-        
-        
-        if($this->isTabelaExiste($strNomeTabela)) {
-            return $this;
-        }
-        
-        $objInfraBanco = $this->getObjInfraIBanco();
-        $arrColunas = array();
-        $arrStrQuery = array();
-
-        foreach($arrSchema['cols'] as $strNomeColuna => $arrColunaConfig) {
-            
-            list($strTipoDado, $strValorPadrao) = $arrColunaConfig;
-            
-            if($strValorPadrao != self::SNULLO && $strValorPadrao != self::NNULLO) {
-                
-                $arrStrQuery[] = $this->adicionarValorPadraoParaColuna($strNomeTabela, $strNomeColuna, $strValorPadrao, true);
-                $strValorPadrao = self::NNULLO;
-            }
-
-            $arrColunas[] = $strNomeColuna.' '.$strTipoDado.' '.$strValorPadrao;
-        }
-        
-        $objInfraBanco->executarSql('CREATE TABLE '.$strNomeTabela.' ('.implode(', ', $arrColunas).')');
-        
-        if(!empty($arrSchema['pk'])) {
-            
-           $this->adicionarChavePrimaria($strNomeTabela, 'pk_'.$strNomeTabela, $arrSchema['pk']); 
-           
-           if(count($arrSchema['pk']) > 1) {
-               
-               foreach($arrSchema['pk'] as $strPk) {
-           
-                    $objInfraBanco->executarSql('CREATE INDEX idx_'.$strNomeTabela.'_'.$strPk.' ON '.$strNomeTabela.'('.$strPk.')');
-               }
-           }
-        }
-        
-        if(array_key_exists('uk', $arrSchema) && !empty($arrSchema['uk'])) {
-            
-            $this->adicionarChaveUnica($strNomeTabela, $arrSchema['uk']);
-        }
-        
-        if(!empty($arrSchema['fks'])) {
-            
-            foreach($arrSchema['fks'] as $strTabelaOrigem => $array) {
-                
-                $strNomeFK = 'fk_'.$strNomeTabela.'_'.$strTabelaOrigem;
-                $arrCamposOrigem = (array)array_shift($array);
-                $arrCampos = $arrCamposOrigem;
-
-                if(!empty($array)) {
-                    $arrCampos = (array)array_shift($array);
-                }
-
-                $this->adicionarChaveEstrangeira($strNomeFK, $strNomeTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem);   
-            }
-        }
-        
-        if(!empty($arrStrQuery)) {
-            
-            foreach($arrStrQuery as $strQuery) {    
-                $objInfraBanco->executarSql($strQuery);
-            }
-        }
-        
-        return $this;
-    }
-    
-    /**
-     * Apagar a estrutura da tabela no banco de dados
-     * 
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function removerTabela($strNomeTabela = ''){
-        
-        $this->getObjInfraIBanco()->executarSql('DROP TABLE '.$strNomeTabela);
-        return $this;
-    }
-    
-    public function adicionarChaveEstrangeira($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem) {
-        
-        if(!$this->isChaveExiste($strTabela, $strNomeFK)) {
-            parent::adicionarChaveEstrangeira($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem);
-        }
-        return $this;
-    }
-    
-    public function adicionarChavePrimaria($strTabela, $strNomePK, $arrCampos) {
-        
-        if(!$this->isChaveExiste($strTabela, $strNomePK)) {
-            parent::adicionarChavePrimaria($strTabela, $strNomePK, $arrCampos);
-        }
-        return $this;
-    }
-    
-    public function alterarColuna($strTabela, $strColuna, $strTipo, $strNull = '') {
-        parent::alterarColuna($strTabela, $strColuna, $strTipo, $strNull);
-        return $this;
-    }
-    
-    public function excluirIndice($strTabela, $strIndex) {
-        if($this->isChaveExiste($strTabela, $strFk)) {
-            parent::excluirIndice($strTabela, $strIndex);
-        }
-        return $this;
-    }
-    
-    public function excluirChaveEstrangeira($strTabela, $strFk) {
-        if($this->isChaveExiste($strTabela, $strFk)) {
-            parent::excluirChaveEstrangeira($strTabela, $strFk);
-        }
-        return $this;
-    }
-}
-
-abstract class PenAtualizadorRN extends InfraRN {
-
-    protected $sip_versao;
-
-    /**
-     * @var string Versão mínima requirida pelo sistema para instalação do PEN
-     */
-    protected $versaoMinRequirida;
-
-    /**
-     * @var InfraIBanco Instância da classe de persistência com o banco de dados
-     */
-    protected $objBanco;
-
-    /**
-     * @var InfraMetaBD Instância do metadata do banco de dados
-     */
-    protected $objMeta;
-
-    /**
-     * @var InfraDebug Instância do debuger
-     */
-    protected $objDebug;
-
-    /**
-     * @var integer Tempo de execução do script
-     */
-    protected $numSeg = 0;
-    
-    protected $objInfraBanco ;
-
-    protected function inicializarObjInfraIBanco() {
-        
-        if (empty($this->objInfraBanco)) {
-            $this->objInfraBanco = BancoSip::getInstance();
-            $this->objInfraBanco->abrirConexao();
-        }
-        
-        return $this->objInfraBanco;
+    public function __construct(){
+        parent::__construct();
     }
 
-    /**
-     * Inicia a conexão com o banco de dados
-     */
-    protected function inicializarObjMetaBanco() {
-        if (empty($this->objMeta)) {
-            $this->objMeta = new PenMetaBD($this->inicializarObjInfraIBanco());
-        }
-        return $this->objMeta;
-    }
-
-    /**
-     * Adiciona uma mensagem ao output para o usuário
-     * 
-     * @return null
-     */
-    protected function logar($strMsg) {
-        $this->objDebug->gravar($strMsg);
+    protected function inicializarObjInfraIBanco(){
+        return BancoSip::getInstance();
     }
 
     /**
@@ -489,44 +30,26 @@ abstract class PenAtualizadorRN extends InfraRN {
      */
     protected function inicializar($strTitulo) {
 
-        $this->numSeg = InfraUtil::verificarTempoProcessamento();
+        session_start();
+        SessaoSip::getInstance(false);
 
-        $this->logar($strTitulo);
-    } 
-
-    /**
-     * Construtor
-     * 
-     * @param array $arrArgs Argumentos enviados pelo script
-     */
-    public function __construct() {
-        
-        parent::__construct();
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
         @ini_set('zlib.output_compression', '0');
         @ini_set('implicit_flush', '1');
         ob_implicit_flush();
         
-        $this->inicializarObjInfraIBanco();
-        $this->inicializarObjMetaBanco();
-
         $this->objDebug = InfraDebug::getInstance();
         $this->objDebug->setBolLigado(true);
         $this->objDebug->setBolDebugInfra(true);
         $this->objDebug->setBolEcho(true);
         $this->objDebug->limpar();
-    }
-}
 
-class PenAtualizarSipRN extends PenAtualizadorRN {
+        $this->numSeg = InfraUtil::verificarTempoProcessamento();
+        $this->logar($strTitulo);
+    } 
 
-    protected $versaoMinRequirida = '1.30.0';
-    protected $sip_versao = 'PEN_VERSAO_MODULO_SIP';
-    private $arrRecurso = array();
-    private $arrMenu = array();
-    
-    public function atualizarVersao() {
+    protected function atualizarVersaoConectado() {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO 1.0.0');
 
@@ -537,10 +60,9 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSip::getInstance()), true);
             }
-            
-           
+                   
             //testando permissoes de criações de tabelas
-            $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+            $objInfraMetaBD = new InfraMetaBD(BancoSip::getInstance());
             
             if (count($objInfraMetaBD->obterTabelas('pen_sip_teste')) == 0) {
                 BancoSip::getInstance()->executarSql('CREATE TABLE pen_sip_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
@@ -548,12 +70,11 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             BancoSip::getInstance()->executarSql('DROP TABLE pen_sip_teste');
 
 
-            $objInfraParametro = new InfraParametro($this->objInfraBanco);
-
+            $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
             // Aplicação de scripts de atualização de forma incremental
-            // Ausência de [break;] proposital para realizar a atualização incremental de versões
-            $strVersaoModuloPen = $objInfraParametro->getValor($this->nomeParametroModulo, false);
+            // Ausência de [break;] proposital para realizar a atualização incremental de versões            
+            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
             switch ($strVersaoModuloPen) {
                 //case '' - Nenhuma versão instalada
                 case '':      $this->instalarV100();
@@ -580,19 +101,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
             throw new InfraException('Erro atualizando VERSAO.', $e);
         }
     }
-    
-    /**
-     * Inicia o script criando um contator interno do tempo de execução
-     * 
-     * @return null
-     */
-    protected function inicializar($strTitulo) {
-
-        $this->numSeg = InfraUtil::verificarTempoProcessamento();
-
-        $this->logar($strTitulo);
-    }
-    
+        
     /**
      * Finaliza o script informando o tempo de execução.
      * 
@@ -667,7 +176,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
     }
 
     /**
-     * 
+     * Cria novo recurso no SIP
      * @return int Código do Recurso gerado
      */
     protected function criarRecurso($strNome = '', $strDescricao = null, $numIdSistema = 0) {
@@ -699,6 +208,44 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         return $objDTO->getNumIdRecurso();
     }
 
+    protected function renomearRecurso($numIdSistema, $strNomeAtual, $strNomeNovo){
+
+        $objRecursoDTO = new RecursoDTO();
+        $objRecursoDTO->setBolExclusaoLogica(false);
+        $objRecursoDTO->retNumIdRecurso();
+        $objRecursoDTO->retStrCaminho();
+        $objRecursoDTO->setNumIdSistema($numIdSistema);
+        $objRecursoDTO->setStrNome($strNomeAtual);
+
+        $objRecursoRN = new RecursoRN();
+        $objRecursoDTO = $objRecursoRN->consultar($objRecursoDTO);
+
+        if ($objRecursoDTO!=null){
+            $objRecursoDTO->setStrNome($strNomeNovo);
+            $objRecursoDTO->setStrCaminho(str_replace($strNomeAtual,$strNomeNovo,$objRecursoDTO->getStrCaminho()));
+            $objRecursoRN->alterar($objRecursoDTO);
+        }
+    }
+
+    protected function consultarRecurso($numIdSistema, $strNomeRecurso){
+
+        $numIdRecurso = null;
+        $objRecursoDTO = new RecursoDTO();
+        $objRecursoDTO->setBolExclusaoLogica(false);        
+        $objRecursoDTO->setNumIdSistema($numIdSistema);
+        $objRecursoDTO->setStrNome($strNomeRecurso);
+        $objRecursoDTO->retNumIdRecurso();
+
+        $objRecursoRN = new RecursoRN();
+        $objRecursoDTO = $objRecursoRN->consultar($objRecursoDTO);
+
+        if ($objRecursoDTO == null){
+            throw new InfraException("Recurso com nome {$strNomeRecurso} não pode ser localizado.");            
+        }
+
+        return $objRecursoDTO->getNumIdRecurso();
+    }
+
     /**
      * Cria um menu
      * 
@@ -714,7 +261,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objDTO->setNumMaxRegistrosRetorno(1);
         $objDTO->retNumIdItemMenu();
 
-        $objBD = new ItemMenuBD($this->objInfraBanco);
+        $objBD = new ItemMenuBD(BancoSip::getInstance());
         $objDTO = $objBD->consultar($objDTO);
 
         if (empty($objDTO)) {
@@ -748,7 +295,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         if (!empty($this->arrRecurso)) {
 
             $objDTO = new RelPerfilRecursoDTO();
-            $objBD = new RelPerfilRecursoBD($this->objInfraBanco);
+            $objBD = new RelPerfilRecursoBD(BancoSip::getInstance());
 
             foreach ($this->arrRecurso as $numIdRecurso) {
 
@@ -768,7 +315,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         if (!empty($this->arrMenu)) {
 
             $objDTO = new RelPerfilItemMenuDTO();
-            $objBD = new RelPerfilItemMenuBD($this->objInfraBanco);
+            $objBD = new RelPerfilItemMenuBD(BancoSip::getInstance());
 
             foreach ($this->arrMenu as $array) {
 
@@ -789,7 +336,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
 
     public function atribuirPerfil($numIdSistema) {
         $objDTO = new PerfilDTO();
-        $objBD = new PerfilBD($this->objInfraBanco);
+        $objBD = new PerfilBD(BancoSip::getInstance());
         $objRN = $this;
 
         // Vincula a um perfil os recursos e menus adicionados nos métodos criarMenu e criarReturso
@@ -840,7 +387,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
         $objItemMenuDTO->retNumIdItemMenu();
 
-        $objItemMenuBD = new ItemMenuBD($this->objInfraBanco);
+        $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
         if (empty($objItemMenuDTO)) {
@@ -878,7 +425,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         $this->atribuirPerfil($numIdSistema);
         
         // ---------- antigo método (instalarV003R003S003IW001) ---------- //
-        $objBD = new ItemMenuBD($this->objInfraBanco);
+        $objBD = new ItemMenuBD(BancoSip::getInstance());
 
         // Achar o root
         $numIdSistema = $this->getNumIdSistema('SEI');
@@ -939,7 +486,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         }
         
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
         
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
@@ -1054,7 +601,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->retTodos();
         
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
@@ -1112,7 +659,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
        
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->retTodos();
         
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
@@ -1241,7 +788,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
@@ -1320,7 +867,7 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
         
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
@@ -1332,14 +879,53 @@ class PenAtualizarSipRN extends PenAtualizadorRN {
      * Instala/Atualiza os módulo PEN para versão 1.1.1
      */
     protected function instalarV111() {
-        
-        //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
-        //...
+        $numIdSistema = $this->getNumIdSistema('SEI');
 
+        //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
+        BancoSIP::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
+
+        //Adequação em nome de recursos do módulo
+        $this->renomearRecurso($numIdSistema, 'apensados_selecionar_expedir_procedimento', 'pen_apensados_selecionar_expedir_procedimento');
+
+        //Atualização com recursos não adicionados automaticamente em versões anteriores
+        $this->arrRecurso = array_merge($this->arrRecurso, array(
+            $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_envio_alterar"),
+            $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_envio_excluir"),
+            $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_recebimento_alterar"),
+            $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_recebimento_excluir"),
+            $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_recebimento_visualizar"),
+            $this->consultarRecurso($numIdSistema, "pen_parametros_configuracao_alterar")
+            ));
+
+        $this->atribuirPerfil($numIdSistema);
+
+        $objPerfilRN = new PerfilRN();
+        $objPerfilDTO = new PerfilDTO();
+        $objPerfilDTO->retNumIdPerfil();
+        $objPerfilDTO->setNumIdSistema($numIdSistema);
+        $objPerfilDTO->setStrNome('Administrador');
+        $objPerfilDTO = $objPerfilRN->consultar($objPerfilDTO);
+        if ($objPerfilDTO == null){
+            throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
+        }
+
+        $numIdPerfilSeiAdministrador = $objPerfilDTO->getNumIdPerfil();
+
+        $objRelPerfilRecursoDTO = new RelPerfilRecursoDTO();
+        $objRelPerfilRecursoDTO->retTodos();
+        $objRelPerfilRecursoDTO->setNumIdSistema($numIdSistema);
+        $objRelPerfilRecursoDTO->setNumIdPerfil($numIdPerfilSeiAdministrador);        
+        $arrRecursosRemoverAdministrador = array(
+            $this->consultarRecurso($numIdSistema, "pen_procedimento_expedido_listar"),
+            $this->consultarRecurso($numIdSistema, "pen_procedimento_expedir"),
+            );
+        $objRelPerfilRecursoDTO->setNumIdRecurso($arrRecursosRemoverAdministrador, InfraDTO::$OPER_IN);
+        $objRelPerfilRecursoRN = new RelPerfilRecursoRN();
+        $objRelPerfilRecursoRN->excluir($objRelPerfilRecursoRN->listar($objRelPerfilRecursoDTO));
 
         /* Corrigir a versão do módulo no banco de dados */
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome($this->sip_versao);
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
