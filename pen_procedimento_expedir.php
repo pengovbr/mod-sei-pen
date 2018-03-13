@@ -56,8 +56,8 @@ try {
 
         case 'pen_procedimento_expedir':
             
-            $strTitulo = 'Tramitar Externamente';
-            $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(this)" value="Tramitar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">T</span>ramitar</button>';
+            $strTitulo = 'Envio Externo de Processo';
+            $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(this)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
             $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
             //TODO: Avaliar a necessidade de validar cada um dos parâmetros do PEN exigidos por essa funcionalidade
@@ -143,7 +143,7 @@ try {
             //Tratamento da ação de expedir o procedimento
             if(isset($_POST['sbmExpedir'])) {            
 
-                $strTituloPagina = "Tramitação do processo $strProtocoloProcedimentoFormatado";
+                $strTituloPagina = "Envio externo do processo $strProtocoloProcedimentoFormatado";
                 $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);                
                 
                 $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();                     
@@ -549,7 +549,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	</div>
 
 	<div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
-		<label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositorio de Estruturas Organizacionais:</label> 
+		<label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label> 
         <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" >
         <?= $strItensSelRepositorioEstruturas ?>
         </select>
