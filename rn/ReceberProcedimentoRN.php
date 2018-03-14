@@ -1082,7 +1082,7 @@ class ReceberProcedimentoRN extends InfraRN
 
             if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)){
                 //$objComponenteDigitalDTO = $arrObjComponenteDigitalDTO[$objDocumento->ordem];
-                //$this->alterarMetadadosDocumento($objComponenteDigitalDTO->getNumIdDocumento(), $objDocumento);
+                //$this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
                 continue;
             }
 

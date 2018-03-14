@@ -31,7 +31,6 @@ class PenParametroRN extends InfraRN {
                
         try {
 
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -46,7 +45,6 @@ class PenParametroRN extends InfraRN {
                
         try {
 
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -61,7 +59,6 @@ class PenParametroRN extends InfraRN {
                
         try {
 
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -76,7 +73,6 @@ class PenParametroRN extends InfraRN {
                
         try {
 
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -91,7 +87,6 @@ class PenParametroRN extends InfraRN {
                
         try {
 
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
