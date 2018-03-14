@@ -46,7 +46,6 @@ class PENIntegracao extends SeiIntegracao {
 
         //Verificação da Restrição de Acesso à Funcionalidade
         $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
-
         $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
 
@@ -57,20 +56,34 @@ class PENIntegracao extends SeiIntegracao {
 
         //Apresenta o botão de expedir processo
         if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-            $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-            $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
+
+            $objPenUnidadeDTO = new PenUnidadeDTO();
+            $objPenUnidadeDTO->retNumIdUnidade();
+            $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+            $objPenUnidadeRN = new PenUnidadeRN();
+
+            if($objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+                $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+                $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
+            }            
         }
 
         //Apresenta o botão da página de recibos
-        $strAcoesProcedimento .= '<a href="' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_estado&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1') . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_consultar_recibos.png" alt="Consultar Recibos" title="Consultar Recibos"/>';
-        $strAcoesProcedimento .= '</a>';
+        if($bolAcaoExpedirProcesso){
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoDTO->retDblIdProcedimento();
+            $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            if($objProcessoEletronicoRN->contar($objProcessoEletronicoDTO) != 0){
+                $strAcoesProcedimento .= '<a href="' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_estado&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1') . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_consultar_recibos.png" alt="Consultar Recibos" title="Consultar Recibos"/>';
+                $strAcoesProcedimento .= '</a>';
+            }
+        }
        
         //Apresenta o botão de cancelar trâmite
         $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
-
         if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
-
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
             $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/sei_desanexar_processo.gif" alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
             $strAcoesProcedimento .= '</a>';
@@ -242,7 +255,7 @@ class PENIntegracao extends SeiIntegracao {
                 require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
                 return true;
 
-            case 'apensados_selecionar_expedir_procedimento':
+            case 'pen_apensados_selecionar_expedir_procedimento':
                 require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
                 return true;
 

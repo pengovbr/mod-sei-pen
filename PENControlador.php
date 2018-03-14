@@ -47,7 +47,7 @@ class PENControlador implements ISeiControlador {
                 require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
                 return true;
                                 
-            case 'apensados_selecionar_expedir_procedimento':
+            case 'pen_apensados_selecionar_expedir_procedimento':
                 require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
                 return true;
                     

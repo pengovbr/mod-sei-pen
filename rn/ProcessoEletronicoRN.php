@@ -1458,6 +1458,15 @@ class ProcessoEletronicoRN extends InfraRN {
             throw new InfraException("Erro durante obtenção da resposta das hipóteses legais", $e);                        
         }
     }
+
+    protected function contarConectado(ProcessoEletronicoDTO $objProcessoEletronicoDTO){
+      try {
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        return $objProcessoEletronicoBD->contar($objProcessoEletronicoDTO);
+      }catch(Exception $e){
+        throw new InfraException('Erro contando Processos Externos.',$e);
+      }
+    }    
 }
 
 

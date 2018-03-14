@@ -29,10 +29,10 @@ class PenUnidadeDTO extends UnidadeDTO {
         // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
         // esta na InfraDTO e ela confunde em função do extends, então tenho que 
         // criar uma nova instância
-        $objDTO = new UnidadeDTO();
-        $objDTO->retTodos();
+        $objUnidadeDTO = new UnidadeDTO();
+        $objUnidadeDTO->retTodos();
         
-        foreach($objDTO->getArrAtributos() as $arrAtrib) {
+        foreach($objUnidadeDTO->getArrAtributos() as $arrAtrib) {
             
             if($arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO] != 'IdUnidade') {
             
@@ -40,7 +40,7 @@ class PenUnidadeDTO extends UnidadeDTO {
                     $arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO], 
                     $arrAtrib[InfraDTO::$POS_ATRIBUTO_NOME], 
                     $arrAtrib[InfraDTO::$POS_ATRIBUTO_CAMPO_SQL], 
-                    $objDTO->getStrNomeTabela()
+                    $objUnidadeDTO->getStrNomeTabela()
                 );
             }
         }     

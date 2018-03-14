@@ -80,7 +80,7 @@ try {
             
             //$strLinkUnidadeSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidade_sel_expedir_procedimento&tipo_selecao=2&id_object=objLupaUnidades');
             //$strLinkRepositorioSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_repositorio_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados');
-            $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
+            $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
 
             //TODO: Obter dados do repositório e unidade de orígem através de serviço do PEN
             //Obtenção dos parâmetros selecionados pelo usuário

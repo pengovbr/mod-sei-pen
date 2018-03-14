@@ -162,8 +162,9 @@ try {
     $objPenUnidadeDTO->retNumIdUnidadeRH();
    
     $objPenUnidadeRN = new PenUnidadeRN();
-    $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidade', 'IdUnidade');
-    $arrMapIdUnidadeRH = InfraArray::converterArrInfraDTO($objPenUnidadeRN->listar($objPenUnidadeDTO), 'IdUnidadeRH', 'IdUnidadeRH');
+    $objArrPenUnidadeDTO = $objPenUnidadeRN->listar($objPenUnidadeDTO);
+    $arrMapIdUnidade = InfraArray::converterArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidade', 'IdUnidade');
+    $arrMapIdUnidadeRH = InfraArray::converterArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeRH', 'IdUnidadeRH');
         
     $objPagina->prepararOrdenacao($objPenUnidadeDTOFiltro, 'IdUnidade', InfraDTO::$TIPO_ORDENACAO_ASC);    
     $objPagina->prepararPaginacao($objPenUnidadeDTOFiltro);

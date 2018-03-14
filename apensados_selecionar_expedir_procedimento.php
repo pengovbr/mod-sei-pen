@@ -21,7 +21,7 @@ try {
   //////////////////////////////////////////////////////////////////////////////
 
   SessaoSEI::getInstance()->validarLink();
-  PaginaSEI::getInstance()->prepararSelecao('apensados_selecionar_expedir_procedimento');  
+  PaginaSEI::getInstance()->prepararSelecao('pen_apensados_selecionar_expedir_procedimento');  
 
   //SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
   

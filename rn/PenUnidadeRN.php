@@ -47,15 +47,12 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function listarConectado(UnidadeDTO $objUnidadeDTO) {
+    protected function listarConectado(UnidadeDTO $objPenUnidadeDTO) {
         try {
             //Valida Permissao
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_unidade_listar',__METHOD__,$objUnidadeDTO);
-
-            $objUnidadeBD = new UnidadeBD($this->getObjInfraIBanco());
-            $ret = $objUnidadeBD->listar($objUnidadeDTO);
-            
-            return $ret;
+            $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
+            return $objPenUnidadeBD->listar($objPenUnidadeDTO);            
         }catch(Exception $e){
             throw new InfraException('Erro listando Unidades.',$e);
         }
@@ -67,13 +64,13 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function alterarConectado(PenUnidadeDTO $objDTO){
+    protected function alterarConectado(UnidadeDTO $objPenUnidadeDTO){
         try {
-            $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-            return $objBD->alterar($objDTO);
+            $objPenUnidadeBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
+            return $objPenUnidadeBD->alterar($objPenUnidadeDTO);
         } 
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro alterando mapeamento de unidades.', $e);
         }
     }
     
@@ -83,13 +80,13 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function cadastrarConectado(PenUnidadeDTO $objDTO){
+    protected function cadastrarConectado(UnidadeDTO $objDTO){
         try {
-            $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+            $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
             return $objBD->cadastrar($objDTO);
         } 
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
         }
     }
     
@@ -99,13 +96,31 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function excluirConectado(PenUnidadeDTO $objDTO){
+    protected function excluirConectado(UnidadeDTO $objDTO){
         try {
-            $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+            $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
             return $objBD->excluir($objDTO);
         } 
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
         }
     }
+
+    /**
+     * Método utilizado para contagem de unidades mapeadas
+     * @param UnidadeDTO $objUnidadeDTO
+     * @return array
+     * @throws InfraException
+     */
+    protected function contarConectado(PenUnidadeDTO $objPenUnidadeDTO) {
+        try {
+            //Valida Permissao
+            $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
+            return $objPenUnidadeBD->contar($objPenUnidadeDTO);
+        }
+        catch(Exception $e){
+            throw new InfraException('Erro contando mapeamento de unidades.',$e);
+        }
+    }    
+
 }
