@@ -298,12 +298,12 @@ Esta seção tem por objetivo demonstrar as funcionalidades que são disponibili
 
 Para realizar o trâmite externo do processo, o módulo disponibiliza ao usuário (**caso o seu perfil possua o recurso pen\_procedimento\_expedir**) um ícone na tela de processos, conforme imagem abaixo: 
 
-*INCLUIR_IMAGEM MOSTRANDO O ÍCONE DE ENVIO EXTERNO*
+![Painel de Botões do Controle de Processos - Destaque para o Ícone de Envio Externo de Processo](/imagens/envio_externo_processo.png)
 
 Ao acionar o ícone de envio externo de processo, disponibiliza-se uma tela onde mostra-se o número do processo selecionado para envio externo, que é apenas informativo, a opção de escolha do repositório de estruturas do receptor (que no caso do Poder Executivo Federal será o do SIORG -  Sistema de Organização e Inovação Institucional do Governo Federal), o nome da unidade receptora na estrutura organizacional e opção de indicar se trata-se de processo com urgência.
 
 
-*INCLUIR_IMAGEM MOSTRANDO TELA DE ENVIO EXTERNO DE PROCESSO*
+![Tela de Envio Externo de Processo - Destaque para as Opções Disponibilizadas](/imagens/tela_envio_externo.png)
 
 O cadastro da estrutura organizacional é feito previamente no Portal de Administração do ConectaGov PEN. A administração central do portal é feita pela equipe do Ministério do Planejamento, Desenvolvimento e Gestão - MP, embora o cadastro da estrutura propriamente dita seja feito por um perfil denominado Comitê Gestor de Protocolo, informado pelo órgão ou entidade e habilitado no portal pela equipe do MP, conforme [fluxo definido](https://www.comprasgovernamentais.gov.br/images/Barramento/FluxoCredenciais.png).
 Para maiores informações sobre o Comitê Gestor de Protocolo, consulte o [manual específico](https://www.comprasgovernamentais.gov.br/images/Barramento/ManualdoGestor.pdf). 
@@ -312,33 +312,48 @@ O ConectaGov PEN permite a participação de órgãos e entidades de outros pode
 
 Ao selecionar o repositório de estruturas desejado, é necessário digital o nome da unidade administrativa receptora do processo. Dinamicamente, sugere-se o nome da unidade, baseado na configuração feita no Portal de Administração do ConectaGov PEN. **As unidades disponíveis para envio externo dependem da configuração realizada por cada Comitê Gestor de Protocolo dos órgãos e entidades.**
 
-*INCLUIR_IMAGEM MOSTRANDO LISTAGEM DAS UNIDADES*
+![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](/imagens/selecao_unidade_envio_externo.png)
 
 Na tela de envio externo de processo há a opção de indicar a **urgência** para o processo. As opções são automaticamente sincronizadas a partir do serviço do ConectaGov PEN.
 
-*INCLUIR_IMAGEM MOSTRANDO LISTAGEM DAS OPÇÕES DE URGÊNCIA*
+![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](/imagens/urgencia_envio_externo.png)
 
 Ao realizar o envio externo, o módulo faz uma **série de validações no processo** para que a informação seja corretamente enviada ao serviço do ConectGov PEN. O andamento do progresso de validação e envio é exibido por meio de uma janela *pop-up* do navegador web. É importante permitir a abertura de *pop-ups* no navegador web, para que a operação possa ser verificada.
 
-*INCLUIR_IMAGEM MOSTRANDO o POP-UP DE ENVIO*
+
+![Tela de Status de Envio do Processo - Barra de Progresso](/imagens/em_envio_externo_processo.png)
+
+Uma vez que o processo tenha sido recebido com sucesso pelo ConectGov PEN, a seguinte mensagem é exibida. **Mas isso não significa que a unidade destinatária recebeu e aceitou o processo, pois esta também deve fazer uma série de validações,** conforme explicado na próxima seção.
+
+![Tela de Status de Envio do Processo - Barra de Progresso - Finalizado](/imagens/confirmado_envio_externo_processo.png)
 
 ### Informações Registradas nos Andamentos do Processo (Histórico)
 
 O ConectaGov PEN atua como uma **terceiro confiável** no trâmite do processo administrativo. Em um primeiro momento, o módulo do SEI faz uma série de validações de informações constantes do processo a ser enviado. Uma vez validadas estas informações, a operação de envio é registrada no andamento do processo. **Mas isso ainda não reflete o sucesso no trâmite de fato**, pois a unidade receptora também faz uma série de validações como, por exemplo, os tamanhos de documentos que tem capacidade de receber, as espécies documentais, hipóteses legais, dentre outras. Uma vez validados, na origem, os requisitos para envio externo,** registra-se no andamento do processo a operação de envio** por meio do ConectaGov, conforme o seguinte exemplo:
 
-*INCLUIR_IMAGEM MOSTRANDO REGISTRO DO ANDAMENTO, NA ORIGEM, DO ENVIO DO PROCESSO*
+![Tela de Status de Envio do Processo - Barra de Progresso - Finalizado](/imagens/confirmado_envio_externo_processo.png)
 
 Enquanto a unidade receptora não confirma o recebimento, o SEI passa a indicar que aquele processo **encontra-se em envio externo**, aguardando o recebimento. Nesse momento, o processo encontra-se bloqueado para edição, evento que possui um alerta de um círculo vermelho à direita do seu número, na tela de Controle do Processo. No estado bloqueado, as opções disponíveis são **apenas de visualização**, sem permitir operações que alteram informações do processo, conforme imagem:
 
-*INCLUIR_IMAGEM MOSTRANDO PROCESSO BLOQUEADO, NA SITUAÇÃO EM TRÂMITE EXTERNO PELO PEN*
+![Tela de Histórico do Processo - Processo em Envio Externo](/imagens/historico_origem_envio_externo.png)
 
 O SEI, ao receber o aviso do ConectaGov PEN de que a unidade receptora validou as informações e recebeu o processo, faz o registro no andamento, indicando o sucesso no trâmite, e o **processo passa a indicar que não possui mais andamentos abertos**.
 
-*INCLUIR_IMAGEM MOSTRANDO PROCESSO BLOQUEADO, SEM ANDAMENTOS ABERTOS NA ORIGEM*
+![Tela de Controle de Processos - Processo sem Andamentos Abertos](/imagens/processo_bloqueado_envio_externo.png)
 
-*INCLUIR_IMAGEM MOSTRANDO ANDAMENTO NA ORIGEM, COM REGISTRO DE QUE O ENVIO EXTERNO FOI REALIZADO COM SUCESSO*
+Abaixo, mensagem registrada no histórico, indicando a confirmação do envio externo:
+
+![Tela de Histórico do Processo - Confirmação do Envio Externo](/imagens/confirmacao_envio_externo.png)
 
 Ainda é possível reabrir o processo na unidade, quando do envio externo ocorrido com sucesso, para que se consulte as informações do processo, caso assim deseje a unidade de origem. Mesmo nesse caso, **apenas a unidade que recebeu o processo** via ConectGov PEN pode realizar a instrução processual, ou seja, efetuar modificações no processo administrativo.
+
+No caso de recebimento de processos por meio do ConectaGov PEN, o processo aparece na área de trabalho da mesma forma que fosse recebido de um trâmite interno (com fonte em vermelho). É importante frisar que, como regra, os processos serão direcionados às unidades receptoras. Caso não haja unidade receptora para determinada unidade visível no ConectGov PEN, o processo é remetido diretamente à unidade destinatária visível para trâmite. A configuração das unidades visíveis para trâmite e das unidades receptoras ficarão a cargo do Comitê Gestor de cada órgão ou unidade.
+
+A operação de recebimento de processo por meio de envio externo também é registrada na unidade destinatária, conforme nota-se na imagem:
+
+*INCLUIR_IMAGEM MOSTRANDO REGISTRO DO ANDAMENTO, NA DESTINO, DO RECEBIMENTO DO PROCESSO* 
+
+A unidade destinatária pode fazer a instrução processual normalmente, inclusive fazendo a devolução do processo para a unidade originária. Neste caso, o ConectGov PEN consegue reconhecer os documentos que a unidade receptora já possui, realizando, assim, o trâmite apenas daquelas documentos necessários para a unidade de origem. 
  
 ### Consulta de Recibos
 
