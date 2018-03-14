@@ -45,6 +45,7 @@ class PenParametroRN extends InfraRN {
                
         try {
 
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -73,6 +74,7 @@ class PenParametroRN extends InfraRN {
                
         try {
 
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao_alterar', __METHOD__, $objDTO);
 
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
             
@@ -96,29 +98,7 @@ class PenParametroRN extends InfraRN {
             throw new InfraException('Erro ao excluir parâmetro.', $e);
         }
     }
-    
-    protected function desativarControlado(PenParametroDTO $objDTO){
         
-        try {
-
-
-        } 
-        catch (Exception $e) {
-            throw new InfraException('Erro ao desativar parâmetro.', $e);
-        }
-    }
-    
-    protected function reativarControlado(PenParametroDTO $objDTO){
-        
-        try {
-
-
-        } 
-        catch (Exception $e) {
-            throw new InfraException('Erro ao reativar parâmetro.', $e);
-        }
-    }
-    
     public function setValor($strNome, $strValor){
         
         try {
@@ -147,7 +127,7 @@ class PenParametroRN extends InfraRN {
         $objPenParametroDTO->retStrValor();
 
         if($this->contar($objPenParametroDTO) > 0) {
-            $objPenParametroDTO = $this->consultarControlado($objPenParametroDTO);
+            $objPenParametroDTO = $this->consultar($objPenParametroDTO);
             return $objPenParametroDTO->getStrValor();
         }
     }
