@@ -92,7 +92,7 @@ try {
     }
     //--------------------------------------------------------------------------
     
-    $strTitulo = 'Lista dos Mapeamentos de Envio';
+    $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Envio';
         
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
@@ -140,8 +140,8 @@ try {
 
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Especie Documental</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento SEI</th>'."\n";        
+        $strResultado .= '<th class="infraTh" width="35%">Espécie Documental PEN</th>'."\n";
         $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
@@ -153,8 +153,8 @@ try {
 
             $strResultado .= '<tr class="'.$strCssTr.'">';
             $strResultado .= '<td>'.$objPaginaSEI->getTrCheck($index, $objPenRelTipoDocMapEnviadoDTO->getDblIdMap(), '').'</td>';
-            $strResultado .= '<td>'.$objPenRelTipoDocMapEnviadoDTO->getStrNomeEspecie().'</td>';
             $strResultado .= '<td>'.$objPenRelTipoDocMapEnviadoDTO->getStrNomeSerie().'</td>';
+            $strResultado .= '<td>'.$objPenRelTipoDocMapEnviadoDTO->getStrNomeEspecie().'</td>';
             $strResultado .= '<td align="center">';
             
             if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_visualizar')) {
@@ -312,12 +312,12 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
-        
-        <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental:</label>
-        <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
 
-        <label for="nome_serie" class="infraLabelObrigatorio input-label-second">Tipo de Documento:</label>
-        <input type="text" name="nome_serie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_serie']; ?>"/>
+        <label for="nome_serie" class="infraLabelObrigatorio input-label-first">Tipo de Documento SEI:</label>
+        <input type="text" name="nome_serie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_serie']; ?>"/>
+        
+        <label for="nome_especie" class="infraLabelObrigatorio input-label-second">Espécie Documental PEN:</label>
+        <input type="text" name="nome_especie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
 
     <?php $objPaginaSEI->fecharAreaDados(); ?>
     

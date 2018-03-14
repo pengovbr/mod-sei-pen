@@ -28,17 +28,17 @@ try {
             $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
                         
             if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
-                $strTitulo = 'Editar Mapeamento de Envio';
+                $strTitulo = 'Editar Mapeamento de Tipo de Documento para Envio';
             }
             else {
-                $strTitulo = 'Novo Mapeamento de Envio';
+                $strTitulo = 'Novo Mapeamento de Tipo de Documento para Envio';
             }
             break;
         
         case 'pen_map_tipo_documento_envio_visualizar':
             $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
             $bolSomenteLeitura = true;
-            $strTitulo = 'Consultar Mapeamento de Envio';           
+            $strTitulo = 'Consultar Mapeamento de Tipo de Documento para Envio';           
             break;
         
         
@@ -125,11 +125,11 @@ $objPaginaSEI->montarStyle();
 ?>
 <style type="text/css">
 
-.input-label-first{position:absolute;left:0%;top:40%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:55%;width:25%}    
+.input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
+.input-field-first{position:absolute;left:0%;top:15%;width:25%}    
 
-.input-label-third {position:absolute;left:0%;top:0%;width:25%; color:#666!important}
-.input-field-third {position:absolute;left:0%;top:15%;width:25%;}
+.input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
+.input-field-third {position:absolute;left:0%;top:55%;width:25%;}
     
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
@@ -175,13 +175,13 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('12em'); ?>
 
-    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento - SEI <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?> :</label>
-    <select name="id_serie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <label for="id_serie" class="infraLabelObrigatorio input-label-first">Tipo de Documento SEI - <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?>:</label>
+    <select name="id_serie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapEnviadoDTO->getNumIdSerie(), $arrSerie); ?>
     </select>
 
-    <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>    
-    <select name="codigo_especie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <label for="codigo_especie" class="infraLabelObrigatorio input-label-third">Espécie Documental PEN:</label>    
+    <select name="codigo_especie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie(), $objTipoDocMapRN->listarParesEspecie()); ?>
     </select>
       
