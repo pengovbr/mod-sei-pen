@@ -560,7 +560,7 @@ class ReceberProcedimentoRN extends InfraRN
     
     //Realiza a alteração dos metadados do processo
     //TODO: Implementar alteração de todos os metadados
-    //$this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
+    $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
         
         //TODO: Finalizar o envio do documento para a respectiva unidade
     $this->enviarProcedimentoUnidade($objProcedimentoDTO, true);
@@ -761,10 +761,13 @@ class ReceberProcedimentoRN extends InfraRN
           
         //Realiza a alteração dos metadados do processo(Por hora, apenas do nível de sigilo e hipótese legal)
         $objProtocoloDTO = new ProtocoloDTO();
-        $objProtocoloDTO->setDblIdProcedimento($parNumIdProcedimento);
-        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->nivelSigilo));
-        $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
-      
+        $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
+        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->nivelDeSigilo));
+        
+        if($parObjMetadadoProcedimento->hipoteseLegal && $parObjMetadadoProcedimento->hipoteseLegal->identificacao){
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao));
+        }
+         
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
     }
@@ -773,8 +776,11 @@ class ReceberProcedimentoRN extends InfraRN
         //Realiza a alteração dos metadados do documento(Por hora, apenas do nível de sigilo e hipótese legal)
         $objProtocoloDTO = new ProtocoloDTO();
         $objProtocoloDTO->setDblIdProtocolo($parNumIdDocumento);
-        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoDocumento->nivelSigilo));
-        $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
+        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjMetadadoDocumento->nivelDeSigilo));
+        
+        if($parObjMetadadoDocumento->hipoteseLegal && $parObjMetadadoDocumento->hipoteseLegal->identificacao){
+            $objProtocoloDTO->setNumIdHipoteseLegal($this->obterHipoteseLegalSEI($parObjMetadadoDocumento->hipoteseLegal->identificacao));
+        }
         
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
@@ -1081,8 +1087,8 @@ class ReceberProcedimentoRN extends InfraRN
             }
 
             if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)){
-                //$objComponenteDigitalDTO = $arrObjComponenteDigitalDTO[$objDocumento->ordem];
-                //$this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
+                 $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
+                 $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
                 continue;
             }
 
