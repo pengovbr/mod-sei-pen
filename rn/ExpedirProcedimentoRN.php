@@ -1612,7 +1612,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         //TODO: Validar se motivo de urgncia foi devidamente informado, caso expedio urgente            
         if ($objExpedirProcedimentoDTO->getBolSinUrgente() && InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdMotivoUrgencia())){
-          $objInfraException->adicionarValidacao('Motivo de urgência da expedição do processo não informado.');
+          $objInfraException->adicionarValidacao('Motivo de urgência não informado.');
         }
       }
 
