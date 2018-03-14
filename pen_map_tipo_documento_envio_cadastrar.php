@@ -125,7 +125,7 @@ $objPaginaSEI->montarStyle();
 ?>
 <style type="text/css">
 
-.input-label-first{position:absolute;left:0%;top:40
+.input-label-first{position:absolute;left:0%;top:40%;width:25%; color: #666!important}
 .input-field-first{position:absolute;left:0%;top:55%;width:25%}    
 
 .input-label-third {position:absolute;left:0%;top:0%;width:25%; color:#666!important}

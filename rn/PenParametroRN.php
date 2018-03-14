@@ -16,9 +16,7 @@ class PenParametroRN extends InfraRN {
     protected function contarControlado(PenParametroDTO $objDTO){
         
         try {
-
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-
             return $objBD->contar($objDTO);
         } 
         catch (Exception $e) {
@@ -30,11 +28,7 @@ class PenParametroRN extends InfraRN {
     protected function consultarControlado(PenParametroDTO $objDTO){
                
         try {
-
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
-
-            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
+            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());            
             return $objBD->consultar($objDTO);
         } 
         catch (Exception $e) {
@@ -45,11 +39,8 @@ class PenParametroRN extends InfraRN {
     protected function listarControlado(PenParametroDTO $objDTO){
                
         try {
-
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
-
-            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao', __METHOD__, $objDTO);
+            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());            
             return $objBD->listar($objDTO);
         } 
         catch (Exception $e) {
@@ -60,11 +51,7 @@ class PenParametroRN extends InfraRN {
     protected function cadastrarControlado(PenParametroDTO $objDTO){
                
         try {
-
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
-
-            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
+            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());            
             return $objBD->cadastrar($objDTO);
         } 
         catch (Exception $e) {
@@ -75,11 +62,8 @@ class PenParametroRN extends InfraRN {
     protected function alterarControlado(PenParametroDTO $objDTO){
                
         try {
-
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
-
-            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao_alterar', __METHOD__, $objDTO);
+            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());            
             return $objBD->alterar($objDTO);
         } 
         catch (Exception $e) {
@@ -90,46 +74,18 @@ class PenParametroRN extends InfraRN {
     protected function excluirControlado(PenParametroDTO $objDTO){
                
         try {
-
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_padrao_cadastrar', __METHOD__, $objDTO);
-
             $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
             return $objBD->excluir($objDTO);
         } 
         catch (Exception $e) {
             throw new InfraException('Erro ao excluir parâmetro.', $e);
         }
     }
-    
-    protected function desativarControlado(PenParametroDTO $objDTO){
         
-        try {
-
-
-        } 
-        catch (Exception $e) {
-            throw new InfraException('Erro ao desativar parâmetro.', $e);
-        }
-    }
-    
-    protected function reativarControlado(PenParametroDTO $objDTO){
-        
-        try {
-
-
-        } 
-        catch (Exception $e) {
-            throw new InfraException('Erro ao reativar parâmetro.', $e);
-        }
-    }
-    
     public function setValor($strNome, $strValor){
         
         try {
-
-            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-            
+            $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());            
             return $objBD->setValor($strNome, $strValor);
         } 
         catch (Exception $e) {
@@ -137,8 +93,7 @@ class PenParametroRN extends InfraRN {
         }
     }
     
-    public function isSetValor($strNome){
-        
+    public function isSetValor($strNome){        
         return $objBD->isSetValor($strNome); 
     }
     
