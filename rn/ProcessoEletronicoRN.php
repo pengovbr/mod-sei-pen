@@ -1088,7 +1088,7 @@ class ProcessoEletronicoRN extends InfraRN {
                 break;
 
             case static::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-                throw new InfraException(utf8_encode('A expedição desse processo já está concluída'));
+                throw new InfraException(utf8_encode('O trâmite externo deste processo já foi concluído'));
                 break;
 
             default:
@@ -1288,7 +1288,7 @@ class ProcessoEletronicoRN extends InfraRN {
   
    
   /**
-   * Cancela um tramite de expedição de um procedimento para outra unidade, gera
+   * Cancela um tramite externo de um procedimento para outra unidade, gera
    * falha caso a unidade de destino já tenha começado a receber o procedimento.
    * 
    * @param type $idTramite

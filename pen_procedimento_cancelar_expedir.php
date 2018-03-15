@@ -4,7 +4,7 @@ require_once dirname(__FILE__) . '/../../SEI.php';
 
 session_start();
     
-$strMensagem = "A Expedição do Processo foi Cancelada com Sucesso!";
+$strMensagem = "O trâmite externo do processo foi cancelado com sucesso!";
 
 try { 
 

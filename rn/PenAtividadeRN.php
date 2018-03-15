@@ -398,7 +398,7 @@ class PenAtividadeRN extends AtividadeRN {
                 
                 switch($numIdTarefa){
                     case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
-                        $strMensagem = 'Expedição do Processo %s para %s';
+                        $strMensagem = 'Trâmite externo do Processo %s para %s';
                         $strNome = 'UNIDADE_DESTINO';
                         
                         $objReciboTramiteDTO = new ReciboTramiteDTO();

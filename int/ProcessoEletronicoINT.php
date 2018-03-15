@@ -4,7 +4,7 @@ require_once dirname(__FILE__).'/../../../SEI.php';
 
 class ProcessoEletronicoINT extends InfraINT {
 
-    //Situação de cada uma das etapas da expedição de processos
+    //Situação de cada uma das etapas da envio externo de processos
     const NEE_EXPEDICAO_ETAPA_VALIDACAO = 1;
     const NEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 2;
     const NEE_EXPEDICAO_ETAPA_DOCUMENTO = 3;
@@ -14,7 +14,7 @@ class ProcessoEletronicoINT extends InfraINT {
     const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informações do processo...';
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
-    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Expedição do processo finalizada com sucesso!';
+    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizada com sucesso!';
 
     /**
      * Concate as siglas das hierarquias no nome da unidade
