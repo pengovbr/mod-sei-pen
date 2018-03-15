@@ -1620,7 +1620,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       {
         $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
         if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
-          $objInfraException->adicionarValidacao('Não é possvel expedir um processo sem documentos', $strAtributoValidacao);
+          $objInfraException->adicionarValidacao('Não é possível trâmitar um processo sem documentos', $strAtributoValidacao);
         }
       }
 
@@ -1686,7 +1686,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {            
         $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
-        $objInfraException->adicionarValidacao("Não é possível expedir processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
+        $objInfraException->adicionarValidacao("Não é possível trâmitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
       }
     }
 
@@ -1700,7 +1700,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         // $objProcedimentoDTO = $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
   
       if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
-          $objInfraException->adicionarValidacao('Não é possível expedir processo com informações sigilosas.', $strAtributoValidacao);
+          $objInfraException->adicionarValidacao('Não é possível trâmitar um processo com informações sigilosas.', $strAtributoValidacao);
       }
     }
     
@@ -1713,7 +1713,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null) {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
-                $objInfraException->adicionarValidacao('Não é possível expedir processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+                $objInfraException->adicionarValidacao('Não é possível trâmitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
             }
         }
     }
@@ -1754,7 +1754,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         if($bolAssinaturaCorretas !== true) {
-            $objInfraException->adicionarValidacao('Não é possível expedir processos com documentos gerados e não assinados', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('Não é possível trâmitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
         }
     }
 

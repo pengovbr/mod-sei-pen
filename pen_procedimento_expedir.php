@@ -504,7 +504,7 @@ function enviarForm(el){
                         
             if(!resp.sucesso) {
                
-               var strRespMensagem = "Verifique alguns erros no procedimento antes de expedir:\n\n";
+               var strRespMensagem = "Verifique alguns erros no processo antes de tramitar:\n\n";
                
                 jQuery.each(resp.erros, function(strProtocoloFormatado, arrStrMensagem){
                    
