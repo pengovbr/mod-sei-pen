@@ -30,17 +30,17 @@ try {
             $bolDesativarCampos = false;
             
             if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
-                $strTitulo = 'Editar Mapeamento de Recebimento';
+                $strTitulo = 'Editar Mapeamento de Tipo de Documento para Recebimento';
             }
             else {
-                $strTitulo = 'Novo Mapeamento de Recebimento';
+                $strTitulo = 'Novo Mapeamento de Tipo de Documento para Recebimento';
             }
             break;
         
         case 'pen_map_tipo_documento_recebimento_visualizar':
             $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
             $bolSomenteLeitura = true;
-            $strTitulo = 'Consultar Mapeamento de Recebimento';           
+            $strTitulo = 'Consultar Mapeamento Tipo de Documento para Recebimento';           
             break;
         
         
@@ -181,7 +181,7 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumCodigoEspecie(), $arrEspecieDocumental); ?>
     </select>
 
-    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento - SEI <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?> :</label>
+    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento SEI - <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?>:</label>
     <select name="id_serie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumIdSerie(), $objTipoDocMapRN->listarParesSerie()); ?>
     </select>

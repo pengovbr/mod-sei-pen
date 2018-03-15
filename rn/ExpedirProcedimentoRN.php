@@ -135,7 +135,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $objInfraException = new InfraException();            
 
-            //Carregamento dos dados de processo e documento para validação e expedição
+      //Carregamento dos dados de processo e documento para validação e envio externo
       $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
       $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
@@ -482,7 +482,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
             $objAtributoAndamentoDTO->setStrNome('MOTIVO');
             $objAtributoAndamentoDTO->setStrIdOrigem(null);
-            $objAtributoAndamentoDTO->setStrValor('Processo está em processamento devido sua expedição para outra entidade.');
+            $objAtributoAndamentoDTO->setStrValor('Processo está em processamento devido ao seu trâmite externo para outra unidade.');
             $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array($objAtributoAndamentoDTO));
 
             $objAtividadeRN = new AtividadeRN();
@@ -1168,7 +1168,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objPenParametroRN = new PenParametroRN();
       if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
            $strTamanhoFormatado = round(($objAnexoDTO->getNumTamanho() / 1024) / 1024,2);
-           throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para a expedição de documentos externos.");
+           throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para trâmite externo de documentos.");
       } 
 
             //Obtenção do conteúdo do documento externo
@@ -1620,7 +1620,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       {
         $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
         if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
-          $objInfraException->adicionarValidacao('Não é possvel expedir um processo sem documentos', $strAtributoValidacao);
+          $objInfraException->adicionarValidacao('Não é possível trâmitar um processo sem documentos', $strAtributoValidacao);
         }
       }
 
@@ -1686,7 +1686,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {            
         $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
-        $objInfraException->adicionarValidacao("Não é possível expedir processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
+        $objInfraException->adicionarValidacao("Não é possível trâmitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
       }
     }
 
@@ -1700,7 +1700,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         // $objProcedimentoDTO = $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
   
       if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
-          $objInfraException->adicionarValidacao('Não é possível expedir processo com informações sigilosas.', $strAtributoValidacao);
+          $objInfraException->adicionarValidacao('Não é possível trâmitar um processo com informações sigilosas.', $strAtributoValidacao);
       }
     }
     
@@ -1713,7 +1713,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null) {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
-                $objInfraException->adicionarValidacao('Não é possível expedir processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+                $objInfraException->adicionarValidacao('Não é possível trâmitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
             }
         }
     }
@@ -1754,7 +1754,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         if($bolAssinaturaCorretas !== true) {
-            $objInfraException->adicionarValidacao('Não é possível expedir processos com documentos gerados e não assinados', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('Não é possível trâmitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
         }
     }
 

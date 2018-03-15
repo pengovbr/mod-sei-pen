@@ -57,7 +57,7 @@ try {
         $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
         $strResultado .= '<th class="infraTh">Processo</th>' . "\n";
         $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
-        $strResultado .= '<th class="infraTh">Data de Expedição</th>' . "\n";
+        $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
         $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
         $strResultado .= '</tr>' . "\n";
         $strCssTr = '';

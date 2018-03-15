@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_envio_listar');
 define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_envio');
-define('PEN_PAGINA_TITULO', 'Mapeamento de Hipóteses Legais de Envio');
+define('PEN_PAGINA_TITULO', 'Mapeamento de Hipóteses Legais para Envio');
 define('PEN_PAGINA_GET_ID', 'id_mapeamento');
 
 
@@ -188,8 +188,8 @@ try {
 
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal - SEI '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal - Tramitação PEN</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal SEI - '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal PEN</th>'."\n";
         $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
@@ -357,12 +357,12 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     <?php //$objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('40px'); ?>
         
-        <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
+        <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal SEI - <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
         <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
         </select>
         
-        <label for="id_barramento" class="infraLabelObrigatorio input-label-second">Hipótese Legal - Tramitação PEN:</label>
+        <label for="id_barramento" class="infraLabelObrigatorio input-label-second">Hipótese Legal PEN:</label>
         <select name="id_barramento" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(),  $arrMapIdBarramento); ?>
         </select> 

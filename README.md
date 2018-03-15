@@ -264,7 +264,6 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
         # /usr/bin/php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/modulos/pen/rn/PendenciasTramiteRN.php    
         # /usr/bin/php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/modulos/pen/rn/ProcessarPendenciasRN.php
 
-    Caso não esteja houve algum problema de configuração e a expedição de processos não irá funcionar. 
 **Atenção**: Importante colocar o serviço para ser iniciado automaticamente juntamente com o servidor. 
 
 19. Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. 

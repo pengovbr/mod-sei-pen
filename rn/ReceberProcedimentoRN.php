@@ -1656,7 +1656,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
         $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
         
-        //Busca a última atividade de expedição
+        //Busca a última atividade de trâmite externo
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
         $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));

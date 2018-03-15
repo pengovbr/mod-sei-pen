@@ -73,7 +73,7 @@ try {
     }
     //--------------------------------------------------------------------------
     
-    $strTitulo = 'Lista dos Mapeamentos de Recebimento';
+    $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Recebimento';
         
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
@@ -119,8 +119,8 @@ try {
 
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Especie Documental</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Espécie Documental PEN</th>'."\n";
+        $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento SEI</th>'."\n";
         $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
         $strResultado .= '</tr>'."\n";
         $strCssTr = '';
@@ -260,10 +260,10 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
-        <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental:</label>
+        <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
 
-        <label for="nome_serie" class="infraLabelObrigatorio input-label-second">Tipo de Documento:</label>
+        <label for="nome_serie" class="infraLabelObrigatorio input-label-second">Tipo de Documento SEI:</label>
         <input type="text" name="nome_serie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_serie']; ?>"/>
     <?php $objPaginaSEI->fecharAreaDados(); ?>
     
