@@ -56,7 +56,8 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
     As linhas de configuração apresentadas abaixo deverão ser adicionadas no final do arquivo de configuração do *Supervisor* (/etc/supervisord.conf).
     
     **Atenção 1:** No parâmetro *[user]* deve ser configurado o usuário que executa o servidor web (verifique no seu servidor qual é o usuario. Ex.: apache)
-**Atenção 2:** Verifique se a localização dos scripts ProcessarPendenciasRN.php e PendenciasTramiteRN.php estão corretas no parâmetro *[command]*.
+    
+    **Atenção 2:** Verifique se a localização dos scripts ProcessarPendenciasRN.php e PendenciasTramiteRN.php estão corretas no parâmetro *[command]*.
 
     Exemplo de configuração do supervisor:
 
@@ -151,12 +152,12 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Exemplo: ***Perfil: Envio Externo***
     
-Recursos: 
+    Recursos: 
     
     * pen_procedimento_expedido_listar
     * pen_procedimento_expedir
 
-Também será necessário a configuração dos seguintes recursos ao perfil ADMINISTRADOR para permitir o mesmo realizar as configurações do módulo:
+    Também será necessário a configuração dos seguintes recursos ao perfil ADMINISTRADOR para permitir o mesmo realizar as configurações do módulo:
     
     * pen_map_hipotese_legal_envio_alterar
     * pen_map_hipotese_legal_envio_cadastrar  
@@ -264,6 +265,7 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
         # /usr/bin/php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/modulos/pen/rn/PendenciasTramiteRN.php    
         # /usr/bin/php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/modulos/pen/rn/ProcessarPendenciasRN.php
 
+    Caso não esteja houve algum problema de configuração e a expedição de processos não irá funcionar. 
 **Atenção**: Importante colocar o serviço para ser iniciado automaticamente juntamente com o servidor. 
 
 19. Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. 
@@ -293,6 +295,22 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 
 Esta seção tem por objetivo demonstrar as funcionalidades que são disponibilizadas pelo módulo de trâmite do PEN e também as configurações que devem ser realizadas no próprio SEI para o correto funcionamento.
 
+### Informações Obrigatórias para Envio Externo de Processo
+
+O ConectaGov PEN atende a diferentes sistemas de gestão eletrônica de documentos (GED) e sistemas informatizados de gestão arquivística de documentos (SIGAD). Para permitir a interoperabilidade entre estes tipos de sistemas, definiu-se um padrão de dados para intercâmbio.
+
+O padrão de dados define atributos que são obrigatórios e opcionais. A obrigatoriedade de alguns elementos obriga que determinadas informações sejam incluídas no processo, as quais, no SEI, originalmente, são opcionais.
+
+Ao criar o processo, para envio externo pelo ConectaGov PEN, são obrigatórios os campos **especificação e interessado** (deve haver pelo menos um interessado no processo)
+
+![Tela de Iniciar Processos - Destaque para Campos Especificação e Interessados](imagens/campos_especificacao_interessado.png)
+
+O SEI fará uma verificação das informações pendentes para envio e exibirá uma mensagem para o usuário, conforme imagem:
+
+![Validação dos Campos Especificação e Interessados no Momento do Envio Externo de Processo](imagens/valida_especificacao_interessado.png)
+
+Verifica-se também se o processo possui pelo menos um documento interno assinado ou se possui algum documento externo.
+
 ### Envio Externo de Processo
 
 Para realizar o trâmite externo do processo, o módulo disponibiliza ao usuário (**caso o seu perfil possua o recurso pen\_procedimento\_expedir**) um ícone na tela de processos, conforme imagem abaixo: 
@@ -313,7 +331,7 @@ Ao selecionar o repositório de estruturas desejado, é necessário digital o no
 
 ![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](imagens/selecao_unidade_envio_externo.png)
 
-Na tela de envio externo de processo há a opção de indicar a **urgência** para o processo. As opções são automaticamente sincronizadas a partir do serviço do ConectaGov PEN.
+Na tela de envio externo de processo, há a opção de indicar a **urgência** para o processo. As opções são automaticamente sincronizadas a partir do serviço do ConectaGov PEN.
 
 ![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](imagens/urgencia_envio_externo.png)
 
