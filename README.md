@@ -152,39 +152,39 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Exemplo: ***Perfil: Envio Externo***
     
-    Recursos: 
+    Recursos:
     
-    * pen_procedimento_expedido_listar
-    * pen_procedimento_expedir
+        * pen_procedimento_expedido_listar  
+        * pen_procedimento_expedir
     
     Também será necessário a configuração dos seguintes recursos ao perfil ADMINISTRADOR para permitir o mesmo realizar as configurações do módulo:
     
-    * pen_map_hipotese_legal_envio_alterar
-    * pen_map_hipotese_legal_envio_cadastrar
-    * pen_map_hipotese_legal_envio_excluir
-    * pen_map_hipotese_legal_envio_listar
-    * pen_map_hipotese_legal_padrao
-    * pen_map_hipotese_legal_padrao_cadastrar
-    * pen_map_hipotese_legal_recebimento_alterar
-    * pen_map_hipotese_legal_recebimento_cadastrar
-    * pen_map_hipotese_legal_recebimento_excluir
-    * pen_map_hipotese_legal_recebimento_listar
-    * pen_map_tipo_documento_envio_alterar
-    * pen_map_tipo_documento_envio_cadastrar
-    * pen_map_tipo_documento_envio_excluir
-    * pen_map_tipo_documento_envio_listar
-    * pen_map_tipo_documento_envio_visualizar
-    * pen_map_tipo_documento_recebimento_alterar
-    * pen_map_tipo_documento_recebimento_cadastrar
-    * pen_map_tipo_documento_recebimento_excluir
-    * pen_map_tipo_documento_recebimento_listar
-    * pen_map_tipo_documento_recebimento_visualizar
-    * pen_map_unidade_alterar
-    * pen_map_unidade_cadastrar   
-    * pen_map_unidade_excluir 
-    * pen_map_unidade_listar
-    * pen_parametros_configuracao
-    * pen_parametros_configuracao_alterar  
+        * pen_map_hipotese_legal_envio_alterar
+        * pen_map_hipotese_legal_envio_cadastrar
+        * pen_map_hipotese_legal_envio_excluir
+        * pen_map_hipotese_legal_envio_listar
+        * pen_map_hipotese_legal_padrao
+        * pen_map_hipotese_legal_padrao_cadastrar
+        * pen_map_hipotese_legal_recebimento_alterar
+        * pen_map_hipotese_legal_recebimento_cadastrar
+        * pen_map_hipotese_legal_recebimento_excluir
+        * pen_map_hipotese_legal_recebimento_listar
+        * pen_map_tipo_documento_envio_alterar
+        * pen_map_tipo_documento_envio_cadastrar
+        * pen_map_tipo_documento_envio_excluir
+        * pen_map_tipo_documento_envio_listar
+        * pen_map_tipo_documento_envio_visualizar
+        * pen_map_tipo_documento_recebimento_alterar
+        * pen_map_tipo_documento_recebimento_cadastrar
+        * pen_map_tipo_documento_recebimento_excluir
+        * pen_map_tipo_documento_recebimento_listar
+        * pen_map_tipo_documento_recebimento_visualizar
+        * pen_map_unidade_alterar
+        * pen_map_unidade_cadastrar   
+        * pen_map_unidade_excluir 
+        * pen_map_unidade_listar
+        * pen_parametros_configuracao
+        * pen_parametros_configuracao_alterar  
     
     Recomenda-se que os recursos acima não sejam atribuídos aos perfis básicos do sistema.
     
