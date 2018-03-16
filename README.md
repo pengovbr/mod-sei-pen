@@ -119,7 +119,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
 7. Mover o arquivo do certificado digital utilizado para integração com o **ConectaGov** para o diretório "sei/config/".
     
-    Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados_mod_conectagov** para adicionar estes arquivos.
+    Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados\_mod_conectagov** para adicionar estes arquivos.
     
     Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no pacote de instalação disponibilizado pela equipe técnica do Ministério do Planejamento, Desenvolvimento e Gestão - MPDG e são disponibilizados no ato do credenciamento da instituição no ConectaGov. 
 
@@ -127,12 +127,12 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Maiores informações e solicitações podem ser feitas através do e-mail processo.eletrônico@planejamento.gov.br.
 
-8. Mover o arquivo de instalação do módulo no SEI **sei_atualizar_versao_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+8. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
-9. Mover o arquivo de instalação do módulo no SIP **sip_atualizar_versao_modulo_pen.php** para a pasta **sip/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+9. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
 
-10. Executar o script **sip_atualizar_versao_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
+10. Executar o script **sip\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
 
         # php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sip/scripts/sip_atualizar_versao_modulo_pen.php
 
@@ -154,42 +154,43 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
     
     Recursos: 
     
-    * pen_procedimento_expedido_listar
-    * pen_procedimento_expedir
+    * pen\_procedimento\_expedido\_listar
+    * pen\_procedimento\_expedir
 
     Também será necessário a configuração dos seguintes recursos ao perfil ADMINISTRADOR para permitir o mesmo realizar as configurações do módulo:
     
-    * pen_map_hipotese_legal_envio_alterar
-    * pen_map_hipotese_legal_envio_cadastrar  
-    * pen_map_hipotese_legal_envio_excluir    
-    * pen_map_hipotese_legal_envio_listar 
-    * pen_map_hipotese_legal_padrao   
-    * pen_map_hipotese_legal_padrao_cadastrar 
-    * pen_map_hipotese_legal_recebimento_alterar  
-    * pen_map_hipotese_legal_recebimento_cadastrar    
-    * pen_map_hipotese_legal_recebimento_excluir  
-    * pen_map_hipotese_legal_recebimento_listar
-    * pen_map_tipo_documento_envio_alterar    
-    * pen_map_tipo_documento_envio_cadastrar  
-    * pen_map_tipo_documento_envio_excluir    
-    * pen_map_tipo_documento_envio_listar 
-    * pen_map_tipo_documento_envio_visualizar 
-    * pen_map_tipo_documento_recebimento_alterar  
-    * pen_map_tipo_documento_recebimento_cadastrar    
-    * pen_map_tipo_documento_recebimento_excluir  
-    * pen_map_tipo_documento_recebimento_listar   
-    * pen_map_tipo_documento_recebimento_visualizar   
-    * pen_map_unidade_alterar 
-    * pen_map_unidade_cadastrar   
-    * pen_map_unidade_excluir 
-    * pen_map_unidade_listar  
-    * pen_parametros_configuracao 
-    * pen_parametros_configuracao_alterar 
+    * pen\_map\_hipotese\_legal\_envio\_alterar
+    * pen\_map\_hipotese\_legal\_envio\_cadastrar
+    * pen\_map\_hipotese\_legal\_envio\_excluir
+    * pen\_map\_hipotese\_legal\_envio\_listar
+    * pen\_map\_hipotese\_legal\_padrao
+    * pen\_map\_hipotese\_legal\_padrao\_cadastrar
+    * pen\_map\_hipotese\_legal\_recebimento\_alterar
+    * pen\_map\_hipotese\_legal\_recebimento\_cadastrar
+    * pen\_map\_hipotese\_legal\_recebimento\_excluir
+    * pen\_map\_hipotese\_legal\_recebimento\_listar
+    * pen\_map\_tipo\_documento\_envio\_alterar
+    * pen\_map\_tipo\_documento\_envio\_cadastrar
+    * pen\_map\_tipo\_documento\_envio\_excluir
+    * pen\_map\_tipo\_documento\_envio\_listar
+    * pen\_map\_tipo\_documento\_envio\_visualizar
+    * pen\_map\_tipo\_documento\_recebimento\_alterar
+    * pen\_map\_tipo\_documento\_recebimento\_cadastrar
+    * pen\_map\_tipo\_documento\_recebimento\_excluir
+    * pen\_map\_tipo\_documento\_recebimento\_listar
+    * pen\_map\_tipo\_documento\_recebimento\_visualizar
+    * pen\_map\_unidade\_alterar
+    * pen\_map\_unidade\_cadastrar   
+    * pen\_map\_unidade\_excluir 
+    * pen\_map\_unidade\_listar
+    * pen\_parametros\_configuracao
+    * pen\_parametros\_configuracao\_alterar
+
 
 14. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
 
     Os ID's de unidades são gerenciados pela própria instituição no portal do Processo Eletrônico Nacional ( http://conectagov.processoeletronico.gov.br). 
-No credenciamento da instituição, estes valores serão passados pela unidade de TI  do MPDG.
+    No credenciamento da instituição, estes valores serão passados pela unidade de TI  do MPDG.
 
     Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Unidades]** e vincule as unidades administrativas com seus respectivos identificadores registrados no portal do Processo Eletrônico Nacional.
 
@@ -307,9 +308,11 @@ Ao criar o processo, para envio externo pelo ConectaGov PEN, são obrigatórios 
 
 O SEI fará uma verificação das informações pendentes para envio e exibirá uma mensagem para o usuário, conforme imagem:
 
-![Validação dos Campos Especificação e Interessados no Momento do Envio Externo de Processo](imagens/valida_especificacao_interessado.png)
+![Validação dos Campos Especificação e Interessados no Momento  do Envio Externo de Processo](imagens/valida_especificacao_interessado.png)
 
-Verifica-se também se o processo possui pelo menos um documento interno assinado ou se possui algum documento externo.
+Verifica-se também se o processo possui pelo menos um documento interno assinado ou se possui algum documento externo, além de impedir o trâmite de processos que possuam documentos sem assinatura, conforme exemplificado a seguir:
+
+![Verificação de Existência de pelo menos um Documento no Processo](imagens/doc_nao_assinado.png)
 
 ### Envio Externo de Processo
 
@@ -352,6 +355,8 @@ O ConectaGov PEN atua como uma **terceiro confiável** no trâmite do processo a
 
 Enquanto a unidade receptora não confirma o recebimento, o SEI passa a indicar que aquele processo **encontra-se em envio externo**, aguardando o recebimento. Nesse momento, o processo encontra-se bloqueado para edição, evento que possui um alerta de um círculo vermelho à direita do seu número, na tela de Controle do Processo. No estado bloqueado, as opções disponíveis são **apenas de visualização**, sem permitir operações que alteram informações do processo.
 
+![Tela de Controle de Processos - Processo em Envio Externo](imagens/processo_em_tramitacao.png)
+
 O SEI, ao receber o aviso do ConectaGov PEN de que a unidade receptora validou as informações e recebeu o processo, faz o registro no andamento, indicando o sucesso no trâmite, e o **processo passa a indicar que não possui mais andamentos abertos**.
 
 ![Tela de Controle de Processos - Processo sem Andamentos Abertos](imagens/processo_bloqueado_envio_externo.png)
@@ -366,9 +371,11 @@ No caso de recebimento de processos por meio do ConectaGov PEN, o processo apare
 
 A operação de recebimento de processo por meio de envio externo também é registrada na unidade destinatária, conforme nota-se na imagem:
 
-*INCLUIR_IMAGEM MOSTRANDO REGISTRO DO ANDAMENTO, NA DESTINO, DO RECEBIMENTO DO PROCESSO* 
+![Tela de Histórico do Processo - Informações na Unidade/Órgão Destinatários](imagens/recebimento_destinatario_historico.png)
 
-A unidade destinatária pode fazer a instrução processual normalmente, inclusive fazendo a devolução do processo para a unidade originária. Neste caso, o ConectGov PEN consegue reconhecer os documentos que a unidade receptora já possui, realizando, assim, o trâmite apenas daquelas documentos necessários para a unidade de origem. 
+No exemplo acima, a unidade EXTERNO é a unidade cadastrada no passo 15 deste manual. Ou seja, a unidade EXTERNO recebeu o processo do ConectaGov PEN, realizou o download dos documentos a partir do ConectaGov e encaminhou o processo para a devida unidade, de forma automática.
+
+A unidade destinatária pode fazer a instrução processual normalmente, inclusive fazendo a devolução do processo para a unidade originária. Neste caso, o ConectGov PEN consegue reconhecer os documentos que a unidade receptora já possui, realizando, assim, o **trâmite apenas daqueles documentos necessários para a unidade de origem**. 
  
 ### Consulta de Recibos
 
