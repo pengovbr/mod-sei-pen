@@ -156,7 +156,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
     
     * pen_procedimento_expedido_listar
     * pen_procedimento_expedir
-
+    
     Também será necessário a configuração dos seguintes recursos ao perfil ADMINISTRADOR para permitir o mesmo realizar as configurações do módulo:
     
     * pen_map_hipotese_legal_envio_alterar
@@ -187,7 +187,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
     * pen_parametros_configuracao_alterar  
     
     Recomenda-se que os recursos acima não sejam atribuídos aos perfis básicos do sistema.
-
+    
 14. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
 
     Os ID's de unidades são gerenciados pela própria instituição no portal do Processo Eletrônico Nacional ( http://conectagov.processoeletronico.gov.br). 
