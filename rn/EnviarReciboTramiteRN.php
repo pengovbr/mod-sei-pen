@@ -20,7 +20,7 @@ class EnviarReciboTramiteRN extends InfraRN
   }
   
     /**
-     * Gera o recibo do tramite para o destin·rio informando o recebimento
+     * Gera o recibo do tramite para o destin√°rio informando o recebimento
      * do procedimento.
      * 
      * @param int $numIdTramite
@@ -88,52 +88,28 @@ class EnviarReciboTramiteRN extends InfraRN
   {        
 
     date_default_timezone_set('America/Sao_Paulo');
-    //$parametro->dadosDoReciboDeTramite->dataDeRecebimento = date('Y-m-d\TH:i:s.000P');
 
     if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
-      throw new InfraException('Par‚metro $parNumIdTramite n„o informado.');            
+      throw new InfraException('Par√¢metro $parNumIdTramite n√£o informado.');            
     }            
 
-    //TODO: Reavaliar validaÁ„o
-    //Verifica se todos os componentes digitais j· foram devidamente recebido
+    //Verifica se todos os componentes digitais j√° foram devidamente recebido
     $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
     if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-      throw new InfraException("Tr‚mite n„o pode ser localizado pelo identificador $parNumIdTramite.");
+      throw new InfraException("Tr√¢mite n√£o pode ser localizado pelo identificador $parNumIdTramite.");
     }
 
     $objTramite = $arrObjTramite[0];
     $strNumeroRegistro = $objTramite->NRE;
 
     if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-      throw new InfraException('SituaÁ„o do Tr‚mite diferente da permitida para o envio do recibo de conclus„o de tr‚mite.'); 
+      throw new InfraException('Situa√ß√£o do Tr√¢mite diferente da permitida para o envio do recibo de conclus√£o de tr√¢mite.'); 
     }
 
-    //TODO: Verificar necessidade de dessa validaÁ„o
-    //Verificar se todos os componentes digitais foram obtidos e validados
-    //$objComponenteDigitalDTO = new ComponenteDigitalDTO();
-    //$objComponenteDigitalDTO->setNumIdTramite($parNumIdTramite);
-    //$objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
-    //$objComponenteDigitalDTO->setNumIdAnexo(null);
-
-    //$objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-    //if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
-    //  throw new InfraException("Pendente obtenÁ„o de componentes digitais do tr‚mite $parNumIdTramite.");
-    //}
-
-    //TODO: Tratar data correta para envio do recibo de tr‚mite
-    //A data atual gera erros no barramento devido a falta de sincronizaÁ„o entre o relÛgio do servidor e o relÛgio do barramento
-    //Avaliar a possibilidade de utilizar a data em que foi realizado o ˙ltimo download. ConsultarTramite - SituaÁ„o 04
-
-    //if(!isset($parDthRecebimento)) {
-    //  $parDthRecebimento = InfraData::getStrDataHoraAtual();
-    //}
-
-    //TODO: Analisar necessidade do tratamento de datas abaixo j· que todos os servidores que integrarem ao PEN dever„o estar sincronizados 
     $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);    
     $dthRecebimentoComponentesDigitais = $dthRecebimentoComponentesDigitais ?: date();
     $dthRecebimento = gmdate("Y-m-d\TH:i:s.000\Z", InfraData::getTimestamp($dthRecebimentoComponentesDigitais));
 
-    
     $strReciboTramite  = "<recibo>";
     $strReciboTramite .= "<IDT>$parNumIdTramite</IDT>";
     $strReciboTramite .= "<NRE>$strNumeroRegistro</NRE>";
@@ -150,13 +126,12 @@ class EnviarReciboTramiteRN extends InfraRN
     //Envia o Recibo de salva no banco
     $hashAssinatura = $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
     $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura, $parArrayHash);
-    
   }    
 
   private function obterDataRecebimentoComponentesDigitais($parObjTramite){
     
     if(!isset($parObjTramite)) {
-      throw new InfraException('Par‚metro $parObjTramite n„o informado.');            
+      throw new InfraException('Par√¢metro $parObjTramite n√£o informado.');            
     }
 
     if(!is_array($parObjTramite->historico->operacao)) {
@@ -173,9 +148,9 @@ class EnviarReciboTramiteRN extends InfraRN
   }
 
     /**
-     * Consulta o componente digital no barramento. Utilizado para casos de retrasmiss„o,
-     * onde esta unidade esta recebendo um componente digital que pertence ‡ ela
-     * prÛpria, ent„o o id_tramite de envio, que foi gravado, È diferente do de recebimento
+     * Consulta o componente digital no barramento. Utilizado para casos de retrasmiss√£o,
+     * onde esta unidade esta recebendo um componente digital que pertence √† ela
+     * pr√≥pria, ent√£o o id_tramite de envio, que foi gravado, √© diferente do de recebimento
      * 
      * @param int $numIdTramite
      * @return array[ComponenteDigitalDTO]
