@@ -252,7 +252,7 @@ class PENAgendamentoRN extends InfraRN {
                 	"Favor, entrar em contato com a equipe de suporte técnico.";
                 throw new InfraException($msg, $e);
             } else {
-                LogSEI::getInstance()->gravar("Todos os serviços estão rodando.");
+                LogSEI::getInstance()->gravar("Todos os serviços necessários na integração com o Processo Eletrônico Nacional - PEN estão ativos.");
             }
         } catch (Exception $e) {
             throw new InfraException('Erro ao analisar status do serviços Gearmand e Supervisord', $e);
@@ -306,7 +306,6 @@ class PENAgendamentoRN extends InfraRN {
                     $objBD->alterar($objDTO);
                 }
             }
-
 
             LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.");
         } catch (Exception $e) {

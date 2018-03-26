@@ -107,7 +107,7 @@ class PenParametroRN extends InfraRN {
         $objPenParametroDTO->retStrValor();
 
         if($this->contar($objPenParametroDTO) > 0) {
-            $objPenParametroDTO = $this->consultarControlado($objPenParametroDTO);
+            $objPenParametroDTO = $this->consultar($objPenParametroDTO);
             return $objPenParametroDTO->getStrValor();
         }
     }
