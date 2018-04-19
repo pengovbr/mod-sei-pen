@@ -380,6 +380,25 @@ A unidade destinatária pode fazer a instrução processual normalmente, inclusi
  
 ### Consulta de Recibos
 
+O ConectGov PEN disponibiliza recibos a respeito das operações realizadas. Os casos de disponibilização de recibos são o de envio para o ConectaGov PEN, disponibilizado ao remetente, e de conclusão de trâmite (disponibilizado para o remetente e o destinatário, para indicar que o destinatário recebeu com sucesso todos os documentos e processos).
+
+Para consultar os recibos gerados, deve-se acessar o ícone correspondente, na barra de controle de processos, conforme imagem seguinte:
+
+![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/icone_consulta_recibos.png)
+
+Para o remetente, disponibilizam-se os recibos de envio e de conclusão de trâmite, conforme imagens seguintes.
+O recibo de envio indica que o ConectaGov PEN recebeu com sucesso os documentos e processos de forma íntegra.
+
+![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_envio.png)
+
+O recibo de trâmite indica que o ConectaGov PEN conseguiu entregar com sucesso os documentos e processos de forma íntegra ao destinatário.
+
+![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_tramite.png)
+
+O destinatário pode realizar a consulta ao recibo de trâmite, acessando o ícone de recibos, conforme imagem seguinte.
+
+![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_conclusao_tramite_destinatario.png)
+
 ### Hipóteses de Recusa de Trâmite
 
 ### Consulta de Processos Enviados Externamente
