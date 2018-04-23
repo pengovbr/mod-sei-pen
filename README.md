@@ -1,8 +1,8 @@
 # Manual do Módulo ConectaGov
 
-O módulo **conectagov** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. 
+O módulo **conectagov** PEN é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. 
 
-O projeto ConectaGov tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de simplificar a troca de documentos oficiais entre instituições de forma rápida e segura. 
+O projeto ConectaGov PEN tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de simplificar a troca de documentos oficiais entre instituições de forma rápida e segura. 
 
 A utilização deste módulo adicionará novas funcionalidades ao SEI permitindo, entre outros:
  - Enviar processos administrativos para instituições externas
@@ -28,10 +28,10 @@ Procedimentos de instalação do módulo nos servidores de aplicação e atualiz
 ## Instalação
 
 ### Pré-requisitos
- - SEI versão 3.0.5 ou superior instalada.
+ - **SEI versão 3.0.5 ou superior instalada, exceto a versão 3.0.10.**
  - Usuário de acesso ao banco de dados do SEI e SIP com  permissões para criar novas estruturas no banco de dados.
   
-Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov**. Para maiores informações, acesse  http://conectagov.processoeletronico.gov.br/ ou entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
+Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov**. Os testes devem ser feitos primeiro em um ambiente de homologação. Para solicitação de acesso ao ambiente de homologação, acesse [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "Portal de Administração ConectaGov PEN - Cadastro de Comitê").  Para maiores informações, entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
 
 ### Procedimentos
 
@@ -49,7 +49,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         # instalação do gearman e supervisord               
         yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
 
-3. Configuração dos serviços de recebimento de processos no **supervidor** 
+3. Configuração dos serviços de recebimento de processos no **supervisor** 
 
     Neste passo será configurado os dois scripts PHP responsáveis por fazer monitoramento de pendências de trâmite no ConectaGov e processar o recebimento de novos processos.
 
@@ -407,14 +407,39 @@ O destinatário pode realizar a consulta ao recibo de trâmite, acessando o íco
 
 ## Problemas Conhecidos
 
-### Problema com validação de certificados HTTPS
+### 1. Problema com validação de certificados HTTPS
 
-Caso o ambiente do ConectaGov utilizado nesta configuração esteja utilizando HTTPS com certificado digital não reconhecido (como ICP-Brasil), será necessário configurar a cadeia não reconhecida como confiáveis nos servidores de aplicação do SEI. Com isto, os seguintes comandos precisam ser executados em cada nós de aplicação do SEI, incluindo aquele responsável pelo tratamento das tarefas agendadas:
+Caso o ambiente do ConectaGov PEN utilizado nesta configuração esteja utilizando HTTPS com certificado digital não reconhecido  pela ICP-Brasil, será necessário configurar a cadeia não reconhecida como confiável nos servidores de aplicação do SEI. Com isto, os seguintes comandos precisam ser executados em cada nós de aplicação do SEI, incluindo aquele responsável pelo tratamento das tarefas agendadas.
 
-Copie o certificado da cadeia de CA utilizado pelo ConectaGov para o diretório /usr/local/share/ca-certificates:
+**Caso o sistema seja Debian ou Ubuntu:**
 
-    cp <CADEIA-CERTIFICADO-CA> /usr/local/share/ca-certificates
+    # Copie o certificado da cadeia de CA (Autoridade Certificadora) que assinou o certificado # fornecido PEN, para o diretório /usr/local/share/ca-certificates:
 
-Efetue a atualização da lista de certificados confiáveis do sistema operacional
+        cp <CADEIA-CERTIFICADO-CA> /usr/local/share/ca-certificates
 
-    sudo update-ca-certificates
+    #Efetue a atualização da lista de certificados confiáveis do sistema operacional
+
+        sudo update-ca-certificates
+
+**Caso o sistema seja CentOS 6:**
+
+    # Instalar o pacote ca-certificates package:
+        
+        yum install ca-certificates
+
+    # Habilitar o recurso de configuração dinâmica de CA
+
+        update-ca-trust force-enable
+
+    # Copiar o arquivo da CA (Autoridade Certificadora) que assinou o certificado fornecido 
+    # no passo 7, para a pasta /etc/pki/ca-trust/source/anchors/: 
+
+        cp <CADEIA-CERTIFICADO-CA> /etc/pki/ca-trust/source/anchors/
+
+    # Usar o comando
+        
+        update-ca-trust extract
+
+### 2. Trâmites não realizados ou recibos não obtidos
+
+Verificar se os serviços *gearman* e *supervisord* estão em execução, conforme orientado no manual de instalação, itens 3 e 4.
