@@ -1387,9 +1387,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
         if(!isset($objUnidadeDTO)){
-          $objInfraException->adicionarValidacao("Unidade de destino [Estrutura: XXXX] não localizada.");
-          $objInfraException->adicionarValidacao("Dados: {$numeroDeIdentificacaoDaEstrutura}");
-          
+          $objInfraException->adicionarValidacao("Unidade de destino [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não localizada.");          
         }                
       }
 
