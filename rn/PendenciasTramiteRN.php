@@ -20,17 +20,17 @@ class PendenciasTramiteRN extends InfraRN {
         if (self::$instance == null) {
             self::$instance = new PendenciasTramiteRN(ConfiguracaoSEI::getInstance(), SessaoSEI::getInstance(), BancoSEI::getInstance(), LogSEI::getInstance());
         }
-    
+
         return self::$instance;
-    }  
+    }
 
     public function __construct() {
         $objPenParametroRN = new PenParametroRN();
-        
+
         $this->strLocalizacaoCertificadoDigital = $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
         $this->strEnderecoServicoPendencias = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
         //TODO: Urgente - Remover senha do certificado de autenticao dos servios do PEN da tabela de parâmetros
-        $this->strSenhaCertificadoDigital = $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');    
+        $this->strSenhaCertificadoDigital = $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
 
         if (InfraString::isBolVazia($this->strEnderecoServicoPendencias)) {
             throw new InfraException('Endereço do serviço de pendências de trâmite do Processo Eletrônico Nacional (PEN) não informado.');
@@ -50,10 +50,12 @@ class PendenciasTramiteRN extends InfraRN {
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
-            InfraDebug::getInstance()->setBolLigado(true);
+            InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
             InfraDebug::getInstance()->limpar();
+
+            PENIntegracao::validarCompatibilidadeModulo();
 
             $objPenParametroRN = new PenParametroRN();
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
@@ -71,9 +73,9 @@ class PendenciasTramiteRN extends InfraRN {
                 //TODO: Tratar quantidade de erros o sistema consecutivos para um tramite de processo
                 //Alcanado est quantidade, uma pendncia posterior dever ser obtida do barramento
                 while (true) {
-                    $objPendenciaDTO = $this->obterPendenciasTramite($numIdTramiteRecebido);          
+                    $objPendenciaDTO = $this->obterPendenciasTramite($numIdTramiteRecebido);
                     if(isset($objPendenciaDTO)) {
-                        if($numIdTramiteRecebido != $objPendenciaDTO->getNumIdentificacaoTramite() || 
+                        if($numIdTramiteRecebido != $objPendenciaDTO->getNumIdentificacaoTramite() ||
                             $strStatusTramiteRecebido != $objPendenciaDTO->getStrStatus()) {
                             $numIdTramiteRecebido = $objPendenciaDTO->getNumIdentificacaoTramite();
                             $strStatusTramiteRecebido = $objPendenciaDTO->getStrStatus();
@@ -83,11 +85,11 @@ class PendenciasTramiteRN extends InfraRN {
                 sleep(5);
                 }
             }
-            //TODO: Urgente: Tratar erro especfico de timeout e refazer a requisio      
+            //TODO: Urgente: Tratar erro especfico de timeout e refazer a requisio
             catch(Exception $e) {
                 $strAssunto = 'Erro monitorando pendências.';
-                $strErro = InfraException::inspecionar($e);      
-                LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro); 
+                $strErro = InfraException::inspecionar($e);
+                LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro);
             }
 
             $numSeg = InfraUtil::verificarTempoProcessamento($numSeg);
@@ -95,7 +97,7 @@ class PendenciasTramiteRN extends InfraRN {
             InfraDebug::getInstance()->gravar('FIM');
             LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug());
 
-        } 
+        }
         catch(Exception $e) {
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
@@ -104,7 +106,7 @@ class PendenciasTramiteRN extends InfraRN {
         }
     }
 
-    private function configurarRequisicao() 
+    private function configurarRequisicao()
     {
         $curl = curl_init($this->strEnderecoServicoPendencias);
         curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias);
@@ -119,24 +121,24 @@ class PendenciasTramiteRN extends InfraRN {
         return $curl;
     }
 
-    private function obterPendenciasTramite($parNumIdTramiteRecebido) 
+    private function obterPendenciasTramite($parNumIdTramiteRecebido)
     {
         $resultado = null;
         $curl = $this->configurarRequisicao();
-      
+
         try{
             if(isset($parNumIdTramiteRecebido)) {
-                curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebida=" . $parNumIdTramiteRecebido);     
+                curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebida=" . $parNumIdTramiteRecebido);
             }
 
             //A seguinte requisio ir aguardar a notificao do PEN sobre uma nova pendncia
             //ou at o lanamento da exceo de timeout definido pela infraestrutura da soluo
-            //Ambos os comportamentos so esperados para a requisio abaixo.      
+            //Ambos os comportamentos so esperados para a requisio abaixo.
             $strResultadoJSON = curl_exec($curl);
 
             if(curl_errno($curl)) {
                 if (curl_errno($curl) != 28)
-                    throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));        
+                    throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));
             }
 
             if(!InfraString::isBolVazia($strResultadoJSON)) {
@@ -145,15 +147,15 @@ class PendenciasTramiteRN extends InfraRN {
                 if(isset($strResultadoJSON) && $strResultadoJSON->encontrou) {
                     $objPendenciaDTO = new PendenciaDTO();
                     $objPendenciaDTO->setNumIdentificacaoTramite($strResultadoJSON->IDT);
-                    $objPendenciaDTO->setStrStatus($strResultadoJSON->status);            
-                    $resultado = $objPendenciaDTO;        
+                    $objPendenciaDTO->setStrStatus($strResultadoJSON->status);
+                    $resultado = $objPendenciaDTO;
                 }
             }
         }
         catch(Exception $e){
             curl_close($curl);
-            throw $e;      
-        }    
+            throw $e;
+        }
 
         curl_close($curl);
         return $resultado;
@@ -197,7 +199,7 @@ class PendenciasTramiteRN extends InfraRN {
                 $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
                 $numCont = 0;
 
-                while($numCont < $numTentativas) {                    
+                while($numCont < $numTentativas) {
                     $client->addTaskBackground('receberReciboTramite', $strWorkload, null);
                     $numCont++;
                 }

@@ -174,7 +174,7 @@ class PENAgendamentoRN extends InfraRN {
 
                         if ($objProcessoEletronico) {
 
-                            //Busca o processo 
+                            //Busca o processo
                             $objProtocolo = new PenProtocoloDTO();
                             $objProtocolo->setDblIdProtocolo($objProcessoEletronico->getDblIdProcedimento());
 
@@ -242,12 +242,12 @@ class PENAgendamentoRN extends InfraRN {
                 $cont++;
                 $servico[] = 'ProcessarPendenciasRN.php';
             }
-            
+
 			$strServicos = array_map(function($item){ return "- $item"; }, $servico);
 			$strServicos = implode("\n", $strServicos);
 
             if ($cont > 0) {
-                $msg = "Identificada inconsistência nos serviços de integração com o Processo Eletrônico Nacional - PEN.\n" . 
+                $msg = "Identificada inconsistência nos serviços de integração com o Processo Eletrônico Nacional - PEN.\n" .
                		"Os seguintes serviços necessários para o correto funcionamento da integração não estão ativos: \n $strServicos \n\n" .
                 	"Favor, entrar em contato com a equipe de suporte técnico.";
                 throw new InfraException($msg, $e);
@@ -265,12 +265,14 @@ class PENAgendamentoRN extends InfraRN {
      */
     public function atualizarHipotesesLegais() {
         try {
+
+            PENIntegracao::validarCompatibilidadeModulo();
             $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
             $processoEletronicoRN = new ProcessoEletronicoRN();
             $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
 
             if(empty($hipotesesPen)){
-                throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');    
+                throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');
             }
 
             //Para cada hipótese vinda do PEN será verificado a existencia.

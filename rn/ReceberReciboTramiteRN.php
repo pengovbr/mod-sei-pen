@@ -19,16 +19,16 @@ class ReceberReciboTramiteRN extends InfraRN
   {
     return BancoSEI::getInstance();
   }
-  
+
   protected function registrarRecebimentoRecibo($numIdProcedimento, $strProtocoloFormatado, $numIdTramite) {
-        
+
         //REALIZA A CONCLUSÃO DO PROCESSO
         $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
         $objEntradaConcluirProcessoAPI->setIdProcedimento($numIdProcedimento);
-        
+
         $objSeiRN = new SeiRN();
         $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
-        
+
         $arrObjAtributoAndamentoDTO = array();
 
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -38,33 +38,33 @@ class ReceberReciboTramiteRN extends InfraRN
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($numIdTramite);
-        
+
         $objTramite = array_pop($arrObjTramite);
-        
+
         $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
-            $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas, 
-            $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura, 
+            $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas,
+            $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura,
             true
         );
-        
+
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
         $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
         $objAtributoAndamentoDTO->setStrValor($objEstrutura->nome);
         $objAtributoAndamentoDTO->setStrIdOrigem($objEstrutura->numeroDeIdentificacaoDaEstrutura);
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-        
+
         if(isset($objEstrutura->hierarquia)) {
- 
+
             $arrObjNivel = $objEstrutura->hierarquia->nivel;
-            
+
             $nome = "";
             $siglasUnidades = array();
             $siglasUnidades[] = $objEstrutura->sigla;
-            
+
             foreach($arrObjNivel as $key => $objNivel){
                 $siglasUnidades[] = $objNivel->sigla  ;
             }
-            
+
             for($i = 1; $i <= 3; $i++){
                 if(isset($siglasUnidades[count($siglasUnidades) - 1])){
                     unset($siglasUnidades[count($siglasUnidades) - 1]);
@@ -78,7 +78,7 @@ class ReceberReciboTramiteRN extends InfraRN
                     $nome .= $nomeUnidade." / ";
                 }
             }
-            
+
             $objNivel = current($arrObjNivel);
 
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -86,19 +86,19 @@ class ReceberReciboTramiteRN extends InfraRN
             $objAtributoAndamentoDTO->setStrValor($nome);
             $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-            
+
         }
-        
+
         $objRepositorioDTO = $this->objProcessoEletronicoRN->consultarRepositoriosDeEstruturas($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas);
         if(!empty($objRepositorioDTO)) {
-        
+
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
             $objAtributoAndamentoDTO->setStrNome('REPOSITORIO_DESTINO');
             $objAtributoAndamentoDTO->setStrValor($objRepositorioDTO->getStrNome());
             $objAtributoAndamentoDTO->setStrIdOrigem($objRepositorioDTO->getNumId());
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
         }
-        
+
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -111,20 +111,20 @@ class ReceberReciboTramiteRN extends InfraRN
     }
 
   protected function receberReciboDeTramiteConectado($parNumIdTramite) {
-              
-        
+
+
         if (!isset($parNumIdTramite)) {
             throw new InfraException('Parâmetro $parNumIdTramite não informado.');
         }
 
         $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
-        
+
         if (!$objReciboTramite) {
             throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
         }
-        
+
         $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
-        $objDateTime = new DateTime($objReciboTramite->recibo->dataDeRecebimento);        
+        $objDateTime = new DateTime($objReciboTramite->recibo->dataDeRecebimento);
 
         $objReciboTramiteDTO = new ReciboTramiteDTO();
         $objReciboTramiteDTO->setStrNumeroRegistro($objReciboTramite->recibo->NRE);
@@ -137,11 +137,11 @@ class ReceberReciboTramiteRN extends InfraRN
         $objTramiteDTO = new TramiteDTO();
         $objTramiteDTO->setNumIdTramite($parNumIdTramite);
         $objTramiteDTO->retNumIdUnidade();
-        
+
         $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
         if ($objTramiteBD->contar($objTramiteDTO) > 0) {
-            
+
             $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
@@ -151,10 +151,10 @@ class ReceberReciboTramiteRN extends InfraRN
 
             $objReciboTramiteBD = new ReciboTramiteBD(BancoSEI::getInstance());
             if ($objReciboTramiteBD->contar($objReciboTramiteDTOExistente) == 0) {
-                
-                //Armazenar dados do recibo de conclusão do trãmite      
+
+                //Armazenar dados do recibo de conclusão do trãmite
                 $objReciboTramiteBD->cadastrar($objReciboTramiteDTO);
-                
+
                  if ($objReciboTramite->recibo->hashDoComponenteDigital && is_array($objReciboTramite->recibo->hashDoComponenteDigital)) {
                     foreach ($objReciboTramite->recibo->hashDoComponenteDigital as $strHashComponenteDigital) {
 
@@ -198,23 +198,21 @@ class ReceberReciboTramiteRN extends InfraRN
 
                     $this->objProcedimentoAndamentoRN->setOpts($objProcessoEletronicoDTO->getDblIdProcedimento(), $parNumIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
                     $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S');
-                    
+
                     //Registra o recbimento do recibo no histórico e realiza a conclusão do processo
                     $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $parNumIdTramite);
-                    
+
                     $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
                     $objPenTramiteProcessadoRN->setRecebido($parNumIdTramite);
-        
+
                 } catch (Exception $e) {
-
-                    $strMessage = 'Falha o modificar o estado do procedimento para bloqueado.';
-
+                    $strMessage = 'Falha ao modificar o estado do procedimento para bloqueado.';
                     LogSEI::getInstance()->gravar($strMessage . PHP_EOL . $e->getMessage() . PHP_EOL . $e->getTraceAsString());
                     throw new InfraException($strMessage, $e);
                 }
             }
         }
-        
+
 
     }
 }
