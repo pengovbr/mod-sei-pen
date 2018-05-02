@@ -274,8 +274,7 @@ class ProcessoEletronicoRN extends InfraRN {
                             $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
                         }
 
-                        $objEstrutura->hierarquia->nivel = (array) $objEstrutura->hierarquia->nivel;
-                        foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
+			foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
                             $objNivel->nome = utf8_decode($objNivel->nome);
                         }
                     }
