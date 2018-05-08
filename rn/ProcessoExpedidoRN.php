@@ -17,10 +17,9 @@ class ProcessoExpedidoRN extends InfraRN {
         $bolSqlServer = $this->getObjInfraIBanco() instanceof InfraSqlServer;
         $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
         $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
+        $strInstrucaoPaginacao = (!$bolSqlServer) ? "LIMIT ".$numOffset.",".$numLimit : "OFFSET $numOffset ROWS FETCH NEXT $numLimit ROWS ONLY";
 
-        $sql = "SELECT " .
-        (($bolSqlServer) ? "TOP $numLimit " : "") .
-        "
+        $sql = "SELECT
                         p.id_protocolo,
                         p.protocolo_formatado,
                         a.id_unidade id_unidade,
@@ -47,9 +46,7 @@ class ProcessoExpedidoRN extends InfraRN {
                 AND at2.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) ."
                 AND at2.dth_abertura > a.dth_abertura )
                GROUP BY
-                        p.id_protocolo, p.protocolo_formatado, a.id_unidade , atd.valor , us.id_usuario, us.nome, a.dth_abertura ORDER BY a.dth_abertura DESC ".
-                        (($bolSqlServer) ? "OFFSET $numOffset ROWS" : "LIMIT ".$numOffset.",".$numLimit."  ");
-
+                        p.id_protocolo, p.protocolo_formatado, a.id_unidade , atd.valor , us.id_usuario, us.nome, a.dth_abertura ORDER BY a.dth_abertura DESC ".$strInstrucaoPaginacao;
 
           $sqlCount = "SELECT
                         count(*) total

@@ -312,7 +312,7 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametros = new stdClass();
       $parametros->filtroDeEstruturas = new stdClass();
       $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-      $parametros->filtroDeEstruturas->apenasAtivas = false;
+      $parametros->filtroDeEstruturas->apenasAtivas = true;
 
       $nome = trim($nome);
       if(is_numeric($nome)) {
