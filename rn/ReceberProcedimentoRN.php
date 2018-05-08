@@ -1387,7 +1387,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
         if(!isset($objUnidadeDTO)){
-          $objInfraException->adicionarValidacao("Unidade de destino [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber trâmites externos.");
+          $objInfraException->adicionarValidacao("Unidade [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber processos externos no sistema de destino.");
         }
       }
 

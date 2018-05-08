@@ -31,7 +31,14 @@ Procedimentos de instalação do módulo nos servidores de aplicação e atualiz
  - **SEI versão 3.0.5 ou superior instalada, exceto a versão 3.0.10.**
  - Usuário de acesso ao banco de dados do SEI e SIP com  permissões para criar novas estruturas no banco de dados.
   
-Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov**. Os testes devem ser feitos primeiro em um ambiente de homologação. Para solicitação de acesso ao ambiente de homologação, acesse [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "Portal de Administração ConectaGov PEN - Cadastro de Comitê").  Para maiores informações, entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
+Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov**. Os testes devem ser feitos primeiro em um ambiente de desenvolvimento/homologação. 
+Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
+
+ - Desenvolvimento [http://pen-portal.trafficmanager.net/solicitarCadastroComite](http://pen-portal.trafficmanager.net/solicitarCadastroComite "DESENVOLVIMENTO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+ - Homologação [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+ - Produção [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+
+ Para maiores informações, entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
 
 ### Procedimentos
 
@@ -125,7 +132,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Para o ambiente de produção, deverá ser utilizado um certificado digital válido gerado por uma Autoridade de Registro - AR confiável (Exemplo: ICP-Brasil, Certisign, Verisign, etc.).
 
-    Maiores informações e solicitações podem ser feitas através do e-mail processo.eletrônico@planejamento.gov.br.
+    Maiores informações e solicitações podem ser feitas através do e-mail processo.eletronico@planejamento.gov.br.
 
 8. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
@@ -214,7 +221,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 
     Caso a opção for pela criação de um novo tipo de processo específico, segue abaixo sugestão para configuração:
 
-        Nome: Demanda Externa: Outros Órgãos Públicos 
+        Nome: Processo Recebido Externamente (a classificar) 
         Descrição: Processos recebidos de outras instituições 
         // O assunto deve ser definido juntamente com a área de documentação
         Sugestão de Assuntos: 019.01 - INFORMAÇÕES SOBRE O ÓRGÃO

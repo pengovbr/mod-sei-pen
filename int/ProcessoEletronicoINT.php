@@ -14,48 +14,48 @@ class ProcessoEletronicoINT extends InfraINT {
     const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informações do processo...';
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
-    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizada com sucesso!';
+    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizado com sucesso!';
 
     /**
      * Concate as siglas das hierarquias no nome da unidade
-     * 
+     *
      * @param array(EstruturaDTO) $estruturas
      * @return array
      */
     private static function gerarHierarquiaEstruturas($estruturas = array()){
-        
-        if(empty($estruturas)) {            
+
+        if(empty($estruturas)) {
             return $estruturas;
         }
-        
-        foreach($estruturas as &$estrutura) {                    
-            
+
+        foreach($estruturas as &$estrutura) {
+
             if($estrutura->isSetArrHierarquia()) {
-                $siglas = $estrutura->getArrHierarquia();                
+                $siglas = $estrutura->getArrHierarquia();
                 $nome  = $estrutura->getStrNome();
                 $nome .= ' - ';
-                
-                $array = array($estrutura->getStrSigla());             
+
+                $array = array($estrutura->getStrSigla());
                 foreach($estrutura->getArrHierarquia() as $sigla) {
                     if(trim($sigla) !== '' && !in_array($sigla, array('PR', 'PE', 'UNIAO'))) {
                         $array[] = $sigla;
                     }
                 }
 
-                $nome .= implode(' / ', $array);                
+                $nome .= implode(' / ', $array);
                 $estrutura->setStrNome($nome);
             }
         }
-        
+
         return $estruturas;
     }
-    
+
     public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa) {
         $objConecaoWebServerRN = new ProcessoEletronicoRN();
-        return static::gerarHierarquiaEstruturas($objConecaoWebServerRN->listarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa));        
+        return static::gerarHierarquiaEstruturas($objConecaoWebServerRN->listarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa));
     }
 
-    public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {  
+    public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {
         $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         return $objExpedirProcedimentoRN->listarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa);
     }
