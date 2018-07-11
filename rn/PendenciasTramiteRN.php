@@ -122,7 +122,7 @@ class PendenciasTramiteRN extends InfraRN {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strSenhaCertificadoDigital);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 180);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 60);
         return $curl;
     }
 
