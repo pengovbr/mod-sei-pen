@@ -49,7 +49,7 @@ class PendenciasTramiteRN extends InfraRN {
 
 
     public function monitorarPendencias() {
-        // try{
+        try{
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
@@ -67,37 +67,29 @@ class PendenciasTramiteRN extends InfraRN {
             LogSEI::getInstance()->gravar($mensagemInicioMonitoramento, LogSEI::$INFORMACAO);
             $this->gravarLogDebug($mensagemInicioMonitoramento);
 
-            // try{
-                $numIdTramiteRecebido = 0;
-                $strStatusTramiteRecebido = '';
-                $numQuantidadeErroTramite = 0;
-                $arrQuantidadeErrosTramite = array();
+            $numIdTramiteRecebido = 0;
+            $strStatusTramiteRecebido = '';
+            $numQuantidadeErroTramite = 0;
+            $arrQuantidadeErrosTramite = array();
 
-                while (true) {
-                    $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
-                    $arrObjPendenciasDTO = $this->obterPendenciasTramite();
-                    foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-                        $this->gravarLogDebug(sprintf(">>> Enviando pendência %d (status %s) para fila de processamento", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus()), 3);
-                        $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
-                    }
-
-                    $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
-                    sleep(5);
+            while (true) {
+                $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
+                $arrObjPendenciasDTO = $this->obterPendenciasTramite();
+                foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
+                    $this->gravarLogDebug(sprintf(">>> Enviando pendência %d (status %s) para fila de processamento", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus()), 3);
+                    $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
                 }
-            // }
-            // //TODO: Urgente: Tratar erro especfico de timeout e refazer a requisio
-            // catch(Exception $e) {
-            //     $strAssunto = 'Erro monitorando pendências.';
-            //     $strErro = InfraException::inspecionar($e);
-            //     LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro);
-            // }
-        // }
-        // catch(Exception $e) {
-        //     InfraDebug::getInstance()->setBolLigado(false);
-        //     InfraDebug::getInstance()->setBolDebugInfra(false);
-        //     InfraDebug::getInstance()->setBolEcho(false);
-        //     throw $e;
-        // }
+
+                $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
+                sleep(5);
+            }
+        }
+        catch(Exception $e) {
+            InfraDebug::getInstance()->setBolLigado(false);
+            InfraDebug::getInstance()->setBolDebugInfra(false);
+            InfraDebug::getInstance()->setBolEcho(false);
+            throw $e;
+        }
     }
 
     private function configurarRequisicao()
