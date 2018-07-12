@@ -4,8 +4,9 @@ require_once dirname(__FILE__) . '/../../../SEI.php';
 
 error_reporting(E_ALL);
 
-//TODO: Modificar nome da classe e mtodo para outro mais apropriado
 class PendenciasTramiteRN extends InfraRN {
+
+    const TIMEOUT_SERVICO_PENDENCIAS = 900;
 
     private static $instance = null;
     private $strEnderecoServicoPendencias = null;
@@ -45,14 +46,16 @@ class PendenciasTramiteRN extends InfraRN {
         }
     }
 
+
+
     public function monitorarPendencias() {
         // try{
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
-            InfraDebug::getInstance()->setBolLigado(false);
+            InfraDebug::getInstance()->setBolLigado(true);
             InfraDebug::getInstance()->setBolDebugInfra(false);
-            InfraDebug::getInstance()->setBolEcho(false);
+            InfraDebug::getInstance()->setBolEcho(true);
             InfraDebug::getInstance()->limpar();
 
             PENIntegracao::validarCompatibilidadeModulo();
@@ -60,9 +63,9 @@ class PendenciasTramiteRN extends InfraRN {
             $objPenParametroRN = new PenParametroRN();
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
-            $numSeg = InfraUtil::verificarTempoProcessamento();
-            InfraDebug::getInstance()->gravar('MONITORANDO OS TRÂMITES PENDENTES ENVIADOS PARA O RGO (PEN)');
-            echo "[".date("d/m/Y H:i:s")."] Iniciando serviço de monitoramento de pendências de trâmites de processos...\n";
+            $mensagemInicioMonitoramento = 'Iniciando serviço de monitoramento de pendências de trâmites de processos';
+            LogSEI::getInstance()->gravar($mensagemInicioMonitoramento, LogSEI::$INFORMACAO);
+            $this->gravarLogDebug($mensagemInicioMonitoramento);
 
             // try{
                 $numIdTramiteRecebido = 0;
@@ -70,23 +73,15 @@ class PendenciasTramiteRN extends InfraRN {
                 $numQuantidadeErroTramite = 0;
                 $arrQuantidadeErrosTramite = array();
 
-
-
-                //TODO: Tratar quantidade de erros o sistema consecutivos para um tramite de processo
-                //Alcanado est quantidade, uma pendncia posterior dever ser obtida do barramento
-                echo "\nIniciando monitoramento de pendências";
                 while (true) {
-                    echo "\n    Obtendo lista de pendências";
+                    $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite();
                     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-                        InfraDebug::getInstance()->gravar(sprintf("[".date("d/m/Y H:i:s")."] Iniciando processamento do trâmite %d com status %s",
-                            $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus()));
-
-                        echo sprintf("\n        Enviando pendência %d com status %s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
+                        $this->gravarLogDebug(sprintf(">>> Enviando pendência %d (status %s) para fila de processamento", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus()), 3);
                         $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
                     }
 
-                    echo "\nReiniciando monitoramento de pendências";
+                    $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
                     sleep(5);
                 }
             // }
@@ -96,12 +91,6 @@ class PendenciasTramiteRN extends InfraRN {
             //     $strErro = InfraException::inspecionar($e);
             //     LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro);
             // }
-
-            $numSeg = InfraUtil::verificarTempoProcessamento($numSeg);
-            InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
-            InfraDebug::getInstance()->gravar('FIM');
-            LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug());
-
         // }
         // catch(Exception $e) {
         //     InfraDebug::getInstance()->setBolLigado(false);
@@ -122,7 +111,7 @@ class PendenciasTramiteRN extends InfraRN {
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strSenhaCertificadoDigital);
-        curl_setopt($curl, CURLOPT_TIMEOUT, 6000);
+        curl_setopt($curl, CURLOPT_TIMEOUT, self::TIMEOUT_SERVICO_PENDENCIAS);
         return $curl;
     }
 
@@ -139,7 +128,8 @@ class PendenciasTramiteRN extends InfraRN {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(false) or array();
 
-        echo sprintf("\n            Recuperando todas as pendências do barramento: " . count($arrObjPendenciasDTO));
+        $this->gravarLogDebug("Recuperado todas pendências de trâmite do PEN: " . count($arrObjPendenciasDTO), 2);
+
         foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
             //Captura todas as pendências e status retornadas para impedir duplicidade
             $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
@@ -151,17 +141,18 @@ class PendenciasTramiteRN extends InfraRN {
         $numUltimoIdTramiteRecebido = 0;
 
         $arrObjPendenciasDTONovas = array();
-        echo "\n            Iniciando monitoramento no serviço long pulling";
+        $this->gravarLogDebug("Iniciando monitoramento no serviço de pendências (long polling)", 2);
+
         do {
             $curl = $this->configurarRequisicao();
             try{
-
+                $arrObjPendenciasDTONovas = array_unique($arrObjPendenciasDTONovas);
                 curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebida=" . $numUltimoIdTramiteRecebido);
 
                 //A seguinte requisio ir aguardar a notificao do PEN sobre uma nova pendncia
                 //ou at o lanamento da exceo de timeout definido pela infraestrutura da soluo
                 //Ambos os comportamentos so esperados para a requisio abaixo.
-                echo sprintf("\n                Executando requisição de pendência com IDT %d", $numUltimoIdTramiteRecebido);
+                $this->gravarLogDebug(sprintf("Executando requisição de pendência com IDT %d como offset", $numUltimoIdTramiteRecebido), 2);
                 $strResultadoJSON = curl_exec($curl);
 
                 if(curl_errno($curl)) {
@@ -169,15 +160,16 @@ class PendenciasTramiteRN extends InfraRN {
                         throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));
 
                     $bolEncontrouPendencia = false;
-                    echo "\n*** TIMEOUT FORÇADO ***";
+                    $this->gravarLogDebug(sprintf("Timeout de monitoramento de %d segundos do serviço de pendências alcançado", self::TIMEOUT_SERVICO_PENDENCIAS), 2);
                 }
 
                 if(!InfraString::isBolVazia($strResultadoJSON)) {
                     $strResultadoJSON = json_decode($strResultadoJSON);
 
-                    if(isset($strResultadoJSON) && isset($strResultadoJSON->encontrou) && strtolower($strResultadoJSON->encontrou) == true) {
+                    if(isset($strResultadoJSON->encontrou) && $strResultadoJSON->encontrou) {
                         $bolEncontrouPendencia = true;
                         $numUltimoIdTramiteRecebido = $strResultadoJSON->IDT;
+                        $strUltimoStatusRecebido = $strResultadoJSON->status;
                         $strChavePendencia = sprintf("%d-%s", $strResultadoJSON->IDT, $strResultadoJSON->status);
                         $objPendenciaDTO = new PendenciaDTO();
                         $objPendenciaDTO->setNumIdentificacaoTramite($strResultadoJSON->IDT);
@@ -192,10 +184,13 @@ class PendenciasTramiteRN extends InfraRN {
                         } elseif(in_array($strChavePendencia, $arrObjPendenciasDTONovas)) {
                             // Sleep adicionado para minimizar problema do serviço de pendência que retorna o mesmo código e status
                             // inúmeras vezes por causa de erro ainda não tratado
-                            echo sprintf("\n                IDT %d desconsiderado por retorno sucessivo pelo barramento", $numUltimoIdTramiteRecebido);
-                            sleep(5);
+                            $mensagemErro = sprintf("Pendência de trâmite (IDT: %d / status: %s) enviado em duplicidade pelo serviço de monitoramento de pendências do PEN",
+                                $numUltimoIdTramiteRecebido, $strUltimoStatusRecebido);
+                            $this->gravarLogDebug($mensagemErro, 2);
+                            throw new InfraException($mensagemErro);
                         } else {
-                            echo sprintf("\n                IDT %d desconsiderado por já ter sido retornado na consulta inicial", $numUltimoIdTramiteRecebido);
+                            $arrObjPendenciasDTONovas[] = $strChavePendencia;
+                            $this->gravarLogDebug(sprintf("IDT %d desconsiderado por já ter sido retornado na consulta inicial", $numUltimoIdTramiteRecebido), 2);
                         }
                     }
                 }
@@ -214,12 +209,7 @@ class PendenciasTramiteRN extends InfraRN {
         if(isset($objPendencia)) {
 
         $client = new GearmanClient();
-        $client->addServer('localhost', 4730);
-        //$client->setCreatedCallback("create_change");
-        //$client->setDataCallback("data_change");
-        //$client->setStatusCallback("status_change");
-        //$client->setCompleteCallback("complete_change");
-        //$client->setFailCallback("fail_change");
+        $client->addServer();
 
         $strWorkload = strval($objPendencia->getNumIdentificacaoTramite());
 
@@ -232,25 +222,13 @@ class PendenciasTramiteRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $objPenParametroRN = new PenParametroRN();
-                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
-                $numCont = 0;
-                // Executa sempre + 1 alm do configurado no parâmetro para executar a recusa
-                while($numCont <= $numTentativas) {
-                    $client->addTaskBackground('receberProcedimento', $strWorkload, null);
-                    $numCont++;
-                }
+                $client->addTaskBackground('receberProcedimento', $strWorkload, null);
+                $numCont++;
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $objPenParametroRN = new PenParametroRN();
-                $numTentativas = $objPenParametroRN->getParametro(PenTramiteProcessadoRN::PARAM_NUMERO_TENTATIVAS, false);
-                $numCont = 0;
-
-                while($numCont < $numTentativas) {
-                    $client->addTaskBackground('receberReciboTramite', $strWorkload, null);
-                    $numCont++;
-                }
+                $client->addTaskBackground('receberReciboTramite', $strWorkload, null);
+                $numCont++;
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
@@ -264,13 +242,18 @@ class PendenciasTramiteRN extends InfraRN {
             break;
 
             default:
-                //TODO: Alterar lgica para no deixar de processar demais pendncias retornadas pelo PEN
                 throw new Exception('Situação do trâmite não pode ser identificada.');
                 break;
             }
 
             $client->runTasks();
         }
+    }
+
+    private function gravarLogDebug($mensagem, $identacao=0)
+    {
+        $mensagem = sprintf("[%s] %s %s", date("d/m/Y H:i:s"), str_repeat("\t", $identacao), $mensagem);
+        InfraDebug::getInstance()->gravar($mensagem);
     }
 }
 

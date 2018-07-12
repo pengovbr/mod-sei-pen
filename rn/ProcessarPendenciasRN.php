@@ -24,7 +24,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     {
         //Configuração do worker do Gearman para realizar o processamento de tarefas
         $this->objGearmanWorker = new GearmanWorker();
-        $this->objGearmanWorker->addServer('localhost', 4730);
+        $this->objGearmanWorker->addServer();
         $this->configurarCallbacks();
     }
 
