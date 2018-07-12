@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 class PendenciasTramiteRN extends InfraRN {
 
-    const TIMEOUT_SERVICO_PENDENCIAS = 900;
+    const TIMEOUT_SERVICO_PENDENCIAS = 600;
 
     private static $instance = null;
     private $strEnderecoServicoPendencias = null;
