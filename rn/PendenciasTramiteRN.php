@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 
 class PendenciasTramiteRN extends InfraRN {
 
-    const TIMEOUT_SERVICO_PENDENCIAS = 600;
+    const TIMEOUT_SERVICO_PENDENCIAS = 300;
 
     private static $instance = null;
     private $strEnderecoServicoPendencias = null;
@@ -97,11 +97,13 @@ class PendenciasTramiteRN extends InfraRN {
     {
         $curl = curl_init($this->strEnderecoServicoPendencias);
         curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias);
+        curl_setopt($curl, CURLOPT_TIMEOUT, self::TIMEOUT_SERVICO_PENDENCIAS);
         curl_setopt($curl, CURLOPT_HEADER, 0);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_FAILONERROR, true);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strSenhaCertificadoDigital);
         curl_setopt($curl, CURLOPT_TIMEOUT, self::TIMEOUT_SERVICO_PENDENCIAS);
