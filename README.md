@@ -76,10 +76,15 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         directory=/opt/sei/web
         user=apache
         autostart=true
-        autorestart=true
+        edutorestart=true
+        startsecs=15
+        startretries=3
+        log_stdout=true
         log_stderr=true
-        stdout_logfile=/var/log/supervisor/sei-supervisord-stdout.log
-        stderr_logfile=/var/log/supervisor/sei-supervisord-stderr.log
+        logfile=/var/log/supervisor/sei_processar_pendencias.log
+        logfile_maxbytes=10MB
+        logfile_backups=50
+
 
         [program:sei_monitorar_pendencias]
         command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/PendenciasTramiteRN.php
@@ -88,9 +93,14 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         user=apache
         autostart=true
         autorestart=true
+        startsecs=15
+        startretries=3
+        log_stdout=true
         log_stderr=true
-        stdout_logfile=/var/log/supervisor/sei-supervisord-stdout.log
-        stderr_logfile=/var/log/supervisor/sei-supervisord-stderr.log
+        logfile=/var/log/supervisor/sei_monitorar_pendencias.log
+        logfile_maxbytes=10MB
+        logfile_backups=50
+
 
 4. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades.
 

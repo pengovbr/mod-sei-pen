@@ -22,7 +22,6 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
 
     public function __construct()
     {
-        //Configuração do worker do Gearman para realizar o processamento de tarefas
         $this->objGearmanWorker = new GearmanWorker();
         $this->objGearmanWorker->addServer();
         $this->configurarCallbacks();
@@ -44,10 +43,9 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
             $objPenParametroRN = new PenParametroRN();
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
-            $numSeg = InfraUtil::verificarTempoProcessamento();
-
-            InfraDebug::getInstance()->gravar('ANALISANDO OS TRÂMITES PENDENTES ENVIADOS PARA O ÓRGÃO (PEN)');
-            echo "[".date("d/m/Y H:i:s")."] Iniciando serviço de processamento de pendências de trâmites de processos...\n";
+            $mensagemInicioProcessamento = 'Iniciando serviço de processamento de pendências de trâmites de processos';
+            LogSEI::getInstance()->gravar($mensagemInicioProcessamento, LogSEI::$INFORMACAO);
+            $this->gravarLogDebug($mensagemInicioProcessamento, 0, true);
 
             while($this->objGearmanWorker->work())
             {
@@ -57,69 +55,48 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                     break;
                 }
             }
-
-            $numSeg = InfraUtil::verificarTempoProcessamento($numSeg);
-            InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
-            InfraDebug::getInstance()->gravar('FIM');
-            LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug());
         }
         catch(Exception $e) {
-            $strAssunto = 'Falha no processamento de pendências do PEN';
-            $strErro = '';
-            $strErro .= 'Servidor: '.gethostname()."\n\n";
-            $strErro .= 'Data/Hora: '.InfraData::getStrDataHoraAtual()."\n\n";
-            $strErro .= 'Erro: '.InfraException::inspecionar($e);
+            $strAssunto = 'Falha no processamento de pendências de trâmite do PEN';
+            $strErro = 'Erro: '. InfraException::inspecionar($e);
             LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro);
+            throw new InfraException($strAssunto."\n\n".$strErro, $e);
         }
     }
 
     private function configurarCallbacks()
     {
-
-        //PROCESSAMENTO DE TAREFAS RELACIONADAS AO ENVIO DE UM PROCESSO ELETRÔNICO
-        //////////////////////////////////////////////////////////////////////////
-
-        //Etapa 01 - Processamento de pendências envio dos metadados do processo
+        // Processamento de pendências envio dos metadados do processo
         $this->objGearmanWorker->addFunction("enviarProcesso", function ($job) {
-
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [enviarProcesso] " . $job->workload());
-            //TODO: Implementar tarefa relacionada
-            //...
-
-            //Agendamento de nova tarefa para envio dos componentes digitais do processo
-            //$this->objGearmanClient->addTask("enviarComponenteDigital", $numIdentificacaoTramite, null);
+            $this->gravarLogDebug("Processando envio de processo [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
         });
 
-        //Etapa 02 - Processamento de pendências envio dos componentes digitais do processo
+        // Processamento de pendências envio dos componentes digitais do processo
         $this->objGearmanWorker->addFunction("enviarComponenteDigital", function ($job) {
-
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [enviarComponenteDigital] " . $job->workload());
-            //TODO: Implementar tarefa relacionada
-            //...
-
-            //Agendamento de nova tarefa para recebimento do recibo de envio do processo
-            //$this->objGearmanClient->addTask("receberReciboTramite", $numIdentificacaoTramite, null);
+            $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
         });
 
-        //Etapa 03 - Processamento de pendências de recebimento do recibo de envio do processo
+        // Processamento de pendências de recebimento do recibo de envio do processo
         $this->objGearmanWorker->addFunction("receberReciboTramite", function ($job) {
-            $numIdentificacaoTramite = intval($job->workload());
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [receberReciboTramite] " . $job->workload());
-            $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
-            if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($numIdentificacaoTramite)){
-                $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
-                $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
+            try{
+                $this->gravarLogDebug("Processando recebimento de recibo de trâmite [receberReciboTramite] com IDT " . $job->workload(), 0, true);
+                $numIdentificacaoTramite = intval($job->workload());
+                $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
+                if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($numIdentificacaoTramite)){
+                    $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
+                    $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
+                }
+            }
+            catch(Exception $e){
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
         });
-
-        //PROCESSAMENTO DE TAREFAS RELACIONADAS AO RECEBIMENTO DE UM PROCESSO ELETRÔNICO
-        //////////////////////////////////////////////////////////////////////////
 
         //Processamento de pendências de recebimento dos metadados do processo
         $this->objGearmanWorker->addFunction("receberProcedimento", function ($job) {
             try{
+                $this->gravarLogDebug("Processando recebimento de processo [receberProcedimento] com IDT " . $job->workload(), 0, true);
                 $numIdentificacaoTramite = intval($job->workload());
-                InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [receberProcedimento] " . $job->workload());
                 $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
 
                 if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($numIdentificacaoTramite)){
@@ -137,36 +114,48 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
 
         // Verifica no barramento os procedimentos que foram enviados por esta unidade e foram recusados pelas mesmas
         $this->objGearmanWorker->addFunction("receberTramitesRecusados", function ($job) {
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [receberRecusaTramite] " . $job->workload());
-            $numIdentificacaoTramite = intval($job->workload());
-            $objReceberProcedimentoRN = new ReceberProcedimentoRN();
-            $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
+            try {
+                $this->gravarLogDebug("Processando trâmite recusado [receberTramitesRecusados] com IDT " . $job->workload(), 0, true);
+                $numIdentificacaoTramite = intval($job->workload());
+                $objReceberProcedimentoRN = new ReceberProcedimentoRN();
+                $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
+            } catch (Exception $e) {
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+            }
+
         });
 
         //Processamento de pendências de recebimento dos componentes digitais do processo
         $this->objGearmanWorker->addFunction("receberComponenteDigital", function ($job) {
-
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [receberComponenteDigital] " . $job->workload());
-            //TODO: A próxima etapa deveria ser o recebimento dos componentes digitais, rotina tradada na função receberProcedimento(...)
-
-            //Agendamento de nova tarefa para envio do recibo de conclusão do trâmite
+            $this->gravarLogDebug("Processando recebimento de componentes digitais [receberComponenteDigital] com IDT " . $job->workload(), 0, true);
             ProcessarPendenciasRN::processarTarefa("enviarReciboTramiteProcesso", $job->workload());
-            //$this->objGearmanClient->addTaskBackground("enviarReciboTramiteProcesso", $numIdentificacaoTramite, null);
         });
 
         //Processamento de pendências de envio do recibo de conclusão do trãmite do processo
         $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function ($job) {
-            InfraDebug::getInstance()->gravar("[".date("d/m/Y H:i:s")."] Processando tarefa [enviarReciboTramiteProcesso] " . $job->workload());
-            $numIdentificacaoTramite = intval($job->workload());
-            $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
-            $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
+            try {
+                $this->gravarLogDebug("Processando envio do recibo de trâmite [enviarReciboTramiteProcesso] com IDT " . $job->workload(), 0, true);
+                $numIdentificacaoTramite = intval($job->workload());
+                $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
+                $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
+            } catch (Exception $e) {
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+            }
       });
+    }
+
+    private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolEcho=false)
+    {
+        $strDataLog = date("d/m/Y H:i:s");
+        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat("\t", $numIdentacao), $strMensagem);
+        InfraDebug::getInstance()->gravar($strLog);
+        if(!InfraDebug::getInstance()->isBolEcho() && $bolEcho) echo sprintf("\n[%s] [PROCESSAMENTO] %s", $strDataLog, $strMensagem);
     }
 
     static function processarTarefa($strNomeTarefa, $strWorkload)
     {
         $objClient = new GearmanClient();
-        $objClient->addServer('localhost', 4730);
+        $objClient->addServer();
         $objClient->doBackground($strNomeTarefa, $strWorkload);
     }
 }

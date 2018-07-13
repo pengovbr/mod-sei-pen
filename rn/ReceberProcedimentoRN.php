@@ -80,15 +80,14 @@ class ReceberProcedimentoRN extends InfraRN
         $objInfraSessao->trocarUnidadeAtual();
     }
 
-    // TODO: Adicionar comandos de debug. Vide SeiWs.php gerarProcedimento
+  // TODO: Adicionar comandos de debug. Vide SeiWs.php gerarProcedimento
   protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
   {
+
     $objPenParametroRN = new PenParametroRN();
     SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
     $objSeiRN = new SeiRN();
-
-    error_log(__METHOD__.'('.$parNumIdentificacaoTramite.')');
 
     if (!isset($parNumIdentificacaoTramite)) {
       throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
@@ -113,7 +112,6 @@ class ReceberProcedimentoRN extends InfraRN
       if($this->tramiteRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
         return ;
       }
-
       // Validação dos dados do processo recebido
       $objInfraException = new InfraException();
       $this->validarDadosDestinatario($objInfraException, $objMetadadosProcedimento);
@@ -133,7 +131,6 @@ class ReceberProcedimentoRN extends InfraRN
 
       //Faz a validação da extensão dos componentes digitais a serem recebidos
       $this->validarExtensaoComponentesDigitais($parNumIdentificacaoTramite, $objProcesso);
-
       //Faz a validação das permissões de leitura e escrita
       $this->verificarPermissoesDiretorios($parNumIdentificacaoTramite);
 
@@ -147,7 +144,6 @@ class ReceberProcedimentoRN extends InfraRN
 
       //Cria o array com a lista de hash
       $arrayHash = array();
-
 
      //Percorre os componentes que precisam ser recebidos
       foreach($objTramite->componenteDigitalPendenteDeRecebimento as $key => $componentePendente){
@@ -167,7 +163,6 @@ class ReceberProcedimentoRN extends InfraRN
                 $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
           }
       }
-
       if(count($arrAnexosComponentes) > 0){
 
             $receberComponenteDigitalRN->setArrAnexos($arrAnexosComponentes);
@@ -183,7 +178,6 @@ class ReceberProcedimentoRN extends InfraRN
       }
 
     $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
-
 
 
 
@@ -227,7 +221,6 @@ class ReceberProcedimentoRN extends InfraRN
       if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
         return;
       }
-
 
 
     //  throw new InfraException("COMPONENTES DIGITAIS A SEREM ANEXADOS: ".var_export($arrayHash, true));
@@ -279,15 +272,13 @@ class ReceberProcedimentoRN extends InfraRN
             }
           }
     }
-
     //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
 
     $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
-   $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
+    $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
 
-   $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
-   $objPenTramiteProcessadoRN->setRecebido($parNumIdentificacaoTramite);
-
+    $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
+    $objPenTramiteProcessadoRN->setRecebido($parNumIdentificacaoTramite);
   }
 
     /**
@@ -1699,7 +1690,7 @@ class ReceberProcedimentoRN extends InfraRN
         $tramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
 
         if(!isset($tramite[0])){
-            throw new InfraException("Não foi encontrado o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+            throw new InfraException("Não foi encontrado no PEN o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
         }
 
         $tramite = $tramite[0];
@@ -1710,6 +1701,10 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
         $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+
+        if(!isset($objTramiteDTO)){
+            throw new InfraException("Não foi encontrado no sistema o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        }
 
         SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
@@ -1729,6 +1724,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
         $objAtividadeDTO->retNumIdAtividade();
 
+        //TODO: Necessário refatoração para chamada da casse AtividadeRN, e não a classe AtividadeBD com risco de quebra de regas internas do sistema
         $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
         $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
 

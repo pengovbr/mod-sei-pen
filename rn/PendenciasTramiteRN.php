@@ -46,16 +46,14 @@ class PendenciasTramiteRN extends InfraRN {
         }
     }
 
-
-
     public function monitorarPendencias() {
         try{
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
-            InfraDebug::getInstance()->setBolLigado(true);
+            InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
-            InfraDebug::getInstance()->setBolEcho(true);
+            InfraDebug::getInstance()->setBolEcho(false);
             InfraDebug::getInstance()->limpar();
 
             PENIntegracao::validarCompatibilidadeModulo();
@@ -65,7 +63,7 @@ class PendenciasTramiteRN extends InfraRN {
 
             $mensagemInicioMonitoramento = 'Iniciando serviço de monitoramento de pendências de trâmites de processos';
             LogSEI::getInstance()->gravar($mensagemInicioMonitoramento, LogSEI::$INFORMACAO);
-            $this->gravarLogDebug($mensagemInicioMonitoramento);
+            $this->gravarLogDebug($mensagemInicioMonitoramento, 0, true);
 
             $numIdTramiteRecebido = 0;
             $strStatusTramiteRecebido = '';
@@ -76,7 +74,9 @@ class PendenciasTramiteRN extends InfraRN {
                 $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                 $arrObjPendenciasDTO = $this->obterPendenciasTramite();
                 foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-                    $this->gravarLogDebug(sprintf(">>> Enviando pendência %d (status %s) para fila de processamento", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus()), 3);
+                    $mensagemLog = sprintf(">>> Enviando pendência %d (status %s) para fila de processamento",
+                        $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
+                    $this->gravarLogDebug($mensagemLog, 3, true);
                     $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
                 }
 
@@ -88,6 +88,7 @@ class PendenciasTramiteRN extends InfraRN {
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
+            LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             throw $e;
         }
     }
@@ -215,12 +216,10 @@ class PendenciasTramiteRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
                 $client->addTaskBackground('receberProcedimento', $strWorkload, null);
-                $numCont++;
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
                 $client->addTaskBackground('receberReciboTramite', $strWorkload, null);
-                $numCont++;
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
@@ -242,11 +241,14 @@ class PendenciasTramiteRN extends InfraRN {
         }
     }
 
-    private function gravarLogDebug($mensagem, $identacao=0)
+    private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolEcho=false)
     {
-        $mensagem = sprintf("[%s] %s %s", date("d/m/Y H:i:s"), str_repeat("\t", $identacao), $mensagem);
-        InfraDebug::getInstance()->gravar($mensagem);
+        $strDataLog = date("d/m/Y H:i:s");
+        $strLog = sprintf("[%s] [MONITORAMENTO] %s %s", $strDataLog, str_repeat("\t", $numIdentacao), $strMensagem);
+        InfraDebug::getInstance()->gravar($strLog);
+        if(!InfraDebug::getInstance()->isBolEcho() && $bolEcho) echo sprintf("\n[%s] [MONITORAMENTO] %s", $strDataLog, $strMensagem);
     }
+
 }
 
 SessaoSEI::getInstance(false);
