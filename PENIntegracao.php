@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao {
 
-    const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12');
+    const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12', '3.0.13');
 
     private static $strDiretorio;
 
@@ -11,7 +11,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.1.3';
+        return '1.1.5';
     }
 
 
