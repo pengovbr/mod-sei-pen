@@ -461,3 +461,11 @@ Caso o ambiente do ConectaGov PEN utilizado nesta configuração esteja utilizan
 ### 2. Trâmites não realizados ou recibos não obtidos
 
 Verificar se os serviços *gearman* e *supervisord* estão em execução, conforme orientado no manual de instalação, itens 3 e 4.
+
+### 3. Erro na inicialização do Gearmand "(Address family not supported by protocol) -> libgearman-server/gearmand.cc:442"
+
+Este problema ocorre quando o servidor não possui suporte ao protocolo IPv6. Por padrão, o Gearman inicia sua comunicação utilizando a porta 4730 e utilizando IPv4 e IPv6. Caso um destes não estejam disponíveis, o serviço não será ativado e um log de erro será gerado com a mensagem "(Address family not supported by protocol) -> libgearman-server/gearmand.cc:442".
+
+Para solucionar o problema, duas ações podem ser feitas:
+- habilitar o suporte à IPv6 no servidor de aplicação onde o Gearman foi instalado
+- configurar o serviço gearmand para utilizar somente IPv4. Para fazer esta configuração, será necessário editar o arquivo de inicialização do Gearmand, normalmente localizado em /etc/sysconfig/gearmand, e adicionar o seguinte parâmetro de inicialização: OPTIONS="--listen=127.0.0.1"
