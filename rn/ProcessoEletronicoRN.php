@@ -104,7 +104,7 @@ class ProcessoEletronicoRN extends InfraRN {
       , 'local_cert' => $this->strLocalCert
       , 'passphrase' => $this->strLocalCertPassword
       , 'resolve_wsdl_remote_includes' => true
-      , 'cache_wsdl'=> WSDL_CACHE_NONE
+      , 'cache_wsdl'=> DIR_SEI_TEMP
       , 'trace' => true
       , 'encoding' => 'UTF-8'
       , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM

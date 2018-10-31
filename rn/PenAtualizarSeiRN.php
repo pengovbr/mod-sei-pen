@@ -12,8 +12,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     public function __construct() {
         parent::__construct();
     }
-    
-    public function atualizarVersao() {
+
+    protected function atualizarVersaoConectado() {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
 
@@ -24,25 +24,31 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSEI::getInstance()), true);
             }
-           
+
             //testando permissoes de criações de tabelas
             $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
-            
+
             if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
                 BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
             }
             BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
 
-            $objInfraParametro = new InfraParametro($this->objInfraBanco);            
-            
+            $objInfraParametro = new InfraParametro($this->objInfraBanco);
+
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
             $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-            switch ($strVersaoModuloPen) {                
+            switch ($strVersaoModuloPen) {
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
                 case '1.0.1': $this->instalarV110();
                 case '1.1.0': $this->instalarV111();
+                case '1.1.1': //Não houve atualização no banco de dados
+                case '1.1.2': //Não houve atualização no banco de dados
+                case '1.1.3': //Não houve atualização no banco de dados
+                case '1.1.4': //Não houve atualização no banco de dados
+                case '1.1.5': //Não houve atualização no banco de dados
+                case '1.1.6': $this->instalarV117();
 
                 break;
                 default:
@@ -76,7 +82,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         return $objDTOCadastrado->getStrNome();
     }
-    
+
     /**
      * Remove um parâmetro do infra_parametros
      * @return string Nome do parâmetro
@@ -88,10 +94,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         return $objBD->excluir($objDTO);
     }
-        
+
     /* Contem atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
-        
+
         $objInfraBanco = $this->objInfraBanco;
         $objMetaBD = $this->objMeta;
 
@@ -653,7 +659,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
 
-        
+
         /* ---------- antigo método (instalarV002R003S000US024) ---------- */
 
         $objMetaBD->criarTabela(array(
@@ -669,9 +675,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $objInfraParametro = new InfraParametro($objInfraBanco);
         $objInfraParametro->setValor('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3');
-        
-        
-        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */      
+
+
+        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */
 
         $objDTO = new TarefaDTO();
         $objBD = new TarefaBD($objInfraBanco);
@@ -698,7 +704,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnAlterar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@');
-        
+
         /* ---------- antigo método (instalarV002R003S001US035) ---------- */
         $objMetaBanco = $this->inicializarObjMetaBanco();
 
@@ -712,7 +718,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objMetaBanco->removerChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado');
             $objMetaBanco->adicionarChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado', array('id_tramite', 'tipo_tramite_processo'));
         }
-        
+
         /* ---------- antigo método (instalarV003R003S003IW001) ---------- */
 
         //----------------------------------------------------------------------
@@ -818,15 +824,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             $objMetaBD->removerTabela('md_pen_rel_serie_especie');
         }
-        
-        
+
+
         /* ---------- antigo método (instalarV004R003S003IW002) ---------- */
         $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
 
         $this->inicializarObjMetaBanco()
                 ->alterarColuna('md_pen_recibo_tramite', 'cadeia_certificado', $strTipo)
                 ->alterarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado', $strTipo);
-        
+
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objDTO = new TarefaDTO();
@@ -857,7 +863,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('O trâmite externo do processo foi abortado manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
-        
+
         /* ---------- antigo método (instalarV005R003S005IW023) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
@@ -883,11 +889,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnAtualizar('PEN_PROCESSO_EXPEDIDO', 'Processo em tramitação externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
         $fnAtualizar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da unidade externa @ENTIDADE_ORIGEM@ - @ENTIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@');
         $fnAtualizar('PEN_OPERACAO_EXTERNA', 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
-        
+
         /* ---------- antigo método (instalarV006R004S004WI001) ---------- */
         $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
         $objInfraParametro->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
-        
+
         /* ---------- antigo método (instalarV007R004S005WI002) ---------- */
 
         $objMetaBD->criarTabela(array(
@@ -913,17 +919,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
         }
-             
+
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
-        
+
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroBD->cadastrar($objInfraParametroDTO);
-        
+
         $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
     }
-    
+
     /* Contem atualizações da versao 1.0.1 do modulo */
     protected function instalarV101() {
         /* ---------- antigo método (instalarV008R004S006IW003) ---------- */
@@ -939,7 +945,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objTarefaDTO->setStrSinPermiteProcessoFechado('S');
 
         $objBD->alterar($objTarefaDTO);
-        
+
         /* ---------- antigo método (instalarV006R004S001US039) ---------- */
         $objMetaBD = $this->inicializarObjMetaBanco();
         $objInfraBanco = $this->inicializarObjInfraIBanco();
@@ -953,7 +959,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             ),
             'pk' => array('id_hipotese_legal')
         ));
-  
+
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_rel_hipotese_legal',
             'cols' => array(
@@ -969,24 +975,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'md_pen_hipotese_legal' => array('id_hipotese_legal', 'id_hipotese_legal_pen')
             )
         ));
-        
+
         $objInfraSequencia = new InfraSequencia($objInfraBanco);
-        
-        if(!$objInfraSequencia->verificarSequencia('md_pen_hipotese_legal')){   
+
+        if(!$objInfraSequencia->verificarSequencia('md_pen_hipotese_legal')){
             $objInfraSequencia->criarSequencia('md_pen_hipotese_legal', '1', '1', '9999999999');
         }
 
-        if(!$objInfraSequencia->verificarSequencia('md_pen_rel_hipotese_legal')){   
+        if(!$objInfraSequencia->verificarSequencia('md_pen_rel_hipotese_legal')){
             $objInfraSequencia->criarSequencia('md_pen_rel_hipotese_legal', '1', '1', '9999999999');
         }
-        
+
         $objHipoteseLegalDTO = new HipoteseLegalDTO();
         $objHipoteseLegalDTO->setDistinct(true);
         $objHipoteseLegalDTO->setStrStaNivelAcesso(1);
         $objHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
         $objHipoteseLegalDTO->retNumIdHipoteseLegal();
         $objHipoteseLegalDTO->retStrNome();
-        
+
         $objMetaBD = $this->inicializarObjMetaBanco();
 
         $objMetaBD->criarTabela(array(
@@ -997,7 +1003,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             ),
             'pk' => array('nome')
         ));
-        
+
         //Agendamento
         $objDTO = new InfraAgendamentoTarefaDTO();
 
@@ -1019,29 +1025,29 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'Verificação se há novas hipóteses legais do barramento.');
-        
+
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
         $objInfraParametroDTO->retTodos();
-        
+
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.0.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
-    
+
     /* Contem atualizações da versao 1.1.0 do modulo */
     protected function instalarV110() {
         $objMetaBD = $this->objMeta;
-        
+
         //Adiciona a coluna de indentificação nas hipóteses que vem do barramento
         $objMetaBD->adicionarColuna('md_pen_hipotese_legal', 'identificacao', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
-        
+
         //Adiciona a coluna de descricao nos parâmetros
         $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
-        
+
         //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
@@ -1053,7 +1059,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho Máximo de Documento Expedido');
         $this->criarParametro('PEN_TIPO_PROCESSO_EXTERNO', '100000320', 'Tipo de Processo Externo');
         $this->criarParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000001', 'Unidade Geradora de Processo e Documento Recebido');
-        
+
         //Deleta os parâmetros do infra_parametros
         $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE');
         $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
@@ -1065,7 +1071,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->deletaParametroInfra('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
         $this->deletaParametroInfra('PEN_TIPO_PROCESSO_EXTERNO', '100000320');
         $this->deletaParametroInfra('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
-        
+
         //Alterar nomeclatura do recurso
         $objDTO = new PenParametroDTO();
         $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
@@ -1082,7 +1088,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objDTO->setStrDescricao('Hipótese Legal Padrão');
             $objBD->cadastrar($objDTO);
         }
-        
+
         /* altera o parâmetro da versão de banco */
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
@@ -1094,7 +1100,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.1 do módulo */    
+    /* Contem atualizações da versao 1.1.1 do módulo */
     protected function instalarV111() {
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
@@ -1109,5 +1115,44 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.1.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+    /* Contem atualizações da versao 1.1.7 do módulo */
+    protected function instalarV117() {
+
+        /* Cadastramento de novas espécies documentais */
+        $objEspecieDocumentalBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+
+        $fnCadastrar = function($dblIdEspecie, $strNomeEspecie, $strDescricao) use($objEspecieDocumentalDTO, $objEspecieDocumentalBD) {
+            $objEspecieDocumentalDTO->unSetTodos();
+            $objEspecieDocumentalDTO->setDblIdEspecie($dblIdEspecie);
+            if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
+                $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+                $objEspecieDocumentalDTO->setStrDescricao($strDescricao);
+                $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
+            }
+        };
+
+        $fnCadastrar(178, 'Alegações', 'Muito comum no Judiciário, tendo previsão no CPC. Podendo ser complementado "Finais", o que representaria o documento "Alegações Finais".');
+        $fnCadastrar(179, 'Anexo', 'Documento ou processo juntado em caráter definitivo a outro processo, para dar continuidade a uma ação administrativa.');
+        $fnCadastrar(180, 'Documento', 'Informação registrada, qualquer que seja o suporte ou formato, que não está reunida e ordenada em processo.');
+        $fnCadastrar(181, 'Apartado', 'Apartado por si só, autos apartados ou partado sigiloso.');
+        $fnCadastrar(182, 'Apresentação', 'Documentos que são apresentações propriamente ditas.');
+        $fnCadastrar(183, 'Diagnóstico', 'Diagnóstico médico, auditoria, etc.');
+        $fnCadastrar(184, 'Exame', 'Exame laboratorial, médico, etc.');
+        $fnCadastrar(185, 'Página', 'Página do Diário Oficial da União.');
+        $fnCadastrar(186, 'Estudo', 'Podendo ser complementado com "Técnico Preliminar da Contratação"; "Técnico".');
+        $fnCadastrar(999, 'Outra', 'Outras espécies documentais não identificadas.');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.1.7');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
 
 }
