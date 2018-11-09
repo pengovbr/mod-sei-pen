@@ -104,7 +104,7 @@ class ProcessoEletronicoRN extends InfraRN {
       , 'local_cert' => $this->strLocalCert
       , 'passphrase' => $this->strLocalCertPassword
       , 'resolve_wsdl_remote_includes' => true
-      , 'cache_wsdl'=> DIR_SEI_TEMP
+      , 'cache_wsdl'=> WSDL_CACHE_NONE
       , 'trace' => true
       , 'encoding' => 'UTF-8'
       , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
@@ -163,13 +163,10 @@ class ProcessoEletronicoRN extends InfraRN {
       try {
 
         $objConfig = ConfiguracaoSEI::getInstance();
-
         if($objConfig->isSetValor('SEI', 'LogPenWs')){
-
             $this->objPenWs = new LogPenWs($objConfig->getValor('SEI', 'LogPenWs'), $this->strWSDL, $this->options);
         }
         else {
-
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
      } catch (Exception $e) {
