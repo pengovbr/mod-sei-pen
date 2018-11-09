@@ -573,10 +573,6 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         <img id="imgExcluirProcedimentosApensados" onclick="objLupaProcedimentosApensados.remover();" src="/infra_css/imagens/remover.gif" alt="Remover Processo Apensado" title="Remover Processo Apensado" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
 	</div>
 
-	<div id="divSinUrgente" class="infraDivCheckbox">
-		<input type="checkbox" id="chkSinUrgente" name="chkSinUrgente" class="infraCheckbox" onclick="selecionarUrgencia();" <?= $objPaginaSEI->setCheckbox($boolSinUrgente, true, false) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-        <label id="lblSinUrgente" for="chkSinUrgente" accesskey="" class="infraLabelCheckbox">Urgente</label>
-	</div>
 
 	<div id="divMotivosUrgencia" class="infraAreaDados" style="height: 4.5em; display:none">
 		<label id="lblMotivosUrgencia" for="selMotivosUrgencia" accesskey="" class="infraLabel">Motivo da Urgência:</label>
