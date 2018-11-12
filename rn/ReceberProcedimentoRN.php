@@ -108,10 +108,13 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcesso = $objMetadadosProcedimento->metadados->processo;
 
       //Verifica se processo já foi registrado para esse trâmite
-      //TODO: Avaliar também processos apensados
+      //TODO: Ajuste para receber corretamente processo em outra unidade do mesmo sistema passando pelo Barramento
+      //Comentando o trecho abaixo funciona, mas o processo fica aberto na unidade de destino
       if($this->tramiteRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
-        return ;
+       InfraDebug::getInstance()->gravar("Trâmite $parNumIdentificacaoTramite desconsiderado por já ter sido processado para o processo" . $objProcesso->protocolo);
+       return ;
       }
+
       // Validação dos dados do processo recebido
       $objInfraException = new InfraException();
       $this->validarDadosDestinatario($objInfraException, $objMetadadosProcedimento);
@@ -1748,12 +1751,9 @@ class ReceberProcedimentoRN extends InfraRN
 
         //Faz o tratamento do processo e do trâmite recusado
         $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
-
-
     }
 
     protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusadoDTO $objReceberTramiteRecusadoDTO){
-
 
         //Realiza o desbloqueio do processo
         $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
