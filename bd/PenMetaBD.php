@@ -178,6 +178,31 @@ class PenMetaBD extends InfraMetaBD {
         }
     }
 
+    public function renomearColuna($strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo){
+
+        if($this->isChaveExiste($strNomeColunaAtual)) {
+
+            $objInfraBanco = $this->getObjInfraIBanco();
+            $strTableDrive = get_parent_class($objInfraBanco);
+            $strQuery = '';
+
+            switch ($strTableDrive) {
+
+                    case 'InfraMySqli':
+                        $strQuery = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` `%s`", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo);
+                        break;
+
+                    case 'InfraSqlServer':
+                        $strQuery = sprintf("SP_RENAME '%s'.'%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+
+                    case 'InfraOracle':
+                        $strQuery = sprintf("ALTER TABLE '%s' RENAME COLUMN '%s' TO '%s'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+                        break;
+            }
+
+            $objInfraBanco->executarSql($strQuery);
+        }
+    }
 
     /**
      * Verifica se uma tabela existe no banco

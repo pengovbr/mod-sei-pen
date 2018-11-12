@@ -824,12 +824,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
         BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
         $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
-        BancoSEI::getInstance()->executarSql("alter table md_pen_recibo_tramite rename column cadeia_certificado_temp to cadeia_certificado");
+        $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+
 
         $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
         BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
         $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
-        BancoSEI::getInstance()->executarSql("alter table md_pen_recibo_tramite_enviado rename column cadeia_certificado_temp to cadeia_certificado");
+        $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+
 
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
