@@ -180,7 +180,7 @@ class PenMetaBD extends InfraMetaBD {
 
     public function renomearColuna($strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo){
 
-        if($this->isChaveExiste($strNomeColunaAtual)) {
+        if($this->isColunaExiste($strNomeTabela, $strNomeColunaAtual)) {
 
             $objInfraBanco = $this->getObjInfraIBanco();
             $strTableDrive = get_parent_class($objInfraBanco);
@@ -196,7 +196,7 @@ class PenMetaBD extends InfraMetaBD {
                         $strQuery = sprintf("SP_RENAME '%s'.'%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
 
                     case 'InfraOracle':
-                        $strQuery = sprintf("ALTER TABLE '%s' RENAME COLUMN '%s' TO '%s'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+                        $strQuery = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
                         break;
             }
 
@@ -215,7 +215,7 @@ class PenMetaBD extends InfraMetaBD {
         return count($this->obterTabelas($strNomeTabela)) != 0;
     }
 
-    public function isColuna($strNomeTabela = '', $strNomeColuna = ''){
+    public function isColunaExiste($strNomeTabela = '', $strNomeColuna = ''){
 
         $arrColunas = $this->obterColunasTabela($strNomeTabela);
         foreach ($arrColunas as $objColuna) {

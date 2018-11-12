@@ -57,7 +57,7 @@ try {
                         $objPenParametroDTO->retStrNome();
 
                         if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-                            $objPenParametroDTO->setStrValor($valor);
+                            $objPenParametroDTO->setStrValor(trim($valor));
                             $objPenParametroRN->alterar($objPenParametroDTO);
                         }
                     }

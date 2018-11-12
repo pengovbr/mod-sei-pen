@@ -112,7 +112,7 @@ class ReceberProcedimentoRN extends InfraRN
       //Comentando o trecho abaixo funciona, mas o processo fica aberto na unidade de destino
       if($this->tramiteRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
        InfraDebug::getInstance()->gravar("Trâmite $parNumIdentificacaoTramite desconsiderado por já ter sido processado para o processo" . $objProcesso->protocolo);
-       return ;
+      // return ;
       }
 
       // Validação dos dados do processo recebido

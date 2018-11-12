@@ -713,7 +713,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         /* ---------- antigo método (instalarV002R003S001US035) ---------- */
         $objMetaBanco = $this->inicializarObjMetaBanco();
 
-        if (!$objMetaBanco->isColuna('md_pen_tramite_processado', 'tipo_tramite_processo')) {
+        if (!$objMetaBanco->isColunaExiste('md_pen_tramite_processado', 'tipo_tramite_processo')) {
             $objMetaBanco->adicionarColuna('md_pen_tramite_processado', 'tipo_tramite_processo', 'CHAR(2)', PenMetaBD::NNULLO);
             $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_tramite_processado', 'tipo_tramite_processo', 'RP');
         }
@@ -826,12 +826,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
         $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
 
-
         $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
         BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
         $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
         $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
-
 
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
