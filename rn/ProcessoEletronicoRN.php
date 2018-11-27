@@ -818,8 +818,8 @@ class ProcessoEletronicoRN extends InfraRN {
 
       //TODO: Avaliar dados do tamanho do documento em bytes salvo na base de dados
       $objComponenteDigitalDTO->setNumTamanho($objComponenteDigital->tamanhoEmBytes);
-      $objComponenteDigitalDTO->setNumIdAnexo($objComponenteDigital->idAnexo);
 
+      $objComponenteDigitalDTO->setNumIdAnexo($objComponenteDigital->idAnexo);
       $arrObjComponenteDigitalDTO[] = $objComponenteDigitalDTO;
     }
 

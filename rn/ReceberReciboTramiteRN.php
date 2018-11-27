@@ -20,14 +20,21 @@ class ReceberReciboTramiteRN extends InfraRN
     return BancoSEI::getInstance();
   }
 
-  protected function registrarRecebimentoRecibo($numIdProcedimento, $strProtocoloFormatado, $numIdTramite) {
-
+  protected function registrarRecebimentoRecibo($numIdProcedimento, $strProtocoloFormatado, $numIdTramite)
+  {
         //REALIZA A CONCLUSÃO DO PROCESSO
         $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
         $objEntradaConcluirProcessoAPI->setIdProcedimento($numIdProcedimento);
 
         $objSeiRN = new SeiRN();
-        $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+        try {
+            $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+        } catch (Exception $e) {
+            //Registra falha em log de debug mas não gera rollback na transação.
+            //O rollback da transação poderia deixar a situação do processo inconsistênte já que o Barramento registrou anteriormente que o
+            //recibo já havia sido obtido. O erro no fechamento não provoca impacto no andamento do processo
+            InfraDebug::getInstance()->gravar("Processo $strProtocoloFormatado não está aberto na unidade.");
+        }
 
         $arrObjAtributoAndamentoDTO = array();
 
@@ -90,6 +97,7 @@ class ReceberReciboTramiteRN extends InfraRN
         }
 
         $objRepositorioDTO = $this->objProcessoEletronicoRN->consultarRepositoriosDeEstruturas($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas);
+
         if(!empty($objRepositorioDTO)) {
 
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -108,11 +116,11 @@ class ReceberReciboTramiteRN extends InfraRN
 
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+
     }
 
-  protected function receberReciboDeTramiteConectado($parNumIdTramite) {
-
-
+    protected function receberReciboDeTramiteControlado($parNumIdTramite)
+    {
         if (!isset($parNumIdTramite)) {
             throw new InfraException('Parâmetro $parNumIdTramite não informado.');
         }
@@ -142,6 +150,7 @@ class ReceberReciboTramiteRN extends InfraRN
 
         if ($objTramiteBD->contar($objTramiteDTO) > 0) {
 
+
             $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
@@ -151,13 +160,10 @@ class ReceberReciboTramiteRN extends InfraRN
 
             $objReciboTramiteBD = new ReciboTramiteBD(BancoSEI::getInstance());
             if ($objReciboTramiteBD->contar($objReciboTramiteDTOExistente) == 0) {
-
                 //Armazenar dados do recibo de conclusão do trãmite
                 $objReciboTramiteBD->cadastrar($objReciboTramiteDTO);
-
                  if ($objReciboTramite->recibo->hashDoComponenteDigital && is_array($objReciboTramite->recibo->hashDoComponenteDigital)) {
                     foreach ($objReciboTramite->recibo->hashDoComponenteDigital as $strHashComponenteDigital) {
-
                         $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
                         $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboTramite->recibo->NRE);
                         $objReciboTramiteHashDTO->setNumIdTramite($objReciboTramite->recibo->IDT);
@@ -168,7 +174,6 @@ class ReceberReciboTramiteRN extends InfraRN
                         $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
                     }
                 }
-
                 //ALTERA O ESTADO DO PROCEDIMENTO
                 try {
 
@@ -198,10 +203,8 @@ class ReceberReciboTramiteRN extends InfraRN
 
                     $this->objProcedimentoAndamentoRN->setOpts($objProcessoEletronicoDTO->getDblIdProcedimento(), $parNumIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
                     $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S');
-
                     //Registra o recbimento do recibo no histórico e realiza a conclusão do processo
                     $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $parNumIdTramite);
-
                     $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
                     $objPenTramiteProcessadoRN->setRecebido($parNumIdTramite);
 

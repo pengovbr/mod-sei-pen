@@ -19,7 +19,6 @@ class PenMetaBD extends InfraMetaBD {
     public function adicionarValorPadraoParaColuna($strNomeTabela, $strNomeColuna, $strValorPadrao, $bolRetornarQuery = false){
 
         $objInfraBanco = $this->getObjInfraIBanco();
-
         $strTableDrive = get_parent_class($objInfraBanco);
         $strQuery = '';
 
@@ -30,18 +29,18 @@ class PenMetaBD extends InfraMetaBD {
                 break;
 
             case 'InfraSqlServer':
-                 $strQuery =  sprintf("ALTER TABLE [%s] ADD DEFAULT('%s') FOR [%s]", $strNomeTabela, $strValorPadrao, $strNomeColuna);
+                $strQuery =  sprintf("ALTER TABLE [%s] ADD DEFAULT('%s') FOR [%s]", $strNomeTabela, $strValorPadrao, $strNomeColuna);
+                 break;
 
             case 'InfraOracle':
+                $strQuery =  sprintf("ALTER TABLE %s MODIFY %s DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
                 break;
         }
 
         if($bolRetornarQuery === false) {
-
             $objInfraBanco->executarSql($strQuery);
         }
         else {
-
             return  $strQuery;
         }
     }
@@ -139,6 +138,7 @@ class PenMetaBD extends InfraMetaBD {
                     break;
 
                 case 'InfraOracle':
+                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP CONSTRAINT '.$strNomeChave);
                     break;
             }
         }
@@ -156,12 +156,10 @@ class PenMetaBD extends InfraMetaBD {
         if($this->isTabelaExiste($strNomeTabelaAtual)) {
 
             $objInfraBanco = $this->getObjInfraIBanco();
-
             $strTableDrive = get_parent_class($objInfraBanco);
             $strQuery = '';
 
             switch ($strTableDrive) {
-
                     case 'InfraMySqli':
                         $strQuery = sprintf("ALTER TABLE `%s` RENAME TO `%s`", $strNomeTabelaAtual, $strNomeTabelaNovo);
                         break;

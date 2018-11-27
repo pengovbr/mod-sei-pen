@@ -77,7 +77,7 @@ class ProcessoExpedidoRN extends InfraRN {
                 AND at2.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) ."
                 AND at2.dth_abertura > a.dth_abertura ) ";
 
-//die($sql);
+        //die($sql);
         $pag = $this->getObjInfraIBanco()->consultarSql($sql);
         $count = $this->getObjInfraIBanco()->consultarSql($sqlCount);
         $total = $count ? $count[0]['total'] : 0;
@@ -88,12 +88,12 @@ class ProcessoExpedidoRN extends InfraRN {
          $objProtocoloDTO->setNumRegistrosPaginaAtual(count($pag));
 
         foreach ($pag as $res) {
-            $data = new \DateTime($res['dth_abertura']);
+            $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);
             $objProcessoExpedidoDTO = new ProcessoExpedidoDTO();
             $objProcessoExpedidoDTO->setDblIdProtocolo($res['id_protocolo']);
             $objProcessoExpedidoDTO->setStrProtocoloFormatado($res['protocolo_formatado']);
             $objProcessoExpedidoDTO->setStrNomeUsuario($res['nome_usuario']);
-            $objProcessoExpedidoDTO->setDthExpedido($data->format('d/m/Y H:i:s'));
+            $objProcessoExpedidoDTO->setDthExpedido($data);
             $objProcessoExpedidoDTO->setStrDestino($res['unidade_destino']);
 
             $arrProcessosExpedidos[] = $objProcessoExpedidoDTO;
