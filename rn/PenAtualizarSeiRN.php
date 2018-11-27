@@ -12,8 +12,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     public function __construct() {
         parent::__construct();
     }
-    
-    public function atualizarVersao() {
+
+    protected function atualizarVersaoConectado() {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
 
@@ -24,25 +24,31 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSEI::getInstance()), true);
             }
-           
+
             //testando permissoes de criações de tabelas
             $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
-            
+
             if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
                 BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
             }
             BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
 
-            $objInfraParametro = new InfraParametro($this->objInfraBanco);            
-            
+            $objInfraParametro = new InfraParametro($this->objInfraBanco);
+
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
             $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-            switch ($strVersaoModuloPen) {                
+            switch ($strVersaoModuloPen) {
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
                 case '1.0.1': $this->instalarV110();
                 case '1.1.0': $this->instalarV111();
+                case '1.1.1': //Não houve atualização no banco de dados
+                case '1.1.2': //Não houve atualização no banco de dados
+                case '1.1.3': //Não houve atualização no banco de dados
+                case '1.1.4': //Não houve atualização no banco de dados
+                case '1.1.5': //Não houve atualização no banco de dados
+                case '1.1.6': $this->instalarV117();
 
                 break;
                 default:
@@ -76,7 +82,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         return $objDTOCadastrado->getStrNome();
     }
-    
+
     /**
      * Remove um parâmetro do infra_parametros
      * @return string Nome do parâmetro
@@ -88,10 +94,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         return $objBD->excluir($objDTO);
     }
-        
+
     /* Contem atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
-        
+
         $objInfraBanco = $this->objInfraBanco;
         $objMetaBD = $this->objMeta;
 
@@ -101,12 +107,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_registro' => array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
                 'id_procedimento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro'),
+            'pk' => array('cols'=>array('numero_registro')),
             'uk' => array('numero_registro', 'id_procedimento'),
             'fks' => array(
-                'procedimento' => array('id_procedimento', 'id_procedimento')
+                'procedimento' => array('nome' => 'fk_md_pen_proc_eletr_procedim',
+                                        'cols' => array('id_procedimento', 'id_procedimento')),
             )
         ));
+
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_tramite',
@@ -119,14 +127,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
                 'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO)
             ),
-            'pk' => array('id_tramite'),
+            'pk' => array('cols'=>array('id_tramite')),
             'uk' => array('numero_registro', 'id_tramite'),
             'fks' => array(
-                'md_pen_processo_eletronico' => array('numero_registro', 'numero_registro'),
+                'md_pen_processo_eletronico' => array('nome'=>'fk_md_pen_tramite_proc_eletr',
+                                                      'cols' => array('numero_registro', 'numero_registro')),
                 'usuario' => array('id_usuario', 'id_usuario'),
-                'unidade' => array('id_unidade', 'id_unidade')
+                'unidade' => array('id_unidade', 'id_unidade'),
             )
         ));
+
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_especie_documental',
@@ -135,8 +145,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'nome_especie' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
                 'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_especie')
+            'pk' => array('cols'=>array('id_especie')),
         ));
+
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_tramite_pendente',
@@ -145,7 +156,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_tramite' => array($objMetaBD->tipoTextoVariavel(255)),
                 'id_atividade_expedicao' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO)
             ),
-            'pk' => array('id')
+            'pk' => array('cols'=>array('id')),
         ));
 
         $objMetaBD->criarTabela(array(
@@ -156,7 +167,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'dth_recebimento' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
                 'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_tramite')
+            'pk' => array('cols'=>array('numero_registro', 'id_tramite')),
         ));
 
 
@@ -172,7 +183,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'hash' => array($objMetaBD->tipoTextoFixo(32), PenMetaBD::NNULLO),
                 'id_tarefa' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_andamento')
+            'pk' => array('nome' => 'pk_md_pen_procedim_andamen', 'cols'=>array('id_andamento')),
         ));
 
         $objMetaBD->criarTabela(array(
@@ -181,20 +192,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'sin_obteve_recusa' => array($objMetaBD->tipoTextoFixo(1), 'N')
             ),
-            'pk' => array('id_protocolo'),
+            'pk' => array('cols'=>array('id_protocolo')),
             'fks' => array(
                 'protocolo' => array('id_protocolo', 'id_protocolo')
             )
         ));
 
-        /*     $objMetaBD->criarTabela(array(
-          'tabela' => 'md_pen_tramite_recusado',
-          'cols' => array(
-          'numero_registro'=> array($objMetaBD->tipoTextoFixo(16), PenMetaBD::NNULLO),
-          'id_tramite' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO)
-          ),
-          'pk' => array('id_tramite')
-          )); */
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_recibo_tramite',
@@ -205,9 +208,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO),
                 'cadeia_certificado' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_tramite'),
+            'pk' => array('cols'=>array('numero_registro', 'id_tramite')),
             'fks' => array(
-                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+                'md_pen_tramite' => array('nome' => 'fk_md_pen_rec_tramite_tramite',
+                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
@@ -220,11 +224,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO),
                 'cadeia_certificado ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_tramite'),
+            'pk' => array('nome' => 'pk_md_pen_recibo_tram_envia', 'cols'=>array('numero_registro', 'id_tramite')),
             'fks' => array(
-                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+                'md_pen_tramite' => array('nome' => 'fk_md_pen_rec_tram_env_tram',
+                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
+
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_recibo_tramite_recebido',
@@ -234,11 +240,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'dth_recebimento' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO),
                 'hash_assinatura' => array($objMetaBD->tipoTextoVariavel(345), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_tramite', 'hash_assinatura'),
+            'pk' => array('nome' => 'pk_md_pen_recibo_tramite_receb', 'cols'=>array('numero_registro', 'id_tramite', 'hash_assinatura')),
             'fks' => array(
-                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+                'md_pen_tramite' => array('nome' => 'fk_md_pen_recibo_receb_tram',
+                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
+
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_rel_processo_apensado',
@@ -247,9 +255,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_procedimento_apensado' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'protocolo' => array($objMetaBD->tipoTextoVariavel(50), PenMetaBD::NNULLO)
             ),
-            'pk' => array('numero_registro', 'id_procedimento_apensado'),
+            'pk' => array('nome' => 'pk_md_pen_rel_processo_apensad', 'cols'=>array('numero_registro', 'id_procedimento_apensado')),
             'fks' => array(
-                'md_pen_processo_eletronico' => array('numero_registro', 'numero_registro')
+                'md_pen_processo_eletronico' => array('nome' => 'fk_md_pen_proc_eletr_apensado',
+                                                      'cols' => array('numero_registro', 'numero_registro'))
             )
         ));
 
@@ -260,10 +269,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_padrao' => array($objMetaBD->tipoTextoFixo(1), 'N')
             ),
-            'pk' => array('id_serie'),
+            'pk' => array('cols'=>array('id_serie')),
             'uk' => array('codigo_especie', 'id_serie'),
             'fks' => array(
-                'serie' => array('id_serie', 'id_serie')
+                'serie' =>  array('nome' => ' fk_md_pen_rel_serie_especie', 'cols' => array('id_serie', 'id_serie'))
             )
         ));
 
@@ -273,22 +282,23 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_tarefa' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'codigo_operacao' => array($objMetaBD->tipoTextoFixo(2), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_tarefa', 'codigo_operacao'),
+            'pk' => array('cols'=>array('id_tarefa', 'codigo_operacao')),
             'fks' => array(
-                'tarefa' => array('id_tarefa', 'id_tarefa')
+                'tarefa' =>  array('nome' => 'fk_md_pen_rel_operacao_tarefa', 'cols' => array('id_tarefa', 'id_tarefa'))
             )
         ));
 
+
         $objMetaBD->criarTabela(array(
-            'tabela' => 'md_pen_rel_tipo_documento_mapeamento_recebido',
+            'tabela' => 'md_pen_rel_tipo_doc_map_rec',
             'cols' => array(
                 'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_padrao' => array($objMetaBD->tipoTextoFixo(2), PenMetaBD::NNULLO)
             ),
-            'pk' => array('codigo_especie', 'id_serie'),
+            'pk' => array('cols'=>array('codigo_especie', 'id_serie')),
             'fks' => array(
-                'serie' => array('id_serie', 'id_serie')
+                'serie' => array('nome' =>'fk_md_pen_rel_tipo_doc_serie', 'cols' => array('id_serie', 'id_serie'))
             )
         ));
 
@@ -311,13 +321,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'ordem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_enviar' => array($objMetaBD->tipoTextoFixo(1), 'N')
             ),
-            'pk' => array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite'),
+            'pk' => array('cols'=>array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite')),
             'fks' => array(
-                'anexo' => array('id_anexo', 'id_anexo'),
-                'documento' => array('id_documento', 'id_documento'),
-                'procedimento' => array('id_procedimento', 'id_procedimento'),
-                'md_pen_processo_eletronico' => array('numero_registro', 'numero_registro'),
-                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+                'anexo' => array('nome' => 'fk_md_pen_comp_dig_anexo', 'cols' => array('id_anexo', 'id_anexo')),
+                'documento' => array('nome' => 'fk_md_pen_comp_dig_documento', 'cols' => array('id_documento', 'id_documento')),
+                'procedimento' => array('nome' => 'fk_md_pen_comp_dig_procediment', 'cols' => array('id_procedimento', 'id_procedimento')),
+                'md_pen_processo_eletronico' => array('nome' => 'fk_md_pen_comp_dig_proc_eletr', 'cols' => array('numero_registro', 'numero_registro')),
+                'md_pen_tramite' => array('nome' => 'fk_md_pen_comp_dig_tramite', 'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
@@ -327,11 +337,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_unidade'),
+            'pk' => array('cols'=>array('id_unidade')),
             'fks' => array(
                 'unidade' => array('id_unidade', 'id_unidade')
             )
         ));
+
 
         //----------------------------------------------------------------------
         // Novas sequências
@@ -653,7 +664,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
 
-        
+
         /* ---------- antigo método (instalarV002R003S000US024) ---------- */
 
         $objMetaBD->criarTabela(array(
@@ -664,14 +675,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'numero_tentativas' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_recebimento_concluido' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_tramite')
+            'pk' => array('cols'=>array('id_tramite')),
         ));
 
         $objInfraParametro = new InfraParametro($objInfraBanco);
         $objInfraParametro->setValor('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3');
-        
-        
-        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */      
+
+
+        /* ---------- antigo método (instalarV002R003S000IW001) ---------- */
 
         $objDTO = new TarefaDTO();
         $objBD = new TarefaBD($objInfraBanco);
@@ -698,11 +709,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnAlterar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@');
-        
+
         /* ---------- antigo método (instalarV002R003S001US035) ---------- */
         $objMetaBanco = $this->inicializarObjMetaBanco();
 
-        if (!$objMetaBanco->isColuna('md_pen_tramite_processado', 'tipo_tramite_processo')) {
+        if (!$objMetaBanco->isColunaExiste('md_pen_tramite_processado', 'tipo_tramite_processo')) {
             $objMetaBanco->adicionarColuna('md_pen_tramite_processado', 'tipo_tramite_processo', 'CHAR(2)', PenMetaBD::NNULLO);
             $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_tramite_processado', 'tipo_tramite_processo', 'RP');
         }
@@ -712,7 +723,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objMetaBanco->removerChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado');
             $objMetaBanco->adicionarChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado', array('id_tramite', 'tipo_tramite_processo'));
         }
-        
+
         /* ---------- antigo método (instalarV003R003S003IW001) ---------- */
 
         //----------------------------------------------------------------------
@@ -736,11 +747,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_padrao' => array($objMetaBD->tipoTextoFixo(1), 'S')
             ),
-            'pk' => array('id_mapeamento'),
-            //'uk' => array('codigo_especie', 'id_serie'),
+            'pk' => array('cols'=>array('id_mapeamento')),
             'fks' => array(
-                'serie' => array('id_serie', 'id_serie'),
-                'md_pen_especie_documental' => array('id_especie', 'codigo_especie'),
+                'serie' => array('nome' => 'fk_md_pen_rel_doc_map_env_seri', 'cols' => array('id_serie', 'id_serie')),
+                'md_pen_especie_documental' => array('nome' => 'fk_md_pen_rel_doc_map_env_espe', 'cols' => array('id_especie', 'codigo_especie')),
             )
         ));
 
@@ -752,22 +762,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'sin_padrao' => array($objMetaBD->tipoTextoFixo(1), 'S')
             ),
-            'pk' => array('id_mapeamento'),
-            //'uk' => array('codigo_especie', 'id_serie'),
+            'pk' => array('cols'=>array('id_mapeamento')),
             'fks' => array(
-                'serie' => array('id_serie', 'id_serie'),
-                'md_pen_especie_documental' => array('id_especie', 'codigo_especie'),
+                'serie' => array('nome' => 'fk_md_pen_rel_doc_map_rec_seri', 'cols' => array('id_serie', 'id_serie')),
+                'md_pen_especie_documental' => array('nome' => 'fk_md_pen_rel_doc_map_rec_espe', 'cols' => array('id_especie', 'codigo_especie')),
             )
         ));
 
         $objBD = new GenericoBD($objInfraBanco);
-
         if ($objMetaBD->isTabelaExiste('md_pen_rel_tipo_documento_mapeamento_recebido')) {
-
             $objDTO = new PenRelTipoDocMapRecebidoDTO();
-
             $fnCadastrar = function($numCodigoEspecie, $numIdSerie) use($objDTO, $objBD) {
-
                 $objDTO->unSetTodos();
                 $objDTO->setNumCodigoEspecie($numCodigoEspecie);
                 $objDTO->setNumIdSerie($numIdSerie);
@@ -782,7 +787,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $arrDados = $objInfraBanco->consultarSql('SELECT DISTINCT codigo_especie, id_serie FROM md_pen_rel_tipo_documento_mapeamento_recebido');
             if (!empty($arrDados)) {
                 foreach ($arrDados as $arrDocMapRecebido) {
-
                     $fnCadastrar($arrDocMapRecebido['codigo_especie'], $arrDocMapRecebido['id_serie']);
                 }
             }
@@ -790,11 +794,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objMetaBD->removerTabela('md_pen_rel_tipo_documento_mapeamento_recebido');
         }
 
-
         if ($objMetaBD->isTabelaExiste('md_pen_rel_serie_especie')) {
-
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
-
             $fnCadastrar = function($numCodigoEspecie, $numIdSerie) use($objDTO, $objBD) {
 
                 $objDTO->unSetTodos();
@@ -802,7 +803,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 $objDTO->setNumIdSerie($numIdSerie);
 
                 if ($objBD->contar($objDTO) == 0) {
-
                     $objDTO->setStrPadrao('S');
                     $objBD->cadastrar($objDTO);
                 }
@@ -811,22 +811,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $arrDados = $objInfraBanco->consultarSql('SELECT DISTINCT codigo_especie, id_serie FROM md_pen_rel_serie_especie');
             if (!empty($arrDados)) {
                 foreach ($arrDados as $arrDocMapEnviado) {
-
                     $fnCadastrar($arrDocMapEnviado['codigo_especie'], $arrDocMapEnviado['id_serie']);
                 }
             }
 
             $objMetaBD->removerTabela('md_pen_rel_serie_especie');
         }
-        
-        
+
+
         /* ---------- antigo método (instalarV004R003S003IW002) ---------- */
         $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
+        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
+        $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
+        $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
 
-        $this->inicializarObjMetaBanco()
-                ->alterarColuna('md_pen_recibo_tramite', 'cadeia_certificado', $strTipo)
-                ->alterarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado', $strTipo);
-        
+        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
+        $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
+        $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objDTO = new TarefaDTO();
@@ -857,7 +861,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('O trâmite externo do processo foi abortado manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
-        
+
         /* ---------- antigo método (instalarV005R003S005IW023) ---------- */
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
@@ -883,11 +887,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnAtualizar('PEN_PROCESSO_EXPEDIDO', 'Processo em tramitação externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
         $fnAtualizar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da unidade externa @ENTIDADE_ORIGEM@ - @ENTIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@');
         $fnAtualizar('PEN_OPERACAO_EXTERNA', 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
-        
+
         /* ---------- antigo método (instalarV006R004S004WI001) ---------- */
         $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
         $objInfraParametro->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
-        
+
         /* ---------- antigo método (instalarV007R004S005WI002) ---------- */
 
         $objMetaBD->criarTabela(array(
@@ -899,31 +903,29 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'tipo_recibo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO),
                 'hash_componente_digital ' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
             ),
-            'pk' => array('id_tramite_hash'),
+            'pk' => array('cols'=>array('id_tramite_hash')),
             'fks' => array(
-                'md_pen_tramite' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite'))
+                'md_pen_tramite' => array('nome' => 'fk_md_pen_rec_tram_hash_tram', 'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
         $objMetaBD->adicionarColuna('md_pen_recibo_tramite_recebido', 'cadeia_certificado', $this->inicializarObjMetaBanco()->tipoTextoGrande(), PenMetaBD::SNULLO);
 
         $objInfraSequencia = new InfraSequencia($this->getObjInfraIBanco());
-
         if (!$objInfraSequencia->verificarSequencia('md_pen_recibo_tramite_hash')) {
-
             $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
         }
-             
+
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
-        
+
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroBD->cadastrar($objInfraParametroDTO);
-        
+
         $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
     }
-    
+
     /* Contem atualizações da versao 1.0.1 do modulo */
     protected function instalarV101() {
         /* ---------- antigo método (instalarV008R004S006IW003) ---------- */
@@ -939,7 +941,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objTarefaDTO->setStrSinPermiteProcessoFechado('S');
 
         $objBD->alterar($objTarefaDTO);
-        
+
         /* ---------- antigo método (instalarV006R004S001US039) ---------- */
         $objMetaBD = $this->inicializarObjMetaBanco();
         $objInfraBanco = $this->inicializarObjInfraIBanco();
@@ -951,9 +953,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'nome' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
                 'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
             ),
-            'pk' => array('id_hipotese_legal')
+            'pk' => array('cols'=>array('id_hipotese_legal')),
         ));
-  
+
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_rel_hipotese_legal',
             'cols' => array(
@@ -963,30 +965,30 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'tipo' => array($objMetaBD->tipoTextoFixo(1), 'E'),
                 'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
             ),
-            'pk' => array('id_mapeamento'),
+            'pk' => array('cols'=>array('id_mapeamento')),
             'fks' => array(
-                'hipotese_legal' => array('id_hipotese_legal', 'id_hipotese_legal'),
-                'md_pen_hipotese_legal' => array('id_hipotese_legal', 'id_hipotese_legal_pen')
+                'hipotese_legal' => array('nome' => 'fk_md_pen_rel_hipotese_legal', 'cols' => array('id_hipotese_legal', 'id_hipotese_legal')),
+                'md_pen_hipotese_legal' => array('nome' => 'fk_md_pen_rel_hipotese_pen', 'cols' => array('id_hipotese_legal', 'id_hipotese_legal_pen'))
             )
         ));
-        
+
         $objInfraSequencia = new InfraSequencia($objInfraBanco);
-        
-        if(!$objInfraSequencia->verificarSequencia('md_pen_hipotese_legal')){   
+
+        if(!$objInfraSequencia->verificarSequencia('md_pen_hipotese_legal')){
             $objInfraSequencia->criarSequencia('md_pen_hipotese_legal', '1', '1', '9999999999');
         }
 
-        if(!$objInfraSequencia->verificarSequencia('md_pen_rel_hipotese_legal')){   
+        if(!$objInfraSequencia->verificarSequencia('md_pen_rel_hipotese_legal')){
             $objInfraSequencia->criarSequencia('md_pen_rel_hipotese_legal', '1', '1', '9999999999');
         }
-        
+
         $objHipoteseLegalDTO = new HipoteseLegalDTO();
         $objHipoteseLegalDTO->setDistinct(true);
         $objHipoteseLegalDTO->setStrStaNivelAcesso(1);
         $objHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
         $objHipoteseLegalDTO->retNumIdHipoteseLegal();
         $objHipoteseLegalDTO->retStrNome();
-        
+
         $objMetaBD = $this->inicializarObjMetaBanco();
 
         $objMetaBD->criarTabela(array(
@@ -995,9 +997,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 'nome'=> array($objMetaBD->tipoTextoVariavel(100), PenMetaBD::NNULLO),
                 'valor' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO)
             ),
-            'pk' => array('nome')
+            'pk' => array('cols'=>array('nome')),
         ));
-        
+
         //Agendamento
         $objDTO = new InfraAgendamentoTarefaDTO();
 
@@ -1019,29 +1021,25 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'Verificação se há novas hipóteses legais do barramento.');
-        
+
         /* altera o parâmetro da versão de banco */
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->setStrValor('1.0.0');
-        $objInfraParametroDTO->retTodos();
-        
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.0.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
-    
+
     /* Contem atualizações da versao 1.1.0 do modulo */
     protected function instalarV110() {
         $objMetaBD = $this->objMeta;
-        
+
         //Adiciona a coluna de indentificação nas hipóteses que vem do barramento
         $objMetaBD->adicionarColuna('md_pen_hipotese_legal', 'identificacao', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
-        
+
         //Adiciona a coluna de descricao nos parâmetros
         $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
-        
+
         //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
@@ -1053,7 +1051,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho Máximo de Documento Expedido');
         $this->criarParametro('PEN_TIPO_PROCESSO_EXTERNO', '100000320', 'Tipo de Processo Externo');
         $this->criarParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000001', 'Unidade Geradora de Processo e Documento Recebido');
-        
+
         //Deleta os parâmetros do infra_parametros
         $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE');
         $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
@@ -1065,7 +1063,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->deletaParametroInfra('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
         $this->deletaParametroInfra('PEN_TIPO_PROCESSO_EXTERNO', '100000320');
         $this->deletaParametroInfra('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
-        
+
         //Alterar nomeclatura do recurso
         $objDTO = new PenParametroDTO();
         $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
@@ -1082,32 +1080,71 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objDTO->setStrDescricao('Hipótese Legal Padrão');
             $objBD->cadastrar($objDTO);
         }
-        
+
         /* altera o parâmetro da versão de banco */
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->setStrValor('1.0.1');
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.1.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
+
     }
 
-    /* Contem atualizações da versao 1.1.1 do módulo */    
+    /* Contem atualizações da versao 1.1.1 do módulo */
     protected function instalarV111() {
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
         BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
         /* altera o parâmetro da versão de banco */
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.1.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
+    /* Contem atualizações da versao 1.1.7 do módulo */
+    protected function instalarV117() {
+
+        /* Cadastramento de novas espécies documentais */
+        $objEspecieDocumentalBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+
+        $fnCadastrar = function($dblIdEspecie, $strNomeEspecie, $strDescricao) use($objEspecieDocumentalDTO, $objEspecieDocumentalBD) {
+            $objEspecieDocumentalDTO->unSetTodos();
+            $objEspecieDocumentalDTO->setDblIdEspecie($dblIdEspecie);
+            if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
+                $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+                $objEspecieDocumentalDTO->setStrDescricao($strDescricao);
+                $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
+            }
+        };
+
+        $fnCadastrar(178, 'Alegações', 'Muito comum no Judiciário, tendo previsão no CPC. Podendo ser complementado "Finais", o que representaria o documento "Alegações Finais".');
+        $fnCadastrar(179, 'Anexo', 'Documento ou processo juntado em caráter definitivo a outro processo, para dar continuidade a uma ação administrativa.');
+        $fnCadastrar(180, 'Documento', 'Informação registrada, qualquer que seja o suporte ou formato, que não está reunida e ordenada em processo.');
+        $fnCadastrar(181, 'Apartado', 'Apartado por si só, autos apartados ou partado sigiloso.');
+        $fnCadastrar(182, 'Apresentação', 'Documentos que são apresentações propriamente ditas.');
+        $fnCadastrar(183, 'Diagnóstico', 'Diagnóstico médico, auditoria, etc.');
+        $fnCadastrar(184, 'Exame', 'Exame laboratorial, médico, etc.');
+        $fnCadastrar(185, 'Página', 'Página do Diário Oficial da União.');
+        $fnCadastrar(186, 'Estudo', 'Podendo ser complementado com "Técnico Preliminar da Contratação"; "Técnico".');
+        $fnCadastrar(999, 'Outra', 'Outras espécies documentais não identificadas.');
+
+        // if($this->isTabelaExiste('md_pen_rel_tipo_documento_mapeamento_recebido')) {
+        //     if (BancoSEI::getInstance() instanceof InfraSqlServer) {
+        //         BancoSEI::getInstance()->executarSql("sp_rename 'md_pen_rel_tipo_documento_mapeamento_recebido', 'md_pen_rel_tipo_doc_map_rec'");
+        //     } else {
+        //         BancoSEI::getInstance()->executarSql("ALTER TABLE 'md_pen_rel_tipo_documento_mapeamento_recebido' RENAME TO 'md_pen_rel_tipo_doc_map_rec'");
+        //     }
+        // }
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.7');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
 }

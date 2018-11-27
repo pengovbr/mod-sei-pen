@@ -15,9 +15,11 @@ class ProcessoExpedidoRN extends InfraRN {
     public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO) {
 
         $bolSqlServer = $this->getObjInfraIBanco() instanceof InfraSqlServer;
+        $bolOracle = $this->getObjInfraIBanco() instanceof InfraOracle;
         $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
         $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
         $strInstrucaoPaginacao = (!$bolSqlServer) ? "LIMIT ".$numOffset.",".$numLimit : "OFFSET $numOffset ROWS FETCH NEXT $numLimit ROWS ONLY";
+        $strInstrucaoPaginacao = ($bolOracle) ? "" : $strInstrucaoPaginacao;
 
         $sql = "SELECT
                         p.id_protocolo,
@@ -41,14 +43,20 @@ class ProcessoExpedidoRN extends InfraRN {
                        ptra.dth_registro = (SELECT MAX(pt.dth_registro) dth_registro FROM md_pen_tramite pt WHERE pt.numero_registro = pe.numero_registro)
                AND
                NOT EXISTS (
-               SELECT at2.* FROM atividade as at2
+               SELECT at2.* FROM atividade at2
                 WHERE at2.id_protocolo = p.id_protocolo
                 AND at2.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) ."
                 AND at2.dth_abertura > a.dth_abertura )
                GROUP BY
                         p.id_protocolo, p.protocolo_formatado, a.id_unidade , atd.valor , us.id_usuario, us.nome, a.dth_abertura ORDER BY a.dth_abertura DESC ".$strInstrucaoPaginacao;
 
-          $sqlCount = "SELECT
+
+        if ($this->getObjInfraIBanco() instanceof InfraOracle){
+            $qtd = $numLimit + $numLimit;
+            $sql = "select a.* from ($sql) a where rownum >= $numOffset and rownum <= $qtd";
+        }
+
+        $sqlCount = "SELECT
                         count(*) total
                FROM protocolo p
                INNER JOIN atividade a ON a.id_protocolo = p.id_protocolo
@@ -64,13 +72,12 @@ class ProcessoExpedidoRN extends InfraRN {
                        ptra.dth_registro = (SELECT MAX(pt.dth_registro) dth_registro FROM md_pen_tramite pt WHERE pt.numero_registro = pe.numero_registro)
                AND
                NOT EXISTS (
-               SELECT at2.* FROM atividade as at2
+               SELECT at2.* FROM atividade at2
                 WHERE at2.id_protocolo = p.id_protocolo
                 AND at2.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) ."
                 AND at2.dth_abertura > a.dth_abertura ) ";
 
-
-
+        //die($sql);
         $pag = $this->getObjInfraIBanco()->consultarSql($sql);
         $count = $this->getObjInfraIBanco()->consultarSql($sqlCount);
         $total = $count ? $count[0]['total'] : 0;
@@ -81,12 +88,12 @@ class ProcessoExpedidoRN extends InfraRN {
          $objProtocoloDTO->setNumRegistrosPaginaAtual(count($pag));
 
         foreach ($pag as $res) {
-            $data = new \DateTime($res['dth_abertura']);
+            $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);
             $objProcessoExpedidoDTO = new ProcessoExpedidoDTO();
             $objProcessoExpedidoDTO->setDblIdProtocolo($res['id_protocolo']);
             $objProcessoExpedidoDTO->setStrProtocoloFormatado($res['protocolo_formatado']);
             $objProcessoExpedidoDTO->setStrNomeUsuario($res['nome_usuario']);
-            $objProcessoExpedidoDTO->setDthExpedido($data->format('d/m/Y H:i:s'));
+            $objProcessoExpedidoDTO->setDthExpedido($data);
             $objProcessoExpedidoDTO->setStrDestino($res['unidade_destino']);
 
             $arrProcessosExpedidos[] = $objProcessoExpedidoDTO;

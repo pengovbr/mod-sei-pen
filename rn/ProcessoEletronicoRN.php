@@ -163,13 +163,10 @@ class ProcessoEletronicoRN extends InfraRN {
       try {
 
         $objConfig = ConfiguracaoSEI::getInstance();
-
         if($objConfig->isSetValor('SEI', 'LogPenWs')){
-
             $this->objPenWs = new LogPenWs($objConfig->getValor('SEI', 'LogPenWs'), $this->strWSDL, $this->options);
         }
         else {
-
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
      } catch (Exception $e) {
@@ -821,8 +818,8 @@ class ProcessoEletronicoRN extends InfraRN {
 
       //TODO: Avaliar dados do tamanho do documento em bytes salvo na base de dados
       $objComponenteDigitalDTO->setNumTamanho($objComponenteDigital->tamanhoEmBytes);
-      $objComponenteDigitalDTO->setNumIdAnexo($objComponenteDigital->idAnexo);
 
+      $objComponenteDigitalDTO->setNumIdAnexo($objComponenteDigital->idAnexo);
       $arrObjComponenteDigitalDTO[] = $objComponenteDigitalDTO;
     }
 

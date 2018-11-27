@@ -86,8 +86,10 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                     $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
                     $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
                 }
+
             }
             catch(Exception $e){
+                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
         });
@@ -105,6 +107,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                 }
             }
             catch(Exception $e){
+                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
                 $objProcessoEletronicoRN = new ProcessoEletronicoRN();
                 $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
@@ -120,9 +123,9 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                 $objReceberProcedimentoRN = new ReceberProcedimentoRN();
                 $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
             } catch (Exception $e) {
+                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
-
         });
 
         //Processamento de pendências de recebimento dos componentes digitais do processo
@@ -139,6 +142,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                 $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
                 $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
             } catch (Exception $e) {
+                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
       });
@@ -147,7 +151,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolEcho=false)
     {
         $strDataLog = date("d/m/Y H:i:s");
-        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat("\t", $numIdentacao), $strMensagem);
+        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat(" ", $numIdentacao * 4), $strMensagem);
         InfraDebug::getInstance()->gravar($strLog);
         if(!InfraDebug::getInstance()->isBolEcho() && $bolEcho) echo sprintf("\n[%s] [PROCESSAMENTO] %s", $strDataLog, $strMensagem);
     }

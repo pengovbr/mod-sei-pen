@@ -11,9 +11,8 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.1.6';
+        return '1.1.7';
     }
-
 
     public function getInstituicao() {
         return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
