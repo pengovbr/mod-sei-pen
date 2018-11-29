@@ -61,11 +61,8 @@ class PenTramiteProcessadoRN extends InfraRN {
             return false;
         }
 
-
-
         if($objDTO->getStrRecebido() == 'S') {
             return true;
-
         }
         else {
             $objPenParametroRN = new PenParametroRN();
