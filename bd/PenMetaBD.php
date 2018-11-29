@@ -187,11 +187,12 @@ class PenMetaBD extends InfraMetaBD {
             switch ($strTableDrive) {
 
                     case 'InfraMySqli':
-                        $strQuery = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` `%s`", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo);
+                        $strQuery = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo);
                         break;
 
                     case 'InfraSqlServer':
-                        $strQuery = sprintf("SP_RENAME '%s'.'%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+                        $strQuery = sprintf("SP_RENAME '%s.%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+                        break;
 
                     case 'InfraOracle':
                         $strQuery = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
