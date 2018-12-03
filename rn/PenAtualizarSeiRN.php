@@ -1107,6 +1107,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.1.7 do módulo */
     protected function instalarV117() {
 
+        $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+
         /* Cadastramento de novas espécies documentais */
         $objEspecieDocumentalBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
@@ -1139,6 +1141,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         //         BancoSEI::getInstance()->executarSql("ALTER TABLE 'md_pen_rel_tipo_documento_mapeamento_recebido' RENAME TO 'md_pen_rel_tipo_doc_map_rec'");
         //     }
         // }
+
+        $objInfraMetaBD->excluirChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado');
+        $objInfraMetaBD->adicionarChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado',array('id_tramite','tipo_tramite_processo'));
 
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());

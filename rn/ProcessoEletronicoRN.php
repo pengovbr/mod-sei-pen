@@ -170,7 +170,8 @@ class ProcessoEletronicoRN extends InfraRN {
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
      } catch (Exception $e) {
-        throw new InfraException('Erro acessando serviço.', $e);
+        $mensagem = InfraException::inspecionar($e);
+        throw new InfraException('Erro acessando serviço: ' . $mensagem, $e);
       }
     }
 
@@ -433,11 +434,14 @@ class ProcessoEletronicoRN extends InfraRN {
         }
       }
     } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
+      //$mensagem = $this->tratarFalhaWebService($fault);
+      $mensagem = InfraException::inspecionar($fault);
       throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-    } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
     }
+    // catch (\Exception $e) {
+    //   $mensagem = InfraException::inspecionar($e);
+    //   throw new InfraException("Error Processing Request", $e);
+    // }
 
     return $arrObjPendenciaDTO;
   }
