@@ -49,6 +49,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.4': //Não houve atualização no banco de dados
                 case '1.1.5': //Não houve atualização no banco de dados
                 case '1.1.6': $this->instalarV117();
+                case '1.1.7': $this->instalarV118();
 
                 break;
                 default:
@@ -1107,8 +1108,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.1.7 do módulo */
     protected function instalarV117() {
 
-        $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
-
         /* Cadastramento de novas espécies documentais */
         $objEspecieDocumentalBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
@@ -1134,22 +1133,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar(186, 'Estudo', 'Podendo ser complementado com "Técnico Preliminar da Contratação"; "Técnico".');
         $fnCadastrar(999, 'Outra', 'Outras espécies documentais não identificadas.');
 
-        // if($this->isTabelaExiste('md_pen_rel_tipo_documento_mapeamento_recebido')) {
-        //     if (BancoSEI::getInstance() instanceof InfraSqlServer) {
-        //         BancoSEI::getInstance()->executarSql("sp_rename 'md_pen_rel_tipo_documento_mapeamento_recebido', 'md_pen_rel_tipo_doc_map_rec'");
-        //     } else {
-        //         BancoSEI::getInstance()->executarSql("ALTER TABLE 'md_pen_rel_tipo_documento_mapeamento_recebido' RENAME TO 'md_pen_rel_tipo_doc_map_rec'");
-        //     }
-        // }
-
-        $objInfraMetaBD->excluirChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado');
-        $objInfraMetaBD->adicionarChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado',array('id_tramite','tipo_tramite_processo'));
-
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.7');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contem atualizações da versao 1.1.8 do módulo */
+    protected function instalarV118() {
+
+        $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+
+        //Correção de chave primária para considerar campo de tipo de recibo
+        $objInfraMetaBD->excluirChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado');
+        $objInfraMetaBD->adicionarChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado',array('id_tramite','tipo_tramite_processo'));
+
+        //Atribuição de dados da unidade de origem e destino no trâmite
+        $objInfraMetaBD->adicionarColuna('md_pen_tramite','id_repositorio_origem', $objInfraMetaBD->tipoNumero(16), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_tramite','id_estrutura_origem', $objInfraMetaBD->tipoNumero(16), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_tramite','id_repositorio_destino', $objInfraMetaBD->tipoNumero(16), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_tramite','id_estrutura_destino', $objInfraMetaBD->tipoNumero(16), 'null');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.8');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

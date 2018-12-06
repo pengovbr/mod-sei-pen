@@ -568,7 +568,8 @@ class ProcessoEletronicoRN extends InfraRN {
 
   }
 
-  public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parDthRegistroTramite, $parObjProcesso, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null)
+  public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
+    $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProcesso, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null)
   {
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
       throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
@@ -580,6 +581,22 @@ class ProcessoEletronicoRN extends InfraRN {
 
     if(!isset($parNumIdentificacaoTramite) || $parNumIdentificacaoTramite == 0) {
       throw new InfraException('Parâmetro $parStrNumeroRegistro não informado.');
+    }
+
+    if(!isset($parNumIdRepositorioOrigem) || $parNumIdRepositorioOrigem == 0) {
+      throw new InfraException('Parâmetro $parNumIdRepositorioOrigem não informado.');
+    }
+
+    if(!isset($parNumIdEstruturaOrigem) || $parNumIdEstruturaOrigem == 0) {
+      throw new InfraException('Parâmetro $parNumIdEstruturaOrigem não informado.');
+    }
+
+    if(!isset($parNumIdRepositorioDestino) || $parNumIdRepositorioDestino == 0) {
+      throw new InfraException('Parâmetro $parNumIdRepositorioDestino não informado.');
+    }
+
+    if(!isset($parNumIdEstruturaDestino) || $parNumIdEstruturaDestino == 0) {
+      throw new InfraException('Parâmetro $parNumIdEstruturaDestino não informado.');
     }
 
     if(!isset($parObjProcesso)) {
@@ -618,6 +635,11 @@ class ProcessoEletronicoRN extends InfraRN {
     $objTramiteDTO->setDthRegistro($this->converterDataSEI($parDthRegistroTramite));
     $objTramiteDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
     $objTramiteDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objTramiteDTO->setNumIdRepositorioOrigem($parNumIdRepositorioOrigem);
+    $objTramiteDTO->setNumIdEstruturaOrigem($parNumIdEstruturaOrigem);
+    $objTramiteDTO->setNumIdRepositorioDestino($parNumIdRepositorioDestino);
+    $objTramiteDTO->setNumIdEstruturaDestino($parNumIdEstruturaDestino);
+
     $objProcessoEletronicoDTO->setArrObjTramiteDTO(array($objTramiteDTO));
 
     //Monta dados dos componentes digitais
@@ -651,25 +673,20 @@ class ProcessoEletronicoRN extends InfraRN {
     $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTOFiltro);
 
     if(empty($objProcessoEletronicoDTO)) {
-
         $objProcessoEletronicoDTO = $objProcessoEletronicoBD->cadastrar($objProcessoEletronicoDTOFiltro);
     }
 
     //Registrar processos apensados
     if($parObjProcessoEletronicoDTO->isSetArrObjRelProcessoEletronicoApensado()) {
-
         $objRelProcessoEletronicoApensadoBD = new RelProcessoEletronicoApensadoBD($this->getObjInfraIBanco());
-
         foreach ($parObjProcessoEletronicoDTO->getArrObjRelProcessoEletronicoApensado() as $objRelProcessoEletronicoApensadoDTOFiltro) {
-
             if($objRelProcessoEletronicoApensadoBD->contar($objRelProcessoEletronicoApensadoDTOFiltro) < 1){
-
                 $objRelProcessoEletronicoApensadoBD->cadastrar($objRelProcessoEletronicoApensadoDTOFiltro);
             }
         }
     }
 
-        //Registrar informações sobre o trâmite do processo
+    //Registrar informações sobre o trâmite do processo
     $arrObjTramiteDTO = $parObjProcessoEletronicoDTO->getArrObjTramiteDTO();
     $parObjTramiteDTO = $arrObjTramiteDTO[0];
 

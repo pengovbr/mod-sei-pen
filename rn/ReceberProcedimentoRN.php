@@ -101,7 +101,7 @@ class ReceberProcedimentoRN extends InfraRN
             if (isset($objMetadadosProcedimento->metadados->unidadeReceptora)) {
                 $numUnidadeReceptora = $objMetadadosProcedimento->metadados->unidadeReceptora;
                 $this->destinatarioReal = $objMetadadosProcedimento->metadados->destinatario;
-                $objMetadadosProcedimento->metadados->destinatario = $numUnidadeReceptora;
+                $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $numUnidadeReceptora;
                 $this->gravarLogDebug("Atribuindo unidade receptora $numUnidadeReceptora para o trâmite $parNumIdentificacaoTramite", 4);
             }
 
@@ -114,7 +114,6 @@ class ReceberProcedimentoRN extends InfraRN
               //Comentando o trecho abaixo funciona, mas o processo fica aberto na unidade de destino
               if($this->tramiteRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
                 $this->gravarLogDebug("Trâmite $parNumIdentificacaoTramite já para o processo " . $objProcesso->protocolo, 4);
-                // return ;
               }
 
               // Validação dos dados do processo recebido
@@ -185,22 +184,28 @@ class ReceberProcedimentoRN extends InfraRN
               $this->gravarLogDebug("Persistindo/atualizando dados do processo com NRE " . $strNumeroRegistro, 4);
               $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
 
-
               // @join_tec US008.08 (#23092)
               $this->objProcedimentoAndamentoRN->setOpts($objProcedimentoDTO->getDblIdProcedimento(), $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
               $this->objProcedimentoAndamentoRN->cadastrar('Obtendo metadados do processo', 'S');
 
 
               $this->gravarLogDebug("Registrando trâmite externo do processo", 4);
-              $objProcessoEletronicoDTO = $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso($objProcedimentoDTO->getDblIdProcedimento(),
-                $strNumeroRegistro, $parNumIdentificacaoTramite, null, $objProcesso);
+              $objProcessoEletronicoDTO = $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
+                    $objProcedimentoDTO->getDblIdProcedimento(),
+                    $strNumeroRegistro,
+                    $parNumIdentificacaoTramite,
+                    null,
+                    $objMetadadosProcedimento->metadados->remetente->identificacaoDoRepositorioDeEstruturas,
+                    $objMetadadosProcedimento->metadados->remetente->numeroDeIdentificacaoDaEstrutura,
+                    $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas,
+                    $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura,
+                    $objProcesso);
 
               //Verifica se o tramite se encontra na situação correta
               $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
               if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
                 throw new InfraException("Trâmite não pode ser localizado pelo identificado $parNumIdentificacaoTramite.");
               }
-
 
               $objTramite = $arrObjTramite[0];
               if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {

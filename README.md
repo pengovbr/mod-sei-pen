@@ -31,14 +31,14 @@ Procedimentos de instalação do módulo nos servidores de aplicação e atualiz
  - **SEI versão 3.0.5 ou superior instalada, exceto a versão 3.0.10.**
  - Usuário de acesso ao banco de dados do SEI e SIP com  permissões para criar novas estruturas no banco de dados.
   
-Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov**. Os testes devem ser feitos primeiro em um ambiente de desenvolvimento/homologação. 
+Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Os testes devem ser feitos primeiro em um ambiente de desenvolvimento/homologação. 
 Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
  - Desenvolvimento [http://pen-portal.trafficmanager.net/solicitarCadastroComite](http://pen-portal.trafficmanager.net/solicitarCadastroComite "DESENVOLVIMENTO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
  - Homologação [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
  - Produção [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
 
- Para maiores informações, entre em contato pelo e-mail processo.eletronico@planejamento.gov.br
+ Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.planejamento.gov.br
 
 ### Procedimentos
 

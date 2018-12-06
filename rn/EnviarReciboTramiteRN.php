@@ -78,16 +78,12 @@ class EnviarReciboTramiteRN extends InfraRN
             $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
             $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
             $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
-
             $objBD->cadastrar($objReciboTramiteHashDTO);
         }
-
-
     }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash = null, $parDthRecebimento = null)
   {
-
     date_default_timezone_set('America/Sao_Paulo');
 
     if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {

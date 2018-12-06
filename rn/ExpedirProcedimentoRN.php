@@ -153,10 +153,10 @@ class ExpedirProcedimentoRN extends InfraRN {
       $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
       $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
 
-            //Construo dos cabecalho para envio do processo
+      //Construo dos cabecalho para envio do processo
       $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
 
-            //Construo do processo para envio
+      //Construo do processo para envio
       $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado());
 
       try {
@@ -171,30 +171,27 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException("Error Processing Request", $e);
       }
 
-
-
         $this->atualizarPenProtocolo($dblIdProcedimento);
 
       if (isset($novoTramite->dadosTramiteDeProcessoCriado)) {
-
         $objTramite = $novoTramite->dadosTramiteDeProcessoCriado;
-
         $this->objProcedimentoAndamentoRN->setOpts($dblIdProcedimento, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
         try {
+            $this->objProcedimentoAndamentoRN->cadastrar('Envio do metadados do processo', 'S');
+            $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
 
-        $this->objProcedimentoAndamentoRN->cadastrar('Envio do metadados do processo', 'S');
-
-        $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
-        //$this->registrarAndamentoExpedicaoProcesso($objExpedirProcedimentoDTO, $objProcesso);
-
-
-        $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
-          $objProcesso->idProcedimentoSEI,
-          $objTramite->NRE,
-          $objTramite->IDT,
-          $objTramite->dataHoraDeRegistroDoTramite, $objProcesso,
-          $objTramite->ticketParaEnvioDeComponentesDigitais,
-          $objTramite->componentesDigitaisSolicitados);
+            $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
+              $objProcesso->idProcedimentoSEI,
+              $objTramite->NRE,
+              $objTramite->IDT,
+              $objTramite->dataHoraDeRegistroDoTramite,
+              $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
+              $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
+              $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+              $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+              $objProcesso,
+              $objTramite->ticketParaEnvioDeComponentesDigitais,
+              $objTramite->componentesDigitaisSolicitados);
 
 
         $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
@@ -802,8 +799,6 @@ class ExpedirProcedimentoRN extends InfraRN {
     $ordemDocumento = 1;
     $objProcesso->documento = array();
 
-
-
     foreach ($arrDocumentosDTO as $documentoDTO) {
 
             //$protocoloDocumentoDTO = $this->consultarProtocoloDocumento($documeto->getDblIdProcedimento());
@@ -845,13 +840,11 @@ class ExpedirProcedimentoRN extends InfraRN {
       $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
 
      if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
-
         $documento->hipoteseLegal = new stdClass();
         $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
-      //  $documento->hipoteseLegal->nome = 'Nomee';
-      //  $documento->hipoteseLegal->baseLegal = 'Base Legall';
       }
-          $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
+
+      $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
 
       $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
       if(isset($usuarioDTO)) {
