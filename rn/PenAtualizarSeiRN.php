@@ -50,6 +50,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.5': //Não houve atualização no banco de dados
                 case '1.1.6': $this->instalarV117();
                 case '1.1.7': $this->instalarV118();
+                case '1.1.8': $this->instalarV119();
 
                 break;
                 default:
@@ -1161,6 +1162,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.8');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contem atualizações da versao 1.1.8 do módulo */
+    protected function instalarV119() {
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.9');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

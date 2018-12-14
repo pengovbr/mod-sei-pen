@@ -1119,7 +1119,6 @@ class ProcessoEletronicoRN extends InfraRN {
         throw new InfraException("Erro ao obter chave privada do certificado digital.");
       }
 
-
       openssl_sign($parStrReciboTramite, $strHashAssinatura, $objPrivatekey, 'sha256');
       $strHashDaAssinaturaBase64 = base64_encode($strHashAssinatura);
 
@@ -1128,7 +1127,6 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametro->dadosDoReciboDeTramite->IDT = $parNumIdTramite;
       $parametro->dadosDoReciboDeTramite->dataDeRecebimento = $parDthRecebimento;
       $parametro->dadosDoReciboDeTramite->hashDaAssinatura = $strHashDaAssinaturaBase64;
-
 
       $this->getObjPenWs()->enviarReciboDeTramite($parametro);
 
