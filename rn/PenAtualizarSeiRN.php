@@ -51,6 +51,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.6': $this->instalarV117();
                 case '1.1.7': $this->instalarV118();
                 case '1.1.8': $this->instalarV119();
+                case '1.1.9': $this->instalarV1110();
 
                 break;
                 default:
@@ -1165,13 +1166,28 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.8 do módulo */
+    /* Contem atualizações da versao 1.1.9 do módulo */
     protected function instalarV119() {
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.9');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contem atualizações da versao 1.1.10 do módulo */
+    protected function instalarV1110() {
+
+        //Correção de atribuição indevida de remetentes em processos feita pelas versões anteriores do módulo
+        BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT protocolo.id_protocolo FROM protocolo WHERE protocolo.id_protocolo = participante.id_protocolo AND participante.sta_participacao='R')");
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.10');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

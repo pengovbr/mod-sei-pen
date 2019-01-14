@@ -658,10 +658,7 @@ class ReceberProcedimentoRN extends InfraRN
     $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
     $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
     //$objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-    $this->atribuirRemetente($objProtocoloDTO, $objRemetente);
     $this->atribuirParticipantes($objProtocoloDTO, $objProcesso->interessado);
-
-
 
     $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', utf8_decode($objProcesso->processoDeNegocio)).PHP_EOL;
     $strDescricao .= $objProcesso->observacao;
