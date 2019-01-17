@@ -62,15 +62,13 @@ class ProcedimentoAndamentoRN extends InfraRN {
      * @param string $strSituacao Tipo ENUM(S,N)
      * @return null
      */
-    public function cadastrar($strMensagem = 'Não informado', $strSituacao = 'N'){
+    protected function cadastrarControlado($strMensagem = 'Não informado', $strSituacao = 'N'){
 
         if($this->isSetOpts === false) {
             throw new InfraException('Log do cadastro de procedimento não foi configurado');
         }
 
         $objInfraIBanco = $this->inicializarObjInfraIBanco();
-
-        $objInfraIBanco->abrirTransacao();
 
         $hash = md5($this->dblIdProcedimento.$strMensagem);
 
@@ -86,7 +84,5 @@ class ProcedimentoAndamentoRN extends InfraRN {
 
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($objInfraIBanco);
         $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
-
-        $objInfraIBanco->confirmarTransacao();
     }
 }
