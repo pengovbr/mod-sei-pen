@@ -23,7 +23,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     public function __construct()
     {
         $this->objGearmanWorker = new GearmanWorker();
-        $this->objGearmanWorker->addServer();
+        $this->objGearmanWorker->addServer("127.0.0.1", 4730);
         $this->configurarCallbacks();
     }
 
@@ -159,7 +159,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     static function processarTarefa($strNomeTarefa, $strWorkload)
     {
         $objClient = new GearmanClient();
-        $objClient->addServer();
+        $objClient->addServer("127.0.0.1", 4730);
         $objClient->doBackground($strNomeTarefa, $strWorkload);
     }
 }
