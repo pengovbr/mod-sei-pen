@@ -204,7 +204,7 @@ class PendenciasTramiteRN extends InfraRN {
         if(isset($objPendencia)) {
 
         $client = new GearmanClient();
-        $client->addServer();
+        $client->addServer("127.0.0.1", 4730);
 
         $strWorkload = strval($objPendencia->getNumIdentificacaoTramite());
 
