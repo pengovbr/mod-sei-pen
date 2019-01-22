@@ -470,8 +470,8 @@ class ProcessoEletronicoRN extends InfraRN {
     return $mensagem;
   }
 
-  public function construirCabecalho($strNumeroRegistro = null, $idRepositorioOrigem = 0, $idUnidadeOrigem = 0, $idRepositorioDestino = 0,
-    $idUnidadeDestino = 0, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false)
+  public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
+    $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false)
   {
     $cabecalho = new stdClass();
 

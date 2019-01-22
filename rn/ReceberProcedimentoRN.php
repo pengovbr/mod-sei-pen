@@ -97,11 +97,13 @@ class ReceberProcedimentoRN extends InfraRN
             $this->gravarLogDebug("Solicitando metadados do trâmite " . $parNumIdentificacaoTramite, 4);
             $objMetadadosProcedimento = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
 
-            //Substituir a unidade destinatária para a receptora (!1!)
+            //Substituir a unidade destinatária para a receptora
             if (isset($objMetadadosProcedimento->metadados->unidadeReceptora)) {
-                $numUnidadeReceptora = $objMetadadosProcedimento->metadados->unidadeReceptora;
+                $unidadeReceptora = $objMetadadosProcedimento->metadados->unidadeReceptora;
                 $this->destinatarioReal = $objMetadadosProcedimento->metadados->destinatario;
-                $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $numUnidadeReceptora;
+                $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas = $unidadeReceptora->identificacaoDoRepositorioDeEstruturas;
+                $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
+                $numUnidadeReceptora = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
                 $this->gravarLogDebug("Atribuindo unidade receptora $numUnidadeReceptora para o trâmite $parNumIdentificacaoTramite", 4);
             }
 
