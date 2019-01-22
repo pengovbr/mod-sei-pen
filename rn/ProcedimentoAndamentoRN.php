@@ -92,7 +92,6 @@ class ProcedimentoAndamentoRN extends InfraRN {
         } catch (Exception $e) {
             $objInfraIBanco->cancelarTransacao();
             throw $e;
-
         }
     }
 }
