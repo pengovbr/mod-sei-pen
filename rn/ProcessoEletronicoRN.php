@@ -38,8 +38,6 @@ class ProcessoEletronicoRN extends InfraRN {
   // 02 a 18 estão registrados na tabela rel_tarefa_operacao
   public static $OP_OPERACAO_REGISTRO = "01";
 
-
-
   const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
   /**
@@ -72,7 +70,6 @@ class ProcessoEletronicoRN extends InfraRN {
       "04" => "Espécie documental não mapeada no destinatário",
       "99" => "Outro"
   );
-
 
   private $strWSDL = null;
   private $objPenWs = null;
@@ -140,8 +137,7 @@ class ProcessoEletronicoRN extends InfraRN {
         @exec($strCommand, $arrOutput, $numRetorno);
 
         if($numRetorno > 0){
-
-            throw new InfraException('Falha de comunicação com o Barramento de Serviços. Por favor, tente novamente mais tarde.', $e);
+            throw new InfraException('Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.');
         }
     }
 
@@ -170,8 +166,9 @@ class ProcessoEletronicoRN extends InfraRN {
             $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
         }
      } catch (Exception $e) {
-        $mensagem = InfraException::inspecionar($e);
-        throw new InfraException('Erro acessando serviço: ' . $mensagem, $e);
+        $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
       }
     }
 
@@ -206,7 +203,10 @@ class ProcessoEletronicoRN extends InfraRN {
         }
       }
     } catch(Exception $e){
-      throw new InfraException("Erro durante obtenção dos repositórios", $e);
+        //throw new InfraException("Erro durante obtenção dos repositórios", $e);
+        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
 
     return $objRepositorioDTO;
@@ -238,7 +238,10 @@ class ProcessoEletronicoRN extends InfraRN {
         }
       }
     } catch(Exception $e){
-      throw new InfraException("Erro durante obtenção dos repositórios", $e);
+        //throw new InfraException("Erro durante obtenção dos repositórios", $e);
+        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
 
     return $arrObjRepositorioDTO;
@@ -247,6 +250,7 @@ class ProcessoEletronicoRN extends InfraRN {
   public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw = false) {
 
         try {
+
             $parametros = new stdClass();
             $parametros->filtroDeEstruturas = new stdClass();
             $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
@@ -276,7 +280,6 @@ class ProcessoEletronicoRN extends InfraRN {
                     return $objEstrutura;
                 }
                 else {
-
                     $objEstruturaDTO = new EstruturaDTO();
                     $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($objEstrutura->numeroDeIdentificacaoDaEstrutura);
                     $objEstruturaDTO->setStrNome($objEstrutura->nome);
@@ -289,48 +292,51 @@ class ProcessoEletronicoRN extends InfraRN {
             }
         }
         catch (Exception $e) {
-            throw new InfraException("Erro durante obtenção das unidades", $e);
+            //throw new InfraException("Erro durante obtenção das unidades", $e);
+            $mensagem = "Falha na obtenção de unidades externas";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
     }
 
     public function listarEstruturas($idRepositorioEstrutura, $nome='')
-  {
-    $arrObjEstruturaDTO = array();
+    {
+        $arrObjEstruturaDTO = array();
 
-    try{
-      $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
-      if(!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
-      }
+        try{
+            $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
+            if(!$idRepositorioEstrutura) {
+                throw new InfraException("Repositório de Estruturas inválido");
+            }
 
-      $parametros = new stdClass();
-      $parametros->filtroDeEstruturas = new stdClass();
-      $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-      $parametros->filtroDeEstruturas->apenasAtivas = true;
+        $parametros = new stdClass();
+        $parametros->filtroDeEstruturas = new stdClass();
+        $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+        $parametros->filtroDeEstruturas->apenasAtivas = true;
 
-      $nome = trim($nome);
-      if(is_numeric($nome)) {
-        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
-      } else {
-        $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
-      }
-
-      $result = $this->getObjPenWs()->consultarEstruturas($parametros);
-
-      if($result->estruturasEncontradas->totalDeRegistros > 0) {
-
-        if(!is_array($result->estruturasEncontradas->estrutura)) {
-          $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
+        $nome = trim($nome);
+        if(is_numeric($nome)) {
+            $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
+        } else {
+            $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
         }
 
-        foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
-          $item = new EstruturaDTO();
-          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-          $item->setStrNome(utf8_decode($estrutura->nome));
-          $item->setStrSigla(utf8_decode($estrutura->sigla));
-          $item->setBolAtivo($estrutura->ativo);
-          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
-          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+        $result = $this->getObjPenWs()->consultarEstruturas($parametros);
+
+        if($result->estruturasEncontradas->totalDeRegistros > 0) {
+
+            if(!is_array($result->estruturasEncontradas->estrutura)) {
+                $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
+            }
+
+            foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
+            $item = new EstruturaDTO();
+            $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+            $item->setStrNome(utf8_decode($estrutura->nome));
+            $item->setStrSigla(utf8_decode($estrutura->sigla));
+            $item->setBolAtivo($estrutura->ativo);
+            $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+            $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
 
             if(!empty($estrutura->hierarquia->nivel)) {
                 $array = array();
@@ -345,7 +351,10 @@ class ProcessoEletronicoRN extends InfraRN {
       }
 
     } catch (Exception $e) {
-      throw new InfraException("Erro durante obtenção das unidades", $e);
+        //throw new InfraException("Erro durante obtenção das unidades", $e);
+        $mensagem = "Falha na obtenção de unidades externas";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
 
     return $arrObjEstruturaDTO;
@@ -391,21 +400,14 @@ class ProcessoEletronicoRN extends InfraRN {
   {
     try {
       return $this->getObjPenWs()->enviarProcesso($parametros);
-    } catch (\SoapFault $fault) {
-
-
-        if (!empty($fault->detail->interoperabilidadeException->codigoErro) && $fault->detail->interoperabilidadeException->codigoErro == '0005') {
-            $mensagem = 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
-        } else {
-            $mensagem = $this->tratarFalhaWebService($fault);
-        }
-            //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
-            //relacionado ao a renderização de mensagens de erro na barra de progresso
-      error_log($mensagem);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha no envio externo do processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
+            $detalhes = 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+        }
+
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -433,27 +435,20 @@ class ProcessoEletronicoRN extends InfraRN {
           $arrObjPendenciaDTO[] = $item;
         }
       }
-    } catch (\SoapFault $fault) {
-      //$mensagem = $this->tratarFalhaWebService($fault);
-      $mensagem = InfraException::inspecionar($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+    } catch (\Exception $e) {
+        $mensagem = "Falha na listagem de pendências de trâmite de processos";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
-    // catch (\Exception $e) {
-    //   $mensagem = InfraException::inspecionar($e);
-    //   throw new InfraException("Error Processing Request", $e);
-    // }
 
     return $arrObjPendenciaDTO;
   }
 
     //TODO: Tratar cada um dos possíveis erros gerados pelos serviços de integração do PEN
-  private function tratarFalhaWebService(SoapFault $fault)
+  private function tratarFalhaWebService(Exception $fault)
   {
-    error_log('$e->faultcode:' . $fault->faultcode);
-    error_log('$e->detail:' . print_r($fault->detail, true));
-
-    $mensagem = $fault->getMessage();
-    if(isset($fault->detail->interoperabilidadeException)){
+    $mensagem = InfraException::inspecionar($fault);
+    if($fault instanceof SoapFault && isset($fault->detail->interoperabilidadeException)){
       $strWsException = $fault->detail->interoperabilidadeException;
 
       switch ($strWsException->codigoErro) {
@@ -498,34 +493,24 @@ class ProcessoEletronicoRN extends InfraRN {
   {
     try {
       return $this->getObjPenWs()->enviarComponenteDigital($parametros);
-    } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-
-    //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
-    //relacionado ao a renderização de mensagens de erro na barra de progresso
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha no envio de componentes digitais";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
 
-  public function solicitarMetadados($parNumIdentificacaoTramite) {
-
-    try
-    {
+  public function solicitarMetadados($parNumIdentificacaoTramite)
+  {
+    try {
       $parametros = new stdClass();
       $parametros->IDT = $parNumIdentificacaoTramite;
       return $this->getObjPenWs()->solicitarMetadados($parametros);
-    } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
-      //relacionado ao a renderização de mensagens de erro na barra de progresso
-      error_log($mensagem);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha na solicitação de metadados do processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -871,9 +856,6 @@ class ProcessoEletronicoRN extends InfraRN {
 
     } catch (\SoapFault $fault) {
         $mensagem = $this->tratarFalhaWebService($fault);
-        //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
-        //rlacionado ao a renderização de mensagens de erro na barra de progresso
-        error_log($mensagem);
         throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
     } catch (\Exception $e) {
       throw new InfraException("Error Processing Request", $e);
@@ -921,12 +903,10 @@ class ProcessoEletronicoRN extends InfraRN {
 
       return $arrObjTramite;
 
-    } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha na consulta de trâmites de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -951,12 +931,10 @@ class ProcessoEletronicoRN extends InfraRN {
 
       return $arrObjTramite;
 
-    } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha na consulta de trâmites de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -966,15 +944,11 @@ class ProcessoEletronicoRN extends InfraRN {
     {
       $parametro = new stdClass();
       $parametro->IDT = $parNumIdTramite;
-
       return $this->getObjPenWs()->cienciaRecusa($parametro);
-
-    } catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha no registro de ciência da recusa de trâmite";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -1129,53 +1103,30 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametro->dadosDoReciboDeTramite->hashDaAssinatura = $strHashDaAssinaturaBase64;
 
       $this->getObjPenWs()->enviarReciboDeTramite($parametro);
-
       return $strHashDaAssinaturaBase64;
 
-    } catch (\SoapFault $fault) {
-
-            $strMensagem  = '[ SOAP Request ]'.PHP_EOL;
-            $strMensagem .= 'Method: enviarReciboDeTramite (FAIL)'.PHP_EOL;
-            $strMensagem .= 'Request: '.$this->getObjPenWs()->__getLastRequest().PHP_EOL;
-            $strMensagem .= 'Response: '.$this->getObjPenWs()->__getLastResponse().PHP_EOL;
-
-            file_put_contents('/tmp/pen.log', $strMensagem.PHP_EOL, FILE_APPEND);
-
-      if(isset($objPrivatekey)){
-        openssl_free_key($objPrivatekey);
-      }
-
-      $mensagem = $this->tratarFalhaWebService($fault);
-
-        //TODO: Remover formatação do javascript após resolução do BUG enviado para Mairon
-        //relacionado ao a renderização de mensagens de erro na barra de progresso
-      error_log($mensagem);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
     } catch (\Exception $e) {
+        $mensagem = "Falha no envio de recibo de trâmite de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    } finally {
       if(isset($objPrivatekey)){
         openssl_free_key($objPrivatekey);
       }
-
-      throw new InfraException("Error Processing Request", $e);
     }
   }
 
   public function receberReciboDeTramite($parNumIdTramite)
   {
-    try
-    {
-      $parametro = new stdClass();
-      $parametro->IDT = $parNumIdTramite;
-
-      $resultado = $this->getObjPenWs()->receberReciboDeTramite($parametro);
-
-      return $resultado;
-    }
-    catch (\SoapFault $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+    try {
+        $parametro = new stdClass();
+        $parametro->IDT = $parNumIdTramite;
+        $resultado = $this->getObjPenWs()->receberReciboDeTramite($parametro);
+        return $resultado;
     } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -1190,19 +1141,14 @@ class ProcessoEletronicoRN extends InfraRN {
         try {
             $parametro = new stdClass();
             $parametro->IDT = $parNumIdTramite;
-
             $resultado = $this->getObjPenWs()->receberReciboDeEnvio($parametro);
-
             return $resultado->conteudoDoReciboDeEnvio;
         }
-        catch (\SoapFault $fault) {
-            $mensagem = $this->tratarFalhaWebService($fault);
-            throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-        }
         catch (\Exception $e) {
-            throw new InfraException("Error Processing Request", $e);
+            $mensagem = "Falha no recebimento de recibo de trâmite";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
-        throw new InfraException("Error Processing Request", $e);
     }
 
     //TODO: Implementar mapeamento entre operações do PEN e tarefas do SEI
@@ -1302,8 +1248,10 @@ class ProcessoEletronicoRN extends InfraRN {
       try{
           $this->getObjPenWs()->cancelarEnvioDeTramite($parametros);
       }
-      catch(\SoapFault $e) {
-          throw new InfraException($e->getMessage(), null, $e);
+      catch(\Exception $e) {
+        $mensagem = "Falha no cancelamento de trâmite de processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
       }
   }
 
@@ -1325,16 +1273,12 @@ class ProcessoEletronicoRN extends InfraRN {
             $parametros->recusaDeTramite->IDT = $idTramite;
             $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
             $parametros->recusaDeTramite->motivo = $motivo;
-
             $resultado = $this->getObjPenWs()->recusarTramite($parametros);
 
-        } catch (SoapFault $fault) {
-
-            $mensagem = $this->tratarFalhaWebService($fault);
-            throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-
         } catch (Exception $e) {
-            return $e->getMessage();
+            $mensagem = "Falha na recusa de trâmite de processo";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
     }
 
@@ -1344,14 +1288,13 @@ class ProcessoEletronicoRN extends InfraRN {
             $tramitePendenteDTO = new TramitePendenteDTO();
             $tramitePendenteDTO->setNumIdTramite($numIdentificacaoTramite);
             $tramitePendenteDTO->setNumIdAtividade($idAtividadeExpedicao);
-
             $tramitePendenteBD = new TramitePendenteBD($this->getObjInfraIBanco());
             $tramitePendenteBD->cadastrar($tramitePendenteDTO);
 
-        } catch (\InfraException $ex) {
-            throw new InfraException($ex->getStrDescricao());
-        } catch (\Exception $ex) {
-            throw new InfraException($ex->getMessage());
+        } catch (\Exception $e) {
+            $mensagem = "Falha no cadastramento de trâmite pendente";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
     }
 
@@ -1445,7 +1388,9 @@ class ProcessoEletronicoRN extends InfraRN {
             return $hipoteses;
 
         } catch(Exception $e){
-            throw new InfraException("Erro durante obtenção da resposta das hipóteses legais", $e);
+            $mensagem = "Falha na obtenção de hipóteses legais";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
     }
 
@@ -1454,7 +1399,9 @@ class ProcessoEletronicoRN extends InfraRN {
         $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
         return $objProcessoEletronicoBD->contar($objProcessoEletronicoDTO);
       }catch(Exception $e){
-        throw new InfraException('Erro contando Processos Externos.',$e);
+            $mensagem = "Falha na contagem de processos eletrônicos registrados";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
       }
     }
 }
