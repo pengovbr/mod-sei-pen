@@ -22,7 +22,10 @@ Procedimentos de instalação do módulo nos servidores de aplicação e atualiz
  4. **Utilização**
  Apresentação das funcionalidades que permitem o trâmite externo de processos e o acompanhamento de seu histórico.
  
- 5. **Suporte**
+ 5. **Atualização**
+ Procedimentos para realizar a atualização de uma nova versão do módulo
+
+ 6. **Suporte**
  Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do ConectaGov.
 
 ## Instalação
@@ -420,6 +423,30 @@ O destinatário pode realizar a consulta ao recibo de trâmite, acessando o íco
 ### Hipóteses de Recusa de Trâmite
 
 ### Consulta de Processos Enviados Externamente
+
+## Atualização
+
+Para realizar a atualização do módulo, realize os seguintes procedimentos:
+
+​1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema;
+
+2. Baixar a última versão do módulo disponível em https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/tags
+
+3. Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/ Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura;
+
+4. Mover o arquivo de instalação do módulo no SEI sei_atualizar_versao_modulo_pen.php para a pasta sei/scripts. Lembre-se de mover, e não copiar, por questões de segurança e padronização;
+
+5. Mover o arquivo de instalação do módulo no SIP sip_atualizar_versao_modulo_pen.php para a pasta sip/scripts. Lembre-se de mover, e não copiar, por questões de segurança e padronização;
+
+6. Executar o script sip_atualizar_versao_modulo_pen.php para atualizar o banco de dados do SIP para o funcionamento do módulo:
+# php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sip/scripts/sip_atualizar_versao_modulo_pen.php
+
+7. Executar o script sei_atualizar_versao_modulo_pen.php para inserção de dados no banco do SEI referente ao módulo:
+# php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_versao_modulo_pen.php
+
+8. Iniciar serviços de monitoramento de pendências de trâmite Gearman e Supervisor:
+# service gearmand start && service supervisord start
+
 
 ## Suporte
 
