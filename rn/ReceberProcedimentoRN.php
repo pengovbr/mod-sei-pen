@@ -546,7 +546,6 @@ class ReceberProcedimentoRN extends InfraRN
            $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
         }
 
-
     $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
     $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
     $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
@@ -565,20 +564,11 @@ class ReceberProcedimentoRN extends InfraRN
     //TODO: Implementar alteração de todos os metadados
     $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
 
-        //TODO: Finalizar o envio do documento para a respectiva unidade
+    //TODO: Finalizar o envio do documento para a respectiva unidade
     $this->enviarProcedimentoUnidade($objProcedimentoDTO, true);
 
-        //TODO: Avaliar necessidade de criar acesso externo para o processo recebido
-        //TODO: Avaliar necessidade de tal recurso
-        //FeedSEIProtocolos::getInstance()->setBolAcumularFeeds(false);
-        //FeedSEIProtocolos::getInstance()->indexarFeeds();
-
-        //InfraDebug::getInstance()->gravar('RETORNO:'.print_r($ret,true));
-        //LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug());
-
-    $this->removerAndamentosProcedimento($objProcedimentoDTO);
+    //$this->removerAndamentosProcedimento($objProcedimentoDTO);
     return $objProcedimentoDTO;
-
 
   }
 
@@ -745,15 +735,7 @@ class ReceberProcedimentoRN extends InfraRN
         //TODO: Finalizar o envio do documento para a respectiva unidade
         $this->enviarProcedimentoUnidade($objProcedimentoDTO);
 
-        //TODO: Avaliar necessidade de criar acesso externo para o processo recebido
-        //TODO: Avaliar necessidade de tal recurso
-        //FeedSEIProtocolos::getInstance()->setBolAcumularFeeds(false);
-        //FeedSEIProtocolos::getInstance()->indexarFeeds();
-
-        //InfraDebug::getInstance()->gravar('RETORNO:'.print_r($ret,true));
-        //LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug());
-
-        $this->removerAndamentosProcedimento($objProcedimentoDTO);
+        //$this->removerAndamentosProcedimento($objProcedimentoDTO);
         return $objProcedimentoDTO;
       }
 
