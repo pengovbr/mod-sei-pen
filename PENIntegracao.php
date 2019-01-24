@@ -11,7 +11,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.1.8';
+        return '1.1.11';
     }
 
     public function getInstituicao() {
