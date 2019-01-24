@@ -92,6 +92,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.1.7': //Não houve atualização no banco de dados
                 case '1.1.8': $this->instalarV119();
                 case '1.1.9': $this->instalarV1110();
+                case '1.1.10': $this->instalarV1111();
 
                 break;
                 default:
@@ -991,7 +992,6 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.10
      */
@@ -1004,6 +1004,21 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.1.10');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.1.11
+     */
+    protected function instalarV1111()
+    {
+         //Corrigir a versão do módulo no banco de dados
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.1.11');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

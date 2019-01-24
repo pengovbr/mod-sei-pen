@@ -79,7 +79,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         directory=/opt/sei/web
         user=apache
         autostart=true
-        edutorestart=true
+        autorestart=true
         startsecs=15
         startretries=3
         log_stdout=true

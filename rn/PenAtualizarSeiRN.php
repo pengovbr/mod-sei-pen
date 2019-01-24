@@ -52,6 +52,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.7': $this->instalarV118();
                 case '1.1.8': $this->instalarV119();
                 case '1.1.9': $this->instalarV1110();
+                case '1.1.10': $this->instalarV1111();
 
                 break;
                 default:
@@ -1179,10 +1180,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     /* Contem atualizações da versao 1.1.10 do módulo */
     protected function instalarV1110() {
-
-        //Correção de atribuição indevida de remetentes em processos feita pelas versões anteriores do módulo
-        BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT protocolo.id_protocolo FROM protocolo WHERE protocolo.id_protocolo = participante.id_protocolo AND participante.sta_participacao='R')");
-
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1190,4 +1187,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.1.10');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+    /* Contem atualizações da versao 1.1.11 do módulo */
+    protected function instalarV1111() {
+        BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT md_pen_processo_eletronico.id_procedimento FROM md_pen_processo_eletronico WHERE md_pen_processo_eletronico.id_procedimento = participante.id_protocolo AND participante.sta_participacao='R')");
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.11');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
 }
