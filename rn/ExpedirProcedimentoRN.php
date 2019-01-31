@@ -26,8 +26,8 @@ class ExpedirProcedimentoRN extends InfraRN {
   const TC_TIPO_CONTEUDO_VIDEO = 'vid';
   const TC_TIPO_CONTEUDO_OUTROS = 'out';
 
-    //TODO: Alterar codificao do SEI para reconhecer esse novo estado do processo
-    //Esse estado ser utilizado juntamente com os estados da expedio
+  //TODO: Alterar codificao do SEI para reconhecer esse novo estado do processo
+  //Esse estado ser utilizado juntamente com os estados da expedio
   const TE_PROCEDIMENTO_BLOQUEADO = '4';
   const TE_PROCEDIMENTO_EM_PROCESSAMENTO = '5';
 
@@ -124,17 +124,14 @@ class ExpedirProcedimentoRN extends InfraRN {
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
-
       $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
       $this->barraProgresso->exibir();
-
             //Valida regras de negócio
       $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
       $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
 
       $objInfraException = new InfraException();
-
       //Carregamento dos dados de processo e documento para validação e envio externo
       $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
       $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
@@ -142,7 +139,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $this->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
       $this->validarParametrosExpedicao($objInfraException, $objExpedirProcedimentoDTO);
-
             //Apresentao da mensagens de validao na janela da barra de progresso
       if($objInfraException->contemValidacoes()){
         $this->barraProgresso->mover(0);
@@ -155,10 +151,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       //Construo dos cabecalho para envio do processo
       $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
-
       //Construo do processo para envio
       $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado());
-
       try {
         $param = new stdClass();
         $param->novoTramiteDeProcesso = new stdClass();
@@ -170,14 +164,13 @@ class ExpedirProcedimentoRN extends InfraRN {
       } catch (\Exception $e) {
         throw new InfraException("Error Processing Request", $e);
       }
-
         $this->atualizarPenProtocolo($dblIdProcedimento);
-
       if (isset($novoTramite->dadosTramiteDeProcessoCriado)) {
         $objTramite = $novoTramite->dadosTramiteDeProcessoCriado;
         $this->objProcedimentoAndamentoRN->setOpts($dblIdProcedimento, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
         try {
-            $this->objProcedimentoAndamentoRN->cadastrar('Envio do metadados do processo', 'S');
+
+            $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
             $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
 
             $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
@@ -230,8 +223,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
 
             // @join_tec US008.06 (#23092)
-            $this->objProcedimentoAndamentoRN->cadastrar('Concluído envio dos componentes do processo', 'S');
-
+            $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
             $this->receberReciboDeEnvio($objTramite->IDT);
         }
@@ -253,7 +245,7 @@ class ExpedirProcedimentoRN extends InfraRN {
              $this->registrarAndamentoExpedicaoAbortada($objProcesso->idProcedimentoSEI);
 
              // @join_tec US008.06 (#23092)
-             $this->objProcedimentoAndamentoRN->cadastrar('Concluído envio dos componentes do processo', 'N');
+             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'N'));
              throw $e;
          }
       }
@@ -1566,10 +1558,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                         //Bloquea documento para atualizao, j que ele foi visualizado
                         $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
                         // @join_tec US008.05 (#23092)
-                        $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S');
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S'));
                     } catch (Exception $e) {
                         // @join_tec US008.05 (#23092)
-                        $this->objProcedimentoAndamentoRN->cadastrar(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N');
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
                         throw new InfraException("Error Processing Request", $e);
                     }
             }

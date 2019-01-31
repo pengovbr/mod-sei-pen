@@ -188,7 +188,7 @@ class ReceberProcedimentoRN extends InfraRN
 
               // @join_tec US008.08 (#23092)
               $this->objProcedimentoAndamentoRN->setOpts($objProcedimentoDTO->getDblIdProcedimento(), $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
-              $this->objProcedimentoAndamentoRN->cadastrar('Obtendo metadados do processo', 'S');
+              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Obtendo metadados do processo', 'S'));
 
 
               $this->gravarLogDebug("Registrando trâmite externo do processo", 4);
@@ -246,15 +246,15 @@ class ReceberProcedimentoRN extends InfraRN
 
                                      // @join_tec US008.09 (#23092)
                                       $strMensagemRecebimento = sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado());
-                                      $this->objProcedimentoAndamentoRN->cadastrar($strMensagemRecebimento, 'S');
+                                      $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
                                       $this->gravarLogDebug($strMensagemRecebimento, 6);
                                 }
                           }
                           // @join_tec US008.10 (#23092)
-                        $this->objProcedimentoAndamentoRN->cadastrar('Todos os componentes digitais foram recebidos', 'S');
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Todos os componentes digitais foram recebidos', 'S'));
 
                     }else{
-                      $this->objProcedimentoAndamentoRN->cadastrar('Nenhum componente digital para receber', 'S');
+                      $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Nenhum componente digital para receber', 'S'));
                     }
                   }
             }
