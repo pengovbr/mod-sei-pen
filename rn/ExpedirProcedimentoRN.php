@@ -838,12 +838,12 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
 
+      $documento->produtor = new stdClass();
       $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
       if(isset($usuarioDTO)) {
-        $documento->produtor = new stdClass();
         $documento->produtor->nome = utf8_encode($usuarioDTO->getStrNome());
         $documento->produtor->numeroDeIdentificacao = $usuarioDTO->getDblCpfContato();
-                //TODO: Obter tipo de pessoa fsica dos contextos/contatos do SEI
+        //TODO: Obter tipo de pessoa fsica dos contextos/contatos do SEI
         $documento->produtor->tipo = self::STA_TIPO_PESSOA_FISICA;;
       }
 
