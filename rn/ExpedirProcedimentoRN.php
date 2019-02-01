@@ -177,6 +177,7 @@ class ExpedirProcedimentoRN extends InfraRN {
               $objProcesso->idProcedimentoSEI,
               $objTramite->NRE,
               $objTramite->IDT,
+              //ProcessoEletronicoRN::STA_TIPO_TRAMITE_ENVIO,
               $objTramite->dataHoraDeRegistroDoTramite,
               $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
               $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
@@ -733,12 +734,11 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     $objProcesso->produtor = new stdClass();
-
     $objUsuarioProdutor = $this->consultarUsuario($dblIdProcedimento);
     if(isset($objUsuarioProdutor)) {
-            //Dados do produtor do processo
+        //Dados do produtor do processo
       $objProcesso->produtor->nome = utf8_encode($objUsuarioProdutor->getStrNome());
-            //TODO: Obter tipo de pessoa fsica dos contatos do SEI
+        //TODO: Obter tipo de pessoa fsica dos contatos do SEI
       $objProcesso->produtor->numeroDeIdentificacao = $objUsuarioProdutor->getDblCpfContato();
       $objProcesso->produtor->tipo = self::STA_TIPO_PESSOA_FISICA;
             //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
@@ -853,7 +853,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documento->produtor->unidade = new stdClass();
         $documento->produtor->unidade->nome = utf8_encode($unidadeDTO->getStrDescricao());
         $documento->produtor->unidade->tipo = self::STA_TIPO_PESSOA_ORGAOPUBLICO;
-                //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
+        //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
       }
 
       $documento->produtor->numeroDeIdentificacao = $documentoDTO->getStrProtocoloDocumentoFormatado();
@@ -1391,6 +1391,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objUsuarioDTO = new UsuarioDTO();
         $objUsuarioDTO->setNumIdUsuario($numIdUsuario);
+        $objUsuarioDTO->setBolExclusaoLogica(false);
         $objUsuarioDTO->retStrNome();
         $objUsuarioDTO->retDblCpfContato();
 
