@@ -1823,19 +1823,16 @@ protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusad
      * @param integer $parIdTramite
      * @throws InfraException
      */
-    public function verificarPermissoesDiretorios($parIdTramite){
-
+    public function verificarPermissoesDiretorios($parIdTramite)
+    {
         //Verifica se o usuário possui permissões de escrita no repositório de arquivos externos
-        if(!is_writable(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'))){
-
+        if(!is_writable(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'))) {
             $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, 'O sistema não possui permissão de escrita no diretório de armazenamento de documentos externos', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
             throw new InfraException('O sistema não possui permissão de escrita no diretório de armazenamento de documentos externos');
-
         }
 
         //Verifica se o usuário possui permissões de escrita no diretório temporário de arquivos
         if(!is_writable(DIR_SEI_TEMP)){
-
             $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, 'O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
             throw new InfraException('O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.');
 
