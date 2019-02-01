@@ -18,6 +18,7 @@ class TramiteDTO extends InfraDTO {
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstruturaOrigem', 'id_estrutura_origem');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdRepositorioDestino', 'id_repositorio_destino');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstruturaDestino', 'id_estrutura_destino');
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StaTipoTramite', 'sta_tipo_tramite');
 
         $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR, 'ObjComponenteDigitalDTO');
 

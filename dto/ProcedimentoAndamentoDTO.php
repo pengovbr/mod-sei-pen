@@ -17,6 +17,7 @@ class ProcedimentoAndamentoDTO extends InfraDTO {
 
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdAndamento', 'id_andamento');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimento', 'id_procedimento');
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdTramite', 'id_tramite');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Situacao', 'situacao');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Data', 'data');

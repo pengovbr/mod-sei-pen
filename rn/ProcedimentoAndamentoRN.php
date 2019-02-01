@@ -11,10 +11,9 @@ class ProcedimentoAndamentoRN extends InfraRN {
 
     protected $isSetOpts = false;
     protected $dblIdProcedimento;
-    protected $dblIdTramit;
+    protected $dblIdTramite;
     protected $numTarefa;
-
-
+    protected $strNumeroRegistro;
 
     /**
      * Invés de aproveitar o singleton do BancoSEI criamos uma nova instância para
@@ -26,11 +25,11 @@ class ProcedimentoAndamentoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
-
-    public function setOpts($dblIdProcedimento = 0, $dblIdTramit = 0, $numTarefa){
-
+    public function setOpts($strNumeroRegistro, $dblIdTramite, $numTarefa, $dblIdProcedimento=null)
+    {
+        $this->strNumeroRegistro = $strNumeroRegistro;
+        $this->dblIdTramite = $dblIdTramite;
         $this->dblIdProcedimento = $dblIdProcedimento;
-        $this->dblIdTramit = $dblIdTramit;
         $this->numTarefa = $numTarefa;
         $this->isSetOpts = true;
     }
@@ -54,12 +53,12 @@ class ProcedimentoAndamentoRN extends InfraRN {
         $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
         $objProcedimentoAndamentoDTO->setDthData(date('d/m/Y H:i:s'));
         $objProcedimentoAndamentoDTO->setDblIdProcedimento($this->dblIdProcedimento);
-        $objProcedimentoAndamentoDTO->setDblIdTramite($this->dblIdTramit);
+        $objProcedimentoAndamentoDTO->setStrNumeroRegistro($this->strNumeroRegistro);
+        $objProcedimentoAndamentoDTO->setDblIdTramite($this->dblIdTramite);
         $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
         $objProcedimentoAndamentoDTO->setStrMensagem($strMensagem);
         $objProcedimentoAndamentoDTO->setStrHash($hash);
         $objProcedimentoAndamentoDTO->setNumTarefa($this->numTarefa);
-
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
         $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
     }

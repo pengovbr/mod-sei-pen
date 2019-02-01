@@ -167,17 +167,18 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->atualizarPenProtocolo($dblIdProcedimento);
       if (isset($novoTramite->dadosTramiteDeProcessoCriado)) {
         $objTramite = $novoTramite->dadosTramiteDeProcessoCriado;
-        $this->objProcedimentoAndamentoRN->setOpts($dblIdProcedimento, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+        $this->objProcedimentoAndamentoRN->setOpts($objTramite->NRE, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $dblIdProcedimento);
         try {
 
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
             $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
 
+
             $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
               $objProcesso->idProcedimentoSEI,
               $objTramite->NRE,
               $objTramite->IDT,
-              //ProcessoEletronicoRN::STA_TIPO_TRAMITE_ENVIO,
+              ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO,
               $objTramite->dataHoraDeRegistroDoTramite,
               $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
               $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),

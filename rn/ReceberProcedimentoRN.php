@@ -6,34 +6,233 @@ require_once dirname(__FILE__) . '/../../../SEI.php';
 
 class ReceberProcedimentoRN extends InfraRN
 {
-  const STR_APENSACAO_PROCEDIMENTOS = 'Relacionamento representando a apensação de processos recebidos externamente';
+    const STR_APENSACAO_PROCEDIMENTOS = 'Relacionamento representando a apensação de processos recebidos externamente';
 
-  private $objProcessoEletronicoRN;
-  private $objInfraParametro;
-  private $objProcedimentoAndamentoRN;
-  private $documentosRetirados = array();
+    private $objProcessoEletronicoRN;
+    private $objInfraParametro;
+    private $objProcedimentoAndamentoRN;
+    private $documentosRetirados = array();
 
-  public $destinatarioReal = null;
+    public $destinatarioReal = null;
 
-  public function __construct()
-  {
-    parent::__construct();
+    public function __construct()
+    {
+        parent::__construct();
+        $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
+    }
 
-    $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-    $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
-  }
+    protected function inicializarObjInfraIBanco()
+    {
+        return BancoSEI::getInstance();
+    }
 
-  protected function inicializarObjInfraIBanco()
-  {
-    return BancoSEI::getInstance();
-  }
+    protected function listarPendenciasConectado()
+    {
+        $arrObjPendencias = $this->objProcessoEletronicoRN->listarPendencias(true);
+        return $arrObjPendencias;
+    }
 
-  protected function listarPendenciasConectado()
-  {
-    $arrObjPendencias = $this->objProcessoEletronicoRN->listarPendencias(true);
-    return $arrObjPendencias;
-  }
+
+    protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
+    {
+        try {
+            $objPenParametroRN = new PenParametroRN();
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+
+            $objSeiRN = new SeiRN();
+
+            if (!isset($parNumIdentificacaoTramite)) {
+                throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
+            }
+
+            //TODO: Urgente: Verificar o status do trâmite e verificar se ele já foi salvo na base de dados
+            $this->gravarLogDebug("Solicitando metadados do trâmite " . $parNumIdentificacaoTramite, 4);
+            $objMetadadosProcedimento = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
+
+            if (isset($objMetadadosProcedimento)) {
+                $strNumeroRegistro = $objMetadadosProcedimento->metadados->NRE;
+                $objProcesso = $objMetadadosProcedimento->metadados->processo;
+
+                $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Iniciando recebimento de processo externo', 'S'));
+
+                //Tratamento para evitar o recebimento simultâneo do mesmo procedimento em serviços/processos concorrentes
+                $this->sincronizarRecebimentoProcessos($strNumeroRegistro, $parNumIdentificacaoTramite);
+
+                //Verifica se processo já foi registrado para esse trâmite
+                if($this->tramiteRecebimentoRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
+                    $this->gravarLogDebug("Trâmite de recebimento $parNumIdentificacaoTramite já registrado para o processo " . $objProcesso->protocolo, 4);
+                    return;
+                }
+
+                //Substituir a unidade destinatária para a receptora
+                if (isset($objMetadadosProcedimento->metadados->unidadeReceptora)) {
+                    $unidadeReceptora = $objMetadadosProcedimento->metadados->unidadeReceptora;
+                    $this->destinatarioReal = $objMetadadosProcedimento->metadados->destinatario;
+                    $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas = $unidadeReceptora->identificacaoDoRepositorioDeEstruturas;
+                    $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
+                    $numUnidadeReceptora = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
+                    $this->gravarLogDebug("Atribuindo unidade receptora $numUnidadeReceptora para o trâmite $parNumIdentificacaoTramite", 4);
+                }
+
+                // Validação dos dados do processo recebido
+                $objInfraException = new InfraException();
+                $this->validarDadosDestinatario($objInfraException, $objMetadadosProcedimento);
+                $objInfraException->lancarValidacoes();
+
+                #############################INICIA O RECEBIMENTO DOS COMPONENTES DIGITAIS US010################################################
+                $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
+                $objTramite = $arrObjTramite[0];
+
+                //Obtém lista de componentes digitais que precisam ser obtidos
+                $this->gravarLogDebug("Obtém lista de componentes digitais que precisam ser obtidos", 4);
+                if(!is_array($objTramite->componenteDigitalPendenteDeRecebimento)){
+                    $objTramite->componenteDigitalPendenteDeRecebimento = array($objTramite->componenteDigitalPendenteDeRecebimento);
+                }
+
+                $this->validarComponentesDigitais($objProcesso, $parNumIdentificacaoTramite);
+                $this->validarExtensaoComponentesDigitais($parNumIdentificacaoTramite, $objProcesso);
+                $this->verificarPermissoesDiretorios($parNumIdentificacaoTramite);
+
+                $this->gravarLogDebug("Obtendo metadados dos componentes digitais do processo", 4);
+                $arrStrNomeDocumento = $this->listarMetaDadosComponentesDigitais($objProcesso);
+                $receberComponenteDigitalRN = new ReceberComponenteDigitalRN();
+                $arrAnexosComponentes = array();
+                $arrayHash = array();
+                $arrayHashPendentes = array();
+
+                //Percorre os componentes que precisam ser recebidos
+                foreach($objTramite->componenteDigitalPendenteDeRecebimento as $key => $componentePendente){
+
+                    if(!is_null($componentePendente)){
+
+                        if(!$this->documentoJaRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite, $componentePendente)){
+                            $arrayHashPendentes[] = $componentePendente;
+                        }
+
+                        //TODO: Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
+                        //Ajuste deverá ser feito em versões futuas
+                        $arrayHash[] = $componentePendente;
+
+                        //Obter os dados do componente digital
+                        $this->gravarLogDebug("Baixando componente digital $key", 6);
+                        $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
+                        $arrAnexosComponentes[$key][$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
+                        $arrAnexosComponentes[$key]['recebido'] = false;
+
+                        //Valida a integridade do hash
+                        $this->gravarLogDebug("Validando integridade de componente digital $key", 6);
+                        $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
+                    }
+                }
+
+                if(count($arrAnexosComponentes) > 0){
+                    $receberComponenteDigitalRN->setArrAnexos($arrAnexosComponentes);
+                }
+
+                #############################TERMINA O RECEBIMENTO DOS COMPONENTES DIGITAIS US010################################################
+
+                $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
+                $objTramite = $arrObjTramite[0];
+
+                //Verifica se o trâmite está recusado
+                if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
+                    $this->gravarLogDebug("Trâmite $parNumIdentificacaoTramite já se encontra recusado. Cancelando o recebimento do processo", 4);
+                    return;
+                }
+
+                $this->gravarLogDebug("Persistindo/atualizando dados do processo com NRE " . $strNumeroRegistro, 4);
+                $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
+
+                // @join_tec US008.08 (#23092)
+                $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), $objProcedimentoDTO->getDblIdProcedimento());
+                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Obtendo metadados do processo', 'S'));
+
+                $this->gravarLogDebug("Registrando trâmite externo do processo", 4);
+                $objProcessoEletronicoDTO = $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
+                    $objProcedimentoDTO->getDblIdProcedimento(),
+                    $strNumeroRegistro,
+                    $parNumIdentificacaoTramite,
+                    ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO,
+                    null,
+                    $objMetadadosProcedimento->metadados->remetente->identificacaoDoRepositorioDeEstruturas,
+                    $objMetadadosProcedimento->metadados->remetente->numeroDeIdentificacaoDaEstrutura,
+                    $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas,
+                    $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura,
+                    $objProcesso);
+
+                //Verifica se o tramite se encontra na situação correta
+                $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
+                if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
+                    throw new InfraException("Trâmite não pode ser localizado pelo identificado $parNumIdentificacaoTramite.");
+                }
+
+                $objTramite = $arrObjTramite[0];
+                if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
+                    $this->gravarLogDebug("Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual, 4);
+                    return;
+                }
+
+                if(count($arrayHashPendentes) > 0){
+                    //Obter dados dos componetes digitais
+                    $this->gravarLogDebug("Iniciando o recebimento dos componentes digitais pendentes", 4);
+                    $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+                    $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
+                    $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
+                    $objComponenteDigitalDTO->setStrHashConteudo($arrayHash, InfraDTO::$OPER_IN);
+                    $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
+                    $objComponenteDigitalDTO->retDblIdDocumento();
+                    $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
+                    $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
+                    $objComponenteDigitalDTO->retStrHashConteudo();
+                    $objComponenteDigitalDTO->retStrProtocolo();
+                    $objComponenteDigitalDTO->retStrNumeroRegistro();
+                    $objComponenteDigitalDTO->retNumIdTramite();
+                    $objComponenteDigitalDTO->retStrNome();
+                    $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
+
+                    $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+                    $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+                    if ($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
+                        $objReceberComponenteDigitalRN = $receberComponenteDigitalRN;
+                        foreach($arrObjComponentesDigitaisDTO as $objComponenteDigitalDTOEnviado) {
+                            if($objComponenteDigitalDTOEnviado->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                                $strHash = $objComponenteDigitalDTOEnviado->getStrHashConteudo();
+                                $strNomeDocumento = (array_key_exists($strHash, $arrStrNomeDocumento)) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
+                                $objReceberComponenteDigitalRN->receberComponenteDigital($objComponenteDigitalDTOEnviado);
+
+                                     // @join_tec US008.09 (#23092)
+                                $strMensagemRecebimento = sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado());
+                                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
+                                $this->gravarLogDebug($strMensagemRecebimento, 6);
+                            }
+                        }
+                          // @join_tec US008.10 (#23092)
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Todos os componentes digitais foram recebidos', 'S'));
+                    }else{
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Nenhum componente digital para receber', 'S'));
+                    }
+                }
+            }
+            //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
+            $this->gravarLogDebug("Enviando recibo de conclusão do trâmite $parNumIdentificacaoTramite", 6);
+            $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
+            $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
+
+            $this->gravarLogDebug("Registrando a conclusão do recebimento do trâmite $parNumIdentificacaoTramite", 6);
+            $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
+            $objPenTramiteProcessadoRN->setRecebido($parNumIdentificacaoTramite);
+
+        } catch (Exception $e) {
+            $mensagemErro = InfraException::inspecionar($e);
+            $this->gravarLogDebug($mensagemErro);
+            LogSEI::getInstance()->gravar($mensagemErro);
+            throw $e;
+        }
+    }
 
     public function fecharProcedimentoEmOutraUnidades(ProcedimentoDTO $objProcedimentoDTO, $parObjMetadadosProcedimento){
 
@@ -78,201 +277,6 @@ class ReceberProcedimentoRN extends InfraRN
         }
         $objInfraSessao->setNumIdUnidadeAtual($numIdUnidade);
         $objInfraSessao->trocarUnidadeAtual();
-    }
-
-
-    protected function receberProcedimentoControlado($parNumIdentificacaoTramite)
-    {
-        try {
-            $objPenParametroRN = new PenParametroRN();
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
-
-            $objSeiRN = new SeiRN();
-
-            if (!isset($parNumIdentificacaoTramite)) {
-              throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
-            }
-
-            //TODO: Urgente: Verificar o status do trâmite e verificar se ele já foi salvo na base de dados
-            $this->gravarLogDebug("Solicitando metadados do trâmite " . $parNumIdentificacaoTramite, 4);
-            $objMetadadosProcedimento = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
-
-            //Substituir a unidade destinatária para a receptora
-            if (isset($objMetadadosProcedimento->metadados->unidadeReceptora)) {
-                $unidadeReceptora = $objMetadadosProcedimento->metadados->unidadeReceptora;
-                $this->destinatarioReal = $objMetadadosProcedimento->metadados->destinatario;
-                $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas = $unidadeReceptora->identificacaoDoRepositorioDeEstruturas;
-                $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
-                $numUnidadeReceptora = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
-                $this->gravarLogDebug("Atribuindo unidade receptora $numUnidadeReceptora para o trâmite $parNumIdentificacaoTramite", 4);
-            }
-
-            if (isset($objMetadadosProcedimento)) {
-              $strNumeroRegistro = $objMetadadosProcedimento->metadados->NRE;
-              $objProcesso = $objMetadadosProcedimento->metadados->processo;
-
-              //Verifica se processo já foi registrado para esse trâmite
-              //TODO: Ajuste para receber corretamente processo em outra unidade do mesmo sistema passando pelo Barramento
-              //Comentando o trecho abaixo funciona, mas o processo fica aberto na unidade de destino
-              if($this->tramiteRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
-                $this->gravarLogDebug("Trâmite $parNumIdentificacaoTramite já para o processo " . $objProcesso->protocolo, 4);
-              }
-
-              // Validação dos dados do processo recebido
-              $objInfraException = new InfraException();
-              $this->validarDadosDestinatario($objInfraException, $objMetadadosProcedimento);
-              $objInfraException->lancarValidacoes();
-
-              #############################INICIA O RECEBIMENTO DOS COMPONENTES DIGITAIS US010################################################
-              $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
-              $objTramite = $arrObjTramite[0];
-
-              //Obtém lista de componentes digitais que precisam ser obtidos
-              $this->gravarLogDebug("Obtém lista de componentes digitais que precisam ser obtidos", 4);
-              if(!is_array($objTramite->componenteDigitalPendenteDeRecebimento)){
-                $objTramite->componenteDigitalPendenteDeRecebimento = array($objTramite->componenteDigitalPendenteDeRecebimento);
-              }
-
-              $this->validarComponentesDigitais($objProcesso, $parNumIdentificacaoTramite);
-              $this->validarExtensaoComponentesDigitais($parNumIdentificacaoTramite, $objProcesso);
-              $this->verificarPermissoesDiretorios($parNumIdentificacaoTramite);
-
-              $this->gravarLogDebug("Obtendo metadados dos componentes digitais do processo", 4);
-              $arrStrNomeDocumento = $this->listarMetaDadosComponentesDigitais($objProcesso);
-              $receberComponenteDigitalRN = new ReceberComponenteDigitalRN();
-              $arrAnexosComponentes = array();
-              $arrayHash = array();
-              $arrayHashPendentes = array();
-
-              //Percorre os componentes que precisam ser recebidos
-              foreach($objTramite->componenteDigitalPendenteDeRecebimento as $key => $componentePendente){
-
-                  if(!is_null($componentePendente)){
-
-                        if(!$this->documentoJaRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite, $componentePendente)){
-                            $arrayHashPendentes[] = $componentePendente;
-                        }
-
-                        //TODO: Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
-                        //Ajuste deverá ser feito em versões futuas
-                        $arrayHash[] = $componentePendente;
-
-                        //Obter os dados do componente digital
-                        $this->gravarLogDebug("Baixando componente digital $key", 6);
-                        $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
-                        $arrAnexosComponentes[$key][$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
-                        $arrAnexosComponentes[$key]['recebido'] = false;
-
-                        //Valida a integridade do hash
-                        $this->gravarLogDebug("Validando integridade de componente digital $key", 6);
-                        $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
-                  }
-              }
-
-              if(count($arrAnexosComponentes) > 0){
-                    $receberComponenteDigitalRN->setArrAnexos($arrAnexosComponentes);
-              }
-              #############################TERMINA O RECEBIMENTO DOS COMPONENTES DIGITAIS US010################################################
-
-              $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
-              $objTramite = $arrObjTramite[0];
-
-              //Verifica se o trâmite está recusado
-              if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
-                    $this->gravarLogDebug("Trâmite $parNumIdentificacaoTramite já se encontra recusado. Cancelando o recebimento do processo", 4);
-                    return;
-              }
-
-              $this->gravarLogDebug("Persistindo/atualizando dados do processo com NRE " . $strNumeroRegistro, 4);
-              $objProcedimentoDTO = $this->registrarProcesso($strNumeroRegistro, $parNumIdentificacaoTramite, $objProcesso, $objMetadadosProcedimento);
-
-              // @join_tec US008.08 (#23092)
-              $this->objProcedimentoAndamentoRN->setOpts($objProcedimentoDTO->getDblIdProcedimento(), $parNumIdentificacaoTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
-              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Obtendo metadados do processo', 'S'));
-
-
-              $this->gravarLogDebug("Registrando trâmite externo do processo", 4);
-              $objProcessoEletronicoDTO = $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
-                    $objProcedimentoDTO->getDblIdProcedimento(),
-                    $strNumeroRegistro,
-                    $parNumIdentificacaoTramite,
-                    null,
-                    $objMetadadosProcedimento->metadados->remetente->identificacaoDoRepositorioDeEstruturas,
-                    $objMetadadosProcedimento->metadados->remetente->numeroDeIdentificacaoDaEstrutura,
-                    $objMetadadosProcedimento->metadados->destinatario->identificacaoDoRepositorioDeEstruturas,
-                    $objMetadadosProcedimento->metadados->destinatario->numeroDeIdentificacaoDaEstrutura,
-                    $objProcesso);
-
-              //Verifica se o tramite se encontra na situação correta
-              $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
-              if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-                throw new InfraException("Trâmite não pode ser localizado pelo identificado $parNumIdentificacaoTramite.");
-              }
-
-              $objTramite = $arrObjTramite[0];
-              if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-                $this->gravarLogDebug("Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual, 4);
-                return;
-              }
-
-              if(count($arrayHashPendentes) > 0){
-                    //Obter dados dos componetes digitais
-                    $this->gravarLogDebug("Iniciando o recebimento dos componentes digitais pendentes", 4);
-                    $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-                    $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
-                    $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
-                    $objComponenteDigitalDTO->setStrHashConteudo($arrayHash, InfraDTO::$OPER_IN);
-                    $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
-                    $objComponenteDigitalDTO->retDblIdDocumento();
-                    $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-                    $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
-                    $objComponenteDigitalDTO->retStrHashConteudo();
-                    $objComponenteDigitalDTO->retStrProtocolo();
-                    $objComponenteDigitalDTO->retStrNumeroRegistro();
-                    $objComponenteDigitalDTO->retNumIdTramite();
-                    $objComponenteDigitalDTO->retStrNome();
-                    $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
-
-                    $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-                    $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-
-                  if ($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
-                          $objReceberComponenteDigitalRN = $receberComponenteDigitalRN;
-                          foreach($arrObjComponentesDigitaisDTO as $objComponenteDigitalDTOEnviado) {
-                                if($objComponenteDigitalDTOEnviado->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
-                                     $strHash = $objComponenteDigitalDTOEnviado->getStrHashConteudo();
-                                     $strNomeDocumento = (array_key_exists($strHash, $arrStrNomeDocumento)) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
-                                     $objReceberComponenteDigitalRN->receberComponenteDigital($objComponenteDigitalDTOEnviado);
-
-                                     // @join_tec US008.09 (#23092)
-                                      $strMensagemRecebimento = sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado());
-                                      $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
-                                      $this->gravarLogDebug($strMensagemRecebimento, 6);
-                                }
-                          }
-                          // @join_tec US008.10 (#23092)
-                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Todos os componentes digitais foram recebidos', 'S'));
-
-                    }else{
-                      $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Nenhum componente digital para receber', 'S'));
-                    }
-                  }
-            }
-            //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
-            $this->gravarLogDebug("Enviando recibo de conclusão do trâmite $parNumIdentificacaoTramite", 6);
-            $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
-            $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
-
-            $this->gravarLogDebug("Registrando a conclusão do recebimento do trâmite $parNumIdentificacaoTramite", 6);
-            $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
-            $objPenTramiteProcessadoRN->setRecebido($parNumIdentificacaoTramite);
-
-        } catch (Exception $e) {
-            $mensagemErro = InfraException::inspecionar($e);
-            $this->gravarLogDebug($mensagemErro);
-            LogSEI::getInstance()->gravar($mensagemErro);
-            throw $e;
-        }
     }
 
     /**
@@ -337,18 +341,12 @@ class ReceberProcedimentoRN extends InfraRN
             }
         }
 
-
-//        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-//        $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
         $objPenParametroRN = new PenParametroRN();
         $numTamDocExterno = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
 
         foreach($arrObjDocumentos as $objDocument) {
-
-
             if (is_null($objDocument->componenteDigital->tamanhoEmBytes) || $objDocument->componenteDigital->tamanhoEmBytes == 0){
-
                 throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
 
             }
@@ -365,115 +363,112 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
 
-  private function registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProcesso, $parObjMetadadosProcedimento)
-  {
-    // Validação dos dados do processo recebido
-    $objInfraException = new InfraException();
-    $this->validarDadosProcesso($objInfraException, $parObjProcesso);
-    $this->validarDadosDocumentos($objInfraException, $parObjProcesso);
+    private function registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProcesso, $parObjMetadadosProcedimento)
+    {
+        // Validação dos dados do processo recebido
+        $objInfraException = new InfraException();
+        $this->validarDadosProcesso($objInfraException, $parObjProcesso);
+        $this->validarDadosDocumentos($objInfraException, $parObjProcesso);
 
-    //TODO: Regra de Negócio - Processos recebidos pelo Barramento não poderão disponibilizar a opção de reordenação e cancelamento de documentos
-    //para o usuário final, mesmo possuindo permissão para isso
+        //TODO: Regra de Negócio - Processos recebidos pelo Barramento não poderão disponibilizar a opção de reordenação e cancelamento de documentos
+        //para o usuário final, mesmo possuindo permissão para isso
 
-    $objInfraException->lancarValidacoes();
+        $objInfraException->lancarValidacoes();
 
-    //Verificar se procedimento já existia na base de dados do sistema
-    $dblIdProcedimento = $this->consultarProcedimentoExistente($parStrNumeroRegistro, $parObjProcesso->protocolo);
+        //Verificar se procedimento já existia na base de dados do sistema
+        $dblIdProcedimento = $this->consultarProcedimentoExistente($parStrNumeroRegistro, $parObjProcesso->protocolo);
 
-    if(isset($dblIdProcedimento)){
-      $objProcedimentoDTO = $this->atualizarProcedimento($dblIdProcedimento, $parObjMetadadosProcedimento, $parObjProcesso);
+        if(isset($dblIdProcedimento)){
+            $objProcedimentoDTO = $this->atualizarProcedimento($dblIdProcedimento, $parObjMetadadosProcedimento, $parObjProcesso);
+        }
+        else {
+            $objProcedimentoDTO = $this->gerarProcedimento($parObjMetadadosProcedimento, $parObjProcesso);
+        }
+
+        //TODO: Fazer o envio de cada um dos procedimentos apensados (Processo principal e seus apensados, caso exista)
+        //...
+
+        //Chamada recursiva para registro dos processos apensados
+        if(isset($objProcesso->processoApensado)) {
+            if(!is_array($objProcesso->processoApensado)) {
+                $objProcesso->processoApensado = array($objProcesso->processoApensado);
+            }
+
+            foreach ($objProcesso->processoApensado as $objProcessoApensado) {
+                $this->registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $objProcessoApensado, $parObjMetadadosProcedimento);
+            }
+        }
+
+        return $objProcedimentoDTO;
     }
-    else {
-      $objProcedimentoDTO = $this->gerarProcedimento($parObjMetadadosProcedimento, $parObjProcesso);
+
+    private function tramiteRecebimentoRegistrado($parStrNumeroRegistro, $parNumIdentificacaoTramite)
+    {
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        return $objTramiteBD->contar($objTramiteDTO) > 0;
     }
 
-    //TODO: Fazer o envio de cada um dos procedimentos apensados (Processo principal e seus apensados, caso exista)
-    //...
 
-    //Chamada recursiva para registro dos processos apensados
-    if(isset($objProcesso->processoApensado)) {
-      if(!is_array($objProcesso->processoApensado)) {
-        $objProcesso->processoApensado = array($objProcesso->processoApensado);
-      }
+    private function documentoJaRegistrado($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrHashComponenteDigital)
+    {
+        //Verifica se componente digital já está registrado para o documento
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
+        // $objComponenteDigitalDTO->retDblIdDocumento();
+        // $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
+        // $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
+        // $objComponenteDigitalDTO->retStrHashConteudo();
+        // $objComponenteDigitalDTO->retStrProtocolo();
+        // $objComponenteDigitalDTO->retStrNumeroRegistro();
+        // $objComponenteDigitalDTO->retNumIdTramite();
+        // $objComponenteDigitalDTO->retStrNome();
+        // $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
 
-      foreach ($objProcesso->processoApensado as $objProcessoApensado) {
-        $this->registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $objProcessoApensado, $parObjMetadadosProcedimento);
-      }
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
     }
 
-    return $objProcedimentoDTO;
-  }
 
-  private function tramiteRegistrado($parStrNumeroRegistro, $parNumIdentificacaoTramite)
-  {
-
-    $objTramiteDTO = new TramiteDTO();
-    $objTramiteDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-    $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
-
-    $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-    return $objTramiteBD->contar($objTramiteDTO) > 0;
-  }
-
-
-  private function documentoJaRegistrado($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrHashComponenteDigital)
-  {
-    //Verifica se componente digital já está registrado para o documento
-    $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-    $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-    $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
-    $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
-    // $objComponenteDigitalDTO->retDblIdDocumento();
-    // $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-    // $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
-    // $objComponenteDigitalDTO->retStrHashConteudo();
-    // $objComponenteDigitalDTO->retStrProtocolo();
-    // $objComponenteDigitalDTO->retStrNumeroRegistro();
-    // $objComponenteDigitalDTO->retNumIdTramite();
-    // $objComponenteDigitalDTO->retStrNome();
-    // $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
-
-    $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-    return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
-  }
-
-
-  private function consultarProcedimentoExistente($parStrNumeroRegistro, $parStrProtocolo = null) {
-
-    $dblIdProcedimento = null;
-
-    $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-    $objProcessoEletronicoDTO->retDblIdProcedimento();
-    $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+    private function consultarProcedimentoExistente($parStrNumeroRegistro, $parStrProtocolo = null)
+    {
+        $dblIdProcedimento = null;
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->retDblIdProcedimento();
+        $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
 
         //TODO: Manter o padrão o sistema em chamar uma classe de regra de negócio (RN) e não diretamente um classe BD
-    $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-    $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
 
-    if(isset($objProcessoEletronicoDTO)){
-      $dblIdProcedimento = $objProcessoEletronicoDTO->getDblIdProcedimento();
+        if(isset($objProcessoEletronicoDTO)){
+            $dblIdProcedimento = $objProcessoEletronicoDTO->getDblIdProcedimento();
+        }
+
+        return $dblIdProcedimento;
     }
 
-    return $dblIdProcedimento;
-  }
+    private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $objProcesso)
+    {
+        if(!isset($parDblIdProcedimento)){
+            throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
+        }
 
- private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $objProcesso)
- {
-
-    if(!isset($parDblIdProcedimento)){
-      throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
-    }
-
-    if(!isset($objMetadadosProcedimento)){
-      throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
-    }
+        if(!isset($objMetadadosProcedimento)){
+            throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
+        }
 
 
-    if ($this->destinatarioReal) {
-        $objDestinatario = $this->destinatarioReal;
-    } else {
-        $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
-    }
+        if ($this->destinatarioReal) {
+            $objDestinatario = $this->destinatarioReal;
+        } else {
+            $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
+        }
 
         //TODO: Refatorar código para criar método de pesquisa do procedimento e reutilizá-la
 
@@ -535,44 +530,44 @@ class ReceberProcedimentoRN extends InfraRN
         $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento);
 
 
-      if($flgReabrir){
+        if($flgReabrir){
             $objEntradaReabrirProcessoAPI = new EntradaReabrirProcessoAPI();
             $objEntradaReabrirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
             $objSeiRN->reabrirProcesso($objEntradaReabrirProcessoAPI);
-      }
+        }
 
        //Cadastro das atividades para quando o destinatário é desviado pelo receptor (!3!)
         if ($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura) {
-           $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
+            $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
         }
 
-    $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-    $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
-    $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
 
-       //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
-    $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
+        //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
+        $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
-    $this->atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $objMetadadosProcedimento);
-    $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
+        $this->atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $objMetadadosProcedimento);
+        $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
 
         //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
-    $this->atribuirProcessosApensados($objProcedimentoDTO, $objProcesso->processoApensado);
+        $this->atribuirProcessosApensados($objProcedimentoDTO, $objProcesso->processoApensado);
 
-    //Realiza a alteração dos metadados do processo
-    //TODO: Implementar alteração de todos os metadados
-    $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
+        //Realiza a alteração dos metadados do processo
+        //TODO: Implementar alteração de todos os metadados
+        $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
 
-    //TODO: Finalizar o envio do documento para a respectiva unidade
-    $this->enviarProcedimentoUnidade($objProcedimentoDTO, true);
+        //TODO: Finalizar o envio do documento para a respectiva unidade
+        $this->enviarProcedimentoUnidade($objProcedimentoDTO, true);
 
-    //$this->removerAndamentosProcedimento($objProcedimentoDTO);
-    return $objProcedimentoDTO;
+        //$this->removerAndamentosProcedimento($objProcedimentoDTO);
+        return $objProcedimentoDTO;
 
-  }
+    }
 
-  private function gerarAndamentoUnidadeReceptora($parNumIdProcedimento) {
+    private function gerarAndamentoUnidadeReceptora($parNumIdProcedimento) {
 
         $objUnidadeDTO = new PenUnidadeDTO();
         $objUnidadeDTO->setNumIdUnidadeRH($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura);
@@ -605,15 +600,15 @@ class ReceberProcedimentoRN extends InfraRN
 
     private function gerarProcedimento($objMetadadosProcedimento, $objProcesso){
 
-    if(!isset($objMetadadosProcedimento)){
-      throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
-    }
+        if(!isset($objMetadadosProcedimento)){
+            throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
+        }
 
         //TODO: Usar dados do destinatário em outro método específico para envio
         // Dados do procedimento enviados pelos órgão externo integrado ao PEN
         //$objProcesso = $objMetadadosProcedimento->metadados->processo;
-    $objRemetente = $objMetadadosProcedimento->metadados->remetente;
-    $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
+        $objRemetente = $objMetadadosProcedimento->metadados->remetente;
+        $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
 
         //TODO: TESTES DE RECEBIMENTO DE PROCESSOS
         //REMOVER APOS TESTES DO SISTEMA
@@ -621,69 +616,69 @@ class ReceberProcedimentoRN extends InfraRN
 
         //Atribuição de dados do protocolo
         //TODO: Validar cada uma das informações de entrada do webservice
-    $objProtocoloDTO = new ProtocoloDTO();
-    $objProtocoloDTO->setDblIdProtocolo(null);
-    $objProtocoloDTO->setStrDescricao(utf8_decode($objProcesso->descricao));
-    $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo));
+        $objProtocoloDTO = new ProtocoloDTO();
+        $objProtocoloDTO->setDblIdProtocolo(null);
+        $objProtocoloDTO->setStrDescricao(utf8_decode($objProcesso->descricao));
+        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo));
 
-    if($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
-        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $objPenParametroRN = new PenParametroRN();
-        $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+        if($this->obterNivelSigiloSEI($objProcesso->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
+            $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+            $objPenParametroRN = new PenParametroRN();
+            $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
-        if (!isset($objProcesso->hipoteseLegal) || (isset($objProcesso->hipoteseLegal) && empty($objProcesso->hipoteseLegal->identificacao))) {
-            $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
-        } else {
-
-            $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal->identificacao);
-            if (empty($numIdHipoteseLegal)) {
+            if (!isset($objProcesso->hipoteseLegal) || (isset($objProcesso->hipoteseLegal) && empty($objProcesso->hipoteseLegal->identificacao))) {
                 $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
             } else {
-                $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+
+                $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProcesso->hipoteseLegal->identificacao);
+                if (empty($numIdHipoteseLegal)) {
+                    $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+                } else {
+                    $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+                }
             }
         }
-    }
 
-    $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($objProcesso->protocolo));
-    $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
-    $objProtocoloDTO->setArrObjAnexoDTO(array());
-    $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
-    $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
-    //$objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
-    $this->atribuirParticipantes($objProtocoloDTO, $objProcesso->interessado);
+        $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($objProcesso->protocolo));
+        $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
+        $objProtocoloDTO->setArrObjAnexoDTO(array());
+        $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
+        $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
+        //$objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_BLOQUEADO);
+        $this->atribuirParticipantes($objProtocoloDTO, $objProcesso->interessado);
 
-    $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', utf8_decode($objProcesso->processoDeNegocio)).PHP_EOL;
-    $strDescricao .= $objProcesso->observacao;
+        $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', utf8_decode($objProcesso->processoDeNegocio)).PHP_EOL;
+        $strDescricao .= $objProcesso->observacao;
 
-    $objObservacaoDTO  = new ObservacaoDTO();
+        $objObservacaoDTO  = new ObservacaoDTO();
 
-    //!Criação da observação de aviso para qual é a real unidade emitida (!2!)
-    if ($this->destinatarioReal) {
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->setNumIdUnidadeRH($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura);
-        $objUnidadeDTO->setStrSinAtivo('S');
-        $objUnidadeDTO->retStrDescricao();
+        //!Criação da observação de aviso para qual é a real unidade emitida (!2!)
+        if ($this->destinatarioReal) {
+            $objUnidadeDTO = new PenUnidadeDTO();
+            $objUnidadeDTO->setNumIdUnidadeRH($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura);
+            $objUnidadeDTO->setStrSinAtivo('S');
+            $objUnidadeDTO->retStrDescricao();
 
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-        $objObservacaoDTO->setStrDescricao($strDescricao . PHP_EOL .'Processo remetido para a unidade ' . $objUnidadeDTO->getStrDescricao());
-    } else {
-        $objObservacaoDTO->setStrDescricao($strDescricao);
-    }
+            $objUnidadeRN = new UnidadeRN();
+            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+            $objObservacaoDTO->setStrDescricao($strDescricao . PHP_EOL .'Processo remetido para a unidade ' . $objUnidadeDTO->getStrDescricao());
+        } else {
+            $objObservacaoDTO->setStrDescricao($strDescricao);
+        }
 
-    //throw new InfraException(var_export($objObservacaoDTO, true));
+        //throw new InfraException(var_export($objObservacaoDTO, true));
 
-    $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
+        $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
 
         //Atribuição de dados do procedimento
         //TODO: Validar cada uma das informações de entrada do webservice
-    $objProcedimentoDTO = new ProcedimentoDTO();
-    $objProcedimentoDTO->setDblIdProcedimento(null);
-    $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-    $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($objProcesso->processoDeNegocio));
-    $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
-    $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($objProcesso->protocolo));
-    $objProcedimentoDTO->setStrSinGerarPendencia('S');
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->setDblIdProcedimento(null);
+        $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
+        $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($objProcesso->processoDeNegocio));
+        $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($objProcesso->dataHoraDeProducao));
+        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($objProcesso->protocolo));
+        $objProcedimentoDTO->setStrSinGerarPendencia('S');
        // $objProcedimentoDTO->setNumVersaoLock(0);  //TODO: Avaliar o comportamento desse campo no cadastro do processo
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
@@ -737,10 +732,10 @@ class ReceberProcedimentoRN extends InfraRN
 
         //$this->removerAndamentosProcedimento($objProcedimentoDTO);
         return $objProcedimentoDTO;
-      }
+    }
 
-      private function alterarMetadadosProcedimento($parNumIdProcedimento, $parObjMetadadoProcedimento){
-
+    private function alterarMetadadosProcedimento($parNumIdProcedimento, $parObjMetadadoProcedimento)
+    {
         //Realiza a alteração dos metadados do processo(Por hora, apenas do nível de sigilo e hipótese legal)
         $objProtocoloDTO = new ProtocoloDTO();
         $objProtocoloDTO->setDblIdProtocolo($parNumIdProcedimento);
@@ -766,12 +761,11 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
-
     }
 
 
-      private function removerAndamentosProcedimento($parObjProtocoloDTO)
-      {
+    private function removerAndamentosProcedimento($parObjProtocoloDTO)
+    {
         //TODO: Remover apenas as atividades geradas pelo recebimento do processo, não as atividades geradas anteriormente
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->retNumIdAtividade();
@@ -780,10 +774,10 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->excluirRN0034($objAtividadeRN->listarRN0036($objAtividadeDTO));
-      }
+    }
 
-      private function registrarAndamentoRecebimentoProcesso(ProcedimentoDTO $objProcedimentoDTO, $parObjMetadadosProcedimento)
-      {
+    private function registrarAndamentoRecebimentoProcesso(ProcedimentoDTO $objProcedimentoDTO, $parObjMetadadosProcedimento)
+    {
         //Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@
         //TODO: Atribuir atributos necessários para formação da mensagem do andamento
         //TODO: Especificar quais andamentos serão registrados
@@ -798,9 +792,9 @@ class ReceberProcedimentoRN extends InfraRN
 
         //TODO: Otimizar código. Apenas buscar no barramento os dados da estrutura 1 única vez (AtribuirRemetente também utiliza)
         $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
-          $objRemetente->identificacaoDoRepositorioDeEstruturas,
-          $objRemetente->numeroDeIdentificacaoDaEstrutura,
-          true
+            $objRemetente->identificacaoDoRepositorioDeEstruturas,
+            $objRemetente->numeroDeIdentificacaoDaEstrutura,
+            true
         );
 
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -864,68 +858,65 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
 
-
-
-      }
+    }
 
 
     //TODO: Avaliar a necessidade de registrar os dados do remetente como participante do processo
-      private function atribuirRemetente(ProtocoloDTO $objProtocoloDTO, $objRemetente)
-      {
+    private function atribuirRemetente(ProtocoloDTO $objProtocoloDTO, $objRemetente)
+    {
         $arrObjParticipantesDTO = array();
         if($objProtocoloDTO->isSetArrObjParticipanteDTO()) {
-          $arrObjParticipantesDTO = $objProtocoloDTO->getArrObjParticipanteDTO();
+            $arrObjParticipantesDTO = $objProtocoloDTO->getArrObjParticipanteDTO();
         }
 
         //Obtenção de detalhes do remetente na infraestrutura do PEN
         $objEstruturaDTO = $this->objProcessoEletronicoRN->consultarEstrutura(
-          $objRemetente->identificacaoDoRepositorioDeEstruturas,
-          $objRemetente->numeroDeIdentificacaoDaEstrutura);
+            $objRemetente->identificacaoDoRepositorioDeEstruturas,
+            $objRemetente->numeroDeIdentificacaoDaEstrutura);
 
         if(!empty($objEstruturaDTO)) {
-          $objParticipanteDTO  = new ParticipanteDTO();
-          $objParticipanteDTO->setStrSiglaContato($objEstruturaDTO->getStrSigla());
-          $objParticipanteDTO->setStrNomeContato($objEstruturaDTO->getStrNome());
-          $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_REMETENTE);
-          $objParticipanteDTO->setNumSequencia(0);
-          $arrObjParticipantesDTO[] = $objParticipanteDTO;
-          $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
+            $objParticipanteDTO  = new ParticipanteDTO();
+            $objParticipanteDTO->setStrSiglaContato($objEstruturaDTO->getStrSigla());
+            $objParticipanteDTO->setStrNomeContato($objEstruturaDTO->getStrNome());
+            $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_REMETENTE);
+            $objParticipanteDTO->setNumSequencia(0);
+            $arrObjParticipantesDTO[] = $objParticipanteDTO;
+            $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
         }
 
         $objProtocoloDTO->setArrObjParticipanteDTO($arrObjParticipantesDTO);
-      }
+    }
 
 
-      private function atribuirParticipantes(ProtocoloDTO $objProtocoloDTO, $arrObjInteressados)
-      {
+    private function atribuirParticipantes(ProtocoloDTO $objProtocoloDTO, $arrObjInteressados)
+    {
         $arrObjParticipantesDTO = array();
         if($objProtocoloDTO->isSetArrObjParticipanteDTO()) {
-          $arrObjParticipantesDTO = $objProtocoloDTO->getArrObjParticipanteDTO();
+            $arrObjParticipantesDTO = $objProtocoloDTO->getArrObjParticipanteDTO();
         }
 
         if (!is_array($arrObjInteressados)) {
-          $arrObjInteressados = array($arrObjInteressados);
+            $arrObjInteressados = array($arrObjInteressados);
         }
 
         for($i=0; $i < count($arrObjInteressados); $i++){
-          $objInteressado = $arrObjInteressados[$i];
-          $objParticipanteDTO  = new ParticipanteDTO();
-          $objParticipanteDTO->setStrSiglaContato($objInteressado->numeroDeIdentificacao);
-          $objParticipanteDTO->setStrNomeContato(utf8_decode($objInteressado->nome));
-          $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_INTERESSADO);
-          $objParticipanteDTO->setNumSequencia($i);
-          $arrObjParticipantesDTO[] = $objParticipanteDTO;
+            $objInteressado = $arrObjInteressados[$i];
+            $objParticipanteDTO  = new ParticipanteDTO();
+            $objParticipanteDTO->setStrSiglaContato($objInteressado->numeroDeIdentificacao);
+            $objParticipanteDTO->setStrNomeContato(utf8_decode($objInteressado->nome));
+            $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_INTERESSADO);
+            $objParticipanteDTO->setNumSequencia($i);
+            $arrObjParticipantesDTO[] = $objParticipanteDTO;
         }
 
         $arrObjParticipanteDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
         $objProtocoloDTO->setArrObjParticipanteDTO($arrObjParticipantesDTO);
+    }
 
-      }
-
-      private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento)
-      {
+    private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento)
+    {
         if(!isset($numIdTipoProcedimento)){
-          throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
+            throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
         }
 
         $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
@@ -937,7 +928,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
 
         if ($objTipoProcedimentoDTO==null){
-          throw new InfraException('Tipo de processo não encontrado.');
+            throw new InfraException('Tipo de processo não encontrado.');
         }
 
         $objProcedimentoDTO->setNumIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
@@ -954,54 +945,55 @@ class ReceberProcedimentoRN extends InfraRN
         $arrObjAssuntoDTO = $objProcedimentoDTO->getObjProtocoloDTO()->getArrObjRelProtocoloAssuntoDTO();
 
         foreach($arrObjRelTipoProcedimentoAssuntoDTO as $objRelTipoProcedimentoAssuntoDTO){
-          $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
-          $objRelProtocoloAssuntoDTO->setNumIdAssunto($objRelTipoProcedimentoAssuntoDTO->getNumIdAssunto());
-          $objRelProtocoloAssuntoDTO->setNumSequencia($objRelTipoProcedimentoAssuntoDTO->getNumSequencia());
-          $arrObjAssuntoDTO[] = $objRelProtocoloAssuntoDTO;
+            $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
+            $objRelProtocoloAssuntoDTO->setNumIdAssunto($objRelTipoProcedimentoAssuntoDTO->getNumIdAssunto());
+            $objRelProtocoloAssuntoDTO->setNumSequencia($objRelTipoProcedimentoAssuntoDTO->getNumSequencia());
+            $arrObjAssuntoDTO[] = $objRelProtocoloAssuntoDTO;
         }
 
         $objProcedimentoDTO->getObjProtocoloDTO()->setArrObjRelProtocoloAssuntoDTO($arrObjAssuntoDTO);
-      }
+    }
 
-      protected function atribuirDadosUnidade(ProcedimentoDTO $objProcedimentoDTO, $objDestinatario){
+    protected function atribuirDadosUnidade(ProcedimentoDTO $objProcedimentoDTO, $objDestinatario)
+    {
 
         if(!isset($objDestinatario)){
-          throw new InfraException('Parâmetro $objDestinatario não informado.');
+            throw new InfraException('Parâmetro $objDestinatario não informado.');
         }
 
         $objUnidadeDTOEnvio = $this->obterUnidadeMapeada($objDestinatario->numeroDeIdentificacaoDaEstrutura);
 
         if(!isset($objUnidadeDTOEnvio))
-          throw new InfraException('Unidade de destino não pode ser encontrada. Repositório: '.$objDestinatario->identificacaoDoRepositorioDeEstruturas.', Número: ' . $objDestinatario->numeroDeIdentificacaoDaEstrutura);
+            throw new InfraException('Unidade de destino não pode ser encontrada. Repositório: '.$objDestinatario->identificacaoDoRepositorioDeEstruturas.', Número: ' . $objDestinatario->numeroDeIdentificacaoDaEstrutura);
 
         $arrObjUnidadeDTO = array();
         $arrObjUnidadeDTO[] = $objUnidadeDTOEnvio;
         $objProcedimentoDTO->setArrObjUnidadeDTO($arrObjUnidadeDTO);
 
         return $objUnidadeDTOEnvio;
-      }
+    }
 
 
     //TODO: Grande parte da regra de negócio se baseou em SEIRN:199 - incluirDocumento.
     //Avaliar a refatoração para impedir a duplicação de código
-      private function atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $parObjMetadadosProcedimento)
-      {
+    private function atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $parObjMetadadosProcedimento)
+    {
 
         if(!isset($objProcesso)) {
-          throw new InfraException('Parâmetro $objProcesso não informado.');
+            throw new InfraException('Parâmetro $objProcesso não informado.');
         }
 
         if(!isset($objUnidadeDTO)) {
-          throw new InfraException('Unidade responsável pelo documento não informada.');
+            throw new InfraException('Unidade responsável pelo documento não informada.');
         }
 
         if(!isset($objProcesso->documento)) {
-          throw new InfraException('Lista de documentos do processo não informada.');
+            throw new InfraException('Lista de documentos do processo não informada.');
         }
 
         $arrObjDocumentos = $objProcesso->documento;
         if(!is_array($arrObjDocumentos)) {
-          $arrObjDocumentos = array($arrObjDocumentos);
+            $arrObjDocumentos = array($arrObjDocumentos);
         }
 
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
@@ -1021,7 +1013,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
         $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, "Ordem");
-       // $arrStrHashConteudo = InfraArray::converterArrInfraDTO($arrObjComponenteDigitalDTO, 'IdDocumento', 'HashConteudo');
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objSeiRN = new SeiRN();
@@ -1031,159 +1022,152 @@ class ReceberProcedimentoRN extends InfraRN
         foreach($arrObjDocumentos as $objDocumento){
 
             // @join_tec US027 (#3498)
-           if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
-
+         if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
                 //$strHashConteudo = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componenteDigital->hash);
-
-
                 // Caso já esteja cadastrado, de um reenvio anterior, então move para bloqueado
-                if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)) {
+            if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)) {
 
                     //Busca o ID do protocolo
                     //$dblIdProtocolo = $arrStrHashConteudo[$strHashConteudo];
-                    $objComponenteIndexado = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
-                    $dblIdProtocolo = $objComponenteIndexado->getDblIdDocumento();
+                $objComponenteIndexado = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
+                $dblIdProtocolo = $objComponenteIndexado->getDblIdDocumento();
 
                     //Instancia o DTO do protocolo
-                    $objProtocoloDTO = new ProtocoloDTO();
-                    $objProtocoloDTO->setDblIdProtocolo($dblIdProtocolo);
-                    $objProtocoloDTO->retStrStaEstado();
+                $objProtocoloDTO = new ProtocoloDTO();
+                $objProtocoloDTO->setDblIdProtocolo($dblIdProtocolo);
+                $objProtocoloDTO->retStrStaEstado();
 
-                    $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
+                $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-                    if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
                         //Instancia o DTO do protocolo
-                       $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
-                       $objEntradaCancelarDocumentoAPI->setIdDocumento($dblIdProtocolo);
-                       $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+                 $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+                 $objEntradaCancelarDocumentoAPI->setIdDocumento($dblIdProtocolo);
+                 $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
 
-                       $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+                 $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
 
-                    }
+             }
+             continue;
+         }
+     }
 
-
-                    continue;
-
-                }
-                //continue;
-            }
-
-            if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)){
-                 $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
-                 $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
-                continue;
-            }
+     if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)){
+       $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
+       $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
+       continue;
+   }
 
             //Validação dos dados dos documentos
-          if(!isset($objDocumento->especie)){
-            throw new InfraException('Espécie do documento ['.$objDocumento->descricao.'] não informada.');
-          }
+   if(!isset($objDocumento->especie)){
+    throw new InfraException('Espécie do documento ['.$objDocumento->descricao.'] não informada.');
+}
 
 //---------------------------------------------------------------------------------------------------
 
-          $objDocumentoDTO = new DocumentoDTO();
-          $objDocumentoDTO->setDblIdDocumento(null);
-          $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+$objDocumentoDTO = new DocumentoDTO();
+$objDocumentoDTO->setDblIdDocumento(null);
+$objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
 
-          $objSerieDTO = $this->obterSerieMapeada($objDocumento->especie->codigo);
+$objSerieDTO = $this->obterSerieMapeada($objDocumento->especie->codigo);
 
-          if ($objSerieDTO==null){
-            throw new InfraException('Tipo de documento [Espécie '.$objDocumento->especie->codigo.'] não encontrado.');
-          }
+if ($objSerieDTO==null){
+    throw new InfraException('Tipo de documento [Espécie '.$objDocumento->especie->codigo.'] não encontrado.');
+}
 
-          if (InfraString::isBolVazia($objDocumento->dataHoraDeProducao)) {
-            $objInfraException->lancarValidacao('Data do documento não informada.');
-          }
+if (InfraString::isBolVazia($objDocumento->dataHoraDeProducao)) {
+    $objInfraException->lancarValidacao('Data do documento não informada.');
+}
 
-          $objProcedimentoDTO2 = new ProcedimentoDTO();
-          $objProcedimentoDTO2->retDblIdProcedimento();
-          $objProcedimentoDTO2->retNumIdUsuarioGeradorProtocolo();
-          $objProcedimentoDTO2->retNumIdTipoProcedimento();
-          $objProcedimentoDTO2->retStrStaNivelAcessoGlobalProtocolo();
-          $objProcedimentoDTO2->retStrProtocoloProcedimentoFormatado();
-          $objProcedimentoDTO2->retNumIdTipoProcedimento();
-          $objProcedimentoDTO2->retStrNomeTipoProcedimento();
-          $objProcedimentoDTO2->adicionarCriterio(array('IdProcedimento','ProtocoloProcedimentoFormatado','ProtocoloProcedimentoFormatadoPesquisa'),
-            array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL),
-            array($objDocumentoDTO->getDblIdProcedimento(),$objDocumentoDTO->getDblIdProcedimento(),$objDocumentoDTO->getDblIdProcedimento()),
-            array(InfraDTO::$OPER_LOGICO_OR,InfraDTO::$OPER_LOGICO_OR));
+$objProcedimentoDTO2 = new ProcedimentoDTO();
+$objProcedimentoDTO2->retDblIdProcedimento();
+$objProcedimentoDTO2->retNumIdUsuarioGeradorProtocolo();
+$objProcedimentoDTO2->retNumIdTipoProcedimento();
+$objProcedimentoDTO2->retStrStaNivelAcessoGlobalProtocolo();
+$objProcedimentoDTO2->retStrProtocoloProcedimentoFormatado();
+$objProcedimentoDTO2->retNumIdTipoProcedimento();
+$objProcedimentoDTO2->retStrNomeTipoProcedimento();
+$objProcedimentoDTO2->adicionarCriterio(array('IdProcedimento','ProtocoloProcedimentoFormatado','ProtocoloProcedimentoFormatadoPesquisa'),
+    array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL),
+    array($objDocumentoDTO->getDblIdProcedimento(),$objDocumentoDTO->getDblIdProcedimento(),$objDocumentoDTO->getDblIdProcedimento()),
+    array(InfraDTO::$OPER_LOGICO_OR,InfraDTO::$OPER_LOGICO_OR));
 
-          $objProcedimentoRN = new ProcedimentoRN();
-          $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO2);
+$objProcedimentoRN = new ProcedimentoRN();
+$objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO2);
 
-          if ($objProcedimentoDTO==null){
-            throw new InfraException('Processo ['.$objDocumentoDTO->getDblIdProcedimento().'] não encontrado.');
-          }
+if ($objProcedimentoDTO==null){
+    throw new InfraException('Processo ['.$objDocumentoDTO->getDblIdProcedimento().'] não encontrado.');
+}
 
-          $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-          $objDocumentoDTO->setNumIdSerie($objSerieDTO->getNumIdSerie());
-          $objDocumentoDTO->setStrNomeSerie($objSerieDTO->getStrNome());
+$objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+$objDocumentoDTO->setNumIdSerie($objSerieDTO->getNumIdSerie());
+$objDocumentoDTO->setStrNomeSerie($objSerieDTO->getStrNome());
 
-          $objDocumentoDTO->setDblIdDocumentoEdoc(null);
-          $objDocumentoDTO->setDblIdDocumentoEdocBase(null);
-          $objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
-          $objDocumentoDTO->setNumIdTipoConferencia(null);
-          $objDocumentoDTO->setStrConteudo(null);
-          $objDocumentoDTO->setStrStaDocumento(DocumentoRN::$TD_EXTERNO);
+$objDocumentoDTO->setDblIdDocumentoEdoc(null);
+$objDocumentoDTO->setDblIdDocumentoEdocBase(null);
+$objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
+$objDocumentoDTO->setNumIdTipoConferencia(null);
+$objDocumentoDTO->setStrConteudo(null);
+$objDocumentoDTO->setStrStaDocumento(DocumentoRN::$TD_EXTERNO);
          // $objDocumentoDTO->setNumVersaoLock(0);
 
-          $objProtocoloDTO = new ProtocoloDTO();
-          $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-          $objProtocoloDTO->setDblIdProtocolo(null);
-          $objProtocoloDTO->setStrStaProtocolo(ProtocoloRN::$TP_DOCUMENTO_RECEBIDO);
+$objProtocoloDTO = new ProtocoloDTO();
+$objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
+$objProtocoloDTO->setDblIdProtocolo(null);
+$objProtocoloDTO->setStrStaProtocolo(ProtocoloRN::$TP_DOCUMENTO_RECEBIDO);
 
-          if($objDocumento->descricao != '***'){
-              $objProtocoloDTO->setStrDescricao(utf8_decode($objDocumento->descricao));
-              $objDocumentoDTO->setStrNumero(utf8_decode($objDocumento->descricao));
-          }else{
-              $objProtocoloDTO->setStrDescricao("");
-              $objDocumentoDTO->setStrNumero("");
-          }
+if($objDocumento->descricao != '***'){
+  $objProtocoloDTO->setStrDescricao(utf8_decode($objDocumento->descricao));
+  $objDocumentoDTO->setStrNumero(utf8_decode($objDocumento->descricao));
+}else{
+  $objProtocoloDTO->setStrDescricao("");
+  $objDocumentoDTO->setStrNumero("");
+}
             //TODO: Avaliar regra de formação do número do documento
 
-          $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo));
-          $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objDocumento->dataHoraDeProducao));
-          $objProtocoloDTO->setArrObjAnexoDTO(array());
-          $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
-          $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
-          $objProtocoloDTO->setArrObjParticipanteDTO(array());
+$objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo));
+$objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objDocumento->dataHoraDeProducao));
+$objProtocoloDTO->setArrObjAnexoDTO(array());
+$objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
+$objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
+$objProtocoloDTO->setArrObjParticipanteDTO(array());
 
             //TODO: Analisar se o modelo de dados do PEN possui destinatários específicos para os documentos
             //caso não possua, analisar o repasse de tais informações via parãmetros adicionais
 
-          $objObservacaoDTO  = new ObservacaoDTO();
-          $objObservacaoDTO->setStrDescricao("Número SEI do Documento na Origem: ".$objDocumento->produtor->numeroDeIdentificacao);
-          $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
+$objObservacaoDTO  = new ObservacaoDTO();
+$objObservacaoDTO->setStrDescricao("Número SEI do Documento na Origem: ".$objDocumento->produtor->numeroDeIdentificacao);
+$objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
 
 
-          $bolReabriuAutomaticamente = false;
-          if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_PUBLICO || $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_RESTRITO) {
+$bolReabriuAutomaticamente = false;
+if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_PUBLICO || $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_RESTRITO) {
 
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
-            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
                 //TODO: Possivelmente, essa regra é desnecessária já que o processo pode ser enviado para outra unidade do órgão através da expedição
-            $objAtividadeRN = new AtividadeRN();
-            if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
-              throw new InfraException('Unidade '.$objUnidadeDTO->getStrSigla().' não possui acesso ao Procedimento '.$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'.');
-            }
+    $objAtividadeRN = new AtividadeRN();
+    if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
+      throw new InfraException('Unidade '.$objUnidadeDTO->getStrSigla().' não possui acesso ao Procedimento '.$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'.');
+  }
 
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
-            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-            $objAtividadeDTO->setDthConclusao(null);
+  $objAtividadeDTO = new AtividadeDTO();
+  $objAtividadeDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+  $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+  $objAtividadeDTO->setDthConclusao(null);
 
-            if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
+  if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
                     //reabertura automática
-              $objReabrirProcessoDTO = new ReabrirProcessoDTO();
-              $objReabrirProcessoDTO->setDblIdProcedimento($objDocumentoDTO->getDblIdProcedimento());
-              $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-              $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-              $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
-              $bolReabriuAutomaticamente = true;
-            }
-          }
+      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+      $objReabrirProcessoDTO->setDblIdProcedimento($objDocumentoDTO->getDblIdProcedimento());
+      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+      $bolReabriuAutomaticamente = true;
+  }
+}
 
             //$objOperacaoServicoDTO = new OperacaoServicoDTO();
             //$this->adicionarCriteriosUnidadeProcessoDocumento ($objOperacaoServicoDTO,$objUnidadeDTO,$objProcedimentoDTO,$objDocumentoDTO);
@@ -1195,239 +1179,228 @@ class ReceberProcedimentoRN extends InfraRN
             //    $objInfraException->lancarValidacao('Nenhuma operação configurada para inclusão de documento do Tipo ['.$objSerieDTO->getStrNome().'] no Tipo de Processo ['.$objProcedimentoDTO->getStrNomeTipoProcedimento().'] na Unidade ['.$objUnidadeDTO->getStrSigla().'] pelo Serviço ['.$objServicoDTO->getStrIdentificacao().'] do Sistema ['.$objServicoDTO->getStrSiglaUsuario().'].');
             //}
 
-          $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
-          $objTipoProcedimentoDTO->retStrStaNivelAcessoSugestao();
-          $objTipoProcedimentoDTO->retStrStaGrauSigiloSugestao();
-          $objTipoProcedimentoDTO->retNumIdHipoteseLegalSugestao();
-          $objTipoProcedimentoDTO->setNumIdTipoProcedimento($objProcedimentoDTO->getNumIdTipoProcedimento());
+$objTipoProcedimentoDTO = new TipoProcedimentoDTO();
+$objTipoProcedimentoDTO->retStrStaNivelAcessoSugestao();
+$objTipoProcedimentoDTO->retStrStaGrauSigiloSugestao();
+$objTipoProcedimentoDTO->retNumIdHipoteseLegalSugestao();
+$objTipoProcedimentoDTO->setNumIdTipoProcedimento($objProcedimentoDTO->getNumIdTipoProcedimento());
 
-          $objTipoProcedimentoRN = new TipoProcedimentoRN();
-          $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
+$objTipoProcedimentoRN = new TipoProcedimentoRN();
+$objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
 
-          if (InfraString::isBolVazia($objDocumentoDTO->getObjProtocoloDTO()->getStrStaNivelAcessoLocal()) || $objDocumentoDTO->getObjProtocoloDTO()->getStrStaNivelAcessoLocal()==$objTipoProcedimentoDTO->getStrStaNivelAcessoSugestao()) {
-            $objDocumentoDTO->getObjProtocoloDTO()->setStrStaNivelAcessoLocal($objTipoProcedimentoDTO->getStrStaNivelAcessoSugestao());
-            $objDocumentoDTO->getObjProtocoloDTO()->setStrStaGrauSigilo($objTipoProcedimentoDTO->getStrStaGrauSigiloSugestao());
-            $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objTipoProcedimentoDTO->getNumIdHipoteseLegalSugestao());
-          }
+if (InfraString::isBolVazia($objDocumentoDTO->getObjProtocoloDTO()->getStrStaNivelAcessoLocal()) || $objDocumentoDTO->getObjProtocoloDTO()->getStrStaNivelAcessoLocal()==$objTipoProcedimentoDTO->getStrStaNivelAcessoSugestao()) {
+    $objDocumentoDTO->getObjProtocoloDTO()->setStrStaNivelAcessoLocal($objTipoProcedimentoDTO->getStrStaNivelAcessoSugestao());
+    $objDocumentoDTO->getObjProtocoloDTO()->setStrStaGrauSigilo($objTipoProcedimentoDTO->getStrStaGrauSigiloSugestao());
+    $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($objTipoProcedimentoDTO->getNumIdHipoteseLegalSugestao());
+}
 
-          if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
-            $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-            $objPenParametroRN = new PenParametroRN();
-            $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
+    $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+    $objPenParametroRN = new PenParametroRN();
+    $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
-            if (!isset($objDocumento->hipoteseLegal) || (isset($objDocumento->hipoteseLegal) && empty($objDocumento->hipoteseLegal->identificacao))) {
-                $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
-            } else {
+    if (!isset($objDocumento->hipoteseLegal) || (isset($objDocumento->hipoteseLegal) && empty($objDocumento->hipoteseLegal->identificacao))) {
+        $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+    } else {
 
-                $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal->identificacao);
-                if (empty($numIdHipoteseLegal)) {
-                    $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
-                } else {
-                    $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
-                }
-            }
-          }
+        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objDocumento->hipoteseLegal->identificacao);
+        if (empty($numIdHipoteseLegal)) {
+            $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+        } else {
+            $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegal);
+        }
+    }
+}
 
-          $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($this->prepararParticipantes($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO()));
+$objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($this->prepararParticipantes($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO()));
 
-          $objDocumentoRN = new DocumentoRN();
+$objDocumentoRN = new DocumentoRN();
 
-          $strConteudoCodificado = $objDocumentoDTO->getStrConteudo();
-          $objDocumentoDTO->setStrConteudo(null);
+$strConteudoCodificado = $objDocumentoDTO->getStrConteudo();
+$objDocumentoDTO->setStrConteudo(null);
           //$objDocumentoDTO->setStrSinFormulario('N');
 
-          $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objDocumentoDTO->setStrSinBloqueado('S');
+$objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+$objDocumentoDTO->setStrSinBloqueado('S');
 
           //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
-          $this->atribuirComponentesDigitais($objDocumentoDTO, $objDocumento->componenteDigital);
-          $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
+$this->atribuirComponentesDigitais($objDocumentoDTO, $objDocumento->componenteDigital);
+$objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
-          $objAtividadeDTOVisualizacao = new AtividadeDTO();
-          $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
-          $objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+$objAtividadeDTOVisualizacao = new AtividadeDTO();
+$objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+$objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
-          if (!$bolReabriuAutomaticamente){
-            $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_ATENCAO);
-          }else{
-            $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_NAO_VISUALIZADO | AtividadeRN::$TV_ATENCAO);
-          }
+if (!$bolReabriuAutomaticamente){
+    $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_ATENCAO);
+}else{
+    $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_NAO_VISUALIZADO | AtividadeRN::$TV_ATENCAO);
+}
 
-          $objAtividadeRN = new AtividadeRN();
-          $objAtividadeRN->atualizarVisualizacaoUnidade($objAtividadeDTOVisualizacao);
+$objAtividadeRN = new AtividadeRN();
+$objAtividadeRN->atualizarVisualizacaoUnidade($objAtividadeDTOVisualizacao);
 
-          $objDocumento->idDocumentoSEI = $objDocumentoDTO->getDblIdDocumento();
-          $arrObjDocumentoDTO[] = $objDocumentoDTO;
+$objDocumento->idDocumentoSEI = $objDocumentoDTO->getDblIdDocumento();
+$arrObjDocumentoDTO[] = $objDocumentoDTO;
 
-          if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
-              $this->documentosRetirados[] = $objDocumento->idDocumentoSEI;
-          }
+if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
+  $this->documentosRetirados[] = $objDocumento->idDocumentoSEI;
+}
 
-        }
+}
 
-        foreach($this->documentosRetirados as $documentoCancelado){
+foreach($this->documentosRetirados as $documentoCancelado){
             //Instancia o DTO do protocolo
-            $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
-            $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
-            $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
-            $objSeiRN = new SeiRN();
-            $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
-        }
+    $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+    $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
+    $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+    $objSeiRN = new SeiRN();
+    $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+}
 
-        $objProcedimentoDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);
+$objProcedimentoDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);
 
       /*  if($numIdUnidadeAtual != $numIdUnidadeGeradora){
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $numIdUnidadeAtual);
         } */
-      }
+    }
 
     //TODO: Método deverá poderá ser transferido para a classe responsável por fazer o recebimento dos componentes digitais
-      private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
-      {
+    private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
+    {
         if(!isset($parArrObjComponentesDigitais)) {
           throw new InfraException('Componentes digitais do documento não informado.');
-        }
+      }
 
         //TODO: Aplicar mesmas validações realizadas no momento do upload de um documento InfraPagina::processarUpload
         //TODO: Avaliar a refatoração do código abaixo para impedir a duplicação de regras de negócios
 
 
-        $arrObjAnexoDTO = array();
-        if($parObjDocumentoDTO->getObjProtocoloDTO()->isSetArrObjAnexoDTO()) {
+      $arrObjAnexoDTO = array();
+      if($parObjDocumentoDTO->getObjProtocoloDTO()->isSetArrObjAnexoDTO()) {
           $arrObjAnexoDTO = $parObjDocumentoDTO->getObjProtocoloDTO()->getArrObjAnexoDTO();
-        }
+      }
 
-        if (!is_array($parArrObjComponentesDigitais)) {
+      if (!is_array($parArrObjComponentesDigitais)) {
           $parArrObjComponentesDigitais = array($parArrObjComponentesDigitais);
-        }
+      }
 
         //TODO: Tratar a ordem dos componentes digitais
         //...
 
 
-        $parObjDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
-      }
+      $parObjDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
+  }
 
-      private function atribuirAssunto(ProtocoloDTO $objProtocoloDTO, $numIdAssunto)
-      {
+  private function atribuirAssunto(ProtocoloDTO $objProtocoloDTO, $numIdAssunto)
+  {
         //TODO: Removido. Serão utilizados os tipos de procedimento enviados atribuídos ao tipo de processo externo (PEN_TIPO_PROCESSO_EXTERNO)
-      }
+  }
 
-      private function atribuirProcessosApensados(ProcedimentoDTO $objProtocoloDTO, $objProcedimento)
-      {
-        if(isset($objProcedimento->processoApensado)) {
-          if(!is_array($objProcedimento->processoApensado)){
+  private function atribuirProcessosApensados(ProcedimentoDTO $objProtocoloDTO, $objProcedimento)
+  {
+    if(isset($objProcedimento->processoApensado)) {
+        if(!is_array($objProcedimento->processoApensado)){
             $objProcedimento->processoApensado = array($objProcedimento->processoApensado);
-          }
+        }
 
-          $objProcedimentoDTOApensado = null;
-          foreach ($objProcedimento->processoApensado as $processoApensado) {
+        $objProcedimentoDTOApensado = null;
+        foreach ($objProcedimento->processoApensado as $processoApensado) {
             $objProcedimentoDTOApensado = $this->gerarProcedimento($objMetadadosProcedimento, $processoApensado);
             $this->relacionarProcedimentos($objProcedimentoDTOPrincipal, $objProcedimentoDTOApensado);
             $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTOApensado);
-          }
-        }
-      }
-
-      private function bloquearProcedimento($objProcesso){
-
-      }
-
-      private function atribuirDataHoraDeRegistro(){
-
-      }
-
-      private function cadastrarTramiteDeProcesso($objTramite, $objProcesso){
-
-      }
-
-      private function validarDadosDestinatario(InfraException $objInfraException, $objMetadadosProcedimento){
-
-        if(isset($objDestinatario)){
-          throw new InfraException("Parâmetro $objDestinatario não informado.");
-        }
-
-        $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
-
-        $objPenParametroRN = new PenParametroRN();
-        $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
-        $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
-        $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
-
-        //Validação do repositório de destino do processo
-        if($numIdRepositorioDestinoProcesso != $numIdRepositorioOrigem){
-          $objInfraException->adicionarValidacao("Identificação do repositório de origem do processo [$numIdRepositorioDestinoProcesso] não reconhecida.");
-        }
-
-        //Validação do unidade de destino do processo
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->setNumIdUnidadeRH($numeroDeIdentificacaoDaEstrutura);
-        $objUnidadeDTO->setStrSinAtivo('S');
-        $objUnidadeDTO->retNumIdUnidade();
-
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
-        if(!isset($objUnidadeDTO)){
-          $objInfraException->adicionarValidacao("Unidade [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber processos externos no sistema de destino.");
-        }
-      }
-
-      private function validarDadosRemetente(InfraException $objInfraException, $objMetadadosProcedimento){
-
-      }
-
-      private function validarDadosProcesso(InfraException $objInfraException, $objMetadadosProcedimento){
-
-      }
-
-      private function validarDadosDocumentos(InfraException $objInfraException, $objMetadadosProcedimento){
-
-      }
-
-      private function obterNivelSigiloSEI($strNivelSigiloPEN) {
-        switch ($strNivelSigiloPEN) {
-
-          case ProcessoEletronicoRN::$STA_SIGILO_PUBLICO: return ProtocoloRN::$NA_PUBLICO;
-          break;
-          case ProcessoEletronicoRN::$STA_SIGILO_RESTRITO: return ProtocoloRN::$NA_RESTRITO;
-          break;
-          case ProcessoEletronicoRN::$STA_SIGILO_SIGILOSO: return ProtocoloRN::$NA_SIGILOSO;
-          break;
-          default:
-          break;
-        }
-      }
-
-    private function obterHipoteseLegalSEI($parNumIdHipoteseLegalPEN) {
-        //Atribuí a hipótese legal
-        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $objPenParametroRN = new PenParametroRN();
-        $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
-
-        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parNumIdHipoteseLegalPEN);
-
-        if (empty($numIdHipoteseLegal)) {
-            return $numIdHipoteseLegalPadrao;
-        } else {
-            return $numIdHipoteseLegal;
         }
     }
+}
+
+
+private function validarDadosDestinatario(InfraException $objInfraException, $objMetadadosProcedimento)
+{
+    if(isset($objDestinatario)){
+      throw new InfraException("Parâmetro $objDestinatario não informado.");
+  }
+
+  $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
+
+  $objPenParametroRN = new PenParametroRN();
+  $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+  $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
+  $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
+
+        //Validação do repositório de destino do processo
+  if($numIdRepositorioDestinoProcesso != $numIdRepositorioOrigem){
+      $objInfraException->adicionarValidacao("Identificação do repositório de origem do processo [$numIdRepositorioDestinoProcesso] não reconhecida.");
+  }
+
+        //Validação do unidade de destino do processo
+  $objUnidadeDTO = new PenUnidadeDTO();
+  $objUnidadeDTO->setNumIdUnidadeRH($numeroDeIdentificacaoDaEstrutura);
+  $objUnidadeDTO->setStrSinAtivo('S');
+  $objUnidadeDTO->retNumIdUnidade();
+
+  $objUnidadeRN = new UnidadeRN();
+  $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+  if(!isset($objUnidadeDTO)){
+      $objInfraException->adicionarValidacao("Unidade [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber processos externos no sistema de destino.");
+  }
+}
+
+private function validarDadosRemetente(InfraException $objInfraException, $objMetadadosProcedimento){
+
+}
+
+private function validarDadosProcesso(InfraException $objInfraException, $objMetadadosProcedimento){
+
+}
+
+private function validarDadosDocumentos(InfraException $objInfraException, $objMetadadosProcedimento){
+
+}
+
+private function obterNivelSigiloSEI($strNivelSigiloPEN) {
+    switch ($strNivelSigiloPEN) {
+
+      case ProcessoEletronicoRN::$STA_SIGILO_PUBLICO: return ProtocoloRN::$NA_PUBLICO;
+      break;
+      case ProcessoEletronicoRN::$STA_SIGILO_RESTRITO: return ProtocoloRN::$NA_RESTRITO;
+      break;
+      case ProcessoEletronicoRN::$STA_SIGILO_SIGILOSO: return ProtocoloRN::$NA_SIGILOSO;
+      break;
+      default:
+      break;
+  }
+}
+
+private function obterHipoteseLegalSEI($parNumIdHipoteseLegalPEN) {
+        //Atribuí a hipótese legal
+    $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+    $objPenParametroRN = new PenParametroRN();
+    $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+
+    $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parNumIdHipoteseLegalPEN);
+
+    if (empty($numIdHipoteseLegal)) {
+        return $numIdHipoteseLegalPadrao;
+    } else {
+        return $numIdHipoteseLegal;
+    }
+}
 
     //TODO: Implementar o mapeamento entre as unidade do SEI e Barramento de Serviços (Secretaria de Saúde: 218794)
-      private function obterUnidadeMapeada($numIdentificacaoDaEstrutura)
-      {
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->setNumIdUnidadeRH($numIdentificacaoDaEstrutura);
-        $objUnidadeDTO->setStrSinAtivo('S');
-        $objUnidadeDTO->retNumIdUnidade();
-        $objUnidadeDTO->retNumIdOrgao();
-        $objUnidadeDTO->retStrSigla();
-        $objUnidadeDTO->retStrDescricao();
+private function obterUnidadeMapeada($numIdentificacaoDaEstrutura)
+{
+    $objUnidadeDTO = new PenUnidadeDTO();
+    $objUnidadeDTO->setNumIdUnidadeRH($numIdentificacaoDaEstrutura);
+    $objUnidadeDTO->setStrSinAtivo('S');
+    $objUnidadeDTO->retNumIdUnidade();
+    $objUnidadeDTO->retNumIdOrgao();
+    $objUnidadeDTO->retStrSigla();
+    $objUnidadeDTO->retStrDescricao();
 
-        $objUnidadeRN = new UnidadeRN();
-        return $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-      }
+    $objUnidadeRN = new UnidadeRN();
+    return $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+}
 
 
       /**
@@ -1451,9 +1424,9 @@ class ReceberProcedimentoRN extends InfraRN
           $objMapDTO->setStrPadrao('S');
           $objMapDTO->setNumMaxRegistrosRetorno(1);
           $objMapDTO = $objGenericoBD->consultar($objMapDTO);
-        }
+      }
 
-        if(!empty($objMapDTO)) {
+      if(!empty($objMapDTO)) {
           $objSerieDTO = new SerieDTO();
           $objSerieDTO->retStrNome();
           $objSerieDTO->retNumIdSerie();
@@ -1461,347 +1434,347 @@ class ReceberProcedimentoRN extends InfraRN
 
           $objSerieRN = new SerieRN();
           $objSerieDTO = $objSerieRN->consultarRN0644($objSerieDTO);
-        }
-
-        return $objSerieDTO;
       }
 
-      private function relacionarProcedimentos($objProcedimentoDTO1, $objProcedimentoDTO2)
-      {
-        if(!isset($objProcedimentoDTO1) || !isset($objProcedimentoDTO1)) {
-          throw new InfraException('Parâmetro $objProcedimentoDTO não informado.');
-        }
+      return $objSerieDTO;
+  }
 
-        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($objProcedimentoDTO2->getDblIdProcedimento());
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objProcedimentoDTO1->getDblIdProcedimento());
-        $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_RELACIONADO);
-        $objRelProtocoloProtocoloDTO->setStrMotivo(self::STR_APENSACAO_PROCEDIMENTOS);
+  private function relacionarProcedimentos($objProcedimentoDTO1, $objProcedimentoDTO2)
+  {
+    if(!isset($objProcedimentoDTO1) || !isset($objProcedimentoDTO1)) {
+      throw new InfraException('Parâmetro $objProcedimentoDTO não informado.');
+  }
 
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoRN->relacionarProcedimentoRN1020($objRelProtocoloProtocoloDTO);
-      }
+  $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+  $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($objProcedimentoDTO2->getDblIdProcedimento());
+  $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objProcedimentoDTO1->getDblIdProcedimento());
+  $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_RELACIONADO);
+  $objRelProtocoloProtocoloDTO->setStrMotivo(self::STR_APENSACAO_PROCEDIMENTOS);
+
+  $objProcedimentoRN = new ProcedimentoRN();
+  $objProcedimentoRN->relacionarProcedimentoRN1020($objRelProtocoloProtocoloDTO);
+}
 
     //TODO: Método identico ao localizado na classe SeiRN:2214
     //Refatorar código para evitar problemas de manutenção
-      private function prepararParticipantes($arrObjParticipanteDTO)
-      {
-        $objContatoRN = new ContatoRN();
-        $objUsuarioRN = new UsuarioRN();
+private function prepararParticipantes($arrObjParticipanteDTO)
+{
+    $objContatoRN = new ContatoRN();
+    $objUsuarioRN = new UsuarioRN();
 
-        foreach($arrObjParticipanteDTO as $objParticipanteDTO) {
+    foreach($arrObjParticipanteDTO as $objParticipanteDTO) {
 
-          $objContatoDTO = new ContatoDTO();
-          $objContatoDTO->retNumIdContato();
+      $objContatoDTO = new ContatoDTO();
+      $objContatoDTO->retNumIdContato();
 
-          if (!InfraString::isBolVazia($objParticipanteDTO->getStrSiglaContato()) && !InfraString::isBolVazia($objParticipanteDTO->getStrNomeContato())) {
-            $objContatoDTO->setStrSigla($objParticipanteDTO->getStrSiglaContato());
-            $objContatoDTO->setStrNome($objParticipanteDTO->getStrNomeContato());
+      if (!InfraString::isBolVazia($objParticipanteDTO->getStrSiglaContato()) && !InfraString::isBolVazia($objParticipanteDTO->getStrNomeContato())) {
+        $objContatoDTO->setStrSigla($objParticipanteDTO->getStrSiglaContato());
+        $objContatoDTO->setStrNome($objParticipanteDTO->getStrNomeContato());
 
-          }  else if (!InfraString::isBolVazia($objParticipanteDTO->getStrSiglaContato())) {
-            $objContatoDTO->setStrSigla($objParticipanteDTO->getStrSiglaContato());
+    }  else if (!InfraString::isBolVazia($objParticipanteDTO->getStrSiglaContato())) {
+        $objContatoDTO->setStrSigla($objParticipanteDTO->getStrSiglaContato());
 
-          } else if (!InfraString::isBolVazia($objParticipanteDTO->getStrNomeContato())) {
-            $objContatoDTO->setStrNome($objParticipanteDTO->getStrNomeContato());
-          } else {
-            if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_INTERESSADO) {
-              throw new InfraException('Interessado vazio ou nulo.');
-            }
-            else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_REMETENTE) {
-              throw new InfraException('Remetente vazio ou nulo.');
-            }
-            else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_DESTINATARIO) {
-              throw new InfraException('Destinatário vazio ou nulo.');
-            }
-          }
+    } else if (!InfraString::isBolVazia($objParticipanteDTO->getStrNomeContato())) {
+        $objContatoDTO->setStrNome($objParticipanteDTO->getStrNomeContato());
+    } else {
+        if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_INTERESSADO) {
+          throw new InfraException('Interessado vazio ou nulo.');
+      }
+      else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_REMETENTE) {
+          throw new InfraException('Remetente vazio ou nulo.');
+      }
+      else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_DESTINATARIO) {
+          throw new InfraException('Destinatário vazio ou nulo.');
+      }
+  }
 
-          $arrObjContatoDTO = $objContatoRN->listarRN0325($objContatoDTO);
+  $arrObjContatoDTO = $objContatoRN->listarRN0325($objContatoDTO);
 
-          if (count($arrObjContatoDTO)) {
+  if (count($arrObjContatoDTO)) {
 
-            $objContatoDTO = null;
+    $objContatoDTO = null;
 
                 //preferencia para contatos que representam usuarios
-            foreach($arrObjContatoDTO as $dto) {
+    foreach($arrObjContatoDTO as $dto) {
 
-              $objUsuarioDTO = new UsuarioDTO();
-              $objUsuarioDTO->setBolExclusaoLogica(false);
-              $objUsuarioDTO->setNumIdContato($dto->getNumIdContato());
+      $objUsuarioDTO = new UsuarioDTO();
+      $objUsuarioDTO->setBolExclusaoLogica(false);
+      $objUsuarioDTO->setNumIdContato($dto->getNumIdContato());
 
-              if ($objUsuarioRN->contarRN0492($objUsuarioDTO)) {
-                $objContatoDTO = $dto;
-                break;
-              }
-            }
+      if ($objUsuarioRN->contarRN0492($objUsuarioDTO)) {
+        $objContatoDTO = $dto;
+        break;
+    }
+}
 
                 //nao achou contato de usuario pega o primeiro retornado
-            if ($objContatoDTO==null)   {
-              $objContatoDTO = $arrObjContatoDTO[0];
-            }
-          } else {
-            $objContatoDTO = $objContatoRN->cadastrarContextoTemporario($objContatoDTO);
-          }
+if ($objContatoDTO==null)   {
+  $objContatoDTO = $arrObjContatoDTO[0];
+}
+} else {
+    $objContatoDTO = $objContatoRN->cadastrarContextoTemporario($objContatoDTO);
+}
 
-          $objParticipanteDTO->setNumIdContato($objContatoDTO->getNumIdContato());
-        }
+$objParticipanteDTO->setNumIdContato($objContatoDTO->getNumIdContato());
+}
 
-        return $arrObjParticipanteDTO;
-      }
+return $arrObjParticipanteDTO;
+}
 
-      private function registrarProcedimentoNaoVisualizado(ProcedimentoDTO $parObjProcedimentoDTO)
-      {
-        $objAtividadeDTOVisualizacao = new AtividadeDTO();
-        $objAtividadeDTOVisualizacao->setDblIdProtocolo($parObjProcedimentoDTO->getDblIdProcedimento());
-        $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_NAO_VISUALIZADO);
+private function registrarProcedimentoNaoVisualizado(ProcedimentoDTO $parObjProcedimentoDTO)
+{
+    $objAtividadeDTOVisualizacao = new AtividadeDTO();
+    $objAtividadeDTOVisualizacao->setDblIdProtocolo($parObjProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_NAO_VISUALIZADO);
 
-        $objAtividadeRN = new AtividadeRN();
-        $objAtividadeRN->atualizarVisualizacao($objAtividadeDTOVisualizacao);
-      }
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeRN->atualizarVisualizacao($objAtividadeDTOVisualizacao);
+}
 
-      private function enviarProcedimentoUnidade(ProcedimentoDTO $parObjProcedimentoDTO, $retransmissao = false)
-      {
-        $objAtividadeRN = new PenAtividadeRN();
-        $objInfraException = new InfraException();
+private function enviarProcedimentoUnidade(ProcedimentoDTO $parObjProcedimentoDTO, $retransmissao = false)
+{
+    $objAtividadeRN = new PenAtividadeRN();
+    $objInfraException = new InfraException();
 
-        if(!$parObjProcedimentoDTO->isSetArrObjUnidadeDTO() || count($parObjProcedimentoDTO->getArrObjUnidadeDTO()) == 0) {
-          $objInfraException->lancarValidacao('Unidade de destino do processo não informada.');
-        }
+    if(!$parObjProcedimentoDTO->isSetArrObjUnidadeDTO() || count($parObjProcedimentoDTO->getArrObjUnidadeDTO()) == 0) {
+      $objInfraException->lancarValidacao('Unidade de destino do processo não informada.');
+  }
 
-        $arrObjUnidadeDTO = $parObjProcedimentoDTO->getArrObjUnidadeDTO();
+  $arrObjUnidadeDTO = $parObjProcedimentoDTO->getArrObjUnidadeDTO();
 
-        if(count($parObjProcedimentoDTO->getArrObjUnidadeDTO()) > 1) {
-          $objInfraException->lancarValidacao('Não permitido a indicação de múltiplas unidades de destino para um processo recebido externamente.');
-        }
+  if(count($parObjProcedimentoDTO->getArrObjUnidadeDTO()) > 1) {
+      $objInfraException->lancarValidacao('Não permitido a indicação de múltiplas unidades de destino para um processo recebido externamente.');
+  }
 
-        $arrObjUnidadeDTO = array_values($parObjProcedimentoDTO->getArrObjUnidadeDTO());
-        $objUnidadeDTO = $arrObjUnidadeDTO[0];
+  $arrObjUnidadeDTO = array_values($parObjProcedimentoDTO->getArrObjUnidadeDTO());
+  $objUnidadeDTO = $arrObjUnidadeDTO[0];
 
-        $objProcedimentoDTO = new ProcedimentoDTO();
-        $objProcedimentoDTO->retDblIdProcedimento();
-        $objProcedimentoDTO->retNumIdTipoProcedimento();
-        $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
-        $objProcedimentoDTO->retNumIdTipoProcedimento();
-        $objProcedimentoDTO->retStrNomeTipoProcedimento();
-        $objProcedimentoDTO->retStrStaNivelAcessoGlobalProtocolo();
+  $objProcedimentoDTO = new ProcedimentoDTO();
+  $objProcedimentoDTO->retDblIdProcedimento();
+  $objProcedimentoDTO->retNumIdTipoProcedimento();
+  $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+  $objProcedimentoDTO->retNumIdTipoProcedimento();
+  $objProcedimentoDTO->retStrNomeTipoProcedimento();
+  $objProcedimentoDTO->retStrStaNivelAcessoGlobalProtocolo();
 //        $objProcedimentoDTO->retStrStaEstadoProtocolo();
-        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+  $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
 
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+  $objProcedimentoRN = new ProcedimentoRN();
+  $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
 
-        if ($objProcedimentoDTO == null || $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_SIGILOSO) {
-          $objInfraException->lancarValidacao('Processo ['.$parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'] não encontrado.');
-        }
+  if ($objProcedimentoDTO == null || $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_SIGILOSO) {
+      $objInfraException->lancarValidacao('Processo ['.$parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'] não encontrado.');
+  }
 
-        if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_RESTRITO) {
-          $objAcessoDTO = new AcessoDTO();
-          $objAcessoDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-          $objAcessoDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
+  if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA_RESTRITO) {
+      $objAcessoDTO = new AcessoDTO();
+      $objAcessoDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+      $objAcessoDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
 
-          $objAcessoRN = new AcessoRN();
-          if ($objAcessoRN->contar($objAcessoDTO)==0) {
+      $objAcessoRN = new AcessoRN();
+      if ($objAcessoRN->contar($objAcessoDTO)==0) {
           //  AVALIAR $objInfraException->adicionarValidacao('Unidade ['.$objUnidadeDTO->getStrSigla().'] não possui acesso ao processo ['.$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado().'].');
-          }
-        }
+      }
+  }
 
-        $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
-        $objPesquisaPendenciaDTO->setDblIdProtocolo(array($objProcedimentoDTO->getDblIdProcedimento()));
-        $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+  $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+  $objPesquisaPendenciaDTO->setDblIdProtocolo(array($objProcedimentoDTO->getDblIdProcedimento()));
+  $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+  $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
-        if($retransmissao){
-            $objAtividadeRN->setStatusPesquisa(false);
+  if($retransmissao){
+    $objAtividadeRN->setStatusPesquisa(false);
 
-        }
+}
 
-        $objAtividadeDTO2 = new AtividadeDTO();
-        $objAtividadeDTO2->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-        $objAtividadeDTO2->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objAtividadeDTO2->setDthConclusao(null);
+$objAtividadeDTO2 = new AtividadeDTO();
+$objAtividadeDTO2->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+$objAtividadeDTO2->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+$objAtividadeDTO2->setDthConclusao(null);
 
 
-        if ($objAtividadeRN->contarRN0035($objAtividadeDTO2) == 0) {
+if ($objAtividadeRN->contarRN0035($objAtividadeDTO2) == 0) {
 
           //reabertura automática
-          $objReabrirProcessoDTO = new ReabrirProcessoDTO();
-          $objReabrirProcessoDTO->setDblIdProcedimento($objAtividadeDTO2->getDblIdProtocolo());
-          $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-          $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+  $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+  $objReabrirProcessoDTO->setDblIdProcedimento($objAtividadeDTO2->getDblIdProtocolo());
+  $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+  $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+  $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
 
-        }
+}
 
         //$objPenAtividadeRN = new PenAtividadeRN();
-        $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+$arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
 
-        $objInfraException->lancarValidacoes();
-
-
-        $objEnviarProcessoDTO = new EnviarProcessoDTO();
-        $objEnviarProcessoDTO->setArrAtividadesOrigem($arrObjProcedimentoDTO[0]->getArrObjAtividadeDTO());
-
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-        $objAtividadeDTO->setNumIdUsuario(null);
-        $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objAtividadeDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
-        $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));
-
-        $objPenParametroRN = new PenParametroRN();
-
-        $objEnviarProcessoDTO->setStrSinManterAberto('N');
-        $strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
-        $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
-        $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
-        $objEnviarProcessoDTO->setDtaPrazo(null);
-        $objEnviarProcessoDTO->setNumDias(null);
-        $objEnviarProcessoDTO->setStrSinDiasUteis('N');
-
-        $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
-
-      }
-
-      /* Essa é a função estática de comparação */
-      static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
-      {
-        $numOrdemDocumento1 = strtolower($parDocumento1->ordem);
-        $numOrdemDocumento2 = strtolower($parDocumento2->ordem);
-        return $numOrdemDocumento1 - $numOrdemDocumento2;
-      }
+$objInfraException->lancarValidacoes();
 
 
-    public function receberTramitesRecusados($parNumIdentificacaoTramite)
-    {
-        try {
-            if (empty($parNumIdentificacaoTramite)) {
-                throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
-            }
+$objEnviarProcessoDTO = new EnviarProcessoDTO();
+$objEnviarProcessoDTO->setArrAtividadesOrigem($arrObjProcedimentoDTO[0]->getArrObjAtividadeDTO());
+
+$objAtividadeDTO = new AtividadeDTO();
+$objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+$objAtividadeDTO->setNumIdUsuario(null);
+$objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+$objAtividadeDTO->setNumIdUnidade($objUnidadeDTO->getNumIdUnidade());
+$objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+$objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));
+
+$objPenParametroRN = new PenParametroRN();
+
+$objEnviarProcessoDTO->setStrSinManterAberto('N');
+$strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
+$objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
+$objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
+$objEnviarProcessoDTO->setDtaPrazo(null);
+$objEnviarProcessoDTO->setNumDias(null);
+$objEnviarProcessoDTO->setStrSinDiasUteis('N');
+
+$objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
+
+}
+
+/* Essa é a função estática de comparação */
+static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
+{
+    $numOrdemDocumento1 = strtolower($parDocumento1->ordem);
+    $numOrdemDocumento2 = strtolower($parDocumento2->ordem);
+    return $numOrdemDocumento1 - $numOrdemDocumento2;
+}
+
+
+public function receberTramitesRecusados($parNumIdentificacaoTramite)
+{
+    try {
+        if (empty($parNumIdentificacaoTramite)) {
+            throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
+        }
 
             //Busca os dados do trâmite no barramento
-            $tramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
+        $tramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
 
-            if(!isset($tramite[0])){
-                throw new InfraException("Não foi encontrado no PEN o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
-            }
+        if(!isset($tramite[0])){
+            throw new InfraException("Não foi encontrado no PEN o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        }
 
-            $tramite = $tramite[0];
+        $tramite = $tramite[0];
 
-            $objTramiteDTO = new TramiteDTO();
-            $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
-            $objTramiteDTO->retNumIdUnidade();
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objTramiteDTO->retNumIdUnidade();
 
-            $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-            if(!isset($objTramiteDTO)){
-                throw new InfraException("Não foi encontrado no sistema o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
-            }
+        if(!isset($objTramiteDTO)){
+            throw new InfraException("Não foi encontrado no sistema o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        }
 
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
+        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
             //Busca os dados do procedimento
-            $this->gravarLogDebug("Buscando os dados de procedimento com NRE " . $tramite->NRE, 2);
-            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-            $objProcessoEletronicoDTO->setStrNumeroRegistro($tramite->NRE);
-            $objProcessoEletronicoDTO->retDblIdProcedimento();
-            $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-            $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
+        $this->gravarLogDebug("Buscando os dados de procedimento com NRE " . $tramite->NRE, 2);
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setStrNumeroRegistro($tramite->NRE);
+        $objProcessoEletronicoDTO->retDblIdProcedimento();
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
 
             //Busca a última atividade de trâmite externo
-            $this->gravarLogDebug("Buscando última atividade de trâmite externo do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento(), 2);
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-            $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
-            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-            $objAtividadeDTO->retNumIdAtividade();
-            $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
-            $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
+        $this->gravarLogDebug("Buscando última atividade de trâmite externo do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento(), 2);
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->retNumIdAtividade();
+        $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+        $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
 
             //Busca a unidade de destino
-            $this->gravarLogDebug("Buscando informações sobre a unidade de destino", 2);
-            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-            $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-            $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
-            $objAtributoAndamentoDTO->retStrValor();
-            $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
-            $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
+        $this->gravarLogDebug("Buscando informações sobre a unidade de destino", 2);
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+        $objAtributoAndamentoDTO->retStrValor();
+        $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
+        $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
 
             //Monta o DTO de receber tramite recusado
-            $this->gravarLogDebug("Preparando recebimento de trâmite " . $parNumIdentificacaoTramite . " recusado", 2);
-            $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
-            $objReceberTramiteRecusadoDTO->setNumIdTramite($parNumIdentificacaoTramite);
-            $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-            $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
-            $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
-            $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($tramite->justificativaDaRecusa));
-            $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
+        $this->gravarLogDebug("Preparando recebimento de trâmite " . $parNumIdentificacaoTramite . " recusado", 2);
+        $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
+        $objReceberTramiteRecusadoDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+        $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
+        $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
+        $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($tramite->justificativaDaRecusa));
+        $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
 
             //Faz o tratamento do processo e do trâmite recusado
-            $this->gravarLogDebug("Atualizando dados do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento() ." e do trâmite recusado " . $parNumIdentificacaoTramite, 2);
-            $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
+        $this->gravarLogDebug("Atualizando dados do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento() ." e do trâmite recusado " . $parNumIdentificacaoTramite, 2);
+        $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
 
-        } catch (Exception $e) {
-            $mensagemErro = InfraException::inspecionar($e);
-            $this->gravarLogDebug($mensagemErro);
-            LogSEI::getInstance()->gravar($mensagemErro);
-            throw $e;
-        }
+    } catch (Exception $e) {
+        $mensagemErro = InfraException::inspecionar($e);
+        $this->gravarLogDebug($mensagemErro);
+        LogSEI::getInstance()->gravar($mensagemErro);
+        throw $e;
     }
+}
 
-    protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusadoDTO $objReceberTramiteRecusadoDTO)
-    {
+protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusadoDTO $objReceberTramiteRecusadoDTO)
+{
         //Realiza o desbloqueio do processo
-        $this->gravarLogDebug("Realizando o desbloqueio do processo", 4);
-        $objProtocoloDTO = new ProtocoloDTO();
-        $objProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-        $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
-        $objProtocoloRN = new ProtocoloRN();
-        if($objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
-            $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-            $objEntradaDesbloquearProcessoAPI->setIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-            $objSeiRN = new SeiRN();
-            $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
-        } else {
-            $this->gravarLogDebug("Processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . " já se encontra desbloqueado!", 6);
-        }
+    $this->gravarLogDebug("Realizando o desbloqueio do processo", 4);
+    $objProtocoloDTO = new ProtocoloDTO();
+    $objProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+    $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
+    $objProtocoloRN = new ProtocoloRN();
+    if($objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
+        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+        $objSeiRN = new SeiRN();
+        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+    } else {
+        $this->gravarLogDebug("Processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . " já se encontra desbloqueado!", 6);
+    }
 
         //Adiciona um andamento para o trâmite recusado
-        $this->gravarLogDebug("Adicionando andamento para registro da recusa do trâmite", 4);
-        $arrObjAtributoAndamentoDTO = array();
-        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-        $objAtributoAndamentoDTO->setStrNome('MOTIVO');
-        $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrMotivoRecusa());
-        $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
-        $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+    $this->gravarLogDebug("Adicionando andamento para registro da recusa do trâmite", 4);
+    $arrObjAtributoAndamentoDTO = array();
+    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTO->setStrNome('MOTIVO');
+    $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrMotivoRecusa());
+    $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
+    $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
-        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-        $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
-        $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrNomeUnidadeDestino());
-        $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
-        $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+    $objAtributoAndamentoDTO->setStrValor($objReceberTramiteRecusadoDTO->getStrNomeUnidadeDestino());
+    $objAtributoAndamentoDTO->setStrIdOrigem($objReceberTramiteRecusadoDTO->getNumIdUnidadeOrigem());
+    $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objAtividadeDTO->setNumIdTarefa($objReceberTramiteRecusadoDTO->getNumIdTarefa());
-        $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setNumIdTarefa($objReceberTramiteRecusadoDTO->getNumIdTarefa());
+    $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
 
-        $objAtividadeRN = new AtividadeRN();
-        $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
 
         //Sinaliza na PenProtocolo que o processo obteve recusa
-        $this->gravarLogDebug("Atualizando protocolo sobre obtenção da ciência de recusa", 4);
-        $objProtocolo = new PenProtocoloDTO();
-        $objProtocolo->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-        $objProtocolo->setStrSinObteveRecusa('S');
-        $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
-        $objProtocoloBD->alterar($objProtocolo);
+    $this->gravarLogDebug("Atualizando protocolo sobre obtenção da ciência de recusa", 4);
+    $objProtocolo = new PenProtocoloDTO();
+    $objProtocolo->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+    $objProtocolo->setStrSinObteveRecusa('S');
+    $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
+    $objProtocoloBD->alterar($objProtocolo);
 
-        $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $objReceberTramiteRecusadoDTO->getNumIdTramite(), 4);
-        $this->objProcessoEletronicoRN->cienciaRecusa($objReceberTramiteRecusadoDTO->getNumIdTramite());
-    }
+    $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $objReceberTramiteRecusadoDTO->getNumIdTramite(), 4);
+    $this->objProcessoEletronicoRN->cienciaRecusa($objReceberTramiteRecusadoDTO->getNumIdTramite());
+}
 
 
     /**
@@ -1867,6 +1840,24 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.');
 
         }
+    }
+
+    private function sincronizarRecebimentoProcessos($parStrNumeroRegistro, $parNumIdentificacaoTramite)
+    {
+        $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
+        $objProcedimentoAndamentoDTO->retDblIdAndamento();
+        $objProcedimentoAndamentoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objProcedimentoAndamentoDTO->setDblIdTramite($parNumIdentificacaoTramite);
+        $objProcedimentoAndamentoDTO->setNumTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+        $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
+
+        $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
+        $objProcedimentoAndamentoDTORet = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
+
+        $this->gravarLogDebug("Sincronizando o recebimento de processos concorrentes...", 4);
+        $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->bloquear($objProcedimentoAndamentoDTORet) ? isset($objProcedimentoAndamentoDTORet) : false;
+        $this->gravarLogDebug("Liberando processo concorrente de recebimento de processo ...", 4);
+        return $objProcedimentoAndamentoDTO;
     }
 
     private function gravarLogDebug($strMensagem, $numIdentacao=0)

@@ -53,6 +53,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.8': $this->instalarV119();
                 case '1.1.9': $this->instalarV1110();
                 case '1.1.10': $this->instalarV1111();
+                case '1.1.11': $this->instalarV1112();
 
                 break;
                 default:
@@ -354,12 +355,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraSequencia = new InfraSequencia($objInfraBanco);
 
         if (!$objInfraSequencia->verificarSequencia('md_pen_procedimento_andamento')) {
-
             $objInfraSequencia->criarSequencia('md_pen_procedimento_andamento', '1', '1', '9999999999');
         }
 
         if (!$objInfraSequencia->verificarSequencia('md_pen_tramite_pendente')) {
-
             $objInfraSequencia->criarSequencia('md_pen_tramite_pendente', '1', '1', '9999999999');
         }
         //----------------------------------------------------------------------
@@ -1197,6 +1196,50 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.11');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contem atualizações da versao 1.1.12 do módulo */
+    protected function instalarV1112() {
+        $objInfraMetaBD = new InfraMetaBD($this->getObjInfraIBanco());
+
+
+        //[#22] Correção de erro de consistência no recebimento de processos com concorrência
+        $objInfraMetaBD->adicionarColuna('md_pen_tramite','sta_tipo_tramite', $objInfraMetaBD->tipoTextoFixo(1), 'null');
+        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','id_procedimento',$objInfraMetaBD->tipoNumeroGrande(),'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
+
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->retNumIdTramite();
+        $objTramiteDTO->retStrNumeroRegistro();
+
+        $objTramiteRN = new TramiteBD($this->inicializarObjInfraIBanco());
+        $arrObjTramiteDTO = $objTramiteRN->listar($objTramiteDTO);
+
+        foreach ($arrObjTramiteDTO as $objTramiteDTO) {
+            $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
+            $objProcedimentoAndamentoDTO->retDblIdAndamento();
+            $objProcedimentoAndamentoDTO->retStrNumeroRegistro();
+            $objProcedimentoAndamentoDTO->retDblIdTramite();
+            $objProcedimentoAndamentoDTO->setDblIdTramite($objTramiteDTO->getNumIdTramite());
+
+            $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
+            $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->listar($objProcedimentoAndamentoDTO);
+            foreach ($arrObjProcedimentoAndamentoDTO as $objProcedimentoAndamentoDTO) {
+
+                $objProcedimentoAndamentoDTO->setStrNumeroRegistro($objTramiteDTO->getStrNumeroRegistro());
+                $objProcedimentoAndamentoBD->alterar($objProcedimentoAndamentoDTO);
+            }
+        }
+
+        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'not null');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.12');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 

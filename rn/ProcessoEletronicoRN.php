@@ -30,6 +30,10 @@ class ProcessoEletronicoRN extends InfraRN {
   public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
   public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                           // Remetente ciente da recusa do trâmite
 
+  /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
+  public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
+  public static $STA_TIPO_TRAMITE_RECEBIMENTO = 'R'; // Trâmite de RECEBIMENTO de processo externo
+
   public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
   public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
   public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
@@ -553,9 +557,10 @@ class ProcessoEletronicoRN extends InfraRN {
 
   }
 
-  public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
+  public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
     $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProcesso, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null)
   {
+
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
       throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
     }
@@ -566,6 +571,10 @@ class ProcessoEletronicoRN extends InfraRN {
 
     if(!isset($parNumIdentificacaoTramite) || $parNumIdentificacaoTramite == 0) {
       throw new InfraException('Parâmetro $parStrNumeroRegistro não informado.');
+    }
+
+    if(!isset($parStrStaTipoTramite) || !in_array($parStrStaTipoTramite, array(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO))) {
+      throw new InfraException('Parâmetro $parStrStaTipoTramite inválio');
     }
 
     if(!isset($parNumIdRepositorioOrigem) || $parNumIdRepositorioOrigem == 0) {
@@ -624,7 +633,7 @@ class ProcessoEletronicoRN extends InfraRN {
     $objTramiteDTO->setNumIdEstruturaOrigem($parNumIdEstruturaOrigem);
     $objTramiteDTO->setNumIdRepositorioDestino($parNumIdRepositorioDestino);
     $objTramiteDTO->setNumIdEstruturaDestino($parNumIdEstruturaDestino);
-
+    $objTramiteDTO->setStrStaTipoTramite($parStrStaTipoTramite);
     $objProcessoEletronicoDTO->setArrObjTramiteDTO(array($objTramiteDTO));
 
     //Monta dados dos componentes digitais
@@ -692,7 +701,6 @@ class ProcessoEletronicoRN extends InfraRN {
     //Registra informações sobre o componente digital do documento
     $arrObjComponenteDigitalDTO = array();
     $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-
     $numOrdem = 1;
 
     foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
