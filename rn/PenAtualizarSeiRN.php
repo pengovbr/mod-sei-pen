@@ -54,6 +54,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.9': $this->instalarV1110();
                 case '1.1.10': $this->instalarV1111();
                 case '1.1.11': $this->instalarV1112();
+                case '1.1.12': $this->instalarV1113();
 
                 break;
                 default:
@@ -1204,7 +1205,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV1112() {
         $objInfraMetaBD = new InfraMetaBD($this->getObjInfraIBanco());
 
-
         //[#22] Correção de erro de consistência no recebimento de processos com concorrência
         $objInfraMetaBD->adicionarColuna('md_pen_tramite','sta_tipo_tramite', $objInfraMetaBD->tipoTextoFixo(1), 'null');
         $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','id_procedimento',$objInfraMetaBD->tipoNumeroGrande(),'null');
@@ -1240,6 +1240,111 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.12');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contem atualizações da versao 1.1.13 do módulo */
+    protected function instalarV1113()
+    {
+        //30 - Correção de erros de chave duplicada devido a concorrência de transações
+        $objInfraSequenciaRN = new InfraSequenciaRN();
+        $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+        //Sequência: md_pen_seq_procedimento_andam
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_andamento) as total from md_pen_procedimento_andamento');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_procedimento_andam', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_procedimento_andamento');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_hipotese_legal
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_hipotese_legal) as total from md_pen_hipotese_legal');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_hipotese_legal', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_hipotese_legal');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_rel_hipotese_legal
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_hipotese_legal');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_hipotese_legal', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_hipotese_legal');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_recibo_tramite_hash
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_tramite_hash) as total from md_pen_recibo_tramite_hash');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_recibo_tramite_hash', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_recibo_tramite_hash');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+        //Sequência: md_pen_seq_rel_doc_map_enviado
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_enviado');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_enviado', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_enviado');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+        //Sequência: md_pen_seq_rel_doc_map_recebid
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_recebido');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_recebid', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_recebido');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_tramite_pendente
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramite_pendente');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramite_pendente', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_tramite_pendente');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.13');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 

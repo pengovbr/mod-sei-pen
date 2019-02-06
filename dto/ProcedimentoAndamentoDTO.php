@@ -13,6 +13,10 @@ class ProcedimentoAndamentoDTO extends InfraDTO {
         return 'md_pen_procedimento_andamento';
     }
 
+    public function getStrNomeSequenciaNativa() {
+        return 'md_pen_seq_procedimento_andam';
+    }
+
     public function montar() {
 
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdAndamento', 'id_andamento');
@@ -30,7 +34,7 @@ class ProcedimentoAndamentoDTO extends InfraDTO {
         $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioDestino', 'id_repositorio_destino', 'md_pen_tramite');
         $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdEstruturaDestino', 'id_estrutura_destino', 'md_pen_tramite');
 
-        $this->configurarPK('IdAndamento', InfraDTO::$TIPO_PK_SEQUENCIAL);
+        $this->configurarPK('IdAndamento', InfraDTO::$TIPO_PK_NATIVA);
         $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OPCIONAL);
     }
 
