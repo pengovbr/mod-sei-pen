@@ -1053,7 +1053,6 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroDTO->setStrValor('1.1.13');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
-}
 
 try {
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);
