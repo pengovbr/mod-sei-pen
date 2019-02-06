@@ -54,6 +54,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.9': $this->instalarV1110();
                 case '1.1.10': $this->instalarV1111();
                 case '1.1.11': $this->instalarV1112();
+                case '1.1.12': $this->instalarV1113();
 
                 break;
                 default:
@@ -1243,4 +1244,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
+    /* Contem atualizações da versao 1.1.13 do módulo */
+    protected function instalarV1113() {
+        $objInfraMetaBD = new InfraMetaBD($this->getObjInfraIBanco());
+
+        //Fix 28 - Erro Data too long for column 'nome' at row 1
+        $objInfraMetaBD->alterarColuna('md_pen_componente_digital','nome', $objInfraMetaBD->tipoTextoVariavel(255), 'not null');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.13');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
 }
