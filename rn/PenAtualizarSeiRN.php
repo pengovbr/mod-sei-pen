@@ -1243,10 +1243,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-
-    /* Contem atualizações da versao 1.1.13 do módulo */
-    protected function instalarV1113()
+    /* Contem atualizações da versao 1.1.14 do módulo */
+    protected function instalarV1114()
     {
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+
         //30 - Correção de erros de chave duplicada devido a concorrência de transações
         $objInfraSequenciaRN = new InfraSequenciaRN();
         $objInfraSequenciaDTO = new InfraSequenciaDTO();
@@ -1339,15 +1340,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
         $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
+        //Fix 28 - Erro Data too long for column 'nome' at row 1
+        $objInfraMetaBD->alterarColuna('md_pen_componente_digital','nome', $objInfraMetaBD->tipoTextoVariavel(255), 'not null');
+
         //Fix-31 - Erro ao Configurar Campo 'numero_registro' como Not Null no Scritp de atualização
-        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
         $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
 
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->setStrValor('1.1.13');
+        $objInfraParametroDTO->setStrValor('1.1.14');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
