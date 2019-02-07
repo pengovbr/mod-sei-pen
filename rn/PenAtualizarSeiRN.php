@@ -55,6 +55,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.10': $this->instalarV1111();
                 case '1.1.11': $this->instalarV1112();
                 case '1.1.12': $this->instalarV1113();
+                case '1.1.13': $this->instalarV1114();
 
                 break;
                 default:
@@ -101,7 +102,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         return $objBD->excluir($objDTO);
     }
 
-    /* Contem atualizações da versao 1.0.0 do modulo */
+    /* Contêm atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
 
         $objInfraBanco = $this->objInfraBanco;
@@ -930,7 +931,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
     }
 
-    /* Contem atualizações da versao 1.0.1 do modulo */
+    /* Contêm atualizações da versao 1.0.1 do modulo */
     protected function instalarV101() {
         /* ---------- antigo método (instalarV008R004S006IW003) ---------- */
         $objBD = new GenericoBD(BancoSEI::getInstance());
@@ -1034,7 +1035,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.0 do modulo */
+    /* Contêm atualizações da versao 1.1.0 do modulo */
     protected function instalarV110() {
         $objMetaBD = $this->objMeta;
 
@@ -1094,7 +1095,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     }
 
-    /* Contem atualizações da versao 1.1.1 do módulo */
+    /* Contêm atualizações da versao 1.1.1 do módulo */
     protected function instalarV111() {
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
@@ -1108,7 +1109,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.7 do módulo */
+    /* Contêm atualizações da versao 1.1.7 do módulo */
     protected function instalarV117() {
 
         /* Cadastramento de novas espécies documentais */
@@ -1144,7 +1145,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.8 do módulo */
+    /* Contêm atualizações da versao 1.1.8 do módulo */
     protected function instalarV118() {
 
         $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
@@ -1167,7 +1168,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.9 do módulo */
+    /* Contêm atualizações da versao 1.1.9 do módulo */
     protected function instalarV119() {
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
@@ -1178,7 +1179,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
 
-    /* Contem atualizações da versao 1.1.10 do módulo */
+    /* Contêm atualizações da versao 1.1.10 do módulo */
     protected function instalarV1110() {
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
@@ -1188,7 +1189,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.11 do módulo */
+    /* Contêm atualizações da versao 1.1.11 do módulo */
     protected function instalarV1111() {
         BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT md_pen_processo_eletronico.id_procedimento FROM md_pen_processo_eletronico WHERE md_pen_processo_eletronico.id_procedimento = participante.id_protocolo AND participante.sta_participacao='R')");
 
@@ -1201,7 +1202,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
 
-    /* Contem atualizações da versao 1.1.12 do módulo */
+    /* Contêm atualizações da versao 1.1.12 do módulo */
     protected function instalarV1112() {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
@@ -1243,7 +1244,23 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contem atualizações da versao 1.1.14 do módulo */
+    /* Contêm atualizações da versao 1.1.13 do módulo */
+    protected function instalarV1113() {
+
+        //Fix-31 - Erro ao Configurar Campo 'numero_registro' como Not Null no Scritp de atualiza<E7><E3>o
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
+
+        //altera o par<E2>metro da vers<E3>o de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.13');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contêm atualizações da versao 1.1.14 do módulo */
     protected function instalarV1114()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -1342,9 +1359,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         //Fix 28 - Erro Data too long for column 'nome' at row 1
         $objInfraMetaBD->alterarColuna('md_pen_componente_digital','nome', $objInfraMetaBD->tipoTextoVariavel(255), 'not null');
-
-        //Fix-31 - Erro ao Configurar Campo 'numero_registro' como Not Null no Scritp de atualização
-        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
 
         //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
