@@ -54,6 +54,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.9': $this->instalarV1110();
                 case '1.1.10': $this->instalarV1111();
                 case '1.1.11': $this->instalarV1112();
+                case '1.1.12': $this->instalarV1113();
 
                 break;
                 default:
@@ -82,7 +83,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO->setStrDescricao($strDescricao);
         $objDTO->retStrNome();
 
-        $objBD = new PenParametroBD($this->getObjInfraIBanco());
+        $objBD = new PenParametroBD(BancoSEI::getInstance());
         $objDTOCadastrado = $objBD->cadastrar($objDTO);
 
         return $objDTOCadastrado->getStrNome();
@@ -96,7 +97,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO = new InfraParametroDTO();
         $objDTO->setStrNome($strNome);
 
-        $objBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objBD = new InfraParametroBD(BancoSEI::getInstance());
         return $objBD->excluir($objDTO);
     }
 
@@ -380,7 +381,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         // Especie de Documento
         //----------------------------------------------------------------------
 
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objBD = new GenericoBD(BancoSEI::getInstance());
         $objDTO = new EspecieDocumentalDTO();
 
         $fnCadastrar = function($dblIdEspecie, $strNomeEspecie, $strDescricao) use($objDTO, $objBD) {
@@ -835,7 +836,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
 
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objBD = new GenericoBD(BancoSEI::getInstance());
         $objDTO = new TarefaDTO();
 
         $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD) {
@@ -866,7 +867,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar('O trâmite externo do processo foi abortado manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
 
         /* ---------- antigo método (instalarV005R003S005IW023) ---------- */
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objBD = new GenericoBD(BancoSEI::getInstance());
 
         $objDTO = new TarefaDTO();
         $objDTO->retNumIdTarefa();
@@ -892,7 +893,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnAtualizar('PEN_OPERACAO_EXTERNA', 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
 
         /* ---------- antigo método (instalarV006R004S004WI001) ---------- */
-        $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $objInfraParametro->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
 
         /* ---------- antigo método (instalarV007R004S005WI002) ---------- */
@@ -914,7 +915,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $objMetaBD->adicionarColuna('md_pen_recibo_tramite_recebido', 'cadeia_certificado', $this->inicializarObjMetaBanco()->tipoTextoGrande(), PenMetaBD::SNULLO);
 
-        $objInfraSequencia = new InfraSequencia($this->getObjInfraIBanco());
+        $objInfraSequencia = new InfraSequencia(BancoSEI::getInstance());
         if (!$objInfraSequencia->verificarSequencia('md_pen_recibo_tramite_hash')) {
             $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
         }
@@ -923,7 +924,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
 
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroBD->cadastrar($objInfraParametroDTO);
 
         $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
@@ -932,7 +933,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.0.1 do modulo */
     protected function instalarV101() {
         /* ---------- antigo método (instalarV008R004S006IW003) ---------- */
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objBD = new GenericoBD(BancoSEI::getInstance());
 
         $objTarefaDTO = new TarefaDTO();
         $objTarefaDTO->setStrIdTarefaModulo('PEN_PROCESSO_RECEBIDO');
@@ -947,7 +948,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         /* ---------- antigo método (instalarV006R004S001US039) ---------- */
         $objMetaBD = $this->inicializarObjMetaBanco();
-        $objInfraBanco = $this->inicializarObjInfraIBanco();
+        $objInfraBanco = BancoSEI::getInstance();
 
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_hipotese_legal',
@@ -1026,7 +1027,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'Verificação se há novas hipóteses legais do barramento.');
 
         /* altera o parâmetro da versão de banco */
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.1');
@@ -1071,7 +1072,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTO = new PenParametroDTO();
         $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
         $objDTO->retStrNome();
-        $objBD = new PenParametroBD($this->getObjInfraIBanco());
+        $objBD = new PenParametroBD(BancoSEI::getInstance());
         $objDTO = $objBD->consultar($objDTO);
         if ($objDTO) {
             $objDTO->setStrDescricao('Hipótese Legal Padrão');
@@ -1085,7 +1086,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
 
         /* altera o parâmetro da versão de banco */
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.1.0');
@@ -1100,7 +1101,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
         /* altera o parâmetro da versão de banco */
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.1');
@@ -1111,7 +1112,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV117() {
 
         /* Cadastramento de novas espécies documentais */
-        $objEspecieDocumentalBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        $objEspecieDocumentalBD = new GenericoBD(BancoSEI::getInstance());
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
 
         $fnCadastrar = function($dblIdEspecie, $strNomeEspecie, $strDescricao) use($objEspecieDocumentalDTO, $objEspecieDocumentalBD) {
@@ -1136,7 +1137,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar(999, 'Outra', 'Outras espécies documentais não identificadas.');
 
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.7');
@@ -1159,7 +1160,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->adicionarColuna('md_pen_tramite','id_estrutura_destino', $objInfraMetaBD->tipoNumero(16), 'null');
 
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.8');
@@ -1169,7 +1170,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.1.9 do módulo */
     protected function instalarV119() {
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.9');
@@ -1180,7 +1181,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contem atualizações da versao 1.1.10 do módulo */
     protected function instalarV1110() {
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.10');
@@ -1192,7 +1193,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT md_pen_processo_eletronico.id_procedimento FROM md_pen_processo_eletronico WHERE md_pen_processo_eletronico.id_procedimento = participante.id_protocolo AND participante.sta_participacao='R')");
 
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.11');
@@ -1202,7 +1203,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     /* Contem atualizações da versao 1.1.12 do módulo */
     protected function instalarV1112() {
-        $objInfraMetaBD = new InfraMetaBD($this->getObjInfraIBanco());
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
 
         //[#22] Correção de erro de consistência no recebimento de processos com concorrência
@@ -1214,7 +1215,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objTramiteDTO->retNumIdTramite();
         $objTramiteDTO->retStrNumeroRegistro();
 
-        $objTramiteRN = new TramiteBD($this->inicializarObjInfraIBanco());
+        $objTramiteRN = new TramiteBD(BancoSEI::getInstance());
         $arrObjTramiteDTO = $objTramiteRN->listar($objTramiteDTO);
 
         foreach ($arrObjTramiteDTO as $objTramiteDTO) {
@@ -1224,7 +1225,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objProcedimentoAndamentoDTO->retDblIdTramite();
             $objProcedimentoAndamentoDTO->setDblIdTramite($objTramiteDTO->getNumIdTramite());
 
-            $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
+            $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
             $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->listar($objProcedimentoAndamentoDTO);
             foreach ($arrObjProcedimentoAndamentoDTO as $objProcedimentoAndamentoDTO) {
 
@@ -1233,14 +1234,31 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }
         }
 
-        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'not null');
+        //$objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'not null');
 
         //altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD($this->inicializarObjInfraIBanco());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.12');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+
+    /* Contem atualizações da versao 1.1.13 do módulo */
+    protected function instalarV1113() {
+
+        //Fix-31 - Erro ao Configurar Campo 'numero_registro' como Not Null no Scritp de atualização
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.13');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
 
 }
