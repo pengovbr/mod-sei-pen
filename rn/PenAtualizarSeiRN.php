@@ -13,6 +13,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         parent::__construct();
     }
 
+    protected function inicializarObjInfraIBanco(){
+        return BancoSEI::getInstance();
+    }
+
     protected function atualizarVersaoConectado() {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
@@ -1251,14 +1255,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
         $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
 
-        //altera o par<E2>metro da vers<E3>o de banco
+        //altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.13');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
-
 
     /* Contêm atualizações da versao 1.1.14 do módulo */
     protected function instalarV1114()
