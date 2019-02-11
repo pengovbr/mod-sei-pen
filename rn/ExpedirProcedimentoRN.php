@@ -122,7 +122,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     $numIdTramite = 0;
 
-
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);

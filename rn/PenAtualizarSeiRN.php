@@ -23,26 +23,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             //testando se esta usando BDs suportados
             if (!(BancoSEI::getInstance() instanceof InfraMySql) &&
-                    !(BancoSEI::getInstance() instanceof InfraSqlServer) &&
-                    !(BancoSEI::getInstance() instanceof InfraOracle)) {
+                !(BancoSEI::getInstance() instanceof InfraSqlServer) &&
+                !(BancoSEI::getInstance() instanceof InfraOracle)) {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSEI::getInstance()), true);
-            }
+        }
 
             //testando permissoes de criações de tabelas
-            $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-            if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
-                BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
-            }
-            BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
+        if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
+            BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
+        }
+        BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
 
-            $objInfraParametro = new InfraParametro($this->objInfraBanco);
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
-            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-            switch ($strVersaoModuloPen) {
+        $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        switch ($strVersaoModuloPen) {
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
                 case '1.0.1': $this->instalarV110();
@@ -63,8 +63,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 break;
                 default:
-                    $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
-                    break;
+                $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
+                break;
             }
 
             $this->finalizar('FIM');
@@ -109,7 +109,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contêm atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
 
-        $objInfraBanco = $this->objInfraBanco;
+        $objInfraBanco = BancoSEI::getInstance();
         $objMetaBD = $this->objMeta;
 
         $objMetaBD->criarTabela(array(
@@ -122,7 +122,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'uk' => array('numero_registro', 'id_procedimento'),
             'fks' => array(
                 'procedimento' => array('nome' => 'fk_md_pen_proc_eletr_procedim',
-                                        'cols' => array('id_procedimento', 'id_procedimento')),
+                    'cols' => array('id_procedimento', 'id_procedimento')),
             )
         ));
 
@@ -142,7 +142,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'uk' => array('numero_registro', 'id_tramite'),
             'fks' => array(
                 'md_pen_processo_eletronico' => array('nome'=>'fk_md_pen_tramite_proc_eletr',
-                                                      'cols' => array('numero_registro', 'numero_registro')),
+                  'cols' => array('numero_registro', 'numero_registro')),
                 'usuario' => array('id_usuario', 'id_usuario'),
                 'unidade' => array('id_unidade', 'id_unidade'),
             )
@@ -222,7 +222,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'pk' => array('cols'=>array('numero_registro', 'id_tramite')),
             'fks' => array(
                 'md_pen_tramite' => array('nome' => 'fk_md_pen_rec_tramite_tramite',
-                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
+                  'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
@@ -238,7 +238,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'pk' => array('nome' => 'pk_md_pen_recibo_tram_envia', 'cols'=>array('numero_registro', 'id_tramite')),
             'fks' => array(
                 'md_pen_tramite' => array('nome' => 'fk_md_pen_rec_tram_env_tram',
-                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
+                  'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
@@ -254,7 +254,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'pk' => array('nome' => 'pk_md_pen_recibo_tramite_receb', 'cols'=>array('numero_registro', 'id_tramite', 'hash_assinatura')),
             'fks' => array(
                 'md_pen_tramite' => array('nome' => 'fk_md_pen_recibo_receb_tram',
-                                          'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
+                  'cols' => array(array('numero_registro', 'id_tramite'), array('numero_registro', 'id_tramite')))
             )
         ));
 
@@ -269,7 +269,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'pk' => array('nome' => 'pk_md_pen_rel_processo_apensad', 'cols'=>array('numero_registro', 'id_procedimento_apensado')),
             'fks' => array(
                 'md_pen_processo_eletronico' => array('nome' => 'fk_md_pen_proc_eletr_apensado',
-                                                      'cols' => array('numero_registro', 'numero_registro'))
+                  'cols' => array('numero_registro', 'numero_registro'))
             )
         ));
 
@@ -1152,7 +1152,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /* Contêm atualizações da versao 1.1.8 do módulo */
     protected function instalarV118() {
 
-        $objInfraMetaBD = new InfraMetaBD($this->objInfraBanco);
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
         //Correção de chave primária para considerar campo de tipo de recibo
         $objInfraMetaBD->excluirChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado');
@@ -1267,6 +1267,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV1114()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+
+        #[Fix-35] Correção de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
+        $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', array('id_serie'), true);
+        $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_recebido', 'ak1_rel_doc_map_recebido', array('codigo_especie'), true);
 
         //30 - Correção de erros de chave duplicada devido a concorrência de transações
         $objInfraSequenciaRN = new InfraSequenciaRN();
