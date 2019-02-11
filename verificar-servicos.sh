@@ -3,35 +3,34 @@
 PATH=/usr/bin:/sbin:/bin:/usr/sbin
 export PATH
 
-if $(service gearmand status | grep -qv "running") ; then
-        service gearmand start;
-        LOG="Servico gearman foi iniciado"
+GEARMAN=$(ls /etc/init.d | grep -owih gearman.* | grep -v job)
+ps cax | grep -ih gearman.* | grep -v job > /dev/null
+if [ $? -ne 0 ]; then
+	/etc/init.d/$GEARMAN start;
+        echo "Serviço gearman foi iniciado"
 fi
 
-if $(service supervisord status | grep -qv "running") ; then
-        service supervisord start;
-        LOG="Servico supervisor foi iniciado"
+
+SUPERVISOR=$(ls /etc/init.d | grep -owih supervisor.*)
+ps cax | grep -ih supervisor.* > /dev/null
+if [ $? -ne 0 ]; then
+        /etc/init.d/$SUPERVISOR start;
+        echo "Serviço supervisor foi iniciado"
 else
 
-        COMMAND=$(ps -C php -f | grep -o "PendenciasTramiteRN.php");
-
+	COMMAND=$(ps -C php -f | grep -o "PendenciasTramiteRN.php");
         if [ -z "$COMMAND" ]
         then
-                service supervisord restart;
-                LOG="Servico supervisor foi reiniciado"
+                /etc/init.d/$SUPERVISOR stop;
+                /etc/init.d/$SUPERVISOR start;
+                echo "Serviço supervisor foi reiniciado"
         fi
 
         COMMAND=$(ps -C php -f | grep -o "ProcessarPendenciasRN.php");
-
         if [ -z "$COMMAND" ]
         then
-                service supervisord restart;
-                LOG="Servico supervisor foi reiniciado"
+                /etc/init.d/$SUPERVISOR stop;
+                /etc/init.d/$SUPERVISOR start;
+                echo "Serviço supervisor foi reiniciado"
         fi
-fi
-
-if [ -n "$LOG" ]
-then
-        #/usr/bin/php console.php log --msg="$LOG" > /dev/null
-        echo $LOG
 fi
