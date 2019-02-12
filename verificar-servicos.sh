@@ -8,9 +8,9 @@ if [[ -z $GEARMAN ]]; then
 	echo "ERROR: Instalação do Gearman não pode ser localizada." 	
 	exit 1
 else
-	ps cax | grep -ih gearman.* | grep -v job > /dev/null
+	ps cax | grep -ih gearman.* > /dev/null
 	if [ $? -ne 0 ]; then
-                echo "Gearman: Iniciando serviço de gerenciamento de fila de tarefas..."
+        echo "Gearman: Iniciando serviço de gerenciamento de fila de tarefas..."
 		/etc/init.d/$GEARMAN start;	        
 	fi
 fi
@@ -22,24 +22,22 @@ if [[ -z $SUPERVISOR ]]; then
 else
 	ps cax | grep -ih supervisor.* > /dev/null
 	if [ $? -ne 0 ]; then
-                echo "Supervisor: Iniciando serviço de monitoramento dos processos de integração..."
+            echo "Supervisor: Iniciando serviço de monitoramento dos processos de integração..."
         	/etc/init.d/$SUPERVISOR start;
 	else
 	
-		COMMAND=$(ps -C php -f | grep -o "PendenciasTramiteRN.php");
-	        if [ -z "$COMMAND" ]
-	        then
-                        echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração..."
-        	        /etc/init.d/$SUPERVISOR stop;
-	                /etc/init.d/$SUPERVISOR start;                        
-	        fi
+	    COMMAND=$(ps -C php -f | grep -o "PendenciasTramiteRN.php");
+	    if [ -z "$COMMAND" ]; then
+            echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração..."
+            /etc/init.d/$SUPERVISOR stop;
+            /etc/init.d/$SUPERVISOR start;                 
+	    fi
 	
-	        COMMAND=$(ps -C php -f | grep -o "ProcessarPendenciasRN.php");
-	        if [ -z "$COMMAND" ]
-	        then
-                        echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração..."
-	                /etc/init.d/$SUPERVISOR stop;
-	                /etc/init.d/$SUPERVISOR start;	                
-	        fi
+        COMMAND=$(ps -C php -f | grep -o "ProcessarPendenciasRN.php");
+        if [ -z "$COMMAND" ]; then
+            echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração..."
+	        /etc/init.d/$SUPERVISOR stop;
+	        /etc/init.d/$SUPERVISOR start;	                
+	    fi
 	fi
 fi
