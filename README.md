@@ -84,9 +84,12 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         startretries=3
         log_stdout=true
         log_stderr=true
-        logfile=/var/log/supervisor/sei_processar_pendencias.log
-        logfile_maxbytes=10MB
         logfile_backups=50
+        logfile_maxbytes=10MB
+        logfile=/var/log/supervisor/sei_processar_pendencias.log
+        stdout_logfile=/var/log/supervisor/sei_processar_pendencias.log-out
+        stderr_logfile=/var/log/supervisor/sei_processar_pendencias.log-err
+        stderr_events_enabled=true
 
 
         [program:sei_monitorar_pendencias]
@@ -100,9 +103,12 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         startretries=3
         log_stdout=true
         log_stderr=true
-        logfile=/var/log/supervisor/sei_monitorar_pendencias.log
         logfile_maxbytes=10MB
         logfile_backups=50
+        logfile=/var/log/supervisor/sei_monitorar_pendencias.log
+        stdout_logfile=/var/log/supervisor/sei_monitorar_pendencias.log-out
+        stderr_logfile=/var/log/supervisor/sei_monitorar_pendencias.log-err
+        stderr_events_enabled=true
 
 
 4. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades.
