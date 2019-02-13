@@ -1268,6 +1268,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
+        SessaoSEI::getInstance(false)->simularLogin(SessaoSEI::$USUARIO_SEI, SessaoSEI::$UNIDADE_TESTE);
+        SessaoInfra::setObjInfraSessao(SessaoSEI::getInstance());
+        BancoInfra::setObjInfraIBanco(BancoSEI::getInstance());
+
         #[Fix-35] Correção de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
         $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', array('id_serie'), true);
         $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_recebido', 'ak1_rel_doc_map_recebido', array('codigo_especie'), true);
