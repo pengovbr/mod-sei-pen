@@ -344,19 +344,20 @@ class ReceberProcedimentoRN extends InfraRN
         $objPenParametroRN = new PenParametroRN();
         $numTamDocExterno = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
-
         foreach($arrObjDocumentos as $objDocument) {
-            if (is_null($objDocument->componenteDigital->tamanhoEmBytes) || $objDocument->componenteDigital->tamanhoEmBytes == 0){
-                throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
 
-            }
+            //Não valida informações do componente digital caso o documento esteja cancelado
+            if(isset($objDocumento->retirado) && $objDocumento->retirado === true){
+                if (is_null($objDocument->componenteDigital->tamanhoEmBytes) || $objDocument->componenteDigital->tamanhoEmBytes == 0){
+                    throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+                }
 
-            if($objDocument->componenteDigital->tamanhoEmBytes > ($numTamDocExterno * 1024 * 1024)){
+                if($objDocument->componenteDigital->tamanhoEmBytes > ($numTamDocExterno * 1024 * 1024)){
+                    $numTamanhoMb = $objDocument->componenteDigital->tamanhoEmBytes / ( 1024 * 1024);
+                    $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, 'Componente digital não pode ultrapassar '.round($numTamDocExterno, 2).'MBs, o tamanho do anexo é '.round($numTamanhoMb, 2).'MBs .', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+                    throw new InfraException('Componente digital não pode ultrapassar '.round($numTamDocExterno, 2).'MBs, o tamanho do anexo é '.round($numTamanhoMb).'MBs');
 
-                $numTamanhoMb = $objDocument->componenteDigital->tamanhoEmBytes / ( 1024 * 1024);
-                $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, 'Componente digital não pode ultrapassar '.$numTamDocExterno.', o tamanho do anexo é '.$numTamanhoMb.' .', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
-                throw new InfraException('Componente digital não pode ultrapassar '.$numTamDocExterno.', o tamanho do anexo é '.$numTamanhoMb);
-
+                }
             }
         }
 
