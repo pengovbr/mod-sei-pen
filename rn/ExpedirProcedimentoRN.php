@@ -976,7 +976,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     $objComponenteDigital = $this->consultarComponenteDigital($objDocumentoDTO->getDblIdDocumento());
     $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
     if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
-        $hashDoComponenteDigital = $arrInformacaoArquivo['CONTEUDO_LEGADO'];
+        $strConteudoAssinaturaLegado = $arrInformacaoArquivo['CONTEUDO_LEGADO'];
+        $hashDoComponenteDigital = hash($strAlgoritmoHash, $strConteudoAssinaturaLegado, true);
+        $hashDoComponenteDigital = base64_encode($hashDoComponenteDigital);
     }
 
     //TODO: Revisar tal implementao para atender a gerao de hash de arquivos grandes
