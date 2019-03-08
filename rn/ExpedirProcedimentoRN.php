@@ -695,7 +695,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objProcedimentoHistoricoDTO = new ProcedimentoHistoricoDTO();
         $objProcedimentoHistoricoDTO->setDblIdProcedimento($dblIdProcedimento);
-        $objProcedimentoHistoricoDTO->setStrStaHistorico(ProcedimentoRN::$TH_PERSONALIZADO);
+        $objProcedimentoHistoricoDTO->setStrStaHistorico(ProcedimentoRN::$TH_TOTAL);
         $objProcedimentoHistoricoDTO->adicionarCriterio(array('IdTarefa','IdTarefa'), array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL), array(TarefaRN::$TI_GERACAO_PROCEDIMENTO, ProcessoeletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), InfraDTO::$OPER_LOGICO_OR);
         $objProcedimentoHistoricoDTO->setStrSinGerarLinksHistorico('N');
         $objProcedimentoHistoricoDTO->setNumMaxRegistrosRetorno(1);
@@ -703,7 +703,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if(isset($dblIdDocumento)){
             $objProcedimentoHistoricoDTO->setDblIdDocumento($dblIdDocumento);
-            $objProcedimentoHistoricoDTO->setNumIdTarefa(array(TarefaRN::$TI_GERACAO_DOCUMENTO, TarefaRN::$TI_RECEBIMENTO_DOCUMENTO), InfraDTO::$OPER_IN);
+            $objProcedimentoHistoricoDTO->setNumIdTarefa(array(TarefaRN::$TI_GERACAO_DOCUMENTO, TarefaRN::$TI_RECEBIMENTO_DOCUMENTO, TarefaRN::$TI_DOCUMENTO_MOVIDO_DO_PROCESSO), InfraDTO::$OPER_IN);
         }
 
         $objProcedimentoDTOHistorico = $this->objProcedimentoRN->consultarHistoricoRN1025($objProcedimentoHistoricoDTO);
