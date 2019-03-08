@@ -61,6 +61,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.12': $this->instalarV1113();
                 case '1.1.13': $this->instalarV1114();
                 case '1.1.14': $this->instalarV1115();
+                case '1.1.15': $this->instalarV1116();
 
                 break;
                 default:
@@ -1393,6 +1394,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.15');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contêm atualizações da versao 1.1.16 do módulo */
+    protected function instalarV1116() {
+
+        //Fix-31 - Erro ao Configurar Campo 'numero_registro' como Not Null no Scritp de atualiza<E7><E3>o
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento','numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.16');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
