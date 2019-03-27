@@ -62,6 +62,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.13': $this->instalarV1114();
                 case '1.1.14': $this->instalarV1115();
                 case '1.1.15': $this->instalarV1116();
+                case '1.1.16': $this->instalarV1117();
 
                 break;
                 default:
@@ -1409,6 +1410,95 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.16');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contêm atualizações da versao 1.1.17 do módulo */
+    protected function instalarV1117() {
+
+        // Definição de função anônima responsável por realizar as seguintes tarefas:
+        //  (1) Identificar a tarefa com ID conflitante do SEI
+        //  (2) Criar nova tarefa identica mas com ID correto dentro das faixas definidas pelo SEI (maior que 1000)
+        //  (3) Atualizar o id_tarefa de todas as atividades relacionadas
+        //  (4) Remover a tarefa anterior com ID inválido
+        //  (5) Atualizar o campo id_tarefa_modulo com o valor correspondente
+        $fnCadastrar = function($numIdTarefa, $strIdTarefaModulo) {
+
+            // Identificar a tarefa com ID conflitante do SEI
+            $objTarefaRN = new TarefaRN();
+            $objTarefaBD = new TarefaBD(BancoSEI::getInstance());
+            $objTarefaDTOAntigo = new TarefaDTO();
+            $objTarefaDTOAntigo->retTodos();
+            $objTarefaDTOAntigo->setStrIdTarefaModulo($strIdTarefaModulo);
+            $objTarefaDTOAntigo = $objTarefaBD->consultar($objTarefaDTOAntigo);
+
+            if(isset($objTarefaDTOAntigo)) {
+                try {
+                    // Criar nova tarefa identica mas com ID correto dentro das faixas definidas pelo SEI (maior que 1000)
+                    InfraDebug::getInstance()->gravar("Duplicando tarefa customizadas $strIdTarefaModulo utilizando o controle de sequência 1000");
+                    $objTarefaDTO = new TarefaDTO();
+                    $objTarefaDTO->setNumIdTarefa($numIdTarefa);
+                    $objTarefaDTO->setStrNome($objTarefaDTOAntigo->getStrNome());
+                    $objTarefaDTO->setStrSinHistoricoResumido($objTarefaDTOAntigo->getStrSinHistoricoResumido());
+                    $objTarefaDTO->setStrSinHistoricoCompleto($objTarefaDTOAntigo->getStrSinHistoricoCompleto());
+                    $objTarefaDTO->setStrSinFecharAndamentosAbertos($objTarefaDTOAntigo->getStrSinFecharAndamentosAbertos());
+                    $objTarefaDTO->setStrSinLancarAndamentoFechado($objTarefaDTOAntigo->getStrSinLancarAndamentoFechado());
+                    $objTarefaDTO->setStrSinPermiteProcessoFechado($objTarefaDTOAntigo->getStrSinPermiteProcessoFechado());
+                    $objTarefaDTO->setStrIdTarefaModulo(null);
+                    $objTarefaBD->cadastrar($objTarefaDTO);
+
+                    // Atualizar o id_tarefa de todas as atividades relacionadas
+                    InfraDebug::getInstance()->gravar("Atualizando atividades com chave da nova tarefa $strIdTarefaModulo");
+                    $numIdTarefaAnterior = $objTarefaDTOAntigo->getNumIdTarefa();
+                    BancoSEI::getInstance()->executarSql("UPDATE atividade SET id_tarefa = $numIdTarefa where id_tarefa = $numIdTarefaAnterior");
+
+                    // Remover a tarefa anterior com ID inválido
+                    InfraDebug::getInstance()->gravar("Apagando a tarefa anterior $strIdTarefaModulo");
+                    $objTarefaBD->excluir($objTarefaDTOAntigo);
+
+                    // Atualizar o campo id_tarefa_modulo com o valor correspondente
+                    $objTarefaDTOUpdate = new TarefaDTO();
+                    $objTarefaDTOUpdate->setNumIdTarefa($numIdTarefa);
+                    $objTarefaDTOUpdate->setStrIdTarefaModulo($strIdTarefaModulo);
+                    $objTarefaBD->alterar($objTarefaDTOUpdate);
+
+                } catch (Exception $e) {
+                    throw new InfraException($e);
+                }
+            }
+        };
+
+        $rsTabelaTarefa = BancoSEI::getInstance()->consultarSql('select max(id_tarefa) as ultimo from tarefa');
+        $numMaxId = $rsTabelaTarefa[0]['ultimo'];
+        if (!isset($numMaxId) || $numMaxId < 1000){
+            $numMaxId = 1000;
+        }
+
+        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_EXPEDIDO');
+        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_RECEBIDO');
+        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_RECUSADO');
+        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_CANCELADO');
+        $fnCadastrar($numMaxId++, 'PEN_OPERACAO_EXTERNA');
+        $fnCadastrar($numMaxId++, 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
+
+        InfraDebug::getInstance()->gravar('Atualizando sequencia da tabela TAREFA');
+        $rsTabelaTarefa = BancoSEI::getInstance()->consultarSql('select max(id_tarefa) as ultimo from tarefa');
+        if ($rsTabelaTarefa[0]['ultimo'] !== null){
+            $rsSeq = BancoSEI::getInstance()->consultarSql('select max(id) as ultimo from seq_tarefa');
+
+            if (($rsTabelaTarefa[0]['ultimo'] > $rsSeq[0]['ultimo']) || $rsSeq[0]['ultimo'] === null){
+                BancoSEI::getInstance()->executarSql('alter table seq_tarefa AUTO_INCREMENT = ' . ($rsTabelaTarefa[0]['ultimo'] + 1));
+            }
+
+            BancoSEI::getInstance()->executarSql('INSERT INTO seq_tarefa (campo) VALUES (null)');
+            $rsSeq = BancoSEI::getInstance()->consultarSql('select max(id) as ultimo from seq_tarefa');
+        }
+
+        //Altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.1.17');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
