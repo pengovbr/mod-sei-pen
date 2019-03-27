@@ -1472,27 +1472,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $numMaxId = $rsTabelaTarefa[0]['ultimo'];
         if (!isset($numMaxId) || $numMaxId < 1000){
             $numMaxId = 1000;
+            die("BINGO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
 
-        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_EXPEDIDO');
-        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_RECEBIDO');
-        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_RECUSADO');
-        $fnCadastrar($numMaxId++, 'PEN_PROCESSO_CANCELADO');
-        $fnCadastrar($numMaxId++, 'PEN_OPERACAO_EXTERNA');
-        $fnCadastrar($numMaxId++, 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
+        $fnCadastrar(++$numMaxId, 'PEN_PROCESSO_EXPEDIDO');
+        $fnCadastrar(++$numMaxId, 'PEN_PROCESSO_RECEBIDO');
+        $fnCadastrar(++$numMaxId, 'PEN_PROCESSO_RECUSADO');
+        $fnCadastrar(++$numMaxId, 'PEN_PROCESSO_CANCELADO');
+        $fnCadastrar(++$numMaxId, 'PEN_OPERACAO_EXTERNA');
+        $fnCadastrar(++$numMaxId, 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
 
-        InfraDebug::getInstance()->gravar('Atualizando sequencia da tabela TAREFA');
-        $rsTabelaTarefa = BancoSEI::getInstance()->consultarSql('select max(id_tarefa) as ultimo from tarefa');
-        if ($rsTabelaTarefa[0]['ultimo'] !== null){
-            $rsSeq = BancoSEI::getInstance()->consultarSql('select max(id) as ultimo from seq_tarefa');
-
-            if (($rsTabelaTarefa[0]['ultimo'] > $rsSeq[0]['ultimo']) || $rsSeq[0]['ultimo'] === null){
-                BancoSEI::getInstance()->executarSql('alter table seq_tarefa AUTO_INCREMENT = ' . ($rsTabelaTarefa[0]['ultimo'] + 1));
-            }
-
-            BancoSEI::getInstance()->executarSql('INSERT INTO seq_tarefa (campo) VALUES (null)');
-            $rsSeq = BancoSEI::getInstance()->consultarSql('select max(id) as ultimo from seq_tarefa');
-        }
+        InfraDebug::getInstance()->gravar('Atualizando sequência das tabelas do sistema');
+        $objVersaoRN = new VersaoRN();
+        $objVersaoRN->atualizarSequencias();
 
         //Altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
