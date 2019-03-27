@@ -1409,31 +1409,64 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $idProcedimento não informado.');
         }
 
-        $documentoDTO = new DocumentoDTO();
-        $documentoDTO->setDblIdProcedimento($idProcedimento);
-        $documentoDTO->retStrDescricaoUnidadeGeradoraProtocolo();
-        $documentoDTO->retNumIdOrgaoUnidadeGeradoraProtocolo();
-        $documentoDTO->retStrSiglaUnidadeGeradoraProtocolo();
-        $documentoDTO->retStrStaNivelAcessoLocalProtocolo();
-        $documentoDTO->retStrProtocoloDocumentoFormatado();
-        $documentoDTO->retStrStaEstadoProtocolo();
-        $documentoDTO->retNumIdUsuarioGeradorProtocolo();
-        $documentoDTO->retStrStaProtocoloProtocolo();
-        $documentoDTO->retNumIdUnidadeResponsavel();
-        $documentoDTO->retStrDescricaoProtocolo();
-        $documentoDTO->retDtaGeracaoProtocolo();
-        $documentoDTO->retDblIdProcedimento();
-        $documentoDTO->retDblIdDocumento();
-        $documentoDTO->retStrNomeSerie();
-        $documentoDTO->retNumIdSerie();
-        $documentoDTO->retStrConteudoAssinatura();
-        $documentoDTO->retStrNumero();
-        $documentoDTO->retNumIdTipoConferencia();
-        $documentoDTO->retStrStaDocumento();
-        $documentoDTO->retNumIdHipoteseLegalProtocolo();
-        $documentoDTO->setOrdStrProtocoloDocumentoFormatado(InfraDTO::$TIPO_ORDENACAO_ASC);
+        //Recupera toda a lista de documentos vinculados ao processo, considerando a ordenação definida pelo usuário
+        $arrTipoAssociacao = array(RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+        $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
+        $objRelProtocoloProtocoloDTO->retDblIdProtocolo1();
+        $objRelProtocoloProtocoloDTO->retDblIdProtocolo2();
+        $objRelProtocoloProtocoloDTO->retStrStaAssociacao();
+        $objRelProtocoloProtocoloDTO->setStrStaAssociacao($arrTipoAssociacao, InfraDTO::$OPER_IN);
+        $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($idProcedimento);
+        $objRelProtocoloProtocoloDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-        return $this->objDocumentoRN->listarRN0008($documentoDTO);
+        $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+        $arrObjRelProtocoloProtocoloDTO = $objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO);
+
+        $arrIdDocumentos = array();
+        foreach($arrObjRelProtocoloProtocoloDTO as $objRelProtocoloProtocoloDTO) {
+            if ($objRelProtocoloProtocoloDTO->getStrStaAssociacao()==RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO ||
+                $objRelProtocoloProtocoloDTO->getStrStaAssociacao()==RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
+
+                $arrIdDocumentos[] = $objRelProtocoloProtocoloDTO->getDblIdProtocolo2();
+            }
+        }
+
+        $objDocumentoDTO = new DocumentoDTO();
+        $objDocumentoDTO->retStrDescricaoUnidadeGeradoraProtocolo();
+        $objDocumentoDTO->retNumIdOrgaoUnidadeGeradoraProtocolo();
+        $objDocumentoDTO->retStrSiglaUnidadeGeradoraProtocolo();
+        $objDocumentoDTO->retStrStaNivelAcessoLocalProtocolo();
+        $objDocumentoDTO->retStrProtocoloDocumentoFormatado();
+        $objDocumentoDTO->retStrStaEstadoProtocolo();
+        $objDocumentoDTO->retNumIdUsuarioGeradorProtocolo();
+        $objDocumentoDTO->retStrStaProtocoloProtocolo();
+        $objDocumentoDTO->retNumIdUnidadeResponsavel();
+        $objDocumentoDTO->retStrDescricaoProtocolo();
+        $objDocumentoDTO->retDtaGeracaoProtocolo();
+        $objDocumentoDTO->retDblIdProcedimento();
+        $objDocumentoDTO->retDblIdDocumento();
+        $objDocumentoDTO->retStrNomeSerie();
+        $objDocumentoDTO->retNumIdSerie();
+        $objDocumentoDTO->retStrConteudoAssinatura();
+        $objDocumentoDTO->retStrNumero();
+        $objDocumentoDTO->retNumIdTipoConferencia();
+        $objDocumentoDTO->retStrStaDocumento();
+        $objDocumentoDTO->retNumIdHipoteseLegalProtocolo();
+        $objDocumentoDTO->setDblIdDocumento($arrIdDocumentos, InfraDTO::$OPER_IN);
+
+        $arrObjDocumentoDTOBanco = $this->objDocumentoRN->listarRN0008($objDocumentoDTO);
+        $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
+
+        //Mantem ordenação definida pelo usuário
+        $arrObjDocumentoDTO = array();
+        foreach($arrIdDocumentos as $dblIdDocumento){
+            if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
+                $arrObjDocumentoDTO[$dblIdDocumento] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+            }
+        }
+
+        return $arrObjDocumentoDTO;
     }
 
     /**
