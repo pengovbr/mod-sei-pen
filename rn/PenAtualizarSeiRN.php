@@ -1472,7 +1472,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $numMaxId = $rsTabelaTarefa[0]['ultimo'];
         if (!isset($numMaxId) || $numMaxId < 1000){
             $numMaxId = 1000;
-            die("BINGO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
 
         $fnCadastrar(++$numMaxId, 'PEN_PROCESSO_EXPEDIDO');
