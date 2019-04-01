@@ -27,22 +27,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 !(BancoSEI::getInstance() instanceof InfraOracle)) {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSEI::getInstance()), true);
-        }
+            }
+
+            PENIntegracao::validarCompatibilidadeModulo();
 
             //testando permissoes de criações de tabelas
-        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+            $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-        if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
-            BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
-        }
-        BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
+            if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
+                BancoSEI::getInstance()->executarSql('CREATE TABLE pen_sei_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
+            }
+            BancoSEI::getInstance()->executarSql('DROP TABLE pen_sei_teste');
 
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
-        $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-        switch ($strVersaoModuloPen) {
+            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+            switch ($strVersaoModuloPen) {
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
                 case '1.0.1': $this->instalarV110();
@@ -63,6 +65,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.14': $this->instalarV1115();
                 case '1.1.15': $this->instalarV1116();
                 case '1.1.16': $this->instalarV1117();
+                case '1.1.17': $this->instalarV1200();
 
                 break;
                 default:
@@ -1482,14 +1485,50 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $fnCadastrar(++$numMaxId, 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
 
         InfraDebug::getInstance()->gravar('Atualizando sequência das tabelas do sistema');
-        $objVersaoRN = new VersaoRN();
-        $objVersaoRN->atualizarSequencias();
+
+
+        //Na versão 3.1.0 do SEI, houve uma mudança na rotina de atualização das sequences do banco de dados,
+        //deixando de se utilizar a classe VersaoRN para utilizar a nova classe ScriptRN.
+        //Devido a esta mudança, é necessário avaliar qual a atual versão do SEI executar a rotina correta
+
+        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.1.0 -> 030100)
+        $numVersaoAtualSEI = explode('.', SEI_VERSAO);
+        $numVersaoAtualSEI = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtualSEI);
+        $numVersaoAtualSEI = intval(join($numVersaoAtualSEI));
+
+        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.1.0 -> 030100)
+        $numVersaoMudancaAtualizarSequencias = explode('.', '3.1.0');
+        $numVersaoMudancaAtualizarSequencias = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoMudancaAtualizarSequencias);
+        $numVersaoMudancaAtualizarSequencias = intval(join($numVersaoMudancaAtualizarSequencias));
+
+        if($numVersaoMudancaAtualizarSequencias >= $numVersaoAtualSEI){
+            //Procedimento de atualização de sequências compatível com SEI 3.1.X
+            $objScriptRN = new ScriptRN();
+            $objScriptRN->atualizarSequencias();
+        } else {
+            //Procedimento de atualização de sequências compatível com SEI 3.0.X
+            $objVersaoRN = new VersaoRN();
+            $objVersaoRN->atualizarSequencias();
+        }
+
 
         //Altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.1.17');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contêm atualizações da versao 1.2.0 do módulo */
+    protected function instalarV1200()
+    {
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.2.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

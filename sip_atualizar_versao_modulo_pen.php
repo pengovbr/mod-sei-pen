@@ -9,9 +9,10 @@ set_include_path(implode(PATH_SEPARATOR, array(
 
 class PenAtualizarSipRN extends InfraRN {
 
-    protected $versaoMinRequirida = '1.30.0';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
+
+    protected $versaoMinRequirida = '1.30.0';
     private $arrRecurso = array();
     private $arrMenu = array();
 
@@ -99,6 +100,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.1.14': $this->instalarV1115();
                 case '1.1.15': $this->instalarV1116();
                 case '1.1.16': $this->instalarV1117();
+                case '1.1.17': $this->instalarV1200();
 
                 break;
                 default:
@@ -117,6 +119,7 @@ class PenAtualizarSipRN extends InfraRN {
             throw new InfraException('Erro atualizando VERSAO.', $e);
         }
     }
+
 
     /**
      * Finaliza o script informando o tempo de execução.
@@ -1115,6 +1118,21 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.1.17');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.2.0
+     */
+    protected function instalarV1200()
+    {
+         //Corrigir a versão do módulo no banco de dados
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.2.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

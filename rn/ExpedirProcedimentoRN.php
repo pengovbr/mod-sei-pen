@@ -1209,8 +1209,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objEditorDTO->setStrSinProcessarLinks('S');
         }
 
-        $numVersaoAtual = intval(str_replace('.', '', SEI_VERSAO));
-        $numVersaoCarimboObrigatorio = intval(str_replace('.', '', self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO));
+        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+        $numVersaoAtual = explode('.', SEI_VERSAO);
+        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+        $numVersaoAtual = intval(join($numVersaoAtual));
+
+        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.7 -> 030007)
+        $numVersaoCarimboObrigatorio = explode('.', self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO);
+        $numVersaoCarimboObrigatorio = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoCarimboObrigatorio);
+        $numVersaoCarimboObrigatorio = intval(join($numVersaoCarimboObrigatorio));
+
         if ($numVersaoAtual >= $numVersaoCarimboObrigatorio) {
             $objEditorDTO->setStrSinCarimboPublicacao('N');
         }

@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao {
 
-    const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12', '3.0.13', '3.0.14', '3.0.15');
+    const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12', '3.0.13', '3.0.14', '3.0.15', '3.1.0');
 
     private static $strDiretorio;
 
@@ -11,7 +11,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.1.17';
+        return '1.2.0';
     }
 
     public function getInstituicao() {
@@ -353,7 +353,8 @@ class PENIntegracao extends SeiIntegracao {
         return $xml;
     }
 
-    public static function validarCompatibilidadeModulo($bolGerarExcecao = true, $strVersaoSEI = SEI_VERSAO) {
+    public static function validarCompatibilidadeModulo($bolGerarExcecao = true, $strVersaoSEI = SEI_VERSAO)
+    {
         $objPENIntegracao = new PENIntegracao();
         if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
             throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
