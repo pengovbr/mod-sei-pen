@@ -300,7 +300,7 @@ class PenMetaBD extends InfraMetaBD {
                     $arrCampos = (array)array_shift($arrayColumns);
                 }
 
-                $this->adicionarChaveEstrangeira($strNomeFK, $strNomeTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem);
+                $this->adicionarChaveEstrangeira($strNomeFK, $strNomeTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem, false);
             }
         }
 

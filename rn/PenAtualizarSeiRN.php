@@ -373,6 +373,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         if (!$objInfraSequencia->verificarSequencia('md_pen_tramite_pendente')) {
             $objInfraSequencia->criarSequencia('md_pen_tramite_pendente', '1', '1', '9999999999');
         }
+
         //----------------------------------------------------------------------
         // Parâmetros
         //----------------------------------------------------------------------
@@ -1273,6 +1274,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV1114()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraSequencia = new InfraSequencia(BancoSEI::getInstance());
 
         SessaoSEI::getInstance(false)->simularLogin(SessaoSEI::$USUARIO_SEI, SessaoSEI::$UNIDADE_TESTE);
         SessaoInfra::setObjInfraSessao(SessaoSEI::getInstance());
