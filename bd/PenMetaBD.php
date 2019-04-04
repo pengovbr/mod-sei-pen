@@ -326,7 +326,7 @@ class PenMetaBD extends InfraMetaBD {
         return $this;
     }
 
-    public function adicionarChaveEstrangeira($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem, $bolCriarIndice = true) {
+    public function adicionarChaveEstrangeira($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem, $bolCriarIndice=false) {
 
         if(!$this->isChaveExiste($strTabela, $strNomeFK)) {
             parent::adicionarChaveEstrangeira($strNomeFK, $strTabela, $arrCampos, $strTabelaOrigem, $arrCamposOrigem, $bolCriarIndice);
