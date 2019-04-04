@@ -1285,98 +1285,96 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_recebido', 'ak1_rel_doc_map_recebido', array('codigo_especie'), true);
 
         //30 - Correção de erros de chave duplicada devido a concorrência de transações
-        if(!(BancoSEI::getInstance() instanceof InfraOracle)){
-            $objInfraSequenciaRN = new InfraSequenciaRN();
-            $objInfraSequenciaDTO = new InfraSequenciaDTO();
+        $objInfraSequenciaRN = new InfraSequenciaRN();
+        $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
-            //Sequência: md_pen_seq_procedimento_andam
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_andamento) as total from md_pen_procedimento_andamento');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_procedimento_andam', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_procedimento_andamento');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-
-            //Sequência: md_pen_seq_hipotese_legal
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_hipotese_legal) as total from md_pen_hipotese_legal');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_hipotese_legal', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_hipotese_legal');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-
-            //Sequência: md_pen_seq_rel_hipotese_legal
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_hipotese_legal');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_hipotese_legal', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_rel_hipotese_legal');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-
-            //Sequência: md_pen_seq_recibo_tramite_hash
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_tramite_hash) as total from md_pen_recibo_tramite_hash');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_recibo_tramite_hash', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_recibo_tramite_hash');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-            //Sequência: md_pen_seq_rel_doc_map_enviado
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_enviado');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_enviado', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_enviado');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-            //Sequência: md_pen_seq_rel_doc_map_recebid
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_recebido');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_recebid', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_recebido');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-
-            //Sequência: md_pen_seq_tramite_pendente
-            $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramite_pendente');
-            $numMaxId = $rs[0]['total'];
-            if ($numMaxId==null){
-                $numMaxId = 0;
-            }
-            BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramite_pendente', $numMaxId + 1);
-            $objInfraSequenciaDTO->setStrNome('md_pen_tramite_pendente');
-            $objInfraSequenciaDTO->retStrNome();
-            $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-            $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+        //Sequência: md_pen_seq_procedimento_andam
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_andamento) as total from md_pen_procedimento_andamento');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
         }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_procedimento_andam', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_procedimento_andamento');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_hipotese_legal
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_hipotese_legal) as total from md_pen_hipotese_legal');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_hipotese_legal', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_hipotese_legal');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_rel_hipotese_legal
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_hipotese_legal');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_hipotese_legal', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_hipotese_legal');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_recibo_tramite_hash
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_tramite_hash) as total from md_pen_recibo_tramite_hash');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_recibo_tramite_hash', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_recibo_tramite_hash');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+        //Sequência: md_pen_seq_rel_doc_map_enviado
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_enviado');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_enviado', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_enviado');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+        //Sequência: md_pen_seq_rel_doc_map_recebid
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_recebido');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_rel_doc_map_recebid', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_rel_doc_map_recebido');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+        //Sequência: md_pen_seq_tramite_pendente
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramite_pendente');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramite_pendente', $numMaxId + 1);
+        $objInfraSequenciaDTO->setStrNome('md_pen_tramite_pendente');
+        $objInfraSequenciaDTO->retStrNome();
+        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
         //Fix 28 - Erro Data too long for column 'nome' at row 1
         $objInfraMetaBD->alterarColuna('md_pen_componente_digital','nome', $objInfraMetaBD->tipoTextoVariavel(255), 'not null');
