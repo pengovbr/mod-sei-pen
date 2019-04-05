@@ -136,20 +136,15 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Construo dos cabecalho para envio do processo
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
 
-            //Construo do processo para envio
+            //Construção do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado());
 
-            try {
-                $param = new stdClass();
-                $param->novoTramiteDeProcesso = new stdClass();
-                $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
-                $param->novoTramiteDeProcesso->processo = $objProcesso;
-                $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
-                $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
-
-            } catch (\Exception $e) {
-                throw new InfraException("Error Processing Request", $e);
-            }
+            $param = new stdClass();
+            $param->novoTramiteDeProcesso = new stdClass();
+            $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
+            $param->novoTramiteDeProcesso->processo = $objProcesso;
+            $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
+            $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
 
             $this->atualizarPenProtocolo($dblIdProcedimento);
 
@@ -1256,26 +1251,26 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
             $objDocumento->identificacao = new stdClass();
-            $objDocumento->identificacao->numero = $parObjDocumentoDTO->getStrNumero();
-            $objDocumento->identificacao->siglaDaUnidadeProdutora = $parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo();
+            $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
+            $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
             $objDocumento->identificacao->complemento = utf8_encode($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo());
         }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO){
             $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
             $objDocumento->identificacao = new stdClass();
-            $objDocumento->identificacao->numero = $parObjDocumentoDTO->getStrNumero();
-            $objDocumento->identificacao->siglaDaUnidadeProdutora = $objOrgaoDTO->getStrSigla();
+            $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
+            $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($objOrgaoDTO->getStrSigla());
             $objDocumento->identificacao->complemento = utf8_encode($objOrgaoDTO->getStrDescricao());
         }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE){
             $objDocumento->identificacao = new stdClass();
-            $objDocumento->identificacao->siglaDaUnidadeProdutora = $parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo();
+            $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
             $objDocumento->identificacao->complemento = utf8_encode($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo());
-            $objDocumento->identificacao->numero = $parObjDocumentoDTO->getStrNumero();
+            $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
             $objDocumento->identificacao->ano = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(),6,4);
         }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO){
             $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
             $objDocumento->identificacao = new stdClass();
-            $objDocumento->identificacao->numero = $parObjDocumentoDTO->getStrNumero();
-            $objDocumento->identificacao->siglaDaUnidadeProdutora = $objOrgaoDTO->getStrSigla();
+            $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
+            $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($objOrgaoDTO->getStrSigla());
             $objDocumento->identificacao->complemento = utf8_encode($objOrgaoDTO->getStrDescricao());
             $objDocumento->identificacao->ano = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(),6,4);
         }

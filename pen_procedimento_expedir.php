@@ -163,13 +163,12 @@ try {
                 try {
                     $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
 
-                    echo '<input type="button" onclick="javascript:window.close()" class="botao_fechar" value="Fechar" '
-                         . 'style="margin-left: 84%; margin-top: 4%;"/>'; //Botão para fechar a janela
+                    //Adiciona o botão Fechar para a janela
+                    echo '<input type="button" onclick="javascript:window.close()" class="botao_fechar" value="Fechar" style="margin-left: 84%; margin-top: 4%;"/>';
                 } catch(\Exception $e) {
                     $objPaginaSEI->processarExcecao($e);
                 }
 
-                // Faz o die();
                 $objPaginaSEI->finalizarBarraProgresso(null, false);
             }
             //------------------------------------------------------------------

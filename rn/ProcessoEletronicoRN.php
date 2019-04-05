@@ -405,13 +405,12 @@ class ProcessoEletronicoRN extends InfraRN {
     try {
       return $this->getObjPenWs()->enviarProcesso($parametros);
     } catch (\Exception $e) {
-        $mensagem = "Falha no envio externo do processo: ";
+        $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
             $detalhes = 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
         }
 
-        $mensagem .= $detalhes;
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -450,25 +449,25 @@ class ProcessoEletronicoRN extends InfraRN {
   }
 
     //TODO: Tratar cada um dos possíveis erros gerados pelos serviços de integração do PEN
-  private function tratarFalhaWebService(Exception $fault)
-  {
-    $mensagem = InfraException::inspecionar($fault);
-    if($fault instanceof SoapFault && isset($fault->detail->interoperabilidadeException)){
-      $strWsException = $fault->detail->interoperabilidadeException;
+    private function tratarFalhaWebService(Exception $fault)
+    {
+        $mensagem = InfraException::inspecionar($fault);
+        if($fault instanceof SoapFault && isset($fault->detail->interoperabilidadeException)) {
 
-      switch ($strWsException->codigoErro) {
-        case '0044':
-        $mensagem = 'Processo já possui um trâmite em andamento';
-        break;
+            $strWsException = $fault->detail->interoperabilidadeException;
+            switch ($strWsException->codigoErro) {
+                case '0044':
+                $mensagem = 'Processo já possui um trâmite em andamento';
+                break;
 
-        default:
-        $mensagem = utf8_decode($fault->detail->interoperabilidadeException->mensagem);
-        break;
-      }
+                default:
+                $mensagem = utf8_decode($fault->detail->interoperabilidadeException->mensagem);
+                break;
+            }
+        }
+
+        return $mensagem;
     }
-
-    return $mensagem;
-  }
 
   public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
     $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false)
