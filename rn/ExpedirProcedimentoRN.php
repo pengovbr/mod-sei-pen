@@ -1247,6 +1247,11 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirNumeracaoDocumento($objDocumento, DocumentoDTO $parObjDocumentoDTO)
     {
         $objSerieDTO = $this->consultarSerie($parObjDocumentoDTO->getNumIdSerie());
+
+        if(!isset($objSerieDTO)){
+            throw new InfraException("Tipo de Documento não pode ser localizado. (Código: ".$parObjDocumentoDTO->getNumIdSerie().")");
+        }
+
         $strStaNumeracao = $objSerieDTO->getStrStaNumeracao();
 
         if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
@@ -1294,6 +1299,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objUnidadeDTO = new UnidadeDTO();
         $objUnidadeDTO->setNumIdUnidade($numIdUnidade);
+        $objUnidadeDTO->setBolExclusaoLogica(false);
         $objUnidadeDTO->retStrDescricao();
 
         return $this->objUnidadeRN->consultarRN0125($objUnidadeDTO);
@@ -1307,6 +1313,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objSerieDTO = new SerieDTO();
         $objSerieDTO->setNumIdSerie($numIdSerie);
+        $objSerieDTO->setBolExclusaoLogica(false);
         $objSerieDTO->retStrStaNumeracao();
 
         return $this->objSerieRN->consultarRN0644($objSerieDTO);
@@ -1318,6 +1325,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objOrgaoDTO->setNumIdOrgao($numIdOrgao);
         $objOrgaoDTO->retStrSigla();
         $objOrgaoDTO->retStrDescricao();
+        $objOrgaoDTO->setBolExclusaoLogica(false);
 
         return $this->objOrgaoRN->consultarRN1352($objOrgaoDTO);
     }
