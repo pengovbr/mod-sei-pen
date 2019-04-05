@@ -1503,7 +1503,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $numVersaoMudancaAtualizarSequencias = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoMudancaAtualizarSequencias);
         $numVersaoMudancaAtualizarSequencias = intval(join($numVersaoMudancaAtualizarSequencias));
 
-        if($numVersaoMudancaAtualizarSequencias >= $numVersaoAtualSEI){
+        if($numVersaoMudancaAtualizarSequencias <= $numVersaoAtualSEI){
             //Procedimento de atualização de sequências compatível com SEI 3.1.X
             $objScriptRN = new ScriptRN();
             $objScriptRN->atualizarSequencias();
