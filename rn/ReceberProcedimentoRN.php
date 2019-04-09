@@ -1636,7 +1636,7 @@ static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
 }
 
 
-public function receberTramitesRecusados($parNumIdentificacaoTramite)
+protected function receberTramitesRecusadosControlado($parNumIdentificacaoTramite)
 {
     try {
         if (empty($parNumIdentificacaoTramite)) {
@@ -1659,53 +1659,55 @@ public function receberTramitesRecusados($parNumIdentificacaoTramite)
         $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
         $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-        if(!isset($objTramiteDTO)){
-            throw new InfraException("Não foi encontrado no sistema o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
-        }
-
-        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
+        if(isset($objTramiteDTO)){
+            //throw new InfraException("Não foi encontrado no sistema o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objTramiteDTO->getNumIdUnidade());
 
             //Busca os dados do procedimento
-        $this->gravarLogDebug("Buscando os dados de procedimento com NRE " . $tramite->NRE, 2);
-        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoDTO->setStrNumeroRegistro($tramite->NRE);
-        $objProcessoEletronicoDTO->retDblIdProcedimento();
-        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-        $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
+            $this->gravarLogDebug("Buscando os dados de procedimento com NRE " . $tramite->NRE, 2);
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoDTO->setStrNumeroRegistro($tramite->NRE);
+            $objProcessoEletronicoDTO->retDblIdProcedimento();
+            $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+            $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
 
             //Busca a última atividade de trâmite externo
-        $this->gravarLogDebug("Buscando última atividade de trâmite externo do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento(), 2);
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
-        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objAtividadeDTO->retNumIdAtividade();
-        $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
-        $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
+            $this->gravarLogDebug("Buscando última atividade de trâmite externo do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento(), 2);
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+            $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
 
             //Busca a unidade de destino
-        $this->gravarLogDebug("Buscando informações sobre a unidade de destino", 2);
-        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-        $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
-        $objAtributoAndamentoDTO->retStrValor();
-        $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
-        $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
+            $this->gravarLogDebug("Buscando informações sobre a unidade de destino", 2);
+            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+            $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+            $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
+            $objAtributoAndamentoDTO->retStrValor();
+            $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
+            $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
 
             //Monta o DTO de receber tramite recusado
-        $this->gravarLogDebug("Preparando recebimento de trâmite " . $parNumIdentificacaoTramite . " recusado", 2);
-        $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
-        $objReceberTramiteRecusadoDTO->setNumIdTramite($parNumIdentificacaoTramite);
-        $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-        $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
-        $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
-        $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($tramite->justificativaDaRecusa));
-        $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
+            $this->gravarLogDebug("Preparando recebimento de trâmite " . $parNumIdentificacaoTramite . " recusado", 2);
+            $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
+            $objReceberTramiteRecusadoDTO->setNumIdTramite($parNumIdentificacaoTramite);
+            $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
+            $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
+            $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
+            $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($tramite->justificativaDaRecusa));
+            $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
 
             //Faz o tratamento do processo e do trâmite recusado
-        $this->gravarLogDebug("Atualizando dados do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento() ." e do trâmite recusado " . $parNumIdentificacaoTramite, 2);
-        $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
+            $this->gravarLogDebug("Atualizando dados do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento() ." e do trâmite recusado " . $parNumIdentificacaoTramite, 2);
+            $this->receberTramiteRecusadoInterno($objReceberTramiteRecusadoDTO);
+        }
+
+        $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $parNumIdentificacaoTramite, 4);
+        $this->objProcessoEletronicoRN->cienciaRecusa($parNumIdentificacaoTramite);
 
     } catch (Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -1763,9 +1765,6 @@ protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusad
     $objProtocolo->setStrSinObteveRecusa('S');
     $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
     $objProtocoloBD->alterar($objProtocolo);
-
-    $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $objReceberTramiteRecusadoDTO->getNumIdTramite(), 4);
-    $this->objProcessoEletronicoRN->cienciaRecusa($objReceberTramiteRecusadoDTO->getNumIdTramite());
 }
 
 

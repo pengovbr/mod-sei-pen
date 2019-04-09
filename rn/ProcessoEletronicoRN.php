@@ -652,8 +652,8 @@ class ProcessoEletronicoRN extends InfraRN {
 
 
   //TODO: Tratar a exceção de recebimento de um trâmite que já havia sido tratado no sistema
-  protected function cadastrarTramiteDeProcessoInternoControlado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO) {
-
+  protected function cadastrarTramiteDeProcessoInternoControlado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+  {
     if(!isset($parObjProcessoEletronicoDTO)) {
       throw new InfraException('Parâmetro $parObjProcessoEletronicoDTO não informado.');
     }

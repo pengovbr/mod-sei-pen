@@ -7,6 +7,7 @@ error_reporting(E_ALL);
 class PendenciasTramiteRN extends InfraRN {
 
     const TIMEOUT_SERVICO_PENDENCIAS = 300;
+    const RECUPERAR_TODAS_PENDENCIAS = true;
 
     private static $instance = null;
     private $strEnderecoServicoPendencias = null;
@@ -121,7 +122,7 @@ class PendenciasTramiteRN extends InfraRN {
         //Obter todos os trâmites pendentes antes de iniciar o monitoramento
         $arrPendenciasRetornadas = array();
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(false) or array();
+        $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) or array();
 
         $this->gravarLogDebug("Recuperado todas pendências de trâmite do PEN: " . count($arrObjPendenciasDTO), 2);
 
@@ -235,7 +236,8 @@ class PendenciasTramiteRN extends InfraRN {
             break;
 
             default:
-                throw new Exception('Situação do trâmite não pode ser identificada.');
+                $strStatus = $objPendencia->getStrStatus();
+                InfraDebug::getInstance()->gravar("Situação do trâmite ($strStatus) não pode ser tratada.");
                 break;
             }
 
