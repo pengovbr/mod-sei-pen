@@ -1151,7 +1151,7 @@ if ($objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo()==ProtocoloRN::$NA
   $objAtividadeDTO->setDthConclusao(null);
 
   if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
-                    //reabertura automática
+        //reabertura automática
       $objReabrirProcessoDTO = new ReabrirProcessoDTO();
       $objReabrirProcessoDTO->setDblIdProcedimento($objDocumentoDTO->getDblIdProcedimento());
       $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -1717,9 +1717,26 @@ protected function receberTramitesRecusadosControlado($parNumIdentificacaoTramit
     }
 }
 
+
 protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusadoDTO $objReceberTramiteRecusadoDTO)
 {
-        //Realiza o desbloqueio do processo
+    //Verifica se processo está fechado, reabrindo-o caso necessário
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeRN = new AtividadeRN();
+    if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
+        $this->gravarLogDebug("Reabrindo automaticamente o processo", 4);
+        $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+        $objReabrirProcessoDTO->setDblIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+        $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objProcedimentoRN = new ProcedimentoRN();
+        $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+    }
+
+    //Realiza o desbloqueio do processo
     $this->gravarLogDebug("Realizando o desbloqueio do processo", 4);
     $objProtocoloDTO = new ProtocoloDTO();
     $objProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
@@ -1734,7 +1751,7 @@ protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusad
         $this->gravarLogDebug("Processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . " já se encontra desbloqueado!", 6);
     }
 
-        //Adiciona um andamento para o trâmite recusado
+    //Adiciona um andamento para o trâmite recusado
     $this->gravarLogDebug("Adicionando andamento para registro da recusa do trâmite", 4);
     $arrObjAtributoAndamentoDTO = array();
     $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -1758,7 +1775,7 @@ protected function receberTramiteRecusadoInternoControlado(ReceberTramiteRecusad
     $objAtividadeRN = new AtividadeRN();
     $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
 
-        //Sinaliza na PenProtocolo que o processo obteve recusa
+    //Sinaliza na PenProtocolo que o processo obteve recusa
     $this->gravarLogDebug("Atualizando protocolo sobre obtenção da ciência de recusa", 4);
     $objProtocolo = new PenProtocoloDTO();
     $objProtocolo->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
