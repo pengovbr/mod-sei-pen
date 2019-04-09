@@ -23,11 +23,13 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'MimeType', 'mime_type');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'DadosComplementares', 'dados_complementares');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Tamanho', 'tamanho');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'CodigoEspecie', 'codigo_especie');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeEspecieProdutor', 'nome_especie_produtor');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Ordem', 'ordem');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');    
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'TicketEnvioComponentes', 'ticket_envio_componentes', 'md_pen_tramite');
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ConteudoAssinaturaDocumento', 'conteudo_assinatura', 'documento_conteudo');    
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ConteudoAssinaturaDocumento', 'conteudo_assinatura', 'documento_conteudo');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ProtocoloDocumentoFormatado', 'protocolo_formatado', 'protocolo');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaEstadoProtocolo', 'sta_estado', 'protocolo');
 
@@ -35,7 +37,7 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->configurarPK('IdDocumento', InfraDTO::$TIPO_PK_INFORMADO);
 
     $this->configurarFK('NumeroRegistro', 'md_pen_tramite', 'numero_registro', InfraDTO::$TIPO_FK_OBRIGATORIA);
-    $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OBRIGATORIA);  
+    $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdDocumento', 'documento', 'id_documento', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdDocumento', 'protocolo', 'id_protocolo', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdDocumento', 'documento_conteudo', 'id_documento', InfraDTO::$TIPO_FK_OBRIGATORIA);

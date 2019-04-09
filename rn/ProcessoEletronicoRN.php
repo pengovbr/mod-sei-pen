@@ -60,7 +60,7 @@ class ProcessoEletronicoRN extends InfraRN {
   /**
    * Espécie documentoal não mapeada
    */
-  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '03';
+  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
 
   /**
    * Motivo para recusar de tramite de componente digital
@@ -404,13 +404,18 @@ class ProcessoEletronicoRN extends InfraRN {
   {
     try {
       return $this->getObjPenWs()->enviarProcesso($parametros);
+
+    } catch (\SoapFault $e) {
+        $mensagem = "Falha no envio externo do processo: ";
+        $mensagem .= InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
+            $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+        }
+
+        throw new InfraException($mensagem, $e);
     } catch (\Exception $e) {
         $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-            $detalhes = 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
-        }
-
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -806,6 +811,11 @@ class ProcessoEletronicoRN extends InfraRN {
 
       $objComponenteDigital = $objDocumento->componenteDigital;
       $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
+
+      if(isset($objDocumento->especie)){
+        $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
+        $objComponenteDigitalDTO->setStrNomeEspecieProdutor($objDocumento->especie->nomeNoProdutor);
+      }
 
       $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
 

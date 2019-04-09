@@ -421,15 +421,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
         $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
         $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
-        // $objComponenteDigitalDTO->retDblIdDocumento();
-        // $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-        // $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
-        // $objComponenteDigitalDTO->retStrHashConteudo();
-        // $objComponenteDigitalDTO->retStrProtocolo();
-        // $objComponenteDigitalDTO->retStrNumeroRegistro();
-        // $objComponenteDigitalDTO->retNumIdTramite();
-        // $objComponenteDigitalDTO->retStrNome();
-        // $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
 
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;

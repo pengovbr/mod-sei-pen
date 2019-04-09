@@ -66,6 +66,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.15': $this->instalarV1116();
                 case '1.1.16': $this->instalarV1117();
                 case '1.1.17': $this->instalarV1200();
+                case '1.2.0': $this->instalarV1201();
 
                 break;
                 default:
@@ -1533,4 +1534,22 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.2.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+    /* Contêm atualizações da versao 1.2.1 do módulo */
+    protected function instalarV1201()
+    {
+        //Fix-47 - Corrigir erro com mapeamento de espécies documentais da origem
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'codigo_especie', $objInfraMetaBD->tipoNumero(), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'nome_especie_produtor', $objInfraMetaBD->tipoTextoVariavel(255), 'null');
+
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.2.1');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
 }

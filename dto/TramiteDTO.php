@@ -30,7 +30,7 @@ class TramiteDTO extends InfraDTO {
         $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
 
         $this->configurarFK('NumeroRegistro', 'md_pen_tramite', 'numero_registro', InfraDTO::$TIPO_FK_OBRIGATORIA);
-        $this->configurarFK('NumeroRegistro', 'md_pen_processo_eletronico pe', 'pe.numero_registro');
+        $this->configurarFK('NumeroRegistro', 'md_pen_processo_eletronico', 'numero_registro');
         $this->configurarFK('IdUsuario', 'usuario u', 'u.id_usuario');
         $this->configurarFK('IdUnidade', 'unidade u', 'u.id_unidade');
     }

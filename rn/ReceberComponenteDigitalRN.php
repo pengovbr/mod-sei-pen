@@ -28,7 +28,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         return BancoSEI::getInstance();
     }
 
-    protected function receberComponenteDigitalConectado(ComponenteDigitalDTO $parObjComponenteDigitalDTO)
+    protected function receberComponenteDigitalControlado(ComponenteDigitalDTO $parObjComponenteDigitalDTO)
     {
 
         if(!isset($parObjComponenteDigitalDTO) || !isset($parObjComponenteDigitalDTO)) {
@@ -120,7 +120,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
 
         if ($objDocumentoDTO==null){
-          throw new InfraException("Registro não encontrado.");
+          throw new InfraException("Documento não pode ser localizado (".$parObjComponenteDigitalDTO->getDblIdDocumento().")");
         }
 
         $objProtocoloDTO = new ProtocoloDTO();

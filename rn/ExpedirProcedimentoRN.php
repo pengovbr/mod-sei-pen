@@ -114,6 +114,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
 
+
             //Valida regras de negócio
             $objInfraException = new InfraException();
             //Carregamento dos dados de processo e documento para validação e envio externo
@@ -133,11 +134,14 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
             $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
 
+            //Busca metadados do processo registrado em trâmite anterior
+            $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
+
             //Construo dos cabecalho para envio do processo
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
 
             //Construção do processo para envio
-            $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado());
+            $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
             $param = new stdClass();
             $param->novoTramiteDeProcesso = new stdClass();
@@ -237,6 +241,43 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
+    /**
+     * Busca metadados do processo registrado no Barramento de Serviços do PEN em trâmites anteriores
+     * @return stdClass Metadados do Processo
+     */
+    private function consultarMetadadosPEN($parDblIdProcedimento)
+    {
+        $objMetadadosProtocolo = null;
+
+        try{
+            $objTramiteDTO = new TramiteDTO();
+            $objTramiteDTO->setNumIdProcedimento($parDblIdProcedimento);
+            $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+            $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+            $objTramiteDTO->retNumIdTramite();
+
+            $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+            if(isset($objTramiteDTO)) {
+                $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
+                $objRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
+
+                if(isset($objRetorno)){
+                    $objMetadadosProtocolo = $objRetorno->metadados;
+                }
+            }
+        }
+        catch(Exception $e){
+            //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
+            //que os metadados do protocolo não pode ser obtida
+            $objMetadadosProtocolo = null;
+            LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.");
+            throw $e;
+        }
+
+        return $objMetadadosProtocolo;
+    }
 
     public function listarRepositoriosDeEstruturas()
     {
@@ -363,13 +404,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         );
     }
 
-    private function construirProcesso($dblIdProcedimento, $arrIdProcessoApensado = null)
+    private function construirProcesso($dblIdProcedimento, $arrIdProcessoApensado=null, $parObjMetadadosTramiteAnterior=null)
     {
         if(!isset($dblIdProcedimento)){
             throw new InfraException('Parâmetro $dblIdProcedimento não informado.');
         }
 
-        //TODO: Passar dados do ProcedimentoDTO via parâmetro j carregado anteriormente
         $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
         $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
@@ -386,7 +426,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $this->atribuirProdutorProcesso($objProcesso, $objProcedimentoDTO->getNumIdUsuarioGeradorProtocolo(), $objProcedimentoDTO->getNumIdUnidadeGeradoraProtocolo());
         $this->atribuirDataHoraDeRegistro($objProcesso, $objProcedimentoDTO->getDblIdProcedimento());
-        $this->atribuirDocumentos($objProcesso, $dblIdProcedimento);
+        $this->atribuirDocumentos($objProcesso, $dblIdProcedimento, $parObjMetadadosTramiteAnterior);
         $this->atribuirDadosInteressados($objProcesso, $dblIdProcedimento);
         $this->adicionarProcessosApensados($objProcesso, $arrIdProcessoApensado);
 
@@ -754,7 +794,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function atribuirDocumentos($objProcesso, $dblIdProcedimento)
+    private function atribuirDocumentos($objProcesso, $dblIdProcedimento, $parObjMetadadosTramiteAnterior)
     {
         if(!isset($objProcesso)) {
             throw new InfraException('Parâmetro $objProcesso não informado.');
@@ -827,10 +867,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->produtor->numeroDeIdentificacao = $documentoDTO->getStrProtocoloDocumentoFormatado();  //TODO: Avaliar se informação está correta
 
             $this->atribuirDataHoraDeRegistro($documento, $documentoDTO->getDblIdProcedimento(), $documentoDTO->getDblIdDocumento());
-            //TODO: Implementar mapeamento de espécies documentais
-            $documento->especie = new stdClass();
-            $documento->especie->codigo = $this->obterEspecieMapeada($documentoDTO->getNumIdSerie());
-            $documento->especie->nomeNoProdutor = utf8_encode($documentoDTO->getStrNomeSerie());
+            $this->atribuirEspecieDocumental($documento, $documentoDTO, $parObjMetadadosTramiteAnterior);
+
             //TODO: Tratar campos adicionais do documento
             //Identificao do documento
             $this->atribuirNumeracaoDocumento($documento, $documentoDTO);
@@ -886,6 +924,91 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function atribuirComponentesDigitaisRetirados($documentoDTO){
 
+    }
+
+    /**
+     * Obtém a espécie documental relacionada ao documento do processo.
+     * A espécie documental, por padrão, é obtida do mapeamento de espécies realizado pelo administrador
+     * nas configurações do módulo.
+     * Caso o documento tenha sido produzido por outro órgão externamente, a espécie a ser considerada será
+     * aquela definida originalmente pelo seu produtor
+     *
+     * @param int $parDblIdProcedimento Identificador do processo
+     * @param int $parDblIdDocumento Identificador do documento
+     * @return int Código da espécie documental
+     *
+     */
+    private function atribuirEspecieDocumental($parMetaDocumento, $parDocumentoDTO, $parObjMetadadosTramiteAnterior)
+    {
+        //Validação dos parâmetros da função
+        if(!isset($parDocumentoDTO)){
+            throw new InfraException('Parâmetro $parDocumentoDTO não informado.');
+        }
+
+        if(!isset($parMetaDocumento)){
+            throw new InfraException('Parâmetro $parMetaDocumento não informado.');
+        }
+
+        $numCodigoEspecie = null;
+        $strNomeEspecieProdutor = null;
+        $dblIdProcedimento = $parDocumentoDTO->getDblIdProcedimento();
+        $dblIdDocumento = $parDocumentoDTO->getDblIdDocumento();
+
+        //Inicialmente, busca espécie documental atribuida pelo produtor em trâmite realizado anteriormente
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->retNumCodigoEspecie();
+        $objComponenteDigitalDTO->retStrNomeEspecieProdutor();
+        $objComponenteDigitalDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objComponenteDigitalDTO->setDblIdDocumento($dblIdDocumento);
+        $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
+        $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+        $objComponenteDigitalDTO = $objComponenteDigitalBD->consultar($objComponenteDigitalDTO);
+
+        if($objComponenteDigitalDTO != null){
+            $numCodigoEspecie = $objComponenteDigitalDTO->getNumCodigoEspecie();
+            $strNomeEspecieProdutor = $objComponenteDigitalDTO->getStrNomeEspecieProdutor();
+        }
+
+        //Caso a informação sobre mapeamento esteja nulo, necessário buscar tal informação no Barramento
+        //A lista de documentos recuperada do trâmite anterior será indexada pela sua ordem no protocolo e
+        //a espécie documental e o nome no produtar serão obtidos para atribuição ao documento
+        if($objComponenteDigitalDTO != null && $numCodigoEspecie == null) {
+            if(isset($parObjMetadadosTramiteAnterior)){
+                $arrObjMetaDocumentosTramiteAnterior = [];
+
+                //Obtenção de lista de documentos do processo
+                $arrObjMetaDocumentosTramiteAnterior = $parObjMetadadosTramiteAnterior->processo->documento;
+                if(isset($arrObjMetaDocumentosTramiteAnterior) && !is_array($arrObjMetaDocumentosTramiteAnterior)){
+                    $arrObjMetaDocumentosTramiteAnterior = array($arrObjMetaDocumentosTramiteAnterior);
+                }
+
+                //Indexação dos documentos pela sua ordem
+                $arrMetaDocumentosAnteriorIndexado = [];
+                foreach ($arrObjMetaDocumentosTramiteAnterior as $objMetaDoc) {
+                    $arrMetaDocumentosAnteriorIndexado[$objMetaDoc->ordem] = $objMetaDoc;
+                }
+
+                //Atribui espécie documental definida pelo produtor do documento e registrado no PEN, caso exista
+                if(count($arrMetaDocumentosAnteriorIndexado) > 0 && array_key_exists($parMetaDocumento->ordem, $arrMetaDocumentosAnteriorIndexado)){
+                    $numCodigoEspecie = $arrMetaDocumentosAnteriorIndexado[$parMetaDocumento->ordem]->especie->codigo;
+                    $strNomeEspecieProdutor = utf8_encode($arrMetaDocumentosAnteriorIndexado[$parMetaDocumento->ordem]->especie->nomeNoProdutor);
+                }
+            }
+        }
+
+        //Aplica o mapeamento de espécies definida pelo administrador para os novos documentos
+        if($numCodigoEspecie == null) {
+            $numCodigoEspecie = $this->obterEspecieMapeada($parDocumentoDTO->getNumIdSerie());
+            $strNomeEspecieProdutor = utf8_encode($parDocumentoDTO->getStrNomeSerie());
+        }
+
+        $parMetaDocumento->especie = new stdClass();
+        $parMetaDocumento->especie->codigo = $numCodigoEspecie;
+        $parMetaDocumento->especie->nomeNoProdutor = $strNomeEspecieProdutor;
+
+        return $parMetaDocumento;
     }
 
     private function obterEspecieMapeada($parNumIdSerie)
