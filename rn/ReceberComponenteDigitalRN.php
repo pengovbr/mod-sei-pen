@@ -100,11 +100,14 @@ class ReceberComponenteDigitalRN extends InfraRN
         $strHashDoArquivo = hash_file("sha256", $strCaminhoAnexo, true);
 
         if(strcmp($strHashInformado, $strHashDoArquivo) != 0) {
+            $strMensagem = "Hash do componente digital não confere com o valor informado pelo remetente.";
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_CORROMPIDO);
 
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, "Hash do componente digital não confere com o valor informado pelo remetente.", ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_CORROMPIDO);
-
-            // Adiciono nos detalhes o nome do método para poder manipular o cache
-            throw new InfraException("Hash do componente digital não confere com o valor informado pelo remetente.", null, __METHOD__);
+            $strHashInformadoBase64 = base64_encode($strHashInformado);
+            $strHashDoArquivoBase64 = base64_encode($strHashDoArquivo);
+            $strDetalhes = "Hash do componente digital informado pelo PEN: $strHashInformadoBase64 \n";
+            $strDetalhes .= "Hash do componente digital calculado pelo SEI: $strHashDoArquivoBase64 \n";
+            throw new InfraException($strMensagem, null, $strDetalhes);
         }
     }
 
