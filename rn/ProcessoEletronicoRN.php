@@ -28,7 +28,8 @@ class ProcessoEletronicoRN extends InfraRN {
   public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
   public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)
   public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
-  public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                           // Remetente ciente da recusa do trâmite
+  public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
+  public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
 
   /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
   public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
@@ -1254,10 +1255,10 @@ class ProcessoEletronicoRN extends InfraRN {
 
       //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->filtroDeConsultaDeTramites = new stdClass()
       //Faz a consulta do tramite
-      $paramConsultaTramite = new stdClass();
-      $paramConsultaTramite->filtroDeConsultaDeTramites = new stdClass();
-      $paramConsultaTramite->filtroDeConsultaDeTramites->IDT = $idTramite;
-      $dadosTramite = $this->getObjPenWs()->consultarTramites($paramConsultaTramite);
+      //$paramConsultaTramite = new stdClass();
+      //$paramConsultaTramite->filtroDeConsultaDeTramites = new stdClass();
+      //$paramConsultaTramite->filtroDeConsultaDeTramites->IDT = $idTramite;
+      //$dadosTramite = $this->getObjPenWs()->consultarTramites($paramConsultaTramite);
 
       //Requisita o cancelamento
       $parametros = new stdClass();

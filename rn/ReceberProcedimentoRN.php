@@ -103,12 +103,20 @@ class ReceberProcedimentoRN extends InfraRN
                 $arrayHash = array();
                 $arrayHashPendentes = array();
 
-                //Percorre os componentes que precisam ser recebidos
-                foreach($objTramite->componenteDigitalPendenteDeRecebimento as $key => $componentePendente){
+                // Lista todos os componentes digitais presente no protocolo
+                // Esta verificação é necessária pois existem situações em que a lista de componentes digitais 
+                // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
+                // mantida pela aplicação.
+                $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProcesso);
 
+                //Percorre os componentes que precisam ser recebidos
+                foreach($arrHashComponentesProtocolo as $key => $componentePendente){
+
+                    $numOrdemComponente = $key + 1;
                     if(!is_null($componentePendente)){
 
-                        if(!$this->documentoJaRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite, $componentePendente)){
+                        $bolComponenteDigitalRegistrado = $this->documentoJaRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite, $componentePendente);
+                        if(!$bolComponenteDigitalRegistrado){
                             $arrayHashPendentes[] = $componentePendente;
                         }
 
@@ -116,15 +124,19 @@ class ReceberProcedimentoRN extends InfraRN
                         //Ajuste deverá ser feito em versões futuas
                         $arrayHash[] = $componentePendente;
 
-                        //Obter os dados do componente digital
-                        $this->gravarLogDebug("Baixando componente digital $key", 6);
-                        $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
-                        $arrAnexosComponentes[$key][$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
-                        $arrAnexosComponentes[$key]['recebido'] = false;
+                        if(!$bolComponenteDigitalRegistrado) {
+                            //Obter os dados do componente digital
+                            $this->gravarLogDebug("Baixando componente digital $numOrdemComponente", 6);
+                            $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
+                            $arrAnexosComponentes[$key][$componentePendente] = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
+                            $arrAnexosComponentes[$key]['recebido'] = false;
 
-                        //Valida a integridade do hash
-                        $this->gravarLogDebug("Validando integridade de componente digital $key", 6);
-                        $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
+                            //Valida a integridade do hash
+                            $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 6);
+                            $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);                            
+                        } else {
+                            $this->gravarLogDebug("Componente digital desconsiderado por já fazer parte do processo", 6);
+                        }
                     }
                 }
 
@@ -232,6 +244,33 @@ class ReceberProcedimentoRN extends InfraRN
             LogSEI::getInstance()->gravar($mensagemErro);
             throw $e;
         }
+    }
+
+    /**
+     * Método para recuperar a lista de todos os hashs dos componentes digitais presentes no protocolo recebido 
+     * 
+     * @return Array Lista de hashs dos componentes digitais     
+     */
+    private function listarHashDosComponentesMetadado($parObjProtocolo)
+    {
+        if(!isset($parObjProtocolo->documento)){
+            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");                
+        }
+
+        $arrHashsComponentesDigitais = array();
+        $arrObjDocumento = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
+        foreach($arrObjDocumento as $objDocumento){
+            if(!isset($objDocumento->componenteDigital)){
+                throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");                
+            }
+
+            $arrObjComponentesDigitais = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital : array($objDocumento->componenteDigital);
+            foreach ($arrObjComponentesDigitais as $objComponenteDigital) {
+                $arrHashsComponentesDigitais[] = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
+            }
+        }
+
+        return $arrHashsComponentesDigitais;
     }
 
     public function fecharProcedimentoEmOutraUnidades(ProcedimentoDTO $objProcedimentoDTO, $parObjMetadadosProcedimento){
@@ -421,6 +460,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
         $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
         $objComponenteDigitalDTO->setStrHashConteudo($parStrHashComponenteDigital);
+        $objComponenteDigitalDTO->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
 
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
