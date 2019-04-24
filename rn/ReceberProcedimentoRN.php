@@ -217,7 +217,7 @@ class ReceberProcedimentoRN extends InfraRN
                     }
                 }
             }
-            //$this->fecharProcedimentoEmOutraUnidades($objProcedimentoDTO, $objMetadadosProcedimento);
+
             $this->gravarLogDebug("Enviando recibo de conclusão do trâmite $parNumIdentificacaoTramite", 6);
             $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
             $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($parNumIdentificacaoTramite, $arrayHash);
