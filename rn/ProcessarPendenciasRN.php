@@ -51,7 +51,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
             {
                 PENIntegracao::validarCompatibilidadeBanco();
 
-                $this->gravarLogDebug("Gearman worker return code: " . $this->objGearmanWorker->returnCode(), 0, true);
+                $this->gravarLogDebug("Processamento de tarefa finalizada com código: " . $this->objGearmanWorker->returnCode(), 0, true);
                 if ($this->objGearmanWorker->returnCode() != GEARMAN_SUCCESS) {
                     $strErro = 'Erro no processamento de pendências do PEN. ErrorCode: ' . $this->objGearmanWorker->returnCode();
                     LogSEI::getInstance()->gravar($strErro);

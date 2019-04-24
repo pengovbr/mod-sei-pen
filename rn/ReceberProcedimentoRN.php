@@ -104,11 +104,12 @@ class ReceberProcedimentoRN extends InfraRN
                 $arrayHashPendentes = array();
 
                 // Lista todos os componentes digitais presente no protocolo
-                // Esta verificação é necessária pois existem situações em que a lista de componentes digitais 
+                // Esta verificação é necessária pois existem situações em que a lista de componentes digitais
                 // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
                 // mantida pela aplicação.
                 $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProcesso);
 
+                $this->gravarLogDebug("{count($arrHashComponentesProtocolo)} componentes digitais identificados no protocolo {$objProcesso->protocolo}", 6);
                 //Percorre os componentes que precisam ser recebidos
                 foreach($arrHashComponentesProtocolo as $key => $componentePendente){
 
@@ -133,7 +134,7 @@ class ReceberProcedimentoRN extends InfraRN
 
                             //Valida a integridade do hash
                             $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 6);
-                            $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);                            
+                            $receberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente], $componentePendente, $parNumIdentificacaoTramite);
                         } else {
                             $this->gravarLogDebug("Componente digital desconsiderado por já fazer parte do processo", 6);
                         }
@@ -247,14 +248,14 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
     /**
-     * Método para recuperar a lista de todos os hashs dos componentes digitais presentes no protocolo recebido 
-     * 
-     * @return Array Lista de hashs dos componentes digitais     
+     * Método para recuperar a lista de todos os hashs dos componentes digitais presentes no protocolo recebido
+     *
+     * @return Array Lista de hashs dos componentes digitais
      */
     private function listarHashDosComponentesMetadado($parObjProtocolo)
     {
         if(!isset($parObjProtocolo->documento)){
-            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");                
+            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
         }
 
         $arrHashsComponentesDigitais = array();
@@ -264,7 +265,7 @@ class ReceberProcedimentoRN extends InfraRN
             //Desconsidera os componendes digitais de documentos cancelados
             if(!isset($objDocumento->retirado) || $objDocumento->retirado == false) {
                 if(!isset($objDocumento->componenteDigital)){
-                    throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");                
+                    throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
                 }
 
                 $arrObjComponentesDigitais = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital : array($objDocumento->componenteDigital);
@@ -586,7 +587,7 @@ class ReceberProcedimentoRN extends InfraRN
             $this->enviarProcedimentoUnidade($objProcedimentoDTO, true);
 
             return $objProcedimentoDTO;
-            
+
         } finally {
             $objPenParametroRN = new PenParametroRN();
             $numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
@@ -1620,10 +1621,10 @@ $objAtividadeDTO2->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtua
 $objAtividadeDTO2->setDthConclusao(null);
 
 
-if ($objAtividadeRN->contarRN0035($objAtividadeDTO2) == 0) {   
+if ($objAtividadeRN->contarRN0035($objAtividadeDTO2) == 0) {
   //reabertura automática
   $objReabrirProcessoDTO = new ReabrirProcessoDTO();
-  $objReabrirProcessoDTO->setDblIdProcedimento($objAtividadeDTO2->getDblIdProtocolo());  
+  $objReabrirProcessoDTO->setDblIdProcedimento($objAtividadeDTO2->getDblIdProtocolo());
   $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
   $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
   $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);

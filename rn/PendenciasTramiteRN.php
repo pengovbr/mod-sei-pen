@@ -53,9 +53,9 @@ class PendenciasTramiteRN extends InfraRN {
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
-            InfraDebug::getInstance()->setBolLigado(false);
+            InfraDebug::getInstance()->setBolLigado(true);
             InfraDebug::getInstance()->setBolDebugInfra(false);
-            InfraDebug::getInstance()->setBolEcho(false);
+            InfraDebug::getInstance()->setBolEcho(true);
             InfraDebug::getInstance()->limpar();
 
             PENIntegracao::validarCompatibilidadeModulo();
