@@ -2229,19 +2229,18 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objPenUnidadeDTO = $objGenericoBD->consultar($objPenUnidadeDTO);
 
         $objTramiteDTO = new TramiteDTO();
-        $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->retDblIdProtocolo());
+        $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
+        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);    
         $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
         $objTramiteDTO->setNumMaxRegistrosRetorno(1);
         $objTramiteDTO->retNumIdTramite();
 
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-        if(!$arrObjTramiteDTO){
-            throw new InfraException('Trâmite não encontrado para esse processo. ');
+        if(!isset($objTramiteDTO)){
+            throw new InfraException("Trâmite não encontrado para esse processo. ({$objDtoProtocolo->getDblIdProtocolo()})");
         }
-
-        $objTramiteDTO = $arrObjTramiteDTO[0];
 
         //Armazena o id do protocolo
         $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
@@ -2284,16 +2283,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
             throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
             break;
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
-            throw new InfraException("O trâmite externo para esse processo já se encontra cancelado.");
-            break;
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
             throw new InfraException("O trâmite externo para esse processo encontra-se recusado.");
             break;
         }
 
-        $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
-
+        //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
+        if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
+            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);    
+        }
+        
         //Desbloqueia o processo
         $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
         $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);
