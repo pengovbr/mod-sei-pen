@@ -84,45 +84,57 @@ class EnviarReciboTramiteRN extends InfraRN
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash = null, $parDthRecebimento = null)
   {
-    date_default_timezone_set('America/Sao_Paulo');
+    try{
+        date_default_timezone_set('America/Sao_Paulo');
 
-    if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
-      throw new InfraException('Parâmetro $parNumIdTramite não informado.');
+        if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
+          throw new InfraException('Parâmetro $parNumIdTramite não informado.');
+        }
+
+        //Verifica se todos os componentes digitais já foram devidamente recebido
+        $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
+        if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
+          throw new InfraException("Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
+        }
+
+        $objTramite = $arrObjTramite[0];
+        $strNumeroRegistro = $objTramite->NRE;
+
+        if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
+          throw new InfraException('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite.');
+        }
+
+        $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);
+        $dthRecebimentoComponentesDigitais = $dthRecebimentoComponentesDigitais ?: date();
+        $dthRecebimento = gmdate("Y-m-d\TH:i:s.000\Z", InfraData::getTimestamp($dthRecebimentoComponentesDigitais));
+
+        $strReciboTramite  = "<recibo>";
+        $strReciboTramite .= "<IDT>$parNumIdTramite</IDT>";
+        $strReciboTramite .= "<NRE>$strNumeroRegistro</NRE>";
+        $strReciboTramite .= "<dataDeRecebimento>$dthRecebimento</dataDeRecebimento>";
+        sort($parArrayHash);
+
+        foreach ($parArrayHash as $strHashConteudo) {
+          if(!empty($strHashConteudo)){
+                $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
+          }
+        }
+        $strReciboTramite  .= "</recibo>";
+
+        //Envia o Recibo de salva no banco
+        $hashAssinatura = $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
+        $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura, $parArrayHash);
+
+    } catch (Exception $e) {
+        $detalhes = null;
+        $mensagem = InfraException::inspecionar($e);
+
+        if(isset($strReciboTramite)){
+            $detalhes = "Falha na validação do recibo de conclusão do trâmite do processo. Recibo: \n" . $strReciboTramite;
+        }
+
+        throw new InfraException($mensagem, $e, $detalhes);
     }
-
-    //Verifica se todos os componentes digitais já foram devidamente recebido
-    $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
-    if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-      throw new InfraException("Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
-    }
-
-    $objTramite = $arrObjTramite[0];
-    $strNumeroRegistro = $objTramite->NRE;
-
-    if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-      throw new InfraException('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite.');
-    }
-
-    $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);
-    $dthRecebimentoComponentesDigitais = $dthRecebimentoComponentesDigitais ?: date();
-    $dthRecebimento = gmdate("Y-m-d\TH:i:s.000\Z", InfraData::getTimestamp($dthRecebimentoComponentesDigitais));
-
-    $strReciboTramite  = "<recibo>";
-    $strReciboTramite .= "<IDT>$parNumIdTramite</IDT>";
-    $strReciboTramite .= "<NRE>$strNumeroRegistro</NRE>";
-    $strReciboTramite .= "<dataDeRecebimento>$dthRecebimento</dataDeRecebimento>";
-    sort($parArrayHash);
-
-    foreach ($parArrayHash as $strHashConteudo) {
-      if(!empty($strHashConteudo)){
-            $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
-      }
-    }
-    $strReciboTramite  .= "</recibo>";
-
-    //Envia o Recibo de salva no banco
-    $hashAssinatura = $this->objProcessoEletronicoRN->enviarReciboDeTramite($parNumIdTramite, $dthRecebimento, $strReciboTramite);
-    $this->cadastrarReciboTramiteRecebimento($strNumeroRegistro, $parNumIdTramite, $hashAssinatura, $parArrayHash);
   }
 
   private function obterDataRecebimentoComponentesDigitais($parObjTramite){
@@ -147,7 +159,7 @@ class EnviarReciboTramiteRN extends InfraRN
     /**
      * Consulta o componente digital no barramento. Utilizado para casos de retrasmissão,
      * onde esta unidade esta recebendo um componente digital que pertence à ela
-     * própria, então o id_tramite de envio, que foi gravado, é diferente do de recebimento
+     * própria, então o id_tramite de envio, que foi gravado, é diferente do recebimento
      *
      * @param int $numIdTramite
      * @return array[ComponenteDigitalDTO]
@@ -188,7 +200,6 @@ class EnviarReciboTramiteRN extends InfraRN
                     $objDocumentoDTO = $objDocumentoBD->consultar($objDocumentoDTO);
 
                     if(empty($objDocumentoDTO)) {
-
                         $dblIdDocumento = $objDocumentoDTO->getDblIdDocumento();
                     }
                 }

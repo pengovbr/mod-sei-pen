@@ -43,6 +43,10 @@ class ProcessoEletronicoRN extends InfraRN {
   // 02 a 18 estão registrados na tabela rel_tarefa_operacao
   public static $OP_OPERACAO_REGISTRO = "01";
 
+  // 10 minutos de timeout para requisições via webservice
+  const WS_CONNECTION_TIMEOUT = 600;
+
+
   const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
   /**
@@ -107,6 +111,9 @@ class ProcessoEletronicoRN extends InfraRN {
       , 'passphrase' => $this->strLocalCertPassword
       , 'resolve_wsdl_remote_includes' => true
       , 'cache_wsdl'=> WSDL_CACHE_NONE
+      , 'connection_timeout' => self::WS_CONNECTION_TIMEOUT
+      , CURLOPT_TIMEOUT => self::WS_CONNECTION_TIMEOUT
+      , CURLOPT_CONNECTTIMEOUT => self::WS_CONNECTION_TIMEOUT
       , 'trace' => true
       , 'encoding' => 'UTF-8'
       , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
@@ -368,34 +375,37 @@ class ProcessoEletronicoRN extends InfraRN {
   public function consultarMotivosUrgencia()
   {
     $curl = curl_init($this->strComumXSD);
-    curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
-    curl_setopt($curl, CURLOPT_HEADER, 0);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
-    curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
-    $output = curl_exec($curl);
-    curl_close($curl);
 
-    $dom = new DOMDocument;
-    $dom->loadXML($output);
+    try{
+        curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+        curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+        $output = curl_exec($curl);
 
-    $xpath = new DOMXPath($dom);
+        $dom = new DOMDocument;
+        $dom->loadXML($output);
 
-    $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
-    $xpath->registerNamespace('x', $rootNamespace);
-    $entries = $xpath->query('/x:schema/x:simpleType[@name="motivoDaUrgencia"]/x:restriction/x:enumeration');
+        $xpath = new DOMXPath($dom);
 
-    $resultado = array();
-    foreach ($entries as $entry) {
-      $valor = $entry->getAttribute('value');
+        $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
+        $xpath->registerNamespace('x', $rootNamespace);
+        $entries = $xpath->query('/x:schema/x:simpleType[@name="motivoDaUrgencia"]/x:restriction/x:enumeration');
 
-      $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
-      $descricao = $documentationNode->item(0)->nodeValue;
+        $resultado = array();
+        foreach ($entries as $entry) {
+          $valor = $entry->getAttribute('value');
+          $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
+          $descricao = $documentationNode->item(0)->nodeValue;
+          $resultado[$valor] = utf8_decode($descricao);
+        }
 
-      $resultado[$valor] = utf8_decode($descricao);
+    } finally{
+        curl_close($curl);
     }
 
     return $resultado;
