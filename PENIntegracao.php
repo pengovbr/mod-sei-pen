@@ -11,7 +11,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.2.0';
+        return '1.2.1';
     }
 
     public function getInstituicao() {
@@ -353,11 +353,38 @@ class PENIntegracao extends SeiIntegracao {
         return $xml;
     }
 
-    public static function validarCompatibilidadeModulo($bolGerarExcecao = true, $strVersaoSEI = SEI_VERSAO)
+    public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
     {
+        $strVersaoSEI =  $parStrVersaoSEI ?: SEI_VERSAO;
         $objPENIntegracao = new PENIntegracao();
         if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
             throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
         }
     }
+
+    /**
+     * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada.
+     *
+     * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
+     * @return boolean                  Indicardor se base de dados é compatível
+     */
+    public static function validarCompatibilidadeBanco($bolGerarExcecao=true)
+    {
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+
+        $objPENIntegracao = new PENIntegracao();
+        $strVersaoModulo = $objPENIntegracao->getVersao();
+
+        $bolBaseCompativel = ($strVersaoModulo === $strVersaoBancoModulo);
+
+        if(!$bolBaseCompativel && $bolGerarExcecao){
+            throw new ModuloIncompativelException(sprintf("Base de dados do módulo '%s' (versão %s) encontra-se incompatível. A versão da base de dados atualmente instalada é a %s. \n ".
+                "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo));
+        }
+
+        return $bolBaseCompativel;
+    }
 }
+
+class ModuloIncompativelException extends InfraException { }

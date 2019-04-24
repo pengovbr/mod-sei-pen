@@ -19,6 +19,7 @@ class PendenciasTramiteRN extends InfraRN {
 
     public static function getInstance() {
         if (self::$instance == null) {
+            PENIntegracao::validarCompatibilidadeBanco();
             self::$instance = new PendenciasTramiteRN(ConfiguracaoSEI::getInstance(), SessaoSEI::getInstance(), BancoSEI::getInstance(), LogSEI::getInstance());
         }
 
@@ -72,6 +73,8 @@ class PendenciasTramiteRN extends InfraRN {
 
             while (true) {
                 try {
+                    PENIntegracao::validarCompatibilidadeBanco();
+
                     $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite();
                     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
@@ -80,6 +83,12 @@ class PendenciasTramiteRN extends InfraRN {
                         $this->gravarLogDebug($mensagemLog, 3, true);
                         $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
                     }
+
+                } catch(ModuloIncompativelException $e) {
+                    //Registra a falha no log do sistema e reinicia o ciclo de requisição e
+                    //sai loop de eventos para finalizar o script e subir uma nova versão atualizada
+                    LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+                    break;
                 } catch (Exception $e) {
                     //Apenas registra a falha no log do sistema e reinicia o ciclo de requisição
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
@@ -211,22 +220,22 @@ class PendenciasTramiteRN extends InfraRN {
         $client = new GearmanClient();
         $client->addServer("127.0.0.1", 4730);
 
-        $strWorkload = strval($objPendencia->getNumIdentificacaoTramite());
+        $numIDT = strval($objPendencia->getNumIdentificacaoTramite());
 
         switch ($objPendencia->getStrStatus()) {
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-                $client->addTaskBackground('enviarComponenteDigital', $strWorkload, null);
+                $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $client->addTaskBackground('receberProcedimento', $strWorkload, null);
+                $client->addTaskBackground('receberProcedimento', $numIDT, null, $numIDT);
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $client->addTaskBackground('receberReciboTramite', $strWorkload, null);
+                $client->addTaskBackground('receberReciboTramite', $numIDT, null, $numIDT);
                 break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
@@ -236,7 +245,7 @@ class PendenciasTramiteRN extends InfraRN {
             break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                $client->addTaskBackground("receberTramitesRecusados", $strWorkload, null);;
+                $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
             break;
 
             default:

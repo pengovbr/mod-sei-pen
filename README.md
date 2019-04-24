@@ -80,8 +80,8 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         user=apache
         autostart=true
         autorestart=true
-        startsecs=15
-        startretries=3
+        startsecs=5
+        startretries=1000
         log_stdout=true
         log_stderr=true
         logfile_backups=50
@@ -99,8 +99,8 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         user=apache
         autostart=true
         autorestart=true
-        startsecs=15
-        startretries=3
+        startsecs=5
+        startretries=1000
         log_stdout=true
         log_stderr=true
         logfile_maxbytes=10MB
