@@ -112,9 +112,13 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
             catch(Exception $e){
                 $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-                $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
-                $objProcessoEletronicoRN->recusarTramite($numIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+
+                //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
+                if($e instanceof InfraException && $e->getObjException() != null && !($e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException)) {
+                    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                    $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
+                    $objProcessoEletronicoRN->recusarTramite($numIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+                }
             }
         });
 

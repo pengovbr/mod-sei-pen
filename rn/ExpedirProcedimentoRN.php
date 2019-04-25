@@ -624,15 +624,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function desbloquearProcessoExpedicao($numIdProcedimento)
     {
-        //Intancia o objeto de desbloqueio da API do SEI
-        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($numIdProcedimento);
-
-        //Solicita o Desbloqueio do Processo
-        $objSeiRN = new SeiRN();
-        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+        ProcessoEletronicoRN::desbloquearProcesso($numIdProcedimento);
     }
-
 
     public function registrarAndamentoExpedicaoAbortada($dblIdProtocolo)
     {
@@ -2209,7 +2202,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
         $objDtoProtocolo = $objProtocoloBD->consultar($objDtoProtocolo);
 
-        $this->cancelarTramiteInternoControlado($objDtoProtocolo);
+        $this->cancelarTramiteInterno($objDtoProtocolo);
 
     }
 
@@ -2254,7 +2247,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         //Verifica se o trâmite est com o status de iniciado
         if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
             $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
-
             return true;
         }
 
@@ -2293,11 +2285,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         //Desbloqueia o processo
-        $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
-        $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);
-
-        $objSeiRN = new SeiRN();
-        $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+        ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
 
         $objDTOFiltro = new TramiteDTO();
         $objDTOFiltro->setNumIdTramite($tramite->IDT);

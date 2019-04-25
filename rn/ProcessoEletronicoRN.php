@@ -1,4 +1,8 @@
 <?php
+
+
+class ProcessoNaoPodeSerDesbloqueadoException extends Exception {}
+
 //@TODOJOIN: VERIFICAR SE NÃO EXISTEM TRY CATCH QUE OCULTAM ERROS. CASO EXISTAM CATCH COM EXEPTION DO PHP, RETIRALOS
 class ProcessoEletronicoRN extends InfraRN {
 
@@ -1254,15 +1258,8 @@ class ProcessoEletronicoRN extends InfraRN {
    * @throws Exception|InfraException
    * @return null
    */
-  public function cancelarTramite($idTramite) {
-
-      //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->filtroDeConsultaDeTramites = new stdClass()
-      //Faz a consulta do tramite
-      //$paramConsultaTramite = new stdClass();
-      //$paramConsultaTramite->filtroDeConsultaDeTramites = new stdClass();
-      //$paramConsultaTramite->filtroDeConsultaDeTramites->IDT = $idTramite;
-      //$dadosTramite = $this->getObjPenWs()->consultarTramites($paramConsultaTramite);
-
+  public function cancelarTramite($idTramite)
+  {
       //Requisita o cancelamento
       $parametros = new stdClass();
       $parametros->IDT = $idTramite;
@@ -1288,7 +1285,6 @@ class ProcessoEletronicoRN extends InfraRN {
    */
   public function recusarTramite($idTramite, $justificativa, $motivo) {
         try {
-
             //@TODOJOIN: Adicionar a seguinte linha abaixo dessa : $parametros->recusaDeTramite = new stdClass()
             $parametros = new stdClass();
             $parametros->recusaDeTramite = new stdClass();
@@ -1425,6 +1421,19 @@ class ProcessoEletronicoRN extends InfraRN {
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             throw new InfraException($mensagem, $e, $detalhes);
       }
+    }
+
+    public static function desbloquearProcesso($parDblIdProcedimento)
+    {
+        try{
+            $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
+            $objEntradaDesbloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+
+            $objSeiRN = new SeiRN();
+            $objSeiRN->desbloquearProcesso($objEntradaDesbloquearProcessoAPI);
+        } catch (InfraException $e) {
+            throw new ProcessoNaoPodeSerDesbloqueadoException("Erro ao desbloquear processo", 1, $e);
+        }
     }
 }
 
