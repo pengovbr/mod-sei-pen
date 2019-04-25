@@ -690,7 +690,7 @@ class ProcessoEletronicoRN extends InfraRN {
     if($parObjProcessoEletronicoDTO->isSetArrObjRelProcessoEletronicoApensado()) {
         $objRelProcessoEletronicoApensadoBD = new RelProcessoEletronicoApensadoBD($this->getObjInfraIBanco());
         foreach ($parObjProcessoEletronicoDTO->getArrObjRelProcessoEletronicoApensado() as $objRelProcessoEletronicoApensadoDTOFiltro) {
-            if($objRelProcessoEletronicoApensadoBD->contar($objRelProcessoEletronicoApensadoDTOFiltro) < 1){
+            if($objRelProcessoEletronicoApensadoBD->contar($objRelProcessoEletronicoApensadoDTOFiltro) == 0){
                 $objRelProcessoEletronicoApensadoBD->cadastrar($objRelProcessoEletronicoApensadoDTOFiltro);
             }
         }
@@ -708,7 +708,7 @@ class ProcessoEletronicoRN extends InfraRN {
     $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
     $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-    if($objTramiteDTO == null) {
+    if(empty($objTramiteDTO)) {
       $objTramiteDTO = $objTramiteBD->cadastrar($parObjTramiteDTO);
     }
 
@@ -720,9 +720,7 @@ class ProcessoEletronicoRN extends InfraRN {
     $numOrdem = 1;
 
     foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
-
         $objComponenteDigitalDTOFiltro = new ComponenteDigitalDTO();
-
         $objComponenteDigitalDTOFiltro->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
         $objComponenteDigitalDTOFiltro->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
         $objComponenteDigitalDTOFiltro->setDblIdDocumento($objComponenteDigitalDTO->getDblIdDocumento());
@@ -730,31 +728,26 @@ class ProcessoEletronicoRN extends InfraRN {
          if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) > 0){
              $numOrdem++;
          }
-
     }
 
     foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
 
       //Verifica se o documento foi inserido pelo trâmite atual
       if($objComponenteDigitalDTO->getDblIdDocumento() != null){
-
         $objComponenteDigitalDTO->setDblIdProcedimento($idProcedimento);
 
         $objComponenteDigitalDTOFiltro = new ComponenteDigitalDTO();
-
         $objComponenteDigitalDTOFiltro->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
         $objComponenteDigitalDTOFiltro->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
         $objComponenteDigitalDTOFiltro->setDblIdDocumento($objComponenteDigitalDTO->getDblIdDocumento());
 
-        if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) < 1){
-
+        if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) == 0){
             $objComponenteDigitalDTO->setNumOrdem($numOrdem);
             $objComponenteDigitalDTO->unSetStrDadosComplementares();
             $objComponenteDigitalDTO = $objComponenteDigitalBD->cadastrar($objComponenteDigitalDTO);
             $numOrdem++;
         }
         else {
-
             //Verifica se foi setado o envio
             if(!$objComponenteDigitalDTO->isSetStrSinEnviar()){
                 $objComponenteDigitalDTO->setStrSinEnviar('N');

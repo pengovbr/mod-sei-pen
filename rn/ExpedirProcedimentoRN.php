@@ -333,7 +333,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAtributoAndamentoDTO->setStrIdOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
-        //TODO: Avaliar qual o usurio que deveria ser registrado no atributo andamento abaixo
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
         $objAtributoAndamentoDTO->setStrNome('USUARIO');
         $objAtributoAndamentoDTO->setStrValor(SessaoSEI::getInstance()->getStrSiglaUsuario() . '' . SessaoSEI::getInstance()->getStrNomeUsuario());
@@ -2230,7 +2229,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objTramiteDTO = new TramiteDTO();
         $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
-        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);    
+        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
         $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
         $objTramiteDTO->setNumMaxRegistrosRetorno(1);
         $objTramiteDTO->retNumIdTramite();
@@ -2290,9 +2289,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
         if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
-            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);    
+            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
         }
-        
+
         //Desbloqueia o processo
         $objEntradaDesbloquearProcessoAPI = new EntradaDesbloquearProcessoAPI();
         $objEntradaDesbloquearProcessoAPI->setIdProcedimento($dblIdProcedimento);

@@ -222,7 +222,6 @@ class PendenciasTramiteRN extends InfraRN {
         $client->addServer("127.0.0.1", 4730);
 
         $numIDT = strval($objPendencia->getNumIdentificacaoTramite());
-
         switch ($objPendencia->getStrStatus()) {
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
@@ -238,12 +237,6 @@ class PendenciasTramiteRN extends InfraRN {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
                 $client->addTaskBackground('receberReciboTramite', $numIDT, null, $numIDT);
                 break;
-
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-            break;
-
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
-            break;
 
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
                 $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
