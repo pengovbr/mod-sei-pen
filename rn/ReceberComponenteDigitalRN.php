@@ -142,15 +142,8 @@ class ReceberComponenteDigitalRN extends InfraRN
 
         $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
         $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
+
+        $objDocumentoDTO->setStrSinBloqueado('S');
         $objDocumentoDTO = $objDocumentoRN->alterarRN0004($objDocumentoDTO);
-
-        // @join_tec US029 (#3790)
-        /*$objObservacaoDTO = new ObservacaoDTO();
-        $objObservacaoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-        $objObservacaoDTO->setStrDescricao(sprintf('Número SEI do Documento na Origem: %s', $strProtocoloFormatado));
-        $objObservacaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-
-        $objObservacaoBD = new ObservacaoRN();
-        $objObservacaoBD->cadastrarRN0222($objObservacaoDTO);*/
     }
 }

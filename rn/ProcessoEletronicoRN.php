@@ -1435,6 +1435,33 @@ class ProcessoEletronicoRN extends InfraRN {
             throw new ProcessoNaoPodeSerDesbloqueadoException("Erro ao desbloquear processo", 1, $e);
         }
     }
+
+    /**
+     * Busca a unidade ao qual o processo foi anteriormente expedido.
+     * Caso seja o primeiro trâmite, considera a unidade atual
+     *
+     * @return integer Id da unidade
+     */
+    public static function obterUnidadeParaRegistroDocumento($parDblIdProcedimento)
+    {
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setStrIdTarefaModuloTarefa(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+        $objAtividadeDTO->setDblIdProcedimentoProtocolo($parDblIdProcedimento);
+        $objAtividadeDTO->setOrd('Conclusao', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->retNumIdUnidade();
+
+        $objAtividadeRN = new AtividadeRN();
+        $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+        $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+        //if(!empty($arrObjAtividadeDTO)){
+        //    $objAtividadeDTO = $arrObjAtividadeDTO[0];
+        //    $numIdUnidade = $objAtividadeDTO->getNumIdUnidade();
+        //}
+
+        return $numIdUnidade;
+    }
 }
 
 
