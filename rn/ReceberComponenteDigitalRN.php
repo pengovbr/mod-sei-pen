@@ -143,7 +143,6 @@ class ReceberComponenteDigitalRN extends InfraRN
         $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
         $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
-        $objDocumentoDTO->setStrSinBloqueado('S');
         $objDocumentoDTO = $objDocumentoRN->alterarRN0004($objDocumentoDTO);
     }
 }

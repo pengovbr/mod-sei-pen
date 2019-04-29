@@ -28,10 +28,13 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Ordem', 'ordem');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
 
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaTipoTramite', 'sta_tipo_tramite', 'md_pen_tramite');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'TicketEnvioComponentes', 'ticket_envio_componentes', 'md_pen_tramite');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ConteudoAssinaturaDocumento', 'conteudo_assinatura', 'documento_conteudo');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ProtocoloDocumentoFormatado', 'protocolo_formatado', 'protocolo');
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaProtocolo', 'sta_protocolo', 'protocolo');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaEstadoProtocolo', 'sta_estado', 'protocolo');
+
 
     $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
     $this->configurarPK('IdDocumento', InfraDTO::$TIPO_PK_INFORMADO);

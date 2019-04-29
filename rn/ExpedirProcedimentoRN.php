@@ -365,31 +365,45 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         //Obtenção do número de registro eletrônico do processo
         $strNumeroRegistro = null;
-        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoDTO->setDblIdProcedimento($objExpedirProcedimentoDTO->getDblIdProcedimento());
-        //TODO: Tratar situao de quando  localizado dois registros para o mesmo processo
-        $objProcessoEletronicoDTO->setNumMaxRegistrosRetorno(1);
-        $objProcessoEletronicoDTO->setOrd('IdProcedimento', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objProcessoEletronicoDTO->retStrNumeroRegistro();
 
-        $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
-        if(isset($objProcessoEletronicoDTO)) {
-            $strNumeroRegistro = $objProcessoEletronicoDTO->getStrNumeroRegistro();
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $objTramiteDTOFiltro = new TramiteDTO();
+        $objTramiteDTOFiltro->retStrNumeroRegistro();
+        $objTramiteDTOFiltro->setNumIdProcedimento($objExpedirProcedimentoDTO->getDblIdProcedimento());
+        $objTramiteDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTOFiltro->setNumMaxRegistrosRetorno(1);
+
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTOFiltro);
+        if(isset($objTramiteDTO)) {
+            $strNumeroRegistro = $objTramiteDTO->getStrNumeroRegistro();
         }
 
         // Consultar se processo eletrônico existe no PEN algum trâmite CANCELADO, caso
         // sim deve ser gerada uma nova NRE, pois a atual ser recusada pelo PEN quando
         // for enviado
-        /* if(!InfraString::isBolVazia($strNumeroRegistro)) {
+        if(!InfraString::isBolVazia($strNumeroRegistro)) {
             $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites(null, $strNumeroRegistro);
-            if(!empty($arrObjTramite) && is_array($arrObjTramite) && count($arrObjTramite) === 1) {
-                $objTramite = current($arrObjTramite);
-                if($objTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO || $objTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO){
+            if(!empty($arrObjTramite) && is_array($arrObjTramite)) {
+
+                $arrNumSituacoesTramiteEfetivado = array(
+                    ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+                    ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+                );
+
+                $bolExisteTramiteConcluido = false;
+                foreach ($arrObjTramite as $objTramite) {
+                    //Caso exista algum trâmite realizado com sucesso para outro destinatário, número do NRE precisa ser reutilizado
+                    if(in_array($objTramite->situacaoAtual, $arrNumSituacoesTramiteEfetivado)){
+                        $bolExisteTramiteConcluido = true;
+                        break;
+                    }
+                }
+
+                if(!$bolExisteTramiteConcluido){
                     $strNumeroRegistro = null;
                 }
             }
-        }    */
+        }
 
         return $this->objProcessoEletronicoRN->construirCabecalho(
             $strNumeroRegistro,
@@ -2241,7 +2255,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $tramite = $tramites ? $tramites[0] : null;
 
         if (!$tramite) {
-            throw new InfraException('Trâmite não encontrado para esse processo. ');
+            throw new InfraException("Trâmite não encontrado para esse processo. ({$objDtoProtocolo->getDblIdProtocolo()})");
         }
 
         //Verifica se o trâmite est com o status de iniciado

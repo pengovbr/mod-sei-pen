@@ -918,9 +918,7 @@ class ProcessoEletronicoRN extends InfraRN {
       }
 
       $objTramitesEncontrados = $this->getObjPenWs()->consultarTramites($parametro);
-
       if(isset($objTramitesEncontrados->tramitesEncontrados)) {
-
         $arrObjTramite = $objTramitesEncontrados->tramitesEncontrados->tramite;
         if(!is_array($arrObjTramite)) {
           $arrObjTramite = array($objTramitesEncontrados->tramitesEncontrados->tramite);
@@ -1455,10 +1453,10 @@ class ProcessoEletronicoRN extends InfraRN {
         $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
         $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
-        //if(!empty($arrObjAtividadeDTO)){
-        //    $objAtividadeDTO = $arrObjAtividadeDTO[0];
-        //    $numIdUnidade = $objAtividadeDTO->getNumIdUnidade();
-        //}
+        if(!empty($arrObjAtividadeDTO)){
+           $objAtividadeDTO = $arrObjAtividadeDTO[0];
+           $numIdUnidade = $objAtividadeDTO->getNumIdUnidade();
+        }
 
         return $numIdUnidade;
     }
