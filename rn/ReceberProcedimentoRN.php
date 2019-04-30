@@ -1864,10 +1864,10 @@ class ReceberProcedimentoRN extends InfraRN
     {
         //Valida se algum documento ficou sem seus respectivos componentes digitais
         $sql = "select doc.id_documento as id_documento, comp.hash_conteudo as hash_conteudo
-                from procedimento proc join documento doc on (doc.id_procedimento = proc.id_procedimento)
+                from procedimento proced join documento doc on (doc.id_procedimento = proced.id_procedimento)
                                        join protocolo prot_doc on (doc.id_documento = prot_doc.id_protocolo)
                                        left join md_pen_componente_digital comp on (comp.id_documento = doc.id_documento)
-                where proc.id_procedimento = $parNumIdProcedimento and prot_doc.sta_protocolo = 'R' and
+                where proced.id_procedimento = $parNumIdProcedimento and prot_doc.sta_protocolo = 'R' and
                 not exists (select 1 from anexo where anexo.id_protocolo = prot_doc.id_protocolo) ";
 
         //Adiciona filtro adicional para verificar pelo identificador do documento, caso parâmetro tenha sido informado
