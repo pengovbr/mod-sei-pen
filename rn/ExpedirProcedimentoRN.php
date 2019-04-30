@@ -2245,7 +2245,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
         if(!isset($objTramiteDTO)){
-            throw new InfraException("Trâmite não encontrado para esse processo. ({$objDtoProtocolo->getDblIdProtocolo()})");
+            throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
         }
 
         //Armazena o id do protocolo
@@ -2255,7 +2255,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         $tramite = $tramites ? $tramites[0] : null;
 
         if (!$tramite) {
-            throw new InfraException("Trâmite não encontrado para esse processo. ({$objDtoProtocolo->getDblIdProtocolo()})");
+            $numIdTramite = $objTramiteDTO->getNumIdTramite();
+            $numIdProtoloco = $objDtoProtocolo->getDblIdProtocolo();
+            throw new InfraException("Trâmite $numIdTramite não encontrado para o processo $numIdProtoloco.");
         }
 
         //Verifica se o trâmite est com o status de iniciado

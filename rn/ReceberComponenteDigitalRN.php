@@ -90,7 +90,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         return $objAnexoDTO;
     }
 
-    public function validarIntegridadeDoComponenteDigital(AnexoDTO $objAnexoDTO, $strHashConteudo, $parNumIdentificacaoTramite)
+    public function validarIntegridadeDoComponenteDigital(AnexoDTO $objAnexoDTO, $strHashConteudo, $parNumIdentificacaoTramite, $parNumOrdemComponente)
     {
         $strHashInformado = $strHashConteudo;
         $strHashInformado = base64_decode($strHashInformado);
@@ -100,7 +100,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         $strHashDoArquivo = hash_file("sha256", $strCaminhoAnexo, true);
 
         if(strcmp($strHashInformado, $strHashDoArquivo) != 0) {
-            $strMensagem = "Hash do componente digital não confere com o valor informado pelo remetente.";
+            $strMensagem = "Hash do componente digital de ordem $parNumOrdemComponente não confere com o valor informado pelo remetente.";
             $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_CORROMPIDO);
 
             $strHashInformadoBase64 = base64_encode($strHashInformado);

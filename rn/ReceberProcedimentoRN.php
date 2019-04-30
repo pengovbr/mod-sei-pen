@@ -124,7 +124,7 @@ class ReceberProcedimentoRN extends InfraRN
                         //Valida a integridade do hash
                         $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 6);
                         $this->objReceberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente],
-                            $componentePendente, $parNumIdentificacaoTramite);
+                            $componentePendente, $parNumIdentificacaoTramite, $numOrdemComponente);
                     }
                 }
 
