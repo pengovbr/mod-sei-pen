@@ -7,6 +7,8 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     private static $instance = null;
     private $objGearmanWorker = null;
 
+    const TIMEOUT_PROCESSAMENTO_JOB = 5400;
+
     protected function inicializarObjInfraIBanco()
     {
         return BancoSEI::getInstance();
@@ -72,12 +74,12 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
         // Processamento de pendências envio dos metadados do processo
         $this->objGearmanWorker->addFunction("enviarProcesso", function ($job) {
             $this->gravarLogDebug("Processando envio de processo [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
-        });
+         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         // Processamento de pendências envio dos componentes digitais do processo
         $this->objGearmanWorker->addFunction("enviarComponenteDigital", function ($job) {
             $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
-        });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         // Processamento de pendências de recebimento do recibo de envio do processo
         $this->objGearmanWorker->addFunction("receberReciboTramite", function ($job) {
@@ -89,13 +91,12 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                     $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
                     $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
                 }
-
             }
             catch(Exception $e){
                 $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
-        });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         //Processamento de pendências de recebimento dos metadados do processo
         $this->objGearmanWorker->addFunction("receberProcedimento", function ($job) {
@@ -121,7 +122,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                     $objProcessoEletronicoRN->recusarTramite($numIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
                 }
             }
-        });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         // Verifica no barramento os procedimentos que foram enviados por esta unidade e foram recusados pelas mesmas
         $this->objGearmanWorker->addFunction("receberTramitesRecusados", function ($job) {
@@ -134,13 +135,13 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                 $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
-        });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         //Processamento de pendências de recebimento dos componentes digitais do processo
         $this->objGearmanWorker->addFunction("receberComponenteDigital", function ($job) {
             $this->gravarLogDebug("Processando recebimento de componentes digitais [receberComponenteDigital] com IDT " . $job->workload(), 0, true);
             ProcessarPendenciasRN::processarTarefa("enviarReciboTramiteProcesso", $job->workload());
-        });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
         //Processamento de pendências de envio do recibo de conclusão do trãmite do processo
         $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function ($job) {
@@ -153,7 +154,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                 $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             }
-      });
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
     }
 
     private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolEcho=false)
