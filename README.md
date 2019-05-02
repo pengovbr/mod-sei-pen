@@ -51,6 +51,7 @@ Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
 
 **Importante:** É imprescindível que os dois sejam instalados **SOMENTE** no nó de aplicação em que está configurado o CRON de agendamento do SEI.
+**Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0
 
     Exemplo de instalação do German e Supervisor no CentOS:
 
@@ -58,7 +59,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         yum install epel-release && yum update
 
         # instalação do gearman e supervisord               
-        yum install supervisor gearmand libgearman libgearman-devel php56*-pecl-gearman
+        yum install supervisor-4.* gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 3. Configuração dos serviços de recebimento de processos no **supervisor** 
 
@@ -75,7 +76,8 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
         # adicione no final do arquivo
         [program:sei_processar_pendencias]
         command=/usr/bin/php -c /etc/php.ini /opt/sei/web/modulos/pen/rn/ProcessarPendenciasRN.php
-        numprocs=1
+        process_name=%(program_name)s_%(process_num)02d
+        numprocs=4
         directory=/opt/sei/web
         user=apache
         autostart=true
