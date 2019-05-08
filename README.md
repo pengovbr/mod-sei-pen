@@ -53,7 +53,7 @@ Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
 
 **Importante:** É imprescindível que os dois sejam instalados **SOMENTE** no nó de aplicação em que está configurado o CRON de agendamento do SEI.
-**Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0
+**Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
 
 Exemplo de instalação do German e Supervisor no CentOS:
 ```bash
@@ -371,7 +371,9 @@ Para realizar a atualização do módulo, realize os seguintes procedimentos:
 ---
 ##### 3. Atualizar software Supervisord para a versão 4.X
 
-Os procedimentos de atualização dependente do OS, mas a versão 4 está disponível via gerenciador de pacotes pip do python 3. Versão 2.X não deve ser mais utilizado.
+Os procedimentos de atualização dependente do OS, mas a versão 4 está disponível via gerenciador de pacotes pip do python 3. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html.
+
+Versão 2.X não deve ser mais utilizada.
 
 ---
 ##### 4. Atualizar as configurações dos serviços de monitoramento do /etc/supervisord.conf conforme definido no passo 03 do Manual de Instalação do mod-sei-pen, seção "Configuração dos serviços de recebimento de processos no supervisor". https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/blob/master/README.md.
