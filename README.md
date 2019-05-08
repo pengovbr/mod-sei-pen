@@ -13,16 +13,16 @@ Para maiores informações sobre o ConectaGov e o PEN, acesse http://www.planeja
 
 Este manual está estruturado nas seguintes seções:
 
-1. [**Instalação**](#instalação):
+1. **[Instalação](#instalação)**:
 Procedimentos de instalação do módulo nos servidores de aplicação e atualização do banco de dados.
 
-2. [**Atualização**](#atualização):
+2. **[Atualização](#atualização)**:
 Procedimentos para realizar a atualização de uma nova versão do módulo
 
-4. [**Utilização**](#utilização):
+4. **[Utilização](#utilização)**:
 Apresentação das funcionalidades que permitem o trâmite externo de processos e o acompanhamento de seu histórico.
  
-5. [**Suporte**](#suporte):
+5. **[Suporte](#suporte)**:
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do ConectaGov.
 
 ## Instalação
