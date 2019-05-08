@@ -1867,8 +1867,10 @@ class ReceberProcedimentoRN extends InfraRN
                 from procedimento proced join documento doc on (doc.id_procedimento = proced.id_procedimento)
                                        join protocolo prot_doc on (doc.id_documento = prot_doc.id_protocolo)
                                        left join md_pen_componente_digital comp on (comp.id_documento = doc.id_documento)
-                where proced.id_procedimento = $parNumIdProcedimento and prot_doc.sta_protocolo = 'R' and
-                not exists (select 1 from anexo where anexo.id_protocolo = prot_doc.id_protocolo) ";
+                where proced.id_procedimento = $parNumIdProcedimento
+                and prot_doc.sta_protocolo = 'R'
+                and prot_doc.sta_estado <> " . ProtocoloRN::$TE_DOCUMENTO_CANCELADO . "
+                and not exists (select 1 from anexo where anexo.id_protocolo = prot_doc.id_protocolo) ";
 
         //Adiciona filtro adicional para verificar pelo identificador do documento, caso parâmetro tenha sido informado
         if(!is_null($parNumIdDocumento)){
