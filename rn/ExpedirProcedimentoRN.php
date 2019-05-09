@@ -1108,6 +1108,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         //$this->atribuirAssinaturaEletronica($objDocumento->componenteDigital, $objDocumentoDTO);
 
         $objDocumento->componenteDigital->idAnexo = $arrInformacaoArquivo['ID_ANEXO'];
+
         return $objDocumento;
     }
 
@@ -1238,52 +1239,61 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
-            if(!isset($objAnexoDTO)){
-                throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
-            }
-
-            //VALIDAO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIO
-            $objPenParametroRN = new PenParametroRN();
-            if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
-                $strTamanhoFormatado = round(($objAnexoDTO->getNumTamanho() / 1024) / 1024,2);
-                throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para trâmite externo de documentos.");
-            }
-
-            //Obtenção do conteúdo do documento externo
-            //TODO: Particionar o documento em tamanho menor caso ultrapasse XX megabytes
-            $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-
-            $fp = fopen($strCaminhoAnexo, "rb");
-            try {
-                $strConteudoAssinatura = fread($fp, filesize($strCaminhoAnexo));
-                fclose($fp);
-            } catch(Exception $e) {
-                fclose($fp);
-                throw new InfraException("Erro obtendo conteúdo do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
-            }
-
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            try {
-                $strMimeType = finfo_file($finfo, $strCaminhoAnexo);
-                $strDadosComplementaresDoTipoDeArquivo = "";
-                if(!array_search($strMimeType, $this->arrPenMimeTypes)){
-                    $strDadosComplementaresDoTipoDeArquivo = $strMimeType;
-                    $strMimeType = 'outro';
+            if(isset($objAnexoDTO)){
+                //VALIDAO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIO
+                $objPenParametroRN = new PenParametroRN();
+                if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                    $strTamanhoFormatado = round(($objAnexoDTO->getNumTamanho() / 1024) / 1024,2);
+                    throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para trâmite externo de documentos.");
                 }
 
-                finfo_close($finfo);
-            } catch(Exception $e) {
-                finfo_close($finfo);
-                throw new InfraException("Erro obtendo informações do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
+                //Obtenção do conteúdo do documento externo
+                $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
+
+                $fp = fopen($strCaminhoAnexo, "rb");
+                try {
+                    $strConteudoAssinatura = fread($fp, filesize($strCaminhoAnexo));
+                    fclose($fp);
+                } catch(Exception $e) {
+                    fclose($fp);
+                    throw new InfraException("Erro obtendo conteúdo do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
+                }
+
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                try {
+                    $strMimeType = finfo_file($finfo, $strCaminhoAnexo);
+                    $strDadosComplementaresDoTipoDeArquivo = "";
+                    if(!array_search($strMimeType, $this->arrPenMimeTypes)){
+                        $strDadosComplementaresDoTipoDeArquivo = $strMimeType;
+                        $strMimeType = 'outro';
+                    }
+
+
+                    finfo_close($finfo);
+                } catch(Exception $e) {
+                    finfo_close($finfo);
+                    throw new InfraException("Erro obtendo informações do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
+                }
+
+                $arrInformacaoArquivo['NOME'] = $objAnexoDTO->getStrNome();
+                $arrInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
+                $arrInformacaoArquivo['TAMANHO'] = $objAnexoDTO->getNumTamanho();
+                $arrInformacaoArquivo['MIME_TYPE'] = $strMimeType;
+                $arrInformacaoArquivo['ID_ANEXO'] = $objAnexoDTO->getNumIdAnexo();
+                $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = $strDadosComplementaresDoTipoDeArquivo;
+
+            } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+                //Quando não é localizado um Anexo para um documento cancelado, os dados de componente digital precisam ser enviados
+                //pois o Barramento considera o componente digital do documento de forma obrigatória
+                $arrInformacaoArquivo['NOME'] = 'cancelado.html';
+                $arrInformacaoArquivo['CONTEUDO'] = "[documento cancelado]";
+                $arrInformacaoArquivo['TAMANHO'] = 0;
+                $arrInformacaoArquivo['ID_ANEXO'] = null;
+                $arrInformacaoArquivo['MIME_TYPE'] = 'text/html';
+                $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+            } else {
+                throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
             }
-
-            $arrInformacaoArquivo['NOME'] = $objAnexoDTO->getStrNome();
-            $arrInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
-            $arrInformacaoArquivo['TAMANHO'] = $objAnexoDTO->getNumTamanho();
-            $arrInformacaoArquivo['MIME_TYPE'] = $strMimeType;
-            $arrInformacaoArquivo['ID_ANEXO'] = $objAnexoDTO->getNumIdAnexo();
-            $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = $strDadosComplementaresDoTipoDeArquivo;
-
         }
         else {
             $objDocumentoDTO2 = new DocumentoDTO();

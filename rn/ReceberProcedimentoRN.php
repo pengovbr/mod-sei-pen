@@ -1799,8 +1799,9 @@ class ReceberProcedimentoRN extends InfraRN
             $arquivoExtensaoDTO->retStrExtensao();
 
             if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0){
-                $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, 'Componentes digitais com formato inválido no destinatário. ', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
-                throw new InfraException("Processo recusado devido a existência de documento em formato {$extDocumento} não permitido pelo sistema. ");
+                $strMensagem = "Processo recusado devido a existência de documento em formato {$extDocumento} não permitido pelo sistema.";
+                $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
+                throw new InfraException($strMensagem);
             }
         }
     }
