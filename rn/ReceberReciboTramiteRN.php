@@ -6,13 +6,14 @@ class ReceberReciboTramiteRN extends InfraRN
   private $objProcessoEletronicoRN;
   private $objInfraParametro;
   private $objProcedimentoAndamentoRN;
+  private $objPenDebug = null;
 
   public function __construct()
   {
-    parent::__construct();
-
-    $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
+        parent::__construct();
+        $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
+        $this->objPenDebug = DebugPen::getInstance();
   }
 
   protected function inicializarObjInfraIBanco()
@@ -33,7 +34,7 @@ class ReceberReciboTramiteRN extends InfraRN
             //Registra falha em log de debug mas não gera rollback na transação.
             //O rollback da transação poderia deixar a situação do processo inconsistênte já que o Barramento registrou anteriormente que o
             //recibo já havia sido obtido. O erro no fechamento não provoca impacto no andamento do processo
-            InfraDebug::getInstance()->gravar("Processo $strProtocoloFormatado não está aberto na unidade.");
+            $this->objPenDebug->gravar("Processo $strProtocoloFormatado não está aberto na unidade.");
         }
 
         $arrObjAtributoAndamentoDTO = array();

@@ -10,6 +10,7 @@ class ReceberProcedimentoRN extends InfraRN
     private $objProcedimentoAndamentoRN;
     private $documentosRetirados = array();
     public $destinatarioReal = null;
+    private $objPenDebug = null;
 
     public function __construct()
     {
@@ -19,7 +20,8 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
         $this->objReceberComponenteDigitalRN = new ReceberComponenteDigitalRN();
 
-        $this->numTempoUltimoLog = null;
+        //Configuração dos logs de debug de processamento
+        $this->objPenDebug = DebugPen::getInstance();
     }
 
     protected function inicializarObjInfraIBanco()
@@ -137,7 +139,7 @@ class ReceberProcedimentoRN extends InfraRN
                         $numTempoInicialValidacao = microtime(true);
                         $this->objReceberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente],
                             $componentePendente, $parNumIdentificacaoTramite, $numOrdemComponente);
-                        $numTempoTotalValidacao = round(microtime(true) - $numTempoInicialValidacao, 2);
+                        $numTempoTotalValidacao = microtime(true) - $numTempoInicialValidacao;
                         $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalValidacao, 2);
                         $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 7);
                     }
@@ -1936,24 +1938,8 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
 
-    private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolLogTempoProcessamento=true)
+    private function gravarLogDebug($parStrMensagem, $parNumIdentacao=0, $parBolLogTempoProcessamento=true)
     {
-        $strDataLog = date("d/m/Y H:i:s");
-        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat(" ", $numIdentacao * 4), $strMensagem);
-
-        //Registro de tempo de processamento desde último log
-        if($bolLogTempoProcessamento){
-            $numTempoFinal = microtime(true);
-            if(is_null($this->numTempoUltimoLog)){
-                //Inicializa contador de tempo de processamento
-                $this->numTempoUltimoLog = $numTempoFinal;
-            } else {
-                $numTempoProcessamento = round($numTempoFinal - $this->numTempoUltimoLog, 2);
-                $strLog .= " [tempo: +{$numTempoProcessamento}s]";
-                $this->numTempoUltimoLog = $numTempoFinal;
-            }
-        }
-
-        InfraDebug::getInstance()->gravar($strLog);
+        $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 }
