@@ -525,6 +525,45 @@ class ProcessoEletronicoRN extends InfraRN {
   }
 
 
+    /**
+     * Método respons<E1>vel por realizar o envio da parte de um componente digital
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function enviarParteDeComponenteDigital($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->enviarParteDeComponenteDigital($parametros);
+        } catch (\Exception $e) {
+            $mensagem = "Falha no envio de parte componente digital";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
+    }
+
+    /**
+     * Método responsável por sinalizar o término do envio das partes de um componente digital
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function sinalizarTerminoDeEnvioDasPartesDoComponente($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
+        } catch (\Exception $e) {
+            $mensagem = "Falha em sinalizar o t<E9>rmino de envio das partes do componente digital";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
+    }
+
+
+
+
   public function solicitarMetadados($parNumIdentificacaoTramite)
   {
     try {
@@ -867,7 +906,7 @@ class ProcessoEletronicoRN extends InfraRN {
   }
 
 
-  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo)
+  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
   {
     try
     {
@@ -877,6 +916,11 @@ class ProcessoEletronicoRN extends InfraRN {
       $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->IDT = $parNumIdentificacaoTramite;
       $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->protocolo = $parStrProtocolo;
       $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->hashDoComponenteDigital = $parStrHashComponenteDigital;
+
+      //Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
+      if(!is_null($parObjParteComponente)){
+          $parametros->parametrosParaRecebimentoDeComponenteDigital->parte = $parObjParteComponente;
+      }
 
       return $this->getObjPenWs()->receberComponenteDigital($parametros);
 

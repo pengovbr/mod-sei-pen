@@ -74,6 +74,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         "video/webm"
     );
 
+
+    private $contadorDaBarraDeProgresso;
+
     public function __construct()
     {
         parent::__construct();
@@ -94,7 +97,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $this->barraProgresso = new InfraBarraProgresso();
         $this->barraProgresso->setNumMin(0);
-        $this->barraProgresso->setNumMax(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
+        //$this->barraProgresso->setNumMax(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
     }
 
     protected function inicializarObjInfraIBanco()
@@ -110,8 +113,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
             $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
-            $this->barraProgresso->exibir();
-            $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
+            //$this->barraProgresso->exibir();
+            //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
 
 
@@ -131,8 +134,8 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objInfraException->lancarValidacoes();
             }
 
-            $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
-            $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+            //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
+            //$this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
 
             //Busca metadados do processo registrado em trâmite anterior
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
@@ -142,6 +145,18 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             //Construção do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
+
+            //Obt<E9>m o tamanho total da barra de progreso
+            $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
+
+            //Seta o tamanho m<E1>ximo da barra de progresso
+            $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
+
+            //Exibe a barra de progresso ap<F3>s definir o seu tamanho
+            $this->barraProgresso->exibir();
+            $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
+            $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+
 
             $param = new stdClass();
             $param->novoTramiteDeProcesso = new stdClass();
@@ -176,8 +191,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
                     $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
-                    //error_log('TRAMITE: ' . print_r($objTramite, true));
-                    //error_log('before enviarComponentesDigitais');
 
                     //TODO: Erro no BARRAMENTO: Processo no pode ser enviado se possuir 2 documentos iguais(mesmo hash)
                     //TODO: Melhoria no barramento de servios. O mtodo solicitar metadados no deixa claro quais os componentes digitais que
@@ -187,30 +200,19 @@ class ExpedirProcedimentoRN extends InfraRN {
                     //que precisam ser enviados
 
                     $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $objProcesso->protocolo);
-                    //error_log('after enviarComponentesDigitais');
-                    //$strNumeroRegistro, $numIdTramite, $strProtocolo
-                    //error_log('==========================>>>>' . print_r($objTramite, true));
 
                     //TODO: Ao enviar o processo e seus documentos, necessrio bloquear os documentos para alterao
                     //pois eles j foram visualizados
                     //$objDocumentoRN = new DocumentoRN();
                     //$objDocumentoRN->bloquearConsultado($objDocumentoRN->consultarRN0005($objDocumentoDTO));
 
-
                     //TODO: Implementar o registro de auditoria, armazenando os metadados xml enviados para o PEN
 
-
-                    # $this->enviarDocProdimentoTramite();
-                    // $this->gravarAuditoria(__METHOD__ , $objExpedirProcedimentoDTO->getDblIdProcedimento());
-                    //$this->bloquearProcesso($objExpedirProcedimentoDTO->getDblIdProcedimento());
-                    #$this->enviarDocProdimentoTramite();
-                    //return array('mensagem' => 'Processo em expedio!', 'retorno' => 1);
-
                     //TODO: Alterar atualizao para somente apresentar ao final de todo o trâmite
-                    $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
+                    //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
+                    $this->barraProgresso->mover($this->barraProgresso->getNumMax());
                     $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
 
-                    // @join_tec US008.06 (#23092)
                     $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
                     $this->receberReciboDeEnvio($objTramite->IDT);
@@ -277,6 +279,35 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         return $objMetadadosProtocolo;
+    }
+
+    /**
+     * M<E9>todo respons<E1>vel por obter o tamanho total que ter<E1> a barra de progresso, considerando os diversos componentes digitais
+     * a quantidade de partes em que cada um ser<E1> particionado
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parObjProcesso
+     * @return float|int $totalBarraProgresso
+     */
+    private function obterTamanhoTotalDaBarraDeProgresso($parObjProcesso)
+    {
+        $objPenParametroRN = new PenParametroRN();
+        $nrTamanhoMegasMaximo  = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+        $nrTamanhoBytesMaximo  = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
+
+        $totalBarraProgresso = 2;
+        $this->contadorDaBarraDeProgresso = 2;
+        foreach ($parObjProcesso->documento as $objDoc)
+        {
+            $nrTamanhoComponente = $objDoc->componenteDigital->tamanhoEmBytes;
+            if($nrTamanhoComponente > $nrTamanhoBytesMaximo){
+                $qtdPartes = ceil($nrTamanhoComponente / $nrTamanhoBytesMaximo);
+                $totalBarraProgresso += $qtdPartes;
+                continue;
+            }
+            $totalBarraProgresso++;
+        }
+
+        return $totalBarraProgresso;
     }
 
     public function listarRepositoriosDeEstruturas()
@@ -1240,23 +1271,37 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
             if(isset($objAnexoDTO)){
-                //VALIDAO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIO
                 $objPenParametroRN = new PenParametroRN();
-                if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
-                    $strTamanhoFormatado = round(($objAnexoDTO->getNumTamanho() / 1024) / 1024,2);
-                    throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para trâmite externo de documentos.");
-                }
+
+                // if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                //     $strTamanhoFormatado = round(($objAnexoDTO->getNumTamanho() / 1024) / 1024,2);
+                //     throw new InfraException("O tamanho do documento {$strTamanhoFormatado} MB é maior que os {$objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO')} MB permitidos para trâmite externo de documentos.");
+                // }
 
                 //Obtenção do conteúdo do documento externo
                 $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
 
-                $fp = fopen($strCaminhoAnexo, "rb");
+                //$fp = fopen($strCaminhoAnexo, "rb");
+
                 try {
-                    $strConteudoAssinatura = fread($fp, filesize($strCaminhoAnexo));
-                    fclose($fp);
+                    $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                    $nrTamanhoBytesMaximo = $nrTamanhoMegasMaximo * pow(1024, 2);
+                    $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
+
+                    //Verifica se o arquivo <E9> maior que 50MB, se for, gera o hash do conte<FA>do do arquivo para enviar para o barramento
+                    //Se n<E3>o for carrega o conte<FA>do do arquivo e envia para o barramento
+                    if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+                        $componenteDigitalParticionado = 1;
+                        $strConteudoAssinatura = hash_file("sha256", $strCaminhoAnexo, true);
+                    } else {
+                        $fp = fopen($strCaminhoAnexo, "rb");
+                        $strConteudoAssinatura = fread($fp, filesize($strCaminhoAnexo));
+                    }
+
                 } catch(Exception $e) {
-                    fclose($fp);
                     throw new InfraException("Erro obtendo conteúdo do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
+                } finally{
+                    fclose($fp);
                 }
 
                 $finfo = finfo_open(FILEINFO_MIME_TYPE);
@@ -1310,8 +1355,15 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         $arrInformacaoArquivo['ALGORITMO_HASH_CONTEUDO'] = self::ALGORITMO_HASH_DOCUMENTO;
-        $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $arrInformacaoArquivo['CONTEUDO'], true);
-        $arrInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
+
+        //Verifica se o componente digital ser<E1> particionado
+        if (isset($componenteDigitalParticionado)) {
+            $arrInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($strConteudoAssinatura);
+        }else{
+            $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $arrInformacaoArquivo['CONTEUDO'], true);
+            $arrInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
+        }
+
         return $arrInformacaoArquivo;
     }
 
@@ -1677,7 +1729,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
     }
 
-    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo) {
+    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo)
+    {
         if (!isset($strNumeroRegistro)) {
             throw new InfraException('Parâmetro $strNumeroRegistro não informado.');
         }
@@ -1699,7 +1752,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
         $objComponenteDigitalDTO->retDblIdDocumento();
         $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
-        //  $objComponenteDigitalDTO->retStrConteudoAssinaturaDocumento();
         $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
         $objComponenteDigitalDTO->retStrHashConteudo();
         $objComponenteDigitalDTO->retStrProtocolo();
@@ -1715,39 +1767,63 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Construir objeto Componentes digitais
             foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
 
-                $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_DOCUMENTO);
+                //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_DOCUMENTO);
                 $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
 
                 $dadosDoComponenteDigital = new stdClass();
                 $dadosDoComponenteDigital->ticketParaEnvioDeComponentesDigitais = $objComponenteDigitalDTO->getNumTicketEnvioComponentes();
 
-                    //TODO: Problema no barramento de servios quando um mesmo arquivo est contido em dois diferentes
-                    //processos apensados. Mesmo erro relatado com dois arquivos iguais em docs diferentes no mesmo processo
+                //Processos apensados. Mesmo erro relatado com dois arquivos iguais em docs diferentes no mesmo processo
                 $dadosDoComponenteDigital->protocolo = $objComponenteDigitalDTO->getStrProtocolo();
                 $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
 
-                    //TODO: Particionar o arquivo em vrias partes caso for muito grande seu tamanho
-                    //TODO: Obter dados do conteudo do documento, sendo Interno ou Externo
-                    //$strConteudoDocumento = $this->consultarConteudoDocumento($objComponenteDigitalDTO->getDblIdDocumento());
-                    //$strConteudoAssinatura = $objComponenteDigitalDTO->getStrConteudoAssinaturaDocumento();
                 $objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
                 $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
-                $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
 
-                $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
+                $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
-                try {
+                //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
+                $nrTamanhoArquivoMb = 0;
+                $nrTamanhoBytesArquivo = 0;
+                if($objAnexoDTO) {
+                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
+                    $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
+                    $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
+                }
+
+                $objPenParametroRN = new PenParametroRN();
+                $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
+
+                try
+                {
+                    //Verifica se o arquivo <E9> maior que o tamanho m<E1>ximo definido para envio, se for, realiza o particionamento do arquivo
+                    if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+                        //M<E9>todo que ir<E1> particionar o arquivo em partes para realizar o envio
+                        $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
+
+                        //Finalizar o envio das partes do componente digital
+                        $parametros = new stdClass();
+                        $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
+                        $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
+                    }else{
+
+                        $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                        $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
+
                         //Enviar componentes digitais
-                    $parametros = new stdClass();
-                    $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
-                    $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
+                        $parametros = new stdClass();
+                        $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
+                        $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                        //Bloquea documento para atualizao, j que ele foi visualizado
+                        $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                        $this->contadorDaBarraDeProgresso++;
+                    }
+
+                    //Bloquea documento para atualizao, j que ele foi visualizado
                     $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
-                        // @join_tec US008.05 (#23092)
                     $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S'));
                 } catch (Exception $e) {
-                        // @join_tec US008.05 (#23092)
                     $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
                     throw new InfraException("Error Processing Request", $e);
                 }
@@ -1755,6 +1831,61 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         }
     }
+
+
+    /**
+     * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $strCaminhoAnexo
+     * @param $dadosDoComponenteDigital
+     * @param $nrTamanhoArquivoMb
+     * @param $nrTamanhoMegasMaximo
+     * @param $nrTamanhoBytesMaximo
+     * @param $objComponenteDigitalDTO
+     * @throws InfraException
+     */
+    private function enviarComponenteDigitalParticionado($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO)
+    {
+        $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
+
+        //Abre o arquivo para leitura
+        $fp = fopen($strCaminhoAnexo, "rb");
+
+        $inicio = 0;
+        //L<EA> o arquivo em partes para realizar o envio
+        for ($i = 1; $i <= $qtdPartes; $i++)
+        {
+            $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO  , $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado())." (Componente digital: parte $i de $qtdPartes)");
+            $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
+            $tamanhoParteArquivo = strlen($parteDoArquivo);
+
+            //Cria um objeto com as informa<E7><F5>es da parte do componente digital
+            $identificacaoDaParte = new stdClass();
+            $identificacaoDaParte->inicio = $inicio;
+            $identificacaoDaParte->fim = ($inicio + $tamanhoParteArquivo);
+
+            $dadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
+            $dadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = new SoapVar($parteDoArquivo, XSD_BASE64BINARY);
+
+            $parametros = new stdClass();
+            $parametros->dadosDaParteDeComponenteDigital = $dadosDoComponenteDigital;
+
+            //Envia uma parte de um componente digital
+            $resultado = $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
+
+            //Obt<E9>m informa<E7><F5>es referente ao tr<E2>mite
+            //$infoTramite = $this->objProcessoEletronicoRN->consultarTramites($numIdTramite);
+
+            $inicio = ($nrTamanhoBytesMaximo * $i);
+        }
+
+        fclose($fp);
+     }
+
+
+
+
+
 
     private function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
@@ -2107,6 +2238,122 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         return $arrObjProcessosApensados;
+    }
+
+
+
+    /**
+     * Método respons<E1>vel por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $strCaminhoAnexo
+     * @param $dadosDoComponenteDigital
+     * @param $nrTamanhoArquivoMb
+     * @param $nrTamanhoMegasMaximo
+     * @param $nrTamanhoBytesMaximo
+     * @param $objComponenteDigitalDTO
+     * @throws InfraException
+     */
+    private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite)
+    {
+        //Faz o c<E1>lculo para obter a quantidade de partes que o arquivo ser<E1> particionado, sempre arrendondando para cima
+        $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
+        //Abre o arquivo para leitura
+        $fp = fopen($strCaminhoAnexo, "rb");
+        $inicio = 0;
+        //L<EA> o arquivo em partes para realizar o envio
+        for ($i = 1; $i <= $qtdPartes; $i++)
+        {
+            $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
+            $tamanhoParteArquivo = strlen($parteDoArquivo);
+            $fim = $inicio + $tamanhoParteArquivo;
+            try{
+                $this->enviarParteDoComponenteDigital($inicio, $fim, $parteDoArquivo, $dadosDoComponenteDigital);
+                $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                $this->contadorDaBarraDeProgresso++;
+            }catch (Exception $e){
+                //Armazena as partes que n<E3>o foram enviadas para tentativa de reenvio posteriormente
+                $arrPartesComponentesDigitaisNaoEnviadas[] = $inicio;
+            }
+            $inicio = ($nrTamanhoBytesMaximo * $i);
+        }
+        //Verifica se existem partes do componente digital que n<E3>o foram enviadas para tentar realizar o envio novamente
+        if(isset($arrPartesComponentesDigitaisNaoEnviadas)){
+            $nrTotalPartesNaoEnviadas = count($arrPartesComponentesDigitaisNaoEnviadas);
+            $i = 1;
+            //Percorre as partes que n<E3>o foram enviadas para reenvia-las
+            foreach ($arrPartesComponentesDigitaisNaoEnviadas as $parteComponenteNaoEnviada)
+            {
+                $conteudoDaParteNaoEnviadaDoArquivo = stream_get_contents($fp, $nrTamanhoBytesMaximo, $parteComponenteNaoEnviada);
+                $fim = ($parteComponenteNaoEnviada + strlen($conteudoDaParteNaoEnviadaDoArquivo));
+                try{
+                    $this->enviarParteDoComponenteDigital($parteComponenteNaoEnviada, $fim, $conteudoDaParteNaoEnviadaDoArquivo, $dadosDoComponenteDigital);
+                }catch (Exception $e){
+                    throw new InfraException($e);
+                }
+                $i++;
+            }
+        }
+        fclose($fp);
+    }
+
+
+    /**
+     * M<E9>todo responsavel por realizar o envio de uma parte especifica de um componente digital
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parInicio
+     * @param $parFim
+     * @param $parParteDoArquivo
+     * @param $parDadosDoComponenteDigital
+     */
+    private function enviarParteDoComponenteDigital($parInicio, $parFim, $parParteDoArquivo, $parDadosDoComponenteDigital){
+        //Cria um objeto com as informa<E7><F5>es da parte do componente digital
+        $identificacaoDaParte = new stdClass();
+        $identificacaoDaParte->inicio = $parInicio;
+        $identificacaoDaParte->fim = $parFim;
+        $parDadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
+        $parDadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = new SoapVar($parParteDoArquivo, XSD_BASE64BINARY);
+        $parametros = new stdClass();
+        $parametros->dadosDaParteDeComponenteDigital = $parDadosDoComponenteDigital;
+        //Envia uma parte de um componente digital para o barramento
+        $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
+     }
+
+
+    /**
+     * M<E9>todo respons<E1>vel por realizar o envio da parte de um componente digital
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function enviarParteDeComponenteDigital($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->enviarParteDeComponenteDigital($parametros);
+        } catch (\Exception $e) {
+            $mensagem = "Falha no envio de parte componente digital";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
+    }
+
+
+    /**
+     * M<E9>todo respons<E1>vel por sinalizar o t<E9>rmino do envio das partes de um componente digital
+     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function sinalizarTerminoDeEnvioDasPartesDoComponente($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
+        } catch (\Exception $e) {
+            $mensagem = "Falha em sinalizar o t<E9>rmino de envio das partes do componente digital";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
     }
 
 
