@@ -481,7 +481,7 @@ class ProcessoEletronicoRN extends InfraRN {
                 break;
 
                 default:
-                $mensagem = utf8_decode($fault->detail->interoperabilidadeException->mensagem);
+                $mensagem = utf8_decode($strWsException->mensagem);
                 break;
             }
         }
@@ -537,9 +537,9 @@ class ProcessoEletronicoRN extends InfraRN {
         try {
             return $this->getObjPenWs()->enviarParteDeComponenteDigital($parametros);
         } catch (\Exception $e) {
-            $mensagem = "Falha no envio de parte componente digital";
-            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-            throw new InfraException($mensagem, $e, $detalhes);
+            //$mensagem = "Falha no envio de parte componente digital";
+            $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e);
         }
     }
 
@@ -906,7 +906,7 @@ class ProcessoEletronicoRN extends InfraRN {
   }
 
 
-  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
+  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente=null)
   {
     try
     {

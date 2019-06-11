@@ -146,13 +146,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Construção do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
-            //Obt<E9>m o tamanho total da barra de progreso
+            //Obtém o tamanho total da barra de progreso
             $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
 
-            //Seta o tamanho m<E1>ximo da barra de progresso
+            //Seta o tamanho máximo da barra de progresso
             $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
 
-            //Exibe a barra de progresso ap<F3>s definir o seu tamanho
+            //Exibe a barra de progresso após definir o seu tamanho
             $this->barraProgresso->exibir();
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
             $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
@@ -282,8 +282,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-     * M<E9>todo respons<E1>vel por obter o tamanho total que ter<E1> a barra de progresso, considerando os diversos componentes digitais
-     * a quantidade de partes em que cada um ser<E1> particionado
+     * M<E9>todo responsável por obter o tamanho total que terá a barra de progresso, considerando os diversos componentes digitais
+     * a quantidade de partes em que cada um será particionado
      * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
      * @param $parObjProcesso
      * @return float|int $totalBarraProgresso
@@ -296,15 +296,20 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $totalBarraProgresso = 2;
         $this->contadorDaBarraDeProgresso = 2;
+        $arrHashIndexados = array();
         foreach ($parObjProcesso->documento as $objDoc)
         {
-            $nrTamanhoComponente = $objDoc->componenteDigital->tamanhoEmBytes;
-            if($nrTamanhoComponente > $nrTamanhoBytesMaximo){
-                $qtdPartes = ceil($nrTamanhoComponente / $nrTamanhoBytesMaximo);
-                $totalBarraProgresso += $qtdPartes;
-                continue;
+            $strHashComponente = ProcessoEletronicoRN::getHashFromMetaDados($objDoc->componenteDigital->hash);
+            if(!in_array($strHashComponente, $arrHashIndexados)){
+                $arrHashIndexados[] = $strHashComponente;
+                $nrTamanhoComponente = $objDoc->componenteDigital->tamanhoEmBytes;
+                if($nrTamanhoComponente > $nrTamanhoBytesMaximo){
+                    $qtdPartes = ceil($nrTamanhoComponente / $nrTamanhoBytesMaximo);
+                    $totalBarraProgresso += $qtdPartes;
+                    continue;
+                }
+                $totalBarraProgresso++;
             }
-            $totalBarraProgresso++;
         }
 
         return $totalBarraProgresso;
@@ -1281,7 +1286,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //Obtenção do conteúdo do documento externo
                 $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
 
-                //$fp = fopen($strCaminhoAnexo, "rb");
+                $fp = fopen($strCaminhoAnexo, "rb");
 
                 try {
                     $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
@@ -1356,7 +1361,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $arrInformacaoArquivo['ALGORITMO_HASH_CONTEUDO'] = self::ALGORITMO_HASH_DOCUMENTO;
 
-        //Verifica se o componente digital ser<E1> particionado
+        //Verifica se o componente digital será particionado
         if (isset($componenteDigitalParticionado)) {
             $arrInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($strConteudoAssinatura);
         }else{
@@ -1762,9 +1767,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if (isset($arrComponentesDigitaisDTO) && count($arrComponentesDigitaisDTO) > 0) {
 
-            //TODO: Valida inconsistncia da quantidade de documentos solicitados e aqueles cadastrados no SEI
-
             //Construir objeto Componentes digitais
+            $arrHashComponentesEnviados = array();
             foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
 
                 //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_DOCUMENTO);
@@ -1797,34 +1801,41 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 try
                 {
-                    //Verifica se o arquivo <E9> maior que o tamanho m<E1>ximo definido para envio, se for, realiza o particionamento do arquivo
-                    if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
-                        //M<E9>todo que ir<E1> particionar o arquivo em partes para realizar o envio
-                        $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
+                    if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
+                        //Verifica se o arquivo <E9> maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
+                        if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+                            //M<E9>todo que irá particionar o arquivo em partes para realizar o envio
+                            $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
 
-                        //Finalizar o envio das partes do componente digital
-                        $parametros = new stdClass();
-                        $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
-                        $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
-                    }else{
+                            //Finalizar o envio das partes do componente digital
+                            $parametros = new stdClass();
+                            $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
+                            $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
+                        }else{
 
-                        $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
-                        $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
+                            $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                            $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
-                        //Enviar componentes digitais
-                        $parametros = new stdClass();
-                        $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
-                        $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
+                            //Enviar componentes digitais
+                            $parametros = new stdClass();
+                            $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
+                            $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                        $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
-                        $this->contadorDaBarraDeProgresso++;
+                            $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                            $this->contadorDaBarraDeProgresso++;
+                        }
+
+                        $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
+
                     }
 
                     //Bloquea documento para atualizao, j que ele foi visualizado
                     $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
-                    $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S'));
+                    $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
+                        $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S'));
                 } catch (Exception $e) {
-                    $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
+                    $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
+                        $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
                     throw new InfraException("Error Processing Request", $e);
                 }
             }
@@ -2243,7 +2254,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-     * Método respons<E1>vel por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+     * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
      * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
      * @param $strCaminhoAnexo
      * @param $dadosDoComponenteDigital
@@ -2255,7 +2266,7 @@ class ExpedirProcedimentoRN extends InfraRN {
      */
     private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite)
     {
-        //Faz o c<E1>lculo para obter a quantidade de partes que o arquivo ser<E1> particionado, sempre arrendondando para cima
+        //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
         $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
         //Abre o arquivo para leitura
         $fp = fopen($strCaminhoAnexo, "rb");
@@ -2288,7 +2299,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 try{
                     $this->enviarParteDoComponenteDigital($parteComponenteNaoEnviada, $fim, $conteudoDaParteNaoEnviadaDoArquivo, $dadosDoComponenteDigital);
                 }catch (Exception $e){
-                    throw new InfraException($e);
+                    throw $e;
                 }
                 $i++;
             }
@@ -2312,15 +2323,17 @@ class ExpedirProcedimentoRN extends InfraRN {
         $identificacaoDaParte->fim = $parFim;
         $parDadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
         $parDadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = new SoapVar($parParteDoArquivo, XSD_BASE64BINARY);
+
         $parametros = new stdClass();
         $parametros->dadosDaParteDeComponenteDigital = $parDadosDoComponenteDigital;
+
         //Envia uma parte de um componente digital para o barramento
         $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
      }
 
 
     /**
-     * M<E9>todo respons<E1>vel por realizar o envio da parte de um componente digital
+     * M<E9>todo responsável por realizar o envio da parte de um componente digital
      * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
      * @param $parametros
      * @return mixed
@@ -2339,7 +2352,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-     * M<E9>todo respons<E1>vel por sinalizar o t<E9>rmino do envio das partes de um componente digital
+     * M<E9>todo responsável por sinalizar o t<E9>rmino do envio das partes de um componente digital
      * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
      * @param $parametros
      * @return mixed
