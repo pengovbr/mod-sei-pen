@@ -52,8 +52,8 @@ class PENIntegracao extends SeiIntegracao {
         $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
 
         $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), array(
-                    ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO,
-                    ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
+            ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO,
+            ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
         ));
 
         //Apresenta o botão de expedir processo
@@ -89,7 +89,7 @@ class PENIntegracao extends SeiIntegracao {
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
             $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_cancelar_tramite.gif" alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
             $strAcoesProcedimento .= '</a>';
-         }
+        }
 
         return array($strAcoesProcedimento);
     }
@@ -224,99 +224,108 @@ class PENIntegracao extends SeiIntegracao {
 
         switch ($strAcao) {
             case 'pen_procedimento_expedir':
-                require_once dirname(__FILE__) . '/pen_procedimento_expedir.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_expedir.php';
+            break;
 
             case 'pen_unidade_sel_expedir_procedimento':
-                require_once dirname(__FILE__) . '/pen_unidade_sel_expedir_procedimento.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_unidade_sel_expedir_procedimento.php';
+            break;
 
             case 'pen_procedimento_processo_anexado':
-                require_once dirname(__FILE__) . '/pen_procedimento_processo_anexado.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_processo_anexado.php';
+            break;
 
             case 'pen_procedimento_cancelar_expedir':
-                require_once dirname(__FILE__) . '/pen_procedimento_cancelar_expedir.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_cancelar_expedir.php';
+            break;
 
             case 'pen_procedimento_expedido_listar':
-                require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
+            break;
 
             case 'pen_map_tipo_documento_envio_listar':
             case 'pen_map_tipo_documento_envio_excluir':
             case 'pen_map_tipo_documento_envio_desativar':
             case 'pen_map_tipo_documento_envio_ativar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
+            break;
 
             case 'pen_map_tipo_documento_envio_cadastrar':
             case 'pen_map_tipo_documento_envio_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
+            break;
 
             case 'pen_map_tipo_documento_recebimento_listar':
             case 'pen_map_tipo_documento_recebimento_excluir':
-                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
+            break;
 
             case 'pen_map_tipo_documento_recebimento_cadastrar':
             case 'pen_map_tipo_documento_recebimento_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
+            break;
 
             case 'pen_apensados_selecionar_expedir_procedimento':
-                require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
-                break;
+            require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
+            break;
+
+            case 'pen_unidades_administrativas_externas_selecionar_expedir_procedimento':
+                //verifica qual o tipo de seleção passado para carregar o arquivo especifico.
+            if($_GET['tipo_pesquisa'] == 1){
+                require_once dirname(__FILE__) . '/pen_unidades_administrativas_selecionar_expedir_procedimento.php';
+            }else {
+                require_once dirname(__FILE__) . '/pen_unidades_administrativas_pesquisa_textual_expedir_procedimento.php';
+            }
+            break;
 
             case 'pen_procedimento_estado':
-                require_once dirname(__FILE__) . '/pen_procedimento_estado.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_estado.php';
+            break;
 
             // Mapeamento de Hipóteses Legais de Envio
             case 'pen_map_hipotese_legal_envio_cadastrar':
             case 'pen_map_hipotese_legal_envio_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
+            break;
 
             case 'pen_map_hipotese_legal_envio_listar':
             case 'pen_map_hipotese_legal_envio_excluir':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
+            break;
 
             // Mapeamento de Hipóteses Legais de Recebimento
             case 'pen_map_hipotese_legal_recebimento_cadastrar':
             case 'pen_map_hipotese_legal_recebimento_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
+            break;
 
             case 'pen_map_hipotese_legal_recebimento_listar':
             case 'pen_map_hipotese_legal_recebimento_excluir':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_listar.php';
+            break;
 
             case 'pen_map_hipotese_legal_padrao_cadastrar':
             case 'pen_map_hipotese_legal_padrao_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
+            break;
 
             case 'pen_map_unidade_cadastrar':
             case 'pen_map_unidade_visualizar':
-                require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
+            break;
 
             case 'pen_map_unidade_listar':
             case 'pen_map_unidade_excluir':
-                require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
+            break;
 
             case 'pen_parametros_configuracao':
             case 'pen_parametros_configuracao_salvar':
-                require_once dirname(__FILE__) . '/pen_parametros_configuracao.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_parametros_configuracao.php';
+            break;
             default:
-                return false;
-                break;
+            return false;
+            break;
         }
 
         return true;
@@ -328,26 +337,76 @@ class PENIntegracao extends SeiIntegracao {
         switch ($_GET['acao_ajax']) {
 
             case 'pen_unidade_auto_completar_expedir_procedimento':
-                $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa']);
+            $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa']);
 
-                if (count($arrObjEstruturaDTO) > 0) {
-                    $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
-                } else {
-                    return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
-                }
-                break;
+            if (count($arrObjEstruturaDTO) > 0) {
+                $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
+            } else {
+                return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+            }
+            break;
 
             case 'pen_apensados_auto_completar_expedir_procedimento':
                 //TODO: Validar parâmetros passados via ajax
-                $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
-                $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-                $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
-                $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjProcedimentoDTO, 'IdProtocolo', 'ProtocoloFormatadoProtocolo');
-                break;
+            $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
+            $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+            $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
+            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjProcedimentoDTO, 'IdProtocolo', 'ProtocoloFormatadoProtocolo');
+            break;
+
 
             case 'pen_procedimento_expedir_validar':
-                require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
-                break;
+            require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
+            break;
+
+
+            case 'pen_pesquisar_unidades_administrativas_estrutura_pai':
+            $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
+            $numeroDeIdentificacaoDaEstrutura = $_POST['numeroDeIdentificacaoDaEstrutura'];
+
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
+            $arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
+
+            print json_encode($arrEstruturas);
+            exit(0);
+            break;
+
+
+            case 'pen_pesquisar_unidades_administrativas_estrutura_pai_textual':
+            $registrosPorPagina = 50;
+            $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
+            $numeroDeIdentificacaoDaEstrutura     = $_POST['numeroDeIdentificacaoDaEstrutura'];
+            $siglaUnidade = ($_POST['siglaUnidade'] == '') ? null : utf8_encode($_POST['siglaUnidade']);
+            $nomeUnidade  = ($_POST['nomeUnidade']  == '') ? null : utf8_encode($_POST['nomeUnidade']);
+            $offset       = $_POST['offset'] * $registrosPorPagina;
+
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
+
+            $interface = new ProcessoEletronicoINT();
+                //Gera a hierarquia de SIGLAS das estruturas
+            $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
+
+            $arrEstruturas['estrutura'] = [];
+            if(!is_null($arrHierarquiaEstruturaDTO[0])){
+                foreach ($arrHierarquiaEstruturaDTO as $key => $estrutura) {
+                        //Monta um array com as estruturas para retornar o JSON
+                    $arrEstruturas['estrutura'][$key]['nome'] = utf8_encode($estrutura->get('Nome'));
+                    $arrEstruturas['estrutura'][$key]['numeroDeIdentificacaoDaEstrutura'] = $estrutura->get('NumeroDeIdentificacaoDaEstrutura');
+                    $arrEstruturas['estrutura'][$key]['sigla'] = utf8_encode($estrutura->get('Sigla'));
+                    $arrEstruturas['estrutura'][$key]['ativo'] = $estrutura->get('Ativo');
+                    $arrEstruturas['estrutura'][$key]['aptoParaReceberTramites'] = $estrutura->get('AptoParaReceberTramites');
+                    $arrEstruturas['estrutura'][$key]['codigoNoOrgaoEntidade'] = $estrutura->get('CodigoNoOrgaoEntidade');
+
+                }
+                $arrEstruturas['totalDeRegistros']   = $estrutura->get('TotalDeRegistros');
+                $arrEstruturas['registrosPorPagina'] = $registrosPorPagina;
+            }
+
+            print json_encode($arrEstruturas);
+            exit(0);
+            break;
         }
 
         return $xml;
@@ -361,6 +420,33 @@ class PENIntegracao extends SeiIntegracao {
             throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
         }
     }
+
+     /**
+      * Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
+      * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+      * @param $idRepositorioEstruturaOrganizacional
+      * @param $arrEstruturas
+      * @return mixed
+      * @throws InfraException
+      */
+     private function obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas)
+     {
+        //Monta o nome da unidade com a hierarquia de SIGLAS
+        foreach ($arrEstruturas as $key => $estrutura) {
+            if(!is_null($estrutura)) {
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, $estrutura->numeroDeIdentificacaoDaEstrutura);
+                if (!is_null($arrObjEstruturaDTO[0])) {
+                    $interface = new ProcessoEletronicoINT();
+                    $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
+                    $arrEstruturas[$key]->nome = utf8_encode($arrHierarquiaEstruturaDTO[0]->get('Nome'));
+                }
+            }
+        }
+
+        return $arrEstruturas;
+    }
+
 
     /**
      * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada.
@@ -385,6 +471,7 @@ class PENIntegracao extends SeiIntegracao {
 
         return $bolBaseCompativel;
     }
+
 }
 
 class ModuloIncompativelException extends InfraException { }

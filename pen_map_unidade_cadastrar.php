@@ -26,6 +26,11 @@ try {
 
     $arrComandos = array();
 
+    //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
+    $objPenParametroRN = new PenParametroRN();
+    $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+    $strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
+
     $bolSomenteLeitura = false;
 
     switch ($_GET['acao']) {
@@ -83,7 +88,7 @@ try {
         $objPenUnidadeDTO->setNumIdUnidade($_POST['id_unidade']);
         $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
 
-        $numIdUnidade = 0;
+        $numIdUnidade = '';
         if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
             $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
             $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
@@ -110,8 +115,8 @@ try {
 
     if(empty($objPenUnidadeDTO)){
         $objPenUnidadeDTO = new PenUnidadeDTO();
-        $objPenUnidadeDTO->setNumIdUnidade(0);
-        $objPenUnidadeDTO->setNumIdUnidadeRH(0);
+        $objPenUnidadeDTO->setNumIdUnidade('');
+        $objPenUnidadeDTO->setNumIdUnidadeRH('');
     }
 
 
@@ -136,6 +141,19 @@ try {
     foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
         $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
     }
+
+    //Verifica se o numero da unidade esta vazio, senão estiver busca o nome da unidade para exibição
+    $strNomeUnidadeSelecionada = '';
+    if(!empty($objPenUnidadeDTO->getNumIdUnidadeRH())){
+        $objProcessoEletronico     = new ProcessoEletronicoRN();
+        $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $objPenUnidadeDTO->getNumIdUnidadeRH());
+
+        if(!is_null($objProcessoEletronicoDTO[0])){
+            $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO[0]->getStrNome();
+        }else{
+            $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
+        }
+    }
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);
@@ -153,6 +171,9 @@ $objPagina->abrirHead();
 $objPagina->montarMeta();
 $objPagina->montarTitle(':: ' . $objPagina->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPagina->montarStyle();
+
+$classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcarSelecao' : '';
+
 ?>
 <style type="text/css">
 
@@ -162,14 +183,39 @@ $objPagina->montarStyle();
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
 
+#txtUnidade {width:50%;border:.1em solid #666;}
+
 </style>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
 
+var objAutoCompletarEstrutura = null;
+var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
+var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
 function inicializar(){
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('selUnidadeRh','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
+    objAutoCompletarEstrutura.mostrarAviso = true;
+    objAutoCompletarEstrutura.limparCampo = false;
+    objAutoCompletarEstrutura.tempoAviso = 10000000;
 
+    objAutoCompletarEstrutura.prepararExecucao = function(){
+        var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidade').value;
+        parametros += '&id_repositorio=' + numIdRepositorioOrigem
+        return parametros;
+    };
 
+    objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
+        window.infraAvisoCancelar();
+    };
+
+    $('#selUnidadeRh2').click(function() {
+        $('#selUnidadeRh').val('');
+        objAutoCompletarEstrutura.executar();
+        objAutoCompletarEstrutura.procurar();
+    });
 }
+
 
 function onSubmit() {
 
@@ -199,19 +245,22 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
 <form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('12em'); ?>
+    <?php $objPagina->abrirAreaDados('15em'); ?>
 
     <div>
         <label for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-
         <select name="id_unidade" class="input-field-first" >
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
         </select>
     </div><br><br><br>
 
-    <div class="infraAreaDados">
-        <label for="selUnidadeRh" class="infraLabelObrigatorio">ID da Unidade - PEN:</label> <br>
-        <input type="number" id="selUnidadeRh" value="<?= PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" name="id_unidade_rh" class="infraText"/>
+    <div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
+        <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
+        <div class="alinhamentoBotaoImput">
+            <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
+            <button id="selUnidadeRh2" type="button" class="infraText">Pesquisar</button>
+        </div>
+        <input type="hidden" id="selUnidadeRh" name="id_unidade_rh" class="infraText" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
     </div>
 
     <?php print $objPagina->fecharAreaDados(); ?>
