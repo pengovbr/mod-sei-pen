@@ -366,7 +366,9 @@ class PENIntegracao extends SeiIntegracao {
 
             $objProcessoEletronicoRN = new ProcessoEletronicoRN();
             $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
-            $arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
+
+            // Obtenção da hierarquia de siglas desativada por questões de desempenho
+            //$arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
 
             print json_encode($arrEstruturas);
             exit(0);
@@ -382,6 +384,8 @@ class PENIntegracao extends SeiIntegracao {
             $offset       = $_POST['offset'] * $registrosPorPagina;
 
             $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            //print "Texto: " . $numeroDeIdentificacaoDaEstrutura;
+            //$siglaUnidade = 'CGPRO';
             $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
 
             $interface = new ProcessoEletronicoINT();
@@ -432,9 +436,9 @@ class PENIntegracao extends SeiIntegracao {
      private function obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas)
      {
         //Monta o nome da unidade com a hierarquia de SIGLAS
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         foreach ($arrEstruturas as $key => $estrutura) {
             if(!is_null($estrutura)) {
-                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
                 $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, $estrutura->numeroDeIdentificacaoDaEstrutura);
                 if (!is_null($arrObjEstruturaDTO[0])) {
                     $interface = new ProcessoEletronicoINT();

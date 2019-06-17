@@ -16,5 +16,6 @@ class EstruturaDTO extends InfraDTO {
     $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'AptoParaReceberTramites');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'CodigoNoOrgaoEntidade');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR, 'Hierarquia');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'TotalDeRegistros');
   }
 }

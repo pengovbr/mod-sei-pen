@@ -175,6 +175,18 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 echo '<select>';
                 break;
 
+
+            case 'PEN_ID_REPOSITORIO_ORIGEM':
+                $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+                $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+                $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
+                $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
+                echo '<select id="parametro[PEN_ID_REPOSITORIO_ORIGEM]" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect">';
+                        echo $strItensSelRepositorioEstruturas;
+                echo '</select>';
+                break;
+
+
             default:
                 echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';
                 break;
