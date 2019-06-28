@@ -10,6 +10,7 @@ class ReceberProcedimentoRN extends InfraRN
     private $objProcedimentoAndamentoRN;
     private $documentosRetirados = array();
     public $destinatarioReal = null;
+    private $objPenDebug = null;
 
     public function __construct()
     {
@@ -18,6 +19,9 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
         $this->objReceberComponenteDigitalRN = new ReceberComponenteDigitalRN();
+
+        //Configuração dos logs de debug de processamento
+        $this->objPenDebug = DebugPen::getInstance();
     }
 
     protected function inicializarObjInfraIBanco()
@@ -110,21 +114,34 @@ class ReceberProcedimentoRN extends InfraRN
 
                     $numOrdemComponente = $key + 1;
                     if(!is_null($componentePendente)){
-                        //TODO: Necessário otimizar trecho abaixo para evitar download desnecessário de documentos
-                        //TODO: Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
+                        //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
                         //Ajuste deverá ser feito em versões futuas
                         $arrayHash[] = $componentePendente;
 
                         //Obter os dados do componente digital
                         $this->gravarLogDebug("Baixando componente digital $numOrdemComponente", 6);
+                        $numTempoInicialDownload = microtime(true);
                         $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
+                        $numTempoTotalDownload = round(microtime(true) - $numTempoInicialDownload, 2);
+                        $numTamanhoArquivoKB = round(strlen($objComponenteDigital->conteudoDoComponenteDigital) / 1024, 2);
+                        $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalDownload, 2);
+                        $this->gravarLogDebug("Tempo total de download de $numTamanhoArquivoKB kb: {$numTempoTotalDownload}s ({$numVelocidade} kb/s)", 7);
+
+                        $numTempoInicialArmazenamento = microtime(true);
                         $arrAnexosComponentes[$key][$componentePendente] = $this->objReceberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
                         $arrAnexosComponentes[$key]['recebido'] = false;
+                        $numTempoTotalArmazenamento = round(microtime(true) - $numTempoInicialArmazenamento, 2);
+                        $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalArmazenamento, 2);
+                        $this->gravarLogDebug("Tempo total de armazenamento em disco: {$numTempoTotalArmazenamento}s ({$numVelocidade} kb/s)", 7);
 
                         //Valida a integridade do hash
-                        $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 6);
+                        $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 7);
+                        $numTempoInicialValidacao = microtime(true);
                         $this->objReceberComponenteDigitalRN->validarIntegridadeDoComponenteDigital($arrAnexosComponentes[$key][$componentePendente],
                             $componentePendente, $parNumIdentificacaoTramite, $numOrdemComponente);
+                        $numTempoTotalValidacao = microtime(true) - $numTempoInicialValidacao;
+                        $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalValidacao, 2);
+                        $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 7);
                     }
                 }
 
@@ -212,7 +229,7 @@ class ReceberProcedimentoRN extends InfraRN
     {
         if(count($parArrHashComponentes) > 0){
             //Obter dados dos componetes digitais
-            $this->gravarLogDebug("Iniciando o recebimento dos componentes digitais pendentes", 4);
+            $this->gravarLogDebug("Iniciando o armazenamento dos componentes digitais pendentes", 4);
             $objComponenteDigitalDTO = new ComponenteDigitalDTO();
             $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
             $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
@@ -246,7 +263,7 @@ class ReceberProcedimentoRN extends InfraRN
                         if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)){
                             $strNomeDocumento = array_key_exists($strHash, $arrStrNomeDocumento) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
                             $this->objReceberComponenteDigitalRN->receberComponenteDigital($objComponenteDigitalDTOEnviado);
-                            $strMensagemRecebimento = sprintf('Recebendo %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado());
+                            $strMensagemRecebimento = sprintf('Armazenando componente do documento %s %s', $strNomeDocumento, $objComponenteDigitalDTOEnviado->getStrProtocoloDocumentoFormatado());
                             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
                             $this->gravarLogDebug($strMensagemRecebimento, 6);
                         }
@@ -1846,14 +1863,6 @@ class ReceberProcedimentoRN extends InfraRN
         return $objProcedimentoAndamentoDTO;
     }
 
-    private function gravarLogDebug($strMensagem, $numIdentacao=0)
-    {
-        $strDataLog = date("d/m/Y H:i:s");
-        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat(" ", $numIdentacao * 4), $strMensagem);
-        InfraDebug::getInstance()->gravar($strLog);
-    }
-
-
     /**
      * Verifica se existe documentos com pendência de download de seus componentes digitais
      * @param  [type] $parNumIdProcedimento        Identificador do processo
@@ -1927,5 +1936,10 @@ class ReceberProcedimentoRN extends InfraRN
         if(!InfraString::isBolVazia($strMensagemErro)){
             throw new InfraException($strMensagemPadrao . $strMensagemErro);
         }
+    }
+
+    private function gravarLogDebug($parStrMensagem, $parNumIdentacao=0, $parBolLogTempoProcessamento=true)
+    {
+        $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 }

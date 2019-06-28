@@ -6,6 +6,7 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
 {
     private static $instance = null;
     private $objGearmanWorker = null;
+    private $objPenDebug = null;
 
     const TIMEOUT_PROCESSAMENTO_JOB = 5400;
 
@@ -26,6 +27,15 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
     {
         $this->objGearmanWorker = new GearmanWorker();
         $this->objGearmanWorker->addServer("127.0.0.1", 4730);
+
+        //Configuração dos logs de debug de processamento
+        $this->objPenDebug = DebugPen::getInstance();
+        $this->objPenDebug->setStrDebugTag("PROCESSAMENTO");
+        $this->objPenDebug->setBolLigado(true);
+        $this->objPenDebug->setBolDebugInfra(false);
+        $this->objPenDebug->setBolEcho(true);
+        $this->objPenDebug->limpar();
+
         $this->configurarCallbacks();
     }
 
@@ -101,7 +111,9 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
         //Processamento de pendências de recebimento dos metadados do processo
         $this->objGearmanWorker->addFunction("receberProcedimento", function ($job) {
             try{
-                $this->gravarLogDebug("Processando recebimento de processo [receberProcedimento] com IDT " . $job->workload(), 0, true);
+                $this->gravarLogDebug("Processando recebimento de protocolo [receberProcedimento] com IDT " . $job->workload(), 0, true);
+                $numTempoInicialRecebimento = microtime(true);
+
                 $numIdentificacaoTramite = intval($job->workload());
                 $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
 
@@ -109,6 +121,10 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
                     $objReceberProcedimentoRN = new ReceberProcedimentoRN();
                     $objReceberProcedimentoRN->receberProcedimento($numIdentificacaoTramite);
                 }
+
+                $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
+                $this->gravarLogDebug("Finalizado o recebimento de protocolo com IDT " . $job->workload() . "(Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
+
             }
             catch(Exception $e){
                 $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
@@ -157,12 +173,9 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
     }
 
-    private function gravarLogDebug($strMensagem, $numIdentacao=0, $bolEcho=false)
+    private function gravarLogDebug($parStrMensagem, $parNumIdentacao=0, $parBolLogTempoProcessamento=false)
     {
-        $strDataLog = date("d/m/Y H:i:s");
-        $strLog = sprintf("[%s] [PROCESSAMENTO] %s %s", $strDataLog, str_repeat(" ", $numIdentacao * 4), $strMensagem);
-        InfraDebug::getInstance()->gravar($strLog);
-        if(!InfraDebug::getInstance()->isBolEcho() && $bolEcho) echo sprintf("\n[%s] [PROCESSAMENTO] %s", $strDataLog, $strMensagem);
+        $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 
     static function processarTarefa($strNomeTarefa, $strWorkload)
