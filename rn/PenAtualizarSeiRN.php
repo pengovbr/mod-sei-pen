@@ -64,16 +64,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.1.13': $this->instalarV1114();
                 case '1.1.14': $this->instalarV1115();
                 case '1.1.15': $this->instalarV1116();
-
-                case '1.1.15': $this->instalarV1115_feature50_feature076();
-
                 case '1.1.16': $this->instalarV1117();
                 case '1.1.17': $this->instalarV1200();
                 case '1.2.0': $this->instalarV1201();
                 case '1.2.1': $this->instalarV1202();
                 case '1.2.2': $this->instalarV1203();
-
-                case '1.2.3': $this->instalarV1115_feature50_feature076();
+                case '1.2.3':
+                case '1.2.4': $this->instalarV1205();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1588,7 +1585,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
      * @author Josinaldo Júnior <josenaldo.pedro@gmail.com>
      * @throws InfraException
      */
-    protected function instalarV1115_feature50_feature076()
+    protected function instalarV1205()
     {
         $objBD = new GenericoBD(BancoSEI::getInstance());
         $objDTO = new TarefaDTO();
@@ -1654,10 +1651,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
 
         // Altera o parâmetro da versão de banco
-        /*$objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->setStrValor('1.1.XX');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);*/
+        $objInfraParametroDTO->setStrValor('1.2.5');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }
