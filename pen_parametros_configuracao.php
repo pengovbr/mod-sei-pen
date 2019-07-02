@@ -22,6 +22,9 @@ try {
 
     $objPenParametroDTO = new PenParametroDTO();
     $objPenParametroDTO->retTodos();
+    $objPenParametroDTO->setNumSequencia(null, InfraDTO::$OPER_DIFERENTE);
+    $objPenParametroDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
     $objPenParametroRN = new PenParametroRN();
     $retParametros = $objPenParametroRN->listar($objPenParametroDTO);
 
@@ -136,11 +139,11 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
         //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
-            //Constroi o label
+            //Constrói o label
             ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label><br> <?php
         }
 
-        //Constroi o campo de valor
+        //Constrói o campo de valor
         switch ($parametro->getStrNome()) {
 
             //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
@@ -177,13 +180,19 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
 
             case 'PEN_ID_REPOSITORIO_ORIGEM':
-                $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-                $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-                $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
-                $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
-                echo '<select id="parametro[PEN_ID_REPOSITORIO_ORIGEM]" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect">';
-                        echo $strItensSelRepositorioEstruturas;
-                echo '</select>';
+                try {
+                    $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+                    $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+                    $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
+                    $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
+                    echo '<select id="parametro[PEN_ID_REPOSITORIO_ORIGEM]" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect">';
+                            echo $strItensSelRepositorioEstruturas;
+                    echo '</select>';
+                } catch (Exception $e) {
+                    // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
+                    echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';
+                }
+
                 break;
 
 

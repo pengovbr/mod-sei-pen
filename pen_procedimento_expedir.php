@@ -165,8 +165,6 @@ try {
 
                     //Adiciona o botão Fechar para a janela
                     echo '<input type="button" onclick="javascript:window.close()" class="botao_fechar" value="Fechar" style="margin-left: 84%; margin-top: 4%;"/>';
-                    echo '<input type="button" onclick="javascript:window.close()" class="botao_fechar" value="Fechar" '.
-                         'style="margin-left: 84%; margin-top: 4%;"/>'; //Botão para fechar a janela
                 } catch(\Exception $e) {
                     $objPaginaSEI->processarExcecao($e);
                 }
@@ -183,7 +181,6 @@ try {
     //$objPaginaSEI->finalizarBarraProgresso($objSessaoSEI->assinarLink('controlador.php?acao='.$objPaginaSEI->getAcaoRetorno().'&acao_origem='.$_GET['acao'].'#ID-'.$IdProcedimento));
     //$objPaginaSEI->processarExcecao($e);
     throw new InfraException("Error Processing Request 11", $e);
-
 }
 
 $objPaginaSEI->montarDocType();

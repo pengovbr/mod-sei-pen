@@ -48,6 +48,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $barraProgresso;
     private $objProcedimentoAndamentoRN;
     private $arrPenMimeTypes = array(
+        "application/pdf",
         "application/vnd.oasis.opendocument.text",
         "application/vnd.oasis.opendocument.formula",
         "application/vnd.oasis.opendocument.spreadsheet",
@@ -117,8 +118,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
 
-
-            //Valida regras de negócio
             $objInfraException = new InfraException();
             //Carregamento dos dados de processo e documento para validação e envio externo
             $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
@@ -134,13 +133,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objInfraException->lancarValidacoes();
             }
 
-            //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
-            //$this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
-
             //Busca metadados do processo registrado em trâmite anterior
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
-            //Construo dos cabecalho para envio do processo
+            //Construção do cabeçalho para envio do processo
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
 
             //Construção do processo para envio
@@ -156,7 +152,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->barraProgresso->exibir();
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
             $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
-
 
             $param = new stdClass();
             $param->novoTramiteDeProcesso = new stdClass();
@@ -406,6 +401,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objTramiteDTOFiltro = new TramiteDTO();
         $objTramiteDTOFiltro->retStrNumeroRegistro();
         $objTramiteDTOFiltro->setNumIdProcedimento($objExpedirProcedimentoDTO->getDblIdProcedimento());
+        $objTramiteDTOFiltro->setStrStaTipoProtocolo(ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO);
         $objTramiteDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
         $objTramiteDTOFiltro->setNumMaxRegistrosRetorno(1);
 
@@ -463,6 +459,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
         $objProcesso = new stdClass();
+        $objProcesso->staTipoProtocolo = ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
         $objProcesso->protocolo = utf8_encode($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
         $objProcesso->nivelDeSigilo = $this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo());
         $objProcesso->processoDeNegocio  = utf8_encode($objProcedimentoDTO->getStrNomeTipoProcedimento());
@@ -2250,8 +2247,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         return $arrObjProcessosApensados;
     }
-
-
 
     /**
      * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)

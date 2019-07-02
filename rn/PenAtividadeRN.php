@@ -65,7 +65,16 @@ class PenAtividadeRN extends AtividadeRN {
                         $objReciboTramiteDTO = new ReciboTramiteDTO();
                         $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                         $objReciboTramiteDTO->retNumIdTramite();
+                        $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objBancoSEI);
+                        $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
+                        break;
 
+                    case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
+                        $strMensagem = 'Recebimento do Documento %s remetido por %s';
+                        $strNome = 'ENTIDADE_ORIGEM';
+
+                        $objReciboTramiteDTO = new ReciboTramiteRecebidoDTO();
+                        $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
                         $objReciboTramiteBD = new ReciboTramiteBD($objBancoSEI);
                         $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
                         break;

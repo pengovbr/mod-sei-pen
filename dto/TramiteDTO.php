@@ -25,6 +25,7 @@ class TramiteDTO extends InfraDTO {
         $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'NomeUsuario', 'nome', 'usuario');
         $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'NomeUnidade', 'nome', 'unidade');
         $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdProcedimento', 'id_procedimento', 'md_pen_processo_eletronico');
+        $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaTipoProtocolo', 'sta_tipo_protocolo', 'md_pen_processo_eletronico');
 
         $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
         $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
