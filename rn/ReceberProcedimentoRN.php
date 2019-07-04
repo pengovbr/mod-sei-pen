@@ -709,7 +709,7 @@ class ReceberProcedimentoRN extends InfraRN
         // gerado pelo destinatário, conforme regras definidas em legislação vigente
         $strProtocoloFormatado = ($parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) ? $parObjProtocolo->protocolo : null;
         $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($strProtocoloFormatado));
-        $objProtocoloDTO->setDtaGeracao($this->objProtocoloEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
+        $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
         $objProtocoloDTO->setArrObjAnexoDTO(array());
         $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
         $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
@@ -744,7 +744,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setDblIdProcedimento(null);
         $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
         $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($objProtocolo->processoDeNegocio));
-        $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProtocoloEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
+        $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
         $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($objProtocolo->protocolo));
         $objProcedimentoDTO->setStrSinGerarPendencia('S');
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
