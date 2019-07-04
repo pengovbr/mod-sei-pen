@@ -1187,7 +1187,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.4
      */
-    protected function instalarV1205()
+    protected function instalarV1204()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
