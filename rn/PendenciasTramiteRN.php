@@ -89,10 +89,11 @@ class PendenciasTramiteRN extends InfraRN {
                     //Registra a falha no log do sistema e reinicia o ciclo de requisição e
                     //sai loop de eventos para finalizar o script e subir uma nova versão atualizada
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-                    break;
+                    $this->gravarLogDebug(InfraException::inspecionar($e));
                 } catch (Exception $e) {
                     //Apenas registra a falha no log do sistema e reinicia o ciclo de requisição
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+                    $this->gravarLogDebug(InfraException::inspecionar($e));
                 } finally {
                     $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
                     sleep(5);

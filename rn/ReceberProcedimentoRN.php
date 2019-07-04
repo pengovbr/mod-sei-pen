@@ -71,7 +71,6 @@ class ReceberProcedimentoRN extends InfraRN
 
             //Verifica se processo já foi registrado para esse trâmite
             //Tratamento para evitar o recebimento simultâneo do mesmo procedimento em serviços/processos concorrentes
-            //$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $parNumIdentificacaoTramite);
             $this->sincronizarRecebimentoProcessos($strNumeroRegistro, $parNumIdentificacaoTramite, $numIdTarefa);
             if($this->tramiteRecebimentoRegistrado($strNumeroRegistro, $parNumIdentificacaoTramite)) {
                 $this->gravarLogDebug("Trâmite de recebimento $parNumIdentificacaoTramite já registrado para o processo " . $objProtocolo->protocolo, 3);
@@ -542,7 +541,7 @@ class ReceberProcedimentoRN extends InfraRN
         return $dblIdProcedimento;
     }
 
-    private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $objProcesso, $parNumIdTramite)
+    private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $parObjProtocolo, $parNumIdTramite)
     {
         if(!isset($parDblIdProcedimento)){
             throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
@@ -616,17 +615,17 @@ class ReceberProcedimentoRN extends InfraRN
         //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
         $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
-        $this->atribuirDocumentos($objProcedimentoDTO, $objProcesso, $objUnidadeDTO, $objMetadadosProcedimento);
+        $this->atribuirDocumentos($objProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $objMetadadosProcedimento);
 
         $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
 
         //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
-        $this->atribuirProcessosApensados($objProcedimentoDTO, $objProcesso->processoApensado);
+        $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado);
 
         //Realiza a alteração dos metadados do processo
         //TODO: Implementar alteração de todos os metadados
-        $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $objProcesso);
+        $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo);
 
         return $objProcedimentoDTO;
     }
@@ -663,7 +662,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
     }
 
-    private function gerarProcedimento($objMetadadosProcedimento, $objProtocolo, $parNumIdTramite)
+    private function gerarProcedimento($objMetadadosProcedimento, $parObjProtocolo, $parNumIdTramite)
     {
         if(!isset($objMetadadosProcedimento)){
             throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
@@ -671,31 +670,26 @@ class ReceberProcedimentoRN extends InfraRN
 
         //TODO: Usar dados do destinatário em outro método específico para envio
         // Dados do procedimento enviados pelos órgão externo integrado ao PEN
-        //$objProtocolo = $objMetadadosProcedimento->metadados->processo;
         $objRemetente = $objMetadadosProcedimento->metadados->remetente;
         $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
-
-        //TODO: TESTES DE RECEBIMENTO DE PROCESSOS
-        //REMOVER APOS TESTES DO SISTEMA
-        //$objProtocolo->protocolo = rand(100000000, 999999999);
 
         //Atribuição de dados do protocolo
         //TODO: Validar cada uma das informações de entrada do webservice
         $objProtocoloDTO = new ProtocoloDTO();
         $objProtocoloDTO->setDblIdProtocolo(null);
-        $objProtocoloDTO->setStrDescricao(utf8_decode($objProtocolo->descricao));
-        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($objProtocolo->nivelDeSigilo));
+        $objProtocoloDTO->setStrDescricao(utf8_decode($parObjProtocolo->descricao));
+        $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo));
 
         if($this->obterNivelSigiloSEI($objProtocolo->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
             $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
             $objPenParametroRN = new PenParametroRN();
             $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
-            if (!isset($objProtocolo->hipoteseLegal) || (isset($objProtocolo->hipoteseLegal) && empty($objProtocolo->hipoteseLegal->identificacao))) {
+            if (!isset($parObjProtocolo->hipoteseLegal) || (isset($parObjProtocolo->hipoteseLegal) && empty($parObjProtocolo->hipoteseLegal->identificacao))) {
                 $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
             } else {
 
-                $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($objProtocolo->hipoteseLegal->identificacao);
+                $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parObjProtocolo->hipoteseLegal->identificacao);
                 if (empty($numIdHipoteseLegal)) {
                     $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
                 } else {
@@ -709,11 +703,11 @@ class ReceberProcedimentoRN extends InfraRN
         // gerado pelo destinatário, conforme regras definidas em legislação vigente
         $strProtocoloFormatado = ($parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) ? $parObjProtocolo->protocolo : null;
         $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($strProtocoloFormatado));
-        $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
+        $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($parObjProtocolo->dataHoraDeProducao));
         $objProtocoloDTO->setArrObjAnexoDTO(array());
         $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
         $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
-        $this->atribuirParticipantes($objProtocoloDTO, $objProtocolo->interessado);
+        $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessado);
 
         $strDescricao = "";
         if(isset($parObjProtocolo->processoDeNegocio)){
@@ -743,15 +737,15 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setDblIdProcedimento(null);
         $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-        $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($objProtocolo->processoDeNegocio));
-        $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($objProtocolo->dataHoraDeProducao));
-        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($objProtocolo->protocolo));
+        $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($parObjProtocolo->processoDeNegocio));
+        $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($parObjProtocolo->dataHoraDeProducao));
+        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($parObjProtocolo->protocolo));
         $objProcedimentoDTO->setStrSinGerarPendencia('S');
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
         $objPenParametroRN = new PenParametroRN();
         $numIdTipoProcedimento = $objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
-        $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $objProtocolo->processoDeNegocio);
+        $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $parObjProtocolo->processoDeNegocio);
 
         // Obtém código da unidade através de mapeamento entre SEI e Barramento
         $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
@@ -783,12 +777,12 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($objProcedimentoDTO->getObjProtocoloDTO()->getStrProtocoloFormatado());
 
         $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento);
-        $this->atribuirDocumentos($objProcedimentoDTO, $objProtocolo, $objUnidadeDTO, $objMetadadosProcedimento);
+        $this->atribuirDocumentos($objProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $objMetadadosProcedimento);
         $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTOGerado);
 
         //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
-        $this->atribuirProcessosApensados($objProcedimentoDTO, $objProtocolo->processoApensado);
+        $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado);
 
         return $objProcedimentoDTO;
     }

@@ -104,7 +104,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.2.0': $this->instalarV1201();
                 case '1.2.1': $this->instalarV1202();
                 case '1.2.2': $this->instalarV1203();
-                case '1.2.3':
+                case '1.2.3': $this->instalarV1204();
                 case '1.2.4': $this->instalarV1205();
 
                 break;
@@ -1181,6 +1181,20 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
         $objInfraParametroDTO->setStrValor('1.2.3');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.2.4
+     */
+    protected function instalarV1205()
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.2.4');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
