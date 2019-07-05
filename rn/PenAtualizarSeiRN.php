@@ -1640,7 +1640,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         BancoSEI::getInstance()->executarSql("update md_pen_processo_eletronico set sta_tipo_protocolo = 'P'");
 
         // Adicionar Chave primaria
-        $objMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('ordem'));
+        $objMetaBD->removerChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+        $objMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
 
         //$objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'id', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
 
