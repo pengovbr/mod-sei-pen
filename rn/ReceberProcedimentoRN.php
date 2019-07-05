@@ -134,8 +134,7 @@ class ReceberProcedimentoRN extends InfraRN
                         //Obter os dados do componente digital particionado
                         $this->gravarLogDebug("Baixando componente digital $numOrdemComponente particionado", 5);
                         $numTempoInicialDownload = microtime(true);
-                        //$objAnexoDTO = $this->receberComponenenteDigitalParticionado($componentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo, $numComponentes, $parNumIdentificacaoTramite, $objTramite);
-                        $objAnexoDTO = $this->receberComponenenteDigitalParticionado($arrObjComponenteDigitalIndexado[$componentePendente], $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo, $numComponentes, $parNumIdentificacaoTramite, $objTramite);
+                        $objAnexoDTO = $this->receberComponenenteDigitalParticionado($componentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo, $numComponentes, $parNumIdentificacaoTramite, $objTramite, $arrObjComponenteDigitalIndexado);
                         $numTempoTotalDownload = round(microtime(true) - $numTempoInicialDownload, 2);
                         $numTamanhoArquivoKB = round(strlen($objComponenteDigital->conteudoDoComponenteDigital) / 1024, 2);
                         $numVelocidade = round($numTamanhoArquivoKB / max([$numTempoTotalDownload, 1]), 2);
@@ -1993,7 +1992,8 @@ class ReceberProcedimentoRN extends InfraRN
      * @return AnexoDTO
      * @throws InfraException
      */
-    private function receberComponenenteDigitalParticionado($componentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo, $numComponentes, $parNumIdentificacaoTramite, $objTramite)
+    private function receberComponenenteDigitalParticionado($componentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo, $numComponentes,
+                                                            $parNumIdentificacaoTramite, $objTramite, $arrObjComponenteDigitalIndexado)
     {
         $receberComponenteDigitalRN = new ReceberComponenteDigitalRN();
 
@@ -2013,7 +2013,7 @@ class ReceberProcedimentoRN extends InfraRN
 
             //Verifica se é a primeira execução do laço, se for cria do arquivo na pasta temporaria, senão incrementa o conteudo no arquivo
             if($i == 1) {
-                $infoAnexoRetornado = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
+                $infoAnexoRetornado = $receberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($arrObjComponenteDigitalIndexado[$componentePendente], $objComponenteDigital);
                 $objAnexoDTO = $infoAnexoRetornado;
             }else{
                 //Incrementa arquivo na pasta TEMP
