@@ -53,6 +53,8 @@ class PenAtividadeRN extends AtividadeRN {
             $objAtividadeBD = new AtividadeBD($objBancoSEI);
             $arrObjAtividadeDTO = $objAtividadeBD->listar($objAtividadeDTO);
 
+
+
             if(!empty($arrObjAtividadeDTO)) {
 
                 $arrNumAtividade = InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'IdAtividade', 'IdAtividade');

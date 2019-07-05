@@ -857,7 +857,7 @@ class ReceberProcedimentoRN extends InfraRN
     {
         //Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@
         $objRemetente = $parObjMetadadosProcedimento->metadados->remetente;
-        $objProcesso = $objMetadadosProcedimento->metadados->processo;
+        $objProcesso = $parObjMetadadosProcedimento->metadados->processo;
 
         $arrObjAtributoAndamentoDTO = array();
 
@@ -946,6 +946,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
         $strIdTarefa = isset($objProcesso) ? ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO : ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO;
+
         $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo($strIdTarefa));
         $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
         $objAtividadeDTO->setDthConclusao(null);
