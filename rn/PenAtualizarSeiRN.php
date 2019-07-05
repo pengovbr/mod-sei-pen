@@ -1641,7 +1641,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Adicionar Chave primaria
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->removerChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+        $objInfraMetaBD->excluirChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
         $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
 
         //$objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'id', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
