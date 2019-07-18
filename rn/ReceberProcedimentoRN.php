@@ -122,7 +122,8 @@ class ReceberProcedimentoRN extends InfraRN
                         $this->gravarLogDebug("Baixando componente digital $numOrdemComponente", 6);
                         $numTempoInicialDownload = microtime(true);
                         $objComponenteDigital = $this->objProcessoEletronicoRN->receberComponenteDigital($parNumIdentificacaoTramite, $componentePendente, $objTramite->protocolo);
-                        $numTempoTotalDownload = round(microtime(true) - $numTempoInicialDownload, 2);
+                        //Adiciona +1 para evitar division by zero, alem de n afetar as estatisticas
+                        $numTempoTotalDownload = round(microtime(true) - $numTempoInicialDownload, 2) + 1;
                         $numTamanhoArquivoKB = round(strlen($objComponenteDigital->conteudoDoComponenteDigital) / 1024, 2);
                         $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalDownload, 2);
                         $this->gravarLogDebug("Tempo total de download de $numTamanhoArquivoKB kb: {$numTempoTotalDownload}s ({$numVelocidade} kb/s)", 7);
@@ -130,7 +131,8 @@ class ReceberProcedimentoRN extends InfraRN
                         $numTempoInicialArmazenamento = microtime(true);
                         $arrAnexosComponentes[$key][$componentePendente] = $this->objReceberComponenteDigitalRN->copiarComponenteDigitalPastaTemporaria($objComponenteDigital);
                         $arrAnexosComponentes[$key]['recebido'] = false;
-                        $numTempoTotalArmazenamento = round(microtime(true) - $numTempoInicialArmazenamento, 2);
+                        //Adiciona +1 para evitar division by zero, alem de n afetar as estatisticas
+                        $numTempoTotalArmazenamento = round(microtime(true) - $numTempoInicialArmazenamento, 2) +1;
                         $numVelocidade = round($numTamanhoArquivoKB / $numTempoTotalArmazenamento, 2);
                         $this->gravarLogDebug("Tempo total de armazenamento em disco: {$numTempoTotalArmazenamento}s ({$numVelocidade} kb/s)", 7);
 
