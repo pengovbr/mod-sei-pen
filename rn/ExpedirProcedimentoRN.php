@@ -933,11 +933,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $documento->componenteDigital->tipoDeConteudo = $componenteDigital->getStrTipoConteudo();
                     $documento->componenteDigital->idAnexo = $componenteDigital->getNumIdAnexo();
 
-
-                    // -------------------------- INICIO DA TAREFA US074 -------------------------------//
                     $documento = $this->atribuirDadosAssinaturaDigital($documentoDTO, $documento, $componenteDigital->getStrHashConteudo());
-                    // -------------------------- FIM TAREFA US074 -------------------------------//
-
 
                     if($componenteDigital->getStrMimeType() == 'outro'){
                         $documento->componenteDigital->dadosComplementaresDoTipoDeArquivo = 'outro';
@@ -1799,28 +1795,28 @@ class ExpedirProcedimentoRN extends InfraRN {
                 try
                 {
                     if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
-                        //Verifica se o arquivo <E9> maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
-                        if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
-                            //M<E9>todo que irá particionar o arquivo em partes para realizar o envio
+                        //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
+                        //if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+                            //Método que irá particionar o arquivo em partes para realizar o envio
                             $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
 
                             //Finalizar o envio das partes do componente digital
                             $parametros = new stdClass();
                             $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
                             $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
-                        }else{
+                        // }else{
 
-                            $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
-                            $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
+                        //     $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                        //     $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
-                            //Enviar componentes digitais
-                            $parametros = new stdClass();
-                            $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
-                            $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
+                        //     //Enviar componentes digitais
+                        //     $parametros = new stdClass();
+                        //     $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
+                        //     $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                            $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
-                            $this->contadorDaBarraDeProgresso++;
-                        }
+                        //     $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                        //     $this->contadorDaBarraDeProgresso++;
+                        // }
 
                         $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
 
