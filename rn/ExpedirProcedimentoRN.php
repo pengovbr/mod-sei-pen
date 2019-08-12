@@ -1287,7 +1287,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
 
                     //Verifica se o arquivo <E9> maior que 50MB, se for, gera o hash do conte<FA>do do arquivo para enviar para o barramento
-                    //Se n<E3>o for carrega o conte<FA>do do arquivo e envia para o barramento
+                    //Se não for carrega o conte<FA>do do arquivo e envia para o barramento
                     if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
                         $componenteDigitalParticionado = 1;
                         $strConteudoAssinatura = hash_file("sha256", $strCaminhoAnexo, true);
@@ -1722,6 +1722,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $documentoDTO->retStrStaDocumento();
         $documentoDTO->retStrStaEstadoProtocolo();
         $documentoDTO->retNumIdHipoteseLegalProtocolo();
+        $documentoDTO->retStrStaProtocoloProtocolo();
         //$documentoDTO->retStrNumero();
 
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
@@ -1763,8 +1764,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Construir objeto Componentes digitais
             $arrHashComponentesEnviados = array();
             foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
-
-                //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_DOCUMENTO);
                 $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
 
                 $dadosDoComponenteDigital = new stdClass();
@@ -1794,9 +1793,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 try
                 {
+                    //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
                     if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
-                        //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
-                        //if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+                        if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
                             //Método que irá particionar o arquivo em partes para realizar o envio
                             $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
 
@@ -1804,19 +1803,20 @@ class ExpedirProcedimentoRN extends InfraRN {
                             $parametros = new stdClass();
                             $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
                             $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
-                        // }else{
 
-                        //     $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
-                        //     $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
+                        } else {
 
-                        //     //Enviar componentes digitais
-                        //     $parametros = new stdClass();
-                        //     $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
-                        //     $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
+                            $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                            $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
-                        //     $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
-                        //     $this->contadorDaBarraDeProgresso++;
-                        // }
+                            //Enviar componentes digitais
+                            $parametros = new stdClass();
+                            $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
+                            $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
+
+                            $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                            $this->contadorDaBarraDeProgresso++;
+                        }
 
                         $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
 
@@ -2246,7 +2246,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     /**
      * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
-     * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
      * @param $strCaminhoAnexo
      * @param $dadosDoComponenteDigital
      * @param $nrTamanhoArquivoMb
@@ -2273,12 +2273,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                 $this->contadorDaBarraDeProgresso++;
             }catch (Exception $e){
-                //Armazena as partes que n<E3>o foram enviadas para tentativa de reenvio posteriormente
+                //Armazena as partes que não foram enviadas para tentativa de reenvio posteriormente
                 $arrPartesComponentesDigitaisNaoEnviadas[] = $inicio;
             }
             $inicio = ($nrTamanhoBytesMaximo * $i);
         }
-        //Verifica se existem partes do componente digital que n<E3>o foram enviadas para tentar realizar o envio novamente
+
+        //Verifica se existem partes do componente digital que não foram enviadas para tentar realizar o envio novamente
         if(isset($arrPartesComponentesDigitaisNaoEnviadas)){
             $nrTotalPartesNaoEnviadas = count($arrPartesComponentesDigitaisNaoEnviadas);
             $i = 1;
