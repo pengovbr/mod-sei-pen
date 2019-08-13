@@ -1629,22 +1629,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         // Modificações de Banco referentes a feature 76
         $objMetaBD = $this->objMeta;
 
-        // Adiciona a coluna para identificar se a cria<E7><E3>o do processo se deu por documento avulso (D) ou processo (P)
+        $objMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem_documento = 1");
         $objMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::NNULLO);
-        $objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
 
-        // Atribui o valo (P) para os registros j<E1> existentes, pois tratam-se apenas de Processos.
-        $objMetaBD->adicionarValorPadraoParaColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', 'P');
-
+        // Adiciona a coluna para identificar se a criação do processo se deu por documento avulso (D) ou processo (P)
         // Atualizar os registros existentes para P - Tipo Processo
+        $objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::SNULLO);
         BancoSEI::getInstance()->executarSql("update md_pen_processo_eletronico set sta_tipo_protocolo = 'P'");
+        $objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
+        $objMetaBD->adicionarValorPadraoParaColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', 'P');
 
         // Adicionar Chave primaria
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
         $objInfraMetaBD->excluirChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
         $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
-
-        //$objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'id', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
 
         // Definição de ordem em que os parâmetros aparecem na página
         $objMetaBD->adicionarColuna('md_pen_parametro', 'sequencia', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
