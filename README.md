@@ -60,8 +60,14 @@ Exemplo de instalação do German e Supervisor no CentOS:
 # pre-requisito
 yum install epel-release && yum update
 
-# instalação do gearman e supervisord               
-yum install supervisor-4.* gearmand libgearman libgearman-devel php56*-pecl-gearman
+# instalação do gearman
+yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
+
+# instalação do supervisor
+yum install python3
+python3 -m ensurepip
+pip3 install supervisor==4.0.4
+echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
 
 ---

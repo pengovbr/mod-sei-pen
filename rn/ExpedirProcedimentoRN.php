@@ -1776,17 +1776,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
                 $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
-                $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
-
                 //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
                 $nrTamanhoArquivoMb = 0;
                 $nrTamanhoBytesArquivo = 0;
-                if($objAnexoDTO) {
-                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-                    $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
-                    $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
-                }
-
                 $objPenParametroRN = new PenParametroRN();
                 $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                 $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
@@ -1796,8 +1788,19 @@ class ExpedirProcedimentoRN extends InfraRN {
                     //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
                     if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
                         if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
+                            $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
+                            if(!$objAnexoDTO){
+                                $strProtocoloDocumento = $documentoDTO->retStrProtocoloDocumentoFormatado();
+                                throw new InfraException("Anexo do documento $strProtocoloDocumento não pode ser localizado.");
+                            }
+
+                            $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
+                            $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
+                            $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
+
                             //Método que irá particionar o arquivo em partes para realizar o envio
-                            $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
+                            $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb,
+                                $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
 
                             //Finalizar o envio das partes do componente digital
                             $parametros = new stdClass();
@@ -1805,11 +1808,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                             $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
 
                         } else {
-
                             $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
                             $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
-                            //Enviar componentes digitais
                             $parametros = new stdClass();
                             $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                             $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
@@ -1819,7 +1820,6 @@ class ExpedirProcedimentoRN extends InfraRN {
                         }
 
                         $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
-
                     }
 
                     //Bloquea documento para atualizao, j que ele foi visualizado
@@ -1855,40 +1855,35 @@ class ExpedirProcedimentoRN extends InfraRN {
         //Abre o arquivo para leitura
         $fp = fopen($strCaminhoAnexo, "rb");
 
-        $inicio = 0;
-        //L<EA> o arquivo em partes para realizar o envio
-        for ($i = 1; $i <= $qtdPartes; $i++)
-        {
-            $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO  , $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado())." (Componente digital: parte $i de $qtdPartes)");
-            $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
-            $tamanhoParteArquivo = strlen($parteDoArquivo);
+        try{
+            $inicio = 0;
+            //Lê o arquivo em partes para realizar o envio
+            for ($i = 1; $i <= $qtdPartes; $i++)
+            {
+                $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO  , $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado())." (Componente digital: parte $i de $qtdPartes)");
+                $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
+                $tamanhoParteArquivo = strlen($parteDoArquivo);
 
-            //Cria um objeto com as informa<E7><F5>es da parte do componente digital
-            $identificacaoDaParte = new stdClass();
-            $identificacaoDaParte->inicio = $inicio;
-            $identificacaoDaParte->fim = ($inicio + $tamanhoParteArquivo);
+                //Cria um objeto com as informa<E7><F5>es da parte do componente digital
+                $identificacaoDaParte = new stdClass();
+                $identificacaoDaParte->inicio = $inicio;
+                $identificacaoDaParte->fim = ($inicio + $tamanhoParteArquivo);
 
-            $dadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
-            $dadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = new SoapVar($parteDoArquivo, XSD_BASE64BINARY);
+                $dadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
+                $dadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = new SoapVar($parteDoArquivo, XSD_BASE64BINARY);
 
-            $parametros = new stdClass();
-            $parametros->dadosDaParteDeComponenteDigital = $dadosDoComponenteDigital;
+                $parametros = new stdClass();
+                $parametros->dadosDaParteDeComponenteDigital = $dadosDoComponenteDigital;
 
-            //Envia uma parte de um componente digital
-            $resultado = $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
-
-            //Obt<E9>m informa<E7><F5>es referente ao tr<E2>mite
-            //$infoTramite = $this->objProcessoEletronicoRN->consultarTramites($numIdTramite);
-
-            $inicio = ($nrTamanhoBytesMaximo * $i);
+                //Envia uma parte de um componente digital
+                $resultado = $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
+                $inicio = ($nrTamanhoBytesMaximo * $i);
+            }
         }
-
-        fclose($fp);
+        finally{
+            fclose($fp);
+        }
      }
-
-
-
-
 
 
     private function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
@@ -2255,14 +2250,15 @@ class ExpedirProcedimentoRN extends InfraRN {
      * @param $objComponenteDigitalDTO
      * @throws InfraException
      */
-    private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite)
+    private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
+        $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite)
     {
         //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
         $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
         //Abre o arquivo para leitura
         $fp = fopen($strCaminhoAnexo, "rb");
         $inicio = 0;
-        //L<EA> o arquivo em partes para realizar o envio
+        //Lê o arquivo em partes para realizar o envio
         for ($i = 1; $i <= $qtdPartes; $i++)
         {
             $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);

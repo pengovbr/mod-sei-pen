@@ -2028,6 +2028,10 @@ class ReceberProcedimentoRN extends InfraRN
             $inicio = ($nrTamanhoBytesMaximo * $i);
             $fim += $nrTamanhoBytesMaximo;
         }
+
+        //Atualiza tamanho total do anexo no banco de dados
+        $objAnexoDTO->setNumTamanho($nrTamanhoBytesArquivo);
+
         return $objAnexoDTO;
      }
 
