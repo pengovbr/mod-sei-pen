@@ -834,7 +834,6 @@ class ProcessoEletronicoRN extends InfraRN
             }
         }
 
-
         $arrObjComponenteDigitalDTO = array();
         foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
 
@@ -863,8 +862,6 @@ class ProcessoEletronicoRN extends InfraRN
                     }
 
                     $objComponenteDigitalDTO->setNumOrdem($objComponenteDigitalDTO->getNumOrdem());
-
-                    // Muda a ID do tramite e o arquivo pode ser enviado
                     $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
                 }
                 $arrObjComponenteDigitalDTO[] = $objComponenteDigitalDTO;

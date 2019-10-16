@@ -274,6 +274,10 @@ class ReceberProcedimentoRN extends InfraRN
             $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
             $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
 
+            $count = count($parArrHashComponentes);
+            $hashs = print_r($parArrHashComponentes, true);
+            $this->gravarLogDebug("Lista de hashs para recebimento ($count): $hashs", 4);
+
             if(!empty($arrObjComponentesDigitaisDTO)){
                 $arrStrNomeDocumento = $this->listarMetaDadosComponentesDigitais($objProtocolo);
                 $arrCompenentesDigitaisIndexados = InfraArray::indexarArrInfraDTO($arrObjComponentesDigitaisDTO, 'IdDocumento', true);
@@ -285,6 +289,7 @@ class ReceberProcedimentoRN extends InfraRN
                             $dblIdProcedimento = $objComponenteDigitalDTO->getDblIdProcedimento();
                             $dblIdDocumento = $numIdDocumento;
                             $strHash = $objComponenteDigitalDTO->getStrHashConteudo();
+
                             //Verificar se documento já foi recebido anteriormente para poder registrar
                             if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)){
                                 $strNomeDocumento = array_key_exists($strHash, $arrStrNomeDocumento) ? $arrStrNomeDocumento[$strHash]['especieNome'] : '[Desconhecido]';
@@ -1112,11 +1117,13 @@ class ReceberProcedimentoRN extends InfraRN
         $objSeiRN = new SeiRN();
 
         $arrObjDocumentoDTO = array();
+
+        $count = count($arrObjDocumentos);
+        $this->gravarLogDebug("Quantidade de documentos para recedimento: $count", 4);
         foreach($arrObjDocumentos as $objDocumento){
 
             if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
                 if(array_key_exists($objDocumento->ordem, $arrObjComponenteDigitalDTOIndexado)) {
-
                     //Busca o ID do protocolo
                     $objComponenteIndexado = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
                     $dblIdProtocolo = $objComponenteIndexado->getDblIdDocumento();
@@ -1256,6 +1263,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objTipoProcedimentoDTO->retStrStaNivelAcessoSugestao();
             $objTipoProcedimentoDTO->retStrStaGrauSigiloSugestao();
             $objTipoProcedimentoDTO->retNumIdHipoteseLegalSugestao();
+            $objTipoProcedimentoDTO->setBolExclusaoLogica(false);
             $objTipoProcedimentoDTO->setNumIdTipoProcedimento($objProcedimentoDTO->getNumIdTipoProcedimento());
 
             $objTipoProcedimentoRN = new TipoProcedimentoRN();

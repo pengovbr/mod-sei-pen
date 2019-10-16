@@ -67,6 +67,8 @@ yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
 yum install python3
 python3 -m ensurepip
 pip3 install supervisor==4.0.4
+mkdir /etc/supervisor/
+mkdir /var/log/supervisor/
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
 
@@ -325,7 +327,9 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 ##### 18. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
 
 ```bash
-service gearmand start && service supervisord start
+service gearmand start 
+service supervisord start
+supervisorctl restart all
 ```
 
 Executar o comando **ps -ef** e verificar se os dois processos seguintes estão em execução: 
@@ -590,3 +594,31 @@ Este problema ocorre quando o servidor não possui suporte ao protocolo IPv6. Po
 Para solucionar o problema, duas ações podem ser feitas:
 - habilitar o suporte à IPv6 no servidor de aplicação onde o Gearman foi instalado
 - configurar o serviço gearmand para utilizar somente IPv4. Para fazer esta configuração, será necessário editar o arquivo de inicialização do Gearmand, normalmente localizado em /etc/sysconfig/gearmand, e adicionar o seguinte parâmetro de inicialização: OPTIONS="--listen=127.0.0.1"
+
+
+### 4. Conversão do Certificado Digital do formato .P12 para o formato .PEM
+
+O formato do certificado digital utilizado pela integração do do SEI com o Processo Eletrônico Nacional é o PEM, com isto, os certificados em outros formatos devem ser convertidos para este formato.
+Para converter o arquivo p12 para PEM, utilize o seguinte comando.
+ps: Podem existir pequenas variações de acordo com a distribuição do Linux utilizada
+
+        
+        openssl pkcs12 --nodes -in <LOCALIZAÇÃO_CERTIFICADO_P12> -out <LOCALIZAÇÃO_CERTIFICADO_PEM>
+        
+        
+### 5. Como obter o Fingerprint e Common Name do certificado digital
+
+Para realizar a configuração do sistema de processo eletrônico na infraestrutura de serviços do Processo Eletrônico Nacional, é necessário a utilização de um Certificado Digital válido que deverá ter suas informações de Fingerprint e Common Name repassadas para a equipe do Processo Eletrônico Nacional fazer as devidas configurações do órgão. 
+Com isto, para obter tais informações do certificado digital, os seguintes comandos podem ser uitlizados, lembrando que podem existir pequenas variações de acordo com a distribuição do Linux utilizada:
+
+Fingerprint:
+        
+        openssl x509 -noout -fingerprint -sha1 -inform pem -in <LOCALIZAÇÃO COMPLETA DO CERTIFICADO DIGITAL>
+        
+        
+Common Name:
+        
+        openssl x509 -noout -subject -sha1 -inform pem -in <LOCALIZAÇÃO COMPLETA DO CERTIFICADO DIGITAL>
+        
+
+
