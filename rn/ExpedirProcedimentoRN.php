@@ -1228,6 +1228,15 @@ class ExpedirProcedimentoRN extends InfraRN {
             $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
             if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), true);
+                 
+                //fix-107 - vamos pegar o hash novamente
+                //caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo
+                //usando as funcoes do sei 3.0.11
+                $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+                if($hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                    $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), true, true);
+                }
+
             }
 
             $arrInformacaoArquivo['NOME'] = $strProtocoloDocumentoFormatado . ".html";
@@ -1329,7 +1338,7 @@ class ExpedirProcedimentoRN extends InfraRN {
      * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
      * @return String                     Conteúdo completo do documento para envio
      */
-    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false)
+    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false)
     {
         $objEditorDTO = new EditorDTO();
         $objEditorDTO->setDblIdDocumento($parDblIdDocumento);
@@ -1358,7 +1367,17 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         $objEditorRN = new EditorRN();
-        return $objEditorRN->consultarHtmlVersao($objEditorDTO);
+        $r = $objEditorRN->consultarHtmlVersao($objEditorDTO);
+        
+        //fix-107. Gerar doc exatamente da forma como estava na v3.0.11
+        //Raramente vai entrar aqui e para diminuir a complexidade ciclomatica 
+        //n encadeei com elseif nas instrucoes acima
+        if($bolFormatoLegado3011){
+            $objEditor3011RN = new Editor3011RN();
+            $r = $objEditor3011RN->consultarHtmlVersao($objEditorDTO);
+        }
+
+        return $r;
     }
 
 
