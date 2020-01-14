@@ -1003,7 +1003,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if($objComponenteDigitalDTO != null){
             $numCodigoEspecie = $objComponenteDigitalDTO->getNumCodigoEspecie();
-            $strNomeEspecieProdutor = $objComponenteDigitalDTO->getStrNomeEspecieProdutor();
+            $strNomeEspecieProdutor = utf8_encode($objComponenteDigitalDTO->getStrNomeEspecieProdutor());
         }
 
         //Caso a informação sobre mapeamento esteja nulo, necessário buscar tal informação no Barramento

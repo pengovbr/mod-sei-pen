@@ -1681,7 +1681,7 @@ class ReceberProcedimentoRN extends InfraRN
 
     }
 
-    /* Essa é a função estática de comparação */
+    //Essa é a função estática de comparação
     static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
     {
         $numOrdemDocumento1 = strtolower($parDocumento1->ordem);

@@ -56,6 +56,7 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 **Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
 
 Exemplo de instalação do German e Supervisor no CentOS:
+
 ```bash
 # pre-requisito
 yum install epel-release && yum update

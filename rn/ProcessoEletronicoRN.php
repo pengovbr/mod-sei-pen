@@ -821,18 +821,19 @@ class ProcessoEletronicoRN extends InfraRN
         //Registra informações sobre o componente digital do documento
         $arrObjComponenteDigitalDTO = array();
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        $numOrdem = 1;
 
-        foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
-            $objComponenteDigitalDTOFiltro = new ComponenteDigitalDTO();
-            $objComponenteDigitalDTOFiltro->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
-            $objComponenteDigitalDTOFiltro->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
-            $objComponenteDigitalDTOFiltro->setDblIdDocumento($objComponenteDigitalDTO->getDblIdDocumento());
+        // $numOrdem = 1;
+        // foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
+        //     $objComponenteDigitalDTOFiltro = new ComponenteDigitalDTO();
+        //     $objComponenteDigitalDTOFiltro->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
+        //     $objComponenteDigitalDTOFiltro->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
+        //     $objComponenteDigitalDTOFiltro->setDblIdDocumento($objComponenteDigitalDTO->getDblIdDocumento());
+        //     $objComponenteDigitalDTOFiltro->setNumIdTramite($objComponenteDigitalDTO->getNumIdTramite());
 
-            if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) > 0){
-                $numOrdem++;
-            }
-        }
+        //     if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) > 0){
+        //         $numOrdem++;
+        //     }
+        // }
 
         $arrObjComponenteDigitalDTO = array();
         foreach ($parObjTramiteDTO->getArrObjComponenteDigitalDTO() as $objComponenteDigitalDTO) {
@@ -850,10 +851,10 @@ class ProcessoEletronicoRN extends InfraRN
 
 
                 if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) == 0){
-                    $objComponenteDigitalDTO->setNumOrdem($numOrdem);
-                    $objComponenteDigitalDTO->unSetStrDadosComplementares();
+                    // $objComponenteDigitalDTO->setNumOrdem($numOrdem);
+                    // $objComponenteDigitalDTO->unSetStrDadosComplementares();
                     $objComponenteDigitalDTO = $objComponenteDigitalBD->cadastrar($objComponenteDigitalDTO);
-                    $numOrdem++;
+                    // $numOrdem++;
                 }
                 else {
                     //Verifica se foi setado o envio
@@ -861,8 +862,8 @@ class ProcessoEletronicoRN extends InfraRN
                         $objComponenteDigitalDTO->setStrSinEnviar('N');
                     }
 
-                    $objComponenteDigitalDTO->setNumOrdem($objComponenteDigitalDTO->getNumOrdem());
-                    $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
+                    //$objComponenteDigitalDTO->setNumOrdem($objComponenteDigitalDTO->getNumOrdem());
+                    //$objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
                 }
                 $arrObjComponenteDigitalDTO[] = $objComponenteDigitalDTO;
             }
@@ -979,7 +980,7 @@ class ProcessoEletronicoRN extends InfraRN
 
                 if(isset($objDocumento->especie)){
                     $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
-                    $objComponenteDigitalDTO->setStrNomeEspecieProdutor($objDocumento->especie->nomeNoProdutor);
+                    $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
                 }
 
                 $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
