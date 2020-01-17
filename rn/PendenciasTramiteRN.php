@@ -79,7 +79,7 @@ class PendenciasTramiteRN extends InfraRN {
                     $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite();
                     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-                        $mensagemLog = sprintf(">>> Enviando pendência %d (status %s) para fila de processamento",
+                        $mensagemLog = sprintf(">>> Enviando pend?ncia %d (status %s) para fila de processamento",
                             $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
                         $this->gravarLogDebug($mensagemLog, 3, true);
                         $this->enviarPendenciaFilaProcessamento($objPendenciaDTO);
@@ -89,12 +89,13 @@ class PendenciasTramiteRN extends InfraRN {
                     //Registra a falha no log do sistema e reinicia o ciclo de requisição e
                     //sai loop de eventos para finalizar o script e subir uma nova versão atualizada
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-                    break;
+                    $this->gravarLogDebug(InfraException::inspecionar($e));
                 } catch (Exception $e) {
                     //Apenas registra a falha no log do sistema e reinicia o ciclo de requisição
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+                    $this->gravarLogDebug(InfraException::inspecionar($e));
                 } finally {
-                    $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
+                    $this->gravarLogDebug("Reiniciando monitoramento de pend?ncias", 1);
                     sleep(5);
                 }
             }
