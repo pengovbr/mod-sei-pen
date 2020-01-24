@@ -117,11 +117,12 @@ class ReceberProcedimentoRN extends InfraRN
                         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
                         //Ajuste deverá ser feito em versões futuras
                         $arrayHash[] = $componentePendente;
-                        $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $componentePendente);
+
+                        $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProcesso, $componentePendente);
                         $nrTamanhoMegasMaximo  = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                         $nrTamanhoBytesMaximo  = $nrTamanhoMegasMaximo * pow(1024, 2);
-                        $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
-                        $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $componentePendente);
+                        $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProcesso);
+                        //$nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProcesso, $componentePendente);
 
                         if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
                             //Obter os dados do componente digital particionado
@@ -150,12 +151,10 @@ class ReceberProcedimentoRN extends InfraRN
                             $numTempoTotalArmazenamento = round(microtime(true) - $numTempoInicialArmazenamento, 2);
                             $numVelocidade = round($numTamanhoArquivoKB / max([$numTempoTotalArmazenamento, 1]), 2);
                             $this->gravarLogDebug("Tempo total de armazenamento em disco: {$numTempoTotalArmazenamento}s ({$numVelocidade} kb/s)", 6);
-
                         }
 
                         $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$componentePendente];
                         $objAnexoBaixadoPraPastaTemp->hash = $componentePendente;
-                        array_push($arrayObjAnexoBaixadoPraPastaTemp, $objAnexoBaixadoPraPastaTemp);
 
                         //Valida a integridade do componente via hash
                         $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 6);
@@ -441,10 +440,10 @@ class ReceberProcedimentoRN extends InfraRN
         $objPenParametroRN = new PenParametroRN();
         $numTamDocExterno = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
-        foreach($arrObjDocumentos as $objDocument) {
+        foreach($arrObjDocumentos as $objDocumento) {
             //Não valida informações do componente digital caso o documento esteja cancelado
             if(isset($objDocumento->retirado) && $objDocumento->retirado === true){
-                if (is_null($objDocument->componenteDigital->tamanhoEmBytes) || $objDocument->componenteDigital->tamanhoEmBytes == 0){
+                if (is_null($objDocumento->componenteDigital->tamanhoEmBytes) || $objDocumento->componenteDigital->tamanhoEmBytes == 0){
                     throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
                 }
             }
@@ -1790,7 +1789,7 @@ class ReceberProcedimentoRN extends InfraRN
     public function validarExtensaoComponentesDigitais($parIdTramite, $parObjProcesso){
 
         //Armazena o array de documentos
-        $arrDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+        $arrDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProcesso);
 
         //Instancia o bd do arquivoExtensão
         $arquivoExtensaoBD = new ArquivoExtensaoBD($this->getObjInfraIBanco());

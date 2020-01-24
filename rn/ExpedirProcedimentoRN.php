@@ -1285,6 +1285,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
 
             if(isset($objAnexoDTO)){
+                $objPenParametroRN = new PenParametroRN();
                 //VALIDAO DE TAMANHO DE DOCUMENTOS EXTERNOS PARA A EXPEDIO
                 // $objPenParametroRN = new PenParametroRN();
                 // if($objAnexoDTO->getNumTamanho() > ($objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO') * 1024 * 1024) && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
@@ -1755,7 +1756,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
     }
 
-    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo) {
+    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo)
+    {
         if (!isset($strNumeroRegistro)) {
             throw new InfraException('Parâmetro $strNumeroRegistro não informado.');
         }

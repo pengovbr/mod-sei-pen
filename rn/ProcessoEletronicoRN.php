@@ -796,7 +796,7 @@ class ProcessoEletronicoRN extends InfraRN
     $arrObjComponenteDigitalDTO = array();
     $arrObjDocumento = self::obterDocumentosProtocolo($parObjProcesso);
 
-    foreach ($parObjProcesso->documento as $objDocumento) {
+    foreach ($arrObjDocumento as $objDocumento) {
       $objComponenteDigitalDTO = new ComponenteDigitalDTO();
       $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjProcesso->idProcedimentoSEI); //TODO: Error utilizar idProcedimentoSEI devido processos apensados
@@ -804,14 +804,14 @@ class ProcessoEletronicoRN extends InfraRN
       $objComponenteDigitalDTO->setNumOrdem($objDocumento->ordem);
       $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
       $objComponenteDigitalDTO->setStrProtocolo($parObjProcesso->protocolo);
-      $objComponenteDigitalDTO->setNumOrdem(1);
+      //$objComponenteDigitalDTO->setNumOrdem(1);
 
       //Por enquanto, considera que o documento possui apenas um componente digital
       if(is_array($objDocumento->componenteDigital) && count($objDocumento->componenteDigital) != 1) {
         throw new InfraException("Erro processando componentes digitais do processo " . $parObjProcesso->protocolo . "\n Somente é permitido o recebimento de documentos com apenas um Componente Digital.");
       }
 
-      $objComponenteDigital = $objDocumento->componenteDigital;
+      $objComponenteDigital = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital[0] : $objDocumento->componenteDigital;
       $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
 
       if(isset($objDocumento->especie)){

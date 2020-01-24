@@ -11,10 +11,10 @@ class ProcessoEletronicoINT extends InfraINT {
     //const NEE_EXPEDICAO_ETAPA_CONCLUSAO = 7;
     const NEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 1;
 
-    const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informa??es do processo...';
+    const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informações do processo...';
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
-    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Tr?mite externo do processo finalizado com sucesso!';
+    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizado com sucesso!';
 
     /**
      * Concate as siglas das hierarquias no nome da unidade
