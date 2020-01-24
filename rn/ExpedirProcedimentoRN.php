@@ -134,14 +134,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objInfraException->lancarValidacoes();
             }
 
-            //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
-            //$this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
-
             //Busca metadados do processo registrado em trâmite anterior
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
+            $objTramitesAnteriores = $this->consultarTramitesAnteriores($objMetadadosProcessoTramiteAnterior->NRE);
+
             //Construção dos cabecalho para envio do processo
-            $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO);
+            $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $objTramitesAnteriores);
 
             //Construção do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
@@ -156,6 +155,11 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->barraProgresso->exibir();
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
             $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+
+            //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
+            if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)){
+                $this->objProcessoEletronicoRN->cancelarTramite($objTramiteInconsistente->IDT);
+            }
 
             $param = new stdClass();
             $param->novoTramiteDeProcesso = new stdClass();
@@ -395,7 +399,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+    private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $parObjTramitesAnteriores)
     {
         if(!isset($objExpedirProcedimentoDTO)){
             throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
@@ -403,7 +407,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         //Obtenção do número de registro eletrônico do processo
         $strNumeroRegistro = null;
-
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $objTramiteDTOFiltro = new TramiteDTO();
         $objTramiteDTOFiltro->retStrNumeroRegistro();
@@ -420,16 +423,14 @@ class ExpedirProcedimentoRN extends InfraRN {
         // sim deve ser gerada uma nova NRE, pois a atual ser recusada pelo PEN quando
         // for enviado
         if(!InfraString::isBolVazia($strNumeroRegistro)) {
-            $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites(null, $strNumeroRegistro);
-            if(!empty($arrObjTramite) && is_array($arrObjTramite)) {
-
+            if(!empty($parObjTramitesAnteriores) && is_array($parObjTramitesAnteriores)) {
                 $arrNumSituacoesTramiteEfetivado = array(
                     ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
                     ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
                 );
 
                 $bolExisteTramiteConcluido = false;
-                foreach ($arrObjTramite as $objTramite) {
+                foreach ($parObjTramitesAnteriores as $objTramite) {
                     //Caso exista algum trâmite realizado com sucesso para outro destinatário, número do NRE precisa ser reutilizado
                     if(in_array($objTramite->situacaoAtual, $arrNumSituacoesTramiteEfetivado)){
                         $bolExisteTramiteConcluido = true;
@@ -2550,7 +2551,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException("Trâmite $numIdTramite não encontrado para o processo $numIdProtoloco.");
         }
 
-        //Verifica se o trâmite est com o status de iniciado
+        //Verifica se o trâmite está com o status de iniciado
         if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
             $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
             return true;
@@ -2720,13 +2721,29 @@ class ExpedirProcedimentoRN extends InfraRN {
    }
 
 
-   public function consultaDocumentosProcesso($idPrtocedimento)
-   {
-       $documentoRespArray = array();
-       $documentoDTO = new DocumentoDTO();
-       $documentoDTO->setDblIdProcedimento($idPrtocedimento);
-       $documentoDTO->retTodos();
-       $documentoDTO = $this->objDocumentoRN->listarRN0008($documentoDTO);
-       return $documentoDTO;
-   }
+    public function consultaDocumentosProcesso($idPrtocedimento)
+    {
+        $documentoRespArray = array();
+        $documentoDTO = new DocumentoDTO();
+        $documentoDTO->setDblIdProcedimento($idPrtocedimento);
+        $documentoDTO->retTodos();
+        $documentoDTO = $this->objDocumentoRN->listarRN0008($documentoDTO);
+        return $documentoDTO;
+    }
+
+    private function consultarTramitesAnteriores($parStrNumeroRegistro)
+    {
+        return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramites(null, $parStrNumeroRegistro) : null;
+    }
+
+    private function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
+    {
+        if(!empty($parArrTramitesAnteriores) && is_array($parArrTramitesAnteriores)){
+            $objUltimoTramite = $parArrTramitesAnteriores[count($parArrTramitesAnteriores) - 1];
+            if($objUltimoTramite->situacaoAtual == ProcessoeletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO){
+                return $objUltimoTramite;
+            }
+        }
+        return null;
+    }
 }

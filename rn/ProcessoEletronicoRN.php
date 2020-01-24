@@ -804,7 +804,6 @@ class ProcessoEletronicoRN extends InfraRN
       $objComponenteDigitalDTO->setNumOrdem($objDocumento->ordem);
       $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
       $objComponenteDigitalDTO->setStrProtocolo($parObjProcesso->protocolo);
-      //$objComponenteDigitalDTO->setNumOrdem(1);
 
       //Por enquanto, considera que o documento possui apenas um componente digital
       if(is_array($objDocumento->componenteDigital) && count($objDocumento->componenteDigital) != 1) {
