@@ -1,7 +1,6 @@
 #!/bin/bash
 
-PATH=/usr/bin:/sbin:/bin:/usr/sbin
-export PATH
+export PATH=/usr/bin:/sbin:/bin:/usr/sbin
 
 echo "[$(date +"%Y-%m-%d %T")] Iniciando verificação dos serviços do Gearman e Supervisor... ";
 GEARMAN=$(ls /etc/init.d | grep -owih gearman.*)
@@ -16,29 +15,32 @@ else
 	fi
 fi
 
-SUPERVISOR=$(ls /etc/init.d | grep -owih supervisor.*)
-if [[ -z $SUPERVISOR ]]; then
+# Comandos válidos para SUPERVISOR 4.*
+# Não utilizar versão inferior à 4.* por questões de compatibilidade e bugs conhecidos
+SUPERVISOR_DAEMON='supervisord'
+SUPERVISOR_SHUTDOWN='supervisorctl shutdown'
+
+if ! which $SUPERVISOR_DAEMON > /dev/null; then
 	echo "ERROR: Instalação do Supervisor não pode ser localizada."
 	exit 1;
 else
 	ps cax | grep -ih supervisor.* > /dev/null
 	if [ $? -ne 0 ]; then
             echo "Supervisor: Iniciando serviço de monitoramento dos processos de integração (1)..."
-        	/etc/init.d/$SUPERVISOR start;
-	else
-	
+        	$SUPERVISOR_DAEMON;
+	else	
 	    COMMAND=$(ps -C php -f | grep -o "PendenciasTramiteRN.php");
 	    if [ -z "$COMMAND" ]; then
             echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração (2)..."
-            /etc/init.d/$SUPERVISOR stop;
-            /etc/init.d/$SUPERVISOR start;  
+            $SUPERVISOR_SHUTDOWN;
+            $SUPERVISOR_DAEMON;  
 	    fi
 	
         COMMAND=$(ps -C php -f | grep -o "ProcessarPendenciasRN.php");
         if [ -z "$COMMAND" ]; then
             echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração (3)..."
-	        /etc/init.d/$SUPERVISOR stop;
-	        /etc/init.d/$SUPERVISOR start;	                
+	        $SUPERVISOR_SHUTDOWN;
+	        $SUPERVISOR_DAEMON;	                
 	    fi
 	fi
 fi
@@ -76,8 +78,8 @@ GEARADMIN_RUNNING_PATTERN="([1-9]+|[1-9]+[0-9]*)+[[:space:]]+([1-9]+|[1-9]+[0-9]
 
 if (echo "$GEARADMIN_STATUS" | grep -Eq "$GEARADMIN_BLOCKED_PATTERN") && !(echo "$GEARADMIN_STATUS" | grep -Eq "$GEARADMIN_RUNNING_PATTERN") ; then
     echo "Supervisor: Reiniciando serviço de monitoramento dos processos de integração (4)..."
-    /etc/init.d/$SUPERVISOR stop;
-    /etc/init.d/$SUPERVISOR start; 
+    $SUPERVISOR_SHUTDOWN;
+    $SUPERVISOR_DAEMON; 
 fi
 
 exit 0

@@ -1,9 +1,5 @@
 <?
-/**
- *
- * 12/08/2017 - criado por thiago.farias
- *
- */
+
 class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
@@ -72,6 +68,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.2.3': $this->instalarV1204();
                 case '1.2.4': $this->instalarV1205();
                 case '1.2.5': $this->instalarV1206();
+                case '1.2.6': $this->instalarV1300();
+
 
                 break;
                 default:
@@ -1609,6 +1607,36 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.2.6');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
+    /* Contêm atualizações da versao 1.3.0 do módulo */
+    protected function instalarV1300()
+    {
+        //Alterar nomeclatura do recurso
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+        $objPenParametroDTO->retStrNome();
+        $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
+        $objPenParametroDTO = $objPenParametroBD->consultar($objPenParametroDTO);
+        if ($objPenParametroDTO) {
+            $objPenParametroDTO->setStrValor(10);
+            $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+            $objPenParametroBD->alterar($objPenParametroDTO);
+        } else {
+            $objPenParametroDTO = new PenParametroDTO();
+            $objPenParametroDTO->setStrNome('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+            $objPenParametroDTO->setStrValor(10);
+            $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+            $objBD->cadastrar($objPenParametroDTO);
+        }
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.3.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

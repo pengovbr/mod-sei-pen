@@ -309,7 +309,7 @@ class PENAgendamentoRN extends InfraRN {
                 }
             }
 
-            LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.");
+            LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.", LogSEI::$INFORMACAO);
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
         }

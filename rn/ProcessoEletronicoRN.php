@@ -1,92 +1,87 @@
 <?php
 
-
 class ProcessoNaoPodeSerDesbloqueadoException extends Exception {}
 
-//@TODOJOIN: VERIFICAR SE NÃO EXISTEM TRY CATCH QUE OCULTAM ERROS. CASO EXISTAM CATCH COM EXEPTION DO PHP, RETIRALOS
-class ProcessoEletronicoRN extends InfraRN {
+class ProcessoEletronicoRN extends InfraRN
+{
+    /* TAREFAS DE EXPEDIÇÃO DE PROCESSOS */
+    //Está definindo o comportamento para a tarefa $TI_PROCESSO_EM_PROCESSAMENTO
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 'PEN_PROCESSO_EXPEDIDO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 'PEN_PROCESSO_RECEBIDO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 'PEN_PROCESSO_CANCELADO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 'PEN_PROCESSO_RECUSADO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
 
-    //const PEN_WEBSERVICE_LOCATION = 'https://desenv-api-pen.intra.planejamento/interoperabilidade/soap/v1_1/';
+    /* NÍVEL DE SIGILO DE PROCESSOS E DOCUMENTOS */
+    public static $STA_SIGILO_PUBLICO = '1';
+    public static $STA_SIGILO_RESTRITO = '2';
+    public static $STA_SIGILO_SIGILOSO = '3';
 
-  /* TAREFAS DE EXPEDIÇÃO DE PROCESSOS */
-  //Está definindo o comportamento para a tarefa $TI_PROCESSO_EM_PROCESSAMENTO
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 'PEN_PROCESSO_EXPEDIDO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 'PEN_PROCESSO_RECEBIDO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 'PEN_PROCESSO_CANCELADO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 'PEN_PROCESSO_RECUSADO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
+    /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
+    public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
+    public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
+    public static $STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO = 3;    // Metadados recebidos pelo destinatário
+    public static $STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO = 4; // Componentes digitais recebidos pelo destinatário
+    public static $STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO = 5;        // Recibo de conclusão do trâmite enviado pelo destinatário do processo
+    public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
+    public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)
+    public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
+    public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
+    public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
 
+    /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
+    public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
+    public static $STA_TIPO_TRAMITE_RECEBIMENTO = 'R'; // Trâmite de RECEBIMENTO de processo externo
 
-  /* NÍVEL DE SIGILO DE PROCESSOS E DOCUMENTOS */
-  public static $STA_SIGILO_PUBLICO = '1';
-  public static $STA_SIGILO_RESTRITO = '2';
-  public static $STA_SIGILO_SIGILOSO = '3';
+    public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
+    public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
+    public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
 
-  /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
-  public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
-  public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
-  public static $STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO = 3;    // Metadados recebidos pelo destinatário
-  public static $STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO = 4; // Componentes digitais recebidos pelo destinatário
-  public static $STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO = 5;        // Recibo de conclusão do trâmite enviado pelo destinatário do processo
-  public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
-  public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)
-  public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
-  public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
-  public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
+    /* OPERAÇÕES DO HISTÓRICO DO PROCESSO */
+    // 02 a 18 estão registrados na tabela rel_tarefa_operacao
+    public static $OP_OPERACAO_REGISTRO = "01";
 
-  /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
-  public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
-  public static $STA_TIPO_TRAMITE_RECEBIMENTO = 'R'; // Trâmite de RECEBIMENTO de processo externo
-
-  public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
-  public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
-  public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
-
-  /* OPERAÇÕES DO HISTÓRICO DO PROCESSO */
-  // 02 a 18 estão registrados na tabela rel_tarefa_operacao
-  public static $OP_OPERACAO_REGISTRO = "01";
-
-  // 10 minutos de timeout para requisições via webservice
-  const WS_CONNECTION_TIMEOUT = 600;
+    // 10 minutos de timeout para requisições via webservice
+    const WS_CONNECTION_TIMEOUT = 600;
 
 
-  const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
+    const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
-  /**
-   * Motivo para recusar de tramite de componente digital pelo formato
-   */
-  const MTV_RCSR_TRAM_CD_FORMATO = '01';
-  /**
-   * Motivo para recusar de tramite de componente digital que esta corrompido
-   */
-  const MTV_RCSR_TRAM_CD_CORROMPIDO = '02';
-  /**
-   * Motivo para recusar de tramite de componente digital que não foi enviado
-   */
-  const MTV_RCSR_TRAM_CD_FALTA = '03';
+    /**
+     * Motivo para recusar de tramite de componente digital pelo formato
+     */
+    const MTV_RCSR_TRAM_CD_FORMATO = '01';
+    /**
+     * Motivo para recusar de tramite de componente digital que esta corrompido
+     */
+    const MTV_RCSR_TRAM_CD_CORROMPIDO = '02';
+    /**
+     * Motivo para recusar de tramite de componente digital que não foi enviado
+     */
+    const MTV_RCSR_TRAM_CD_FALTA = '03';
 
-  /**
-   * Espécie documentoal não mapeada
-   */
-  const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
+    /**
+     * Espécie documentoal não mapeada
+     */
+    const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
 
-  /**
-   * Motivo para recusar de tramite de componente digital
-   */
-  const MTV_RCSR_TRAM_CD_OUTROU = '99';
+    /**
+     * Motivo para recusar de tramite de componente digital
+     */
+    const MTV_RCSR_TRAM_CD_OUTROU = '99';
 
-  public static $MOTIVOS_RECUSA = array(
-      "01"  => "Formato de componente digital não suportado",
-      "02" => "Componente digital corrompido",
-      "03" => "Falta de componentes digitais",
-      "04" => "Espécie documental não mapeada no destinatário",
-      "99" => "Outro"
-  );
+    public static $MOTIVOS_RECUSA = array(
+        "01"  => "Formato de componente digital não suportado",
+        "02" => "Componente digital corrompido",
+        "03" => "Falta de componentes digitais",
+        "04" => "Espécie documental não mapeada no destinatário",
+        "99" => "Outro"
+    );
 
-  private $strWSDL = null;
-  private $objPenWs = null;
-  private $options = null;
+    private $strWSDL = null;
+    private $objPenWs = null;
+    private $options = null;
 
   public function __construct() {
     $objPenParametroRN = new PenParametroRN();
@@ -799,11 +794,9 @@ class ProcessoEletronicoRN extends InfraRN {
   {
     //Monta dados dos componentes digitais
     $arrObjComponenteDigitalDTO = array();
-    if(!is_array($parObjProcesso->documento)) {
-      $parObjProcesso->documento = array($parObjProcesso->documento);
-    }
+    $arrObjDocumento = self::obterDocumentosProtocolo($parObjProcesso);
 
-    foreach ($parObjProcesso->documento as $objDocumento) {
+    foreach ($arrObjDocumento as $objDocumento) {
       $objComponenteDigitalDTO = new ComponenteDigitalDTO();
       $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjProcesso->idProcedimentoSEI); //TODO: Error utilizar idProcedimentoSEI devido processos apensados
@@ -817,7 +810,7 @@ class ProcessoEletronicoRN extends InfraRN {
         throw new InfraException("Erro processando componentes digitais do processo " . $parObjProcesso->protocolo . "\n Somente é permitido o recebimento de documentos com apenas um Componente Digital.");
       }
 
-      $objComponenteDigital = $objDocumento->componenteDigital;
+      $objComponenteDigital = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital[0] : $objDocumento->componenteDigital;
       $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
 
       if(isset($objDocumento->especie)){
@@ -826,23 +819,20 @@ class ProcessoEletronicoRN extends InfraRN {
       }
 
       $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
-
       $objComponenteDigitalDTO->setStrHashConteudo($strHashConteudo);
       $objComponenteDigitalDTO->setStrAlgoritmoHash(self::ALGORITMO_HASH_DOCUMENTO);
       $objComponenteDigitalDTO->setStrTipoConteudo($objComponenteDigital->tipoDeConteudo);
       $objComponenteDigitalDTO->setStrMimeType($objComponenteDigital->mimeType);
       $objComponenteDigitalDTO->setStrDadosComplementares($objComponenteDigital->dadosComplementaresDoTipoDeArquivo);
 
-      //Registrar componente digital necessita ser enviado pelo trâmite espefífico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui
+      //Registrar componente digital necessita ser enviado pelo trâmite espefífico
       if(isset($parObjComponentesDigitaisSolicitados)){
         $arrObjItensSolicitados = is_array($parObjComponentesDigitaisSolicitados->processo) ? $parObjComponentesDigitaisSolicitados->processo : array($parObjComponentesDigitaisSolicitados->processo);
-
         foreach ($arrObjItensSolicitados as $objItemSolicitado) {
             if(!is_null($objItemSolicitado)){
                 $objItemSolicitado->hash = is_array($objItemSolicitado->hash) ? $objItemSolicitado->hash : array($objItemSolicitado->hash);
-
                 if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash) && !$objDocumento->retirado) {
-                  $objComponenteDigitalDTO->setStrSinEnviar("S");
+                    $objComponenteDigitalDTO->setStrSinEnviar("S");
                 }
             }
         }
@@ -850,7 +840,6 @@ class ProcessoEletronicoRN extends InfraRN {
 
       //TODO: Avaliar dados do tamanho do documento em bytes salvo na base de dados
       $objComponenteDigitalDTO->setNumTamanho($objComponenteDigital->tamanhoEmBytes);
-
       $objComponenteDigitalDTO->setNumIdAnexo($objComponenteDigital->idAnexo);
       $arrObjComponenteDigitalDTO[] = $objComponenteDigitalDTO;
     }
@@ -867,26 +856,31 @@ class ProcessoEletronicoRN extends InfraRN {
   }
 
 
-  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo)
-  {
-    try
+    public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente=null)
     {
-      $parametros = new stdClass();
-      $parametros->parametrosParaRecebimentoDeComponenteDigital = new stdClass();
-      $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital = new stdClass();
-      $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->IDT = $parNumIdentificacaoTramite;
-      $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->protocolo = $parStrProtocolo;
-      $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->hashDoComponenteDigital = $parStrHashComponenteDigital;
+        try
+        {
+            $parametros = new stdClass();
+            $parametros->parametrosParaRecebimentoDeComponenteDigital = new stdClass();
+            $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital = new stdClass();
+            $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->IDT = $parNumIdentificacaoTramite;
+            $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->protocolo = $parStrProtocolo;
+            $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->hashDoComponenteDigital = $parStrHashComponenteDigital;
 
-      return $this->getObjPenWs()->receberComponenteDigital($parametros);
+            //Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
+            if(!is_null($parObjParteComponente)){
+                $parametros->parametrosParaRecebimentoDeComponenteDigital->parte = $parObjParteComponente;
+            }
 
-    } catch (\SoapFault $fault) {
-        $mensagem = $this->tratarFalhaWebService($fault);
-        throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-    } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
+            return $this->getObjPenWs()->receberComponenteDigital($parametros);
+
+        } catch (\SoapFault $fault) {
+            $mensagem = $this->tratarFalhaWebService($fault);
+            throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+        } catch (\Exception $e) {
+            throw new InfraException("Error Processing Request", $e);
+        }
     }
-  }
 
   public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
   {
@@ -1434,6 +1428,39 @@ class ProcessoEletronicoRN extends InfraRN {
         }
     }
 
+    public static function obterDocumentosProtocolo($parObjProtocolo)
+    {
+        $arrObjDocumento = array();
+        if(isset($parObjProtocolo->documento)){
+            $arrObjDocumento = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
+        } else {
+            //Quando se tratar de um Documento Avulso, a ordem será sempre 1
+            $parObjProtocolo->ordem = 1;
+            $arrObjDocumento = array($parObjProtocolo);
+        }
+        return $arrObjDocumento;
+    }
+
+
+
+    /**
+     * Método responsável por obter os componentes digitais do documento
+     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+     * @param $parObjDocumento
+     * @return array
+     */
+    public static function obterComponentesDigitaisDocumento($parObjDocumento)
+    {
+        $arrObjComponenteDigital = array();
+        if(isset($parObjDocumento->componenteDigital)){
+            $arrObjComponenteDigital = is_array($parObjDocumento->componenteDigital) ? $parObjDocumento->componenteDigital : array($parObjDocumento->componenteDigital);
+        }
+
+        return $arrObjComponenteDigital;
+    }
+
+
+
     /**
      * Busca a unidade ao qual o processo foi anteriormente expedido.
      * Caso seja o primeiro trâmite, considera a unidade atual
@@ -1459,6 +1486,41 @@ class ProcessoEletronicoRN extends InfraRN {
         }
 
         return $numIdUnidade;
+    }
+
+    /**
+     * Método responsável por realizar o envio da parte de um componente digital
+     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function enviarParteDeComponenteDigital($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->enviarParteDeComponenteDigital($parametros);
+        } catch (\Exception $e) {
+            $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e);
+        }
+    }
+
+    /**
+     * Método responsável por sinalizar o término do envio das partes de um componente digital
+     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+     * @param $parametros
+     * @return mixed
+     * @throws InfraException
+     */
+    public function sinalizarTerminoDeEnvioDasPartesDoComponente($parametros)
+    {
+        try {
+            return $this->getObjPenWs()->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
+        } catch (\Exception $e) {
+            $mensagem = "Falha em sinalizar o término de envio das partes do componente digital";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
     }
 }
 
