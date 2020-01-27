@@ -1,17 +1,14 @@
 # Manual do Módulo ConectaGov
 
-O módulo **conectagov** PEN é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. 
-
-O projeto ConectaGov PEN tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de simplificar a troca de documentos oficiais entre instituições de forma rápida e segura. 
+O módulo **conectagov** PEN é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Esse projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de simplificar a troca de documentos oficiais de forma rápida e segura. 
 
 A utilização deste módulo adicionará novas funcionalidades ao SEI, permitindo, entre outros:
- - Enviar processos administrativos para instituições externas
- - Receber processos administrativos de outros órgãos
+ - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
 Para maiores informações sobre o ConectaGov e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
 
-Este manual está estruturado nas seguintes seções:
+Este documento está estruturado nas seguintes seções:
 
 1. **[Instalação](#instalação)**:
 Procedimentos de instalação do módulo nos servidores de aplicação e atualização do banco de dados.
@@ -33,8 +30,7 @@ Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módul
  - Gearman instalado;
  - Usuário de acesso ao banco de dados do SEI e SIP com permissões para criar novas estruturas no banco de dados.
   
-Para iniciar os procedimentos de configuração do módulo, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Os testes devem ser feitos primeiro em um ambiente de desenvolvimento/homologação. 
-Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
+Para iniciar os procedimentos de configuração, será necessário registrar no **ConectaGov** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Lembrando que os testes devem ser feitos primeiro em um ambiente de desenvolvimento/homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
  - Desenvolvimento [http://pen-portal.trafficmanager.net/solicitarCadastroComite](http://pen-portal.trafficmanager.net/solicitarCadastroComite "DESENVOLVIMENTO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
  - Homologação [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
@@ -44,16 +40,16 @@ Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
 ### Procedimentos
 
-##### 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema.
+#### 1. Fazer backup dos bancos de dados do SEI, SIP e dos arquivos de configuração do sistema.
 
 ---
 
-##### 2.  Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/
+#### 2.  Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/
 Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura.
 
 ---
 
-##### 3.  Configurar módulo ConectaGov no arquivo de configuração do SEI
+#### 3.  Configurar módulo no arquivo de configuração do SEI
 
 Editar o arquivo **sei/config/ConfiguracaoSEI.php**, tomando o cuidado de usar editor que não altere o charset ISO 5589-1 do arquivo, para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
 
@@ -72,28 +68,28 @@ Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acim
 ```
 ---
 
-##### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+#### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
 ---
 
-##### 5. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+#### 5. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
 ---
 
-##### 6. Executar o script **sip\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
+#### 6. Executar o script **sip\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
 ```bash
 php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sip/scripts/sip_atualizar_versao_modulo_pen.php
 ```
 
 ---
 
-##### 7. Executar o script **sei_atualizar_versao_modulo_pen.php** para inserção de dados no banco do SEI referente ao módulo.
+#### 7. Executar o script **sei_atualizar_versao_modulo_pen.php** para inserção de dados no banco do SEI referente ao módulo.
 ```bash
 php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_versao_modulo_pen.php
 ```
 
 ---
-##### 8. Mover o arquivo do certificado digital utilizado para integração com o **ConectaGov** para o diretório "sei/config/".
+#### 8. Mover o arquivo do certificado digital utilizado para integração com o **ConectaGov** para o diretório "sei/config/".
     
 Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados\_mod_conectagov** para adicionar estes arquivos.
     
@@ -104,10 +100,10 @@ Para o ambiente de produção, deverá ser utilizado um certificado digital vál
 Maiores informações e solicitações podem ser feitas através do e-mail processo.eletronico@planejamento.gov.br.
 
 ---
-##### 9. Após a instalação do módulo, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de leitura e escrita no banco de dados.
+#### 9. Após a instalação do módulo, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de leitura e escrita no banco de dados.
 
 ---
-##### 10. Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos. 
+#### 10. Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos. 
 
 Por padrão, as funcionalidades (recursos) criados pelo módulo não são atribuídos automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
 
@@ -156,7 +152,7 @@ Recomenda-se que os recursos acima não sejam atribuídos aos perfis básicos do
     
 ---
 
-##### 11. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
+#### 11. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
 
 Os ID's de unidades são gerenciados pela própria instituição no portal do Processo Eletrônico Nacional ( http://conectagov.processoeletronico.gov.br). 
 No credenciamento da instituição, estes valores serão passados pela unidade de TI  do MPDG.
@@ -165,7 +161,7 @@ Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeame
 
 ---
 
-##### 12. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
+#### 12. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
 
 Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição metadados de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
 
@@ -180,7 +176,7 @@ Sugerimos que está unidade seja configurada no mesmo nível hierárquico da uni
 
 ---
 
-##### 13. Configuração de tipo de processo a ser aplicado aos processos recebidos de instituições externas.
+#### 13. Configuração de tipo de processo a ser aplicado aos processos recebidos de instituições externas.
 
 Como o processo de recebimento de novos processos será feito de forma automática pelo módulo de integração, o sistema precisa atribuir um Tipo de Processo padrão para o novo procedimento recebido. Importante lembrar que a criação de um novo tipo de processo não é obrigatório, sendo possível utilizar outro pré-existente. 
 
@@ -202,7 +198,7 @@ Caso a opção for pela criação de um novo tipo de processo específico, segue
 
 ---
 
-##### 14. Configurar os parâmetros do Módulo de Integração Pen
+#### 14. Configurar os parâmetros do Módulo de Integração Pen
 Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo:  
 
 * **Endereço do Web Service:**  
@@ -235,7 +231,7 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 
 ---
 
-##### 15. Instalar o **gearmand** e o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema.
+#### 15. Instalar o **gearmand** e o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema.
 
 Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
 
@@ -260,15 +256,15 @@ echo_supervisord_conf > /etc/supervisor/supervisord.conf
 
 --- 
 
-##### 16. Configuração dos serviços de recebimento de processos no **supervisor** 
+#### 16. Configuração dos serviços de recebimento de processos no **supervisor** 
 
-Neste passo será configurado o serviço de monitoramento de pendências de trâmite do módulo para poder escultar as mensagens do Barramento de Serviços do PEN e processar o recebimento de processos.
+Neste passo será configurado o serviço de monitoramento de pendências de trâmite para escultar as mensagens do Barramento de Serviços do PEN e processar o recebimento de processos.
 
-O módulo utiliza a ferramenta Supervisord para manter a resiliência dos serviços, evitando quedas do serviço ou a não reconexão automática, caso a próprio infraestrutura do Barramento fique indisponível.
+O módulo utiliza a ferramenta **Supervisord** para manter a resiliência dos serviços, evitando quedas ou a não reconexão automática, caso a próprio infraestrutura do Barramento fique indisponível.
 
 Para configurar este serviço, será necessário incluir as configurações do módulo ao arquivo de configuração do Supervisor, localizado em /etc/supervisor/supervisord.conf.
 
-Na chave de configuração _files_ da seção _[include]_, informe o caminho completo para o arquivo supervisord.conf.php, configurações do supervisor preparadas exclusivamente para o módulo. Este arquivo fica localizado na pasta _config_ do módulo.
+Na chave de configuração *files* da seção *[include]*, informe o caminho completo para o arquivo supervisord.conf.php, configurações do supervisor preparadas exclusivamente para o módulo. Este arquivo fica localizado na pasta *config* do módulo.
 
 Exemplo: 
 
@@ -278,11 +274,11 @@ Exemplo:
 files = /opt/sei/web/modulos/pen/config/supervisord.conf.php
 ```
 
-As configurações contidas no arquivo _config/supervisord.conf.php_ devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação a chave de configuração *[user]* que deverá ser configurado com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache)
+As configurações contidas no arquivo *config/supervisord.conf.php* devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação a chave de configuração *[user]*, que deverá ser configurado com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache)
 
 ---
 
-##### 17. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades.
+#### 17. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades.
 
 Esta configuração é recomendada como contingência para garantir que os serviços de integração não serão desativados em caso de indisponibilidade momentânea da infraestrutura do ConectaGov.
 
@@ -304,7 +300,7 @@ crontab -e
 
 --- 
 
-##### 18. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
+#### 18. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
 
 ```bash
 service gearmand start && supervisord
@@ -335,7 +331,7 @@ Esta configuração deve ser feita antes de começar a utilização do módulo.
 **Observação**: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
 ---
-##### 20. Realizar o mapeamento das hipóteses legais do SEI com as definidas no PEN para permitir o trâmite externo de processos e documentos restritos.
+#### 20. Realizar o mapeamento das hipóteses legais do SEI com as definidas no PEN para permitir o trâmite externo de processos e documentos restritos.
 
 **Atenção**: Antes de iniciar esta configuração, será necessário executar manualmente o agendamento **PENAgendamentoRN::atualizarHipotesesLegais** em [**SEI > Infra > Agendamentos**]. Esta tarefa é necessária para atualizar o SEI com a última versão da tabela de hipóteses legais do PEN.
 
@@ -355,47 +351,46 @@ Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-l
 
 Para realizar a atualização do módulo, realize os seguintes procedimentos:
 
-##### 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema
+#### 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema
 
 ---
-##### 2. Baixar a última versão do módulo disponível em https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/tags
+#### 2. Baixar a última versão do módulo disponível em https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/tags
 
 ---
-##### 3. Atualizar software Supervisord para a versão 4.X
+#### 3. Atualizar software Supervisord para a versão 4.X
 
 Os procedimentos de atualização dependente do OS, mas a versão 4 está disponível via gerenciador de pacotes pip do python 3. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html.
 
 Versão 2.X não deve ser mais utilizada.
 
 ---
-##### 4. Atualizar as configurações dos serviços de monitoramento do /etc/supervisord.conf conforme definido no passo 03 do Manual de Instalação do mod-sei-pen, seção "Configuração dos serviços de recebimento de processos no supervisor". https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/blob/master/README.md.
+#### 4. Atualizar as configurações dos serviços de monitoramento do /etc/supervisord.conf conforme definido no passo 03 do Manual de Instalação do mod-sei-pen, seção "Configuração dos serviços de recebimento de processos no supervisor". https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/blob/master/README.md.
 
 ---
-##### 5. Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura
+#### 5. Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura
 
 ---
-##### 6. Mover o arquivo de instalação do módulo no SEI sei_atualizar_versao_modulo_pen.php para a pasta sei/scripts
-Lembre-se de mover, e não copiar, por questões de segurança e padronização;
-
-
----
-##### 7. Mover o arquivo de instalação do módulo no SIP sip_atualizar_versao_modulo_pen.php para a pasta sip/scripts
+#### 6. Mover o arquivo de instalação do módulo no SEI sei_atualizar_versao_modulo_pen.php para a pasta sei/scripts
 Lembre-se de mover, e não copiar, por questões de segurança e padronização;
 
 ---
-##### 8. Executar o script sip_atualizar_versao_modulo_pen.php para atualizar o banco de dados do SIP para o funcionamento do módulo
+#### 7. Mover o arquivo de instalação do módulo no SIP sip_atualizar_versao_modulo_pen.php para a pasta sip/scripts
+Lembre-se de mover, e não copiar, por questões de segurança e padronização;
+
+---
+#### 8. Executar o script sip_atualizar_versao_modulo_pen.php para atualizar o banco de dados do SIP para o funcionamento do módulo
 ```bash
 php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sip/scripts/sip_atualizar_versao_modulo_pen.php
 ```
 
 ---
-##### 9. Executar o script sei_atualizar_versao_modulo_pen.php para inserção de dados no banco do SEI referente ao módulo
+#### 9. Executar o script sei_atualizar_versao_modulo_pen.php para inserção de dados no banco do SEI referente ao módulo
 ```bash
 php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_versao_modulo_pen.php
 ```
 
 ---
-##### 10. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades. (Manual de Instalação do módulo) 
+#### 10. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades. (Manual de Instalação do módulo) 
 Os procedimento descritos abaixo deverão ser executados no mesmo servidor em que está instalado o supervisor e o gearman (passo 3 do Manual de Instalação do módulo).
 ​
 Mova o script verificar-servicos.sh, localizado na raiz do diretório do módulo, para a pasta de sei/bin do SEI.
@@ -413,7 +408,7 @@ crontab -e
 ```
 
 ---
-##### 11. Reiniciar serviços de monitoramento de pendências de trâmite Gearman e Supervisor:
+#### 11. Reiniciar serviços de monitoramento de pendências de trâmite Gearman e Supervisor:
 ```bash
 service gearmand restart && service supervisord restart
 ```
@@ -529,6 +524,8 @@ O destinatário pode realizar a consulta ao recibo de trâmite, acessando o íco
 ![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_conclusao_tramite_destinatario.png)
 
 ## Suporte
+
+Para maiores informações e suporte ao PEN, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.planejamento.gov.br
 
 ## Problemas Conhecidos
 
