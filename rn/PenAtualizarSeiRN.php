@@ -71,6 +71,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.2.2': $this->instalarV1203();
                 case '1.2.3': $this->instalarV1204();
                 case '1.2.4': $this->instalarV1205();
+                case '1.2.5': $this->instalarV1206();
+                case '1.2.6': $this->instalarV1300();
+                case '1.3.0': $this->instalarV1400();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1588,6 +1591,57 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
+    /* Contêm atualizações da versao 1.2.5 do módulo */
+    protected function instalarV1205()
+    {
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.2.5');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contêm atualizações da versao 1.2.6 do módulo */
+    protected function instalarV1206()
+    {
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.2.6');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /* Contêm atualizações da versao 1.3.0 do módulo */
+    protected function instalarV1300()
+    {
+        //Alterar nomeclatura do recurso
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+        $objPenParametroDTO->retStrNome();
+        $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
+        $objPenParametroDTO = $objPenParametroBD->consultar($objPenParametroDTO);
+        if ($objPenParametroDTO) {
+            $objPenParametroDTO->setStrValor(10);
+            $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+            $objPenParametroBD->alterar($objPenParametroDTO);
+        } else {
+            $objPenParametroDTO = new PenParametroDTO();
+            $objPenParametroDTO->setStrNome('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+            $objPenParametroDTO->setStrValor(10);
+            $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+            $objBD->cadastrar($objPenParametroDTO);
+        }
+
+        //altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.3.0');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
     /**
      * Método Responsavel por realizar as atualizações na Base de Dados referentes as novas implementações
      * Receber/Enviar Documento Avulso
@@ -1595,7 +1649,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
      * @author Josinaldo Júnior <josenaldo.pedro@gmail.com>
      * @throws InfraException
      */
-    protected function instalarV1205()
+    protected function instalarV1400()
     {
         $objBD = new GenericoBD(BancoSEI::getInstance());
         $objDTO = new TarefaDTO();
@@ -1665,7 +1719,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->setStrValor('1.2.5');
+        $objInfraParametroDTO->setStrValor('1.4.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

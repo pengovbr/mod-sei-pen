@@ -57,7 +57,7 @@ class ReceberComponenteDigitalRN extends InfraRN
 
     /**
      * Este método:
-     *  Seta os anexos como recebidos
+     *  Atribui os anexos como recebidos
      *  Chama o método que faz a compactação dos anexos, para caso de mais de um componente
      *
      * @param $parNumIdDocumento
