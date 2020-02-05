@@ -93,7 +93,7 @@ php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_vers
     
 Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados\_mod_conectagov** para adicionar estes arquivos.
     
-Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no pacote de instalação disponibilizado pela equipe técnica do Ministério do Planejamento, Desenvolvimento e Gestão - MPDG e são disponibilizados no ato do credenciamento da instituição no PEN. 
+Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no pacote de instalação disponibilizado pela equipe técnica do Ministério da Economia - ME e são disponibilizados no ato do credenciamento da instituição no PEN. 
 
 Para o ambiente de produção, deverá ser utilizado um certificado digital válido gerado por uma Autoridade de Registro - AR confiável (Exemplo: ICP-Brasil, Certisign, Verisign, etc.).
 
@@ -105,7 +105,7 @@ Maiores informações e solicitações podem ser feitas através do e-mail proce
 ---
 #### 10. Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos. 
 
-Por padrão, as funcionalidades (recursos) criados pelo módulo não são atribuídos automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
+Por padrão, as funcionalidades básicas criadas pelo módulo não são atribuídas automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
 
 Sugerimos que seja criado um novo perfil de usuário que receberá as permissões incluídas pelo módulo (pen_*). Este novo perfil deverá ser atribuído aos usuários que poderão realizar o trâmite externo de processos para outras instituições. 
 
@@ -123,31 +123,22 @@ Recomenda-se que os recursos acima não sejam atribuídos aos perfis básicos do
     
 ---
 
-#### 11. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
-
-Os ID's de unidades são gerenciados pela própria instituição no portal do Processo Eletrônico Nacional ( http://conectagov.processoeletronico.gov.br). 
-No credenciamento da instituição, estes valores serão passados pela unidade de TI  do MPDG.
-
-Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Unidades]** e vincule as unidades administrativas com seus respectivos identificadores registrados no portal do Processo Eletrônico Nacional.
-
----
-
-#### 12. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
+#### 11. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
 
 Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição metadados de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
 
-#####    12.1. Acessar o SIP e criar uma nova unidade administrativa com as seguintes configurações:
+#####    11.1. Acessar o SIP e criar uma nova unidade administrativa com as seguintes configurações:
     
     Sigla: EXTERNO
     Nome: Unidade Externa
 
-#####    12.2. Configurar a nova unidade na hierarquia do SEI, através da funcionalidade **[SIP > Hierarquias > Montar]**
+#####    11.2. Configurar a nova unidade na hierarquia do SEI, através da funcionalidade **[SIP > Hierarquias > Montar]**
 
 Sugerimos que está unidade seja configurada no mesmo nível hierárquico da unidade de teste padrão existente no SEI. Para saber qual é a unidade de testes, basta verificar o parâmetro do SEI chamado **SEI_UNIDADE_TESTE**
 
 ---
 
-#### 13. Configuração de tipo de processo a ser aplicado aos processos recebidos de instituições externas.
+#### 12. Configuração de tipo de processo a ser aplicado aos processos recebidos de instituições externas.
 
 Como o processo de recebimento de novos processos será feito de forma automática pelo módulo de integração, o sistema precisa atribuir um Tipo de Processo padrão para o novo procedimento recebido. Importante lembrar que a criação de um novo tipo de processo não é obrigatório, sendo possível utilizar outro pré-existente. 
 
@@ -156,18 +147,15 @@ Caso a opção for pela criação de um novo tipo de processo específico, segue
     Nome: Processo Recebido Externamente (a classificar) 
     Descrição: Processos recebidos de outras instituições 
     // O assunto deve ser definido juntamente com a área de documentação
-    Sugestão de Assuntos: 019.01 - INFORMAÇÕES SOBRE O ÓRGÃO
-    Restringir aos Órgãos: [vazio] 
-    Restringir às Unidades: [vazio] 
+    Sugestão de Assuntos: a classificar
     Níveis de Acesso Permitidos: Restrito e Público 
     Nível de Acesso Sugerido: Público 
-    Processo único no órgão por usuário: Não
-    Interessado: Não 
+    Processo único no órgão por usuário interessado: Não
     Interno do Sistema: Sim
 
 ---
 
-#### 14. Configurar os parâmetros do Módulo de Integração Pen
+#### 13. Configurar os parâmetros do Módulo de Integração Pen
 Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo:  
 
 * **Endereço do Web Service:**  
@@ -182,7 +170,7 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
     - Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
 * **ID do Repositório de Estruturas:**   
 *ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*  
-    - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo - SIORG)*  
+    - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo Federal)*  
 * **Localização do Certificado Digital:**  
     - *Localização do certificado digital o órgão (arquivo do passo 8)*  
 * **Número Máximo de Tentativas de Recebimento:**  
@@ -193,10 +181,19 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
     - *Senha do certificado digital*  
 * **Tipo de Processo Externo:**  
 *Id do tipo de documento externo. *  
-    - *Configurar com o ID do Tipo de Processo Externo configurado no passo 15*  
+    - *Configurar com o ID do Tipo de Processo Externo configurado no passo 12*  
 * **Unidade Geradora de Processo e Documento Recebido:**  
 *Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão.*   
-    - *Configurar com o ID da Unidade criada no passo 14*
+    - *Configurar com o ID da Unidade criada no passo 11*
+
+---
+
+#### 14. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
+
+Os ID's de unidades são gerenciados pela própria instituição no portal do Processo Eletrônico Nacional ( http://conectagov.processoeletronico.gov.br). 
+No credenciamento da instituição, estes valores serão passados pela unidade de TI  do MPDG.
+
+Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Unidades]** e vincule as unidades administrativas com seus respectivos identificadores registrados no portal do Processo Eletrônico Nacional.
 
 ---
 
@@ -208,6 +205,8 @@ Estes dois componentes são utilizados para gerenciar a fila de recebimento de n
 **Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
 
 ##### Exemplo de instalação do German e Supervisor no CentOS:
+Os pacotes abaixo estão presentes em todas as distribuições do Linux
+
 ```bash
 # pre-requisito
 yum install epel-release && yum update
@@ -216,16 +215,15 @@ yum install epel-release && yum update
 yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 # instalação do supervisor
-yum install python3*
+yum install python3
 python3 -m ensurepip
-pip3 install supervisor==4.*
+python3 -m pip install supervisor==4.*
 mkdir -p /etc/supervisor/ /var/log/supervisor/
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
 
 ##### Configuração da inicialização automática do Supervisord no Linux
-A inicialização automática do Supervisor não é configurada automaticamente durante sua instalação, portanto, é necessário configurar um script de inicialização para o serviço. No repositório oficial do projeto existe uma exemplos de scripts de inicialização do Supervisor específico para cada distribuição Linux. Estes script podem ser encontrados no endereço: https://github.com/Supervisor/initscripts
-
+A inicialização automática do Supervisor não é configurada durante sua instalação, portanto, é necessário configurar um script de inicialização para o serviço. No repositório oficial do projeto existe uma exemplos de scripts de inicialização do Supervisor específico para cada distribuição Linux. Estes script podem ser encontrados no endereço: https://github.com/Supervisor/initscripts
 
 --- 
 
@@ -324,7 +322,7 @@ Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-l
 
 Para realizar a atualização do módulo, realize os seguintes procedimentos:
 
-#### 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de configuração do sistema
+#### 1. Fazer backup dos banco de dados do SEI e SIP e dos arquivos de *configuração do sistema
 
 ---
 #### 2. Baixar a última versão do módulo disponível em https://softwarepublico.gov.br/gitlab/sei/mod-sei-pen/tags
