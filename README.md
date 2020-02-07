@@ -215,7 +215,7 @@ yum install epel-release && yum update
 yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 # instalação do supervisor
-yum install python3
+yum install python34
 python3 -m ensurepip
 python3 -m pip install supervisor==4.*
 mkdir -p /etc/supervisor/ /var/log/supervisor/

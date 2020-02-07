@@ -202,7 +202,10 @@ $objPaginaSEI->montarStyle();
 #imgLupaUnidades {position:absolute;left:52%;top:48%;}
 .alinhamentoBotaoImput{position:absolute;left:0%;top:48%;width:85%;};
 #hdnIdUnidade2 {float: right;}
-#imgPesquisaAvancada {vertical-align: middle;}
+#imgPesquisaAvancada {
+    vertical-align: middle;
+    margin-left: 10px;
+}
 
 #lblProcedimentosApensados {position:absolute;left:0%;top:10%;}
 #txtProcedimentoApensado {position:absolute;left:0%;top:25%;width:50%;border:.1em solid #666;}
@@ -236,9 +239,7 @@ function inicializar() {
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
-    //objAutoCompletarEstrutura.tamanhoMinimo = 3;
     objAutoCompletarEstrutura.limparCampo = false;
-    //objAutoCompletarEstrutura.mostrarImagemVerificado = true;
     objAutoCompletarEstrutura.tempoAviso = 10000000;
 
     objAutoCompletarEstrutura.prepararExecucao = function(){
@@ -570,14 +571,14 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	<div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
             <div class="alinhamentoBotaoImput">
-                <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
-                <button id="hdnIdUnidade2" type="button" class="infraText">Pesquisar</button>
-                <img src="/infra_css/imagens/lupa.gif" alt="Pesquisa avançada" title="Pesquisa avançada" class="infraImg" id="imgPesquisaAvancada" >
+                <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
+                    placeholder="Digite o nome/sigla da unidade e precione ENTER para iniciar a pesquisa rápida"
+                    value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                <button id="hdnIdUnidade2" type="button" class="infraText">Consultar</button>
+                <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
             </div>
 
         <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" />
-        <?php /* ?><img id="imgLupaUnidades" src="/infra_css/imagens/lupa.gif" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" /><?php */ ?>
-
 	</div>
 
 	<div id="divProcedimentosApensados" class="infraAreaDados" style="height: 12em; display: none; ">

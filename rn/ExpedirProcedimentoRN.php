@@ -1262,7 +1262,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-            if($hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), true, true);
             }
 
@@ -1758,7 +1758,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
         $objComponenteDigitalDTO->setNumIdTramite($numIdTramite);
         $objComponenteDigitalDTO->setStrSinEnviar("S");
-        $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC); //TODO-Ref: Ordenar por dois campos
         $objComponenteDigitalDTO->retDblIdDocumento();
         $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
         $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
