@@ -572,7 +572,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
             <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
-                    placeholder="Digite o nome/sigla da unidade e precione ENTER para iniciar a pesquisa rápida"
+                    placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
                     value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
                 <button id="hdnIdUnidade2" type="button" class="infraText">Consultar</button>
                 <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
