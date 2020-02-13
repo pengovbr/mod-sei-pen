@@ -215,9 +215,9 @@ yum install epel-release && yum update
 yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
 
 # instalação do supervisor
-yum install python34
-python3 -m ensurepip
-python3 -m pip install supervisor==4.*
+yum install python36
+python36 -m ensurepip
+python36 -m pip install supervisor==4.*
 mkdir -p /etc/supervisor/ /var/log/supervisor/
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
@@ -241,7 +241,6 @@ Exemplo:
 
 ```ini
 [include]
-;files = relative/directory/*.ini
 files = /opt/sei/web/modulos/pen/config/supervisord.conf.php
 ```
 
