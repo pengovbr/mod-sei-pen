@@ -291,12 +291,8 @@ class ReceberProcedimentoRN extends InfraRN
     */
     private function listarHashDosComponentesMetadado($parObjProtocolo)
     {
-        if(!isset($parObjProtocolo->documento)){
-            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
-        }
-
         $arrHashsComponentesDigitais = array();
-        $arrObjDocumento = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
+        $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
         foreach($arrObjDocumento as $objDocumento){
 
             //Desconsidera os componendes digitais de documentos cancelados
@@ -429,9 +425,6 @@ class ReceberProcedimentoRN extends InfraRN
                 throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
             }
         }
-
-        $objPenParametroRN = new PenParametroRN();
-        $numTamDocExterno = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
         foreach($arrObjDocumentos as $objDocumento) {
 
@@ -1063,13 +1056,9 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('Unidade responsável pelo documento não informada.');
         }
 
-        if(!isset($parObjProtocolo->documento)) {
-            throw new InfraException('Lista de documentos do processo não informada.');
-        }
-
         $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
         if(!isset($arrObjDocumentos) || count($arrObjDocumentos) == 0) {
-            throw new InfraException('Lista de documentos n<E3>o informada.');
+            throw new InfraException('Lista de documentos do processo não informada.');
         }
 
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
@@ -1203,9 +1192,10 @@ class ReceberProcedimentoRN extends InfraRN
             $objProtocoloDTO->setArrObjParticipanteDTO(array());
 
             //TODO: Analisar se o modelo de dados do PEN possui destinatários específicos para os documentos
-            //caso não possua, analisar o repasse de tais informações via parãmetros adicionais
+            //caso não possua, analisar o repasse de tais informações via parâmetros adicionais
             $objObservacaoDTO  = new ObservacaoDTO();
-            $objObservacaoDTO->setStrDescricao("Número SEI do Documento na Origem: ".$objDocumento->produtor->numeroDeIdentificacao);
+            $strNumeroDocumentoOrigem = isset($objDocumento->protocolo) ? $objDocumento->protocolo : $objDocumento->produtor->numeroDeIdentificacao;
+            $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
             $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
 
             $bolReabriuAutomaticamente = false;
@@ -1858,13 +1848,13 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
 
-    private function sincronizarRecebimentoProcessos($parStrNumeroRegistro, $parNumIdentificacaoTramite)
+    private function sincronizarRecebimentoProcessos($parStrNumeroRegistro, $parNumIdentificacaoTramite, $numIdTarefa)
     {
         $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
         $objProcedimentoAndamentoDTO->retDblIdAndamento();
         $objProcedimentoAndamentoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
         $objProcedimentoAndamentoDTO->setDblIdTramite($parNumIdentificacaoTramite);
-        $objProcedimentoAndamentoDTO->setNumTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+        $objProcedimentoAndamentoDTO->setNumTarefa($numIdTarefa);
         $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
 
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());

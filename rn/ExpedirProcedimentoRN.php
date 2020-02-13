@@ -1018,7 +1018,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $arrObjMetaDocumentosTramiteAnterior = [];
 
                 //Obtenção de lista de documentos do processo
-                $arrObjMetaDocumentosTramiteAnterior = $parObjMetadadosTramiteAnterior->processo->documento;
+                $objProcesso = $parObjMetadadosTramiteAnterior->processo;
+                $objDocumento = $parObjMetadadosTramiteAnterior->documento;
+                $objProtocolo = isset($objProcesso) ? $objProcesso : $objDocumento;
+
+                $arrObjMetaDocumentosTramiteAnterior = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
                 if(isset($arrObjMetaDocumentosTramiteAnterior) && !is_array($arrObjMetaDocumentosTramiteAnterior)){
                     $arrObjMetaDocumentosTramiteAnterior = array($arrObjMetaDocumentosTramiteAnterior);
                 }
