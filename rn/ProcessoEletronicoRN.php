@@ -112,8 +112,7 @@ class ProcessoEletronicoRN extends InfraRN
             'soap_version' => SOAP_1_1
             , 'local_cert' => $this->strLocalCert
             , 'passphrase' => $this->strLocalCertPassword
-            , 'resolve_wsdl_remote_includes' => false
-            , 'cache_wsdl'=> WSDL_CACHE_NONE
+            , 'resolve_wsdl_remote_includes' => true
             , 'connection_timeout' => self::WS_CONNECTION_TIMEOUT
             , CURLOPT_TIMEOUT => self::WS_CONNECTION_TIMEOUT
             , CURLOPT_CONNECTTIMEOUT => self::WS_CONNECTION_TIMEOUT
