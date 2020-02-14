@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export PATH=/usr/bin:/sbin:/bin:/usr/sbin
+export PATH=/usr/bin:/sbin:/bin:/usr/sbin:/usr/local/bin
 
 echo "[$(date +"%Y-%m-%d %T")] Iniciando verificação dos serviços do Gearman e Supervisor... ";
 GEARMAN=$(ls /etc/init.d | grep -owih gearman.*)
