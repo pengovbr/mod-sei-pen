@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Script para atualização do sistema SEI.
  *
@@ -8,14 +9,10 @@
  * Copyright (c) 1997-2010 The PHP Group
  * Zend Engine v2.3.0, Copyright (c) 1998-2010 Zend Technologies
  *
- * @author Join Tecnologia
  */
 
 try {
-
     require_once dirname(__FILE__).'/../web/SEI.php';
-
-
     $objAtualizarRN = new PenAtualizarSeiRN();
     $objAtualizarRN->atualizarVersao();
 
@@ -39,3 +36,4 @@ catch(Exception $e) {
 }
 
 print PHP_EOL;
+

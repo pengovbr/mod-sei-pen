@@ -231,8 +231,6 @@ class EnviarReciboTramiteRN extends InfraRN
         return $arrObjComponenteDigitalDTO;
     }
 
-    /**
-     */
     private function listarComponenteDigitalDTO($parNumIdTramite) {
 
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -243,8 +241,7 @@ class EnviarReciboTramiteRN extends InfraRN
         $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
 
         if (empty($arrObjComponenteDigitalDTO)) {
-
-            //$arrObjComponenteDigitalDTO = $this->recarregarComponenteDigitalDTO($parNumIdTramite);
+            $arrObjComponenteDigitalDTO = $this->recarregarComponenteDigitalDTO($parNumIdTramite);
         }
 
         return $arrObjComponenteDigitalDTO;

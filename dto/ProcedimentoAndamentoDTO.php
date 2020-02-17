@@ -38,7 +38,7 @@ class ProcedimentoAndamentoDTO extends InfraDTO {
         $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OPCIONAL);
     }
 
-    public static function criarAndamento($strMensagem = 'Não informado', $strSituacao = 'N') {
+    public static function criarAndamento($strMensagem='Não informado', $strSituacao='N') {
         $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
         $objProcedimentoAndamentoDTO->setStrSituacao($strSituacao);
         $objProcedimentoAndamentoDTO->setStrMensagem($strMensagem);

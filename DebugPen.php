@@ -22,15 +22,15 @@ class DebugPen extends InfraDebug {
         return self::$instance;
     }
 
-    public function setStrDebugTag($parStrDebugTag=null){
+    public function setStrDebugTag($parStrDebugTag=null)
+    {
         $this->strDebugTag = $parStrDebugTag;
     }
 
-    public function gravar($str, $numIdentacao=0, $bolLogTempoProcessamento=true) {
-
+    public function gravar($str, $numIdentacao=0, $bolLogTempoProcessamento=true)
+    {
         $strDataLog = date("d/m/Y H:i:s");
         $strTag = (!is_null($this->strDebugTag)) ? "[" . $this->strDebugTag . "]": "";
-
         $strLog = sprintf("[%s] %s %s %s", $strDataLog, $strTag, str_repeat(" ", $numIdentacao * 4), $str);
 
         //Registro de tempo de processamento desde último log
@@ -41,7 +41,7 @@ class DebugPen extends InfraDebug {
                 $this->numTempoUltimoLog = $numTempoFinal;
             } else {
                 $numTempoProcessamento = round($numTempoFinal - $this->numTempoUltimoLog, 2);
-                $strLog .= " [tempo: +{$numTempoProcessamento}s]";
+                $strLog .= " [+{$numTempoProcessamento}s]";
                 $this->numTempoUltimoLog = $numTempoFinal;
             }
         }

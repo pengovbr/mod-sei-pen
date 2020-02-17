@@ -22,6 +22,9 @@ try {
 
     $objPenParametroDTO = new PenParametroDTO();
     $objPenParametroDTO->retTodos();
+    $objPenParametroDTO->setNumSequencia(null, InfraDTO::$OPER_DIFERENTE);
+    $objPenParametroDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
     $objPenParametroRN = new PenParametroRN();
     $retParametros = $objPenParametroRN->listar($objPenParametroDTO);
 
@@ -118,15 +121,13 @@ $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <style>
-    .input-field-input {
-        width: 35%;
-        margin-bottom: 8px;
-        margin-top: 2px;
-    }
+
     .input-field {
-        margin-bottom: 8px;
+        width: 35%;
+        margin-bottom: 15px;
         margin-top: 2px;
     }
+
 </style>
 
 <form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'_salvar&acao_origem='.$_GET['acao'])?>">
@@ -136,11 +137,11 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
         //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
-            //Constroi o label
+            //Constrói o label
             ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label><br> <?php
         }
 
-        //Constroi o campo de valor
+        //Constrói o campo de valor
         switch ($parametro->getStrNome()) {
 
             //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
@@ -149,18 +150,18 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 break;
 
             case 'PEN_SENHA_CERTIFICADO_DIGITAL':
-                echo '<input type="password" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';
+                echo '<input type="password" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                 break;
 
             case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
-                echo '<select id="PARAMETRO_PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="input-field" >';
+                echo '<select id="PARAMETRO_PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraText input-field" >';
                 echo '    <option value="S" ' . ($parametro->getStrValor() == 'S' ? 'selected="selected"' : '') . '>Sim</option>';
                 echo '    <option value="N" ' . ($parametro->getStrValor() == 'N' ? 'selected="selected"' : '') . '>Não</option>';
                 echo '<select>';
                 break;
 
             case 'PEN_TIPO_PROCESSO_EXTERNO':
-                echo '<select name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="input-field" >';
+                echo '<select name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraText input-field" >';
                 foreach ($arrObjTipoProcedimentoDTO as $procedimento) {
                     echo '<option ' . ($parametro->getStrValor() == $procedimento->getNumIdTipoProcedimento() ? 'selected="selected"' : '') . ' value="'.$procedimento->getNumIdTipoProcedimento().'">'.$procedimento->getStrNome().'</option>';
                 }
@@ -168,15 +169,33 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 break;
 
             case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
-                echo '<select name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="input-field" >';
+                echo '<select name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraText input-field" >';
                 foreach ($arrObjUnidade as $unidade) {
                     echo '<option ' . ($parametro->getStrValor() == $unidade->getNumIdUnidade() ? 'selected="selected"' : '') . ' value="'.$unidade->getNumIdUnidade().'">'.$unidade->getStrSigla().'</option>';
                 }
                 echo '<select>';
                 break;
 
+
+            case 'PEN_ID_REPOSITORIO_ORIGEM':
+                try {
+                    $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+                    $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+                    $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
+                    $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
+                    echo '<select id="parametro[PEN_ID_REPOSITORIO_ORIGEM]" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
+                            echo $strItensSelRepositorioEstruturas;
+                    echo '</select>';
+                } catch (Exception $e) {
+                    // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
+                    echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                }
+
+                break;
+
+
             default:
-                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field-input" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" /><br>';
+                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                 break;
         }
         echo '<br>';

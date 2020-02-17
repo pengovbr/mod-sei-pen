@@ -16,7 +16,6 @@ try {
     $objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao($_GET['acao']);
 
-
     $strParametros = '';
     $bolErrosValidacao = false;
     $executarExpedicao = false;
@@ -78,6 +77,7 @@ try {
             //$strLinkUnidadeSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidade_sel_expedir_procedimento&tipo_selecao=2&id_object=objLupaUnidades');
             //$strLinkRepositorioSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_repositorio_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados');
             $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
+            $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
 
             //TODO: Obter dados do repositório e unidade de orígem através de serviço do PEN
             //Obtenção dos parâmetros selecionados pelo usuário
@@ -181,7 +181,6 @@ try {
     //$objPaginaSEI->finalizarBarraProgresso($objSessaoSEI->assinarLink('controlador.php?acao='.$objPaginaSEI->getAcaoRetorno().'&acao_origem='.$_GET['acao'].'#ID-'.$IdProcedimento));
     //$objPaginaSEI->processarExcecao($e);
     throw new InfraException("Error Processing Request 11", $e);
-
 }
 
 $objPaginaSEI->montarDocType();
@@ -203,6 +202,10 @@ $objPaginaSEI->montarStyle();
 #imgLupaUnidades {position:absolute;left:52%;top:48%;}
 .alinhamentoBotaoImput{position:absolute;left:0%;top:48%;width:85%;};
 #hdnIdUnidade2 {float: right;}
+#imgPesquisaAvancada {
+    vertical-align: middle;
+    margin-left: 10px;
+}
 
 #lblProcedimentosApensados {position:absolute;left:0%;top:10%;}
 #txtProcedimentoApensado {position:absolute;left:0%;top:25%;width:50%;border:.1em solid #666;}
@@ -217,11 +220,13 @@ $objPaginaSEI->montarStyle();
 <?php $objPaginaSEI->montarJavaScript(); ?>
 <script type="text/javascript">
 
+var idRepositorioEstrutura = null;
 var objAutoCompletarUnidade = null;
 var objAutoCompletarEstrutura = null;
 var objAutoCompletarProcedimentosApensados = null;
 
 var objLupaUnidades = null;
+var objLupaUnidadesAdministrativas = null;
 var objLupaProcedimentosApensados = null;
 var objJanelaExpedir = null;
 var evnJanelaExpedir = null;
@@ -229,13 +234,12 @@ var evnJanelaExpedir = null;
 function inicializar() {
 
     objLupaProcedimentosApensados = new infraLupaSelect('selProcedimentosApensados','hdnProcedimentosApensados','<?=$strLinkProcedimentosApensadosSelecao ?>');
+    objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas','hdnUnidadesAdministrativas','<?=$strLinkUnidadesAdministrativasSelecao ?>');
 
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
-    //objAutoCompletarEstrutura.tamanhoMinimo = 3;
     objAutoCompletarEstrutura.limparCampo = false;
-    //objAutoCompletarEstrutura.mostrarImagemVerificado = true;
     objAutoCompletarEstrutura.tempoAviso = 10000000;
 
     objAutoCompletarEstrutura.prepararExecucao = function(){
@@ -253,6 +257,18 @@ function inicializar() {
         objAutoCompletarEstrutura.executar();
         objAutoCompletarEstrutura.procurar();
     });
+
+    //Botão de pesquisa avançada
+    $('#imgPesquisaAvancada').click(function() {
+        var idRepositorioEstrutura = $('#selRepositorioEstruturas :selected').val();
+        if((idRepositorioEstrutura != '') && (idRepositorioEstrutura != 'null')){
+            $("#hdnUnidadesAdministrativas").val(idRepositorioEstrutura);
+            objLupaUnidadesAdministrativas.selecionar(700,500);
+        }else{
+            alert('Selecione um repositório de Estruturas Organizacionais');
+        }
+    });
+
 
     objAutoCompletarApensados = new infraAjaxAutoCompletar('hdnIdProcedimentoApensado','txtProcedimentoApensado','<?=$strLinkAjaxProcedimentoApensado?>');
     objAutoCompletarApensados.mostrarAviso = true;
@@ -534,6 +550,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 	method="post"
 	action="<?= $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros)) ?>">
     <input type="hidden" id="sbmExpedir" name="sbmExpedir" value="1" />
+    <input type="hidden" id="sbmPesquisa" name="sbmPesquisa" value="1" />
 <?php
 //$objPaginaSEI->montarBarraLocalizacao($strTitulo);
 $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
@@ -554,13 +571,14 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	<div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
             <div class="alinhamentoBotaoImput">
-                <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
-                <button id="hdnIdUnidade2" type="button" class="infraText">Pesquisar</button>
+                <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
+                    placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
+                    value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                <button id="hdnIdUnidade2" type="button" class="infraText">Consultar</button>
+                <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
             </div>
 
         <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" />
-        <?php /* ?><img id="imgLupaUnidades" src="/infra_css/imagens/lupa.gif" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" /><?php */ ?>
-
 	</div>
 
 	<div id="divProcedimentosApensados" class="infraAreaDados" style="height: 12em; display: none; ">
@@ -583,6 +601,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	<input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?=$numIdProcedimento ?>" />
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=$_POST['hdnProcedimentosApensados']?>" />
+    <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
 <?
 //$objPaginaSEI->montarBarraComandosInferior($arrComandos);
 ?>

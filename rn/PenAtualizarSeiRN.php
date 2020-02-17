@@ -1,5 +1,9 @@
 <?
-
+/**
+ *
+ * 12/08/2017 - criado por thiago.farias
+ *
+ */
 class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
@@ -69,9 +73,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.2.4': $this->instalarV1205();
                 case '1.2.5': $this->instalarV1206();
                 case '1.2.6': $this->instalarV1300();
-
-
-                break;
+                case '1.3.0': $this->instalarV1400();
+                    break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
                 break;
@@ -1577,7 +1580,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-    /* Contêm atualizações da versao 1.2.3 do módulo */
+    /* Contêm atualizações da versao 1.2.4 do módulo */
     protected function instalarV1204()
     {
         //altera o parâmetro da versão de banco
@@ -1610,7 +1613,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 
-
     /* Contêm atualizações da versao 1.3.0 do módulo */
     protected function instalarV1300()
     {
@@ -1637,6 +1639,87 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
         $objInfraParametroDTO->setStrValor('1.3.0');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
+     * Método Responsavel por realizar as atualizações na Base de Dados referentes as novas implementações
+     * Receber/Enviar Documento Avulso
+     * Receber/Enviar Multiplos Componentes Digitais
+     * @author Josinaldo Júnior <josenaldo.pedro@gmail.com>
+     * @throws InfraException
+     */
+    protected function instalarV1400()
+    {
+        $objBD = new GenericoBD(BancoSEI::getInstance());
+        $objDTO = new TarefaDTO();
+
+        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD) {
+
+            $objDTO->unSetTodos();
+            $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+
+            if ($objBD->contar($objDTO) == 0) {
+                $objUltimaTarefaDTO = new TarefaDTO();
+                $objUltimaTarefaDTO->retNumIdTarefa();
+                $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+                $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+
+                $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
+                $objDTO->setStrNome($strNome);
+                $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
+                $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
+                $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
+                $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
+                $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+                $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+                $objBD->cadastrar($objDTO);
+            }
+        };
+
+        $fnCadastrar('Documento recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_DOCUMENTO_AVULSO_RECEBIDO');
+
+        // Modificações de Banco referentes a feature 76
+        $objMetaBD = $this->objMeta;
+
+        $objMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem_documento = 1");
+        $objMetaBD->alterarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::NNULLO);
+
+        // Adiciona a coluna para identificar se a criação do processo se deu por documento avulso (D) ou processo (P)
+        // Atualizar os registros existentes para P - Tipo Processo
+        $objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_processo_eletronico set sta_tipo_protocolo = 'P'");
+        $objMetaBD->alterarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::NNULLO);
+        $objMetaBD->adicionarValorPadraoParaColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', 'P');
+
+        // Adicionar Chave primaria
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->excluirChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+        $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
+
+        // Definição de ordem em que os parâmetros aparecem na página
+        $objMetaBD->adicionarColuna('md_pen_parametro', 'sequencia', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 1 where nome = 'PEN_ENDERECO_WEBSERVICE'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 2 where nome = 'PEN_ENDERECO_WEBSERVICE_PENDENCIAS'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 3 where nome = 'PEN_LOCALIZACAO_CERTIFICADO_DIGITAL'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 4 where nome = 'PEN_SENHA_CERTIFICADO_DIGITAL'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 5 where nome = 'PEN_ID_REPOSITORIO_ORIGEM'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 6 where nome = 'PEN_TIPO_PROCESSO_EXTERNO'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 7 where nome = 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 8 where nome = 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 9 where nome = 'PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO'");
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = null where nome = 'HIPOTESE_LEGAL_PADRAO'");
+        // Este parâmetro passará a ser interno do sistema e será configurado com o valor 5 MB que será o valor fixo utilizado para updaload e download
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = null, valor = 5 where nome = 'PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO'");
+
+
+        // Altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.4.0');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
 }

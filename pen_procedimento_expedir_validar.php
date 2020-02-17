@@ -104,7 +104,6 @@ catch(\InfraException $e) {
     LogSEI::getInstance()->gravar($strmensagemErro);
 }
 
-
 if($objInfraException->contemValidacoes()) {
 
     $arrErros = array();

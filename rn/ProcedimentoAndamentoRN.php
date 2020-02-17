@@ -39,8 +39,8 @@ class ProcedimentoAndamentoRN extends InfraRN {
      *
      * @param ProcedimentoAndamentoDTO $parProcedimentoAndamentoDTO
      */
-    protected function cadastrarControlado($parProcedimentoAndamentoDTO){
-
+    protected function cadastrarControlado($parProcedimentoAndamentoDTO)
+    {
         if($this->isSetOpts === false) {
             throw new InfraException('Log do cadastro de procedimento não foi configurado');
         }
@@ -59,6 +59,7 @@ class ProcedimentoAndamentoRN extends InfraRN {
         $objProcedimentoAndamentoDTO->setStrMensagem($strMensagem);
         $objProcedimentoAndamentoDTO->setStrHash($hash);
         $objProcedimentoAndamentoDTO->setNumTarefa($this->numTarefa);
+
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
         $objProcedimentoAndamentoBD->cadastrar($objProcedimentoAndamentoDTO);
     }

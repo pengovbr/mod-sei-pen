@@ -1,7 +1,3 @@
-########################################
-## Arquivo de configuração padrão do módulo mod-sei-pen para funcionamento no Supervisor 4
-## As diretivas abaixo deverão ser revisadas e modificadas durante o processo de instalação
-## seguindo as orientações presente no arquivo README.md deste projeto
 ##<?php
 
 [program:sei_processar_pendencias]

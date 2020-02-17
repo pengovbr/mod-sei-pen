@@ -212,6 +212,9 @@ try {
                 $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaDestino();
             elseif (ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) == $objProcedimentoAndamentoDTO->getNumTarefa())
                 $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaOrigem();
+            elseif (ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO) == $objProcedimentoAndamentoDTO->getNumTarefa())
+                $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaOrigem();
+
 
             $key = $objProcedimentoAndamentoDTO->getDblIdTramite() . '-' . $numIdEstrutura . '-' . $objProcedimentoAndamentoDTO->getNumTarefa();
             $arrAgruparProcedimentoAndamentoDTO[$key][] = $objProcedimentoAndamentoDTO;
