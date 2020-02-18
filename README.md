@@ -13,6 +13,9 @@ Este documento está estruturado nas seguintes seções:
 1. **[Instalação](#instalação)**:
 Procedimentos de instalação do módulo nos servidores de aplicação e atualização do banco de dados.
 
+1. **[Script de Monitoramento](#script-de-monitoramento)**:
+Procedimentos para configuração de um monitor para a fila de pendências do barramento e seu reboot automático quando necessário
+
 2. **[Atualização](#atualização)**:
 Procedimentos para realizar a atualização de uma nova versão do módulo
 
@@ -346,6 +349,21 @@ Este mapeamento deve ser feito antes de começar a utilização do módulo e est
 Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-linux-comum.php
 
 ---
+## Script de Monitoramento
+
+Atualmente o script verificar-servicos.sh monitora se os serviços gearmand e supervisord estão no ar. 
+Identificamos que além dos serviços estarem no ar, uma verificação adicional faz-se necessária para garantir que não haja pendências a serem processadas no barramento.
+
+Elaboramos duas rotinas adicionais, que opcionalmente poderão ser configuradas ao ambiente para monitoramento e reboot automático da fila:
+
+1. A rotina "verificar-pendencias-represadas.py" é uma rotina verificadora para notificar ferramentas de monitoramento (ex.: Nagios) sobre trâmites parados sem processamento há xx minutos no barramento. Maiores detalhes de seu uso podem ser lidos no comentário dentro do próprio arquivo;
+
+2. A rotina "verificar-rebootar-fila.sh" poderá ser configurada no crontab do nó onde roda o supervisor. Através da rotina 1 acima, vai rebootar a fila e evitar que sejam necessários reboots manuais no supervisor caso haja alguma eventual paralisação no processamento;
+
+Essas rotinas podem ter que sofrer alguns ajustes em seus comandos a depender do SO utilizado.
+A sugestão acima foi testada em CentOs7.3. A rotina em python foi testada em python 2 e python 3.
+Dúvidas com as rotinas favor abrir chamado em [http://processoeletronico.gov.br/index.php/conteudo/suporte](http://processoeletronico.gov.br/index.php/conteudo/suporte). De posse do número do chamado pode ligar para 61 2020-8711 (falar com Marcelo)
+
 
 ## Atualização
 
