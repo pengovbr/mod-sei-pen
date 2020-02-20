@@ -843,30 +843,24 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $objProcesso não informado.');
         }
 
-        //TODO: Passar dados do ProcedimentoDTO via parâmetro j carregado anteriormente
         $arrDocumentosDTO = $this->listarDocumentos($dblIdProcedimento);
 
         if(!isset($arrDocumentosDTO)) {
             throw new InfraException('Documentos não encontrados.');
         }
 
-        $ordemDocumento = 1;
         $objProcesso->documento = array();
-        foreach ($arrDocumentosDTO as $documentoDTO) {
+        foreach ($arrDocumentosDTO as $ordem => $documentoDTO) {
 
-            //$protocoloDocumentoDTO = $this->consultarProtocoloDocumento($documeto->getDblIdProcedimento());
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
             //TODO: Atribuir das informações abaixo ao documento
             //<protocoloDoDocumentoAnexado>123</protocoloDoDocumentoAnexado>
             //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>
-            //Retirado
-            //Considera o nmero/nome do documento externo para descrio do documento
-            if($documentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO && $documentoDTO->getStrNumero() != null) {
-                $strDescricaoDocumento = $documentoDTO->getStrNumero();
-            }else{
-                $strDescricaoDocumento = "***";
-            }
+
+            //Considera o número/nome do documento externo para descrição do documento
+            $boolDocumentoRecebidoComNumero = $documentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO && $documentoDTO->getStrNumero() != null;
+            $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
 
             // Não é um documento externo
             /*elseif($documentoDTO->isSetNumIdTipoConferencia()){
@@ -880,9 +874,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strDescricaoDocumento = $objTipoProcedimentoDTO->getStrNome();
             }*/
 
-            $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
-            $documento->ordem = $ordemDocumento++;
+            $documento->ordem = $ordem + 1;
             $documento->descricao = utf8_encode($strDescricaoDocumento);
+            $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
                 $documento->hipoteseLegal = new stdClass();
@@ -907,13 +901,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
             }
 
-            $documento->produtor->numeroDeIdentificacao = $documentoDTO->getStrProtocoloDocumentoFormatado();  //TODO: Avaliar se informação está correta
+            $documento->produtor->numeroDeIdentificacao = $documentoDTO->getStrProtocoloDocumentoFormatado();
 
             $this->atribuirDataHoraDeRegistro($documento, $documentoDTO->getDblIdProcedimento(), $documentoDTO->getDblIdDocumento());
             $this->atribuirEspecieDocumental($documento, $documentoDTO, $parObjMetadadosTramiteAnterior);
 
-            //TODO: Tratar campos adicionais do documento
-            //Identificao do documento
+            //TODO: Tratar campos adicionais do documento identifição do documento
             $this->atribuirNumeracaoDocumento($documento, $documentoDTO);
             if($documento->retirado === true){
 
@@ -950,12 +943,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $this->atribuirComponentesDigitais($documento, $documentoDTO);
             }
 
-            //TODO: Necessrio tratar informações abaixo
-            //protocoloDoDocumentoAnexado
-            //protocoloDoProcessoAnexado
-            //retirado
-            //protocoloAnterior
-            //historico
+            // TODO: Necessário tratar informações abaixo
+            //- protocoloDoDocumentoAnexado
+            //- protocoloDoProcessoAnexado
+            //- protocoloAnterior
+            //- historico
             $documento->idDocumentoSEI = $documentoDTO->getDblIdDocumento();
             $objProcesso->documento[] = $documento;
         }
@@ -1617,14 +1609,23 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $this->objUsuarioRN->consultarRN0489($objUsuarioDTO);
     }
 
-    public function listarDocumentos($idProcedimento)
+    /**
+     * Recupera a lista de todos os documentos do processo, principal ou anexados, mantendo a ordem correta entre eles
+     *
+     * @param Num $idProcedimento
+     * @return array Lista de Ids dos documentos do processo em ordem
+     */
+    private function listarSequenciaDocumentos($idProcedimento)
     {
         if(!isset($idProcedimento)){
             throw new InfraException('Parâmetro $idProcedimento não informado.');
         }
 
         //Recupera toda a lista de documentos vinculados ao processo, considerando a ordenação definida pelo usuário
-        $arrTipoAssociacao = array(RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+        $arrTipoAssociacao = array(
+            RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO, RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_ANEXADO
+        );
+
         $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
         $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
         $objRelProtocoloProtocoloDTO->retDblIdProtocolo1();
@@ -1639,30 +1640,45 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $arrIdDocumentos = array();
         foreach($arrObjRelProtocoloProtocoloDTO as $objRelProtocoloProtocoloDTO) {
-            if ($objRelProtocoloProtocoloDTO->getStrStaAssociacao()==RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO ||
-            $objRelProtocoloProtocoloDTO->getStrStaAssociacao()==RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
-
+            if (in_array($objRelProtocoloProtocoloDTO->getStrStaAssociacao(), [RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO])) {
+                // Adiciona documentos em ordem presentes diretamente ao processo
                 $arrIdDocumentos[] = $objRelProtocoloProtocoloDTO->getDblIdProtocolo2();
+            } elseif($objRelProtocoloProtocoloDTO->getStrStaAssociacao() == RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_ANEXADO) {
+                // Adiciona documentos presente no processo anexado, mantendo a ordem de todo o conjunto
+                $numIdProtocoloAnexado = $objRelProtocoloProtocoloDTO->getDblIdProtocolo2();
+                $arrIdDocumentosAnexados = $this->listarSequenciaDocumentos($numIdProtocoloAnexado);
+                $arrIdDocumentos = array_merge($arrIdDocumentos, $arrIdDocumentosAnexados);
             }
         }
+        return $arrIdDocumentos;
+    }
+
+    public function listarDocumentos($idProcedimento)
+    {
+        if(!isset($idProcedimento)){
+            throw new InfraException('Parâmetro $idProcedimento não informado.');
+        }
+
+        $arrIdDocumentos = $this->listarSequenciaDocumentos($idProcedimento);
 
         $objDocumentoDTO = new DocumentoDTO();
         $objDocumentoDTO->retStrDescricaoUnidadeGeradoraProtocolo();
         $objDocumentoDTO->retNumIdOrgaoUnidadeGeradoraProtocolo();
+        $objDocumentoDTO->retStrProtocoloProcedimentoFormatado();
         $objDocumentoDTO->retStrSiglaUnidadeGeradoraProtocolo();
         $objDocumentoDTO->retStrStaNivelAcessoLocalProtocolo();
         $objDocumentoDTO->retStrProtocoloDocumentoFormatado();
-        $objDocumentoDTO->retStrStaEstadoProtocolo();
         $objDocumentoDTO->retNumIdUsuarioGeradorProtocolo();
         $objDocumentoDTO->retStrStaProtocoloProtocolo();
         $objDocumentoDTO->retNumIdUnidadeResponsavel();
+        $objDocumentoDTO->retStrStaEstadoProtocolo();
         $objDocumentoDTO->retStrDescricaoProtocolo();
+        $objDocumentoDTO->retStrConteudoAssinatura();
         $objDocumentoDTO->retDtaGeracaoProtocolo();
         $objDocumentoDTO->retDblIdProcedimento();
         $objDocumentoDTO->retDblIdDocumento();
         $objDocumentoDTO->retStrNomeSerie();
         $objDocumentoDTO->retNumIdSerie();
-        $objDocumentoDTO->retStrConteudoAssinatura();
         $objDocumentoDTO->retStrNumero();
         $objDocumentoDTO->retNumIdTipoConferencia();
         $objDocumentoDTO->retStrStaDocumento();
@@ -1676,7 +1692,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjDocumentoDTO = array();
         foreach($arrIdDocumentos as $dblIdDocumento){
             if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
-                $arrObjDocumentoDTO[$dblIdDocumento] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+                //$arrObjDocumentoDTO[$dblIdDocumento] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+                $arrObjDocumentoDTO[] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
             }
         }
 

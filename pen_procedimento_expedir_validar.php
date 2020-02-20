@@ -4,16 +4,8 @@ require_once dirname(__FILE__) . '/../../SEI.php';
 
 session_start();
 
-//print_r($_POST); exit;
-
-
 $arrResponse = array('sucesso' => false, 'mensagem' => '', 'erros' => array());
 $objInfraException = new InfraException();
-
-//txtProtocoloExibir
-//selRepositorioEstruturas
-//hdnIdUnidade
-//selProcedimentosApensados
 
 
 try {
@@ -35,34 +27,38 @@ try {
     // processo e os seus processos apensados
     $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
 
-    $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
 
-    //Consulta do ID Pai
-    $objRelProtocoloProtocoloDTO1 = new RelProtocoloProtocoloDTO();
-    $objRelProtocoloProtocoloDTO1->setDblIdProtocolo1($dblIdProcedimento);
-    $objRelProtocoloProtocoloDTO1->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
-    $objRelProtocoloProtocoloDTO1->retDblIdProtocolo1();
+    //TODO: IMPLEMENTAÇÃO DE ENVIO DE RECEBIMENTO DE PROCESSO ANEXADO /////////////////////////
+    // $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
 
-    //Consulta do ID Filhos
-    $objRelProtocoloProtocoloDTO2 = new RelProtocoloProtocoloDTO();
-    $objRelProtocoloProtocoloDTO2->setDblIdProtocolo2($dblIdProcedimento);
-    $objRelProtocoloProtocoloDTO2->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
-    $objRelProtocoloProtocoloDTO2->retDblIdProtocolo2();
+    // //Consulta do ID Pai
+    // $objRelProtocoloProtocoloDTO1 = new RelProtocoloProtocoloDTO();
+    // $objRelProtocoloProtocoloDTO1->setDblIdProtocolo1($dblIdProcedimento);
+    // $objRelProtocoloProtocoloDTO1->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+    // $objRelProtocoloProtocoloDTO1->retDblIdProtocolo1();
 
-    $numCount1 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO1);
-    $numCount2 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO2);
+    // //Consulta do ID Filhos
+    // $objRelProtocoloProtocoloDTO2 = new RelProtocoloProtocoloDTO();
+    // $objRelProtocoloProtocoloDTO2->setDblIdProtocolo2($dblIdProcedimento);
+    // $objRelProtocoloProtocoloDTO2->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+    // $objRelProtocoloProtocoloDTO2->retDblIdProtocolo2();
 
-    if ($numCount1 > 0 && $numCount2 > 0) {
-            $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo e possui outros em anexo, portanto não pode ser tramitado.', $strProtocoloFormatado);
-    } else {
-        if ($numCount1 > 0) {
-            $objInfraException->adicionarValidacao('Esse processo possuí outros em anexo, portanto não pode ser tramitado externamente.', $strProtocoloFormatado);
-        }
+    // $numCount1 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO1);
+    // $numCount2 = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO2);
 
-        if ($numCount2 > 0) {
-            $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo, portanto não pode ser tramitado.', $strProtocoloFormatado);
-        }
-    }
+    // if ($numCount1 > 0 && $numCount2 > 0) {
+    //         $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo e possui outros em anexo, portanto não pode ser tramitado.', $strProtocoloFormatado);
+    // } else {
+    //     if ($numCount1 > 0) {
+    //         $objInfraException->adicionarValidacao('Esse processo possui outros em anexo, portanto não pode ser tramitado externamente.', $strProtocoloFormatado);
+    //     }
+
+    //     if ($numCount2 > 0) {
+    //         $objInfraException->adicionarValidacao('Esse processo está anexado a outro processo, portanto não pode ser tramitado.', $strProtocoloFormatado);
+    //     }
+    // }
+
+    //TODO: FIM - IMPLEMENTAÇÃO DE ENVIO DE RECEBIMENTO DE PROCESSO ANEXADO /////////////////////////
 
     if(!array_key_exists('txtProtocoloExibir', $_POST) || empty($_POST['txtProtocoloExibir'])) {
         $objInfraException->adicionarValidacao('Informe o Protocolo', $strProtocoloFormatado);
