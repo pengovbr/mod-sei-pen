@@ -106,6 +106,10 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.2.2': $this->instalarV1203();
                 case '1.2.3': $this->instalarV1204();
                 case '1.2.4': $this->instalarV1205();
+                case '1.2.5': $this->instalarV1206();
+                case '1.2.6': $this->instalarV1300();
+                case '1.3.0': $this->instalarV1400();
+                case '1.4.0': $this->instalarV1401();
 
                 break;
                 default:
@@ -1211,6 +1215,62 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroDTO->setStrValor('1.2.5');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.2.6
+     */
+    protected function instalarV1206()
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.2.6');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }    
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.3.0
+     */
+    protected function instalarV1300()
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.3.0');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+    
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.4.0
+     */
+    protected function instalarV1400()
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.4.0');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+    
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.4.1
+     */
+    protected function instalarV1401()
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor('1.4.1');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }        
 }
 
 try {
