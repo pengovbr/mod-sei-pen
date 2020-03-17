@@ -233,7 +233,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                         $this->registrarAndamentoExpedicaoAbortada($objProcesso->idProcedimentoSEI);
 
-                        // @join_tec US008.06 (#23092)
                         $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'N'));
                         throw $e;
                     }
@@ -878,6 +877,9 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->descricao = utf8_encode($strDescricaoDocumento);
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
+
+            $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
+
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
                 $documento->hipoteseLegal = new stdClass();
                 $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
