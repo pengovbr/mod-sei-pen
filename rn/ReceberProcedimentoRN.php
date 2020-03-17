@@ -1793,35 +1793,36 @@ class ReceberProcedimentoRN extends InfraRN
     */
     public function validarExtensaoComponentesDigitais($parIdTramite, $parObjProtocolo)
     {
-        //Armazena o array de documentos
         $arrDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
         $arquivoExtensaoBD = new ArquivoExtensaoBD($this->getObjInfraIBanco());
 
         foreach($arrDocumentos as $objDocumento){
-            $arrComponentesDigitais = $objDocumento->componenteDigital;
-            if(isset($arrComponentesDigitais) && !is_array($arrComponentesDigitais)){
-                $arrComponentesDigitais = array($arrComponentesDigitais);
-            }
-
-            foreach ($arrComponentesDigitais as $componenteDigital) {
-                //Busca o nome do documento
-                $nomeDocumento = $componenteDigital->nome;
-
-                //Busca pela extensão do documento
-                $arrNomeDocumento = explode('.', $nomeDocumento);
-                $extDocumento = $arrNomeDocumento[count($arrNomeDocumento) - 1];
-
-                //Verifica se a extensão do arquivo está cadastrada e ativa
-                $arquivoExtensaoDTO = new ArquivoExtensaoDTO();
-                $arquivoExtensaoDTO->setStrSinAtivo('S');
-                $arquivoExtensaoDTO->setStrExtensao($extDocumento);
-                $arquivoExtensaoDTO->retStrExtensao();
-
-                if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0){
-                    $strMensagem = "Processo recusado devido a existência de documento em formato {$extDocumento} não permitido pelo sistema.";
-                    $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
-                    throw new InfraException($strMensagem);
+            if($documento->retirado === false){
+                $arrComponentesDigitais = $objDocumento->componenteDigital;
+                if(isset($arrComponentesDigitais) && !is_array($arrComponentesDigitais)){
+                    $arrComponentesDigitais = array($arrComponentesDigitais);
                 }
+    
+                foreach ($arrComponentesDigitais as $componenteDigital) {
+                    //Busca o nome do documento
+                    $nomeDocumento = $componenteDigital->nome;
+    
+                    //Busca pela extensão do documento
+                    $arrNomeDocumento = explode('.', $nomeDocumento);
+                    $extDocumento = $arrNomeDocumento[count($arrNomeDocumento) - 1];
+    
+                    //Verifica se a extensão do arquivo está cadastrada e ativa
+                    $arquivoExtensaoDTO = new ArquivoExtensaoDTO();
+                    $arquivoExtensaoDTO->setStrSinAtivo('S');
+                    $arquivoExtensaoDTO->setStrExtensao($extDocumento);
+                    $arquivoExtensaoDTO->retStrExtensao();
+    
+                    if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0){
+                        $strMensagem = "Processo recusado devido a existência de documento em formato {$extDocumento} não permitido pelo sistema.";
+                        $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
+                        throw new InfraException($strMensagem);
+                    }
+                }    
             }
         }
     }
