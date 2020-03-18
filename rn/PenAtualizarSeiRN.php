@@ -75,6 +75,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.2.6': $this->instalarV1300();
                 case '1.3.0': $this->instalarV1400();
                 case '1.4.0': $this->instalarV1401();
+                case '1.4.1': $this->instalarV1402();
+                
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -118,6 +120,22 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $objBD = new InfraParametroBD(BancoSEI::getInstance());
         return $objBD->excluir($objDTO);
+    }
+
+    /**
+     * Remove todos os índices criados para o conjunto de tabelas informado
+     */
+    protected function removerIndicesTabela($parObjInfraMetaBD, $parMixTabelas)
+    {
+        $arrTabelas = is_array($parMixTabelas) ? $parMixTabelas : array($parMixTabelas);
+        foreach ($arrTabelas as $strTabelaRecibo) {
+            $arrStrIndices = $parObjInfraMetaBD->obterIndices(null, $strTabelaRecibo);
+            foreach ($arrStrIndices as $strTabela => $arrStrIndices) {
+                foreach ($arrStrIndices as $strNomeIndice => $arrStrColunas) {
+                    $parObjInfraMetaBD->excluirIndice($strTabela, $strNomeIndice);
+                }                
+            }         
+        }        
     }
 
     /* Contêm atualizações da versao 1.0.0 do modulo */
@@ -1726,13 +1744,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function instalarV1401()
     {
-        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->alterarColuna('md_pen_recibo_tramite', 'hash_assinatura', $objInfraMetaBD->tipoTextoVariavel(1000), 'not null');
-        $objInfraMetaBD->alterarColuna('md_pen_tramite_recibo_envio', 'hash_assinatura', $objInfraMetaBD->tipoTextoVariavel(1000), 'not null');
-        $objInfraMetaBD->alterarColuna('md_pen_recibo_tramite_enviado', 'hash_assinatura', $objInfraMetaBD->tipoTextoVariavel(1000), 'not null');
-        $objInfraMetaBD->alterarColuna('md_pen_recibo_tramite_recebido', 'hash_assinatura', $objInfraMetaBD->tipoTextoVariavel(1000), 'not null');
 
+        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
+        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
+        $objInfraMetaBD->excluirChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
+        $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
+        $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'));
+        $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
+        $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite_recebido", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
+        $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
+        $objInfraMetaBD->alterarColuna("md_pen_tramite_recibo_envio", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
+        $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite_enviado", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
+        
         // Altera o parâmetro da versão de banco
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1740,4 +1764,23 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.4.1');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }
+
+    protected function instalarV1402()
+    {
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+    
+        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
+        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
+        $objInfraMetaBD->excluirChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
+        $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
+        $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'));
+        $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
+
+        // Altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.4.2');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }    
 }
