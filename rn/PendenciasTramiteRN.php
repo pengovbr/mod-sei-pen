@@ -95,7 +95,7 @@ class PendenciasTramiteRN extends InfraRN {
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
                     $this->gravarLogDebug(InfraException::inspecionar($e));
                 } finally {
-                    $this->gravarLogDebug("Reiniciando monitoramento de pend?ncias", 1);
+                    $this->gravarLogDebug("Reiniciando monitoramento de pendências", 1);
                     sleep(5);
                 }
             }
@@ -218,35 +218,36 @@ class PendenciasTramiteRN extends InfraRN {
     private function enviarPendenciaFilaProcessamento($objPendencia)
     {
         if(isset($objPendencia)) {
+            $client = new GearmanClient();
+            $client->addServer("127.0.0.1", 4730);
 
-        $client = new GearmanClient();
-        $client->addServer("127.0.0.1", 4730);
+            $numIDT = strval($objPendencia->getNumIdentificacaoTramite());
+            $numStatus = strval($objPendencia->getStrStatus());
 
-        $numIDT = strval($objPendencia->getNumIdentificacaoTramite());
-        switch ($objPendencia->getStrStatus()) {
+            switch ($numStatus) {
 
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-                $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+                    $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);
+                    break;
+
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
+                    $client->addTaskBackground('receberProcedimento', $numIDT, null, $numIDT);
+                    break;
+
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+                    $client->addTaskBackground('receberReciboTramite', $numIDT, null, $numIDT);
+                    break;
+
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+                    $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
                 break;
 
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $client->addTaskBackground('receberProcedimento', $numIDT, null, $numIDT);
-                break;
-
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $client->addTaskBackground('receberReciboTramite', $numIDT, null, $numIDT);
-                break;
-
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                $client->addTaskBackground("receberTramitesRecusados", $numIDT, null, $numIDT);
-            break;
-
-            default:
-                $strStatus = $objPendencia->getStrStatus();
-                InfraDebug::getInstance()->gravar("Situação do trâmite ($strStatus) não pode ser tratada.");
-                break;
+                default:
+                    $strStatus = $objPendencia->getStrStatus();
+                    InfraDebug::getInstance()->gravar("Situação do trâmite ($strStatus) não pode ser tratada.");
+                    break;
             }
 
             $client->runTasks();
