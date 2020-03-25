@@ -76,6 +76,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.3.0': $this->instalarV1400();
                 case '1.4.0': $this->instalarV1401();
                 case '1.4.1': $this->instalarV1402();
+                case '1.4.2': $this->instalarV1403();
                 
                     break;
                 default:
@@ -1785,4 +1786,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametroDTO->setStrValor('1.4.2');
         $objInfraParametroBD->alterar($objInfraParametroDTO);
     }    
+
+    protected function instalarV1403()
+    {
+        // Altera o parâmetro da versão de banco
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTO->setStrValor('1.4.3');
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }        
 }
