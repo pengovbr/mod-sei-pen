@@ -2372,51 +2372,53 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param int $parNumIdTramite
     * @return bool
     */
-    protected function receberReciboDeEnvioControlado($parNumIdTramite){
-
+    protected function receberReciboDeEnvioControlado($parNumIdTramite)
+    {
         if (empty($parNumIdTramite)) {
             return false;
         }
 
-        $objReciboTramiteEnviadoDTO = new ReciboTramiteEnviadoDTO();
-        $objReciboTramiteEnviadoDTO->setNumIdTramite($parNumIdTramite);
-
-        $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
-
-        if ($objGenericoBD->contar($objReciboTramiteEnviadoDTO) > 0) {
-            return false;
-        }
-
-        $objReciboEnvio = $this->objProcessoEletronicoRN->receberReciboDeEnvio($parNumIdTramite);
-        $objDateTime = new DateTime($objReciboEnvio->reciboDeEnvio->dataDeRecebimentoDoUltimoComponenteDigital);
-
-        $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
-        $objReciboTramiteDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
-        $objReciboTramiteDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
-        $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
-        $objReciboTramiteDTO->setStrCadeiaCertificado($objReciboEnvio->cadeiaDoCertificado);
-        $objReciboTramiteDTO->setStrHashAssinatura($objReciboEnvio->hashDaAssinatura);
-
-        $objGenericoBD->cadastrar($objReciboTramiteDTO);
-
-        if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
-            $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
-            if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
-
-                foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
-
-                    $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-                    $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
-                    $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
-                    $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
-                    $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
-
-                    $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+        try {
+            $objReciboTramiteEnviadoDTO = new ReciboTramiteEnviadoDTO();
+            $objReciboTramiteEnviadoDTO->setNumIdTramite($parNumIdTramite);    
+            $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
+    
+            if ($objGenericoBD->contar($objReciboTramiteEnviadoDTO) > 0) {
+                return false;
+            }
+    
+            $objReciboEnvio = $this->objProcessoEletronicoRN->receberReciboDeEnvio($parNumIdTramite);
+            $objDateTime = new DateTime($objReciboEnvio->reciboDeEnvio->dataDeRecebimentoDoUltimoComponenteDigital);
+    
+            $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
+            $objReciboTramiteDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+            $objReciboTramiteDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+            $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
+            $objReciboTramiteDTO->setStrCadeiaCertificado($objReciboEnvio->cadeiaDoCertificado);
+            $objReciboTramiteDTO->setStrHashAssinatura($objReciboEnvio->hashDaAssinatura);    
+            $objGenericoBD->cadastrar($objReciboTramiteDTO);
+    
+            if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
+                $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
+                if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
+                    foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){    
+                        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+                        $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
+                        $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
+                        $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+                        $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
+    
+                        $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
+                    }
                 }
             }
+    
+            return true;
+    
+        } catch (\Exception $e) {
+            $strMensagem = "Falha na obtenção do recibo de envio de protocolo do trâmite $parNumIdTramite. $e";
+            LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
         }
-
-        return true;
     }
 
     /**
