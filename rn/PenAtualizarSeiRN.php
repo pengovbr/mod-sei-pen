@@ -126,17 +126,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     /**
      * Remove todos os índices criados para o conjunto de tabelas informado
      */
-    protected function removerIndicesTabela($parObjInfraMetaBD, $parMixTabelas)
+    protected function removerIndicesTabela($parObjInfraMetaBD, $parFiltroTabelas)
     {
-        $arrTabelas = is_array($parMixTabelas) ? $parMixTabelas : array($parMixTabelas);
-        foreach ($arrTabelas as $strTabelaRecibo) {
-            $arrStrIndices = $parObjInfraMetaBD->obterIndices(null, $strTabelaRecibo);
+        $arrTabelasExclusao = is_array($parFiltroTabelas) ? $parFiltroTabelas : array($parFiltroTabelas);
+        foreach ($arrTabelasExclusao as $strTabelaExclusao) {
+            $arrStrIndices = $parObjInfraMetaBD->obterIndices(null, $strTabelaExclusao);
             foreach ($arrStrIndices as $strTabela => $arrStrIndices) {
-                if($strTabela == $strTabelaRecibo){
+                if($strTabela == $strTabelaExclusao){
                     foreach ($arrStrIndices as $strNomeIndice => $arrStrColunas) {
-                        $parObjInfraMetaBD->excluirIndice($strTabelaRecibo, $strNomeIndice);
-                    }                
-                }
+                        $parObjInfraMetaBD->excluirIndice($strTabelaExclusao, $strNomeIndice);
+                    }
+                }             
             }         
         }        
     }
@@ -1749,7 +1749,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
+        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas        
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
         $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
         $objInfraMetaBD->excluirChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
