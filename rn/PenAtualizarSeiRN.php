@@ -131,9 +131,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         foreach ($arrTabelas as $strTabelaRecibo) {
             $arrStrIndices = $parObjInfraMetaBD->obterIndices(null, $strTabelaRecibo);
             foreach ($arrStrIndices as $strTabela => $arrStrIndices) {
-                foreach ($arrStrIndices as $strNomeIndice => $arrStrColunas) {
-                    $parObjInfraMetaBD->excluirIndice($strTabela, $strNomeIndice);
-                }                
+                if($strTabela == $strTabelaRecibo){
+                    foreach ($arrStrIndices as $strNomeIndice => $arrStrColunas) {
+                        $parObjInfraMetaBD->excluirIndice($strTabelaRecibo, $strNomeIndice);
+                    }                
+                }
             }         
         }        
     }
