@@ -200,30 +200,32 @@ Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeame
 
 ---
 
-#### 15. Instalar o **gearmand** e o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema.
+#### 15. Instalar o **gearmand** no servidor responsável por tratar o agendamento de tarefas do sistema
 
-Estes dois componentes são utilizados para gerenciar a fila de recebimento de novos processos de forma assíncrona pelo SEI.
+O gearman é o componente responsável pelo gerenciamento das filas de tarefas e eventos gerados de forma assíncrona pela infraestrutura de integração do barramento do PEN. 
+
+Os procedimento de instalação do Gearman podem ser encontrados no seguinte endereço: http://gearman.org/getting-started.
 
 **Importante:** É imprescindível que os dois sejam instalados **SOMENTE** no nó de aplicação em que está configurado o CRON de agendamento do SEI.
-**Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
 
-##### Exemplo de instalação do German e Supervisor no CentOS:
-Os pacotes abaixo estão presentes em todas as distribuições do Linux
+Para instalação das bibliotecas do Gearman para uso no PHP, execute os comandos abaixo:
 
 ```bash
-# pre-requisito
 yum install epel-release && yum update
-
-# instalação do gearman e supervisord               
 yum install gearmand libgearman libgearman-devel php56*-pecl-gearman
 
-# instalação do supervisor
-yum install python36
-python36 -m ensurepip
-python36 -m pip install supervisor==4.*
-mkdir -p /etc/supervisor/ /var/log/supervisor/
-echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
+
+#### 16. Instalar o **supervisord** no servidor responsável por tratar o agendamento de tarefas do sistema
+
+O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelas infraestrutura de integração do barramento de serviços do PEN. Sua principal função é garantir que nenhum dos processos envolvidos com o envio e recebimento de processos ficaram indisponíveis, o que poderia acarretar atrasos no recebimento de documentos.
+
+**Importante:** É imprescindível que os dois sejam instalados **SOMENTE** no nó de aplicação em que está configurado o CRON de agendamento do SEI.
+
+**Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. 
+
+Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
+
 
 ##### Configuração da inicialização automática do Supervisord no Linux
 A inicialização automática do Supervisor não é configurada durante sua instalação, portanto, é necessário configurar um script de inicialização para o serviço. No repositório oficial do projeto existe uma exemplos de scripts de inicialização do Supervisor específico para cada distribuição Linux. Estes script podem ser encontrados no endereço: https://github.com/Supervisor/initscripts
