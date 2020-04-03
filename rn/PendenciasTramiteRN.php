@@ -27,7 +27,8 @@ class PendenciasTramiteRN extends InfraRN {
         return self::$instance;
     }
 
-    public function __construct() {
+    public function __construct() 
+    {
         $objPenParametroRN = new PenParametroRN();
 
         $this->strLocalizacaoCertificadoDigital = $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');

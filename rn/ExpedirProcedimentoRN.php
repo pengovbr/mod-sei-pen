@@ -853,9 +853,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+
             //TODO: Atribuir das informações abaixo ao documento
             //<protocoloDoDocumentoAnexado>123</protocoloDoDocumentoAnexado>
-            //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>
 
             //Considera o número/nome do documento externo para descrição do documento
             $boolDocumentoRecebidoComNumero = $documentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO && $documentoDTO->getStrNumero() != null;
@@ -877,9 +877,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->descricao = utf8_encode($strDescricaoDocumento);
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
-
-            $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
-
+            
+            //TODO: processo-anexado - Não atribuir parâmetro para documentos contidos no processo raiz
+            //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>
+            if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
+                $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
+            }
+            
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
                 $documento->hipoteseLegal = new stdClass();
                 $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());

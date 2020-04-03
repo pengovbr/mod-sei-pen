@@ -1183,7 +1183,7 @@ class ProcessoEletronicoRN extends InfraRN
             throw new InfraException(utf8_encode(sprintf('Nenhum procedimento foi encontrado com o id %s', $strProtocoloFormatado)));
         }
 
-        if (!in_array($objProtocoloDTO->getStrStaEstado(), array(ProtocoloRN::$TE_EM_PROCESSAMENTO, ProtocoloRn::$TE_BLOQUEADO))) {
+        if ($objProtocoloDTO->getStrStaEstado() != ProtocoloRn::$TE_PROCEDIMENTO_BLOQUEADO) {
             throw new InfraException(utf8_encode('O processo não esta com o estado com "Em Processamento" ou "Bloqueado"'));
         }
 
@@ -1650,6 +1650,24 @@ class ProcessoEletronicoRN extends InfraRN
         return $arrObjDocumento;
     }
 
+
+    /**
+     * Retorna a referência para o processo ou documento avulso
+     *
+     * @param stdclass $parobjMetadadosProcedimento
+     * @return Mixed Protocolo representado um processo ou um documento avulso
+     */
+    public static function obterProtocoloDosMetadados($parobjMetadadosProcedimento)
+    {
+        $objProcesso = $parobjMetadadosProcedimento->metadados->processo;
+        $objDocumento = $parobjMetadadosProcedimento->metadados->documento;
+        $objProtocolo = isset($objProcesso) ? $objProcesso : $objDocumento;
+
+        //Caso seja processo receberá em staTipoProtocolo P e caso seja documento avulso receberá D
+        $objProtocolo->staTipoProtocolo = isset($objProcesso) ? ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO : ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO;
+
+        return $objProtocolo;
+    }
 
     /**
     * Busca a unidade ao qual o processo foi anteriormente expedido.

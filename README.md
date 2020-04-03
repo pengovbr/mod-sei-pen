@@ -208,7 +208,7 @@ Os procedimento de instalação do Gearman podem ser encontrados no seguinte end
 
 **Importante:** É imprescindível que os dois sejam instalados **SOMENTE** no nó de aplicação em que está configurado o CRON de agendamento do SEI.
 
-Para instalação das bibliotecas do Gearman para uso no PHP, execute os comandos abaixo:
+Como exemplo de instalação das bibliotecas do Gearman considerando uma distribuição CENTOS do Linux, execute os comandos abaixo:
 
 ```bash
 yum install epel-release && yum update
@@ -225,6 +225,17 @@ O supervisor é o componente responsável pelo gerenciamento dos processos de mo
 **Importante:** Deverá ser utilizado o Supervisor a partir da versão 4.0. 
 
 Para maiores orientações sobre como realizar a instalação em diferentes distribuições do Linux, acessar a documentação oficial em http://supervisord.org/installing.html
+
+Como exemplo de instalação do Supervisor considerando uma distribuição CENTOS do Linux, execute os comandos abaixo:
+
+```bash
+yum install python36
+python3 -m ensurepip
+python3 -m pip install supervisor==4.*
+mkdir -p /etc/supervisor/ /var/log/supervisor/
+echo_supervisord_conf > /etc/supervisor/supervisord.conf
+```
+
 
 
 ##### Configuração da inicialização automática do Supervisord no Linux
