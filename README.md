@@ -33,9 +33,8 @@ Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módul
  - Gearman instalado;
  - Usuário de acesso ao banco de dados do SEI e SIP com permissões para criar novas estruturas no banco de dados.
   
-Para iniciar os procedimentos de configuração, será necessário registrar no **ConectaGov-PEN** as unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Lembrando que os testes devem ser feitos primeiro em ambiente de desenvolvimento/homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
+Para iniciar os procedimentos de configuração, será necessário registrar no **ConectaGov-PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
- - Desenvolvimento [http://pen-portal.trafficmanager.net/solicitarCadastroComite](http://pen-portal.trafficmanager.net/solicitarCadastroComite "DESENVOLVIMENTO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
  - Homologação [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
  - Produção [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
 
@@ -71,11 +70,15 @@ Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acim
 ```
 ---
 
-#### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+#### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. 
+
+Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
 ---
 
-#### 5. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+#### 5. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. 
+
+Lembre-se de mover, e não copiar, por questões de segurança e padronização.
 
 ---
 
