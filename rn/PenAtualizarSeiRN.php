@@ -142,6 +142,25 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }        
     }
 
+
+    /**
+     * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
+     *
+     * @param string $parStrNumeroVersao
+     * @return void
+     */
+    private function atualizarNumeroVersao($parStrNumeroVersao)
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(array(self::PARAMETRO_VERSAO_MODULO, self::PARAMETRO_VERSAO_MODULO_ANTIGO), InfraDTO::$OPER_IN);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor($parStrNumeroVersao);
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+
     /* Contêm atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
 
@@ -1800,11 +1819,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function instalarV1500()
     {
-        // Altera o parâmetro da versão de banco
-        $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->setStrValor('1.5.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.5.0');
     }    
 }

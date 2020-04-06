@@ -393,9 +393,26 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     /**
+     * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
+     *
+     * @param string $parStrNumeroVersao
+     * @return void
+     */
+    private function atualizarNumeroVersao($parStrNumeroVersao)
+    {
+        $objInfraParametroDTO = new InfraParametroDTO();
+        $objInfraParametroDTO->setStrNome(array(self::PARAMETRO_VERSAO_MODULO, self::PARAMETRO_VERSAO_MODULO_ANTIGO), InfraDTO::$OPER_IN);
+        $objInfraParametroDTO->retTodos();
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
+        $objInfraParametroDTO->setStrValor($parStrNumeroVersao);
+        $objInfraParametroBD->alterar($objInfraParametroDTO);
+    }
+
+    /**
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
-    protected function instalarV100() {
+    private function instalarV100() {
         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
@@ -528,7 +545,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.1
      */
-    protected function instalarV101() {
+    private function instalarV101() {
         // ---------- antigo método (instalarV006R004S001US039) ---------- //
         $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -646,7 +663,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.0
      */
-    protected function instalarV102() {
+    private function instalarV102() {
 
         $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -704,7 +721,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.3
      */
-    protected function instalarV103() {
+    private function instalarV103() {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Alterar rotulo do menu
@@ -831,7 +848,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.4
      */
-    protected function instalarV104() {
+    private function instalarV104() {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Cadastrar recurso Mapeamento dos Tipo de documentos enviados
@@ -910,7 +927,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.1
      */
-    protected function instalarV111() {
+    private function instalarV111() {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
@@ -969,7 +986,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.9
      */
-    protected function instalarV119()
+    private function instalarV119()
     {
         /* Corrige nome de menu de trâmite de documentos */
         $numIdSistema = $this->getNumIdSistema('SEI');
@@ -1016,7 +1033,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.10
      */
-    protected function instalarV1110()
+    private function instalarV1110()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1031,7 +1048,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.11
      */
-    protected function instalarV1111()
+    private function instalarV1111()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1046,7 +1063,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.12
      */
-    protected function instalarV1112()
+    private function instalarV1112()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1061,7 +1078,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.13
      */
-    protected function instalarV1113()
+    private function instalarV1113()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1076,7 +1093,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.14
      */
-    protected function instalarV1114()
+    private function instalarV1114()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1091,7 +1108,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.15
      */
-    protected function instalarV1115()
+    private function instalarV1115()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1106,7 +1123,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.16
      */
-    protected function instalarV1116()
+    private function instalarV1116()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1121,7 +1138,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.17
      */
-    protected function instalarV1117()
+    private function instalarV1117()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1136,7 +1153,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.0
      */
-    protected function instalarV1200()
+    private function instalarV1200()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1151,7 +1168,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.1
      */
-    protected function instalarV1201()
+    private function instalarV1201()
     {
          //Corrigir a versão do módulo no banco de dados
         $objInfraParametroDTO = new InfraParametroDTO();
@@ -1166,7 +1183,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.2
      */
-    protected function instalarV1202()
+    private function instalarV1202()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1180,7 +1197,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.3
      */
-    protected function instalarV1203()
+    private function instalarV1203()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1194,7 +1211,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.4
      */
-    protected function instalarV1204()
+    private function instalarV1204()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1208,7 +1225,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.5
      */
-    protected function instalarV1205()
+    private function instalarV1205()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1222,7 +1239,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.6
      */
-    protected function instalarV1206()
+    private function instalarV1206()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1236,7 +1253,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.3.0
      */
-    protected function instalarV1300()
+    private function instalarV1300()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1250,7 +1267,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.0
      */
-    protected function instalarV1400()
+    private function instalarV1400()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1264,7 +1281,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.1
      */
-    protected function instalarV1401()
+    private function instalarV1401()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1278,7 +1295,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.2
      */
-    protected function instalarV1402()
+    private function instalarV1402()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1292,7 +1309,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.3
      */
-    protected function instalarV1403()
+    private function instalarV1403()
     {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
@@ -1306,15 +1323,9 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.5.0
      */
-    protected function instalarV1500()
+    private function instalarV1500()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.5.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.5.0');
     }    
 }
 
