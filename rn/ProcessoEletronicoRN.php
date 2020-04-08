@@ -177,9 +177,9 @@ class ProcessoEletronicoRN extends InfraRN
             try {
                 $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
             } catch (Exception $e) {
-                $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.";
                 $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-                throw new \SoapFault("HTTP", $mensagem, null, $detalhes);
+                $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional. " . $detalhes;
+                throw new \SoapFault("HTTP", $mensagem);
             }
         }
 
