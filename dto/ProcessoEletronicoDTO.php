@@ -16,7 +16,15 @@ class ProcessoEletronicoDTO extends InfraDTO {
         $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR, 'ObjTramiteDTO');
         $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR, 'ObjRelProcessoEletronicoApensado');
 
+        $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
+            'ProtocoloProcedimentoFormatado',
+            'protocolo_formatado',
+            'protocolo'
+        );
+
+
         $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
-        $this->configurarFK('IdProcedimento', 'procedimento', 'id_procedimento', InfraDTO::$TIPO_FK_OBRIGATORIA);
+        $this->configurarFK('IdProcedimento', 'protocolo', 'id_protocolo');
+        $this->configurarFK('IdProcedimento', 'procedimento', 'id_procedimento', InfraDTO::$TIPO_FK_OBRIGATORIA);        
 	}
 }

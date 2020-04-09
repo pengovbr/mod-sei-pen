@@ -157,7 +157,8 @@ class ProcessoEletronicoRN extends InfraRN
         @exec($strCommand, $arrOutput, $numRetorno);
 
         if($numRetorno > 0){
-            throw new InfraException('Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.');
+            $strMensagem = "Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.";
+            throw new InfraException($strMensagem);
         }
     }
 
@@ -174,7 +175,9 @@ class ProcessoEletronicoRN extends InfraRN
     private function getObjPenWs()
     {
         if($this->objPenWs == null) {
-            try {
+            $this->testaUrl($this->strWSDL, $this->options['local_cert']);
+
+            try {                
                 $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
             } catch (Exception $e) {
                 $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -187,8 +190,8 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
 
-    public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas) {
-
+    public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas) 
+    {
         $objRepositorioDTO = null;
         try{
             $parametros = new stdClass();
@@ -784,7 +787,8 @@ class ProcessoEletronicoRN extends InfraRN
         $objProcessoEletronicoDTO->setArrObjTramiteDTO(array($objTramiteDTO));
 
         //Monta dados dos componentes digitais
-        $arrObjComponenteDigitalDTO = $this->montarDadosComponenteDigital($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados);
+        $parObjProtocoloDesmembrado = ProcessoEletronicoRN::desmembrarProcessosAnexados($parObjProtocolo);
+        $arrObjComponenteDigitalDTO = $this->montarDadosComponenteDigital($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocoloDesmembrado, $parObjComponentesDigitaisSolicitados);
 
         $objTramiteDTO->setArrObjComponenteDigitalDTO($arrObjComponenteDigitalDTO);
         $objProcessoEletronicoDTO = $this->cadastrarTramiteDeProcessoInterno($objProcessoEletronicoDTO);
@@ -912,16 +916,24 @@ class ProcessoEletronicoRN extends InfraRN
         $arrayTeste = array();
         $contComponentes = 0;
 
-        foreach ($arrayComponentesDigitais as $objComponenteDigital){
+        foreach ($arrayComponentesDigitais as $indice => $objComponenteDigital){
             $contComponentes++;
             $objComponenteDigitalDTO = new ComponenteDigitalDTO();
             $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-            $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI); //TODO: Error utilizar idProcedimentoSEI devido processos apensados
+            //TODO: Error utilizar idProcedimentoSEI devido processos apensados
+            $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI); 
             $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
             $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
             $objComponenteDigitalDTO->setNumOrdem($objComponenteDigital->ordem);
             $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
             $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
+
+            if(isset($objDocumento->idProcedimentoAnexadoSEI)){
+                $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($objDocumento->idProcedimentoAnexadoSEI);
+                $objComponenteDigitalDTO->setStrProtocoloProcedimentoAnexado($objDocumento->protocoloDoProcessoAnexado);
+                $objComponenteDigitalDTO->setNumOrdemDocumentoAnexado($objDocumento->ordemAjustada);
+            }
+
 
             $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
             $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
@@ -962,7 +974,7 @@ class ProcessoEletronicoRN extends InfraRN
     {
         //Monta dados dos componentes digitais
         $arrObjComponenteDigitalDTO = array();
-        $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo);
+        $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo, true);
 
         $arrObjComponenteDigitalDTOAux = array();
         foreach ($arrObjDocumento as $objDocumento) {
@@ -973,12 +985,19 @@ class ProcessoEletronicoRN extends InfraRN
             }else{
                 $objComponenteDigitalDTO = new ComponenteDigitalDTO();
                 $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-                $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI); //TODO: Error utilizar idProcedimentoSEI devido processos apensados
-                $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
-                $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
+                //TODO: Error utilizar idProcedimentoSEI devido processos apensados
+                $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);                
+                $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);                
+                $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);                
                 $objComponenteDigitalDTO->setNumOrdem(1);
                 $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
                 $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
+
+                if(isset($objDocumento->idProcedimentoAnexadoSEI)){
+                    $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($objDocumento->idProcedimentoAnexadoSEI);
+                    $objComponenteDigitalDTO->setStrProtocoloProcedimentoAnexado($objDocumento->protocoloDoProcessoAnexado);
+                    $objComponenteDigitalDTO->setNumOrdemDocumentoAnexado($objDocumento->ordemAjustada);
+                }
 
                 //Por enquanto, considera que o documento possui apenas um componente digital
                 if(is_array($objDocumento->componenteDigital) && count($objDocumento->componenteDigital) != 1) {
@@ -1636,18 +1655,54 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
+    public static function comparacaoOrdemAjustadaDocumentos($parDocumento1, $parDocumento2)
+    {
+        $numOrdemDocumento1 = isset($parDocumento1->ordemAjustada) ? intval($parDocumento1->ordemAjustada) : intval($parDocumento1->ordem);
+        $numOrdemDocumento2 = isset($parDocumento2->ordemAjustada) ? intval($parDocumento2->ordemAjustada) : intval($parDocumento2->ordem);
+        return $numOrdemDocumento1 - $numOrdemDocumento2;
+    }
 
-    public static function obterDocumentosProtocolo($parObjProtocolo)
+    public static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
+    {
+        $numOrdemDocumento1 = intval($parDocumento1->ordem);
+        $numOrdemDocumento2 = intval($parDocumento2->ordem);
+        return $numOrdemDocumento1 - $numOrdemDocumento2;
+    }
+
+    public static function obterDocumentosProtocolo($parObjProtocolo, $parBolExtrairAnexados=false)
     {
         $arrObjDocumento = array();
         if(isset($parObjProtocolo->documento)){
-            $arrObjDocumento = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
+            $arrObjProtocolo = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
+            usort($arrObjProtocolo, array("ProcessoEletronicoRN", "comparacaoOrdemAjustadaDocumentos"));
+
+            foreach ($arrObjProtocolo as $objProtocolo) {
+                //Tratamento recursivo para processos anexados
+                $bolEhProcessoAnexado = $objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
+                if($parBolExtrairAnexados && $bolEhProcessoAnexado){
+                    $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);                    
+                    $arrObjDocumento = array_merge($arrObjDocumento, $arrProtocolosAnexados);                    
+                } else {
+                    if(!$bolEhProcessoAnexado){
+                        $objProtocolo->idProcedimentoSEI = $parObjProtocolo->idProcedimentoSEI;
+                    }
+
+                    $objProtocolo->idProtocoloSEI = ($bolEhProcessoAnexado) ? $objProtocolo->idProcedimentoSEI : $objProtocolo->idDocumentoSEI;
+                    $arrObjDocumento[] = $objProtocolo;
+                }
+            }
         } else {
             //Quando se tratar de um Documento Avulso, a ordem será sempre 1
             $parObjProtocolo->ordem = 1;
+            $parObjProtocolo->ordemAjustada = 1;
             $arrObjDocumento = array($parObjProtocolo);
         }
-        return $arrObjDocumento;
+        
+        if($parBolExtrairAnexados){
+            usort($arrObjDocumento, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
+        }
+        
+        return ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
     }
 
 
@@ -1711,4 +1766,70 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $arrObjComponenteDigital;
     }
+
+
+    /**
+    * Método responsável pelo desmembramento de processos anexados
+    * 
+    * Método responsável por desmembrar os metadados do processo recebido caso ele possua outros processos anexados
+    * O desmembramento é necessário para que o processo possa ser recriado na mesma estrutura original, ou seja, em vários 
+    * processos diferentes, um anexado ao outro
+    * 
+    * @param object $parObjProtocolo
+    * 
+    * @return list($objProtocoloPrincipal, $arrProtocolosAnexados)
+    */
+    public static function desmembrarProcessosAnexados($parObjProtocolo) 
+    {
+        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+
+        // Função anônima de identificação se um determinado documento faz parte de um processo anexado
+        $funcDocumentoFoiAnexado = function($parObjDocumento) use ($parObjProtocolo){
+            return (
+                isset($parObjDocumento->protocoloDoProcessoAnexado) && 
+                !empty($parObjDocumento->protocoloDoProcessoAnexado) && 
+                $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
+            );
+        };
+
+        // Verifica se existe algum processo anexado, retornando a referência original do processo caso não exista
+        $bolExisteProcessoAnexado = array_reduce($arrObjDocumentos, function($bolExiste, $objDoc) use ($funcDocumentoFoiAnexado){
+            return $bolExiste || $funcDocumentoFoiAnexado($objDoc);
+        });
+        
+        if(!$bolExisteProcessoAnexado){
+            return $parObjProtocolo;
+        }
+
+        $arrObjRefProcessosAnexados = array();
+        $objProcessoPrincipal = clone $parObjProtocolo;
+        $objProcessoPrincipal->documento = array();
+        $arrObjDocumentosOrdenados = $arrObjDocumentos;
+        usort($arrObjDocumentosOrdenados, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
+                
+        // Agrupamento dos documentos por processo
+        foreach ($arrObjDocumentosOrdenados as $objDocumento) {
+            $bolDocumentoAnexado = $funcDocumentoFoiAnexado($objDocumento);            
+            $strProtocoloProcAnexado = ($bolDocumentoAnexado) ? $objDocumento->protocoloDoProcessoAnexado : $objProcessoPrincipal->protocolo;
+            
+            // Cria uma nova presentação para o processo anexado identico ao processo principal
+            // As informações do processo anexado não são consideradas pois não existem metadados no modelo do PEN, 
+            // existe apenas o número do protocolo de referência
+            if($bolDocumentoAnexado && !array_key_exists($strProtocoloProcAnexado, $arrObjRefProcessosAnexados)){
+                $objProcessoAnexado = clone $objProcessoPrincipal;
+                $objProcessoAnexado->documento = array();
+                $objProcessoAnexado->protocolo = $strProtocoloProcAnexado;
+                $objProcessoAnexado->ordemAjustada = count($objProcessoPrincipal->documento) + 1;
+                $objProcessoPrincipal->documento[] = $objProcessoAnexado;
+                $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] = $objProcessoAnexado;
+            }
+            
+            $objProcessoDoDocumento = ($bolDocumentoAnexado) ? $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] : $objProcessoPrincipal;
+            $objDocumentoReposicionado = clone $objDocumento;
+            $objDocumentoReposicionado->ordemAjustada = count($objProcessoDoDocumento->documento) + 1;
+            $objProcessoDoDocumento->documento[] = $objDocumentoReposicionado;
+        }    
+        
+        return $objProcessoPrincipal;
+    }    
 }

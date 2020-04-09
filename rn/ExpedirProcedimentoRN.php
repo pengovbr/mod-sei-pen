@@ -882,6 +882,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>
             if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
                 $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
+                $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
             }
             
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){

@@ -13,9 +13,27 @@
 
 try {
     require_once dirname(__FILE__).'/../web/SEI.php';
+
+    BancoSEI::getInstance()->setBolScript(true);
+
+    if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI','UsuarioScript')){
+        throw new InfraException('Chave BancoSEI/UsuarioScript não encontrada.');
+    }
+  
+    if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI','UsuarioScript'))){
+        throw new InfraException('Chave BancoSEI/UsuarioScript não possui valor.');
+    }
+  
+    if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI','SenhaScript')){
+        throw new InfraException('Chave BancoSEI/SenhaScript não encontrada.');
+    }
+  
+    if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI','SenhaScript'))){
+        throw new InfraException('Chave BancoSEI/SenhaScript não possui valor.');
+    }
+
     $objAtualizarRN = new PenAtualizarSeiRN();
     $objAtualizarRN->atualizarVersao();
-
     exit(0);
 }
 catch(InfraException $e){

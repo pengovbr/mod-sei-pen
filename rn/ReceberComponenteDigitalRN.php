@@ -370,7 +370,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
 
         if ($objDocumentoDTO == null){
-            throw new InfraException("Documento (id: $dblIdDocumento) n<E3>o pode ser localizado.");
+            throw new InfraException("Documento (id: $dblIdDocumento) não pode ser localizado.");
         }
 
         $objProtocoloDTO = new ProtocoloDTO();
@@ -389,5 +389,6 @@ class ReceberComponenteDigitalRN extends InfraRN
         $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
         $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+
     }
 }

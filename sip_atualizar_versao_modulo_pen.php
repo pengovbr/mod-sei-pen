@@ -537,7 +537,6 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroDTO = new InfraParametroDTO();
         $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
-
         $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
         $objInfraParametroBD->cadastrar($objInfraParametroDTO);
     }
@@ -648,16 +647,7 @@ class PenAtualizarSipRN extends InfraRN {
         $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
         $this->atribuirPerfil($numIdSistema);
 
-        /* altera o parâmetro da versão de banco */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->retTodos();
-
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.1');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
-
+        $this->atualizarNumeroVersao('1.0.1');
     }
 
     /**
@@ -706,16 +696,7 @@ class PenAtualizarSipRN extends InfraRN {
         // ------------------ Atribui as permisses aos recursos e menus ----------------------//
         $this->atribuirPerfil($numIdSistema);
 
-        /* altera o parâmetro da versão de banco */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->retTodos();
-
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
-
+        $this->atualizarNumeroVersao('1.1.0');
     }
 
     /**
@@ -835,14 +816,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Cadastrar recurso de alteração dos parâmetros
         $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
 
-        /* altera o parâmetro da versão de banco */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.3');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.0.3');
     }
 
     /**
@@ -914,14 +888,7 @@ class PenAtualizarSipRN extends InfraRN {
             $objBD->alterar($objDTO);
         }
 
-        /* altera o parâmetro da versão de banco */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.0.4');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.0.4');
     }
 
     /**
@@ -972,14 +939,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objRelPerfilRecursoRN = new RelPerfilRecursoRN();
         $objRelPerfilRecursoRN->excluir($objRelPerfilRecursoRN->listar($objRelPerfilRecursoDTO));
 
-        /* Corrigir a versão do módulo no banco de dados */
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.1');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.1');
     }
 
 
@@ -1020,14 +980,8 @@ class PenAtualizarSipRN extends InfraRN {
             $objItemMenuBD->alterar($objItemMenuDTO);
         }
 
-        //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.9');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        
+        $this->atualizarNumeroVersao('1.1.9');
     }
 
     /**
@@ -1035,14 +989,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1110()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.10');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.10');
     }
 
     /**
@@ -1050,14 +997,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1111()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.11');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.11');
     }
 
     /**
@@ -1065,14 +1005,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1112()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.12');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.12');
     }
 
     /**
@@ -1080,14 +1013,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1113()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.13');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.13');
     }
 
     /**
@@ -1095,14 +1021,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1114()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.14');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.14');
     }
 
     /**
@@ -1110,14 +1029,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1115()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.15');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.15');
     }
 
     /**
@@ -1125,14 +1037,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1116()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.16');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.16');
     }
 
     /**
@@ -1140,14 +1045,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1117()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.1.17');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.1.17');
     }
 
     /**
@@ -1155,14 +1053,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1200()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.0');
     }
 
     /**
@@ -1170,14 +1061,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1201()
     {
-         //Corrigir a versão do módulo no banco de dados
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.1');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.1');
     }
 
     /**
@@ -1185,13 +1069,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1202()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.2');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.2');
     }
 
     /**
@@ -1199,13 +1077,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1203()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.3');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.3');
     }
 
     /**
@@ -1213,13 +1085,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1204()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.4');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.4');
     }
 
     /**
@@ -1227,13 +1093,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1205()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.5');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.5');
     }
 
     /**
@@ -1241,13 +1101,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1206()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.2.6');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.2.6');
     }    
 
     /**
@@ -1255,13 +1109,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1300()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.3.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.3.0');
     }
     
     /**
@@ -1269,13 +1117,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1400()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.4.0');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.4.0');
     }
     
     /**
@@ -1283,13 +1125,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1401()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.4.1');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.4.1');
     }        
 
     /**
@@ -1297,13 +1133,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1402()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.4.2');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.4.2');
     }            
 
     /**
@@ -1311,13 +1141,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     private function instalarV1403()
     {
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO);
-        $objInfraParametroDTO->retTodos();
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor('1.4.3');
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.4.3');
     }
 
     /**
@@ -1330,6 +1154,25 @@ class PenAtualizarSipRN extends InfraRN {
 }
 
 try {
+    
+    BancoSip::getInstance()->setBolScript(true);
+
+    if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
+        throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
+    }
+
+    if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
+        throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
+    }
+
+    if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
+        throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
+    }
+
+    if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
+        throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
+    }
+
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);
     $objAtualizarRN->atualizarVersao();
     exit(0);

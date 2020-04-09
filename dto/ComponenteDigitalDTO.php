@@ -11,13 +11,14 @@ class ComponenteDigitalDTO extends InfraDTO {
   public function montar() {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimento', 'id_procedimento');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimentoAnexado', 'id_procedimento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdDocumento', 'id_documento');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'id_tramite');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdAnexo', 'id_anexo');
-
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Nome', 'nome');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'HashConteudo', 'hash_conteudo');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Protocolo', 'protocolo');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'ProtocoloProcedimentoAnexado', 'protocolo_procedimento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'AlgoritmoHash', 'algoritmo_hash');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'TipoConteudo', 'tipo_conteudo');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'MimeType', 'mime_type');
@@ -27,6 +28,7 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeEspecieProdutor', 'nome_especie_produtor');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Ordem', 'ordem');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumento', 'ordem_documento');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoAnexado', 'ordem_documento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaTipoTramite', 'sta_tipo_tramite', 'md_pen_tramite');

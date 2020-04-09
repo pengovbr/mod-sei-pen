@@ -9,17 +9,24 @@ class ReceberProcedimentoRN extends InfraRN
     private $objProcessoEletronicoRN;
     private $objInfraParametro;
     private $objProcedimentoAndamentoRN;
+    private $objRelProtocoloProtocoloRN;
     private $documentosRetirados = array();
-    public $destinatarioReal = null;
-    private $objPenDebug = null;
+    private $objProcedimentoRN;
+    public $destinatarioReal;
+    private $objPenDebug;
+    private $objSeiRN;
     
     public function __construct()
     {
         parent::__construct();
+        $this->objSeiRN = new SeiRN();
+        $this->objProtocoloRN = new ProtocoloRN();
+        $this->objProcedimentoRN = new ProcedimentoRN();
         $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
-        $this->objReceberComponenteDigitalRN = new ReceberComponenteDigitalRN();
+        $this->objReceberComponenteDigitalRN = new ReceberComponenteDigitalRN();        
+        $this->objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
         $this->objPenDebug = DebugPen::getInstance();
     }
     
@@ -45,7 +52,6 @@ class ReceberProcedimentoRN extends InfraRN
             // todos os metadados do processo, comportamento não permitido pelas regras de negócio do PEN.
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
             
-            $objSeiRN = new SeiRN();
             if (!isset($parNumIdentificacaoTramite)) {
                 throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
             }
@@ -96,7 +102,7 @@ class ReceberProcedimentoRN extends InfraRN
             
             $arrayHash = array();
             $arrAnexosComponentes = array();
-            $receberComponenteDigitalRN = new ReceberComponenteDigitalRN();
+            //$receberComponenteDigitalRN = new ReceberComponenteDigitalRN();
             $this->gravarLogDebug("Obtendo metadados dos componentes digitais do processo", 3);
             
             // TODO: Refatorar código abaixo, encapsulando um nova função para realizar o download dos componentes
@@ -107,7 +113,7 @@ class ReceberProcedimentoRN extends InfraRN
             // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
             // mantida pela aplicação.
             $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProtocolo);
-            $arrHashPendentesDownload = $objTramite->componenteDigitalPendenteDeRecebimento;
+            //$arrHashPendentesDownload = $objTramite->componenteDigitalPendenteDeRecebimento;
             
             $numQtdComponentes = count($arrHashComponentesProtocolo);
             $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 5);
@@ -170,8 +176,7 @@ class ReceberProcedimentoRN extends InfraRN
             
             //TODO: processo-anexado
             if($objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO){
-                //$objProcessoPrincipal = $this->desmembrarProcessosAnexados($objProtocolo);
-                $objProtocolo = $this->desmembrarProcessosAnexados($objProtocolo);
+                $objProtocolo = ProcessoEletronicoRN::desmembrarProcessosAnexados($objProtocolo);
             }            
             
             $this->gravarLogDebug("Persistindo/atualizando dados do processo com NRE " . $strNumeroRegistro, 3);            
@@ -211,9 +216,10 @@ class ReceberProcedimentoRN extends InfraRN
             }
             
             //Atribui componentes digitais baixados anteriormente aos documentos do processo
-            //TODO: processo-anexado - Necessário atribuir os documentos nos processos correspondentes
             $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $parNumIdentificacaoTramite, $arrayHash, $objProtocolo);
             
+            $this->atribuirProcessosAnexados($objProtocolo);
+
             //Finalizar o envio do documento para a respectiva unidade
             $this->enviarProcedimentoUnidade($objProcedimentoDTO, null, $bolProcedimentoExistente);
             
@@ -374,7 +380,7 @@ class ReceberProcedimentoRN extends InfraRN
         $arrMetadadoDocumento = array();
         $objMapBD = new GenericoBD($this->getObjInfraIBanco());
         
-        $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+        $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
         foreach($arrObjDocumento as $objDocumento){
             $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componenteDigital->hash);
             $objMapDTO = new PenRelTipoDocMapRecebidoDTO(true);
@@ -503,24 +509,51 @@ class ReceberProcedimentoRN extends InfraRN
         return $objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0;
     }
     
-    private function consultarProcedimentoExistente($parStrNumeroRegistro, $parStrProtocolo = null)
+    private function consultarProcedimentoExistente($parStrNumeroRegistro, $parStrProtocolo=null)
     {
         $dblIdProcedimento = null;
         $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
         $objProcessoEletronicoDTO->retDblIdProcedimento();
+        $objProcessoEletronicoDTO->retStrProtocoloProcedimentoFormatado();
         $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
         
         //TODO: Manter o padrão o sistema em chamar uma classe de regra de negócio (RN) e não diretamente um classe BD
         $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
         $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
         
+        $strProtocoloFormatado = $objProcessoEletronicoDTO->getStrProtocoloProcedimentoFormatado();
+        if($strProtocoloFormatado !== $parStrProtocolo){
+            throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo PEN: $parStrProtocolo)"));
+        }
+
         if(isset($objProcessoEletronicoDTO)){
             $dblIdProcedimento = $objProcessoEletronicoDTO->getDblIdProcedimento();
         }
         
         return $dblIdProcedimento;
     }
-    
+
+
+    private function consultarProcedimentoAnexadoExistente($parStrNumeroRegistro, $parStrProtocolo=null)
+    {
+        $dblIdProcedimentoAnexado = null;
+        $objComponenteDigital = new ComponenteDigitalDTO();
+        $objComponenteDigital->retDblIdProcedimentoAnexado();
+        $objComponenteDigital->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objComponenteDigital->setStrProtocoloProcedimentoAnexado($parStrProtocolo);
+        $objComponenteDigital->setNumMaxRegistrosRetorno(1);
+        
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $objComponenteDigitalDTO = $objComponenteDigitalBD->consultar($objComponenteDigital);
+        
+        if(isset($objComponenteDigitalDTO)){
+            $dblIdProcedimentoAnexado = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
+        }
+        
+        return $dblIdProcedimentoAnexado;
+    }
+
+
     private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $parObjProtocolo, $parNumIdTramite)
     {
         if(!isset($parDblIdProcedimento)){
@@ -545,7 +578,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objPenParametroRN = new PenParametroRN();
         
         try {
-            $objSeiRN = new SeiRN();
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->retDthConclusao();
             $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
@@ -572,7 +604,7 @@ class ReceberProcedimentoRN extends InfraRN
             if($flgReabrir){
                 $objEntradaReabrirProcessoAPI = new EntradaReabrirProcessoAPI();
                 $objEntradaReabrirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
-                $objSeiRN->reabrirProcesso($objEntradaReabrirProcessoAPI);
+                $this->objSeiRN->reabrirProcesso($objEntradaReabrirProcessoAPI);
             }
             
             ProcessoEletronicoRN::desbloquearProcesso($parDblIdProcedimento);
@@ -597,8 +629,8 @@ class ReceberProcedimentoRN extends InfraRN
         
         $this->atribuirDocumentos($objProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $objMetadadosProcedimento);
         
-        $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
-        
+        $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);                        
+
         //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
         $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
@@ -739,8 +771,7 @@ class ReceberProcedimentoRN extends InfraRN
         //FeedSEIProtocolos::getInstance()->setBolAcumularFeeds(true);
         
         //TODO: Analisar impacto do parâmetro SEI_HABILITAR_NUMERO_PROCESSO_INFORMADO no recebimento do processo
-        //$objSeiRN = new SeiRN();
-        //$objWSRetornoGerarProcedimentoDTO = $objSeiRN->gerarProcedimento($objWSEntradaGerarProcedimentoDTO);
+        //$objWSRetornoGerarProcedimentoDTO = $this->objSeiRN->gerarProcedimento($objWSEntradaGerarProcedimentoDTO);
         
         // Finalizar criação do procedimento
         $objProcedimentoRN = new ProcedimentoRN();
@@ -758,12 +789,14 @@ class ReceberProcedimentoRN extends InfraRN
         
         $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento);
         $this->atribuirDocumentos($objProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $objMetadadosProcedimento);
-        $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTOGerado);
-        
+        $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTOGerado);    
+
         //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
         $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
         
+        $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
+
         return $objProcedimentoDTO;
     }
     
@@ -1075,7 +1108,7 @@ class ReceberProcedimentoRN extends InfraRN
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
         
         //Ordenação dos documentos conforme informado pelo remetente. Campo documento->ordem
-        usort($arrObjDocumentos, array("ReceberProcedimentoRN", "comparacaoOrdemDocumentos"));
+        usort($arrObjDocumentos, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
         
         //Obter dados dos documentos já registrados no sistema
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1084,6 +1117,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->retDblIdDocumento();
         $objComponenteDigitalDTO->retStrHashConteudo();
         $objComponenteDigitalDTO->retNumOrdemDocumento();
+        $objComponenteDigitalDTO->retDblIdProcedimentoAnexado();
+        $objComponenteDigitalDTO->retStrProtocoloProcedimentoAnexado();
         $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
         $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
         
@@ -1092,7 +1127,6 @@ class ReceberProcedimentoRN extends InfraRN
         $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, "OrdemDocumento");
         
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
-        $objSeiRN = new SeiRN();
         
         $arrObjDocumentoDTO = array();
         
@@ -1121,7 +1155,7 @@ class ReceberProcedimentoRN extends InfraRN
                             $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
                             $objEntradaCancelarDocumentoAPI->setIdDocumento($dblIdProtocolo);
                             $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
-                            $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+                            $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
                         }
                         
                         continue;
@@ -1132,6 +1166,9 @@ class ReceberProcedimentoRN extends InfraRN
                     $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$objDocumento->ordem];
                     $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
                     $objDocumento->idDocumentoSEI = $objComponenteDigitalDTO->getDblIdDocumento();
+                    $objDocumento->idProcedimentoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
+                    $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
+                    
                     continue;
                 }
                 
@@ -1295,25 +1332,32 @@ class ReceberProcedimentoRN extends InfraRN
                 $objAtividadeRN->atualizarVisualizacaoUnidade($objAtividadeDTOVisualizacao);
                 
                 $objDocumento->idDocumentoSEI = $objDocumentoDTO->getDblIdDocumento();
+                $objDocumento->idProcedimentoSEI = $objDocumentoDTO->getDblIdProcedimento();
+                $objDocumento->protocoloProcedimentoSEI = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();                
+
                 $arrObjDocumentoDTO[] = $objDocumentoDTO;
                 
                 if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
                     $this->documentosRetirados[] = $objDocumento->idDocumentoSEI;
                 }
-
-              // Tratamento para atribuição de processos anexados  
+              
             } elseif($objDocumento->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) {
-                $mumIdentificacaoTramite = $parObjMetadadosProcedimento->metadados->IDT;
-                $objProcedimentoDTOAnexado = $this->gerarProcedimento($parObjMetadadosProcedimento, $objDocumento);
 
-                $objEntradaAnexarProcessoAPI = new EntradaAnexarProcessoAPI();
-                $objEntradaAnexarProcessoAPI->setIdProcedimentoPrincipal($objProcedimentoDTO->getDblIdProcedimento());
-                $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoPrincipal($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
-                $objEntradaAnexarProcessoAPI->setIdProcedimentoAnexado($objProcedimentoDTOAnexado->getDblIdProcedimento());
-                $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoAnexado($objProcedimentoDTOAnexado->getStrProtocoloProcedimentoFormatado());
+                $objProcessoAnexado = $objDocumento;
+                // Tratamento para atribuição de processos anexados
+                // TODO: Parei aqui: Verificar se processo já existe e já se encontra anexado ao processo em questão
+                // 2 tratamentos serão necessários:
+                // - o primeiro para identificar um processo anexado já existente e que o retorno do processo não faz necessários 
+                // que o processo anexado seja criado novamente
+                // - O segundo caso é identificar que dois processos independentes foram tramitados para o órgão B e estes 
+                // foram retornados como anexados
 
-                $objSeiRN = new SeiRN();
-                $objSeiRN->anexarProcesso($objEntradaAnexarProcessoAPI);      
+                // Verificar se procedimento já existia na base de dados do sistema
+                $dblIdProcedimentoAnexado = $this->consultarProcedimentoAnexadoExistente($strNumeroRegistro, $objProcessoAnexado->protocolo);
+                $bolProcedimentoExistente = isset($dblIdProcedimentoAnexado);
+                if(!$bolProcedimentoExistente){
+                    $this->gerarProcedimento($parObjMetadadosProcedimento, $objProcessoAnexado);
+                }                
             }
         }
         
@@ -1322,8 +1366,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
             $objEntradaCancelarDocumentoAPI->setIdDocumento($documentoCancelado);
             $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
-            $objSeiRN = new SeiRN();
-            $objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+            $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
         }
         
         $objProcedimentoDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);
@@ -1349,6 +1392,61 @@ class ReceberProcedimentoRN extends InfraRN
     }
     
     
+    private function atribuirProcessosAnexados($parObjProtocolo)
+    {
+        $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+        $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+        $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
+
+        $arrOrdemProtocolos = array();
+        $arrObjProtocolos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+        foreach ($arrObjProtocolos as $numOrdem => $objProtocolo) {
+
+            if($objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) {
+
+                // Verifica se o processo já se encontra anexado ao principal            
+                $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parObjProtocolo->idProcedimentoSEI);    
+                $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objProtocolo->idProcedimentoSEI);
+                $bolProcessoJaAnexado = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+
+                if($bolProcessoJaAnexado){                    
+                    //Procedimento principal será aquele passado como parâmetro
+                    $objEntradaAnexarProcessoAPI = new EntradaAnexarProcessoAPI();
+                    $objEntradaAnexarProcessoAPI->setIdProcedimentoPrincipal($parObjProtocolo->idProcedimentoSEI);
+                    $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoPrincipal($parObjProtocolo->protocolo);
+    
+                    //Procedimento anexado será aquele contido na lista de documentos do processo principal
+                    $objEntradaAnexarProcessoAPI->setIdProcedimentoAnexado($objProtocolo->idProcedimentoSEI);
+                    $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoAnexado($objProtocolo->protocolo);
+                    $this->objSeiRN->anexarProcesso($objEntradaAnexarProcessoAPI);                    
+                }
+            }
+
+            $arrOrdemProtocolos[$objProtocolo->idProtocoloSEI] = $numOrdem;
+        }
+
+        // Após a anexação de todos os processos, ajusta a ordenação dos mesmos
+        // Busca a ordem atual dos processos anexados e documentos do processo
+        $objProcedimentoDTO = new ProcedimentoDTO();    
+        $objProcedimentoDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
+        $objProcedimentoDTO->setStrSinDocTodos('S');
+        $objProcedimentoDTO->setStrSinProcAnexados('S');
+        $arrObjProcedimentoPrincipalDTO = $this->objProcedimentoRN->listarCompleto($objProcedimentoDTO);
+        $objProcedimentoDTO = $arrObjProcedimentoPrincipalDTO[0];        
+        $arrRelProtocoloIndexadoDTO = InfraArray::indexarArrInfraDTO($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO(), "IdProtocolo2");
+
+        foreach ($arrOrdemProtocolos as $numIdProtocolo => $numOrdem) {
+            //Atribuição do posicionamento correto dos processos anexados
+            $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+            $numIdProtocoloProtocolo = $arrRelProtocoloIndexadoDTO[$numIdProtocolo]->getDblIdRelProtocoloProtocolo();
+            $objRelProtocoloProtocoloDTO->setDblIdRelProtocoloProtocolo($numIdProtocoloProtocolo);
+            $objRelProtocoloProtocoloDTO->setNumSequencia($numOrdem);
+            $this->objRelProtocoloProtocoloRN->alterar($objRelProtocoloProtocoloDTO);
+        }
+    }
+
+
     private function atribuirProcessosApensados(ProcedimentoDTO $objProtocoloDTO, $objProcedimento, $parMetadadosProcedimento)
     {
         if(isset($objProcedimento->processoApensado)) {
@@ -1663,13 +1761,16 @@ class ReceberProcedimentoRN extends InfraRN
         
     }
     
+
+/* Função movida para a classe ProcessoEletronicoRN
+
     static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
     {
         $numOrdemDocumento1 = strtolower($parDocumento1->ordem);
         $numOrdemDocumento2 = strtolower($parDocumento2->ordem);
         return $numOrdemDocumento1 - $numOrdemDocumento2;
     }
-    
+*/    
     
     protected function receberTramitesRecusadosControlado($parNumIdentificacaoTramite)
     {
@@ -1913,7 +2014,7 @@ class ReceberProcedimentoRN extends InfraRN
         from procedimento proced join documento doc on (doc.id_procedimento = proced.id_procedimento)
         join protocolo prot_doc on (doc.id_documento = prot_doc.id_protocolo)
         left join md_pen_componente_digital comp on (comp.id_documento = doc.id_documento)
-        where proced.id_procedimento = $parNumIdProcedimento
+        where comp.id_procedimento = $parNumIdProcedimento
         and prot_doc.sta_protocolo = 'R'
         and prot_doc.sta_estado <> " . ProtocoloRN::$TE_DOCUMENTO_CANCELADO . "
         and not exists (select 1 from anexo where anexo.id_protocolo = prot_doc.id_protocolo) ";
@@ -2094,67 +2195,5 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
     
-    /**
-    * Método responsável pelo desmembramento de processos anexados
-    * 
-    * Método responsável por desmembrar os metadados do processo recebido caso ele possua outros processos anexados
-    * O desmembramento é necessário para que o processo possa ser recriado na mesma estrutura original, ou seja, em vários 
-    * processos diferentes, um anexado ao outro
-    * 
-    * @param object $parObjProtocolo
-    * 
-    * @return list($objProtocoloPrincipal, $arrProtocolosAnexados)
-    */
-    private function desmembrarProcessosAnexados($parObjProtocolo) 
-    {
-        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
 
-        // Função anônima de identificação se um determinado documento faz parte de um processo anexado
-        $funcDocumentoFoiAnexado = function($parObjDocumento) use ($parObjProtocolo){
-            return (
-                isset($parObjDocumento->protocoloDoProcessoAnexado) && 
-                !empty($parObjDocumento->protocoloDoProcessoAnexado) && 
-                $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
-            );
-        };
-
-        // Verifica se existe algum processo anexado, retornando a referência original do processo caso não exista
-        $bolExisteProcessoAnexado = array_reduce($parObjProtocolo->documento, function($bolExiste, $objDoc) use ($funcDocumentoFoiAnexado){
-            return $bolExiste || $funcDocumentoFoiAnexado($objDoc);
-        });
-        
-        if(!$bolExisteProcessoAnexado){
-            return $parObjProtocolo;
-        }
-
-        $arrObjRefProcessosAnexados = array();
-        $objProcessoPrincipal = clone $parObjProtocolo;
-        $objProcessoPrincipal->documento = array();
-        $arrObjDocumentosOrdenados = $arrObjDocumentos;
-        usort($arrObjDocumentosOrdenados, array("ReceberProcedimentoRN", "comparacaoOrdemDocumentos"));
-                
-        // Agrupamento dos documentos por processo
-        foreach ($arrObjDocumentosOrdenados as $objDocumento) {
-            $bolDocumentoAnexado = $funcDocumentoFoiAnexado($objDocumento);            
-            $strProtocoloProcAnexado = ($bolDocumentoAnexado) ? $objDocumento->protocoloDoProcessoAnexado : $objProcessoPrincipal->protocolo;
-            
-            // Cria uma nova presentação para o processo anexado identico ao processo principal
-            // As informações do processo anexado não são consideradas pois não existem metadados no modelo do PEN, 
-            // existe apenas o número do protocolo de referência
-            if($bolDocumentoAnexado && !array_key_exists($strProtocoloProcAnexado, $arrObjRefProcessosAnexados)){
-                $objProcessoAnexado = clone $objProcessoPrincipal;
-                $objProcessoAnexado->documento = array();
-                $objProcessoAnexado->ordem = count($objProcessoPrincipal->documento) + 1; $objProcessoAnexado->protocolo = $strProtocoloProcAnexado;
-                $objProcessoPrincipal->documento[] = $objProcessoAnexado;
-                $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] = $objProcessoAnexado;
-            }
-            
-            $objProcessoDoDocumento = ($bolDocumentoAnexado) ? $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] : $objProcessoPrincipal;
-            $objDocumentoReposicionado = clone $objDocumento;            
-            $objDocumentoReposicionado->ordem = count($objProcessoDoDocumento->documento) + 1;
-            $objProcessoDoDocumento->documento[] = $objDocumentoReposicionado;
-        }    
-        
-        return $objProcessoPrincipal;
-    }
 }
