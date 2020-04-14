@@ -163,6 +163,29 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
 
+    /**
+     * Remove a chave primária da tabela indicada, removendo também o índice vinculado, caso seja necessário
+     * 
+     * Necessário dependendo da versão do banco de dados Oracle utilizado que pode não remover um índice criado com mesmo 
+     * nome da chave primária, impedindo que este objeto seja recriado posteriormente na base de dados
+     *
+     * @param [type] $parStrNomeTabela
+     * @param [type] $parStrNomeChavePrimario
+     * @return void
+     */
+    private function excluirChavePrimariaComIndice($parStrNomeTabela, $parStrNomeChavePrimaria)
+    {
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->excluirChavePrimaria($parStrNomeTabela, $parStrNomeChavePrimaria);
+
+        try{
+            $objInfraMetaBD->excluirIndice($parStrNomeTabela, $parStrNomeChavePrimaria);
+        } catch(\Exception $ex) {
+            //Caso o índice não seja localizado, nada deverá ser feito pois a existência depende de versão do banco de dados
+        }
+    }
+
+
     /* Contêm atualizações da versao 1.0.0 do modulo */
     protected function instalarV100() {
 
@@ -786,9 +809,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
 
         if ($objMetaBanco->isChaveExiste('md_pen_tramite_processado', 'pk_md_pen_tramite_processado')) {
-
-            $objMetaBanco->removerChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado');
-            $objMetaBanco->adicionarChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado', array('id_tramite', 'tipo_tramite_processo'));
+            $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());    
+            $this->excluirChavePrimariaComIndice("md_pen_tramite_processado", "pk_md_pen_tramite_processado");
+            $objInfraMetaBD->adicionarChavePrimaria("md_pen_tramite_processado", "pk_md_pen_tramite_processado", array('id_tramite', 'tipo_tramite_processo'));
         }
 
         /* ---------- antigo método (instalarV003R003S003IW001) ---------- */
@@ -1186,12 +1209,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     /* Contêm atualizações da versao 1.1.8 do módulo */
-    protected function instalarV118() {
-
+    protected function instalarV118() 
+    {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
         //Correção de chave primária para considerar campo de tipo de recibo
-        $objInfraMetaBD->excluirChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado');
+        $this->excluirChavePrimariaComIndice('md_pen_tramite_processado','pk_md_pen_tramite_processado');
         $objInfraMetaBD->adicionarChavePrimaria('md_pen_tramite_processado','pk_md_pen_tramite_processado',array('id_tramite','tipo_tramite_processo'));
 
         //Atribuição de dados da unidade de origem e destino no trâmite
@@ -1625,7 +1648,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Adicionar Chave primaria
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->excluirChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+        $this->excluirChavePrimariaComIndice('md_pen_componente_digital', 'pk_md_pen_componente_digital');
         $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
 
         // Definição de ordem em que os parâmetros aparecem na página
@@ -1654,13 +1677,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas        
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
         $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
-        $objInfraMetaBD->excluirChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
-        
-        try{
-            $objInfraMetaBD->excluirIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
-        } catch(\Throwable $th) {
-            InfraDebug::getInstance()->gravar("Índice adicional não localizado para chave pk_md_pen_recibo_tramite_receb");
-        }
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
         $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'), false);
@@ -1679,14 +1696,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
-        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
-        $objInfraMetaBD->excluirChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
-
-        try{
-            $objInfraMetaBD->excluirIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
-        } catch(\Throwable $th) {
-            InfraDebug::getInstance()->gravar("Índice adicional não localizado para chave pk_md_pen_recibo_tramite_receb");
-        }
+        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");                
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
         $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'), false);

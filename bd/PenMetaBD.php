@@ -115,36 +115,6 @@ class PenMetaBD extends InfraMetaBD {
         return $this;
     }
 
-    /**
-     * Apaga a chave primária da tabela
-     *
-     * @throws InfraException
-     * @return PenMetaBD
-     */
-    public function removerChavePrimaria($strNomeTabela, $strNomeChave){
-
-        if($this->isChaveExiste($strNomeTabela, $strNomeChave)) {
-
-            $strTableDrive = get_parent_class($this->getObjInfraIBanco());
-
-            switch($strTableDrive) {
-
-                case 'InfraMySqli':
-                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP PRIMARY KEY');
-                    break;
-
-                case 'InfraSqlServer':
-                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP CONSTRAINT '.$strNomeChave);
-                    break;
-
-                case 'InfraOracle':
-                    $this->getObjInfraIBanco()->executarSql('ALTER TABLE '.$strNomeTabela.' DROP CONSTRAINT '.$strNomeChave);
-                    break;
-            }
-        }
-        return $this;
-    }
-
     public function adicionarChaveUnica($strNomeTabela = '', $arrNomeChave = array()){
 
         $this->getObjInfraIBanco()
