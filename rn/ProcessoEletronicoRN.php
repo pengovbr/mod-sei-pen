@@ -978,7 +978,6 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrObjComponenteDigitalDTOAux = array();
         foreach ($arrObjDocumento as $objDocumento) {
-
             $quantidadeDeComponentesDigitais = count($objDocumento->componenteDigital);
             if($quantidadeDeComponentesDigitais > 1){
                 $arrObjComponenteDigitalDTOAux = self::montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados);
@@ -1781,7 +1780,7 @@ class ProcessoEletronicoRN extends InfraRN
     */
     public static function desmembrarProcessosAnexados($parObjProtocolo) 
     {
-        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
 
         // Função anônima de identificação se um determinado documento faz parte de um processo anexado
         $funcDocumentoFoiAnexado = function($parObjDocumento) use ($parObjProtocolo){
