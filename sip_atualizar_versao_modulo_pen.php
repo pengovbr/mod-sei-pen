@@ -1,12 +1,6 @@
 <?php
 require_once dirname(__FILE__).'/../web/Sip.php';
 
-set_include_path(implode(PATH_SEPARATOR, array(
-    realpath(__DIR__ . '/../../infra/infra_php'),
-    get_include_path(),
-)));
-
-
 class PenAtualizarSipRN extends InfraRN {
 
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
@@ -1155,22 +1149,35 @@ class PenAtualizarSipRN extends InfraRN {
 
 try {
     
-    BancoSip::getInstance()->setBolScript(true);
+    //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+    $numVersaoAtual = explode('.', SIP_VERSAO);
+    $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+    $numVersaoAtual = intval(join($numVersaoAtual));
 
-    if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
-        throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
-    }
+    //Normaliza o formato de número de versão considerando dois caracteres para cada item (2.1.0 -> 020100)
+    // A partir da versão 2.1.0 é que o SIP passa a dar suporte ao UsuarioScript/SenhaScript
+    $numVersaoScript = explode('.', "2.1.0");
+    $numVersaoScript = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoScript);
+    $numVersaoScript = intval(join($numVersaoScript));
 
-    if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
-        throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
-    }
+    if ($numVersaoAtual >= $numVersaoScript) {
+        BancoSip::getInstance()->setBolScript(true);
 
-    if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
-        throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
-    }
-
-    if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
-        throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
+        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
+            throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
+        }
+    
+        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
+            throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
+        }
+    
+        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
+            throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
+        }
+    
+        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
+            throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
+        }    
     }
 
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);
