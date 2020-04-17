@@ -1676,7 +1676,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas        
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
-        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
+
+        try{ // Remoção de chave estrangeira com nome antigo da tabela md_pen_recibo_tramite_recebido
+            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite");
+        } catch(\Exception $e){
+            $this->logar("Chave estrangeira 'fk_md_pen_recibo_tramite_recebido_md_pen_tramite' não localizada para remoção. ");
+        }
+
+        try{ // Remoção de chave estrangeira com nome novo da tabela md_pen_recibo_tramite_recebido
+            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
+        } catch(\Exception $e){
+            $this->logar("Chave estrangeira 'fk_md_pen_recibo_receb_tram' não localizada para remoção. ");
+        }
+        
         $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
@@ -1696,7 +1708,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
-        $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");                
+
+        try{ // Remoção de chave estrangeira com nome antigo da tabela md_pen_recibo_tramite_recebido
+            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite");
+        } catch(\Exception $e){
+            $this->logar("Chave estrangeira 'fk_md_pen_recibo_tramite_recebido_md_pen_tramite' não localizada para remoção. ");
+        }
+
+        try{ // Remoção de chave estrangeira com nome novo da tabela md_pen_recibo_tramite_recebido
+            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
+        } catch(\Exception $e){
+            $this->logar("Chave estrangeira 'fk_md_pen_recibo_receb_tram' não localizada para remoção. ");
+        }        
+
         $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
