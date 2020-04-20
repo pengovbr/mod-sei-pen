@@ -35,8 +35,12 @@ Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módul
   
 Para iniciar os procedimentos de configuração, será necessário registrar no **ConectaGov-PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
- - Homologação [http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite](http://homolog.pen.portal.trafficmanager.net/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
- - Produção [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+ - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+ - **Produção:** [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+
+**Atenção!**
+Conforme publicado no Portal do Processo Eletrônico Nacional, [Manutenção Programada no Barramento PEN - Abril 2020](http://processoeletronico.gov.br/index.php/noticias/manutencao-programada-no-barramento-pen-abril-2020), os endereços dos ambientes de homologação do projeto serão atualizados no dia 22/04/2020. Com isto, o seguinte endereço deverá ser utilizado até a data programada de mudança para solicitações de cadastramento em comitê de protocolo: https://homolog.pen.portal.trafficmanager.net
+
 
  Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.planejamento.gov.br
 
@@ -166,13 +170,11 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 
 * **Endereço do Web Service:**  
 *Endereço dos serviços de integração do PEN* 
-    - Desenvolvimento: https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/
-    - Homologação: https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
+    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
     - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/  
 * **Endereço do Web Service de Pendências**:  
 *Endereço dos serviços de notificação de trâmites de processos*
-    - Desenvolvimento: https://pen-pendencias.trafficmanager.net/
-    - Homologação: https://homolog.pen.pendencias.trafficmanager.net/
+    - Homologação: https://homolog.pendencias.processoeletronico.gov.br/
     - Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
 * **ID do Repositório de Estruturas:**   
 *ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*  
@@ -193,6 +195,14 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
     - *Configurar com o ID da Unidade criada no passo 11*
 
 ---
+
+**Atenção!**
+Conforme publicado no Portal do Processo Eletrônico Nacional, [Manutenção Programada no Barramento PEN - Abril 2020](http://processoeletronico.gov.br/index.php/noticias/manutencao-programada-no-barramento-pen-abril-2020), os endereços dos ambientes de homologação do projeto serão atualizados no dia 22/04/2020. Com isto, os seguintes endereços deverão ser utilizados até a data programada de mudança: https://homolog.pen.portal.trafficmanager.net
+
+* **Endereço do Web Service em homologação:** https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
+* **Endereço do Web Service de Pendências em homologação:**: https://homolog.pen.pendencias.trafficmanager.net/
+
+
 
 #### 14. Configurar as unidades do SEI que poderão realizar o envio e recebimento de trâmites externos
 
