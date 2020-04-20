@@ -80,6 +80,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.1': $this->instalarV1402();
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
+                case '1.5.0': $this->instalarV1501();
                 
                     break;
                 default:
@@ -1742,5 +1743,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->adicionarColuna("md_pen_componente_digital", "ordem_documento_anexado", $objInfraMetaBD->tipoNumero(), 'null');
 
         $this->atualizarNumeroVersao("1.5.0");
+    }
+    
+    protected function instalarV1501()
+    {
+        $this->atualizarNumeroVersao("1.5.1");
     }    
 }
