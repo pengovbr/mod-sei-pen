@@ -9,8 +9,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
+    private $objInfraMetaBD = null;
+
     public function __construct() {
         parent::__construct();
+
+        $this->objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
     }
 
     protected function inicializarObjInfraIBanco(){
@@ -174,15 +178,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
      * @param [type] $parStrNomeChavePrimario
      * @return void
      */
-    private function excluirChavePrimariaComIndice($parStrNomeTabela, $parStrNomeChavePrimaria)
+    private function excluirChavePrimariaComIndice($parStrNomeTabela, $parStrNomeChavePrimaria, $bolSuprimirErro=false)
     {
-        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->excluirChavePrimaria($parStrNomeTabela, $parStrNomeChavePrimaria);
-
         try{
-            $objInfraMetaBD->excluirIndice($parStrNomeTabela, $parStrNomeChavePrimaria);
-        } catch(\Exception $ex) {
-            //Caso o índice não seja localizado, nada deverá ser feito pois a existência depende de versão do banco de dados
+            $this->objInfraMetaBD->excluirChavePrimaria($parStrNomeTabela, $parStrNomeChavePrimaria);
+
+            try{
+                $this->objInfraMetaBD->excluirIndice($parStrNomeTabela, $parStrNomeChavePrimaria);
+            } catch(\Exception $e) {
+                //Caso o índice não seja localizado, nada deverá ser feito pois a existência depende de versão do banco de dados
+            }
+        } catch(Exception $e) {
+            // Mensagem de erro deve ser suprimida caso seja indicado pelo usuário
+            if(!$bolSuprimirErro){
+                throw $e;
+            }
+        }
+    }
+
+
+    private function excluirChaveEstrangeira($parStrTabela, $parStrNomeChaveEstrangeira, $bolSuprimirErro=false)
+    {
+        try{ 
+            $this->objInfraMetaBD->excluirChaveEstrangeira($parStrTabela, $parStrNomeChaveEstrangeira);
+        } catch(\Exception $e){
+            // Mensagem de erro deve ser suprimida caso seja indicado pelo usuário
+            if(!$bolSuprimirErro){
+                throw $e;
+            }
         }
     }
 
@@ -1678,19 +1701,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas        
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
-        try{ // Remoção de chave estrangeira com nome antigo da tabela md_pen_recibo_tramite_recebido
-            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite");
-        } catch(\Exception $e){
-            $this->logar("Chave estrangeira 'fk_md_pen_recibo_tramite_recebido_md_pen_tramite' não localizada para remoção. ");
-        }
-
-        try{ // Remoção de chave estrangeira com nome novo da tabela md_pen_recibo_tramite_recebido
-            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
-        } catch(\Exception $e){
-            $this->logar("Chave estrangeira 'fk_md_pen_recibo_receb_tram' não localizada para remoção. ");
-        }
-        
-        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
+        // Remove chaves estrangeiras e primárias com supressão de mensagens de erro devido a incompatibilidade de nomes entre diferentes versões do sistema
+        $bolSuprimirError = true;
+        $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite", $bolSuprimirError);
+        $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram", $bolSuprimirError);
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", $bolSuprimirError);
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_recebido", $bolSuprimirError);
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
         $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'), false);
@@ -1710,19 +1726,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
-        try{ // Remoção de chave estrangeira com nome antigo da tabela md_pen_recibo_tramite_recebido
-            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite");
-        } catch(\Exception $e){
-            $this->logar("Chave estrangeira 'fk_md_pen_recibo_tramite_recebido_md_pen_tramite' não localizada para remoção. ");
-        }
-
-        try{ // Remoção de chave estrangeira com nome novo da tabela md_pen_recibo_tramite_recebido
-            $objInfraMetaBD->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram");
-        } catch(\Exception $e){
-            $this->logar("Chave estrangeira 'fk_md_pen_recibo_receb_tram' não localizada para remoção. ");
-        }        
-
-        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb");
+        // Remove chaves estrangeiras e primárias com supressão de mensagens de erro devido a incompatibilidade de nomes entre diferentes versões do sistema
+        $bolSuprimirError = true;
+        $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite", $bolSuprimirError);
+        $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram", $bolSuprimirError);
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", $bolSuprimirError);
+        $this->excluirChavePrimariaComIndice("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_recebido", $bolSuprimirError);
 
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_recibo_tramite_recebido", "pk_md_pen_recibo_tramite_receb", array("numero_registro", "id_tramite"));
         $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'), false);
