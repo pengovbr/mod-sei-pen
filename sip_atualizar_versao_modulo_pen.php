@@ -108,6 +108,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
+                case '1.5.1': $this->instalarV1502();
 
                 break;
                 default:
@@ -317,6 +318,7 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
 
+    //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
     public function addRecursosToPerfil($numIdPerfil, $numIdSistema) {
 
         if (!empty($this->arrRecurso)) {
@@ -337,6 +339,7 @@ class PenAtualizarSipRN extends InfraRN {
         }
     }
 
+    //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
     public function addMenusToPerfil($numIdPerfil, $numIdSistema) {
 
         if (!empty($this->arrMenu)) {
@@ -384,8 +387,8 @@ class PenAtualizarSipRN extends InfraRN {
         };
 
         $fnCadastrar('ADMINISTRADOR', $numIdSistema);
-        //$fnCadastrar('BASICO', $numIdSistema);
     }
+
 
     /**
      * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
@@ -1154,6 +1157,28 @@ class PenAtualizarSipRN extends InfraRN {
     {
         $this->atualizarNumeroVersao('1.5.1');
     }        
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.5.2
+     */
+    private function instalarV1502()
+    {        
+        $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
+
+        $strNomeMenuProcessosTramitados = "Processos Tramitados Externamente";
+        $numIdSistemaSei = ScriptSip::obterIdSistema('SEI');
+        $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
+        $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei,'Principal');
+
+        // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
+        $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');        
+        $numIdMenuProcessoTramitados = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSei, $strNomeMenuProcessosTramitados);
+        ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
+        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
+
+        $this->atualizarNumeroVersao('1.5.2');
+    }   
 }
 
 try {
