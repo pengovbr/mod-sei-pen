@@ -275,31 +275,9 @@ files = /opt/sei/web/modulos/pen/config/supervisord.conf.php
 
 As configurações contidas no arquivo *config/supervisord.conf.php* devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação a chave de configuração *[user]*, que deverá ser configurado com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache)
 
----
-
-#### 17. Configurar a tarefa de reinicialização de serviços caso se identifique possíveis indisponibilidades.
-
-Esta configuração é recomendada como contingência para garantir que os serviços de integração não serão desativados em caso de indisponibilidade momentânea da infraestrutura do PEN.
-
-Os procedimento descritos abaixo deverão ser executados no mesmo servidor em que está instalado o **supervisor** e o **gearman** (passo 3). 
-
-Mova o script **verificar-servicos.sh**, localizado na raiz do diretório do módulo, para a pasta de **sei/bin** do SEI:
-
-```bash
-cp [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/web/modulos/pen/verificar-servicos.sh /opt/sei/bin/
-```
-
-Configure este script no serviço de agendamento CRON com uma periodicidade sugerida de 10 minutos, tempo este utilizado para o devido monitoramento e tentativa de reativação dos serviços.
-
-```bash
-crontab -e 
-
-*/10 * * * * [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/bin/verificar-servicos.sh
-```
-
 --- 
 
-#### 18. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
+#### 17. Iniciar serviços de monitoramento de pendências de trâmite **Gearman** e **Supervisor**
 
 ```bash
 service gearmand start && supervisord
@@ -321,7 +299,7 @@ Caso os dois serviços mencionados anteriormente não estiverem com status _RUNN
 **Atenção**: Importante colocar o serviço para ser iniciado automaticamente juntamente com o servidor. 
 
 ---
-#### 19. Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. 
+#### 18. Realizar o mapeamento de tipos de documentos do SEI com as especies documentais definidas no PEN, tanto de envio quanto de recebimento. 
 
 Esta configuração deve ser feita antes de começar a utilização do módulo.
     - SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Tipos de Documentos >> **Envio** >> Cadastrar
@@ -330,7 +308,7 @@ Esta configuração deve ser feita antes de começar a utilização do módulo.
 **Observação**: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
 ---
-#### 20. Realizar o mapeamento das hipóteses legais do SEI com as definidas no PEN para permitir o trâmite externo de processos e documentos restritos.
+#### 19. Realizar o mapeamento das hipóteses legais do SEI com as definidas no PEN para permitir o trâmite externo de processos e documentos restritos.
 
 **Atenção**: Antes de iniciar esta configuração, será necessário executar manualmente o agendamento **PENAgendamentoRN::atualizarHipotesesLegais** em [**SEI > Infra > Agendamentos**]. Esta tarefa é necessária para atualizar o SEI com a última versão da tabela de hipóteses legais do PEN.
 
@@ -341,7 +319,7 @@ Este mapeamento deve ser feito antes de começar a utilização do módulo e est
 **Observação**: Os tipos de documentos a serem mapeados deverão estar configurados no SEI como Externo ou Interno/Externo 
 
 ---
-#### 21. O protocolo de comunicação implementado pelo PEN realiza a geração e assinatura digital de recibos de entrega e conclusão dos trâmites de processo. Para a correta geração dos recibos pelo módulo, é indispensável que todos os nós da aplicação estejam configurados com o serviço de sincronização de relógios oficial NTP.br.    
+#### 20. O protocolo de comunicação implementado pelo PEN realiza a geração e assinatura digital de recibos de entrega e conclusão dos trâmites de processo. Para a correta geração dos recibos pelo módulo, é indispensável que todos os nós da aplicação estejam configurados com o serviço de sincronização de relógios oficial NTP.br.    
 Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-linux-comum.php
 
 ---
