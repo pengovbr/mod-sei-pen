@@ -85,6 +85,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
+                case '1.5.1': $this->instalarV1502();
                 
                     break;
                 default:
@@ -777,7 +778,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
-
 
         /* ---------- antigo método (instalarV002R003S000US024) ---------- */
 
@@ -1758,4 +1758,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     {
         $this->atualizarNumeroVersao("1.5.1");
     }    
+
+    protected function instalarV1502()
+    {        
+        // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
+        $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+        $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
+        $objInfraAgendamentoTarefaDTO->retNumIdInfraAgendamentoTarefa();
+        $objInfraAgendamentoTarefaDTO->setStrComando("PENAgendamentoRN::seiVerificarServicosBarramento");
+        $objInfraAgendamentoTarefaDTO->setBolExclusaoLogica(False);        
+        $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaBD->consultar($objInfraAgendamentoTarefaDTO);        
+        if(isset($objInfraAgendamentoTarefaDTO)) {
+            $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');        
+            $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
+        }
+
+        $this->atualizarNumeroVersao("1.5.2");
+    }        
 }
