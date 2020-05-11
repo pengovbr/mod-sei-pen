@@ -11,12 +11,23 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.5.1';
+        return '1.5.2';
     }
 
     public function getInstituicao() {
         return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
     }
+
+
+    public function inicializar($strVersaoSEI) 
+    {
+        PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
+        PENIntegracao::validarCompatibilidadeBanco();
+        PENIntegracao::validarArquivoConfiguracao();
+
+        require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+    }
+
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) {
 
@@ -416,14 +427,6 @@ class PENIntegracao extends SeiIntegracao {
         return $xml;
     }
 
-    public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
-    {
-        $strVersaoSEI =  $parStrVersaoSEI ?: SEI_VERSAO;
-        $objPENIntegracao = new PENIntegracao();
-        if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
-            throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
-        }
-    }
 
      /**
       * Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
@@ -453,7 +456,7 @@ class PENIntegracao extends SeiIntegracao {
 
 
     /**
-     * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada.
+     * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada
      *
      * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
      * @return boolean                  Indicardor se base de dados é compatível
@@ -476,6 +479,67 @@ class PENIntegracao extends SeiIntegracao {
         return $bolBaseCompativel;
     }
 
+    /**
+     * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
+     *
+     * @param string $parStrVersaoSEI
+     * @return void
+     */
+    public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
+    {
+        $strVersaoSEI =  $parStrVersaoSEI ?: SEI_VERSAO;
+        $objPENIntegracao = new PENIntegracao();
+        if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
+            throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
+        }
+    }
+
+    /**
+     * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
+     *
+     * @param string $parStrVersaoSEI
+     * @return void
+     */
+    public static function validarArquivoConfiguracao()
+    {
+        // Valida se arquivo de configuração está presente na instalação do sistema
+        $strArquivoConfiguracao = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        if (file_exists($strArquivoConfiguracao) && is_readable($strArquivoConfiguracao)) {
+            require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        } else {
+            $strMensagem = "Arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizado";
+            $strDetalhes = "As configurações do módulo mod-sei-pen não foram encontradas em $strArquivoConfiguracao \n";
+            $strDetalhes .= "Verifique se a instalação foi feita corretamente seguindo os procedimentos do manual de instalação.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+
+        // Valida se arquivo de configuração está íntegro e se a classe de configuração está presente
+        if(!class_exists("ConfiguracaoModPEN")){
+            $strMensagem = "Definição de configurações do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizada";
+            $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+
+        // Valida se todos os parâmetros de configuração estão presentes no arquivo de configuração
+        $arrStrChavesConfiguracao = ConfiguracaoModPEN::getInstance()->getArrConfiguracoes();
+        if(!array_key_exists("PEN", $arrStrChavesConfiguracao)){
+            $strMensagem = "Grupo de parametrização 'PEN' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+            $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+
+        
+        // Valida se todas as chaves de configuração foram atribuídas
+        $arrStrChavesConfiguracao = $arrStrChavesConfiguracao["PEN"];
+        $arrStrParametrosExperados = array("WebService", "WebServicePendencias", "LocalizacaoCertificado", "SenhaCertificado");
+        foreach ($arrStrParametrosExperados as $strChaveConfiguracao) {
+            if(!array_key_exists($strChaveConfiguracao, $arrStrChavesConfiguracao)){
+                $strMensagem = "Parâmetro 'PEN > $strChaveConfiguracao' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+                $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+                throw new InfraException($strMensagem, null, $strDetalhes);
+            }
+        }
+    }
 }
 
 class ModuloIncompativelException extends InfraException { }

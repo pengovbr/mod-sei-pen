@@ -85,6 +85,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
+                case '1.5.1': $this->instalarV1502();
                 
                     break;
                 default:
@@ -117,6 +118,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objDTOCadastrado = $objBD->cadastrar($objDTO);
 
         return $objDTOCadastrado->getStrNome();
+    }
+
+    /**
+     * Remove parâmetro de configuração do módulo da base de dados
+     * @return int Código do Parametro gerado
+     */
+    protected function removerParametro($strNome) {
+        $objDTO = new PenParametroDTO();
+        $objDTO->setStrNome($strNome);
+        $objDTO->retStrNome();
+
+        $objBD = new PenParametroBD(BancoSEI::getInstance());
+        $objDTOCadastrado = $objBD->excluir($objDTO);
     }
 
     /**
@@ -1757,5 +1771,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV1501()
     {
         $this->atualizarNumeroVersao("1.5.1");
+    }    
+
+    protected function instalarV1502()
+    {
+        // Remoção de parâmetros do banco de dados do SEI devido a necessidade de migração 
+        // para arquivo de configuração do módulo em sei/config/mod-pen/ConfiguracaoModPEN.php
+        $this->removerParametro("PEN_ENDERECO_WEBSERVICE");
+        $this->removerParametro("PEN_ENDERECO_WEBSERVICE_PENDENCIAS");
+        $this->removerParametro("PEN_SENHA_CERTIFICADO_DIGITAL");
+        $this->removerParametro("PEN_LOCALIZACAO_CERTIFICADO_DIGITAL");
+        $this->removerParametro("PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO");
+
+
+        $this->atualizarNumeroVersao("1.5.2");
     }    
 }

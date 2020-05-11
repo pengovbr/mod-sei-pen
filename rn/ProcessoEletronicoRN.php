@@ -50,7 +50,7 @@ class ProcessoEletronicoRN extends InfraRN
     // 10 minutos de timeout para requisições via webservice
     const WS_TIMEOUT_CONEXAO = 600;
     const WS_ESPERA_RECONEXAO = 5;
-    const WS_TENTATIVAS_RECONEXAO = 1;
+    const WS_TENTATIVAS_RECONEXAO = 3;
 
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
@@ -94,12 +94,19 @@ class ProcessoEletronicoRN extends InfraRN
 
     public function __construct() 
     {
-        $objPenParametroRN = new PenParametroRN();
-        $strEnderecoWebService = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
-        $strLocalizacaoCertificadoDigital =  $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
-        $strSenhaCertificadoDigital =  $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
-        $numTentativasErro = $objPenParametroRN->getParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', self::WS_TENTATIVAS_RECONEXAO);
+        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+        $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
+        $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+        $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
+        $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro");
         $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_RECONEXAO;
+
+        $objPenParametroRN = new PenParametroRN();
+        //$strEnderecoWebService = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
+        //$strLocalizacaoCertificadoDigital =  $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
+        //$strSenhaCertificadoDigital =  $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
+        //$numTentativasErro = $objPenParametroRN->getParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', self::WS_TENTATIVAS_RECONEXAO);
+
 
         if (InfraString::isBolVazia($strEnderecoWebService)) {
             throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
