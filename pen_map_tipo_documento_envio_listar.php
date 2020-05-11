@@ -16,6 +16,8 @@ InfraDebug::getInstance()->limpar();
 
 $objPaginaSEI = PaginaSEI::getInstance();
 $objSessaoSEI = SessaoSEI::getInstance();
+
+$objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
  
 $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
 
@@ -23,10 +25,7 @@ try {
     
     $objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao('pen_map_tipo_documento_envio_listar');
-    
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-    
+        
     //--------------------------------------------------------------------------
     // Ações
     if(array_key_exists('acao', $_GET)) {
@@ -39,7 +38,7 @@ try {
                 
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
-                    PenRelTipoDocMapEnviadoRN::excluir(explode(',', $arrParam['hdnInfraItensSelecionados']));
+                    $objPenRelTipoDocMapEnviadoRN->excluir(explode(',', $arrParam['hdnInfraItensSelecionados']));
                     
                     $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
                     
@@ -50,36 +49,7 @@ try {
                     
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
-                break;
-            
-            case 'pen_map_tipo_documento_envio_desativar':
-                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelTipoDocMapEnviadoRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
-                    
-                    $objPaginaSEI->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-                    
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-                
-            case 'pen_map_tipo_documento_envio_ativar':
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelTipoDocMapEnviadoRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
-                    
-                    $objPaginaSEI->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                break;
+                break;            
                 
             case 'pen_map_tipo_documento_envio_listar':
                 // Ação padrão desta tela
@@ -124,8 +94,7 @@ try {
     $objPaginaSEI->prepararOrdenacao($objPenRelTipoDocMapEnviadoDTO, 'CodigoEspecie', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objPenRelTipoDocMapEnviadoDTO);
     
-    $objGenericoBD = new GenericoBD($objBancoSEI);
-    $arrObjPenRelTipoDocMapEnviadoDTO = $objGenericoBD->listar($objPenRelTipoDocMapEnviadoDTO);
+    $arrObjPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->listar($objPenRelTipoDocMapEnviadoDTO);
     
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapEnviadoDTO);
 
@@ -246,36 +215,7 @@ function onClickBtnNovo(){
     
     window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
 }
-<?php /* ?>
-function onClickBtnAtivar(){
-    
-   try {
-        
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-            
-        alert('Erro : ' + e.message);
-    } 
-    
-}
 
-function onClickBtnDesativar(){
-    
-    try {
-        
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-            
-        alert('Erro : ' + e.message);
-    }
-}
-<?php */ ?>
 function onClickBtnExcluir(){
     
     try {

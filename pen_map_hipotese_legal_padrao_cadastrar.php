@@ -20,8 +20,6 @@ $objSessao = SessaoSEI::getInstance();
 
 
 try {
-
-    $objBanco->abrirConexao();
     
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
@@ -84,11 +82,9 @@ try {
         $objPenParametroDTO->retTodos();
         
         if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-            
             $objPenParametroDTO = $objPenParametroRN->consultar($objPenParametroDTO);
         }
         else {
-            
             $objPenParametroDTO->setStrValor('0'); 
         }
     }

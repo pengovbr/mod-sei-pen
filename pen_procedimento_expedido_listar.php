@@ -28,8 +28,6 @@ try {
     }
     $objPaginaSEI->prepararPaginacao($objFiltroDTO, 50);
 
-    BancoSEI::getInstance()->abrirConexao();
-
     $objProcessoExpedidoRN = new ProcessoExpedidoRN();
     $arrObjProcessoExpedidoDTO = $objProcessoExpedidoRN->listarProcessoExpedido($objFiltroDTO);
 

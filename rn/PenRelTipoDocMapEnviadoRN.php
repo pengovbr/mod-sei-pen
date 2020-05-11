@@ -2,8 +2,8 @@
 
 require_once dirname(__FILE__) . '/../../../SEI.php';
 
-class PenRelTipoDocMapEnviadoRN extends InfraRN {
-
+class PenRelTipoDocMapEnviadoRN extends InfraRN 
+{
     public function __construct() {
         parent::__construct();
     }
@@ -12,32 +12,47 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
     
-    public function listarEmUso($dblIdSerie = 0) {
+    
+    protected function listarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO) 
+    {
+        try {        
+            $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+            return $objPenRelTipoDocMapEnviadoBD->listar($objPenRelTipoDocMapEnviadoDTO);
+        }catch(Exception $e){
+            throw new InfraException('Erro listando mapeamento de documentos para envio.',$e);
+        }
+    }
 
-        $objInfraIBanco = $this->inicializarObjInfraIBanco();   
+    protected function consultarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO) 
+    {
+        try {        
+            $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+            return $objPenRelTipoDocMapEnviadoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
+        }catch(Exception $e){
+            throw new InfraException('Erro consultando mapeamento de documentos para envio.',$e);
+        }
+    }
 
-        $arrNumIdSerie = array();
-        
+    
+    protected function listarEmUsoConectado($dblIdSerie = 0) 
+    {
+        $arrNumIdSerie = array();        
         $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapEnviadoDTO();
         $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
         $objPenRelTipoDocMapRecebidoDTO->setDistinct(true);
         $objPenRelTipoDocMapRecebidoDTO->setOrdNumIdSerie(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-        $objGenericoBD = new GenericoBD($objInfraIBanco);
-        $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objPenRelTipoDocMapRecebidoDTO);
+        $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD(BancoSEI::getInstance());
+        $arrObjPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapEnviadoBD->listar($objPenRelTipoDocMapRecebidoDTO);
 
         if (!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {
-
             foreach ($arrObjPenRelTipoDocMapRecebidoDTO as $objPenRelTipoDocMapRecebidoDTO) {
-
                 $arrNumIdSerie[] = $objPenRelTipoDocMapRecebidoDTO->getNumIdSerie();
             }
         }
 
         if ($dblIdSerie > 0) {
-
-            // Tira da lista de ignorados o que foi selecionado, em caso de
-            // edição
+            // Tira da lista de ignorados o que foi selecionado, em caso de edição
             $numIndice = array_search($dblIdSerie, $arrNumIdSerie);
 
             if ($numIndice !== false) {
@@ -48,10 +63,9 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
         return $arrNumIdSerie;
     }
     
-    public function cadastrarConectado(PenRelTipoDocMapEnviadoDTO $objParamDTO){
-        
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-        
+    protected function cadastrarControlado(PenRelTipoDocMapEnviadoDTO $objParamDTO)
+    {
+        $objBD = new PenRelTipoDocMapEnviadoBD($this->inicializarObjInfraIBanco());        
         if($objParamDTO->isSetDblIdMap()) {
             
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
@@ -77,45 +91,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
             $objBD->cadastrar($objDTO);
         }
     }
-    
-    /**
-     * Muda o estado entre ativado/desativado
-     * 
-     * @param int|array Codigo da Especie
-     * @throws InfraException
-     * @return null
-     */
-    public static function mudarEstado($dblIdMap, $strPadrao = 'N'){
-        
-        $objBancoSEI = BancoSEI::getInstance();
-        
-        $objGenericoBD = new GenericoBD($objBancoSEI);
-        
-        if(is_array($dblIdMap)) {
-                        
-            foreach($dblIdMap as $_dblIdMap){
 
-                $objDTO = new PenRelTipoDocMapEnviadoDTO();
-                $objDTO->setNumCodigoEspecie($_dblIdMap);
-                $objDTO->retStrPadrao();
-                
-                $objDTO->setStrPadrao($strPadrao);
-                
-                $objGenericoBD->alterar($objDTO);
-
-            }
-        }
-        else {
-
-            $objDTO = new PenRelTipoDocMapEnviadoDTO();
-            $objDTO->setNumCodigoEspecie($dblIdMap);
-            $objDTO->retStrPadrao();
-
-            $objDTO->setStrPadrao($strPadrao);
-
-            $objGenericoBD->alterar($objDTO);
-        }       
-    }
     
     /**
      * Exclui um ou um bloco de registros entre ativado/desativado
@@ -124,28 +100,23 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
      * @throws InfraException
      * @return null
      */
-    public static function excluir($dblIdMap){
-        
-        $objBancoSEI = BancoSEI::getInstance();
-        
-        $objGenericoBD = new GenericoBD($objBancoSEI);
+    protected function excluirControlado($dblIdMap)
+    {        
+        $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD(BancoSEI::getInstance());
         
         if(is_array($dblIdMap)) {
                         
             foreach($dblIdMap as $_dblIdMap){
 
                 $objDTO = new PenRelTipoDocMapEnviadoDTO();
-                $objDTO->setDblIdMap($_dblIdMap);
-                
-                $objGenericoBD->excluir($objDTO);
+                $objDTO->setDblIdMap($_dblIdMap);                
+                $objPenRelTipoDocMapEnviadoBD->excluir($objDTO);
             }
         }
         else {
-
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
-            $objDTO->setDblIdMap($dblIdMap);
- 
-            $objGenericoBD->alterar($objDTO);
+            $objDTO->setDblIdMap($dblIdMap); 
+            $objPenRelTipoDocMapEnviadoBD->alterar($objDTO);
         }  
     }
 }

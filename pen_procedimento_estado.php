@@ -34,9 +34,6 @@ try {
             case 'baixarReciboEnvio':
 
                 header('Content-Disposition: attachment; filename="recibo_de_envio_do_tramite.xml"');
-                // print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
-                $objBancoSEI = BancoSEI::getInstance();
-                $objBancoSEI->abrirConexao();
 
               try {
 
@@ -95,9 +92,6 @@ try {
             // @join_tec US008.03 (#23092)
             case 'baixarReciboRecebimento':
                 header('Content-Disposition: attachment; filename="recibo_de_conclusao_do_tramite.xml"');
-                // print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
-                $objBancoSEI = BancoSEI::getInstance();
-                $objBancoSEI->abrirConexao();
 
                 try {
 
@@ -194,10 +188,7 @@ try {
     //$objPaginaSEI->prepararOrdenacao($objProcedimentoAndamentoDTO, 'IdProcedimento', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objProcedimentoAndamentoDTO);
 
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-
-    $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($objBancoSEI);
+    $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
     $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->listar($objProcedimentoAndamentoDTO);
 
     $objPaginaSEI->processarPaginacao($objProcedimentoAndamentoDTO);

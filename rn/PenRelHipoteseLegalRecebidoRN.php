@@ -9,22 +9,22 @@ require_once dirname(__FILE__) . '/../../../SEI.php';
  */
 class PenRelHipoteseLegalRecebidoRN extends PenRelHipoteseLegalRN {
 
-    public function listar(PenRelHipoteseLegalDTO $objDTO) {
+    protected function listarConectado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_listar', __METHOD__, $objDTO);
         return parent::listarConectado($objDTO);
     }
 
-    public function alterar(PenRelHipoteseLegalDTO $objDTO) {
+    protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_alterar', __METHOD__, $objDTO);
         return parent::alterarConectado($objDTO);
     }
 
-    public function cadastrar(PenRelHipoteseLegalDTO $objDTO) {
+    protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_cadastrar', __METHOD__, $objDTO);
         return parent::cadastrarConectado($objDTO);
     }
 
-    public function excluir(PenRelHipoteseLegalDTO $objDTO) {
+    protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_excluir', __METHOD__, $objDTO);
         return parent::excluirConectado($objDTO);
     }
@@ -34,7 +34,7 @@ class PenRelHipoteseLegalRecebidoRN extends PenRelHipoteseLegalRN {
      * @param integer $numIdentificacao
      * @return integer
      */
-    public function getIdHipoteseLegalSEI($numIdentificacao) {
+    protected function getIdHipoteseLegalSEIConectado($numIdentificacao) {
         $objBanco = BancoSEI::getInstance();
         $objGenericoBD = new GenericoBD($objBanco);
 

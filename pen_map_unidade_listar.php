@@ -31,8 +31,6 @@ try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
-    $objBanco->abrirConexao();
-
 
     //--------------------------------------------------------------------------
     // Ações
@@ -73,35 +71,6 @@ try {
                 else {
 
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-
-            case PEN_RECURSO_BASE.'_desativar':
-
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-
-                    PenUnidadeRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
-
-                    $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-
-            case PEN_RECURSO_BASE.'_ativar':
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-
-                    PenUnidadeRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
-
-                    $objPagina->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
                 }
                 break;
 

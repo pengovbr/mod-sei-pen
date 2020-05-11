@@ -7,7 +7,6 @@ require_once dirname(__FILE__) . '/../../SEI.php';
 
 
 try {
-
     session_start();
 	$objSessao = SessaoSEI::getInstance(); 
     $objPaginaSEI = PaginaSEI::getInstance();
@@ -15,9 +14,6 @@ try {
     SessaoSEI::getInstance()->validarLink();
     SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
      
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-
     $arrComandos = array();
 
     $bolSomenteLeitura = false;
@@ -81,8 +77,8 @@ try {
         $objPenRelTipoDocMapEnviadoDTO->setDblIdMap($_GET['id_mapeamento']);
         $objPenRelTipoDocMapEnviadoDTO->retTodos();
         
-        $objEspecieDocumentalBD = new GenericoBD(BancoSEI::getInstance());
-        $objPenRelTipoDocMapEnviadoDTO = $objEspecieDocumentalBD->consultar($objPenRelTipoDocMapEnviadoDTO);
+        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN(BancoSEI::getInstance());
+        $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->consultar($objPenRelTipoDocMapEnviadoDTO);
     }
     
     if(empty($objPenRelTipoDocMapEnviadoDTO)){

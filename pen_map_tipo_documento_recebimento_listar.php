@@ -16,16 +16,15 @@ InfraDebug::getInstance()->limpar();
 
 $objPaginaSEI = PaginaSEI::getInstance();
 $objSessaoSEI = SessaoSEI::getInstance();
+
+$objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
  
 $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
 
 try {
     
     $objSessaoSEI->validarLink();
-    //$objSessaoSEI->validarPermissao('pen_map_tipo_documento_recebimento_listar');
-    
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
+    //$objSessaoSEI->validarPermissao('pen_map_tipo_documento_recebimento_listar');    
     
     //--------------------------------------------------------------------------
     // Ações
@@ -38,26 +37,14 @@ try {
             case 'pen_map_tipo_documento_recebimento_excluir':
                 
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    $objBancoSEI = BancoSEI::getInstance();
-                    $objGenericoBD = new GenericoBD($objBancoSEI);
-                    
                     $arrDblIdMap = explode(',', $arrParam['hdnInfraItensSelecionados']);
-                    
-                    foreach($arrDblIdMap as $dblIdMap) {
-                        
-                        $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO(); 
-                        $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($dblIdMap);
-
-                        $objGenericoBD->excluir($objPenRelTipoDocMapRecebidoDTO);
-                    }
+                    $objPenRelTipoDocMapRecebidoRN->excluir($arrDblIdMap);
                     $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
                     
                     header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
                     exit(0);
                 }
-                else {
-                    
+                else {                    
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
                 break;
@@ -102,9 +89,8 @@ try {
 
     $objPaginaSEI->prepararOrdenacao($objPenRelTipoDocMapRecebidoDTO, 'CodigoEspecie', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objPenRelTipoDocMapRecebidoDTO);
-    
-    $objGenericoBD = new GenericoBD($objBancoSEI);
-    $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objPenRelTipoDocMapRecebidoDTO);
+            
+    $arrObjPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapRecebidoDTO);
     
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapRecebidoDTO);
 
