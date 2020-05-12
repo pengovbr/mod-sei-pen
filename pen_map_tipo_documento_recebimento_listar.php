@@ -86,16 +86,15 @@ try {
     
     $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
     $objPenRelTipoDocMapRecebidoDTO->retTodos(true);
+    $objPenRelTipoDocMapRecebidoDTO->setOrdStrNomeEspecie(InfraDTO::$TIPO_ORDENACAO_ASC);
     //--------------------------------------------------------------------------
     // Filtragem 
     
-    if(array_key_exists('nome_serie', $_POST) && !empty($_POST['nome_serie'])) {
-       
+    if(array_key_exists('nome_serie', $_POST) && !empty($_POST['nome_serie'])) {       
         $objPenRelTipoDocMapRecebidoDTO->setStrNomeSerie('%'.$_POST['nome_serie'].'%', InfraDTO::$OPER_LIKE);
     } 
     
-    if(array_key_exists('nome_especie', $_POST) && !empty($_POST['nome_especie'])) {
-       
+    if(array_key_exists('nome_especie', $_POST) && !empty($_POST['nome_especie'])) {       
         $objPenRelTipoDocMapRecebidoDTO->setStrNomeEspecie('%'.$_POST['nome_especie'].'%', InfraDTO::$OPER_LIKE);
     } 
     //--------------------------------------------------------------------------

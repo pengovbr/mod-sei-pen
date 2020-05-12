@@ -12,12 +12,11 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
-    public function listarEmUso($dblCodigoEspecie = 0){
-        
-        $objInfraIBanco = $this->inicializarObjInfraIBanco();  
-        
+    public function listarEmUso($dblCodigoEspecie = 0)
+    {    
         $arrNumCodigoEspecie = array();
-        
+        $objInfraIBanco = $this->inicializarObjInfraIBanco();  
+                        
         $objDTO = new PenRelTipoDocMapRecebidoDTO();  
         $objDTO->retNumCodigoEspecie();
         $objDTO->setDistinct(true);
@@ -28,19 +27,14 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objDTO);
 
         if(!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {
-
             foreach($arrObjPenRelTipoDocMapRecebidoDTO as $objDTO) {
-
                 $arrNumCodigoEspecie[] = $objDTO->getNumCodigoEspecie();
             }
         }
 
         if($dblCodigoEspecie > 0) {
-
-            // Tira da lista de ignorados o que foi selecionado, em caso de
-            // edição
+            // Tira da lista de ignorados o que foi selecionado, em caso de edição
             $numIndice = array_search($dblCodigoEspecie, $arrNumCodigoEspecie);
-
             if($numIndice !== false) {
                 unset($arrNumCodigoEspecie[$numIndice]);
             }
@@ -72,4 +66,16 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
             $objBD->alterar($objDTO);
         }
     }
+
+
+    protected function contarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
+    {
+        try {
+          $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
+          return $objPenRelTipoDocMapRecebidoBD->contar($parObjPenRelTipoDocMapRecebidoDTO);
+        }catch(Exception $e){
+          throw new InfraException('Erro contando Mapeamento de Tipos de Documento para Recebimento.',$e);
+        }
+      }
+    
 }

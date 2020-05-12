@@ -131,12 +131,9 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
         $objGenericoBD = new GenericoBD($objBancoSEI);
         
         if(is_array($dblIdMap)) {
-                        
             foreach($dblIdMap as $_dblIdMap){
-
                 $objDTO = new PenRelTipoDocMapEnviadoDTO();
                 $objDTO->setDblIdMap($_dblIdMap);
-                
                 $objGenericoBD->excluir($objDTO);
             }
         }
@@ -144,8 +141,17 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
 
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
             $objDTO->setDblIdMap($dblIdMap);
- 
             $objGenericoBD->alterar($objDTO);
         }  
     }
+
+    protected function contarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
+    {
+        try {
+          $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+          return $objPenRelTipoDocMapEnviadoBD->contar($parObjPenRelTipoDocMapEnviadoDTO);
+        }catch(Exception $e){
+          throw new InfraException('Erro contando Mapeamento de Tipos de Documento para Envio.',$e);
+        }
+    }        
 }

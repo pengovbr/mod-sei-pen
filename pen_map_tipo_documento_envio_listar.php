@@ -107,6 +107,7 @@ try {
     
     $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
     $objPenRelTipoDocMapEnviadoDTO->retTodos(true);
+    $objPenRelTipoDocMapEnviadoDTO->setOrdStrNomeSerie(InfraDTO::$TIPO_ORDENACAO_ASC);
     //--------------------------------------------------------------------------
     // Filtragem 
     

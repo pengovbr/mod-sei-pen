@@ -108,6 +108,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
+                case '1.5.1': $this->instalarV1502();
 
                 break;
                 default:
@@ -253,9 +254,8 @@ class PenAtualizarSipRN extends InfraRN {
         }
     }
 
-    protected function consultarRecurso($numIdSistema, $strNomeRecurso){
-
-        $numIdRecurso = null;
+    protected function consultarRecurso($numIdSistema, $strNomeRecurso)
+    {
         $objRecursoDTO = new RecursoDTO();
         $objRecursoDTO->setBolExclusaoLogica(false);
         $objRecursoDTO->setNumIdSistema($numIdSistema);
@@ -273,12 +273,12 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     /**
-     * Cria um menu
+     * Cria um novo menu lateral para o sistema SEI
      *
      * @return int
      */
-    protected function criarMenu($strRotulo = '', $numSequencia = 10, $numIdItemMenuPai = null, $numIdMenu = null, $numIdRecurso = null, $numIdSistema = 0) {
-
+    protected function criarMenu($strRotulo, $numSequencia, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema) 
+    {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdItemMenuPai($numIdItemMenuPai);
         $objDTO->setNumIdSistema($numIdSistema);
@@ -291,7 +291,6 @@ class PenAtualizarSipRN extends InfraRN {
         $objDTO = $objBD->consultar($objDTO);
 
         if (empty($objDTO)) {
-
             $objDTO = new ItemMenuDTO();
             $objDTO->setNumIdMenu($numIdMenu);
             $objDTO->setNumIdMenuPai($numIdMenu);
@@ -309,7 +308,6 @@ class PenAtualizarSipRN extends InfraRN {
         }
 
         if (!empty($numIdRecurso)) {
-
             $this->arrMenu[] = array($objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso);
         }
 
@@ -514,14 +512,11 @@ class PenAtualizarSipRN extends InfraRN {
             $arrObjDTO = $objBD->listar($objDTO);
 
             if (!empty($arrObjDTO)) {
-
                 $numIdItemMenuPai = $this->criarMenu('Processo Eletrônico Nacional', 0, $numIdItemMenuRoot, $numIdMenu, null, $numIdSistema);
                 $numIdItemMenuPai = $this->criarMenu('Mapeamento de Tipos de Documento', 10, $numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
 
                 foreach ($arrObjDTO as $objDTO) {
-
                     $objDTO->setNumIdItemMenuPai($numIdItemMenuPai);
-
                     $objBD->alterar($objDTO);
                 }
 
@@ -1148,12 +1143,20 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.5.0
+     * Instala/Atualiza os módulo PEN para versão 1.5.1
      */
     private function instalarV1501()
     {
         $this->atualizarNumeroVersao('1.5.1');
-    }        
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.5.2
+     */
+    private function instalarV1502()
+    {
+        $this->atualizarNumeroVersao('1.5.2');
+    }            
 }
 
 try {
