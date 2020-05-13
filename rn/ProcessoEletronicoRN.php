@@ -497,6 +497,55 @@ class ProcessoEletronicoRN extends InfraRN
         return $resultado;
     }
 
+
+    /**
+     * Busca as espécies documentais aceitas pelo Barramento de Serviços do PEN
+     * 
+     * As espécies aceitas estão registradas no WSDL do serviço e são obtidas a partir de análise deste descritor do serviço
+     *
+     * @return array
+     */
+    public function consultarEspeciesDocumentais()
+    {
+        $curl = curl_init($this->strComumXSD);
+
+        try{
+            curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+            
+            $output = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($curl) {
+                return curl_exec($curl);
+            });
+
+            $dom = new DOMDocument;
+            $dom->loadXML($output);
+
+            $xpath = new DOMXPath($dom);
+            $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
+            $xpath->registerNamespace('x', $rootNamespace);
+            $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
+
+            $resultado = array();
+            foreach ($entries as $entry) {
+                $valor = $entry->getAttribute('value');
+                $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
+                $descricao = $documentationNode->item(0)->nodeValue;
+                $resultado[$valor] = utf8_decode($descricao);
+            }
+        } finally{
+            curl_close($curl);
+        }
+
+        return $resultado;
+    }
+
+
     public function enviarProcesso($parametros)
     {
         try {

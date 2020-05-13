@@ -260,12 +260,12 @@ class PENAgendamentoRN extends InfraRN {
     }
 
     /**
-     * Atualiza??o das hip?teses legais vindas do barramento
+     * Atualização das hipóteses legais vindas do barramento
      * @throws InfraException
      */
-    public function atualizarHipotesesLegais() {
+    protected function atualizarHipotesesLegaisControlado() 
+    {
         try {
-
             PENIntegracao::validarCompatibilidadeModulo();
             $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
             $processoEletronicoRN = new ProcessoEletronicoRN();
@@ -309,9 +309,103 @@ class PENAgendamentoRN extends InfraRN {
                 }
             }
 
-            LogSEI::getInstance()->gravar("Hipóteses Legais atualizadas.", LogSEI::$INFORMACAO);
+            LogSEI::getInstance()->gravar("Hipóteses Legais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
-        }
+        }        
     }
+
+
+    /**
+     * Rotina de atualização das espécies documentais do Barramento PEN na base de dados do SEI
+     *
+     * Durante a sincronização, as espécies documentais podem ser cadastradas, removidas ou atualizadas
+     * 
+     * @throws InfraException
+     * @return void
+     */
+    protected function atualizarEspeciesDocumentaisControlado()
+    {
+        try{
+            PENIntegracao::validarCompatibilidadeModulo();
+
+            // Obtém lista de espécies documentais do Barramento de Serviços do PEN
+            $processoEletronicoRN = new ProcessoEletronicoRN();
+            $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();
+
+            // Obtém lista de espécies documentais registradas na base de dados do SEI
+            $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
+            $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+            $objEspecieDocumentalDTO->retDblIdEspecie();
+            $objEspecieDocumentalDTO->retStrNomeEspecie();
+            $arrIdsEspeciesDocumentaisSEI = InfraArray::converterArrInfraDTO($objGenericoBD->listar($objEspecieDocumentalDTO), "NomeEspecie", "IdEspecie");
+
+            // Combina e percorre as duas listas para avaliar o que precisar ser feito: inserir, desativar ou alterar a descrição
+            $arrEspeciesDocumentaisCombinadas = array_replace($arrIdsEspeciesDocumentaisSEI, $arrEspeciesDocumentaisPEN);        
+            foreach ($arrEspeciesDocumentaisCombinadas as $numIdEspecie => $strNomeEspecie) {
+                $numIdEspecie = intval($numIdEspecie);
+                $bolExisteBaseDados = array_key_exists($numIdEspecie, $arrIdsEspeciesDocumentaisSEI);
+                $bolExisteBarramento = array_key_exists($numIdEspecie, $arrEspeciesDocumentaisPEN);
+                $bolNomesDiferentes = ($bolExisteBaseDados && $bolExisteBaseDados && $arrEspeciesDocumentaisPEN[$numIdEspecie] != $arrIdsEspeciesDocumentaisSEI[$numIdEspecie]);
+
+                // Prepara consulta e atualização da espécie documental
+                $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+                $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
+
+                if($bolExisteBarramento && !$bolExisteBaseDados){
+                    // Caso a espécie documental EXISTA no Barramento do PEN mas não exista no SEI, necessário fazer o seu cadastramento    
+                    if ($objGenericoBD->contar($objEspecieDocumentalDTO) == 0) {
+                        $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
+                        $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+                        $objGenericoBD->cadastrar($objEspecieDocumentalDTO);
+                    }
+                } elseif(!$bolExisteBarramento && $bolExisteBaseDados){
+                    // Caso a espécie documental NÂO exista no Barramento do PEN mas exista no SEI, necessário fazer a sua desativação
+                    if ($objGenericoBD->contar($objEspecieDocumentalDTO) > 0) {
+                        // Remove mapeamentos de Tipos de Documentos para Envio vinculados ao código de espécie
+                        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+                        $objPenRelTipoDocMapEnviadoRN->excluirPorEspecieDocumental($numIdEspecie);
+                                            
+                        // Remove mapeamentos de Tipos de Documentos para Envio vinculados ao código de espécie
+                        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+                        $objPenRelTipoDocMapRecebidoRN->excluirPorEspecieDocumental($numIdEspecie);
+                        
+                        // Remove a espécie documental do PEN que não mais existe no Barramento do PEN
+                        $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
+                        $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+                        $objGenericoBD->excluir($objEspecieDocumentalDTO);
+                    }
+                } elseif($bolExisteBarramento && $bolExisteBaseDados && $bolNomesDiferentes) {
+                    // Caso a espécie documental exista no Barramento do PEN e no SEI mas com nomes diferentes, necessário atualizar descrição
+                    if ($objGenericoBD->contar($objEspecieDocumentalDTO) > 0) {
+                        $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
+                        $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+                        $objGenericoBD->alterar($objEspecieDocumentalDTO);
+                    }
+                }
+            }
+
+            LogSEI::getInstance()->gravar("Espécies Documentais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
+        } catch (Exception $e) {
+            throw new InfraException('Erro no agendamento de atualização de Hipóteses Legais', $e);
+        }               
+    }
+
+    /**
+     * Atualização de dados do Barramento de Serviços do PEN para utilização pelo SEI nas configurações
+     * @throws InfraException
+     */
+    protected function atualizarInformacoesPENControlado() 
+    {
+        $this->atualizarHipotesesLegais();
+        $this->atualizarEspeciesDocumentais();
+
+        LogSEI::getInstance()->gravar("Espécies Documentais para envio mapeadas com sucesso", LogSEI::$INFORMACAO);
+        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+        $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
+
+        LogSEI::getInstance()->gravar("Espécies Documentais para recebimento mapeadas com sucesso", LogSEI::$INFORMACAO);
+        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+        $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
+    }    
 }

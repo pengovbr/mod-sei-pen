@@ -67,6 +67,29 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         }
     }
 
+    /**
+     * Remove uma espécie documental da base de dados do SEI baseado em um código de espécie do Barramento
+     *
+     * @param int $parNumIdEspecieDocumentla
+     * @return void
+     */
+    protected function excluirPorEspecieDocumentalControlado($parNumIdEspecieDocumental)
+    {        
+        try {
+            $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
+            $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+            $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($parNumIdEspecieDocumental);
+            $objPenRelTipoDocMapRecebidoDTO->retDblIdMap();
+            
+            foreach ($objPenRelTipoDocMapRecebidoBD->listar($objPenRelTipoDocMapRecebidoDTO) as $objDTO) {
+                $objPenRelTipoDocMapRecebidoBD->excluir($objDTO);
+            }
+                                    
+          }catch(Exception $e){
+            throw new InfraException('Erro removendo Mapeamento de Tipos de Documento para recebimento pelo código de espécie.',$e);
+          }
+    }
+
 
     protected function contarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
@@ -76,6 +99,78 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         }catch(Exception $e){
           throw new InfraException('Erro contando Mapeamento de Tipos de Documento para Recebimento.',$e);
         }
-      }
-    
+    }    
+
+
+    /**
+     * Registra o mapeamento de espécies documentais para RECEBIMENTO com os Tipos de Documentos similares do SEI
+     * 
+     * A análise de simularidade utiliza o algorítmo para calcular a distãncia entre os dois nomes
+     * Mais informações sobre o algorítmo podem ser encontradas no link abaixo:
+     * https://www.php.net/manual/pt_BR/function.similar-text.php
+     *
+     * @return void
+     */
+    protected function mapearEspeciesDocumentaisRecebimentoControlado()
+    {
+        $objTipoDocMapRN = new TipoDocMapRN();
+        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+
+        //Persentual de similaridade mínimo aceito para que a espécie documental possa ser automaticamente mapeada
+        $numPercentualSimilaridadeValido = 85;
+
+        $arrTiposDocumentos = $objTipoDocMapRN->listarParesSerie(null, true);
+
+        // Obter todas as espécies documentais do Barramento de Serviços do PEN
+        // Antes separa as espécies com nomes separados por '/' em itens diferentes
+        $arrEspeciesDocumentais = array();
+        $arrEspecies = $objTipoDocMapRN->listarParesEspecie($objPenRelTipoDocMapRecebidoRN->listarEmUso(null));
+        foreach ($arrEspecies as $numCodigo => $strItem) {
+            foreach (preg_split('/\//', $strItem) as $strNomeEspecie) {
+                $arrEspeciesDocumentais[] = array("codigo" => $numCodigo, "nome" => $strNomeEspecie);
+            }            
+        }        
+
+        foreach ($arrEspeciesDocumentais as $objEspecieDocumental) {
+            $numIdEspecieDocumental = $objEspecieDocumental["codigo"];
+            $strNomeEspecieDocumental = $objEspecieDocumental["nome"];
+            $numMelhorSimilaridade = null;
+            $numIdTipDocumentoSimilar = null;
+            
+            foreach ($arrTiposDocumentos as $numIdTipoDocumento => $strNomeTipoDocumento) {
+                $numSimilaridade = 0;
+                $numTamNomeTipoDoc = strlen($strNomeTipoDocumento);
+                $numTamNomeEspecie = strlen($strNomeEspecieDocumental);                
+                $numPosEspacoAdicional = strpos($strNomeTipoDocumento, ' ', min($numTamNomeEspecie, $numTamNomeTipoDoc));
+
+                if($numPosEspacoAdicional){
+                    // Avaliação com tamanho reduzido, caso seja um termo composto
+                    $numTamanhoReducao = max($numTamNomeEspecie, $numPosEspacoAdicional);
+                    $strNomeTipoDocReduzido = substr($strNomeTipoDocumento, 0, $numTamanhoReducao);
+                    similar_text(strtolower($strNomeEspecieDocumental), strtolower($strNomeTipoDocReduzido), $numSimilaridadeReduzido);
+                    $numSimilaridade = $numSimilaridadeReduzido;
+                } else {
+                    // Avaliação de termo em tamanho normal
+                    similar_text(strtolower($strNomeEspecieDocumental), strtolower($strNomeTipoDocumento), $numSimilaridadeNormal);
+                    $numSimilaridade = $numSimilaridadeNormal;
+                }
+
+                if($numMelhorSimilaridade < $numSimilaridade && $numSimilaridade > $numPercentualSimilaridadeValido) {
+                    $numMelhorSimilaridade = $numSimilaridade;
+                    $numIdTipDocumentoSimilar = $numIdTipoDocumento;
+                }
+
+            }
+
+            if(isset($numMelhorSimilaridade)){
+                // Realiza o mapeamento do tipo de documento com a espécie documental similar
+                $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+                $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numIdEspecieDocumental);
+                if($objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO) == 0){
+                    $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie($numIdTipDocumentoSimilar);
+                    $objPenRelTipoDocMapRecebidoRN->cadastrar($objPenRelTipoDocMapRecebidoDTO);
+                }                
+            }            
+        }
+    }
 }
