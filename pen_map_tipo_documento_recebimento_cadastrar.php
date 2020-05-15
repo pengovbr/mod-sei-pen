@@ -39,8 +39,7 @@ try {
             $bolSomenteLeitura = true;
             $strTitulo = 'Consultar Mapeamento Tipo de Documento para Recebimento';           
             break;
-        
-        
+                
         default:
             throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
     }  

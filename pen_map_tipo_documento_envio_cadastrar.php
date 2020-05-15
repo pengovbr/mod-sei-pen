@@ -14,9 +14,6 @@ try {
     SessaoSEI::getInstance()->validarLink();
     SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
      
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-
     $arrComandos = array();
 
     $bolSomenteLeitura = false;
@@ -38,8 +35,7 @@ try {
             $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
             $bolSomenteLeitura = true;
             $strTitulo = 'Consultar Mapeamento de Tipo de Documento para Envio';           
-            break;
-        
+            break;        
         
         default:
             throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
