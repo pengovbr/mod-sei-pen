@@ -19,65 +19,33 @@ $objSessaoSEI = SessaoSEI::getInstance();
  
 $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
 
-try {
-    
+try {    
     $objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao('pen_map_tipo_documento_envio_listar');
-    
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-    
+        
+    $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+
     //--------------------------------------------------------------------------
     // Ações
-    if(array_key_exists('acao', $_GET)) {
-        
-        $arrParam = array_merge($_GET, $_POST);
-        
-        switch($_GET['acao']) {
-            
-            case 'pen_map_tipo_documento_envio_excluir':
-                
+    if(array_key_exists('acao', $_GET)) {        
+        $arrParam = array_merge($_GET, $_POST);        
+        switch($_GET['acao']) {            
+            case 'pen_map_tipo_documento_envio_excluir':                
                 if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelTipoDocMapEnviadoRN::excluir(explode(',', $arrParam['hdnInfraItensSelecionados']));
-                    
-                    $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
+                    $arrDblIdMap = explode(',', $arrParam['hdnInfraItensSelecionados']);
+                    $arrPenRelTipoDocMapEnvioDTO = array_map(function($parDblIdMap){
+                        $objPenRelTipoDocMapEnvioDTO = new PenRelTipoDocMapEnviadoDTO();
+                        $objPenRelTipoDocMapEnvioDTO->setDblIdMap($parDblIdMap);
+                        return $objPenRelTipoDocMapEnvioDTO;
+                    }, $arrDblIdMap);
+
+                    $objPenRelTipoDocMapEnviadoRN->excluir($arrPenRelTipoDocMapEnvioDTO);
+                    $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);                    
                     header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
                     exit(0);
                 }
-                else {
-                    
+                else {                    
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-            
-            case 'pen_map_tipo_documento_envio_desativar':
-                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelTipoDocMapEnviadoRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
-                    
-                    $objPaginaSEI->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-                    
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-                
-            case 'pen_map_tipo_documento_envio_ativar':
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelTipoDocMapEnviadoRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
-                    
-                    $objPaginaSEI->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
                 }
                 break;
                 
@@ -93,12 +61,23 @@ try {
     //--------------------------------------------------------------------------
     
     $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Envio';
+
+    $strBotaoEspeciePadrao = "";
+    if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_consultar')){
+        $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do PEN" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
+    }
         
+    if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_atribuir')){
+        $bolPadraoNaoAtribuido = empty((new PenParametroRN)->getParametro( "PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
+        $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
+        $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de espécie documental padrão para envio de processos" : "";
+        $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
+    }
+
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $arrComandos[] = $strBotaoEspeciePadrao;
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
     $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
@@ -111,13 +90,11 @@ try {
     //--------------------------------------------------------------------------
     // Filtragem 
     
-    if(array_key_exists('nome_serie', $_POST) && !empty($_POST['nome_serie'])) {
-       
+    if(array_key_exists('nome_serie', $_POST) && !empty($_POST['nome_serie'])) {       
         $objPenRelTipoDocMapEnviadoDTO->setStrNomeSerie('%'.$_POST['nome_serie'].'%', InfraDTO::$OPER_LIKE);
     } 
     
-    if(array_key_exists('nome_especie', $_POST) && !empty($_POST['nome_especie'])) {
-       
+    if(array_key_exists('nome_especie', $_POST) && !empty($_POST['nome_especie'])) {       
         $objPenRelTipoDocMapEnviadoDTO->setStrNomeEspecie('%'.$_POST['nome_especie'].'%', InfraDTO::$OPER_LIKE);
     } 
     //--------------------------------------------------------------------------
@@ -125,20 +102,16 @@ try {
     $objPaginaSEI->prepararOrdenacao($objPenRelTipoDocMapEnviadoDTO, 'CodigoEspecie', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objPenRelTipoDocMapEnviadoDTO);
     
-    $objGenericoBD = new GenericoBD($objBancoSEI);
-    $arrObjPenRelTipoDocMapEnviadoDTO = $objGenericoBD->listar($objPenRelTipoDocMapEnviadoDTO);
+    $arrObjPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->listar($objPenRelTipoDocMapEnviadoDTO);
     
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapEnviadoDTO);
-
     $numRegistros = count($arrObjPenRelTipoDocMapEnviadoDTO);
 
     if(!empty($arrObjPenRelTipoDocMapEnviadoDTO)){
         
         $strResultado = '';
-
         $strResultado .= '<table width="99%" class="infraTable">'."\n";
         $strResultado .= '<caption class="infraCaption">'.$objPaginaSEI->gerarCaptionTabela('estados do processo', $numRegistros).'</caption>';
-
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
         $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento SEI</th>'."\n";        
@@ -198,6 +171,19 @@ $objPaginaSEI->montarStyle();
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
 
+#btnAtribuirPadrao{
+    position: relative;
+}
+
+#btnAtribuirPadrao .pendencia {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  padding: 5px 5px;
+  border-radius: 50%;
+  background: red;
+  color: white;
+}
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
 <script type="text/javascript">
@@ -205,13 +191,9 @@ $objPaginaSEI->montarStyle();
 var objAutoCompletarInteressadoRI1225 = null;
 
 function inicializar(){
-
   infraEfeitoTabelas();
-  
   var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
-   
    if(strMensagens) {
-       
        alert(strMensagens);
    }
 }
@@ -229,76 +211,37 @@ function tratarEnter(ev){
     return true;
 }
 
-function onCLickLinkDelete(url, link) {
-    
-    var row = jQuery(link).parents('tr:first');
-    
+function onCLickLinkDelete(url, link) {    
+    var row = jQuery(link).parents('tr:first');    
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento     = row.find('td:eq(2)').text();
     
-    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){
-        
+    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){        
         window.location = url;
-    }
-    
+    }    
 }
 
-function onClickBtnNovo(){
-    
+function onClickBtnNovo(){    
     window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
 }
-<?php /* ?>
-function onClickBtnAtivar(){
-    
-   try {
-        
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-            
-        alert('Erro : ' + e.message);
-    } 
-    
-}
 
-function onClickBtnDesativar(){
-    
-    try {
-        
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-            
-        alert('Erro : ' + e.message);
-    }
-}
-<?php */ ?>
 function onClickBtnExcluir(){
     
-    try {
-        
+    try {        
         var len = jQuery('input[name*=chkInfraItem]:checked').length;
         
-        if(len > 0){
-        
+        if(len > 0){        
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
-
                 var form = jQuery('#frmAcompanharEstadoProcesso');
                 form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
                 form.submit();
             }
         }
-        else {
-        
+        else {        
             alert('Selecione pelo menos um mapeamento para Excluir');
         }
     }
-    catch(e){
-            
+    catch(e){            
         alert('Erro : ' + e.message);
     }
 }
@@ -308,10 +251,9 @@ function onClickBtnExcluir(){
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
-<form id="frmAcompanharEstadoProcesso" method="post" action="<?php// print $objSessaoSEI->assinarLink($strProprioLink); ?>">
+<form id="frmAcompanharEstadoProcesso" method="post" action="">
     
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
-    <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
 
         <label for="nome_serie" class="infraLabelObrigatorio input-label-first">Tipo de Documento SEI:</label>
@@ -324,7 +266,6 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     
     <?php if($numRegistros > 0): ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
-        <?php //$objPaginaSEI->montarAreaDebug(); ?>
     <?php else: ?>
         <div style="clear:both"></div>
         <p>Nenhum estado foi encontrado para este procedimento</p>

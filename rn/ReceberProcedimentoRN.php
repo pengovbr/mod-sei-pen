@@ -7,8 +7,9 @@ class ReceberProcedimentoRN extends InfraRN
     const STR_APENSACAO_PROCEDIMENTOS = 'Relacionamento representando a apensação de processos recebidos externamente';
     
     private $objProcessoEletronicoRN;
-    private $objInfraParametro;
+    private $objPenRelTipoDocMapRecebidoRN;
     private $objProcedimentoAndamentoRN;
+    private $objPenParametroRN;
     private $objRelProtocoloProtocoloRN;
     private $documentosRetirados = array();
     private $objProcedimentoRN;
@@ -27,6 +28,8 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
         $this->objReceberComponenteDigitalRN = new ReceberComponenteDigitalRN();        
         $this->objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+        $this->objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+        $this->objPenParametroRN = new PenParametroRN();
         $this->objPenDebug = DebugPen::getInstance();
     }
     
@@ -422,21 +425,23 @@ class ReceberProcedimentoRN extends InfraRN
     private function validarComponentesDigitais($parObjProtocolo, $parNumIdentificacaoTramite)
     {
         $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
-        
-        foreach($arrObjDocumentos as $objDocument){
+        $numIdTipoDocumentoPadrao = $this->objPenRelTipoDocMapRecebidoRN->consultarTipoDocumentoPadrao();
+                
+        if(!isset($numIdTipoDocumentoPadrao)){
+            foreach($arrObjDocumentos as $objDocument){
             
-            $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapRecebidoDTO();
-            $objPenRelTipoDocMapEnviadoDTO->retTodos();
-            $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($objDocument->especie->codigo);
-            
-            $objProcessoEletronicoDB = new PenRelTipoDocMapRecebidoBD(BancoSEI::getInstance());
-            $numContador = (integer)$objProcessoEletronicoDB->contar($objPenRelTipoDocMapEnviadoDTO);
-            
-            // Não achou, ou seja, não esta cadastrado na tabela, então não é
-            // aceito nesta unidade como válido
-            if($numContador <= 0) {
-                $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('Documento do tipo %s não está mapeado', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
-                throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
+                $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapRecebidoDTO();
+                $objPenRelTipoDocMapEnviadoDTO->retTodos();
+                $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($objDocument->especie->codigo);
+                
+                $objProcessoEletronicoDB = new PenRelTipoDocMapRecebidoBD(BancoSEI::getInstance());
+                $numContador = (integer)$objProcessoEletronicoDB->contar($objPenRelTipoDocMapEnviadoDTO);
+                
+                // Não achou, ou seja, não esta cadastrado na tabela, então não é aceito nesta unidade como válido
+                if($numContador <= 0) {
+                    $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('Documento do tipo %s não está mapeado', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+                    throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
+                }
             }
         }
         
@@ -1214,7 +1219,6 @@ class ReceberProcedimentoRN extends InfraRN
             $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($parDblIdProcedimentoAnexado);
             $objComponenteDigitalDTO->setOrdNumOrdemDocumentoAnexado(InfraDTO::$TIPO_ORDENACAO_ASC);
             $strCampoOrdenacao = "OrdemDocumento";
-            //$strCampoOrdenacao = "OrdemDocumentoAnexado";
         }        
 
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
@@ -1653,29 +1657,21 @@ class ReceberProcedimentoRN extends InfraRN
     
     private function obterSerieMapeada($numCodigoEspecie)
     {
-        $objSerieDTO = null;
-        
+        $objSerieDTO = null;        
         $objMapDTO = new PenRelTipoDocMapRecebidoDTO();
         $objMapDTO->setNumCodigoEspecie($numCodigoEspecie);
         $objMapDTO->retNumIdSerie();
         
+        // Busca mapeamento de tipos de documento definido pelo 
         $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
-        $objMapDTO = $objGenericoBD->consultar($objMapDTO);
-        
-        if(empty($objMapDTO)) {
-            $objMapDTO = new PenRelTipoDocMapRecebidoDTO();
-            $objMapDTO->retNumIdSerie();
-            $objMapDTO->setStrPadrao('S');
-            $objMapDTO->setNumMaxRegistrosRetorno(1);
-            $objMapDTO = $objGenericoBD->consultar($objMapDTO);
-        }
-        
-        if(!empty($objMapDTO)) {
+        $objMapDTO = $objGenericoBD->consultar($objMapDTO);                
+
+        $numIdSerieMapeada = (isset($objMapDTO)) ? $objMapDTO->getNumIdSerie() : $this->objPenRelTipoDocMapRecebidoRN->consultarTipoDocumentoPadrao();
+        if(!empty($numIdSerieMapeada)) {            
             $objSerieDTO = new SerieDTO();
             $objSerieDTO->retStrNome();
             $objSerieDTO->retNumIdSerie();
-            $objSerieDTO->setNumIdSerie($objMapDTO->getNumIdSerie());
-            
+            $objSerieDTO->setNumIdSerie($numIdSerieMapeada);            
             $objSerieRN = new SerieRN();
             $objSerieDTO = $objSerieRN->consultarRN0644($objSerieDTO);
         }

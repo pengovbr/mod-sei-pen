@@ -11,6 +11,25 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
     protected function inicializarObjInfraIBanco() {
         return BancoSEI::getInstance();
     }
+
+
+    /**
+     * Lista mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO
+     * @return array
+     */
+    protected function listarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
+    {
+        try {
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_listar', __METHOD__, $parObjPenRelTipoDocMapEnviadoDTO);
+            $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+            return $objPenRelTipoDocMapEnviadoBD->listar($parObjPenRelTipoDocMapEnviadoDTO);
+        }catch(Exception $e){
+            throw new InfraException('Erro listando mapeamento de Tipos de Documento para envio.',$e);
+        }
+    }       
+        
     
     public function listarEmUso($dblIdSerie = 0) {
 
@@ -27,9 +46,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
         $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objPenRelTipoDocMapRecebidoDTO);
 
         if (!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {
-
             foreach ($arrObjPenRelTipoDocMapRecebidoDTO as $objPenRelTipoDocMapRecebidoDTO) {
-
                 $arrNumIdSerie[] = $objPenRelTipoDocMapRecebidoDTO->getNumIdSerie();
             }
         }
@@ -39,7 +56,6 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
             // Tira da lista de ignorados o que foi selecionado, em caso de
             // edição
             $numIndice = array_search($dblIdSerie, $arrNumIdSerie);
-
             if ($numIndice !== false) {
                 unset($arrNumIdSerie[$numIndice]);
             }
@@ -48,12 +64,12 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
         return $arrNumIdSerie;
     }
     
-    public function cadastrarConectado(PenRelTipoDocMapEnviadoDTO $objParamDTO){
-        
+    public function cadastrarConectado(PenRelTipoDocMapEnviadoDTO $objParamDTO)
+    {        
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
         
-        if($objParamDTO->isSetDblIdMap()) {
-            
+        if($objParamDTO->isSetDblIdMap()) {            
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_alterar', __METHOD__, $objParamDTO);
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
             $objDTO->setDblIdMap($objParamDTO->getDblIdMap());
             $objDTO->retTodos();
@@ -63,78 +79,45 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
             if(empty($objDTO)) {
                 throw new InfraException(sprintf('Nenhum Registro foi localizado com ao ID %s', $objParamDTO->getNumIdSerie()));   
             }
-            
+                        
             $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie()); 
             $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie()); 
             $objBD->alterar($objDTO);
         }
-        else {
-            
+        else { 
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_cadastrar', __METHOD__, $objParamDTO);
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
             $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie()); 
             $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie()); 
-            $objDTO->setStrPadrao('S');
             $objBD->cadastrar($objDTO);
         }
     }
     
-    /**
-     * Muda o estado entre ativado/desativado
-     * 
-     * @param int|array Codigo da Especie
-     * @throws InfraException
-     * @return null
-     */
-    public static function mudarEstado($dblIdMap, $strPadrao = 'N'){
-        
-        $objBancoSEI = BancoSEI::getInstance();        
-        $objGenericoBD = new GenericoBD($objBancoSEI);
-        
-        if(is_array($dblIdMap)) {                        
-            foreach($dblIdMap as $_dblIdMap){
-                $objDTO = new PenRelTipoDocMapEnviadoDTO();
-                $objDTO->setNumCodigoEspecie($_dblIdMap);
-                $objDTO->retStrPadrao();                
-                $objDTO->setStrPadrao($strPadrao);                
-                $objGenericoBD->alterar($objDTO);
-            }
-        }
-        else {
-            $objDTO = new PenRelTipoDocMapEnviadoDTO();
-            $objDTO->setNumCodigoEspecie($dblIdMap);
-            $objDTO->retStrPadrao();
-            $objDTO->setStrPadrao($strPadrao);
-            $objGenericoBD->alterar($objDTO);
-        }       
-    }
     
+
     /**
-     * Exclui um ou um bloco de registros entre ativado/desativado
-     * 
-     * @param int|array Codigo da Especie
-     * @throws InfraException
-     * @return null
+     * Exclui lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO
+     * @return void
      */
-    public static function excluir($dblIdMap){
-        
-        $objBancoSEI = BancoSEI::getInstance();        
-        $objGenericoBD = new GenericoBD($objBancoSEI);
-        
-        if(is_array($dblIdMap)) {
-            foreach($dblIdMap as $_dblIdMap){
-                $objDTO = new PenRelTipoDocMapEnviadoDTO();
-                $objDTO->setDblIdMap($_dblIdMap);
-                $objGenericoBD->excluir($objDTO);
-            }
+    protected function excluirControlado($parArrObjPenRelTipoDocMapEnviadoDTO)
+    {
+        try {
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_excluir', __METHOD__, $parArrObjPenRelTipoDocMapEnviadoDTO);
+            $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+
+            foreach ($parArrObjPenRelTipoDocMapEnviadoDTO as $objPenRelTipoDocMapEnviadoDTO) {
+                $objPenRelTipoDocMapEnviadoBD->excluir($objPenRelTipoDocMapEnviadoDTO);
+            }            
+        }catch(Exception $e){
+            throw new InfraException('Erro excluindo Mapeamento de Tipos de Documento para envio.',$e);
         }
-        else {
-            $objDTO = new PenRelTipoDocMapEnviadoDTO();
-            $objDTO->setDblIdMap($dblIdMap);
-            $objGenericoBD->alterar($objDTO);
-        }  
-    }
+    }      
 
     
+
+
     /**
      * Remove uma espécie documental da base de dados do SEI baseado em um código de espécie do Barramento
      *
@@ -238,6 +221,46 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN {
                     $objPenRelTipoDocMapEnviadoRN->cadastrar($objPenRelTipoDocMapEnviadoDTO);
                 }
             }
-        }    
+        }            
     }    
+
+    /**
+     * Recupera espécie documental padrão para envio de processos, verificando se o mesmo se encontra ativo
+     *
+     * @return num
+     */
+    protected function consultarEspeciePadraoConectado()
+    {       
+        $objEspecieDocumentalDTO = null; 
+        $objPenParametro = new PenParametroRN();
+        $strIdEspeciePadrao = $objPenParametro->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
+
+        if(!empty($strIdEspeciePadrao)) {            
+            $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+            $objEspecieDocumentalDTO->retDblIdEspecie();
+            $objEspecieDocumentalDTO->setDblIdEspecie($strIdEspeciePadrao);
+            
+            $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
+            $objEspecieDocumentalDTO = $objGenericoBD->consultar($objEspecieDocumentalDTO);
+        }
+
+        return isset($objEspecieDocumentalDTO) ? intval($objEspecieDocumentalDTO->getDblIdEspecie()) : null;
+    }
+
+    /**
+     * Atribui especie documental padrão para envio de processos
+     *
+     * @return void
+     */
+    protected function atribuirEspeciePadraoControlado($parNumEspeciePadrao)
+    {
+        try{
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_padrao_atribuir', __METHOD__, $parNumEspeciePadrao);
+            $objPenParametroRN = new PenParametroRN();
+            $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
+        }catch(Exception $e){
+            throw new InfraException('Erro atribuindo Espécie Documental padrão para envio.',$e);
+        }        
+    }
+
 }

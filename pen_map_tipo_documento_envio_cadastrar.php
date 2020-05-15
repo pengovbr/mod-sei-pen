@@ -5,7 +5,6 @@
  */
 require_once dirname(__FILE__) . '/../../SEI.php';
 
-
 try {
 
     session_start();

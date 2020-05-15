@@ -12,7 +12,7 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
-    public function listarEmUso($dblCodigoEspecie = 0)
+    protected function listarEmUsoConectado($dblCodigoEspecie)
     {    
         $arrNumCodigoEspecie = array();
         $objInfraIBanco = $this->inicializarObjInfraIBanco();  
@@ -42,9 +42,15 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         
         return $arrNumCodigoEspecie;
     }
-    
-    public function cadastrarControlado(PenRelTipoDocMapRecebidoDTO $objParamDTO){
-          
+
+    /**
+     * Cadastra mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return void
+     */    
+    public function cadastrarControlado(PenRelTipoDocMapRecebidoDTO $objParamDTO)
+    {                  
         $objDTO = new PenRelTipoDocMapRecebidoDTO();
         $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie());
         $objDTO->retTodos();
@@ -52,16 +58,15 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
         
-        if(empty($objDTO)) {
-            
+        if(empty($objDTO)) {            
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_recebimento_cadastrar', __METHOD__, $objParamDTO);
             $objDTO = new PenRelTipoDocMapRecebidoDTO();
             $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie());
             $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie());
-            $objDTO->setStrPadrao('S');
             $objBD->cadastrar($objDTO);  
         }
         else {
-            
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_recebimento_alterar', __METHOD__, $objParamDTO);
             $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie()); 
             $objBD->alterar($objDTO);
         }
@@ -90,7 +95,29 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
           }
     }
 
+    /**
+     * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return array
+     */
+    protected function listarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
+    {
+        try {
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_recebimento_listar', __METHOD__, $parObjPenRelTipoDocMapRecebidoDTO);
+            $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
+            return $objPenRelTipoDocMapRecebidoBD->listar($parObjPenRelTipoDocMapRecebidoDTO);
+        }catch(Exception $e){
+            throw new InfraException('Erro listando mapeamento de Tipos de Documento para recebimento.',$e);
+        }
+    }        
 
+    /**
+     * Conta a lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return int
+     */
     protected function contarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
         try {
@@ -101,6 +128,25 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         }
     }    
 
+    /**
+     * Exclui lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return void
+     */
+    protected function excluirControlado($parArrObjPenRelTipoDocMapRecebidoDTO)
+    {
+        try {
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_recebimento_excluir', __METHOD__, $parArrObjPenRelTipoDocMapRecebidoDTO);
+            $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
+
+            foreach ($parArrObjPenRelTipoDocMapRecebidoDTO as $objPenRelTipoDocMapRecebidoDTO) {
+                $objPenRelTipoDocMapRecebidoBD->excluir($objPenRelTipoDocMapRecebidoDTO);
+            }            
+        }catch(Exception $e){
+            throw new InfraException('Erro excluindo Mapeamento de Tipos de Documento para Recebimento.',$e);
+        }
+    }        
 
     /**
      * Registra o mapeamento de espécies documentais para RECEBIMENTO com os Tipos de Documentos similares do SEI
@@ -173,4 +219,43 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
             }            
         }
     }
+
+    /**
+     * Recupera o tipo de mapeamento padrão para recebimento de processos, verificando se o mesmo se encontra ativo
+     *
+     * @return num
+     */
+    protected function consultarTipoDocumentoPadraoConectado()
+    {       
+        $objSerieDTO = null; 
+        $objPenParametro = new PenParametroRN();
+        $strIdTipoDocumentoPadrao = $objPenParametro->getParametro("PEN_TIPO_DOCUMENTO_PADRAO_RECEBIMENTO");
+
+        if(!empty($strIdTipoDocumentoPadrao)) {
+            $objSerieDTO = new SerieDTO();
+            $objSerieDTO->retNumIdSerie();
+            $objSerieDTO->setNumIdSerie($strIdTipoDocumentoPadrao);            
+            $objSerieRN = new SerieRN();
+            $objSerieDTO = $objSerieRN->consultarRN0644($objSerieDTO);
+        }
+
+        return isset($objSerieDTO) ? intval($objSerieDTO->getNumIdSerie()) : null;
+    }
+
+    /**
+     * Atribui tipo de documento padrão para recebimento de processos
+     *
+     * @return void
+     */
+    protected function atribuirTipoDocumentoPadraoControlado($numTipoDocumentoPadrao)
+    {
+        try{
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_doc_recebimento_padrao_atribuir', __METHOD__, $numTipoDocumentoPadrao);
+            $objPenParametroRN = new PenParametroRN();
+            $objPenParametroRN->persistirParametro("PEN_TIPO_DOCUMENTO_PADRAO_RECEBIMENTO", $numTipoDocumentoPadrao);
+        }catch(Exception $e){
+            throw new InfraException('Erro atribuindo Tipos de Documento padrão para recebimento.',$e);
+        }        
+    }
+
 }

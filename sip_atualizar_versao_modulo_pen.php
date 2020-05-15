@@ -108,7 +108,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
-                case '1.5.1': $this->instalarV1502();
+                case '1.5.1': $this->instalarV2000();
 
                 break;
                 default:
@@ -1153,10 +1153,73 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.5.2
      */
-    private function instalarV1502()
-    {
-        $this->atualizarNumeroVersao('1.5.2');
-    }            
+    private function instalarV2000()
+    {        
+        // Criar novos recursos de configuração de espécie documental padrão para envio de processos
+        $this->logar('ATRIBUIÇÃO DE PERMISSÃO DE ATRIBUÍÇÃO DE ESPÉCIES/TIPO DE DOCUMENTO PADRÃO AO PERFIL ADMINISTRADOR');
+        $numIdSistemaSei = $this->getNumIdSistema('SEI');
+        $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
+        $this->criarRecurso('pen_map_tipo_documento_envio_padrao_atribuir', 'Atribuir espécie documental padrão para envio de processos', $numIdSistemaSei);
+        $this->criarRecurso('pen_map_tipo_documento_envio_padrao_consultar', 'Consultar espécie documental padrão para envio de processos', $numIdSistemaSei);
+        $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_atribuir', 'Atribuir tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
+        $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_consultar', 'Consultar tipo de documento padrão para recebimento de processos', $numIdSistemaSei);        
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_documento_envio_padrao_atribuir');
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_documento_envio_padrao_consultar');
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_atribuir');
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_consultar');
+
+        $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO PEN');
+        $numIdSistemaSei = $this->getNumIdSistema('SEI');
+        $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
+        $numIdMenuSEI = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
+
+        try {
+            // Remove item de menu anterior e seus submenus configurados de forma errada
+            $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI,'Mapeamento de Tipos de Documento');
+            ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuMapTipDoc);
+        } catch (\Exception $e) {
+            $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
+        }
+
+        // Recriar item de menu agrupador de mapeamento de tipos de documento
+        $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
+        $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuPEN, null,         
+            "Mapeamento de Tipos de Documentos", 20
+        );
+
+        // Recriar item de menu de mapeamento de envio de documentos, acionando o recurso listar correspondente
+        $numIdItemMenuMapeamento = $objItemMenuMapeamentoDTO->getNumIdItemMenu();
+        $objRecursoMapEnvioListar = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, "pen_map_tipo_documento_envio_listar");
+        $numIdRecursoMapEnvioListar = $objRecursoMapEnvioListar->getNumIdRecurso();
+        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapEnvioListar,"Envio", 10);
+
+        // Recriar item de menu de mapeamento de recebimento de documentos, acionando o recurso listar correspondente
+        $objRecursoMapRecebimentoListar = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, "pen_map_tipo_documento_recebimento_listar");
+        $numIdRecursoMapRecebimentoListar = $objRecursoMapRecebimentoListar->getNumIdRecurso();
+        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapRecebimentoListar,"Recebimento", 20);
+        
+        // Redefinir ordem de apresentação dos menus de administração do módulo
+        $arrOrdemMenusAdministracaoPEN = array(
+            array("rotulo" => "Parâmetros de Configuração", "sequencia" => 10),
+            array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20),
+            array("rotulo" => "Mapeamento de Unidades", "sequencia" => 30),
+            array("rotulo" => "Mapeamento de Hipóteses Legais", "sequencia" => 40),
+        );
+
+        array_map(function($item) use ($numIdSistemaSei, $numIdMenuSEI){
+            $objItemMenuRN = new ItemMenuRN();
+            $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotulo"]);
+            if(isset($numIdItemMenu)){                
+                $objItemMenuDTO = new ItemMenuDTO();
+                $objItemMenuDTO->setNumIdMenu($numIdMenuSEI);
+                $objItemMenuDTO->setNumIdItemMenu($numIdItemMenu);
+                $objItemMenuDTO->setNumSequencia($item["sequencia"]);
+                $objItemMenuRN->alterar($objItemMenuDTO);
+            }
+        }, $arrOrdemMenusAdministracaoPEN);
+
+        $this->atualizarNumeroVersao('2.0.0');
+    }
 }
 
 try {

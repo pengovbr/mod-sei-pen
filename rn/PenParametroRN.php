@@ -92,12 +92,9 @@ class PenParametroRN extends InfraRN {
         }
     }
 
-    public function isSetValor($strNome){
-        return $objBD->isSetValor($strNome);
-    }
-
+    //TODO: Refatorar nome de função para obterValorParametro(...)
     /**
-     * Resgata o valor do parâmetro
+     * Resgata o valor do parâmetro configura
      * @param string $strNome
      */
     public function getParametro($strNome) {
@@ -109,5 +106,37 @@ class PenParametroRN extends InfraRN {
             $objPenParametroDTO = $this->consultar($objPenParametroDTO);
             return $objPenParametroDTO->getStrValor();
         }
+    }
+
+
+    /**
+     * Insere ou alterar o valor de um parâmetro de configuração do módulo de integração PEN
+     *
+     * @param string $parStrNome Nome do parâmetro
+     * @param string $parStrValor valor do parâmetro
+     * @return void
+     */
+    public static function persistirParametro($parStrNome, $parStrValor, $parStrDescricao=null, $parNumSequencia=null)
+    {
+        try{
+            $objPenParametroRN = new PenParametroRN();
+            $objPenParametroDTO = new PenParametroDTO();
+            $objPenParametroDTO->setStrNome($parStrNome);
+            
+            if($objPenParametroRN->contar($objPenParametroDTO) == 0){
+                $objPenParametroDTO->setStrValor($parStrValor);
+                $objPenParametroDTO->setStrDescricao($parStrDescricao);
+                $objPenParametroDTO->setNumSequencia($parNumSequencia);
+                $objPenParametroRN->cadastrar($objPenParametroDTO);
+            } else {
+                $objPenParametroDTO->setStrValor($parStrValor);
+                $objPenParametroDTO->setStrDescricao($parStrDescricao);
+                $objPenParametroDTO->setNumSequencia($parNumSequencia);                
+                $objPenParametroRN->alterar($objPenParametroDTO);
+            }
+        }
+        catch (Exception $e) {
+            throw new InfraException("Erro ao persistir parâmetro $parStrNome", $e);
+        }        
     }
 }

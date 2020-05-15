@@ -22,11 +22,10 @@ $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['a
 try {
     
     $objSessaoSEI->validarLink();
-    //$objSessaoSEI->validarPermissao('pen_map_tipo_documento_recebimento_listar');
+    $objSessaoSEI->validarPermissao('pen_map_tipo_documento_recebimento_listar');
     
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-    
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+
     //--------------------------------------------------------------------------
     // Ações
     if(array_key_exists('acao', $_GET)) {
@@ -35,29 +34,21 @@ try {
         
         switch($_GET['acao']) {
             
-            case 'pen_map_tipo_documento_recebimento_excluir':
-                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    $objBancoSEI = BancoSEI::getInstance();
-                    $objGenericoBD = new GenericoBD($objBancoSEI);
-                    
+            case 'pen_map_tipo_documento_recebimento_excluir':                
+                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {                    
                     $arrDblIdMap = explode(',', $arrParam['hdnInfraItensSelecionados']);
-                    
-                    foreach($arrDblIdMap as $dblIdMap) {
-                        
-                        $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO(); 
-                        $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($dblIdMap);
+                    $arrPenRelTipoDocMapRecebidoDTO = array_map(function($parDblIdMap){
+                        $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+                        $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($parDblIdMap);
+                        return $objPenRelTipoDocMapRecebidoDTO;
+                    }, $arrDblIdMap);
 
-                        $objGenericoBD->excluir($objPenRelTipoDocMapRecebidoDTO);
-                    }
-                    $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
-                    
+                    $objPenRelTipoDocMapRecebidoRN->excluir($arrPenRelTipoDocMapRecebidoDTO);
+                    $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);                    
                     header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
                     exit(0);
                 }
-                else {
-                    
+                else {                    
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
                 break;
@@ -74,9 +65,23 @@ try {
     //--------------------------------------------------------------------------
     
     $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Recebimento';
+
+    $strBotaoTipoDocumentoPadrao = "";
+    if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_consultar')){
+        $strBotaoTipoDocumentoPadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebimento_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Tipo de Documento padrão" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Tipo de Documento Padrão</button>';
+    }
         
+    if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_atribuir')){
+        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+        $bolPadraoNaoAtribuido = empty($objPenRelTipoDocMapRecebidoRN->consultarTipoDocumentoPadrao());
+        $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
+        $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de Tipo de Documento padrão para recebimento de processos" : "";
+        $strBotaoTipoDocumentoPadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebimento_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Tipo de Documento Padrão</button>';
+    }    
+
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $arrComandos[] = $strBotaoTipoDocumentoPadrao;
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
     $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
@@ -102,11 +107,9 @@ try {
     $objPaginaSEI->prepararOrdenacao($objPenRelTipoDocMapRecebidoDTO, 'CodigoEspecie', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objPenRelTipoDocMapRecebidoDTO);
     
-    $objGenericoBD = new GenericoBD($objBancoSEI);
-    $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objPenRelTipoDocMapRecebidoDTO);
+    $arrObjPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapRecebidoDTO);
     
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapRecebidoDTO);
-
     $numRegistros = count($arrObjPenRelTipoDocMapRecebidoDTO);
 
     if(!empty($arrObjPenRelTipoDocMapRecebidoDTO)){
@@ -175,6 +178,20 @@ $objPaginaSEI->montarStyle();
 .input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
 .input-field-third {position:absolute;left:0%;top:55%;width:25%;}
 
+#btnAtribuirPadrao{
+    position: relative;
+}
+
+#btnAtribuirPadrao .pendencia {
+  position: absolute;
+  top: -5px;
+  right: -4px;
+  padding: 5px 5px;
+  border-radius: 50%;
+  background: red;
+  color: white;
+}
+
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
 <script type="text/javascript">
@@ -204,47 +221,36 @@ function tratarEnter(ev){
     return true;
 }
 
-function onCLickLinkDelete(url, link) {
-    
-    var row = jQuery(link).parents('tr:first');
-    
+function onCLickLinkDelete(url, link) {    
+    var row = jQuery(link).parents('tr:first');    
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento     = row.find('td:eq(2)').text();
     
-    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){
-        
+    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){        
         window.location = url;
     }
     
 }
 
-function onClickBtnNovo(){
-    
+function onClickBtnNovo(){    
     window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
 }
 
-function onClickBtnExcluir(){
-    
-    try {
-        
-        var len = jQuery('input[name*=chkInfraItem]:checked').length;
-        
-        if(len > 0){
-        
+function onClickBtnExcluir(){    
+    try {        
+        var len = jQuery('input[name*=chkInfraItem]:checked').length;        
+        if(len > 0){        
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
-
                 var form = jQuery('#frmAcompanharEstadoProcesso');
                 form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_recebimento_listar'); ?>');
                 form.submit();
             }
         }
-        else {
-        
+        else {        
             alert('Selecione pelo menos um mapeamento para Excluir');
         }
     }
-    catch(e){
-            
+    catch(e){            
         alert('Erro : ' + e.message);
     }
 }
@@ -254,10 +260,8 @@ function onClickBtnExcluir(){
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
-<form id="frmAcompanharEstadoProcesso" method="post" action="<?php// print $objSessaoSEI->assinarLink($strProprioLink); ?>">
-    
+<form id="frmAcompanharEstadoProcesso" method="post" action="">
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
-    <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
         <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
@@ -268,7 +272,6 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
     
     <?php if($numRegistros > 0): ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
-        <?php //$objPaginaSEI->montarAreaDebug(); ?>
     <?php else: ?>
         <div style="clear:both"></div>
         <p>Nenhum estado foi encontrado para este procedimento</p>

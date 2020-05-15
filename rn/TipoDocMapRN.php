@@ -22,7 +22,7 @@ class TipoDocMapRN extends InfraRN {
      * conjunto com o primeiro paramêtro
      * @return array
      */
-    public function listarParesEspecie($arrNumCodigoEspecie = array()) 
+    protected function listarParesEspecieConectado($arrNumCodigoEspecie = array()) 
     {
         try {
             $objInfraIBanco = $this->inicializarObjInfraIBanco();
@@ -82,8 +82,8 @@ class TipoDocMapRN extends InfraRN {
                 $objSerieDTO->setNumIdSerie($arrNumIdSerie, InfraDTO::$OPER_NOT_IN);
             } 
 
-            $objGenericoBD = new GenericoBD($objInfraIBanco);
-            $arrObjSerieDTO = $objGenericoBD->listar($objSerieDTO);
+            $objSerieRN = new SerieRN($objInfraIBanco);
+            $arrObjSerieDTO = $objSerieRN->listarRN0646($objSerieDTO);
                         
             if(!empty($arrObjSerieDTO)) {                
                 foreach($arrObjSerieDTO as $objSerieDTO) {

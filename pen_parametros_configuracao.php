@@ -14,7 +14,6 @@ try {
     $objBanco = BancoSEI::getInstance();
     $objSessao = SessaoSEI::getInstance();
 
-
     $o = new PenRelHipoteseLegalEnvioRN();
     $os = new PenRelHipoteseLegalRecebidoRN();
 

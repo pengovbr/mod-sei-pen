@@ -14,11 +14,8 @@ try {
     $objPaginaSEI = PaginaSEI::getInstance();
 
     SessaoSEI::getInstance()->validarLink();
-    //SessaoSEI::getInstance()->validarPermissao('pen_map_tipo_documento_recebimento_cadastrar');
-     
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
-  
+    SessaoSEI::getInstance()->validarPermissao('pen_map_tipo_documento_recebimento_cadastrar');
+       
     $arrComandos = array();
     
     $bolSomenteLeitura = false;

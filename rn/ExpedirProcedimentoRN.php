@@ -45,6 +45,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $objOrgaoRN;
     private $objSerieRN;
     private $objAnexoRN;
+    private $objPenParametroRN;
+    private $objPenRelTipoDocMapEnviadoRN;
     private $barraProgresso;
     private $objProcedimentoAndamentoRN;
     private $arrPenMimeTypes = array(
@@ -94,11 +96,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->objOrgaoRN = new OrgaoRN();
         $this->objSerieRN = new SerieRN();
         $this->objAnexoRN = new AnexoRN();
+        $this->objPenParametroRN = new PenParametroRN();
+        $this->objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
 
         $this->barraProgresso = new InfraBarraProgresso();
         $this->barraProgresso->setNumMin(0);
-        //$this->barraProgresso->setNumMax(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
     }
 
     protected function inicializarObjInfraIBanco()
@@ -290,8 +293,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         */
         private function obterTamanhoTotalDaBarraDeProgresso($parObjProcesso)
         {
-            $objPenParametroRN = new PenParametroRN();
-            $nrTamanhoMegasMaximo  = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+            $nrTamanhoMegasMaximo  = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
             $nrTamanhoBytesMaximo  = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
             $totalBarraProgresso = 2;
@@ -1069,16 +1071,18 @@ class ExpedirProcedimentoRN extends InfraRN {
         if($objPenRelTipoDocMapEnviadoDTO == null) {
             $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
             $objPenRelTipoDocMapEnviadoDTO->retNumCodigoEspecie();
-            $objPenRelTipoDocMapEnviadoDTO->setStrPadrao('S');
             $objPenRelTipoDocMapEnviadoDTO->setNumMaxRegistrosRetorno(1);
             $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
         }
 
-        if($objPenRelTipoDocMapEnviadoDTO == null) {
+        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
+        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
+
+        if(!isset($numCodigoEspecieMapeada)) {
             throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
         }
 
-        return $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie();
+        return $numCodigoEspecieMapeada;
     }
 
 
@@ -1277,15 +1281,13 @@ class ExpedirProcedimentoRN extends InfraRN {
         } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO)  {
             $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
             if(isset($objAnexoDTO)){
-                $objPenParametroRN = new PenParametroRN();
-
                 //Obtenção do conteúdo do documento externo
                 $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
 
                 $fp = fopen($strCaminhoAnexo, "rb");
 
                 try {
-                    $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                    $nrTamanhoMegasMaximo = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                     $nrTamanhoBytesMaximo = $nrTamanhoMegasMaximo * pow(1024, 2);
                     $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
 
@@ -1818,8 +1820,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
                 $nrTamanhoArquivoMb = 0;
                 $nrTamanhoBytesArquivo = 0;
-                $objPenParametroRN = new PenParametroRN();
-                $nrTamanhoMegasMaximo = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                $nrTamanhoMegasMaximo = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                 $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
                 try {
@@ -1983,12 +1984,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
             $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
 
+            $strMapeamentoEnvioPadrao = $this->objPenParametroRN->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
+
             foreach($arrDocumentoDTO as $objDocumentoDTO) {
                 $objDocMapDTO->unSetTodos();
                 $objDocMapDTO->setNumIdSerie($objDocumentoDTO->getNumIdSerie());
 
-                if($objGenericoBD->contar($objDocMapDTO) == 0) {
-
+                if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
                     $strDescricao = sprintf(
                         'Não existe mapeamento de envio para %s no documento %s',
                         $objDocumentoDTO->getStrNomeSerie(),
@@ -2515,8 +2517,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     protected function cancelarTramiteInternoControlado(ProtocoloDTO $objDtoProtocolo)
     {
         //Obtem o id_rh que representa a unidade no barramento
-        $objPenParametroRN = new PenParametroRN();
-        $numIdRespositorio = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $numIdRespositorio = $this->objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
         //Obtem os dados da unidade
         $objPenUnidadeDTO = new PenUnidadeDTO();

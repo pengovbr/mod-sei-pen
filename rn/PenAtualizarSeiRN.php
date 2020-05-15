@@ -1,4 +1,7 @@
 <?
+
+use Symfony\Component\Intl\Scripts;
+
 /**
  *
  * 12/08/2017 - criado por thiago.farias
@@ -85,7 +88,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
-                case '1.5.1': $this->instalarV1502();
+                case '1.5.1': $this->instalarV2000();
                 
                     break;
                 default:
@@ -895,7 +898,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 $objDTO->setNumIdSerie($numIdSerie);
 
                 if ($objBD->contar($objDTO) == 0) {
-
                     $objDTO->setStrPadrao('S');
                     $objBD->cadastrar($objDTO);
                 }
@@ -1763,14 +1765,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }    
 
 
-    protected function instalarV1502()
+    protected function instalarV2000()
     {
-        try {
-            $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-            $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");
-        } catch (\Exception $e) {
-            //TODO: remover este try..catch
-        }
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");
         
         $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
         $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
@@ -1779,7 +1777,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
         $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
         $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
-
 
         $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");        
         // Remove agendamento de tarefas de atualização de hipóteses legais
@@ -1806,7 +1803,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objAgendamentoInformacoesPEN->setStrSinSucesso("S");
             $objInfraAgendamentoTarefaBD->cadastrar($objAgendamentoInformacoesPEN);
         }
+        
+        $this->logar("CADASTRAMENTO DE NOVOS RECURSOS DE ATRIBUIÇÃO DE ESPÉCIE DOCUMENTAL E TIPO DE DOCUMENTO PADRÃO");
 
-        $this->atualizarNumeroVersao("1.5.2");
+        $this->logar("REMOÇÃO DE COLUNAS DE DESATIVAÇÃO DE MAPEAMENTO DE ESPÉCIES NÃO MAIS UTILIZADOS");
+        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_enviado", "sin_padrao");
+        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_recebido", "sin_padrao");
+
+        // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
+        PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");        
+
+        $this->atualizarNumeroVersao("2.0.0");
     }    
 }
