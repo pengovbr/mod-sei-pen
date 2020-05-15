@@ -144,7 +144,7 @@ Esta configuração é necessária para o SEI realizar as devidas regras de regi
 
 #####    11.2. Configurar a nova unidade na hierarquia do SEI, através da funcionalidade **[SIP > Hierarquias > Montar]**
 
-Sugerimos que está unidade seja configurada no mesmo nível hierárquico da unidade de teste padrão existente no SEI. Para saber qual é a unidade de testes, basta verificar o parâmetro do SEI chamado **SEI_UNIDADE_TESTE**
+A unidade EXTERNO sugerida anteriormente será utilizada apenas para o correto registros dos históricos de andamento dos processos e não deverá receber nenhum processo ou acesso de usuários. Portanto, sua localização na hierarquia de unidades do SEI precisa ser feita para que o sistema sincronize tais informações do SIP para o SEI, mas seu real posicionamento na hierarquia é irrelevante neste cenário. Desta forma, unidade pode ser adicionada em qualquer ponto da hierarquia, inclusive na raiz.
 
 ---
 
@@ -183,8 +183,6 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
     - *Localização do certificado digital o órgão (arquivo do passo 8)*  
 * **Número Máximo de Tentativas de Recebimento:**  
     - *Valor padrão: 3*  
-* **Tamanho Máximo de Documentos Expedidos:**  
-    - *Valor padrão: 50*  
 * **Senha do Certificado Digital:**  
     - *Senha do certificado digital*  
 * **Tipo de Processo Externo:**  
