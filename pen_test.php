@@ -30,9 +30,6 @@ try {
         
         print '<?xml version="1.0" encoding="UTF-8" ? >'.PHP_EOL;
         
-        $objBancoSEI = BancoSEI::getInstance();
-        $objBancoSEI->abrirConexao();
-
         switch ($_GET['metodo']){
             
             // @join_tec US008.02 (#23092)
@@ -58,7 +55,7 @@ try {
                     $objProcessoEletronicoDTO->setDblIdProcedimento($_GET['id_procedimento']);
                     $objProcessoEletronicoDTO->retStrNumeroRegistro();
 
-                    $objProcessoEletronicoBD = new ProcessoEletronicoBD($objBancoSEI);
+                    $objProcessoEletronicoBD = new ProcessoEletronicoBD(BancoSEI::getInstance());
                     $objProcessoEletronicoDTO = $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
 
                     $objReciboTramiteDTO = new ReciboTramiteDTO();
@@ -67,7 +64,7 @@ try {
                     $objReciboTramiteDTO->retDthRecebimento();
                     $objReciboTramiteDTO->retStrHashAssinatura();
 
-                    $objReciboTramiteBD = new ReciboTramiteBD($objBancoSEI);
+                    $objReciboTramiteBD = new ReciboTramiteBD(BancoSEI::getInstance());
                     $arrObjReciboTramiteDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
 
                     if(!empty($arrObjReciboTramiteDTO)) {
@@ -114,11 +111,8 @@ try {
     $objPaginaSEI->setTipoPagina(InfraPagina::$TIPO_PAGINA_SIMPLES);
     $objPaginaSEI->prepararOrdenacao($objProcedimentoAndamentoDTO, 'IdProcedimento', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objProcedimentoAndamentoDTO);
-
-    $objBancoSEI = BancoSEI::getInstance();
-    $objBancoSEI->abrirConexao();
     
-    $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($objBancoSEI);
+    $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
     $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->listar($objProcedimentoAndamentoDTO);
     
     $objPaginaSEI->processarPaginacao($objProcedimentoAndamentoDTO);

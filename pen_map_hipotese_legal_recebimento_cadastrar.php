@@ -20,8 +20,6 @@ $objSessao = SessaoSEI::getInstance();
 
 
 try {
-
-    $objBanco->abrirConexao();
     
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);

@@ -15,7 +15,9 @@ try {
 
     SessaoSEI::getInstance()->validarLink();
     SessaoSEI::getInstance()->validarPermissao('pen_map_tipo_documento_recebimento_cadastrar');
-       
+           
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+
     $arrComandos = array();
     
     $bolSomenteLeitura = false;
@@ -64,9 +66,7 @@ try {
             $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($_GET['id_mapeamento']);
         }
         
-        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
         $objPenRelTipoDocMapRecebidoRN->cadastrar($objPenRelTipoDocMapRecebidoDTO);
-        
         $objPaginaSEI->adicionarMensagem('Salvo com sucesso', InfraPagina::$TIPO_MSG_INFORMACAO);
         
         header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem='.$_GET['acao']));
@@ -79,8 +79,7 @@ try {
         $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($_GET['id_mapeamento']);
         $objPenRelTipoDocMapRecebidoDTO->retTodos();
         
-        $objEspecieDocumentalBD = new GenericoBD(BancoSEI::getInstance());
-        $objPenRelTipoDocMapRecebidoDTO = $objEspecieDocumentalBD->consultar($objPenRelTipoDocMapRecebidoDTO);
+        $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->consultar($objPenRelTipoDocMapRecebidoDTO);
     }
     
     if(empty($objPenRelTipoDocMapRecebidoDTO)){
@@ -90,8 +89,6 @@ try {
     }
     
     $objTipoDocMapRN = new TipoDocMapRN();
-    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
-    
     $arrEspecieDocumental = $objTipoDocMapRN->listarParesEspecie(
         $objPenRelTipoDocMapRecebidoRN->listarEmUso($objPenRelTipoDocMapRecebidoDTO->getNumCodigoEspecie())
     ); 
@@ -99,11 +96,9 @@ try {
 catch (InfraException $e) {
     
     if(preg_match('/Duplicate/', $e->getStrDescricao())){
-
         $objPaginaSEI->adicionarMensagem('Nenhuma das duas chaves pode estar sendo utilizada em outra relação', InfraPagina::$TIPO_MSG_INFORMACAO);
     }
-    else {
-        
+    else {        
         $objPaginaSEI->processarExcecao($e);
     }
 }

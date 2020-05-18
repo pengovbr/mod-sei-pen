@@ -22,7 +22,7 @@ class PenUnidadeRN extends InfraRN {
      * @param PenUnidadeDTO $objFiltroDTO
      * @return arrayDTO
      */
-    public function getIdUnidadeEmUso(PenUnidadeDTO $objFiltroDTO){
+    protected function getIdUnidadeEmUsoConectado(PenUnidadeDTO $objFiltroDTO){
         $objDTO = new PenUnidadeDTO();
         $objDTO->setDistinct(true);
         $objDTO->retNumIdUnidade();
@@ -64,9 +64,9 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function alterarConectado(UnidadeDTO $objPenUnidadeDTO){
+    protected function alterarControlado(UnidadeDTO $objPenUnidadeDTO){
         try {
-            $objPenUnidadeBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
+            $objPenUnidadeBD = new PenUnidadeBD(BancoSEI::getInstance());
             return $objPenUnidadeBD->alterar($objPenUnidadeDTO);
         } 
         catch (Exception $e) {
@@ -82,7 +82,7 @@ class PenUnidadeRN extends InfraRN {
      */
     protected function cadastrarConectado(UnidadeDTO $objDTO){
         try {
-            $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
+            $objBD = new PenUnidadeBD(BancoSEI::getInstance());
             return $objBD->cadastrar($objDTO);
         } 
         catch (Exception $e) {
@@ -96,9 +96,9 @@ class PenUnidadeRN extends InfraRN {
      * @return array
      * @throws InfraException
      */
-    protected function excluirConectado(UnidadeDTO $objDTO){
+    protected function excluirControlado(UnidadeDTO $objDTO){
         try {
-            $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
+            $objBD = new PenUnidadeBD(BancoSEI::getInstance());
             return $objBD->excluir($objDTO);
         } 
         catch (Exception $e) {

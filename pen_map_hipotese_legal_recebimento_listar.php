@@ -35,9 +35,7 @@ try {
 
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
-    
-    $objBanco->abrirConexao();
-    
+        
     //--------------------------------------------------------------------------
     // Aes
     if(array_key_exists('acao', $_GET)) {

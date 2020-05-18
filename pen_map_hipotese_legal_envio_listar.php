@@ -31,8 +31,6 @@ try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
     
-    $objBanco->abrirConexao();
-    
     
     //--------------------------------------------------------------------------
     // Ações

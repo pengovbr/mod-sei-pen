@@ -16,6 +16,8 @@ InfraDebug::getInstance()->limpar();
 
 $objPaginaSEI = PaginaSEI::getInstance();
 $objSessaoSEI = SessaoSEI::getInstance();
+
+$objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
  
 $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
 

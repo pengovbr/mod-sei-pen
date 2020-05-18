@@ -18,8 +18,6 @@ $objBanco = BancoSEI::getInstance();
 $objSessao = SessaoSEI::getInstance(); 
 
 try {
-
-    $objBanco->abrirConexao();
     
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
@@ -136,7 +134,6 @@ try {
     
     $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
     $arrMapIdBarramento = InfraArray::converterArrInfraDTO($objPenHipoteseLegalRN->listar($objPenHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
-    //--------------------------------------------------------------------------
 } 
 catch (InfraException $e) {   
     $objPagina->processarExcecao($e);

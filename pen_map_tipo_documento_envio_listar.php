@@ -16,6 +16,8 @@ InfraDebug::getInstance()->limpar();
 
 $objPaginaSEI = PaginaSEI::getInstance();
 $objSessaoSEI = SessaoSEI::getInstance();
+
+$objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
  
 $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
 
@@ -31,15 +33,8 @@ try {
         $arrParam = array_merge($_GET, $_POST);        
         switch($_GET['acao']) {            
             case 'pen_map_tipo_documento_envio_excluir':                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    $arrDblIdMap = explode(',', $arrParam['hdnInfraItensSelecionados']);
-                    $arrPenRelTipoDocMapEnvioDTO = array_map(function($parDblIdMap){
-                        $objPenRelTipoDocMapEnvioDTO = new PenRelTipoDocMapEnviadoDTO();
-                        $objPenRelTipoDocMapEnvioDTO->setDblIdMap($parDblIdMap);
-                        return $objPenRelTipoDocMapEnvioDTO;
-                    }, $arrDblIdMap);
-
-                    $objPenRelTipoDocMapEnviadoRN->excluir($arrPenRelTipoDocMapEnvioDTO);
+                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {                    
+                    $objPenRelTipoDocMapEnviadoRN->excluir(explode(',', $arrParam['hdnInfraItensSelecionados']));                    
                     $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);                    
                     header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
                     exit(0);
@@ -47,7 +42,7 @@ try {
                 else {                    
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
-                break;
+                break;            
                 
             case 'pen_map_tipo_documento_envio_listar':
                 // Ação padrão desta tela
