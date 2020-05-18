@@ -29,12 +29,10 @@ class PendenciasTramiteRN extends InfraRN {
 
     public function __construct() 
     {
-        $objPenParametroRN = new PenParametroRN();
-
-        $this->strLocalizacaoCertificadoDigital = $objPenParametroRN->getParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL');
-        $this->strEnderecoServicoPendencias = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
-        //TODO: Urgente - Remover senha do certificado de autenticao dos servios do PEN da tabela de parâmetros
-        $this->strSenhaCertificadoDigital = $objPenParametroRN->getParametro('PEN_SENHA_CERTIFICADO_DIGITAL');
+        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+        $this->strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+        $this->strEnderecoServicoPendencias = $objConfiguracaoModPEN->getValor("PEN", "WebServicePendencias");
+        $this->strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
 
         if (InfraString::isBolVazia($this->strEnderecoServicoPendencias)) {
             throw new InfraException('Endereço do serviço de pendências de trâmite do Processo Eletrônico Nacional (PEN) não informado.');

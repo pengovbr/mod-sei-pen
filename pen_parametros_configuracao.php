@@ -44,7 +44,7 @@ try {
     $arrObjUnidade = $objUnidadeRN->listarRN0127($objUnidadeDTO);
 
     if ($objPenParametroDTO===null){
-        throw new PENException("Registros não encontrados.");
+        throw new InfraException("Registros não encontrados.");
     }
 
     switch ($_GET['acao']) {
@@ -76,7 +76,7 @@ try {
             break;
 
         default:
-            throw new PENException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
     }
 
 } catch (Exception $e) {
@@ -120,7 +120,6 @@ $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <style>
-
     .input-field {
         width: 35%;
         margin-bottom: 15px;

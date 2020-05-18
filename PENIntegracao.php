@@ -1,25 +1,36 @@
 <?php
 
-class PENIntegracao extends SeiIntegracao {
-    
+class PENIntegracao extends SeiIntegracao 
+{    
     const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12', '3.0.13', '3.0.14', '3.0.15', '3.1.0', '3.1.1', '3.1.2', '3.1.3');
-    
-    private static $strDiretorio;
     
     public function getNome() {
         return 'Integração Processo Eletrônico Nacional - PEN';
     }
     
+    
     public function getVersao() {
         return '2.0.0';
     }
     
+    
     public function getInstituicao() {
         return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
-    }
+    }    
     
-    public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) {
+    
+    public function inicializar($strVersaoSEI) 
+    {
+        PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
+        PENIntegracao::validarCompatibilidadeBanco();
+        PENIntegracao::validarArquivoConfiguracao();
         
+        require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+    }    
+    
+    
+    public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) 
+    {        
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setDblIdProcedimento($objSeiIntegracaoDTO->getIdProcedimento());
         $objProcedimentoDTO->retTodos();
@@ -94,8 +105,9 @@ class PENIntegracao extends SeiIntegracao {
         return array($strAcoesProcedimento);
     }
     
-    public function montarIconeControleProcessos($arrObjProcedimentoAPI = array()) {
-        
+    
+    public function montarIconeControleProcessos($arrObjProcedimentoAPI = array()) 
+    {        
         $arrStrIcone = array();
         $arrDblIdProcedimento = array();
         
@@ -134,7 +146,8 @@ class PENIntegracao extends SeiIntegracao {
         return $arrStrIcone;
     }
     
-    public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP) {
+    public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP) 
+    {
         $dblIdProcedimento = $objProcedimentoAP->getIdProcedimento();
         
         $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
@@ -177,21 +190,23 @@ class PENIntegracao extends SeiIntegracao {
         return $arrObjArvoreAcaoItemAPI;
     }
     
-    public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO) {
+    public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO) 
+    {
         
     }
     
-    public function getDiretorioImagens() {
+    public function getDiretorioImagens() 
+    {
         return static::getDiretorio() . '/imagens';
     }
     
-    public function montarMensagemProcesso(ProcedimentoAPI $objProcedimentoAPI) {
-        
+    
+    public function montarMensagemProcesso(ProcedimentoAPI $objProcedimentoAPI) 
+    {        
         $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objProcedimentoAPI->getIdProcedimento());
         
-        if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
-            
+        if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {            
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
             $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO');
             $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
@@ -204,11 +219,13 @@ class PENIntegracao extends SeiIntegracao {
         }
     }
     
+    
     public static function getDiretorio() {
         $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
         $strModulo = $arrConfig['PENIntegracao'];
         return "modulos/".$strModulo;
     }
+    
     
     public function processarControlador($strAcao)
     {
@@ -328,7 +345,7 @@ class PENIntegracao extends SeiIntegracao {
             case 'pen_map_tipo_documento_envio_padrao_consultar':
                 require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_padrao.php';
             break;            
-
+            
             case 'pen_map_tipo_doc_recebimento_padrao_atribuir';
             case 'pen_map_tipo_doc_recebimento_padrao_consultar':
                 require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebimento_padrao.php';
@@ -336,157 +353,212 @@ class PENIntegracao extends SeiIntegracao {
             
             default:
                 return false;
-        break;
+            
+        }
+        return true;
     }
     
-    return true;
-}
-
-public function processarControladorAjax($strAcao) {
-    $xml = null;
     
-    switch ($_GET['acao_ajax']) {
+    public function processarControladorAjax($strAcao) {
+        $xml = null;
         
-        case 'pen_unidade_auto_completar_expedir_procedimento':
-            $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa']);
+        switch ($_GET['acao_ajax']) {
             
-            if (count($arrObjEstruturaDTO) > 0) {
-                $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
-            } else {
-                return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
-            }
-        break;
-        
-        case 'pen_apensados_auto_completar_expedir_procedimento':
-            //TODO: Validar parâmetros passados via ajax
-            $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
-            $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
-            $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
-            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjProcedimentoDTO, 'IdProtocolo', 'ProtocoloFormatadoProtocolo');
-        break;
-        
-        
-        case 'pen_procedimento_expedir_validar':
-            require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
-        break;
-        
-        
-        case 'pen_pesquisar_unidades_administrativas_estrutura_pai':
-            $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
-            $numeroDeIdentificacaoDaEstrutura = $_POST['numeroDeIdentificacaoDaEstrutura'];
-            
-            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-            $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
-            
-            // Obtenção da hierarquia de siglas desativada por questões de desempenho
-            //$arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
-            
-            print json_encode($arrEstruturas);
-            exit(0);
-        break;
-        
-        
-        case 'pen_pesquisar_unidades_administrativas_estrutura_pai_textual':
-            $registrosPorPagina = 50;
-            $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
-            $numeroDeIdentificacaoDaEstrutura     = $_POST['numeroDeIdentificacaoDaEstrutura'];
-            $siglaUnidade = ($_POST['siglaUnidade'] == '') ? null : utf8_encode($_POST['siglaUnidade']);
-            $nomeUnidade  = ($_POST['nomeUnidade']  == '') ? null : utf8_encode($_POST['nomeUnidade']);
-            $offset       = $_POST['offset'] * $registrosPorPagina;
-            
-            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-            //print "Texto: " . $numeroDeIdentificacaoDaEstrutura;
-            //$siglaUnidade = 'CGPRO';
-            $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
-            
-            $interface = new ProcessoEletronicoINT();
-            //Gera a hierarquia de SIGLAS das estruturas
-            $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
-            
-            $arrEstruturas['estrutura'] = [];
-            if(!is_null($arrHierarquiaEstruturaDTO[0])){
-                foreach ($arrHierarquiaEstruturaDTO as $key => $estrutura) {
-                    //Monta um array com as estruturas para retornar o JSON
-                    $arrEstruturas['estrutura'][$key]['nome'] = utf8_encode($estrutura->get('Nome'));
-                    $arrEstruturas['estrutura'][$key]['numeroDeIdentificacaoDaEstrutura'] = $estrutura->get('NumeroDeIdentificacaoDaEstrutura');
-                    $arrEstruturas['estrutura'][$key]['sigla'] = utf8_encode($estrutura->get('Sigla'));
-                    $arrEstruturas['estrutura'][$key]['ativo'] = $estrutura->get('Ativo');
-                    $arrEstruturas['estrutura'][$key]['aptoParaReceberTramites'] = $estrutura->get('AptoParaReceberTramites');
-                    $arrEstruturas['estrutura'][$key]['codigoNoOrgaoEntidade'] = $estrutura->get('CodigoNoOrgaoEntidade');
-                    
+            case 'pen_unidade_auto_completar_expedir_procedimento':
+                $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa']);
+                
+                if (count($arrObjEstruturaDTO) > 0) {
+                    $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
+                } else {
+                    return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
                 }
-                $arrEstruturas['totalDeRegistros']   = $estrutura->get('TotalDeRegistros');
-                $arrEstruturas['registrosPorPagina'] = $registrosPorPagina;
-            }
+            break;
             
-            print json_encode($arrEstruturas);
-            exit(0);
-        break;
+            case 'pen_apensados_auto_completar_expedir_procedimento':
+                //TODO: Validar parâmetros passados via ajax
+                $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
+                $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+                $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
+                $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjProcedimentoDTO, 'IdProtocolo', 'ProtocoloFormatadoProtocolo');
+            break;
+            
+            
+            case 'pen_procedimento_expedir_validar':
+                require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
+            break;
+            
+            
+            case 'pen_pesquisar_unidades_administrativas_estrutura_pai':
+                $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
+                $numeroDeIdentificacaoDaEstrutura = $_POST['numeroDeIdentificacaoDaEstrutura'];
+                
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
+                
+                // Obtenção da hierarquia de siglas desativada por questões de desempenho
+                //$arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
+                
+                print json_encode($arrEstruturas);
+                exit(0);
+            break;
+            
+            
+            case 'pen_pesquisar_unidades_administrativas_estrutura_pai_textual':
+                $registrosPorPagina = 50;
+                $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
+                $numeroDeIdentificacaoDaEstrutura     = $_POST['numeroDeIdentificacaoDaEstrutura'];
+                $siglaUnidade = ($_POST['siglaUnidade'] == '') ? null : utf8_encode($_POST['siglaUnidade']);
+                $nomeUnidade  = ($_POST['nomeUnidade']  == '') ? null : utf8_encode($_POST['nomeUnidade']);
+                $offset       = $_POST['offset'] * $registrosPorPagina;
+                
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                //print "Texto: " . $numeroDeIdentificacaoDaEstrutura;
+                //$siglaUnidade = 'CGPRO';
+                $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
+                
+                $interface = new ProcessoEletronicoINT();
+                //Gera a hierarquia de SIGLAS das estruturas
+                $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
+                
+                $arrEstruturas['estrutura'] = [];
+                if(!is_null($arrHierarquiaEstruturaDTO[0])){
+                    foreach ($arrHierarquiaEstruturaDTO as $key => $estrutura) {
+                        //Monta um array com as estruturas para retornar o JSON
+                        $arrEstruturas['estrutura'][$key]['nome'] = utf8_encode($estrutura->get('Nome'));
+                        $arrEstruturas['estrutura'][$key]['numeroDeIdentificacaoDaEstrutura'] = $estrutura->get('NumeroDeIdentificacaoDaEstrutura');
+                        $arrEstruturas['estrutura'][$key]['sigla'] = utf8_encode($estrutura->get('Sigla'));
+                        $arrEstruturas['estrutura'][$key]['ativo'] = $estrutura->get('Ativo');
+                        $arrEstruturas['estrutura'][$key]['aptoParaReceberTramites'] = $estrutura->get('AptoParaReceberTramites');
+                        $arrEstruturas['estrutura'][$key]['codigoNoOrgaoEntidade'] = $estrutura->get('CodigoNoOrgaoEntidade');
+                        
+                    }
+                    $arrEstruturas['totalDeRegistros']   = $estrutura->get('TotalDeRegistros');
+                    $arrEstruturas['registrosPorPagina'] = $registrosPorPagina;
+                }
+                
+                print json_encode($arrEstruturas);
+                exit(0);
+            break;
+        }
+        
+        return $xml;
     }
     
-    return $xml;
-}
-
-public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
-{
-    $strVersaoSEI =  $parStrVersaoSEI ?: SEI_VERSAO;
-    $objPENIntegracao = new PENIntegracao();
-    if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
-        throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
-    }
-}
-
-/**
-* Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
-* @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
-* @param $idRepositorioEstruturaOrganizacional
-* @param $arrEstruturas
-* @return mixed
-* @throws InfraException
-*/
-private function obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas)
-{
-    //Monta o nome da unidade com a hierarquia de SIGLAS
-    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    foreach ($arrEstruturas as $key => $estrutura) {
-        if(!is_null($estrutura)) {
-            $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, $estrutura->numeroDeIdentificacaoDaEstrutura);
-            if (!is_null($arrObjEstruturaDTO[0])) {
-                $interface = new ProcessoEletronicoINT();
-                $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
-                $arrEstruturas[$key]->nome = utf8_encode($arrHierarquiaEstruturaDTO[0]->get('Nome'));
+    
+    /**
+    * Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
+    * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
+    * @param $idRepositorioEstruturaOrganizacional
+    * @param $arrEstruturas
+    * @return mixed
+    * @throws InfraException
+    */
+    private function obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas)
+    {
+        //Monta o nome da unidade com a hierarquia de SIGLAS
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        foreach ($arrEstruturas as $key => $estrutura) {
+            if(!is_null($estrutura)) {
+                $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, $estrutura->numeroDeIdentificacaoDaEstrutura);
+                if (!is_null($arrObjEstruturaDTO[0])) {
+                    $interface = new ProcessoEletronicoINT();
+                    $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
+                    $arrEstruturas[$key]->nome = utf8_encode($arrHierarquiaEstruturaDTO[0]->get('Nome'));
+                }
             }
+        }
+        
+        return $arrEstruturas;
+    }
+    
+    
+    /**
+    * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada
+    *
+    * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
+    * @return boolean                  Indicardor se base de dados é compatível
+    */
+    public static function validarCompatibilidadeBanco($bolGerarExcecao=true)
+    {
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        
+        $objPENIntegracao = new PENIntegracao();
+        $strVersaoModulo = $objPENIntegracao->getVersao();
+        
+        $bolBaseCompativel = ($strVersaoModulo === $strVersaoBancoModulo);
+        
+        if(!$bolBaseCompativel && $bolGerarExcecao){
+            throw new ModuloIncompativelException(sprintf("Base de dados do módulo '%s' (versão %s) encontra-se incompatível. A versão da base de dados atualmente instalada é a %s. \n ".
+            "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo));
+        }
+        
+        return $bolBaseCompativel;
+    }
+    
+    
+    /**
+    * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
+    *
+    * @param string $parStrVersaoSEI
+    * @return void
+    */
+    public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
+    {
+        $strVersaoSEI =  $parStrVersaoSEI ?: SEI_VERSAO;
+        $objPENIntegracao = new PENIntegracao();
+        if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
+            throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
         }
     }
     
-    return $arrEstruturas;
-}
-
-
-/**
-* Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada.
-*
-* @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
-* @return boolean                  Indicardor se base de dados é compatível
-*/
-public static function validarCompatibilidadeBanco($bolGerarExcecao=true)
-{
-    $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-    $strVersaoBancoModulo = $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
     
-    $objPENIntegracao = new PENIntegracao();
-    $strVersaoModulo = $objPENIntegracao->getVersao();
-    
-    $bolBaseCompativel = ($strVersaoModulo === $strVersaoBancoModulo);
-    
-    if(!$bolBaseCompativel && $bolGerarExcecao){
-        throw new ModuloIncompativelException(sprintf("Base de dados do módulo '%s' (versão %s) encontra-se incompatível. A versão da base de dados atualmente instalada é a %s. \n ".
-        "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo));
+    /**
+    * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
+    *
+    * @param string $parStrVersaoSEI
+    * @return void
+    */
+    public static function validarArquivoConfiguracao()
+    {
+        // Valida se arquivo de configuração está presente na instalação do sistema
+        $strArquivoConfiguracao = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        if (file_exists($strArquivoConfiguracao) && is_readable($strArquivoConfiguracao)) {
+            require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        } else {
+            $strMensagem = "Arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizado";
+            $strDetalhes = "As configurações do módulo mod-sei-pen não foram encontradas em $strArquivoConfiguracao \n";
+            $strDetalhes .= "Verifique se a instalação foi feita corretamente seguindo os procedimentos do manual de instalação.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+        
+        // Valida se arquivo de configuração está íntegro e se a classe de configuração está presente
+        if(!class_exists("ConfiguracaoModPEN")){
+            $strMensagem = "Definição de configurações do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizada";
+            $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+        
+        // Valida se todos os parâmetros de configuração estão presentes no arquivo de configuração
+        $arrStrChavesConfiguracao = ConfiguracaoModPEN::getInstance()->getArrConfiguracoes();
+        if(!array_key_exists("PEN", $arrStrChavesConfiguracao)){
+            $strMensagem = "Grupo de parametrização 'PEN' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+            $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+            throw new InfraException($strMensagem, null, $strDetalhes);
+        }
+        
+        
+        // Valida se todas as chaves de configuração foram atribuídas
+        $arrStrChavesConfiguracao = $arrStrChavesConfiguracao["PEN"];
+        $arrStrParametrosExperados = array("WebService", "WebServicePendencias", "LocalizacaoCertificado", "SenhaCertificado");
+        foreach ($arrStrParametrosExperados as $strChaveConfiguracao) {
+            if(!array_key_exists($strChaveConfiguracao, $arrStrChavesConfiguracao)){
+                $strMensagem = "Parâmetro 'PEN > $strChaveConfiguracao' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+                $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
+                throw new InfraException($strMensagem, null, $strDetalhes);
+            }
+        }
     }
-    
-    return $bolBaseCompativel;
-}
-
 }
 
 class ModuloIncompativelException extends InfraException { }

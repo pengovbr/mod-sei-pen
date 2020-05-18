@@ -123,6 +123,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     /**
+     * Remove parâmetro de configuração do módulo da base de dados
+     * @return int Código do Parametro gerado
+     */
+    protected function removerParametro($strNome) {
+        $objDTO = new PenParametroDTO();
+        $objDTO->setStrNome($strNome);
+        $objDTO->retStrNome();
+
+        $objBD = new PenParametroBD(BancoSEI::getInstance());
+        $objDTOCadastrado = $objBD->excluir($objDTO);
+    }
+
+    /**
      * Remove um parâmetro do infra_parametros
      * @return string Nome do parâmetro
      */
@@ -1821,6 +1834,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');        
             $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
         }        
+
+
+        // Remoção de parâmetros do banco de dados do SEI devido a necessidade de migração 
+        // para arquivo de configuração do módulo em sei/config/mod-pen/ConfiguracaoModPEN.php
+        $this->logar("REMOÇÃO DE PARÂMETROS DO BANCO DE DADOS DO SEI DEVIDO MIGRAÇÃO PARA ARQUIVO DE CONFIGURAÇÃO");
+        $this->removerParametro("PEN_ENDERECO_WEBSERVICE");
+        $this->removerParametro("PEN_ENDERECO_WEBSERVICE_PENDENCIAS");
+        $this->removerParametro("PEN_SENHA_CERTIFICADO_DIGITAL");
+        $this->removerParametro("PEN_LOCALIZACAO_CERTIFICADO_DIGITAL");
+        $this->removerParametro("PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO");
 
         $this->atualizarNumeroVersao("2.0.0");
     }    

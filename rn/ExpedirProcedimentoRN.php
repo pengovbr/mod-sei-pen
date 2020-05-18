@@ -2499,7 +2499,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param int $dblIdProcedimento
     * @throws InfraException
     */
-    public function cancelarTramite($dblIdProcedimento)
+    protected function cancelarTramiteControlado($dblIdProcedimento)
     {
         //Busca os dados do protocolo
         $objDtoProtocolo = new ProtocoloDTO();

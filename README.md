@@ -74,6 +74,39 @@ Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acim
 ```
 ---
 
+#### 4. Configurar os parâmetros do Módulo de Integração PEN
+Altere o arquivo de configuração específico para o módulo em **[DIRETORIO_RAIZ_INSTALAÇÃO]/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
+
+* **WebService**  
+*Endereço do Web Service principal de integração com o Barramento de Serviços do PEN*
+*Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):*
+    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/*
+    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
+
+
+* **WebServicePendencias**  
+*Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN*
+*Configuração necessária para que o envio e recebimento de processos sejam feitas de forma dinâmica pelo sistema*
+*Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):*
+    * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
+    * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
+
+* **LocalizaçãoCertificado**  
+*Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN*
+*e assinar os recibos de envio/conclusão dos trâmites de processo*
+*Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo: *
+*Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem*
+
+* **SenhaCertificado**  
+*Senha do certificado digital necessário para a aplicação descriptografar a chave privada*
+
+* **NumeroTentativasErro**  
+*Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação*
+*Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *
+*Valor padrão: 3*
+
+---
+
 #### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. 
 
 Lembre-se de mover, e não copiar, por questões de segurança e padronização.
@@ -109,28 +142,6 @@ Para o ambiente de produção, deverá ser utilizado um certificado digital vál
 
 Maiores informações e solicitações podem ser feitas através do e-mail processo.eletronico@planejamento.gov.br.
 
----
-#### 9. Após a instalação do módulo, o usuário de manutenção deverá ser alterado para outro contendo apenas as permissões de leitura e escrita no banco de dados.
-
----
-#### 10. Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos. 
-
-Por padrão, as funcionalidades básicas criadas pelo módulo não são atribuídas automaticamente à um perfil específico do sistema, evitando sua disponibilização para todos os usuários do sistema sem a prévia definição dos administradores.
-
-Sugerimos que seja criado um novo perfil de usuário que receberá as permissões incluídas pelo módulo (pen_*). Este novo perfil deverá ser atribuído aos usuários que poderão realizar o trâmite externo de processos para outras instituições. 
-
-Para criação do novo perfil e atribuição dos devidos recursos, acesse [**SIP > Perfil > Novo**]
-
-Exemplo: ***Perfil: Envio Externo***
-    
-Recursos:
-~~~~    
-    * pen_procedimento_expedido_listar  
-    * pen_procedimento_expedir
-~~~~
-
-Recomenda-se que os recursos acima não sejam atribuídos aos perfis básicos do sistema.
-    
 ---
 
 #### 11. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
@@ -168,23 +179,11 @@ Caso a opção for pela criação de um novo tipo de processo específico, segue
 #### 13. Configurar os parâmetros do Módulo de Integração Pen
 Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo:  
 
-* **Endereço do Web Service:**  
-*Endereço dos serviços de integração do PEN* 
-    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
-    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/  
-* **Endereço do Web Service de Pendências**:  
-*Endereço dos serviços de notificação de trâmites de processos*
-    - Homologação: https://homolog.pendencias.processoeletronico.gov.br/
-    - Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
 * **ID do Repositório de Estruturas:**   
 *ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*  
     - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo Federal)*  
 * **Localização do Certificado Digital:**  
     - *Localização do certificado digital o órgão (arquivo do passo 8)*  
-* **Número Máximo de Tentativas de Recebimento:**  
-    - *Valor padrão: 3*  
-* **Senha do Certificado Digital:**  
-    - *Senha do certificado digital*  
 * **Tipo de Processo Externo:**  
 *Id do tipo de documento externo. *  
     - *Configurar com o ID do Tipo de Processo Externo configurado no passo 12*  
@@ -192,7 +191,6 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 *Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão.*   
     - *Configurar com o ID da Unidade criada no passo 11*
 
----
 
 **Atenção!**
 Conforme publicado no Portal do Processo Eletrônico Nacional, [Manutenção Programada no Barramento PEN - Abril 2020](http://processoeletronico.gov.br/index.php/noticias/manutencao-programada-no-barramento-pen-abril-2020), os endereços dos ambientes de homologação do projeto serão atualizados no dia 22/04/2020. Com isto, os seguintes endereços deverão ser utilizados até a data programada de mudança: https://homolog.pen.portal.trafficmanager.net
@@ -590,3 +588,21 @@ Common Name:
 
         openssl x509 -noout -subject -sha1 -inform pem -in <LOCALIZAÇÃO COMPLETA DO CERTIFICADO DIGITAL>
 
+
+
+### 6. Configurar as permissões de segurança para os perfis e unidades que poderão realizar o trâmite externo de processos. 
+
+Por padrão, as funcionalidades básicas criadas pelo módulo são atribuídas automaticamente ao perfil Básico, simplificando os procedimentos de configuração do módulo.
+
+Caso seja necessário atribuir as permissões de trâmite externo a um grupo restrito de usuários, sugerimos que os recursos descritos abaixo sejam removidos do perfil de usuários Básico e que seja criado um novo perfil que receberá estas mesmas permissões.
+
+Para criação do novo perfil e atribuição dos devidos recursos, acesse [**SIP > Perfil > Novo**]
+
+Exemplo: ***Perfil: Envio Externo***
+    
+Recursos:
+~~~~    
+    * pen_procedimento_expedido_listar  
+    * pen_procedimento_expedir
+~~~~
+    
