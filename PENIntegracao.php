@@ -22,7 +22,6 @@ class PENIntegracao extends SeiIntegracao
     public function inicializar($strVersaoSEI) 
     {
         PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
-        PENIntegracao::validarCompatibilidadeBanco();
         PENIntegracao::validarArquivoConfiguracao();
         
         require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';

@@ -38,14 +38,14 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
                 //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
                 //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/ 
-                "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidad/soap/v2/",
+                "WebService" => "",
                 
                 // Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
                 // Configuração necessária para que o envio e recebimento de processos sejam feitas de forma dinâmica pelo sistema
                 // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
                 //    - Homologação: https://homolog.pendencias.processoeletronico.gov.br/
                 //    - Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
-                "WebServicePendencias" => "https://homolog.pendencias.processoeletronico.gov.br/",
+                "WebServicePendencias" => "",
                 
                 // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN 
                 // e assinar os recibos de envio/conclusão dos trâmites de processo
@@ -54,7 +54,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 "LocalizacaoCertificado" => "/opt/sei/config/certificados/certificado.pem",
 
                 // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
-                "SenhaCertificado" => "1234",
+                "SenhaCertificado" => "",
 
                 // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
                 // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. 

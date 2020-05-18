@@ -29,18 +29,6 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
             throw new InfraException('Erro listando mapeamento de Tipos de Documento para envio.',$e);
         }
     }       
-        
-    
-    
-    protected function listarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO) 
-    {
-        try {        
-            $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
-            return $objPenRelTipoDocMapEnviadoBD->listar($objPenRelTipoDocMapEnviadoDTO);
-        }catch(Exception $e){
-            throw new InfraException('Erro listando mapeamento de documentos para envio.',$e);
-        }
-    }
 
     protected function consultarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO) 
     {

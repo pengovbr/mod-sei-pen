@@ -276,7 +276,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'cols' => array(
                 'id_especie' => array($objMetaBD->tipoNumero(16), PenMetaBD::NNULLO),
                 'nome_especie' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
-                'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO)
+                // Campo não mais necessário após a versão 2.0.0 do módulo
+                'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO)
             ),
             'pk' => array('cols'=>array('id_especie')),
         ));
@@ -519,7 +520,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             if ($objBD->contar($objDTO) == 0) {
                 $objDTO->setDblIdEspecie($dblIdEspecie);
-                $objDTO->setStrDescricao($strDescricao);
+                // Descrição da espécie documental não mais necessária a partir da versão 2.0.0
+                //$objDTO->setStrDescricao($strDescricao);                
                 $objBD->cadastrar($objDTO);
             }
         };
@@ -1229,7 +1231,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objEspecieDocumentalDTO->setDblIdEspecie($dblIdEspecie);
             if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
                 $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
-                $objEspecieDocumentalDTO->setStrDescricao($strDescricao);
+                // Descrição da espécie documental não mais necessária a partir da versão 2.0.0
+                //$objEspecieDocumentalDTO->setStrDescricao($strDescricao);
                 $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
             }
         };

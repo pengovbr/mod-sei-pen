@@ -19,7 +19,6 @@ class PenParametroDTO extends InfraDTO {
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Valor', 'valor');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Descricao', 'descricao');
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Sequencia', 'sequencia');
-        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinVisivel', 'sin_visivel');
         $this->configurarPK('Nome',InfraDTO::$TIPO_PK_INFORMADO);
     }
 }
