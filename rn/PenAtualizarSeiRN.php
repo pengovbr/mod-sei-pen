@@ -89,7 +89,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
                 case '1.5.1': $this->instalarV2000();
-                
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -783,7 +782,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         };
 
         $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
-
 
         /* ---------- antigo método (instalarV002R003S000US024) ---------- */
 
@@ -1764,7 +1762,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->atualizarNumeroVersao("1.5.1");
     }    
 
-
     protected function instalarV2000()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -1811,7 +1808,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_recebido", "sin_padrao");
 
         // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
-        PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");        
+        PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");      
+                
+        // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
+        $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+        $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
+        $objInfraAgendamentoTarefaDTO->retNumIdInfraAgendamentoTarefa();
+        $objInfraAgendamentoTarefaDTO->setStrComando("PENAgendamentoRN::seiVerificarServicosBarramento");
+        $objInfraAgendamentoTarefaDTO->setBolExclusaoLogica(False);        
+        $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaBD->consultar($objInfraAgendamentoTarefaDTO);        
+        if(isset($objInfraAgendamentoTarefaDTO)) {
+            $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');        
+            $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
+        }        
 
         $this->atualizarNumeroVersao("2.0.0");
     }    
