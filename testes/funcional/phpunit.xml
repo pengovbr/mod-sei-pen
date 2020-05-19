@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<phpunit bootstrap="bootstrap.php" backupGlobals="false" colors="true" verbose="true">
+  <php>
+    <const name="PHPUNIT_HOST" value="127.0.0.1"/>
+    <const name="PHPUNIT_PORT" value="4444"/>
+    <const name="PHPUNIT_BROWSER" value="chrome"/>
+    <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
+
+    <const name="DB_SEI_DSN" value="mysql:dbname=sei;host=127.0.0.1" />
+    <const name="DB_SEI_HOST" value="127.0.0.1" />
+    <const name="DB_SEI_USER" value="sei_user" />
+    <const name="DB_SEI_PASSWORD" value="sei_user" />
+    <const name="DB_SEI_DBNAME" value="sei" />
+
+    <const name="ENV_SEI_ORGAO" value="ABC" />
+    <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
+
+    <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/?wsdl"/>
+
+    <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
+    <const name="PEN_WAIT_TIMEOUT" value="360000" /> 
+    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="720000" /> 
+
+    <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
+    <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" /> 
+    <const name="CONTEXTO_ORGAO_A_URL" value="http://localhost/sei"/>
+    <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />        
+    <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="1" />
+    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="Poder Executivo Federal" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="32357" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="BNDES / ME" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Banco Nacional de Desenvolvimento Econômico e Social" />    
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />    
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Conselho Fiscal" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="CF-BNDES / BNDES / ME" />
+    <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
+    <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />    
+    <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
+    <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO" value="Ofício" />       
+    <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO" value="Voto" />    
+    <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
+    <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
+    <const name="CONTEXTO_ORGAO_A_CARGO_ASSINATURA" value="Assessor(a)" />       
+    <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+    <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="arquivos/certificado_digital.pem" />
+    <const name="CONTEXTO_ORGAO_A_SENHA_CERTIFICADO_DIGITAL" value="1234" />
+
+    <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
+    <const name="CONTEXTO_ORGAO_B_URL" value="http://org3.sei-ci.seges.intra.planejamento/sei"/>
+    <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="1" />
+    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="Poder Executivo Federal" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="STF" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
+    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="312" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="1ªT-STF / STF / PJ" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Primeira Turma" />
+    <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
+    <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />        
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_SECUNDARIA" value="" />  
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_SECUNDARIA" value="" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
+    <const name="CONTEXTO_ORGAO_B_TIPO_PROCESSO" value="Arrecadação: Cobrança" />    
+    <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO" value="Ofício" />
+    <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO" value="Aviso" />           
+    <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />    
+    <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Operações Bancárias (Art. 1º da Lei Complementar nº 105/2001)" />
+    <const name="CONTEXTO_ORGAO_B_CARGO_ASSINATURA" value="Assessor(a)" />       
+    <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+    <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="arquivos/certificado_digital.pem" />
+    <const name="CONTEXTO_ORGAO_B_SENHA_CERTIFICADO_DIGITAL" value="1234" />
+
+    <const name="CONTEXTO_ORGAO_C" value="CONTEXTO_ORGAO_C" />
+    <const name="CONTEXTO_ORGAO_C_URL" value=""/>
+    <const name="CONTEXTO_ORGAO_C_ID_REP_ESTRUTURAS" value="1" />
+    <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="Poder Executivo Federal" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_ORGAO" value="ABC" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE" value="TESTE" />
+    <const name="CONTEXTO_ORGAO_C_ID_ESTRUTURA" value="" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_HIERARQUIA" value="" />
+    <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE" value="Assessoria Internacional" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA" value="" />
+    <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE_SECUNDARIA" value="" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
+    <const name="CONTEXTO_ORGAO_C_USUARIO_LOGIN" value="teste" />
+    <const name="CONTEXTO_ORGAO_C_USUARIO_SENHA" value="teste" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO" value="Ofício" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO_NAO_MAPEADO" value="Voto" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />  
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />      
+    <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+    <const name="CONTEXTO_ORGAO_C_LOCALIZACAO_CERTIFICADO_DIGITAL" value="arquivos\certificado_digital.pem" />
+    <const name="CONTEXTO_ORGAO_C_SENHA_CERTIFICADO_DIGITAL" value="1234" />
+</php>
+<testsuites>
+    <testsuite name="Login">
+      <file>tests/login/LoginTest.php</file>
+  </testsuite>
+
+  <testsuite name="ManterProcesso">
+      <file>tests/manterProcesso/IniciarProcessoTest.php</file>      
+      <file>tests/manterProcesso/ConcluirProcessoTest.php</file>
+      <file>tests/manterProcessoCompleto/ManterProcessoCompletoTest.php</file>
+  </testsuite>
+</testsuites>
+</phpunit>

@@ -1,0 +1,41 @@
+{
+    "name": "ass/xmlsecurity",
+    "type": "library",
+    "description": "The XmlSecurity library is written in PHP for working with XML Encryption and Signatures",
+    "keywords": [ "xml", "security", "encryption", "signature" ],
+    "homepage": "https://github.com/aschamberger/XmlSecurity",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Robert Richards",
+            "email": "rrichards@cdatazone.org"
+        },
+        {
+            "name": "Andreas Schamberger",
+            "email": "mail@andreass.net"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "ext-openssl": "*",
+        "lib-openssl": ">=0.9.0"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master"
+    },
+    "suggest": {
+        "ext-mcrypt": "*"
+    },
+    "autoload": {
+       "psr-0": { "ass\\XmlSecurity": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0.x-dev"
+        }
+    },
+    "support": {
+        "issues": "https://github.com/aschamberger/XmlSecurity/issues",
+        "source": "https://github.com/aschamberger/XmlSecurity"
+    }
+}

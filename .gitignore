@@ -1,0 +1,6 @@
+# Ignorar pasta de distribuição de arquivos do módulo
+dist/
+
+**/*.lock
+**/*.log
+**/*.out
