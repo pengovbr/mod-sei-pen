@@ -2,7 +2,8 @@
 
 class PENIntegracao extends SeiIntegracao 
 {    
-    const COMPATIBILIDADE_MODULO_SEI = array('3.0.5', '3.0.6', '3.0.7', '3.0.8', '3.0.9', '3.0.11', '3.0.12', '3.0.13', '3.0.14', '3.0.15', '3.1.0', '3.1.1', '3.1.2', '3.1.3');
+    // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X    
+    const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4');
     
     public function getNome() {
         return 'Integração Processo Eletrônico Nacional - PEN';
