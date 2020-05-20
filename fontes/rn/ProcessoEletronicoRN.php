@@ -1724,8 +1724,8 @@ class ProcessoEletronicoRN extends InfraRN
             $arrObjProtocolo = is_array($parObjProtocolo->documento) ? $parObjProtocolo->documento : array($parObjProtocolo->documento);
             usort($arrObjProtocolo, array("ProcessoEletronicoRN", "comparacaoOrdemAjustadaDocumentos"));
 
+            //Tratamento recursivo para processos anexados
             foreach ($arrObjProtocolo as $objProtocolo) {
-                //Tratamento recursivo para processos anexados
                 $bolEhProcessoAnexado = $objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
                 if($parBolExtrairAnexados && $bolEhProcessoAnexado){
                     $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);                    
@@ -1743,7 +1743,7 @@ class ProcessoEletronicoRN extends InfraRN
             //Quando se tratar de um Documento Avulso, a ordem será sempre 1
             $parObjProtocolo->ordem = 1;
             $parObjProtocolo->ordemAjustada = 1;
-            $arrObjDocumento = array($parObjProtocolo);
+            return array($parObjProtocolo);
         }
         
         if($parBolExtrairAnexados){

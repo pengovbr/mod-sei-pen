@@ -1191,8 +1191,8 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('Lista de documentos do processo não informada.');
         }
         
-        $objProcessoPrincipal = $parObjMetadadosProcedimento->metadados->processo;
-        //$strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
+        $bolDocumentoAvulso = $parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO;
+        $objProcessoPrincipal = !$bolDocumentoAvulso ? $parObjMetadadosProcedimento->metadados->processo : null;
         $strNumeroRegistro = $parStrNumeroRegistro;
         
         //Ordenação dos documentos conforme informado pelo remetente. Campo documento->ordem
@@ -1233,7 +1233,7 @@ class ReceberProcedimentoRN extends InfraRN
         foreach($arrObjDocumentos as $objDocumento){
 
             // Tratamento para atribuição dos documentos do processo
-            if(!isset($objDocumento->staTipoProtocolo)) {
+            if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
                 // Definição da ordem do documento para avaliação do posicionamento
                 //$numOrdemDocumento = isset($objDocumento->ordemAjustada) ? $objDocumento->ordemAjustada : $objDocumento->ordem;
@@ -1439,7 +1439,7 @@ class ReceberProcedimentoRN extends InfraRN
                 $objDocumento->idProcedimentoSEI = $objDocumentoDTO->getDblIdProcedimento();
                 $objDocumento->protocoloProcedimentoSEI = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();                
 
-                if($objProcessoPrincipal->protocolo != $parObjProtocolo->protocolo){
+                if(!$bolDocumentoAvulso && $objProcessoPrincipal->protocolo != $parObjProtocolo->protocolo){
                     $objDocumento->protocoloProcedimentoSEI = $parObjProtocolo->protocolo;
                     $objDocumento->idProcedimentoAnexadoSEI = $objDocumentoDTO->getDblIdProcedimento();
                 }
@@ -1514,55 +1514,57 @@ class ReceberProcedimentoRN extends InfraRN
     
     private function atribuirProcessosAnexados($parObjProtocolo)
     {
-        $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
-        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-        $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
-        $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
-
-        $arrOrdemProtocolos = array();
-        $arrObjProtocolos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
-        foreach ($arrObjProtocolos as $numOrdem => $objProtocolo) {
-
-            if($objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) {
-
-                // Verifica se o processo já se encontra anexado ao principal            
-                $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parObjProtocolo->idProcedimentoSEI);    
-                $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objProtocolo->idProcedimentoSEI);
-                $bolProcessoJaAnexado = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
-
-                if(!$bolProcessoJaAnexado){                    
-                    //Procedimento principal será aquele passado como parâmetro
-                    $objEntradaAnexarProcessoAPI = new EntradaAnexarProcessoAPI();
-                    $objEntradaAnexarProcessoAPI->setIdProcedimentoPrincipal($parObjProtocolo->idProcedimentoSEI);
-                    $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoPrincipal($parObjProtocolo->protocolo);
-    
-                    //Procedimento anexado será aquele contido na lista de documentos do processo principal
-                    $objEntradaAnexarProcessoAPI->setIdProcedimentoAnexado($objProtocolo->idProcedimentoSEI);
-                    $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoAnexado($objProtocolo->protocolo);
-                    $this->objSeiRN->anexarProcesso($objEntradaAnexarProcessoAPI);                    
-                }
-            }
-
-            $arrOrdemProtocolos[$objProtocolo->idProtocoloSEI] = $numOrdem;
-        }
-
-        // Após a anexação de todos os processos, ajusta a ordenação dos mesmos
-        // Busca a ordem atual dos processos anexados e documentos do processo
-        $objProcedimentoDTO = new ProcedimentoDTO();    
-        $objProcedimentoDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
-        $objProcedimentoDTO->setStrSinDocTodos('S');
-        $objProcedimentoDTO->setStrSinProcAnexados('S');
-        $arrObjProcedimentoPrincipalDTO = $this->objProcedimentoRN->listarCompleto($objProcedimentoDTO);
-        $objProcedimentoDTO = $arrObjProcedimentoPrincipalDTO[0];        
-        $arrRelProtocoloIndexadoDTO = InfraArray::indexarArrInfraDTO($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO(), "IdProtocolo2");
-
-        foreach ($arrOrdemProtocolos as $numIdProtocolo => $numOrdem) {
-            //Atribuição do posicionamento correto dos processos anexados
+        if($parObjProtocolo->staTipoProtocolo != ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO){
+            $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
             $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-            $numIdProtocoloProtocolo = $arrRelProtocoloIndexadoDTO[$numIdProtocolo]->getDblIdRelProtocoloProtocolo();
-            $objRelProtocoloProtocoloDTO->setDblIdRelProtocoloProtocolo($numIdProtocoloProtocolo);
-            $objRelProtocoloProtocoloDTO->setNumSequencia($numOrdem);
-            $this->objRelProtocoloProtocoloRN->alterar($objRelProtocoloProtocoloDTO);
+            $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
+            $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
+    
+            $arrOrdemProtocolos = array();
+            $arrObjProtocolos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+            foreach ($arrObjProtocolos as $numOrdem => $objProtocolo) {
+    
+                if($objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) {
+    
+                    // Verifica se o processo já se encontra anexado ao principal            
+                    $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parObjProtocolo->idProcedimentoSEI);    
+                    $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objProtocolo->idProcedimentoSEI);
+                    $bolProcessoJaAnexado = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+    
+                    if(!$bolProcessoJaAnexado){                    
+                        //Procedimento principal será aquele passado como parâmetro
+                        $objEntradaAnexarProcessoAPI = new EntradaAnexarProcessoAPI();
+                        $objEntradaAnexarProcessoAPI->setIdProcedimentoPrincipal($parObjProtocolo->idProcedimentoSEI);
+                        $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoPrincipal($parObjProtocolo->protocolo);
+        
+                        //Procedimento anexado será aquele contido na lista de documentos do processo principal
+                        $objEntradaAnexarProcessoAPI->setIdProcedimentoAnexado($objProtocolo->idProcedimentoSEI);
+                        $objEntradaAnexarProcessoAPI->setProtocoloProcedimentoAnexado($objProtocolo->protocolo);
+                        $this->objSeiRN->anexarProcesso($objEntradaAnexarProcessoAPI);                    
+                    }
+                }
+    
+                $arrOrdemProtocolos[$objProtocolo->idProtocoloSEI] = $numOrdem;
+            }
+    
+            // Após a anexação de todos os processos, ajusta a ordenação dos mesmos
+            // Busca a ordem atual dos processos anexados e documentos do processo
+            $objProcedimentoDTO = new ProcedimentoDTO();    
+            $objProcedimentoDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
+            $objProcedimentoDTO->setStrSinDocTodos('S');
+            $objProcedimentoDTO->setStrSinProcAnexados('S');
+            $arrObjProcedimentoPrincipalDTO = $this->objProcedimentoRN->listarCompleto($objProcedimentoDTO);
+            $objProcedimentoDTO = $arrObjProcedimentoPrincipalDTO[0];        
+            $arrRelProtocoloIndexadoDTO = InfraArray::indexarArrInfraDTO($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO(), "IdProtocolo2");
+    
+            foreach ($arrOrdemProtocolos as $numIdProtocolo => $numOrdem) {
+                //Atribuição do posicionamento correto dos processos anexados
+                $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+                $numIdProtocoloProtocolo = $arrRelProtocoloIndexadoDTO[$numIdProtocolo]->getDblIdRelProtocoloProtocolo();
+                $objRelProtocoloProtocoloDTO->setDblIdRelProtocoloProtocolo($numIdProtocoloProtocolo);
+                $objRelProtocoloProtocoloDTO->setNumSequencia($numOrdem);
+                $this->objRelProtocoloProtocoloRN->alterar($objRelProtocoloProtocoloDTO);
+            }
         }
     }
 
