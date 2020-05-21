@@ -85,6 +85,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.2': $this->instalarV1403();
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
+                case '1.5.1': $this->instalarV1502();
                 
                     break;
                 default:
@@ -1758,4 +1759,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     {
         $this->atualizarNumeroVersao("1.5.1");
     }    
+
+    protected function instalarV1502()
+    {
+        $this->atualizarNumeroVersao("1.5.2");
+    }        
 }
