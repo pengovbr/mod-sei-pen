@@ -1,8 +1,0 @@
-vendor
-/phpunit.xml
-.buildpath
-.project
-.settings
-.idea
-composer.lock
-composer.phar

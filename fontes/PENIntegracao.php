@@ -4,7 +4,19 @@ class PENIntegracao extends SeiIntegracao
 {    
     // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X    
     const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4');
-    
+
+    private static $instance = null;
+
+    public static function getInstance() 
+    {
+        if (self::$instance == null) {
+            self::$instance = new PENIntegracao();
+        }
+
+        return self::$instance;
+    }
+
+
     public function getNome() {
         return 'Integração Processo Eletrônico Nacional - PEN';
     }
@@ -561,6 +573,12 @@ class PENIntegracao extends SeiIntegracao
                 throw new InfraException($strMensagem, null, $strDetalhes);
             }
         }
+    }
+
+    public function processarPendencias()
+    {
+        SessaoSEI::getInstance(false);
+        ProcessarPendenciasRN::getInstance()->processarPendencias();
     }
 }
 

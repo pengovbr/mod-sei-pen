@@ -27,7 +27,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function atualizarVersaoConectado() {
         try {            
 
-            $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
+            $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI ' . SEI_VERSAO);
 
             //testando se esta usando BDs suportados
             if (!(BancoSEI::getInstance() instanceof InfraMySql) &&
@@ -1781,17 +1781,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV2000()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");
-        
+        $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");                    
+
+        try{
+            $objPENAgendamentoRN = new PENAgendamentoRN();
+            $objPENAgendamentoRN->atualizarEspeciesDocumentais();
+        } catch (\Exception $th) {
+            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do PEN pois serviço encontra-se inacessível\n";
+            $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+            $this->logar($strMensagemErroMapeamentoAutomatico);
+        }
+
         $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
-        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
-        $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
+        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();        
+        $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();            
 
         $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
         $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
         $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
-        $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");        
+        $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");
         // Remove agendamento de tarefas de atualização de hipóteses legais
         $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
         $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
@@ -1802,6 +1811,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
         }
 
+        // Adicionar agendamento de atualização de informações
         $objAgendamentoInformacoesPEN = new InfraAgendamentoTarefaDTO();
         $objAgendamentoInformacoesPEN->setStrComando("PENAgendamentoRN::atualizarInformacoesPEN");
         if($objInfraAgendamentoTarefaBD->contar($objAgendamentoInformacoesPEN) == 0){
@@ -1817,15 +1827,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objInfraAgendamentoTarefaBD->cadastrar($objAgendamentoInformacoesPEN);
         }
         
-        $this->logar("CADASTRAMENTO DE NOVOS RECURSOS DE ATRIBUIÇÃO DE ESPÉCIE DOCUMENTAL E TIPO DE DOCUMENTO PADRÃO");
+        $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA RECEBIMENTO DE PROCESSOS DO BARRAMENTO DO SERVIÇOS DO PEN");
+        // Adicionar agendamento de atualização de informações
+        $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
+        $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
+        if($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0){
+            $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
+            $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
+            $strDesc .= " - debug: Indica se o log de debug gerado no processamento será registrado nos logs do sistema (valores: true,false | padrão: false)\n";
+            $strDesc .= " - workers: Quantidade de processos paralelos que serão abertos para processamento de tarefas (valores: 0-9 | padrão: 4)\n";
+            $objReceberProcessosPEN->setStrDescricao($strDesc);            
+            $objReceberProcessosPEN->setStrStaPeriodicidadeExecucao("N");
+            $objReceberProcessosPEN->setStrPeriodicidadeComplemento("0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58");
+            $objReceberProcessosPEN->setStrSinAtivo("S");
+            $objReceberProcessosPEN->setStrSinSucesso("S");
+            $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
+        }
 
-        $this->logar("REMOÇÃO DE COLUNAS DE DESATIVAÇÃO DE MAPEAMENTO DE ESPÉCIES NÃO MAIS UTILIZADOS");
-        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_enviado", "sin_padrao");
-        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_recebido", "sin_padrao");
 
-        // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
-        PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");      
-                
         // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
         $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
         $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
@@ -1836,8 +1855,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         if(isset($objInfraAgendamentoTarefaDTO)) {
             $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');        
             $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
-        }        
+        }             
 
+        $this->logar("REMOÇÃO DE COLUNAS DE DESATIVAÇÃO DE MAPEAMENTO DE ESPÉCIES NÃO MAIS UTILIZADOS");
+        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_enviado", "sin_padrao");
+        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_recebido", "sin_padrao");
+
+        // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
+        PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");                         
 
         // Remoção de parâmetros do banco de dados do SEI devido a necessidade de migração 
         // para arquivo de configuração do módulo em sei/config/mod-pen/ConfiguracaoModPEN.php

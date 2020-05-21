@@ -101,7 +101,7 @@ class EnviarReciboTramiteRN extends InfraRN
         $strNumeroRegistro = $objTramite->NRE;
 
         if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-          throw new InfraException('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite.');
+          throw new InfraException(sprintf('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite (%s).', $objTramite->situacaoAtual));
         }
 
         $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);

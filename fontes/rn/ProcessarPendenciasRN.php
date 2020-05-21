@@ -2,74 +2,122 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class ProcessarPendenciasRN extends InfraAgendamentoTarefa
+class ProcessarPendenciasRN extends InfraRN
 {
-    private static $instance = null;
     private $objGearmanWorker = null;
     private $objPenDebug = null;
+    private $strGearmanServidor = null;
+    private $strGearmanPorta = null;
 
     const TIMEOUT_PROCESSAMENTO_JOB = 5400;
+    const TIMEOUT_PROCESSAMENTO_EVENTOS = 5000;
+
+    const NUMERO_WORKERS_GEARMAN = 4;
+    const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%d' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%d >/dev/null 2>&1 &';
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/ProcessamentoTarefasPEN.php";
 
     protected function inicializarObjInfraIBanco()
     {
         return BancoSEI::getInstance();
     }
 
-    public static function getInstance()
-    {
-        if (self::$instance == null) {
-          self::$instance = new ProcessarPendenciasRN(ConfiguracaoSEI::getInstance(), SessaoSEI::getInstance(), BancoSEI::getInstance(), LogSEI::getInstance());
-      }
-      return self::$instance;
+    public function __construct($parStrLogTag=null) 
+    {   
+        $this->carregarParametrosIntegracao();
+        $this->objPenDebug = DebugPen::getInstance($parStrLogTag);
     }
 
-    public function __construct()
+    private function carregarParametrosIntegracao()
     {
+        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+        $this->strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+        $this->strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");        
+
+        // Parâmetro opcional. Não ativar o processamento por fila de tarefas, deixando o agendamento do SEI executar tal operação
+        $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
+        $this->strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
+        $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+
+        if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
+            throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
+        }
+
+        if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
+            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
+        }
+    }
+
+    /**
+     * Inicializa GearmanWorker caso bibliotecas e serviço sejam localizados
+     *
+     * @return void
+     */
+    private function inicializarGearman()
+    {
+        if(!class_exists("GearmanWorker")){
+            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" . 
+                                     "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+        }
+        
         $this->objGearmanWorker = new GearmanWorker();
-        $this->objGearmanWorker->addServer("127.0.0.1", 4730);
-
-        //Configuração dos logs de debug de processamento
-        $this->objPenDebug = DebugPen::getInstance();
-        $this->objPenDebug->setStrDebugTag("PROCESSAMENTO");
-        $this->objPenDebug->setBolLigado(true);
-        $this->objPenDebug->setBolDebugInfra(false);
-        $this->objPenDebug->setBolEcho(true);
-        $this->objPenDebug->limpar();
-
-        $this->configurarCallbacks();
+        $this->objGearmanWorker->setTimeout(self::TIMEOUT_PROCESSAMENTO_EVENTOS);
+        $this->objGearmanWorker->addServer($this->strGearmanServidor, $this->strGearmanPorta);
+        $this->configurarCallbacks();    
     }
 
     public function processarPendencias()
     {
         try{
+            global $bolInterromper;
+            $this->inicializarGearman();
+
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
-
-            InfraDebug::getInstance()->setBolLigado(true);
-            InfraDebug::getInstance()->setBolDebugInfra(false);
-            InfraDebug::getInstance()->setBolEcho(true);
-            InfraDebug::getInstance()->limpar();
 
             PENIntegracao::validarCompatibilidadeModulo();
 
             $objPenParametroRN = new PenParametroRN();
             SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
-            $mensagemInicioProcessamento = 'Iniciando serviço de processamento de pendências de trâmites de processos';
-            LogSEI::getInstance()->gravar($mensagemInicioProcessamento, LogSEI::$INFORMACAO);
+            $numProcID = getmygid();
+            $mensagemInicioProcessamento = "Iniciando serviço de processamento de pendências de trâmites de processos ($numProcID)";
             $this->gravarLogDebug($mensagemInicioProcessamento, 0, true);
 
-            while($this->objGearmanWorker->work())
+            while(!$bolInterromper)
             {
-                PENIntegracao::validarCompatibilidadeBanco();
-
-                $this->gravarLogDebug("Processamento de tarefa finalizada com código: " . $this->objGearmanWorker->returnCode(), 0, true);
-                if ($this->objGearmanWorker->returnCode() != GEARMAN_SUCCESS) {
-                    $strErro = 'Erro no processamento de pendências do PEN. ErrorCode: ' . $this->objGearmanWorker->returnCode();
-                    LogSEI::getInstance()->gravar($strErro);
-                    break;
+                try {
+                    $this->objGearmanWorker->work();
+                    $numReturnCode = $this->objGearmanWorker->returnCode();
+    
+                    switch ($numReturnCode) {                    
+                        case GEARMAN_SUCCESS:
+    
+                            break;
+    
+                        case GEARMAN_TIMEOUT:
+                            //Nenhuma ação necessário, sendo que timeout é utilizado apenas para avaliação de sinal pcntl_signal de interrupção
+                            break;
+                            
+                        case GEARMAN_ERRNO:
+                            $strErro = "Erro no processamento de pendências do PEN. ErrorCode: $numReturnCode";
+                            LogSEI::getInstance()->gravar($strErro);
+                            $this->gravarLogDebug($strErro, 0);
+                            break;
+    
+                        default:                        
+                            $this->gravarLogDebug("Código de retorno $numReturnCode de processamento de tarefas não tradado", 0);
+                            break;
+                    }
+                } catch (\Exception $e) {
+                    $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
+                    LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
                 }
-            }
+            }    
+            
+            $numProcID = getmygid();
+            $this->gravarLogDebug("Finalização do processamento de tarefas do Barramento do PEN (pid=$numProcID)", 0);
         }
         catch(Exception $e) {
             $strAssunto = 'Falha no processamento de pendências de trâmite do PEN';
@@ -79,98 +127,150 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
         }
     }
 
+    /**
+     * Processa a mensagem de pendência de Envio de Processos
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function enviarProcesso($idTramite)
+    {
+        $this->gravarLogDebug("Processando envio de processo [enviarProcesso] com IDT $idTramite", 0, true);
+    }
+
+
+    /**
+     * Processa a mensagem de pendência de Envio de Componentes Digitais
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function enviarComponenteDigital($idTramite) 
+    {
+        $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
+    }
+
+
+    /**
+     * Processa a mensagem de pendência de Recebimento de Recibo de Conclusão de Trâmite
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function receberReciboTramite($idTramite) 
+    {
+        $this->gravarLogDebug("Processando recebimento de recibo de trâmite [receberReciboTramite] com IDT $idTramite", 0, true);
+        $numIdentificacaoTramite = intval($idTramite);
+        $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
+        $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);            
+    }
+
+    /**
+     * Processa a mensagem de pendência de Recebimento de Processo ou Documento Avulso
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function receberProcedimento($idTramite) 
+    {
+        try{
+            $this->gravarLogDebug("Processando recebimento de protocolo [receberProcedimento] com IDT " . $idTramite, 0, true);
+            $numTempoInicialRecebimento = microtime(true);
+
+            $numIdentificacaoTramite = intval($idTramite);
+            $objReceberProcedimentoRN = new ReceberProcedimentoRN();
+            $objReceberProcedimentoRN->receberProcedimento($numIdentificacaoTramite);
+
+            $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
+            $this->gravarLogDebug("Finalizado o recebimento de protocolo com IDT $idTramite(Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
+        }
+        catch(Exception $e){
+            //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
+            $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
+            if($bolDeveRecusarTramite) {
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
+                $objProcessoEletronicoRN->recusarTramite($idTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+            }
+
+            throw $e;
+        }
+    }
+
+
+    /**
+     * Processa a mensagem de pendência de Recebimento de Trâmites Recusados
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function receberTramitesRecusados($idTramite) 
+    {
+        $this->gravarLogDebug("Processando trâmite recusado [receberTramitesRecusados] com IDT $idTramite", 0, true);
+        $numIdentificacaoTramite = intval($idTramite);
+        $objReceberProcedimentoRN = new ReceberProcedimentoRN();
+        $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
+    }
+
+
+    /**
+     * Processa a mensagem de pendência de Recebimento de Componentes Digitais
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */    
+    public function receberComponenteDigital($idTramite) {        
+        $this->gravarLogDebug("Processando recebimento de componentes digitais [receberComponenteDigital] com IDT " . $idTramite, 0, true);
+        // Caso receba mensagem indicando que foi realizado o recebimento dos componentes digitais, então o recibo de concluão deverá ser enviado
+        $this->enviarReciboTramiteProcesso($idTramite);
+    }
+
+
+    /**
+     * Processa a mensagem de pendência de Envio de Recibo de Trâmite
+     *
+     * @param object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */    
+    public function enviarReciboTramiteProcesso($idTramite) 
+    {
+        $this->gravarLogDebug("Processando envio do recibo de trâmite [enviarReciboTramiteProcesso] com IDT $idTramite", 0, true);
+        $numIdentificacaoTramite = intval($idTramite);
+        $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
+        $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
+    }
+
+
     private function configurarCallbacks()
     {
-        // Processamento de pendências envio dos metadados do processo
-        $this->objGearmanWorker->addFunction("enviarProcesso", function ($job) {
-            $this->gravarLogDebug("Processando envio de processo [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
-         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
-
-        // Processamento de pendências envio dos componentes digitais do processo
-        $this->objGearmanWorker->addFunction("enviarComponenteDigital", function ($job) {
-            $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT " . $job->workload(), 0, true);
+        $this->objGearmanWorker->addFunction("enviarProcesso", function($job) {
+            $this->enviarProcesso($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-        // Processamento de pendências de recebimento do recibo de envio do processo
-        $this->objGearmanWorker->addFunction("receberReciboTramite", function ($job) {
-            try{
-                $this->gravarLogDebug("Processando recebimento de recibo de trâmite [receberReciboTramite] com IDT " . $job->workload(), 0, true);
-                $numIdentificacaoTramite = intval($job->workload());
-                $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
-                if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($numIdentificacaoTramite)){
-                    $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
-                    $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
-                }
-            }
-            catch(Exception $e){
-                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
-                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-            }
+        $this->objGearmanWorker->addFunction("enviarComponenteDigital", function($job) {
+            $this->enviarComponenteDigital($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-        //Processamento de pendências de recebimento dos metadados do processo
-        $this->objGearmanWorker->addFunction("receberProcedimento", function ($job) {
-            try{
-                $this->gravarLogDebug("Processando recebimento de protocolo [receberProcedimento] com IDT " . $job->workload(), 0, true);
-                $numTempoInicialRecebimento = microtime(true);
-
-                $numIdentificacaoTramite = intval($job->workload());
-                $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_PROCESSO);
-
-                if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($numIdentificacaoTramite)){
-                    $objReceberProcedimentoRN = new ReceberProcedimentoRN();
-                    $objReceberProcedimentoRN->receberProcedimento($numIdentificacaoTramite);
-                }
-
-                $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
-                $this->gravarLogDebug("Finalizado o recebimento de protocolo com IDT " . $job->workload() . "(Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
-
-            }
-            catch(Exception $e){
-                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
-                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-
-                //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
-                $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
-                if($bolDeveRecusarTramite) {
-                    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-                    $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
-                    $objProcessoEletronicoRN->recusarTramite($numIdentificacaoTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
-                }
-            }
+        $this->objGearmanWorker->addFunction("receberReciboTramite", function($job) {
+            $this->receberReciboTramite($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-        // Verifica no barramento os procedimentos que foram enviados por esta unidade e foram recusados pelas mesmas
-        $this->objGearmanWorker->addFunction("receberTramitesRecusados", function ($job) {
-            try {
-                $this->gravarLogDebug("Processando trâmite recusado [receberTramitesRecusados] com IDT " . $job->workload(), 0, true);
-                $numIdentificacaoTramite = intval($job->workload());
-                $objReceberProcedimentoRN = new ReceberProcedimentoRN();
-                $objReceberProcedimentoRN->receberTramitesRecusados($numIdentificacaoTramite);
-            } catch (Exception $e) {
-                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
-                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-            }
+        $this->objGearmanWorker->addFunction("receberProcedimento", function($job) {
+            $this->receberProcedimento($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-        //Processamento de pendências de recebimento dos componentes digitais do processo
-        $this->objGearmanWorker->addFunction("receberComponenteDigital", function ($job) {
-            $this->gravarLogDebug("Processando recebimento de componentes digitais [receberComponenteDigital] com IDT " . $job->workload(), 0, true);
-            ProcessarPendenciasRN::processarTarefa("enviarReciboTramiteProcesso", $job->workload());
+        $this->objGearmanWorker->addFunction("receberTramitesRecusados", function($job) {
+            $this->receberTramitesRecusados($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-        //Processamento de pendências de envio do recibo de conclusão do trãmite do processo
-        $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function ($job) {
-            try {
-                $this->gravarLogDebug("Processando envio do recibo de trâmite [enviarReciboTramiteProcesso] com IDT " . $job->workload(), 0, true);
-                $numIdentificacaoTramite = intval($job->workload());
-                $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
-                $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
-            } catch (Exception $e) {
-                $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
-                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-            }
+        $this->objGearmanWorker->addFunction("receberComponenteDigital", function($job) {
+            $this->receberComponenteDigital($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
+
+        $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function($job) {
+            $this->enviarReciboTramiteProcesso($job->workload());
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
+
     }
 
     private function gravarLogDebug($parStrMensagem, $parNumIdentacao=0, $parBolLogTempoProcessamento=false)
@@ -178,15 +278,84 @@ class ProcessarPendenciasRN extends InfraAgendamentoTarefa
         $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 
-    static function processarTarefa($strNomeTarefa, $strWorkload)
+    /**
+     * Inicializa processos workers de processamento de tarefas do PEN
+     *
+     * @return void
+     */
+    private static function verificarGearmanAtivo($parStrServidor, $parStrPorta)
     {
-        $objClient = new GearmanClient();
-        $objClient->addServer("127.0.0.1", 4730);
-        $objClient->doBackground($strNomeTarefa, $strWorkload);
-    }
-}
+        // Verifica se existe um servidor do Gearman ativo para conexão
+        $bolAtivo = false;        
 
-SessaoSEI::getInstance(false);
-ProcessarPendenciasRN::getInstance()->processarPendencias();
+        try {
+            if(!class_exists("GearmanClient")){
+                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " . 
+                    "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+            }
+            
+            if(!class_exists("GearmanWorker")){
+                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanWorker). " . 
+                    "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+            }
+
+            $objGearmanClient = new GearmanClient();
+            $objGearmanClient->addServer($parStrServidor, $parStrPorta);
+            return $objGearmanClient->ping("health");
+
+        } catch (\Exception $e) {
+            $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento PEN via Gearman";
+            $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
+            $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
+            LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
+        } 
+    }    
+
+    /**
+     * Inicializa processos workers de processamento de tarefas do PEN
+     *
+     * @return void
+     */
+    public static function inicializarWorkers($parNumQtdeWorkers=self::NUMERO_WORKERS_GEARMAN)
+    {
+        $bolInicializado = false; 
+        $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_WORKERS_GEARMAN;
+
+        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+        $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
+        $strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
+        $strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
+
+        if(!empty($strGearmanServidor)){
+            try {
+                if(self::verificarGearmanAtivo($strGearmanServidor, $strGearmanPorta)) {
+                    for ($worker=1; $worker <= self::NUMERO_WORKERS_GEARMAN ; $worker++) { 
+                        $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
+                        exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
+    
+                        if($numCodigoResposta != 0){
+                           $strLocalizacaoScript = realpath(SELF::LOCALIZACAO_SCRIPT_WORKER);
+                           $strComandoInicializacao = sprintf(self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $worker);
+                           shell_exec($strComandoInicializacao);
+                        }
+                    }
+                }
+
+                // Confirma se existe algum worker ativo
+                exec(self::COMANDO_IDENTIFICACAO_WORKER, $strSaida, $numCodigoRespostaAtivacao);
+                $bolInicializado = $numCodigoRespostaAtivacao == 0;
+
+            } catch (\Exception $e) {
+                $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento PEN via Gearman";
+                $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
+                $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
+            } 
+        }
+
+        return $bolInicializado;
+    }
+
+}
 
 ?>

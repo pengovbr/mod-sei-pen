@@ -1,4 +1,0 @@
-
-services:
-    foo:
-        abstract: true

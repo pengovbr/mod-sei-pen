@@ -16,17 +16,17 @@ build: clean
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
 	@cp -R fontes/* $(SEI_MODULO_DIR)/
-	@cp fontes/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
-	@cp fontes/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
-	@cp fontes/config/ConfiguracaoModPEN.php $(SEI_CONFIG_DIR)/
-	@cp fontes/config/supervisor.ini $(SEI_CONFIG_DIR)/
-	@cp fontes/verificar-reboot-fila.sh $(SEI_BIN_DIR)/
-	@cp fontes/verificar-pendencias-represadas.py $(SEI_BIN_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/	
+	@mv $(SEI_MODULO_DIR)/config/ConfiguracaoModPEN.php $(SEI_CONFIG_DIR)/
+	@mv $(SEI_MODULO_DIR)/config/supervisor.ini $(SEI_CONFIG_DIR)/
+	@mv $(SEI_MODULO_DIR)/bin/verificar-reboot-fila.sh $(SEI_BIN_DIR)/
+	@mv $(SEI_MODULO_DIR)/bin/verificar-pendencias-represadas.py $(SEI_BIN_DIR)/
 	@rm -rf $(SEI_MODULO_DIR)/config
-	@rm -rf $(SEI_MODULO_DIR)/sei_atualizar_versao_modulo_pen.php
-	@rm -rf $(SEI_MODULO_DIR)/sip_atualizar_versao_modulo_pen.php
-	@rm -rf $(SEI_MODULO_DIR)/verificar-reboot-fila.sh
-	@rm -rf $(SEI_MODULO_DIR)/verificar-pendencias-represadas.py	
+	@rm -rf $(SEI_MODULO_DIR)/scripts
+	@rm -rf $(SEI_MODULO_DIR)/bin
 	# TODO: Incluir READM.md com procedimentos de instalação simplificado
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
