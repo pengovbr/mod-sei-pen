@@ -549,15 +549,12 @@ class ProcessoEletronicoRN extends InfraRN
     public function enviarProcesso($parametros)
     {
         try {
-            //return $this->getObjPenWs()->enviarProcesso($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->enviarProcesso($parametros);
             });
 
-
         } catch (\SoapFault $e) {
             $mensagem = "Falha no envio externo do processo: ";
-            $mensagem .= InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
                 $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }
@@ -579,7 +576,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDePendencias = new stdClass();
             $parametros->filtroDePendencias->todasAsPendencias = $bolTodasPendencias;
             
-            //$result = $this->getObjPenWs()->listarPendencias($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->listarPendencias($parametros);
             });
@@ -647,7 +643,6 @@ class ProcessoEletronicoRN extends InfraRN
     public function enviarComponenteDigital($parametros)
     {
         try {
-            //return $this->getObjPenWs()->enviarComponenteDigital($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use (&$parametros) {
                 return $objPenWs->enviarComponenteDigital($parametros);
             });
@@ -690,7 +685,6 @@ class ProcessoEletronicoRN extends InfraRN
     public function sinalizarTerminoDeEnvioDasPartesDoComponente($parametros)
     {
         try {
-            //return $this->getObjPenWs()->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
             });            
