@@ -45,7 +45,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $objOrgaoRN;
     private $objSerieRN;
     private $objAnexoRN;
-    private $barraProgresso;
+    private $objAssinaturaRN;
+    private $barraProgresso;    
     private $objProcedimentoAndamentoRN;
     private $arrPenMimeTypes = array(
         "application/pdf",
@@ -94,6 +95,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->objOrgaoRN = new OrgaoRN();
         $this->objSerieRN = new SerieRN();
         $this->objAnexoRN = new AnexoRN();
+        $this->objAssinaturaRN = new AssinaturaRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
 
         $this->barraProgresso = new InfraBarraProgresso();
@@ -1145,9 +1147,17 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $objDocumento;
     }
 
+
+    /**
+     * Atribui a informação textual das tarjas de assinatura em metadados para envio, removendo os conteúdos de script e html
+     *
+     * @param DocumentoDTO $objDocumentoDTO
+     * @param stdClass $objDocumento
+     * @param string $strHashDocumento
+     * @return void
+     */
     public function atribuirDadosAssinaturaDigital($objDocumentoDTO, $objDocumento, $strHashDocumento)
     {
-        //Busca as Tarjas
         $objDocumentoDTOTarjas = new DocumentoDTO();
         $objDocumentoDTOTarjas->retDblIdDocumento();
         $objDocumentoDTOTarjas->retStrNomeSerie();
@@ -1167,34 +1177,24 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objDocumentoRN = new DocumentoRN();
         $objDocumentoDTOTarjas = $objDocumentoRN->consultarRN0005($objDocumentoDTOTarjas);
 
-        $objAssinaturaRN = new AssinaturaRN();
-        $tarjas = $objAssinaturaRN->montarTarjas($objDocumentoDTOTarjas);
-
-        //Remove todos os 12 espaos padres aps remover as tags.
-        $dataTarjas = explode('            ', strip_tags($tarjas));
-        foreach ($dataTarjas as $key => $content) {
-            $contentTrim = trim($content); //Limpa os espaos no inicio e fim de cada texto.
-            if (empty($contentTrim)) {
-                unset($dataTarjas[$key]);
-            } else {
-                $dataTarjas[$key] = html_entity_decode($contentTrim); //Decodifica por causa do strip_tags
+        $dataTarjas = array();
+        $arrObjTarjas = $this->listarTarjasHTML($objDocumentoDTOTarjas);        
+        foreach ($arrObjTarjas as $strConteudoTarja) {
+            $strConteudoTarja = trim(strip_tags($strConteudoTarja));
+            if (!empty($strConteudoTarja)) {
+                $dataTarjas[] = html_entity_decode($strConteudoTarja); 
             }
         }
-        $dataTarjas = array_values($dataTarjas); //Reseta os valores da array
 
         $objAssinaturaDTO = new AssinaturaDTO();
         $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
         $objAssinaturaDTO->retNumIdAtividade();
         $objAssinaturaDTO->retStrStaFormaAutenticacao();
         $objAssinaturaDTO->retStrP7sBase64();
-
-        $objAssinaturaRN = new AssinaturaRN();
-        $resAssinatura = $objAssinaturaRN->listarRN1323($objAssinaturaDTO);
+        $resAssinatura = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
 
         $objDocumento->componenteDigital->assinaturaDigital = array();
-        //Para cada assinatura
         foreach ($resAssinatura as $keyOrder => $assinatura) {
-            //Busca data da assinatura
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade());
             $objAtividadeDTO->setNumIdTarefa(array(TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO), InfraDTO::$OPER_IN);
@@ -1223,11 +1223,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
 
-    private function consultarComponenteDigital($parDblIdDocumento, $parNumIdTramite=null)
+    private function consultarComponenteDigital($parDblIdDocumento)
     {
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->setDblIdDocumento($parDblIdDocumento);
-        //$objComponenteDigitalDTO->setNumIdTramite($parNumIdTramite, InfraDTO::$OPER_DIFERENTE);
         $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
         $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
         $objComponenteDigitalDTO->retTodos();
@@ -2070,16 +2069,11 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAssinaturaDTO->setDistinct(true);
             $objAssinaturaDTO->retDblIdDocumento();
 
-            $objAssinaturaRN = new AssinaturaRN();
-
             foreach($arrObjDocumentoDTO as $objDocumentoDTO) {
-
                 $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
 
-                // Se o documento no tem assinatura e não foi cancelado ento
-                // cai na regra de validao
-                if($objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO && ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_EDOC || $objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_INTERNO) ){
-
+                // Se o documento no tem assinatura e não foi cancelado então cai na regra de validao
+                if($this->objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO && ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_EDOC || $objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_INTERNO) ){
                     $bolAssinaturaCorretas = false;
                 }
             }
@@ -2748,4 +2742,93 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
         return null;
     }
+
+
+    /**
+     * Recupera lista de tarjas de assinaturas aplicadas ao documento em seu formato HTML
+     * 
+     * Este método foi baseado na implementação presente em AssinaturaRN::montarTarjas. 
+     * Devido a estrutura interna do SEI, não existe uma forma de reaproveitar as regras de montagem de tarjas
+     * de forma individual, restando como última alternativa a reprodução das regras até que esta seja encapsulado pelo core do SEI
+     *
+     * @param DocumentoDTO $objDocumentoDTO
+     * @return array
+     */
+    protected function listarTarjasHTMLConectado(DocumentoDTO $objDocumentoDTO) {
+        try {
+    
+          $arrResposta = array();
+    
+          $objAssinaturaDTO = new AssinaturaDTO();
+          $objAssinaturaDTO->retStrNome();
+          $objAssinaturaDTO->retNumIdAssinatura();
+          $objAssinaturaDTO->retNumIdTarjaAssinatura();
+          $objAssinaturaDTO->retStrTratamento();
+          $objAssinaturaDTO->retStrStaFormaAutenticacao();
+          $objAssinaturaDTO->retStrNumeroSerieCertificado();
+          $objAssinaturaDTO->retDthAberturaAtividade();    
+          $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());           
+          $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
+           
+          $arrObjAssinaturaDTO = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
+    
+          if (count($arrObjAssinaturaDTO)) {    
+            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+            $objTarjaAssinaturaDTO->setBolExclusaoLogica(false);
+            $objTarjaAssinaturaDTO->retNumIdTarjaAssinatura();
+            $objTarjaAssinaturaDTO->retStrStaTarjaAssinatura();
+            $objTarjaAssinaturaDTO->retStrTexto();
+            $objTarjaAssinaturaDTO->retStrLogo();
+            $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
+    
+            $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
+            $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
+    
+            foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {    
+              if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
+                throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
+              }
+    
+              $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];    
+              $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
+              $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
+              $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
+              $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
+              $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
+              $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
+              $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+              $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+              $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
+              $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
+              $arrResposta[] = EditorRN::converterHTML($strTarja);              
+            }
+    
+            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+            $objTarjaAssinaturaDTO->retStrTexto();
+            $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
+    
+            $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+    
+            if ($objTarjaAssinaturaDTO != null){    
+              $strLinkAcessoExterno = '';
+              if (strpos($objTarjaAssinaturaDTO->getStrTexto(),'@link_acesso_externo_processo@')!==false){
+                $objEditorRN = new EditorRN();
+                $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
+              }
+    
+              $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
+              $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
+              $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+              $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+              $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
+              $arrResposta[] = EditorRN::converterHTML($strTarja);
+            }
+          }
+    
+          return $arrResposta;
+    
+        } catch (Exception $e) {
+          throw new InfraException('Erro montando tarja de assinatura.',$e);
+        }
+      }
 }
