@@ -12,8 +12,7 @@ class PenProtocoloDTO extends InfraDTO {
     public function montar() {
              
         $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProtocolo', 'id_protocolo'); 
-        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinObteveRecusa', 'sin_obteve_recusa');
-        
+        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinObteveRecusa', 'sin_obteve_recusa');        
         $this->configurarPK('IdProtocolo',InfraDTO::$TIPO_PK_INFORMADO);
     }
 }

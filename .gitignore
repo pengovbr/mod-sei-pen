@@ -1,5 +1,6 @@
 # Ignorar pasta de distribuição de arquivos do módulo
 dist/
+testes/funcional/vendor/
 
 **/*.lock
 **/*.log

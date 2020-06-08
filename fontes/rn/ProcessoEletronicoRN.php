@@ -47,8 +47,8 @@ class ProcessoEletronicoRN extends InfraRN
     // 02 a 18 estão registrados na tabela rel_tarefa_operacao
     public static $OP_OPERACAO_REGISTRO = "01";
 
-    // 10 minutos de timeout para requisições via webservice
-    const WS_TIMEOUT_CONEXAO = 600;
+    // 5 minutos de timeout para requisições via webservice
+    const WS_TIMEOUT_CONEXAO = 300;
     const WS_ESPERA_RECONEXAO = 5;
     const WS_TENTATIVAS_RECONEXAO = 3;
 
@@ -147,10 +147,13 @@ class ProcessoEletronicoRN extends InfraRN
     */
     private function testaUrl($strUrl='', $strLocalCert='')
     {
-        $arrParseUrl = parse_url($this->strWSDL);
-        $strUrl = $arrParseUrl['scheme'].'://'.$arrParseUrl['host'];
+        //$arrParseUrl = parse_url($this->strWSDL);
+        //$strUrl = $arrParseUrl['scheme'].'://'.$arrParseUrl['host'];
+        $strUrl = $this->strWSDL;
 
-        $strCommand = sprintf('curl %s --insecure --cert %s 2>&1', $strUrl, $this->options['local_cert']);
+        $strCommand = sprintf('curl --insecure --cert %s --connect-timeout %s %s 2>&1', 
+            $this->options['local_cert'], $this->options['connection_timeout'], $strUrl);
+
         $numRetorno = 0;
         $arrOutput = array();
 
@@ -162,15 +165,6 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
-    public function testarDisponibilidade()
-    {
-        try{
-            $this->testaUrl($this->strWSDL, $this->options['local_cert']);
-            return true;
-        } catch (Exception $ex) {
-            return false;
-        }
-    }
 
     private function getObjPenWs()
     {
@@ -699,11 +693,11 @@ class ProcessoEletronicoRN extends InfraRN
     {
         try {
             $parametros = new stdClass();
-            $parametros->IDT = $parNumIdentificacaoTramite;
-            
-            //return $this->getObjPenWs()->solicitarMetadados($parametros);
+            $parametros->IDT = $parNumIdentificacaoTramite;            
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-                return $objPenWs->solicitarMetadados($parametros);
+                $objMetadadosProtocolo = $objPenWs->solicitarMetadados($parametros);
+                $objMetadadosProtocolo->IDT = $parametros->IDT;
+                return $objMetadadosProtocolo;
             });                        
         } catch (\Exception $e) {
             $mensagem = "Falha na solicitação de metadados do processo";
@@ -1311,12 +1305,8 @@ class ProcessoEletronicoRN extends InfraRN
 
         switch ($objTramite->situacaoAtual) {
             case static::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                $objPenTramiteProcessadoRN = new PenTramiteProcessadoRN(PenTramiteProcessadoRN::STR_TIPO_RECIBO);
-
-                if(!$objPenTramiteProcessadoRN->isProcedimentoRecebido($objTramite->IDT)){
-                    $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
-                    $objReceberReciboTramiteRN->receberReciboDeTramite($objTramite->IDT);
-                }
+                $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
+                $objReceberReciboTramiteRN->receberReciboDeTramite($objTramite->IDT);
             break;
 
             case static::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
@@ -1365,7 +1355,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->dadosDoReciboDeTramite->dataDeRecebimento = $parDthRecebimento;
             $parametros->dadosDoReciboDeTramite->hashDaAssinatura = $strHashDaAssinaturaBase64;
 
-            //$this->getObjPenWs()->enviarReciboDeTramite($parametros);
             $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->enviarReciboDeTramite($parametros);
             });
