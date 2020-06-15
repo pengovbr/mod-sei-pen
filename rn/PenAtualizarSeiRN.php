@@ -22,7 +22,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     protected function atualizarVersaoConectado() {
-        try {            
+        try {
 
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI VERSAO ' . SEI_VERSAO);
 
@@ -86,7 +86,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
                 case '1.5.1': $this->instalarV1502();
-                
+                case '1.5.2': $this->instalarV1503();
+
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -145,9 +146,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                     foreach ($arrStrIndices as $strNomeIndice => $arrStrColunas) {
                         $parObjInfraMetaBD->excluirIndice($strTabelaExclusao, $strNomeIndice);
                     }
-                }             
-            }         
-        }        
+                }
+            }
+        }
     }
 
 
@@ -171,8 +172,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     /**
      * Remove a chave primária da tabela indicada, removendo também o índice vinculado, caso seja necessário
-     * 
-     * Necessário dependendo da versão do banco de dados Oracle utilizado que pode não remover um índice criado com mesmo 
+     *
+     * Necessário dependendo da versão do banco de dados Oracle utilizado que pode não remover um índice criado com mesmo
      * nome da chave primária, impedindo que este objeto seja recriado posteriormente na base de dados
      *
      * @param [type] $parStrNomeTabela
@@ -200,7 +201,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     private function excluirChaveEstrangeira($parStrTabela, $parStrNomeChaveEstrangeira, $bolSuprimirErro=false)
     {
-        try{ 
+        try{
             $this->objInfraMetaBD->excluirChaveEstrangeira($parStrTabela, $parStrNomeChaveEstrangeira);
         } catch(\Exception $e){
             // Mensagem de erro deve ser suprimida caso seja indicado pelo usuário
@@ -834,7 +835,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
 
         if ($objMetaBanco->isChaveExiste('md_pen_tramite_processado', 'pk_md_pen_tramite_processado')) {
-            $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());    
+            $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
             $this->excluirChavePrimariaComIndice("md_pen_tramite_processado", "pk_md_pen_tramite_processado");
             $objInfraMetaBD->adicionarChavePrimaria("md_pen_tramite_processado", "pk_md_pen_tramite_processado", array('id_tramite', 'tipo_tramite_processo'));
         }
@@ -1041,7 +1042,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     /* Contêm atualizações da versao 1.0.1 do modulo */
-    protected function instalarV101() 
+    protected function instalarV101()
     {
         $objBD = new GenericoBD(BancoSEI::getInstance());
 
@@ -1234,7 +1235,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     /* Contêm atualizações da versao 1.1.8 do módulo */
-    protected function instalarV118() 
+    protected function instalarV118()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
@@ -1252,14 +1253,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     }
 
     /* Contêm atualizações da versao 1.1.9 do módulo */
-    protected function instalarV119() 
+    protected function instalarV119()
     {
         $this->atualizarNumeroVersao("1.1.9");
     }
 
 
     /* Contêm atualizações da versao 1.1.10 do módulo */
-    protected function instalarV1110() 
+    protected function instalarV1110()
     {
         $this->atualizarNumeroVersao("1.1.10");
     }
@@ -1699,7 +1700,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas        
+        // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
         // Remove chaves estrangeiras e primárias com supressão de mensagens de erro devido a incompatibilidade de nomes entre diferentes versões do sistema
@@ -1715,7 +1716,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
         $objInfraMetaBD->alterarColuna("md_pen_tramite_recibo_envio", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
         $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite_enviado", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
-        
+
         // Altera o parâmetro da versão de banco
         $this->atualizarNumeroVersao("1.4.1");
     }
@@ -1723,7 +1724,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV1402()
     {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-    
+
         // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
         $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
@@ -1738,7 +1739,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD->adicionarChaveEstrangeira("fk_md_pen_recibo_receb_tram", "md_pen_recibo_tramite_recebido", array('numero_registro', 'id_tramite'), "md_pen_tramite", array('numero_registro', 'id_tramite'), false);
 
         $this->atualizarNumeroVersao("1.4.2");
-    }    
+    }
 
     protected function instalarV1403()
     {
@@ -1754,14 +1755,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         $this->atualizarNumeroVersao("1.5.0");
     }
-    
+
     protected function instalarV1501()
     {
         $this->atualizarNumeroVersao("1.5.1");
-    }    
+    }
 
     protected function instalarV1502()
     {
         $this->atualizarNumeroVersao("1.5.2");
-    }        
+    }
+
+    protected function instalarV1503()
+    {
+        $this->atualizarNumeroVersao("1.5.3");
+    }
 }

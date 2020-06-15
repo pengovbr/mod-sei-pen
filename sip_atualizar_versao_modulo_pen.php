@@ -109,6 +109,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.4.3': $this->instalarV1500();
                 case '1.5.0': $this->instalarV1501();
                 case '1.5.1': $this->instalarV1502();
+                case '1.5.2': $this->instalarV1503();
 
                 break;
                 default:
@@ -976,7 +977,7 @@ class PenAtualizarSipRN extends InfraRN {
             $objItemMenuBD->alterar($objItemMenuDTO);
         }
 
-        
+
         $this->atualizarNumeroVersao('1.1.9');
     }
 
@@ -1098,7 +1099,7 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1206()
     {
         $this->atualizarNumeroVersao('1.2.6');
-    }    
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.3.0
@@ -1107,7 +1108,7 @@ class PenAtualizarSipRN extends InfraRN {
     {
         $this->atualizarNumeroVersao('1.3.0');
     }
-    
+
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.0
      */
@@ -1115,14 +1116,14 @@ class PenAtualizarSipRN extends InfraRN {
     {
         $this->atualizarNumeroVersao('1.4.0');
     }
-    
+
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.1
      */
     private function instalarV1401()
     {
         $this->atualizarNumeroVersao('1.4.1');
-    }        
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.2
@@ -1130,7 +1131,7 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1402()
     {
         $this->atualizarNumeroVersao('1.4.2');
-    }            
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.3
@@ -1154,7 +1155,7 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1501()
     {
         $this->atualizarNumeroVersao('1.5.1');
-    }        
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.5.2
@@ -1162,11 +1163,19 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1502()
     {
         $this->atualizarNumeroVersao('1.5.2');
-    }            
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.5.3
+     */
+    private function instalarV1503()
+    {
+        $this->atualizarNumeroVersao('1.5.3');
+    }
 }
 
 try {
-    
+
     //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
     $numVersaoAtual = explode('.', SIP_VERSAO);
     $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
@@ -1184,18 +1193,18 @@ try {
         if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
             throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
         }
-    
+
         if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
             throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
         }
-    
+
         if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
             throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
         }
-    
+
         if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
             throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
-        }    
+        }
     }
 
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);

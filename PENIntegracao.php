@@ -9,7 +9,7 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.5.2';
+        return '1.5.3';
     }
 
     public function getInstituicao() {
