@@ -7,13 +7,12 @@ class ReceberProcedimentoRN extends InfraRN
     const STR_APENSACAO_PROCEDIMENTOS = 'Relacionamento representando a apensação de processos recebidos externamente';
 
     private $objProcessoEletronicoRN;
-    private $objInfraParametro;
     private $objProcedimentoAndamentoRN;
     private $objRelProtocoloProtocoloRN;
-    private $documentosRetirados = array();
     private $objProcedimentoRN;
     public $destinatarioReal;
     private $objPenDebug;
+    private $objProtocoloRN;
     private $objSeiRN;
 
     public function __construct()
@@ -1468,7 +1467,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objProtocoloDTO = new ProtocoloDTO();
             $objProtocoloDTO->setDblIdProtocolo($numIdDocumento);
             $objProtocoloDTO->retStrStaEstado();
-            $objProtocoloDTO = $objProtocoloRN->consultar($objProtocoloDTO);
+            $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
 
             if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
                 $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
