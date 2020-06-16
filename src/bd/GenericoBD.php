@@ -4,7 +4,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Classe gererica de persistência com o banco de dados
- * 
+ *
  *
  */
 class GenericoBD extends InfraBD {

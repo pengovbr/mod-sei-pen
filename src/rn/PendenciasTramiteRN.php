@@ -8,9 +8,9 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 // PHP internal, faz com que o tratamento de sinais funcione corretamente
 // TODO: Substituir declaração por pcntl_async_signal no php 7
-//declare(ticks=1); 
+//declare(ticks=1);
 
-class PendenciasTramiteRN extends InfraRN 
+class PendenciasTramiteRN extends InfraRN
 {
     const TIMEOUT_SERVICO_PENDENCIAS = 300; // 5 minutos
     const TEMPO_ESPERA_REINICIALIZACAO_MONITORAMENTO = 30; // 30 segundos
@@ -28,7 +28,7 @@ class PendenciasTramiteRN extends InfraRN
     private $arrStrUltimasMensagensErro = array();
 
     public function __construct($parStrLogTag=null)
-    {   
+    {
         $this->carregarParametrosIntegracao();
         $this->objPenDebug = DebugPen::getInstance($parStrLogTag);
     }
@@ -45,7 +45,7 @@ class PendenciasTramiteRN extends InfraRN
         $this->strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
         $this->strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
         $this->strEnderecoServico = trim($objConfiguracaoModPEN->getValor("PEN", "WebService", false));
-        
+
         // Parâmetro opcional. Não ativar o serviço de monitoramento de pendências, deixando o agendamento do SEI executar tal operação
         $this->strEnderecoServicoPendencias = trim($objConfiguracaoModPEN->getValor("PEN", "WebServicePendencias", false));
 
@@ -66,7 +66,7 @@ class PendenciasTramiteRN extends InfraRN
 
     /**
      * Busca pendências de recebimento de trâmites de processos e encaminha para processamento
-     * 
+     *
      * Os códigos de trâmites podem ser obtidos de duas formas:
      * 1 - Através da API Webservice SOAP, fazendo uma requisição direta para o serviço de consulta de pendências de trâmite
      * 2 - Através da API Rest de Stream, onde o módulo irá conectar ao Barramento e ficar na esculta por qualquer novo evento
@@ -74,7 +74,7 @@ class PendenciasTramiteRN extends InfraRN
      * @param boolean $parBolMonitorarPendencias Indicador para ativar a esculta de eventos do Barramento
      * @return int  Código de resultado do processamento, sendo 0 para sucesso e 1 em caso de erros
      */
-    public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false) 
+    public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false)
     {
         try{
             global $bolEmExecucao;
@@ -98,7 +98,7 @@ class PendenciasTramiteRN extends InfraRN
                     PENIntegracao::validarCompatibilidadeBanco();
                     $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite($parBolMonitorarPendencias);
-                    
+
                     $objInfraException = new InfraException();
                     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
                         $numIdTramite = $objPendenciaDTO->getNumIdentificacaoTramite();
@@ -110,17 +110,17 @@ class PendenciasTramiteRN extends InfraRN
                             $this->enviarPendenciaProcessamento($objPendenciaDTO, $parBolSegundoPlano);
                         } catch (\Exception $e) {
                             $this->gravarAmostraErroLogSEI($e);
-                            $this->gravarLogDebug(InfraException::inspecionar($e));                
+                            $this->gravarLogDebug(InfraException::inspecionar($e));
                             if(!$parBolMonitorarPendencias && count($objInfraException->getArrObjInfraValidacao()) < 10){
                                 $strMensagemErro = "Falha no trâmite $numIdTramite: $e";
                                 $objInfraException->adicionarValidacao($strMensagemErro);
-                            }                            
+                            }
                         }
-                    }                    
-                    
+                    }
+
                 } catch(ModuloIncompativelException $e) {
                     // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
-                    throw $e;                    
+                    throw $e;
                 } catch (Exception $e) {
                     //Apenas registra a falha no log do sistema e reinicia o ciclo de requisição
                     $this->gravarAmostraErroLogSEI($e);
@@ -131,8 +131,8 @@ class PendenciasTramiteRN extends InfraRN
                     $this->gravarLogDebug(sprintf("Reiniciando monitoramento de pendências em %s segundos", self::TEMPO_ESPERA_REINICIALIZACAO_MONITORAMENTO), 1);
                     sleep(self::TEMPO_ESPERA_REINICIALIZACAO_MONITORAMENTO);
                     $this->carregarParametrosIntegracao();
-                }                
-                
+                }
+
             } while($parBolMonitorarPendencias && $bolEmExecucao);
         }
         catch(Exception $e) {
@@ -141,7 +141,7 @@ class PendenciasTramiteRN extends InfraRN
             return self::CODIGO_EXECUCAO_ERRO;
         }
 
-        // Caso não esteja sendo realizado o monitoramente de pendências, 
+        // Caso não esteja sendo realizado o monitoramente de pendências,
         // lança exceção diretamente na página para apresentação ao usuário
         if(!$parBolMonitorarPendencias && isset($objInfraException)){
             $objInfraException->lancarValidacoes();
@@ -179,6 +179,7 @@ class PendenciasTramiteRN extends InfraRN
         $arrPendenciasRetornadas = array();
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
+        shuffle($arrObjPendenciasDTO);
 
         $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 
@@ -265,20 +266,20 @@ class PendenciasTramiteRN extends InfraRN
      */
     private function servicoGearmanAtivo()
     {
-        $bolAtivo = false;        
+        $bolAtivo = false;
         $strMensagemErro = "Não foi possível conectar ao servidor Gearman (%s, %s). Erro: %s";
         try {
             if(!empty($this->strGearmanServidor)) {
                 if(!class_exists("GearmanClient")){
-                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" . 
+                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
                         "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
                 }
             }
         } catch (\InfraException $e) {
             $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, InfraException::inspecionar($e));
             LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
-        } 
-        
+        }
+
         try{
             $objGearmanClient = new GearmanClient();
             $objGearmanClient->addServer($this->strGearmanServidor, $this->strGearmanPorta);
@@ -287,7 +288,7 @@ class PendenciasTramiteRN extends InfraRN
             $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
             $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
             LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
-        } 
+        }
 
         return $bolAtivo;
     }
@@ -313,12 +314,12 @@ class PendenciasTramiteRN extends InfraRN
      * @return void
      */
     private function enviarPendenciaProcessamento($objPendencia, $parBolSegundoPlano)
-    {        
+    {
         if($parBolSegundoPlano && $this->servicoGearmanAtivo()){
             $this->enviarPendenciaFilaProcessamento($objPendencia);
         } else {
             $this->enviarPendenciaProcessamentoDireto($objPendencia);
-        }        
+        }
     }
 
 
@@ -351,7 +352,7 @@ class PendenciasTramiteRN extends InfraRN
                     break;
 
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                    $objProcessarPendenciaRN->receberTramitesRecusados($numIDT);                    
+                    $objProcessarPendenciaRN->receberTramitesRecusados($numIDT);
                     break;
 
                 default:
@@ -456,7 +457,7 @@ class PendenciasTramiteRN extends InfraRN
 // if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 //     pcntl_signal(SIGINT, 'tratarSinalInterrupcaoMonitoramento');
 //     pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoMonitoramento');
-//     pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento'); 
+//     pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento');
 
 //     InfraDebug::getInstance()->setBolLigado(true);
 //     InfraDebug::getInstance()->setBolDebugInfra(false);

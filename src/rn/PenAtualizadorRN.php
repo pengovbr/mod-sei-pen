@@ -2,7 +2,7 @@
 
 /**
  * Atualizador abstrato para sistema do SEI para instalar/atualizar o módulo PEN
- * 
+ *
  *
  */
 abstract class PenAtualizadorRN extends InfraRN {
@@ -33,16 +33,16 @@ abstract class PenAtualizadorRN extends InfraRN {
      * @var integer Tempo de execução do script
      */
     protected $numSeg = 0;
-    
+
     protected $objInfraBanco ;
 
     protected function inicializarObjInfraIBanco() {
-        
+
         if (empty($this->objInfraBanco)) {
             $this->objInfraBanco = BancoSEI::getInstance();
             $this->objInfraBanco->abrirConexao();
         }
-        
+
         return $this->objInfraBanco;
     }
 
@@ -58,7 +58,7 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     /**
      * Adiciona uma mensagem ao output para o usuário
-     * 
+     *
      * @return null
      */
     protected function logar($strMsg) {
@@ -67,7 +67,7 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     /**
      * Inicia o script criando um contator interno do tempo de execução
-     * 
+     *
      * @return null
      */
     protected function inicializar($strTitulo) {
@@ -79,7 +79,7 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     /**
      * Finaliza o script informando o tempo de execução.
-     * 
+     *
      * @return null
      */
     protected function finalizar($strMsg=null, $bolErro=false){
@@ -99,22 +99,22 @@ abstract class PenAtualizadorRN extends InfraRN {
         InfraDebug::getInstance()->setBolEcho(false);
         $this->numSeg = 0;
         die;
-    }    
+    }
 
     /**
      * Construtor
-     * 
+     *
      * @param array $arrArgs Argumentos enviados pelo script
      */
     public function __construct() {
-        
+
         parent::__construct();
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
         @ini_set('zlib.output_compression', '0');
         @ini_set('implicit_flush', '1');
         ob_implicit_flush();
-        
+
         $this->inicializarObjInfraIBanco();
         $this->inicializarObjMetaBanco();
 

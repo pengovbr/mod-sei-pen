@@ -1,5 +1,7 @@
 <?php
-require_once dirname(__FILE__).'/../web/Sip.php';
+
+$dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__."/../../web" : DIR_SIP_WEB;
+require_once $dirSipWeb . '/Sip.php';
 
 class PenAtualizarSipRN extends InfraRN {
 
@@ -277,7 +279,7 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return int
      */
-    protected function criarMenu($strRotulo, $numSequencia, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema) 
+    protected function criarMenu($strRotulo, $numSequencia, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema)
     {
         $objDTO = new ItemMenuDTO();
         $objDTO->setNumIdItemMenuPai($numIdItemMenuPai);
@@ -972,7 +974,7 @@ class PenAtualizarSipRN extends InfraRN {
             $objItemMenuBD->alterar($objItemMenuDTO);
         }
 
-        
+
         $this->atualizarNumeroVersao('1.1.9');
     }
 
@@ -1094,7 +1096,7 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1206()
     {
         $this->atualizarNumeroVersao('1.2.6');
-    }    
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.3.0
@@ -1103,7 +1105,7 @@ class PenAtualizarSipRN extends InfraRN {
     {
         $this->atualizarNumeroVersao('1.3.0');
     }
-    
+
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.0
      */
@@ -1111,14 +1113,14 @@ class PenAtualizarSipRN extends InfraRN {
     {
         $this->atualizarNumeroVersao('1.4.0');
     }
-    
+
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.1
      */
     private function instalarV1401()
     {
         $this->atualizarNumeroVersao('1.4.1');
-    }        
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.2
@@ -1126,7 +1128,7 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1402()
     {
         $this->atualizarNumeroVersao('1.4.2');
-    }            
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.3
@@ -1156,7 +1158,7 @@ class PenAtualizarSipRN extends InfraRN {
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
     private function instalarV2000()
-    {        
+    {
         // Criar novos recursos de configuração de espécie documental padrão para envio de processos
         $this->logar('ATRIBUIÇÃO DE PERMISSÃO DE ATRIBUÍÇÃO DE ESPÉCIES/TIPO DE DOCUMENTO PADRÃO AO PERFIL ADMINISTRADOR');
         $numIdSistemaSei = $this->getNumIdSistema('SEI');
@@ -1164,7 +1166,7 @@ class PenAtualizarSipRN extends InfraRN {
         $this->criarRecurso('pen_map_tipo_documento_envio_padrao_atribuir', 'Atribuir espécie documental padrão para envio de processos', $numIdSistemaSei);
         $this->criarRecurso('pen_map_tipo_documento_envio_padrao_consultar', 'Consultar espécie documental padrão para envio de processos', $numIdSistemaSei);
         $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_atribuir', 'Atribuir tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
-        $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_consultar', 'Consultar tipo de documento padrão para recebimento de processos', $numIdSistemaSei);        
+        $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_consultar', 'Consultar tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_documento_envio_padrao_atribuir');
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_documento_envio_padrao_consultar');
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_atribuir');
@@ -1185,7 +1187,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         // Recriar item de menu agrupador de mapeamento de tipos de documento
         $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
-        $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuPEN, null,         
+        $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuPEN, null,
             "Mapeamento de Tipos de Documentos", 20
         );
 
@@ -1199,7 +1201,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objRecursoMapRecebimentoListar = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, "pen_map_tipo_documento_recebimento_listar");
         $numIdRecursoMapRecebimentoListar = $objRecursoMapRecebimentoListar->getNumIdRecurso();
         ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapRecebimentoListar,"Recebimento", 20);
-        
+
         // Redefinir ordem de apresentação dos menus de administração do módulo
         $arrOrdemMenusAdministracaoPEN = array(
             array("rotulo" => "Parâmetros de Configuração", "sequencia" => 10),
@@ -1211,7 +1213,7 @@ class PenAtualizarSipRN extends InfraRN {
         array_map(function($item) use ($numIdSistemaSei, $numIdMenuSEI){
             $objItemMenuRN = new ItemMenuRN();
             $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotulo"]);
-            if(isset($numIdItemMenu)){                
+            if(isset($numIdItemMenu)){
                 $objItemMenuDTO = new ItemMenuDTO();
                 $objItemMenuDTO->setNumIdMenu($numIdMenuSEI);
                 $objItemMenuDTO->setNumIdItemMenu($numIdItemMenu);
@@ -1229,7 +1231,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
-        $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');        
+        $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');
         $numIdMenuProcessoTramitados = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSei, $strNomeMenuProcessosTramitados);
         ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
         ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
@@ -1239,7 +1241,7 @@ class PenAtualizarSipRN extends InfraRN {
 }
 
 try {
-    
+
     //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
     $numVersaoAtual = explode('.', SIP_VERSAO);
     $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
@@ -1257,18 +1259,18 @@ try {
         if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
             throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
         }
-    
+
         if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
             throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
         }
-    
+
         if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
             throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
         }
-    
+
         if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
             throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
-        }    
+        }
     }
 
     $objAtualizarRN = new PenAtualizarSipRN($arrArgs);

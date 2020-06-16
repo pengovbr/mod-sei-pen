@@ -8,8 +8,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
  *
  */
 try {
-
-
     session_start();
 
     InfraDebug::getInstance()->setBolLigado(false);
@@ -283,8 +281,8 @@ $objPaginaSEI->abrirHead();
 $objPaginaSEI->montarMeta();
 $objPaginaSEI->montarTitle(':: '.$objPaginaSEI->getStrNomeSistema().' - '.$strTitulo.' ::');
 $objPaginaSEI->montarStyle();
+$objPaginaSEI->abrirStyle();
 ?>
-<style type="text/css">
 #lblTextoPesquisa {position:absolute;left:0%;top:10%;}
 #txtTextoPesquisa {position:absolute;left:0%;top:26%;width:50%;}
 
@@ -324,8 +322,8 @@ function tratarEnter(ev){
     }
     return true;
 }
-</script>
 <?php
+$objPaginaSEI->fecharStyle();
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 ?>

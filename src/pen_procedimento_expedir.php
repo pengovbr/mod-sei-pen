@@ -154,7 +154,8 @@ $objPaginaSEI->montarMeta();
 $objPaginaSEI->montarTitle(':: ' . $objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPaginaSEI->montarStyle();
 echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
-PaginaSEI::getInstance()->abrirStyle();
+
+$objPaginaSEI->abrirStyle();
 ?>
 
 #lblProtocoloExibir {position:absolute;left:0%;top:0%;}
@@ -182,7 +183,6 @@ PaginaSEI::getInstance()->abrirStyle();
 #lblMotivosUrgencia {position:absolute;left:0%;top:10%;width:50%;}
 #selMotivosUrgencia {position:absolute;left:0%;top:48%;width:51%;}
 
-</style>
 <?php
 $objPaginaSEI->fecharStyle();
 $objPaginaSEI->montarJavaScript();

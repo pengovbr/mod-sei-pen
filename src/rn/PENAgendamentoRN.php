@@ -2,7 +2,7 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class PENAgendamentoRN extends InfraRN 
+class PENAgendamentoRN extends InfraRN
 {
     const NUMERO_WORKERS_GEARMAN = 4;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%d' | grep -o '^[ ]*[0-9]*'";
@@ -12,14 +12,14 @@ class PENAgendamentoRN extends InfraRN
 
     protected function inicializarObjInfraIBanco() {
         return BancoSEI::getInstance();
-    }    
+    }
 
     /**
      * Atualização das hipóteses legais vindas do barramento
      * @throws InfraException
      */
 
-    protected function atualizarHipotesesLegaisControlado() 
+    protected function atualizarHipotesesLegaisControlado()
     {
         try {
             PENIntegracao::validarCompatibilidadeModulo();
@@ -68,7 +68,7 @@ class PENAgendamentoRN extends InfraRN
             LogSEI::getInstance()->gravar("Hipóteses Legais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
-        }        
+        }
     }
 
 
@@ -76,7 +76,7 @@ class PENAgendamentoRN extends InfraRN
      * Rotina de atualização das espécies documentais do Barramento PEN na base de dados do SEI
      *
      * Durante a sincronização, as espécies documentais podem ser cadastradas, removidas ou atualizadas
-     * 
+     *
      * @throws InfraException
      * @return void
      */
@@ -97,7 +97,7 @@ class PENAgendamentoRN extends InfraRN
             $arrIdsEspeciesDocumentaisSEI = InfraArray::converterArrInfraDTO($objGenericoBD->listar($objEspecieDocumentalDTO), "NomeEspecie", "IdEspecie");
 
             // Combina e percorre as duas listas para avaliar o que precisar ser feito: inserir, desativar ou alterar a descrição
-            $arrEspeciesDocumentaisCombinadas = array_replace($arrIdsEspeciesDocumentaisSEI, $arrEspeciesDocumentaisPEN);        
+            $arrEspeciesDocumentaisCombinadas = array_replace($arrIdsEspeciesDocumentaisSEI, $arrEspeciesDocumentaisPEN);
             foreach ($arrEspeciesDocumentaisCombinadas as $numIdEspecie => $strNomeEspecie) {
                 $numIdEspecie = intval($numIdEspecie);
                 $bolExisteBaseDados = array_key_exists($numIdEspecie, $arrIdsEspeciesDocumentaisSEI);
@@ -109,7 +109,7 @@ class PENAgendamentoRN extends InfraRN
                 $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
 
                 if($bolExisteBarramento && !$bolExisteBaseDados){
-                    // Caso a espécie documental EXISTA no Barramento do PEN mas não exista no SEI, necessário fazer o seu cadastramento    
+                    // Caso a espécie documental EXISTA no Barramento do PEN mas não exista no SEI, necessário fazer o seu cadastramento
                     if ($objGenericoBD->contar($objEspecieDocumentalDTO) == 0) {
                         $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
                         $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
@@ -121,11 +121,11 @@ class PENAgendamentoRN extends InfraRN
                         // Remove mapeamentos de Tipos de Documentos para Envio vinculados ao código de espécie
                         $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
                         $objPenRelTipoDocMapEnviadoRN->excluirPorEspecieDocumental($numIdEspecie);
-                                            
+
                         // Remove mapeamentos de Tipos de Documentos para Envio vinculados ao código de espécie
                         $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
                         $objPenRelTipoDocMapRecebidoRN->excluirPorEspecieDocumental($numIdEspecie);
-                        
+
                         // Remove a espécie documental do PEN que não mais existe no Barramento do PEN
                         $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecie);
                         $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
@@ -144,21 +144,21 @@ class PENAgendamentoRN extends InfraRN
             LogSEI::getInstance()->gravar("Espécies Documentais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
         } catch (Exception $e) {
             throw new InfraException('Erro no agendamento de atualização de Hipóteses Legais', $e);
-        }               
+        }
     }
 
     /**
      * Atualização de dados do Barramento de Serviços do PEN para utilização pelo SEI nas configurações
      * @throws InfraException
      */
-    protected function atualizarInformacoesPENControlado() 
+    protected function atualizarInformacoesPENControlado()
     {
         InfraDebug::getInstance()->setBolLigado(true);
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(true);
         InfraDebug::getInstance()->limpar();
 
-        try {        
+        try {
             $this->atualizarHipotesesLegais();
             $this->atualizarEspeciesDocumentais();
 
@@ -173,14 +173,14 @@ class PENAgendamentoRN extends InfraRN
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-            
+
             throw new InfraException('Erro processamento atualização de informações do Barramento de Serviços do PEN.',$e);
-        }            
-    }    
+        }
+    }
 
 
     /**
-     * Processa tarefas recebidas pelo Barramento de Serviços do PEN para receber novos processos/documentos, 
+     * Processa tarefas recebidas pelo Barramento de Serviços do PEN para receber novos processos/documentos,
      * notificações de conclusão de trâmites ou notificação de recusa de processos
      *
      * @return void
@@ -207,9 +207,9 @@ class PENAgendamentoRN extends InfraRN
             // Inicializa workers do Gearman caso este componente esteja configurado e não desativado no agendamento do sistema
             if($bolAtivaWorker && $bolGearmanConfigurado){
                 ProcessarPendenciasRN::inicializarWorkers($numValorWorkers);
-            }            
+            }
 
-            // Consulta e processamento de pendências de recebimento de trâmites            
+            // Consulta e processamento de pendências de recebimento de trâmites
             $objPendenciaTramiteRN = new PendenciasTramiteRN();
 
             //TODO: Avaliar possibilidade de avaliar se existe algum worker ativo antes de enviar
@@ -223,7 +223,7 @@ class PENAgendamentoRN extends InfraRN
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-            
+
             throw new InfraException('Erro processando pendências de trâmites do Barramento de Serviços do PEN.',$e);
         }
     }

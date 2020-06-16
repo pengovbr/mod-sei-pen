@@ -1,14 +1,11 @@
 <?php
 
-if(!defined("DIR_SEI_WEB")){
-    define("DIR_SEI_WEB", getenv("DIR_SEI_WEB"));
-}
-
-require_once DIR_SEI_WEB.'/SEI.php';
+$dirSeiWeb = !defined("DIR_SEI_WEB") ? getenv("DIR_SEI_WEB") ?: __DIR__."/../../web" : DIR_SEI_WEB;
+require_once $dirSeiWeb . '/SEI.php';
 
 // PHP internal, faz com que o tratamento de sinais funcione corretamente
 // TODO: Substituir declaração por pcntl_async_signal no php 7
-declare(ticks=1); 
+declare(ticks=1);
 
 
 $bolEmExecucao = true;
@@ -24,10 +21,10 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     ini_set('max_execution_time','0');
     ini_set('memory_limit','-1');
-        
+
     pcntl_signal(SIGINT, 'tratarSinalInterrupcaoMonitoramento');
     pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoMonitoramento');
-    pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento'); 
+    pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento');
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);
