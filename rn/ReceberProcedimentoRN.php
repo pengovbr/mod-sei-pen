@@ -1242,6 +1242,10 @@ class ReceberProcedimentoRN extends InfraRN
                     $objDocumento->idProcedimentoAnexadoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
                     $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
 
+                    if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
+                        $arrIdDocumentosRetirados[] = $objDocumento->idDocumentoSEI;
+                    }
+
                     continue;
                 }
 
