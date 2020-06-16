@@ -5,7 +5,7 @@ require_once $dirSeiWeb . '/SEI.php';
 
 // PHP internal, faz com que o tratamento de sinais funcione corretamente
 // TODO: Substituir declaração por pcntl_async_signal no php 7
-declare(ticks=1); 
+declare(ticks=1);
 
 $bolInterromper = false;
 function tratarSinalInterrupcaoProc($sinal)
@@ -31,20 +31,20 @@ class ProcessamentoTarefasPEN
     {
         ini_set('max_execution_time','0');
         ini_set('memory_limit','-1');
-    
+
         pcntl_signal(SIGINT, 'tratarSinalInterrupcaoProc');
         pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoProc');
-        pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoProc');     
+        pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoProc');
     }
-    
+
 
     public function processarPendencias()
     {
-        InfraDebug::getInstance()->setBolLigado(true);
+        InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);
-        InfraDebug::getInstance()->setBolEcho(true);
+        InfraDebug::getInstance()->setBolEcho(false);
         InfraDebug::getInstance()->limpar();
-    
+
         try {
             SessaoSEI::getInstance(false);
             $objProcessarPendenciasRN = new ProcessarPendenciasRN("PROCESSAMENTO");
@@ -54,38 +54,14 @@ class ProcessamentoTarefasPEN
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-        }        
-    }    
+        }
+    }
 }
 
 
 // Garante que código abaixo foi executado unicamente via linha de comando
 if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
-    
     ProcessamentoTarefasPEN::getInstance()->processarPendencias();
-
-    // ini_set('max_execution_time','0');
-    // ini_set('memory_limit','-1');
-
-    // pcntl_signal(SIGINT, 'tratarSinalInterrupcaoProc');
-    // pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoProc');
-    // pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoProc'); 
-
-    // InfraDebug::getInstance()->setBolLigado(true);
-    // InfraDebug::getInstance()->setBolDebugInfra(false);
-    // InfraDebug::getInstance()->setBolEcho(true);
-    // InfraDebug::getInstance()->limpar();
-
-    // try {
-    //     SessaoSEI::getInstance(false);
-    //     $objProcessarPendenciasRN = new ProcessarPendenciasRN("PROCESSAMENTO");
-    //     $resultado = $objProcessarPendenciasRN->processarPendencias();
-    //     exit($resultado);
-    // } finally {
-    //     InfraDebug::getInstance()->setBolLigado(false);
-    //     InfraDebug::getInstance()->setBolDebugInfra(false);
-    //     InfraDebug::getInstance()->setBolEcho(false);
-    // }
 }
 
 ?>

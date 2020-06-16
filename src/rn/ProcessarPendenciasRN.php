@@ -14,8 +14,8 @@ class ProcessarPendenciasRN extends InfraRN
 
     const NUMERO_WORKERS_GEARMAN = 4;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%d >/dev/null 2>&1 &';
+    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%02d >/dev/null 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/ProcessamentoTarefasPEN.php";
 
     protected function inicializarObjInfraIBanco()
@@ -23,8 +23,8 @@ class ProcessarPendenciasRN extends InfraRN
         return BancoSEI::getInstance();
     }
 
-    public function __construct($parStrLogTag=null) 
-    {   
+    public function __construct($parStrLogTag=null)
+    {
         $this->carregarParametrosIntegracao();
         $this->objPenDebug = DebugPen::getInstance($parStrLogTag);
     }
@@ -33,7 +33,7 @@ class ProcessarPendenciasRN extends InfraRN
     {
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $this->strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
-        $this->strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");        
+        $this->strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
 
         // Parâmetro opcional. Não ativar o processamento por fila de tarefas, deixando o agendamento do SEI executar tal operação
         $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
@@ -57,14 +57,14 @@ class ProcessarPendenciasRN extends InfraRN
     private function inicializarGearman()
     {
         if(!class_exists("GearmanWorker")){
-            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" . 
+            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
                                      "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
         }
-        
+
         $this->objGearmanWorker = new GearmanWorker();
         $this->objGearmanWorker->setTimeout(self::TIMEOUT_PROCESSAMENTO_EVENTOS);
         $this->objGearmanWorker->addServer($this->strGearmanServidor, $this->strGearmanPorta);
-        $this->configurarCallbacks();    
+        $this->configurarCallbacks();
     }
 
     public function processarPendencias()
@@ -90,23 +90,23 @@ class ProcessarPendenciasRN extends InfraRN
                 try {
                     $this->objGearmanWorker->work();
                     $numReturnCode = $this->objGearmanWorker->returnCode();
-    
-                    switch ($numReturnCode) {                    
+
+                    switch ($numReturnCode) {
                         case GEARMAN_SUCCESS:
-    
+
                             break;
-    
+
                         case GEARMAN_TIMEOUT:
                             //Nenhuma ação necessário, sendo que timeout é utilizado apenas para avaliação de sinal pcntl_signal de interrupção
                             break;
-                            
+
                         case GEARMAN_ERRNO:
                             $strErro = "Erro no processamento de pendências do PEN. ErrorCode: $numReturnCode";
                             LogSEI::getInstance()->gravar($strErro);
                             $this->gravarLogDebug($strErro, 0);
                             break;
-    
-                        default:                        
+
+                        default:
                             $this->gravarLogDebug("Código de retorno $numReturnCode de processamento de tarefas não tradado", 0);
                             break;
                     }
@@ -114,8 +114,8 @@ class ProcessarPendenciasRN extends InfraRN
                     $this->gravarLogDebug(InfraException::inspecionar($e), 0, true);
                     LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
                 }
-            }    
-            
+            }
+
             $numProcID = getmygid();
             $this->gravarLogDebug("Finalização do processamento de tarefas do Barramento do PEN (pid=$numProcID)", 0);
         }
@@ -145,7 +145,7 @@ class ProcessarPendenciasRN extends InfraRN
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
      */
-    public function enviarComponenteDigital($idTramite) 
+    public function enviarComponenteDigital($idTramite)
     {
         $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
     }
@@ -157,12 +157,12 @@ class ProcessarPendenciasRN extends InfraRN
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
      */
-    public function receberReciboTramite($idTramite) 
+    public function receberReciboTramite($idTramite)
     {
         $this->gravarLogDebug("Processando recebimento de recibo de trâmite [receberReciboTramite] com IDT $idTramite", 0, true);
         $numIdentificacaoTramite = intval($idTramite);
         $objReceberReciboTramiteRN = new ReceberReciboTramiteRN();
-        $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);            
+        $objReceberReciboTramiteRN->receberReciboDeTramite($numIdentificacaoTramite);
     }
 
     /**
@@ -171,7 +171,7 @@ class ProcessarPendenciasRN extends InfraRN
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
      */
-    public function receberProcedimento($idTramite) 
+    public function receberProcedimento($idTramite)
     {
         try{
             $this->gravarLogDebug("Processando recebimento de protocolo [receberProcedimento] com IDT " . $idTramite, 0, true);
@@ -204,7 +204,7 @@ class ProcessarPendenciasRN extends InfraRN
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
      */
-    public function receberTramitesRecusados($idTramite) 
+    public function receberTramitesRecusados($idTramite)
     {
         $this->gravarLogDebug("Processando trâmite recusado [receberTramitesRecusados] com IDT $idTramite", 0, true);
         $numIdentificacaoTramite = intval($idTramite);
@@ -218,8 +218,8 @@ class ProcessarPendenciasRN extends InfraRN
      *
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
-     */    
-    public function receberComponenteDigital($idTramite) {        
+     */
+    public function receberComponenteDigital($idTramite) {
         $this->gravarLogDebug("Processando recebimento de componentes digitais [receberComponenteDigital] com IDT " . $idTramite, 0, true);
         // Caso receba mensagem indicando que foi realizado o recebimento dos componentes digitais, então o recibo de concluão deverá ser enviado
         $this->enviarReciboTramiteProcesso($idTramite);
@@ -231,8 +231,8 @@ class ProcessarPendenciasRN extends InfraRN
      *
      * @param object $idTramite Contexto com informações para processamento da tarefa
      * @return void
-     */    
-    public function enviarReciboTramiteProcesso($idTramite) 
+     */
+    public function enviarReciboTramiteProcesso($idTramite)
     {
         $this->gravarLogDebug("Processando envio do recibo de trâmite [enviarReciboTramiteProcesso] com IDT $idTramite", 0, true);
         $numIdentificacaoTramite = intval($idTramite);
@@ -286,16 +286,16 @@ class ProcessarPendenciasRN extends InfraRN
     private static function verificarGearmanAtivo($parStrServidor, $parStrPorta)
     {
         // Verifica se existe um servidor do Gearman ativo para conexão
-        $bolAtivo = false;        
+        $bolAtivo = false;
 
         try {
             if(!class_exists("GearmanClient")){
-                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " . 
+                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " .
                     "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
             }
-            
+
             if(!class_exists("GearmanWorker")){
-                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanWorker). " . 
+                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanWorker). " .
                     "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
             }
 
@@ -308,8 +308,8 @@ class ProcessarPendenciasRN extends InfraRN
             $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
             $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
             LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
-        } 
-    }    
+        }
+    }
 
     /**
      * Inicializa processos workers de processamento de tarefas do PEN
@@ -318,7 +318,7 @@ class ProcessarPendenciasRN extends InfraRN
      */
     public static function inicializarWorkers($parNumQtdeWorkers=self::NUMERO_WORKERS_GEARMAN)
     {
-        $bolInicializado = false; 
+        $bolInicializado = false;
         $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_WORKERS_GEARMAN;
 
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
@@ -329,10 +329,10 @@ class ProcessarPendenciasRN extends InfraRN
         if(!empty($strGearmanServidor)){
             try {
                 if(self::verificarGearmanAtivo($strGearmanServidor, $strGearmanPorta)) {
-                    for ($worker=1; $worker <= self::NUMERO_WORKERS_GEARMAN ; $worker++) { 
+                    for ($worker=0; $worker < self::NUMERO_WORKERS_GEARMAN ; $worker++) {
                         $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
                         exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
-    
+
                         if($numCodigoResposta != 0){
                            $strLocalizacaoScript = realpath(SELF::LOCALIZACAO_SCRIPT_WORKER);
                            $strComandoInicializacao = sprintf(self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $worker);
@@ -350,7 +350,7 @@ class ProcessarPendenciasRN extends InfraRN
                 $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
                 $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
                 LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
-            } 
+            }
         }
 
         return $bolInicializado;

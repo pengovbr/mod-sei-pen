@@ -4,12 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class PENAgendamentoRN extends InfraRN
 {
-    const NUMERO_WORKERS_GEARMAN = 4;
-    const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%d >/dev/null 2>&1 &';
-    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/ProcessamentoTarefasPEN.php";
-
-
     protected function inicializarObjInfraIBanco() {
         return BancoSEI::getInstance();
     }
