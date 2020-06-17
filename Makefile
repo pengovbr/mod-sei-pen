@@ -16,6 +16,7 @@ build: clean
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
 	@cp -R src/* $(SEI_MODULO_DIR)/
+	@cp docs/INSTALL.md dist/
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
@@ -27,9 +28,8 @@ build: clean
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	# TODO: Incluir READM.md com procedimentos de instalação simplificado
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) sei/ sip/
-	@rm -rf dist/sei dist/sip
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALL.md sei/ sip/
+	@rm -rf dist/sei dist/sip dist/INSTALL.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
 clean:

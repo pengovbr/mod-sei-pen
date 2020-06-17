@@ -40,35 +40,44 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
                 "WebService" => "",
 
-                // Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
-                // Configuração necessária para que o envio e recebimento de processos sejam feitas de forma dinâmica pelo sistema
-                // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-                //    - Homologação: https://homolog.pendencias.processoeletronico.gov.br/
-                //    - Produção: https://pendencias.conectagov.processoeletronico.gov.br/
-                "WebServicePendencias" => "",
-
-                // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN
-                // e assinar os recibos de envio/conclusão dos trâmites de processo
+                // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN.
+                // Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento
+                // da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.
+                //
                 // Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
-                //  Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
+                // Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
                 "LocalizacaoCertificado" => "/opt/sei/config/mod-pen/certificado.pem",
 
-                // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
+                // Senha do certificado digital necessário para a aplicação descriptografar e acessar a sua chave privada
                 "SenhaCertificado" => "",
 
-                // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
-                // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.
-                // Valor padrão: 3
-                "NumeroTentativasErro" => 3,
-
+                // Opcional
                 // Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
                 // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para
                 // processamento paralelo. Caso este parâmetro não seja configurado ou o servidor este indisponível, o processamento será
                 // feito diretamente pelo sistema na periodicidade definida pelo agendamento da tarefa PENAgendamento::receberProcessos
                 "Gearman" => array(
                     "Servidor" => "",
-                    "Porta" => "", // Padr?o: 4730
-                )
+                    "Porta" => "",     // Valor padrão: 4730
+                ),
+
+
+                // Opcional
+                // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
+                // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.
+                // Valor padrão: 3
+                "NumeroTentativasErro" => 3,
+
+
+                // Opcional
+                // Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
+                // Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor
+                // para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Barramento de Serviços do PEN.
+                // Para maiores informações sobre como utilzar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações. \
+                // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
+                //     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
+                //     * Produção: https://pendencias.conectagov.processoeletronico.gov.br/
+                "WebServicePendencias" => "",
             )
         );
     }

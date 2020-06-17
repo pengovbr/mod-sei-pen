@@ -1,146 +1,190 @@
 # Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simplificar e segura.
+O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simplificada e segura.
 
 A utilização deste módulo adicionará novas funcionalidades ao SEI, permitindo, entre outros:
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o ConectaGov e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
+Para maiores informações sobre o Barramento de Serviços e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
 
 Este documento está estruturado nas seguintes seções:
 
 1. **[Instalação](#instalação)**:
 Procedimentos de instalação do módulo nos servidores de aplicação e atualização do banco de dados.
 
-2. **[Script de Monitoramento](#script-de-monitoramento)**:
-Procedimentos para configuração de um monitor para a fila de pendências do barramento e seu reboot automático quando necessário
-
-3. **[Atualização](#atualização)**:
+2. **[Atualização](#atualização)**:
 Procedimentos para realizar a atualização de uma nova versão do módulo
 
-4. **[Utilização](#utilização)**:
-Apresentação das funcionalidades que permitem o trâmite externo de processos e o acompanhamento de seu histórico.
- 
-5. **[Suporte](#suporte)**:
+3. **[Script de Monitoramento](#script-de-monitoramento)**:
+Procedimentos para configuração de um monitor para a fila de pendências do barramento e seu reboot automático quando necessário
+
+4. **[Suporte](#suporte)**:
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
 
-## Instalação
+5. **[Problemas Conhecidos](#problemas-conhecidos)**:
+Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
+
+---
+
+## 1. Instalação
 
 ### Pré-requisitos
- - **SEI versão 3.0.11 ou superior instalada**;
- - Supervisor versão 4.X ou superior instalada;
- - Gearman instalado;
- - Usuário de acesso ao banco de dados do SEI e SIP com permissões para criar novas estruturas no banco de dados.
+ - **SEI versão 3.1.x ou superior instalada**;
+ - Usuário de acesso ao banco de dados do SEI e SIP com permissões para criar novas estruturas no banco de dados
+ - Certificado Digital de autenticação de sistema no Barramento do PEN emitido pela equipe do Processo Eletrônico Nacional após aprovação do Comitê Gestor De Protocolo.
   
-Para iniciar os procedimentos de configuração, será necessário registrar no **ConectaGov-PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos/documentos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo** previamente habilitado no portal do **ConectaGov-PEN**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
+Para iniciar os procedimentos de configuração, será necessário registrar no **Barramento de Serviços do PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo**, previamente habilitado no portal do **Barramento de Serviços**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
- - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
- - **Produção:** [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](http://conectagov.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração ConectaGov PEN - Cadastro de Comitê")
+ - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
+ - **Produção:** [http://conectagov.processoeletronico.gov.br/solicitarCadastroComite](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
 
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.planejamento.gov.br
+Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
+
 
 ### Procedimentos
 
 #### 1. Fazer backup dos bancos de dados do SEI, SIP e dos arquivos de configuração do sistema.
 
----
-
-#### 2.  Mover o diretório de arquivos do módulo "pen" para o diretório sei/web/modulos/
-Importante renomear a pasta do módulo "mod-sei-pen" para somente "pen" por questões de padronização de nomenclatura.
+Todos os procedimentos de manutenção do sistema devem ser precedidos de backup completo de todo o sistema a fim de possibilitar a sua recuperação em caso de falha. A rotina de instalação descrita abaixo atualiza tanto o banco de dados, como os arquivos pré-instalados do módulo e, por isto, todas estas informações precisam ser resguardadas.
 
 ---
 
-#### 3.  Configurar módulo no arquivo de configuração do SEI
+#### 2. Baixar o arquivo de distribuição do mod-sei-pen
 
-Editar o arquivo **sei/config/ConfiguracaoSEI.php**, tomando o cuidado de usar editor que não altere o charset ISO 5589-1 do arquivo, para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
+Necessário realizar o _download_ do pacote de distribuição do módulo mod-sei-pen para instalação ou atualização do sistema SEI. O pacote de distribuição consiste em um arquivo zip com a denominação mod-sei-pen-VERSAO.zip e sua última versão pode ser encontrada em https://github.com/spbgovbr/mod-sei-pen/releases
+
+---
+
+#### 3. Descompactar o pacote de instalação e atualizar os arquivos do sistema
+
+Após realizar a descompactação do arquivo zip de instalação, será criada uma pasta contendo a seguinte estrutura:
+
+```
+/mod-sei-pen-VERSAO 
+    /sei              # Pasta com arquivos do módulo posicionados corretamente dentro da estrutura do SEI
+    /sip              # Pasta com arquivos do módulo posicionados corretamente dentro da estrutura do SIP
+    /INSTALL.md       # Arquivo contendo instruções de instalação e atualização do mod-sei-pen
+```
+
+Importante enfatizar que os arquivos contidos dentro dos diretórios sei e sip não substituem nenhum código original do sistema. Eles apenas posiciona os arquivos do módulos nas pastas corretas do sistema para scripts, configurações e pasta de módulos, todos posicionados dentro de um diretório específico denominado mod-pen para deixar claro quais scripts fazem parte do mod-sei-pen.
+
+Os diretórios sei e sip descompactados acima devem ser mesclados com os diretórios originais do SEI e SIP através de uma cópia simples dos arquivos.
+
+Observação: O termo curinga VERSAO deve ser substituído nas instruções abaixo pelo número de versão do módulo que está sendo instalado
+
+```
+cp /tmp/mod-sei-pen-VERSAO.zip <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>
+cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>
+unzip mod-sei-pen-VERSAO.zip
+```
+---
+
+#### 4.  Habilitar módulo mod-sei-pen no arquivo de configuração do SEI
+
+Esta etapa é padrão para a instalação de qualquer módulo no SEI para que ele possa ser carregado junto com o sistema. Edite o arquivo **sei/config/ConfiguracaoSEI.php** para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
 
 ```php
 'SEI' => array(
-    'URL' => 'http://[servidor sei]/sei',
-    'Producao' => true,
-    'RepositorioArquivos' => '/var/sei/arquivos',
+    'URL' => ...,
+    'Producao' => ...,
+    'RepositorioArquivos' => ...,
     'Modulos' => array('PENIntegracao' => 'pen'),
     ),
 ```
 
 Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acima:
+
 ```php
 'Modulos' => array('PENIntegracao' => 'pen')
 ```
 ---
 
-#### 4. Configurar os parâmetros do Módulo de Integração PEN
-Altere o arquivo de configuração específico para o módulo em **[DIRETORIO_RAIZ_INSTALAÇÃO]/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
+#### 5. Configurar os parâmetros do Módulo de Integração PEN
+
+A instalação da nova versão do mod-sei-pen cria um arquivo de configuração específico para o módulo dentro da pasta de configuração do SEI (**<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen**). 
+
+O arquivo de configuração padrão criado **ConfiguracaoModPEN.exemplo.php** vem com o sufixo **exemplo** justamente para não substituir o arquivo principal contendo as configurações das versões anteriores.
+
+Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php**, renomeie o arquivo de exemplo para iniciar a parametrização da integração.
+
+```
+cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/
+mv ConfiguracaoModPEN.exemplo.php ConfiguracaoModPEN.php
+```
+
+Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
 
 * **WebService**  
-*Endereço do Web Service principal de integração com o Barramento de Serviços do PEN*
-*Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):*
+Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/*
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
 
 
-* **WebServicePendencias**  
-*Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN*
-*Configuração necessária para que o envio e recebimento de processos sejam feitas de forma dinâmica pelo sistema*
-*Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):*
-    * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
-    * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
-
 * **LocalizaçãoCertificado**  
-*Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN*
-*e assinar os recibos de envio/conclusão dos trâmites de processo*
-*Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo: *
-*Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem*
+Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
+Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
+```
+Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
+```
 
 * **SenhaCertificado**  
-*Senha do certificado digital necessário para a aplicação descriptografar a chave privada*
+Senha do certificado digital necessário para a aplicação descriptografar e acessar a sua chave privada.
 
-* **NumeroTentativasErro**  
+
+* **NumeroTentativasErro** _(opcional)_
 *Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação*
 *Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *
 *Valor padrão: 3*
 
+* **Gearman** _(opcional)_  
+Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN.  
+As mensagens recebidas do Barramento são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para processamento coordenado. Caso este parâmetro não seja configurado ou o servidor do Gearman esteja indisponível, o processamento será feito diretamente pelo sistema na periodicidade definida no agendamento da tarefa _PENAgendamentoRN::processarTarefasPEN_.  
+Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-de-multiplos-processos-com-Gearman)) para maiores informações.
+
+    * **Servidor**  
+    *IP ou Hostname do servidor Gearman instalado*
+
+    * **Porta**  
+    *Porta utilizada para conexão ao servidor do Gearman. Valor padrão 4730*
+
+
+* **WebServicePendencias** _(opcional)_  
+Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
+Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Barramento de Serviços do PEN. Para maiores informações sobre como utilzar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações. \
+Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
+    * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
+    * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
+
+
+
 ---
 
-#### 4. Mover o arquivo de instalação do módulo no SEI **sei\_atualizar\_versao\_modulo_pen.php** para a pasta **sei/scripts**. 
+#### 5. Atualizar a base de dados do SEI com as tabelas do mod-sei-pen
 
-Lembre-se de mover, e não copiar, por questões de segurança e padronização.
+Nesta etapa é instalado/atualizado as tabelas de banco de dados vinculadas do mod-sei-pen. Todas estas tabelas possuem o prefixo **md_pen_** para organização e fácil localização no banco de dados.
 
----
+Executar o script **sei\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
 
-#### 5. Mover o arquivo de instalação do módulo no SIP **sip\_atualizar\_versao\_modulo\_pen.php** para a pasta **sip/scripts**. 
-
-Lembre-se de mover, e não copiar, por questões de segurança e padronização.
-
----
-
-#### 6. Executar o script **sip\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
 ```bash
-php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sip/scripts/sip_atualizar_versao_modulo_pen.php
+php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/sei_atualizar_versao_modulo_pen.php
 ```
 
 ---
 
-#### 7. Executar o script **sei_atualizar_versao_modulo_pen.php** para inserção de dados no banco do SEI referente ao módulo.
+#### 6. Atualizar a base de dados do SIP com as tabelas do mod-sei-pen
+
+A atualização realizada no SIP não cria nenhuma tabela específica para o módulo, apenas é aplicada a criarção os recursos, permissões e menus de sistema utilizados pelo mod-sei-pen. Todos os novos recursos criados possuem o prefixo **pen_** para fácil localização pelas funcionalidades de gerenciamento de recursos do SIP.
+
+Executar o script **sip\_atualizar\_versao\_modulo_pen.php** para atualizar o banco de dados do SIP para o funcionamento do módulo:
+
 ```bash
-php -c /etc/php.ini [DIRETORIO_RAIZ_INSTALAÇÃO]/sei/scripts/sei_atualizar_versao_modulo_pen.php
+php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/sip_atualizar_versao_modulo_pen.php
 ```
 
 ---
-#### 8. Mover o arquivo do certificado digital utilizado para integração com o **PEN** para o diretório "sei/config/".
-    
-Para melhor organização dos arquivos dentro do diretório **sei/config**, sugerimos a criação da uma nova pasta chamada **sei/config/certificados\_mod_conectagov** para adicionar estes arquivos.
-    
-Os certificados digitais para conectar aos ambientes de desenvolvimento e homologação do PEN estão localizados no pacote de instalação disponibilizado pela equipe técnica do Ministério da Economia - ME e são disponibilizados no ato do credenciamento da instituição no PEN. 
 
-Para o ambiente de produção, deverá ser utilizado um certificado digital válido gerado por uma Autoridade de Registro - AR confiável (Exemplo: ICP-Brasil, Certisign, Verisign, etc.).
-
-Maiores informações e solicitações podem ser feitas através do e-mail processo.eletronico@planejamento.gov.br.
-
----
-
-#### 11. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
+#### 7. Configuração de unidade administrativa virtual para gerenciamento de envio e recebimento de processos pelo módulo.
 
 Esta configuração é necessária para o SEI realizar as devidas regras de registro de históricos de trâmites externos e bloqueio de edição metadados de processos/documentos. Tal unidade será utilizada internamente pelo módulo e não deverá ter acesso liberado para nenhum usuário do sistema.
 
@@ -175,24 +219,17 @@ Caso a opção for pela criação de um novo tipo de processo específico, segue
 #### 13. Configurar os parâmetros do Módulo de Integração Pen
 Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Parâmetros de Configuração]** para configurar os parâmetros de funcionamento do módulo:  
 
-* **ID do Repositório de Estruturas:**   
+* **Repositório de Estruturas:**   
 *ID do repositório de origem do órgão na estrutura organizacional. Este identificador é enviado para a instituição junto com o pacote de integração.*  
-    - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo Federal)*  
-* **Localização do Certificado Digital:**  
-    - *Localização do certificado digital o órgão (arquivo do passo 8)*  
+    - *Poder Executivo Federal - Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo Federal)*  
+
 * **Tipo de Processo Externo:**  
 *Id do tipo de documento externo. *  
     - *Configurar com o ID do Tipo de Processo Externo configurado no passo 12*  
+
 * **Unidade Geradora de Processo e Documento Recebido:**  
 *Id da unidade de origem que serão atribuídos os documentos recebidos de um outro órgão.*   
     - *Configurar com o ID da Unidade criada no passo 11*
-
-
-**Atenção!**
-Conforme publicado no Portal do Processo Eletrônico Nacional, [Manutenção Programada no Barramento PEN - Abril 2020](http://processoeletronico.gov.br/index.php/noticias/manutencao-programada-no-barramento-pen-abril-2020), os endereços dos ambientes de homologação do projeto serão atualizados no dia 22/04/2020. Com isto, os seguintes endereços deverão ser utilizados até a data programada de mudança: https://homolog.pen.portal.trafficmanager.net
-
-* **Endereço do Web Service em homologação:** https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/
-* **Endereço do Web Service de Pendências em homologação:**: https://homolog.pen.pendencias.trafficmanager.net/
 
 
 
@@ -203,6 +240,7 @@ No credenciamento da instituição, estes valores serão passados pela unidade d
 
 Acesse o menu **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Unidades]** e vincule as unidades administrativas com seus respectivos identificadores registrados no portal do Processo Eletrônico Nacional.
 
+---
 ---
 
 #### 15. Instalar o **gearmand** no servidor responsável por tratar o agendamento de tarefas do sistema
@@ -402,113 +440,6 @@ service gearmand restart && service supervisord restart
 
 ---
 ---
-
-
-## Utilização
-
-Esta seção tem por objetivo demonstrar as funcionalidades que são disponibilizadas pelo módulo de trâmite do PEN e também as configurações que devem ser realizadas no próprio SEI para o correto funcionamento.
-
-### Informações Obrigatórias para Envio Externo de Processo
-
-O **ConectaGov-PEN** atende a diferentes sistemas de gestão eletrônica de documentos (GED) e sistemas informatizados de gestão arquivística de documentos (SIGAD). Para permitir a interoperabilidade entre estes tipos de sistemas, definiu-se um padrão de dados para intercâmbio.
-
-O padrão de dados define atributos que são obrigatórios e opcionais. A obrigatoriedade de alguns elementos obriga que determinadas informações sejam incluídas no processo, as quais, no SEI, originalmente, são opcionais.
-
-Ao criar o processo, para envio externo pelo PEN, são obrigatórios os campos **especificação e interessado** (deve haver pelo menos um interessado no processo)
-
-![Tela de Iniciar Processos - Destaque para Campos Especificação e Interessados](imagens/campos_especificacao_interessado.png)
-
-O SEI fará uma verificação das informações pendentes para envio e exibirá uma mensagem para o usuário, conforme imagem:
-
-![Validação dos Campos Especificação e Interessados no Momento  do Envio Externo de Processo](imagens/valida_especificacao_interessado.png)
-
-Verifica-se também se o processo possui pelo menos um documento interno assinado ou se possui algum documento externo, além de impedir o trâmite de processos que possuam documentos sem assinatura, conforme exemplificado a seguir:
-
-![Verificação de Existência de pelo menos um Documento no Processo](imagens/doc_nao_assinado.png)
-
-### Envio Externo de Processo
-
-Para realizar o trâmite externo do processo, o módulo disponibiliza ao usuário (**caso o seu perfil possua o recurso pen\_procedimento\_expedir**) um ícone na tela de processos, conforme imagem abaixo: 
-
-![Painel de Botões do Controle de Processos - Destaque para o Ícone de Envio Externo de Processo](imagens/envio_externo_processo.png)
-
-Ao acionar o ícone de envio externo de processo, disponibiliza-se uma tela onde mostra-se o número do processo selecionado para envio externo, que é apenas informativo, a opção de escolha do repositório de estruturas do receptor (que no caso do Poder Executivo Federal será o do SIORG -  Sistema de Organização e Inovação Institucional do Governo Federal), o nome da unidade receptora na estrutura organizacional e opção de indicar se trata-se de processo com urgência.
-
-
-![Tela de Envio Externo de Processo - Destaque para as Opções Disponibilizadas](imagens/tela_envio_externo.png)
-
-O cadastro da estrutura organizacional é feito previamente no Portal de Administração do ConectaGov PEN. A administração central do portal é feita pela equipe do Ministério do Planejamento, Desenvolvimento e Gestão - MP, embora o cadastro da estrutura propriamente dita seja feito por um perfil denominado Comitê Gestor de Protocolo, informado pelo órgão ou entidade e habilitado no portal pela equipe do MP, conforme [fluxo definido](https://www.comprasgovernamentais.gov.br/images/Barramento/FluxoCredenciais.png).
-Para maiores informações sobre o Comitê Gestor de Protocolo, consulte o [manual específico](https://www.comprasgovernamentais.gov.br/images/Barramento/ManualdoGestor.pdf). 
-
-O ConectaGov PEN permite a participação de órgãos e entidades de outros poderes e esferas administrativas, sendo no Poder Executivo Federal o uso obrigatório do SIORG, conforme parágrafo único do Art. 25, do [Decreto nº 6.944, de 21 de agosto de 2009](http://www.planalto.gov.br/ccivil_03/_Ato2007-2010/2009/Decreto/D6944.htm).   
-
-Ao selecionar o repositório de estruturas desejado, é necessário digital o nome da unidade administrativa receptora do processo. Dinamicamente, sugere-se o nome da unidade, baseado na configuração feita no Portal de Administração do PEN. **As unidades disponíveis para envio externo dependem da configuração realizada por cada Comitê Gestor de Protocolo dos órgãos e entidades.**
-
-![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](imagens/selecao_unidade_envio_externo.png)
-
-Na tela de envio externo de processo, há a opção de indicar a **urgência** para o processo. As opções são automaticamente sincronizadas a partir do serviço do PEN.
-
-![Tela de Envio Externo de Processo - Destaque para o Filtro de Unidades Administrativas para Envio Externo](imagens/urgencia_envio_externo.png)
-
-Ao realizar o envio externo, o módulo faz uma **série de validações no processo** para que a informação seja corretamente enviada ao serviço do PEN. O andamento do progresso de validação e envio é exibido por meio de uma janela *pop-up* do navegador web. É importante permitir a abertura de *pop-ups* no navegador web, para que a operação possa ser verificada.
-
-
-![Tela de Status de Envio do Processo - Barra de Progresso](imagens/em_envio_externo_processo.png)
-
-Uma vez que o processo tenha sido recebido com sucesso pelo PEN, a seguinte mensagem é exibida. **Mas isso não significa que a unidade destinatária recebeu e aceitou o processo, pois esta também deve fazer uma série de validações,** conforme explicado na próxima seção.
-
-![Tela de Status de Envio do Processo - Barra de Progresso - Finalizado](imagens/confirmado_envio_externo_processo.png)
-
-### Informações Registradas nos Andamentos do Processo (Histórico)
-
-O ConectaGov PEN atua como uma **terceiro confiável** no trâmite do processo administrativo. Em um primeiro momento, o módulo do SEI faz uma série de validações de informações constantes do processo a ser enviado. Uma vez validadas estas informações, a operação de envio é registrada no andamento do processo. **Mas isso ainda não reflete o sucesso no trâmite de fato**, pois a unidade receptora também faz uma série de validações como, por exemplo, os tamanhos de documentos que tem capacidade de receber, as espécies documentais, hipóteses legais, dentre outras. Uma vez validados, na origem, os requisitos para envio externo,** registra-se no andamento do processo a operação de envio** por meio do ConectaGov, conforme o seguinte exemplo:
-
-![Tela de Histórico do Processo - Processo em Envio Externo](imagens/historico_origem_envio_externo.png)
-
-Enquanto a unidade receptora não confirma o recebimento, o SEI passa a indicar que aquele processo **encontra-se em envio externo**, aguardando o recebimento. Nesse momento, o processo encontra-se bloqueado para edição, evento que possui um alerta de um círculo vermelho à direita do seu número, na tela de Controle do Processo. No estado bloqueado, as opções disponíveis são **apenas de visualização**, sem permitir operações que alteram informações do processo.
-
-![Tela de Controle de Processos - Processo em Envio Externo](imagens/processo_em_tramitacao.png)
-
-O SEI, ao receber o aviso do ConectaGov PEN de que a unidade receptora validou as informações e recebeu o processo, faz o registro no andamento, indicando o sucesso no trâmite, e o **processo passa a indicar que não possui mais andamentos abertos**.
-
-![Tela de Controle de Processos - Processo sem Andamentos Abertos](imagens/processo_bloqueado_envio_externo.png)
-
-Abaixo, mensagem registrada no histórico, indicando a confirmação do envio externo:
-
-![Tela de Histórico do Processo - Confirmação do Envio Externo](imagens/confirmacao_envio_externo.png)
-
-Ainda é possível reabrir o processo na unidade, quando do envio externo ocorrido com sucesso, para que se consulte as informações do processo, caso assim deseje a unidade de origem. Mesmo nesse caso, **apenas a unidade que recebeu o processo** via PEN pode realizar a instrução processual, ou seja, efetuar modificações no processo administrativo.
-
-No caso de recebimento de processos por meio do ConectaGov PEN, o processo aparece na área de trabalho da mesma forma que fosse recebido de um trâmite interno (com fonte em vermelho). É importante frisar que, como regra, os processos serão direcionados às unidades receptoras. Caso não haja unidade receptora para determinada unidade visível no PEN, o processo é remetido diretamente à unidade destinatária visível para trâmite. A configuração das unidades visíveis para trâmite e das unidades receptoras ficarão a cargo do Comitê Gestor de cada órgão ou unidade.
-
-A operação de recebimento de processo por meio de envio externo também é registrada na unidade destinatária, conforme nota-se na imagem:
-
-![Tela de Histórico do Processo - Informações na Unidade/Órgão Destinatários](imagens/recebimento_destinatario_historico.png)
-
-No exemplo acima, a unidade EXTERNO é a unidade cadastrada no passo 15 deste manual. Ou seja, a unidade EXTERNO recebeu o processo do ConectaGov PEN, realizou o download dos documentos a partir do ConectaGov e encaminhou o processo para a devida unidade, de forma automática.
-
-A unidade destinatária pode fazer a instrução processual normalmente, inclusive fazendo a devolução do processo para a unidade originária. Neste caso, o PEN consegue reconhecer os documentos que a unidade receptora já possui, realizando, assim, o **trâmite apenas daqueles documentos necessários para a unidade de origem**. 
- 
-### Consulta de Recibos
-
-O PEN disponibiliza recibos a respeito das operações realizadas. Os casos de disponibilização de recibos são o de envio para o ConectaGov PEN, disponibilizado ao remetente, e de conclusão de trâmite (disponibilizado para o remetente e o destinatário, para indicar que o destinatário recebeu com sucesso todos os documentos e processos).
-
-Para consultar os recibos gerados, deve-se acessar o ícone correspondente, na barra de controle de processos, conforme imagem seguinte:
-
-![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/icone_consulta_recibos.png)
-
-Para o remetente, disponibilizam-se os recibos de envio e de conclusão de trâmite, conforme imagens seguintes.
-O recibo de envio indica que o ConectaGov PEN recebeu com sucesso os documentos e processos de forma íntegra.
-
-![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_envio.png)
-
-O recibo de trâmite indica que o ConectaGov PEN conseguiu entregar com sucesso os documentos e processos de forma íntegra ao destinatário.
-
-![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_tramite.png)
-
-O destinatário pode realizar a consulta ao recibo de trâmite, acessando o ícone de recibos, conforme imagem seguinte.
-
-![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_conclusao_tramite_destinatario.png)
 
 ## Suporte
 
