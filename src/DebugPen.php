@@ -14,22 +14,22 @@ class DebugPen
         if (!array_key_exists($parStrDebugTag, self::$instance)) {
             self::$instance[$parStrDebugTag] = new DebugPen($parStrDebugTag);
         }
-        
+
         return self::$instance[$parStrDebugTag];
     }
-    
+
     public function __construct($parStrDebugTag)
     {
         $this->objInfraDebug = InfraDebug::getInstance();
         $this->strDebugTag = $parStrDebugTag;
     }
 
-    public function gravar($str, $numIdentacao=0, $bolLogTempoProcessamento=true)
+    public function gravar($str, $numIdentacao=0, $bolLogTempoProcessamento=true, $bolLogDataHora=true)
     {
-        $strDataLog = date("d/m/Y H:i:s");
+        $strDataLog = ($bolLogDataHora) ? "[".date("d/m/Y H:i:s")."]" : "";
         $strTag = (!is_null($this->strDebugTag)) ? "[" . $this->strDebugTag . "]" : "";
-        $strProcId = (!is_null($this->strDebugTag)) ? "(" . getmypid() . ")" : "";        
-        $strLog = sprintf("[%s] %s %s %s %s", $strDataLog, $strProcId, $strTag, str_repeat(" ", $numIdentacao * 4), $str);
+        $strProcId = (!is_null($this->strDebugTag)) ? "(" . getmypid() . ")" : "";
+        $strLog = sprintf("%s %s %s %s %s", $strDataLog, $strProcId, $strTag, str_repeat(" ", $numIdentacao * 4), $str);
 
         //Registro de tempo de processamento desde último log
         if($bolLogTempoProcessamento){
@@ -42,7 +42,7 @@ class DebugPen
                 $this->numTempoUltimoLog = $numTempoFinal;
             }
         }
-        
+
         $this->objInfraDebug->gravar(utf8_encode($strLog));
     }
 }

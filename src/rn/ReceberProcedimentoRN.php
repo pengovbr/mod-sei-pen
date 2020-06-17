@@ -1437,6 +1437,10 @@ class ReceberProcedimentoRN extends InfraRN
                     $objDocumento->idProcedimentoAnexadoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
                     $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
 
+                    if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
+                        $arrIdDocumentosRetirados[] = $objDocumento->idDocumentoSEI;
+                    }
+
                     continue;
                 }
 
@@ -1607,10 +1611,11 @@ class ReceberProcedimentoRN extends InfraRN
                     $objDocumento->idProcedimentoAnexadoSEI = $objDocumentoDTO->getDblIdProcedimento();
                 }
 
-                $arrObjDocumentoDTO[] = $objDocumentoDTO;
                 if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
                     $arrIdDocumentosRetirados[] = $objDocumento->idDocumentoSEI;
                 }
+
+                $arrObjDocumentoDTO[] = $objDocumentoDTO;
 
             } elseif($objDocumento->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) {
 
