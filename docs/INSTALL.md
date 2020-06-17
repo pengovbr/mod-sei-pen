@@ -137,7 +137,7 @@ Senha do certificado digital necessário para a aplicação descriptografar e ac
 *Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *
 *Valor padrão: 3*
 
-* **Gearman** _(opcional)_  
+* **Gearman** _(opcional e altamente desejável)_  
 Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN.  
 As mensagens recebidas do Barramento são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para processamento coordenado. Caso este parâmetro não seja configurado ou o servidor do Gearman esteja indisponível, o processamento será feito diretamente pelo sistema na periodicidade definida no agendamento da tarefa _PENAgendamentoRN::processarTarefasPEN_.  
 Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-de-multiplos-processos-com-Gearman)) para maiores informações.
