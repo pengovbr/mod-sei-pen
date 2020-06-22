@@ -136,6 +136,13 @@ class VerificadorInstalacaoRN extends InfraRN
         return true;
     }
 
+
+
+    /**
+    * Verifica a compatibilidade da versão do módulo com a atual versão do SEI em que está sendo feita a instalação
+    *
+    * @return bool
+    */
     public function verificarCompatibilidadeModulo()
     {
         $strVersaoSEI = SEI_VERSAO;
@@ -172,6 +179,12 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
 
+
+    /**
+    * Verifica a validação do Certificado Digital, verificando sua localização e a validação das senhas de criptografia
+    *
+    * @return bool
+    */
     public function verificarCertificadoDigital()
     {
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
@@ -198,7 +211,14 @@ class VerificadorInstalacaoRN extends InfraRN
         return true;
     }
 
-    protected function verificarConexaoBarramentoPENConectado()
+
+
+    /**
+    * Verifica a conexão com o Barramento de Serviços do PEN, utilizando o endereço e certificados informados
+    *
+    * @return bool
+    */
+    public function verificarConexaoBarramentoPEN()
     {
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
@@ -232,15 +252,26 @@ class VerificadorInstalacaoRN extends InfraRN
         return true;
     }
 
-    private function verificarExistenciaArquivo($parStrLocalizacaoArquivo)
+
+    /**
+    * Verifica a conexão com o Barramento de Serviços do PEN, utilizando o endereço e certificados informados
+    *
+    * @return bool
+    */
+    public function verificarAcessoPendenciasTramitePEN()
     {
-        if(!file_exists($parStrLocalizacaoArquivo)){
-            $strNomeArquivo = basename($parStrLocalizacaoArquivo);
-            $strDiretorioArquivo = dirname($parStrLocalizacaoArquivo);
-            throw new InfraException("Arquivo do $strNomeArquivo não pode ser localizado em $strDiretorioArquivo");
-        }
+        // Processa uma chamada ao Barramento de Serviços para certificar que o atual certificado está corretamente vinculado à um
+        // comitê de protocolo válido
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objProcessoEletronicoRN->listarPendencias(false);
+        return true;
     }
 
+    /**
+    * Verifica se Gearman foi corretamente configurado e se o mesmo se encontra ativo
+    *
+    * @return bool
+    */
     public function verificarConfiguracaoGearman()
     {
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
@@ -248,24 +279,36 @@ class VerificadorInstalacaoRN extends InfraRN
         $strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
         $strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
 
-        $strMensagemErro = "Não foi possível conectar ao servidor Gearman (%s, %s). Erro: %s";
-        if(!empty($strGearmanServidor)) {
-            if(!class_exists("GearmanClient")){
-                throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
-                    "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
-            }
+        if(empty($strGearmanServidor)) {
+            // Não processa a verificação da instalação do Gearman caso não esteja configurado
+            return false;
+        }
 
-            try{
-                $objGearmanClient = new GearmanClient();
-                $objGearmanClient->addServer($strGearmanServidor, $strGearmanPorta);
-                $objGearmanClient->ping("health");
-            } catch (\Exception $e) {
-                $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
-                $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
-                throw new InfraException($strMensagem);
-            }
+        if(!class_exists("GearmanClient")){
+            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
+                "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+        }
+
+        try{
+            $objGearmanClient = new GearmanClient();
+            $objGearmanClient->addServer($strGearmanServidor, $strGearmanPorta);
+            $objGearmanClient->ping("health");
+        } catch (\Exception $e) {
+            $strMensagemErro = "Não foi possível conectar ao servidor Gearman (%s, %s). Erro: %s";
+            $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
+            $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
+            throw new InfraException($strMensagem);
         }
 
         return true;
+    }
+
+    private function verificarExistenciaArquivo($parStrLocalizacaoArquivo)
+    {
+        if(!file_exists($parStrLocalizacaoArquivo)){
+            $strNomeArquivo = basename($parStrLocalizacaoArquivo);
+            $strDiretorioArquivo = dirname($parStrLocalizacaoArquivo);
+            throw new InfraException("Arquivo do $strNomeArquivo não pode ser localizado em $strDiretorioArquivo");
+        }
     }
 }

@@ -61,6 +61,11 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         }
 
         sleep(1);
+        if($objVerificadorInstalacaoRN->verificarAcessoPendenciasTramitePEN()){
+            $fnPrint("- Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso", 1);
+        }
+
+        sleep(1);
         if($objVerificadorInstalacaoRN->verificarConfiguracaoGearman()){
             $fnPrint("- Conexão com o servidor de processamento de tarefas Gearman realizada com sucesso", 1);
         }
