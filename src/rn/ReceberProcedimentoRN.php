@@ -85,8 +85,9 @@ class ReceberProcedimentoRN extends InfraRN
     protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
         try {
-            $objPenParametroRN = new PenParametroRN();
+            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
+            $objPenParametroRN = new PenParametroRN();
             $numIdTramite = $parObjMetadadosProcedimento->IDT;
             $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
             $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
@@ -285,6 +286,8 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
         }
 
+        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+
         $this->gravarLogDebug("Solicitando dados do trâmite " . $parNumIdentificacaoTramite, 1);
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
         if(!isset($arrObjTramite) || !array_key_exists(0, $arrObjTramite)){
@@ -322,6 +325,8 @@ class ReceberProcedimentoRN extends InfraRN
     protected function receberTramitesRecusadosInternoControlado($parObjTramite)
     {
         try {
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+
             $tramite = $parObjTramite;
             $numIdTramite = $parObjTramite->IDT;
             $strNumeroRegistro = $parObjTramite->NRE;
@@ -880,7 +885,6 @@ class ReceberProcedimentoRN extends InfraRN
             $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
         }
 
-        //TODO: Obter código da unidade através de mapeamento entre SEI e Barramento
         $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
         $strNumeroRegistro = $objMetadadosProcedimento->metadados->NRE;
@@ -893,7 +897,6 @@ class ReceberProcedimentoRN extends InfraRN
         $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
 
         //Realiza a alteração dos metadados do processo
-        //TODO: Implementar alteração de todos os metadados
         $this->alterarMetadadosProcedimento($objProcedimentoDTO->getDblIdProcedimento(), $parObjProtocolo);
 
         $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
@@ -1354,9 +1357,10 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objUnidadeDTOEnvio = $this->obterUnidadeMapeada($objDestinatario->numeroDeIdentificacaoDaEstrutura);
 
-        if(!isset($objUnidadeDTOEnvio))
-        throw new InfraException('Unidade de destino não pode ser encontrada. Repositório: ' . $objDestinatario->identificacaoDoRepositorioDeEstruturas .
-        ', Número: ' . $objDestinatario->numeroDeIdentificacaoDaEstrutura);
+        if(!isset($objUnidadeDTOEnvio)){
+            throw new InfraException('Unidade de destino não pode ser encontrada. Repositório: ' . $objDestinatario->identificacaoDoRepositorioDeEstruturas .
+            ', Número: ' . $objDestinatario->numeroDeIdentificacaoDaEstrutura);
+        }
 
         $arrObjUnidadeDTO = array();
         $arrObjUnidadeDTO[] = $objUnidadeDTOEnvio;

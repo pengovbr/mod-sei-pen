@@ -6,6 +6,7 @@ class EnviarReciboTramiteRN extends InfraRN
 {
   private $objProcessoEletronicoRN;
   private $objInfraParametro;
+  private $objPenParametroRN;
 
   public function __construct()
   {
@@ -13,6 +14,7 @@ class EnviarReciboTramiteRN extends InfraRN
 
     $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
     $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $this->objPenParametroRN = new PenParametroRN();
   }
 
   protected function inicializarObjInfraIBanco()
@@ -85,6 +87,7 @@ class EnviarReciboTramiteRN extends InfraRN
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash = null, $parDthRecebimento = null)
   {
     try{
+        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
         date_default_timezone_set('America/Sao_Paulo');
 
         if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {

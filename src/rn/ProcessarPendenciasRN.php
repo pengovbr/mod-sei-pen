@@ -8,6 +8,7 @@ class ProcessarPendenciasRN extends InfraRN
     private $objPenDebug = null;
     private $strGearmanServidor = null;
     private $strGearmanPorta = null;
+    private $objPenParametroRN = null;
 
     const TIMEOUT_PROCESSAMENTO_JOB = 5400;
     const TIMEOUT_PROCESSAMENTO_EVENTOS = 5000;
@@ -27,6 +28,7 @@ class ProcessarPendenciasRN extends InfraRN
     {
         $this->carregarParametrosIntegracao();
         $this->objPenDebug = DebugPen::getInstance($parStrLogTag);
+        $this->objPenParametroRN = new PenParametroRN();
     }
 
     private function carregarParametrosIntegracao()
@@ -77,9 +79,7 @@ class ProcessarPendenciasRN extends InfraRN
             ini_set('memory_limit','-1');
 
             PENIntegracao::validarCompatibilidadeModulo();
-
-            $objPenParametroRN = new PenParametroRN();
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
 
             $numProcID = getmygid();
             $mensagemInicioProcessamento = "Iniciando serviço de processamento de pendências de trâmites de processos ($numProcID)";

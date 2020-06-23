@@ -4,18 +4,21 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class ProcessoExpedidoRN extends InfraRN {
 
-    public function __construct() {
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    protected function inicializarObjInfraIBanco() {
+    protected function inicializarObjInfraIBanco()
+    {
         return BancoSEI::getInstance();
     }
 
-    public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO) {
-
+    public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO)
+    {
         $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
         $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
+        $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
 
         $sql = "SELECT
@@ -35,9 +38,11 @@ class ProcessoExpedidoRN extends InfraRN {
                WHERE
                  p.sta_estado = " . $objProtocoloDTO->getStrStaEstado() . "
                AND
-                       a.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO) ."
+                    a.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO) ."
                AND
-                       ptra.dth_registro = (SELECT MAX(pt.dth_registro) dth_registro FROM md_pen_tramite pt WHERE pt.numero_registro = pe.numero_registro)
+                    a.id_unidade = $numIdUnidade
+               AND
+                    ptra.dth_registro = (SELECT MAX(pt.dth_registro) dth_registro FROM md_pen_tramite pt WHERE pt.numero_registro = pe.numero_registro)
                AND
                NOT EXISTS (
                SELECT at2.* FROM atividade at2
