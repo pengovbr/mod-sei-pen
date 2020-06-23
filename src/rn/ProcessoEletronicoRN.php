@@ -548,7 +548,8 @@ class ProcessoEletronicoRN extends InfraRN
             });
 
         } catch (\SoapFault $e) {
-            $mensagem = "Falha no envio externo do processo: ";
+            //$mensagem = "Falha no envio externo do processo: ";
+            $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
                 $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }

@@ -48,9 +48,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $objPenParametroRN;
     private $objPenRelTipoDocMapEnviadoRN;
     private $objAssinaturaRN;
-    private $barraProgresso;    
+    private $barraProgresso;
     private $objProcedimentoAndamentoRN;
-    
+    private $fnEventoEnvioMetadados;
+
     private $arrPenMimeTypes = array(
         "application/pdf",
         "application/vnd.oasis.opendocument.text",
@@ -112,7 +113,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
-    public function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+    protected function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
         $numIdTramite = 0;
         try {
@@ -120,8 +121,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
             $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
-            //$this->barraProgresso->exibir();
-            //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_VALIDACAO);
+            $this->barraProgresso->exibir();
             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
 
             $objInfraException = new InfraException();
@@ -156,7 +156,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
 
             //Exibe a barra de progresso após definir o seu tamanho
-            $this->barraProgresso->exibir();
             $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
             $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
 
@@ -171,6 +170,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $param->novoTramiteDeProcesso->processo = $objProcesso;
             $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
             $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
+            $this->lancarEventoEnvioMetadados($numIdTramite);
 
             $this->atualizarPenProtocolo($dblIdProcedimento);
 
@@ -225,11 +225,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $this->receberReciboDeEnvio($objTramite->IDT);
                     }
                     catch (\Exception $e) {
-                        //@TODO: Melhorar essa estrutura
                         //Realiza o desbloqueio do processo
                         try{ $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI); } catch (InfraException $ex) { }
 
-                        //@TODO: Melhorar essa estrutura
                         //Realiza o cancelamento do tramite
                         try{
                             if($numIdTramite != 0){
@@ -684,7 +682,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function registrarAndamentoExpedicaoAbortada($dblIdProtocolo)
     {
-        //Seta todos os atributos do histrico de aborto da expedio
+        //Seta todos os atributos do histórico de aborto da expedio
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($dblIdProtocolo);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -859,37 +857,20 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
-            //TODO: Atribuir das informações abaixo ao documento
-            //<protocoloDoDocumentoAnexado>123</protocoloDoDocumentoAnexado>
-
             //Considera o número/nome do documento externo para descrição do documento
             $boolDocumentoRecebidoComNumero = $documentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO && $documentoDTO->getStrNumero() != null;
             $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
-
-            // Não é um documento externo
-            /*elseif($documentoDTO->isSetNumIdTipoConferencia()){
-
-                $objTipoProcedimentoDTO = new PenTipoProcedimentoDTO(true);
-                $objTipoProcedimentoDTO->retStrNome();
-                $objTipoProcedimentoDTO->setBolExclusaoLogica(false);
-                $objTipoProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-                $objTipoProcedimentoBD = new TipoProcedimentoBD(BancoSEI::getInstance());
-                $objTipoProcedimentoDTO = $objTipoProcedimentoBD->consultar($objTipoProcedimentoDTO);
-                $strDescricaoDocumento = $objTipoProcedimentoDTO->getStrNome();
-            }*/
 
             $documento->ordem = $ordem + 1;
             $documento->descricao = utf8_encode($strDescricaoDocumento);
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
-            
-            //TODO: processo-anexado - Não atribuir parâmetro para documentos contidos no processo raiz
-            //<protocoloDoProcessoAnexado>456</protocoloDoProcessoAnexado>
+
             if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
                 $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
                 $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
             }
-            
+
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
                 $documento->hipoteseLegal = new stdClass();
                 $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
@@ -1183,11 +1164,11 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objDocumentoDTOTarjas = $objDocumentoRN->consultarRN0005($objDocumentoDTOTarjas);
 
         $dataTarjas = array();
-        $arrObjTarjas = $this->listarTarjasHTML($objDocumentoDTOTarjas);        
+        $arrObjTarjas = $this->listarTarjasHTML($objDocumentoDTOTarjas);
         foreach ($arrObjTarjas as $strConteudoTarja) {
             $strConteudoTarja = trim(strip_tags($strConteudoTarja));
             if (!empty($strConteudoTarja)) {
-                $dataTarjas[] = html_entity_decode($strConteudoTarja); 
+                $dataTarjas[] = html_entity_decode($strConteudoTarja);
             }
         }
 
@@ -2401,41 +2382,41 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         try {
             $objReciboTramiteEnviadoDTO = new ReciboTramiteEnviadoDTO();
-            $objReciboTramiteEnviadoDTO->setNumIdTramite($parNumIdTramite);    
+            $objReciboTramiteEnviadoDTO->setNumIdTramite($parNumIdTramite);
             $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
-    
+
             if ($objGenericoBD->contar($objReciboTramiteEnviadoDTO) > 0) {
                 return false;
             }
-    
+
             $objReciboEnvio = $this->objProcessoEletronicoRN->receberReciboDeEnvio($parNumIdTramite);
             $objDateTime = new DateTime($objReciboEnvio->reciboDeEnvio->dataDeRecebimentoDoUltimoComponenteDigital);
-    
+
             $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
             $objReciboTramiteDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
             $objReciboTramiteDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
             $objReciboTramiteDTO->setDthRecebimento($objDateTime->format('d/m/Y H:i:s'));
             $objReciboTramiteDTO->setStrCadeiaCertificado($objReciboEnvio->cadeiaDoCertificado);
-            $objReciboTramiteDTO->setStrHashAssinatura($objReciboEnvio->hashDaAssinatura);    
+            $objReciboTramiteDTO->setStrHashAssinatura($objReciboEnvio->hashDaAssinatura);
             $objGenericoBD->cadastrar($objReciboTramiteDTO);
-    
+
             if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
                 $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
                 if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
-                    foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){    
+                    foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
                         $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
                         $objReciboTramiteHashDTO->setStrNumeroRegistro($objReciboEnvio->reciboDeEnvio->NRE);
                         $objReciboTramiteHashDTO->setNumIdTramite($objReciboEnvio->reciboDeEnvio->IDT);
                         $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
                         $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_ENVIO);
-    
+
                         $objGenericoBD->cadastrar($objReciboTramiteHashDTO);
                     }
                 }
             }
-    
+
             return true;
-    
+
         } catch (\Exception $e) {
             $strMensagem = "Falha na obtenção do recibo de envio de protocolo do trâmite $parNumIdTramite. $e";
             LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
@@ -2472,21 +2453,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objProtocoloBD->alterar($objProtocoloDTO);
         }
     }
-
-
-    /**
-    * @author Fabio.braga@softimais.com.br
-    * @deprecated  consulta  processo
-    * data : 28/05/2015
-    * @return objet
-    */
-    public function listarTramiteParaCancelar($idProcedimento)
-    {
-        $objProtocoloDTO  = $this->consultarProtocoloPk($idProcedimento);
-        $result = $this->objProcessoEletronicoRN->serviceConsultarTramitesProtocolo( $objProtocoloDTO->getStrProtocoloFormatado( ) );
-        return $result;
-    }
-
 
     /**
     * Cancela uma expedio de um Procedimento para outra unidade
@@ -2748,8 +2714,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     /**
      * Recupera lista de tarjas de assinaturas aplicadas ao documento em seu formato HTML
-     * 
-     * Este método foi baseado na implementação presente em AssinaturaRN::montarTarjas. 
+     *
+     * Este método foi baseado na implementação presente em AssinaturaRN::montarTarjas.
      * Devido a estrutura interna do SEI, não existe uma forma de reaproveitar as regras de montagem de tarjas
      * de forma individual, restando como última alternativa a reprodução das regras até que esta seja encapsulado pelo core do SEI
      *
@@ -2758,9 +2724,9 @@ class ExpedirProcedimentoRN extends InfraRN {
      */
     protected function listarTarjasHTMLConectado(DocumentoDTO $objDocumentoDTO) {
         try {
-    
+
           $arrResposta = array();
-    
+
           $objAssinaturaDTO = new AssinaturaDTO();
           $objAssinaturaDTO->retStrNome();
           $objAssinaturaDTO->retNumIdAssinatura();
@@ -2768,13 +2734,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objAssinaturaDTO->retStrTratamento();
           $objAssinaturaDTO->retStrStaFormaAutenticacao();
           $objAssinaturaDTO->retStrNumeroSerieCertificado();
-          $objAssinaturaDTO->retDthAberturaAtividade();    
-          $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());           
+          $objAssinaturaDTO->retDthAberturaAtividade();
+          $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
           $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
-           
+
           $arrObjAssinaturaDTO = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
-    
-          if (count($arrObjAssinaturaDTO)) {    
+
+          if (count($arrObjAssinaturaDTO)) {
             $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
             $objTarjaAssinaturaDTO->setBolExclusaoLogica(false);
             $objTarjaAssinaturaDTO->retNumIdTarjaAssinatura();
@@ -2782,16 +2748,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objTarjaAssinaturaDTO->retStrTexto();
             $objTarjaAssinaturaDTO->retStrLogo();
             $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
-    
+
             $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
             $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
-    
-            foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {    
+
+            foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
               if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
                 throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
               }
-    
-              $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];    
+
+              $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
               $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
               $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
               $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
@@ -2802,22 +2768,22 @@ class ExpedirProcedimentoRN extends InfraRN {
               $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
               $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
               $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
-              $arrResposta[] = EditorRN::converterHTML($strTarja);              
+              $arrResposta[] = EditorRN::converterHTML($strTarja);
             }
-    
+
             $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
             $objTarjaAssinaturaDTO->retStrTexto();
             $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
-    
+
             $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
-    
-            if ($objTarjaAssinaturaDTO != null){    
+
+            if ($objTarjaAssinaturaDTO != null){
               $strLinkAcessoExterno = '';
               if (strpos($objTarjaAssinaturaDTO->getStrTexto(),'@link_acesso_externo_processo@')!==false){
                 $objEditorRN = new EditorRN();
                 $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
               }
-    
+
               $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
               $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
               $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
@@ -2826,11 +2792,25 @@ class ExpedirProcedimentoRN extends InfraRN {
               $arrResposta[] = EditorRN::converterHTML($strTarja);
             }
           }
-    
+
           return $arrResposta;
-    
+
         } catch (Exception $e) {
           throw new InfraException('Erro montando tarja de assinatura.',$e);
         }
       }
+
+    public function setEventoEnvioMetadados(callable $callback)
+    {
+        $this->fnEventoEnvioMetadados = $callback;
+    }
+
+    private function lancarEventoEnvioMetadados($parNumIdTramite)
+    {
+        if(isset($this->fnEventoEnvioMetadados)){
+            $evento = $this->fnEventoEnvioMetadados;
+            $evento($parNumIdTramite);
+        }
+    }
+
 }

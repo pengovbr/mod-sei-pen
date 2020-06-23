@@ -51,14 +51,11 @@ div.infraBarraProgresso div.infraBarraProgressoMiolo:after {
     overflow: hidden;
 }
 
-.concluido div.infraBarraProgressoBorda{
-    background-color: green; 
-}
-
-.concluido div.infraBarraProgressoMiolo{
-    display: none;
-}
-
-.concluido div.infraBarraProgressoMiolo{
-    background-color: red;
+.acaoBarraProgresso{
+    width: 100px;
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    margin-right: 20px;
+    margin-bottom: 25px;
 }

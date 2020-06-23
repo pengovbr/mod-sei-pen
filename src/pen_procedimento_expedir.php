@@ -97,17 +97,16 @@ try {
 
             //Carregar dados do procedimento na primeiro acesso à página
            if (!isset($_POST['hdnIdProcedimento'])) {
-
                 $objProcedimentoRN = new ProcedimentoRN();
                 $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
                 $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
                 $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
             }
 
-            //Tratamento da ação de expedir o procedimento
             if(isset($_POST['sbmExpedir'])) {
+                $numVersao = $objPaginaSEI->getNumVersao();
                 echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
-                echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js'></script> ";
+                echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
                 $strTituloPagina = "Envio externo do processo $strProtocoloProcedimentoFormatado";
                 $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
@@ -126,18 +125,23 @@ try {
                 $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia($numIdMotivoUrgente);
 
                 try {
+                    $objExpedirProcedimentosRN->setEventoEnvioMetadados(function($parNumIdTramite) use ($strLinkProcedimento){
+                        $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
+                        echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
+                    });
+
                     $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
 
                     // Muda situação da barra de progresso para Concluído
-                    echo "<script type='text/javascript'>sinalizarStatusConclusao('div.infraBarraProgresso');</script> ";
-                    echo '<input type="button" onclick="window.top.location = \'' .$strLinkProcedimento. '\'" class="bntFechar" value="Fechar" style="margin-left: 84%; margin-top: 4%;"/>';
+                    echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento');</script> ";
                 } catch(\Exception $e) {
                     $objPaginaSEI->processarExcecao($e);
+                    echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
                 }
 
                 $objPaginaSEI->finalizarBarraProgresso(null, false);
             }
-            //------------------------------------------------------------------
+
             break;
         default:
             throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
@@ -361,7 +365,7 @@ function criarIFrameBarraProgresso() {
     iframe.id = nomeIFrameEnvioProcesso;
     iframe.name = nomeIFrameEnvioProcesso;
     iframe.setAttribute('frameBorder', '0');
-    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('scrolling', 'auto');
 
     return iframe;
 }

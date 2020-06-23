@@ -100,6 +100,7 @@ class PENIntegracao extends SeiIntegracao
             $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
             $objProcessoEletronicoRN = new ProcessoEletronicoRN();
             if($objProcessoEletronicoRN->contar($objProcessoEletronicoDTO) != 0){
+                $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
                 $strAcoesProcedimento .= '<a href="' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_estado&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1') . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
                 $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_consultar_recibos.png" alt="Consultar Recibos" title="Consultar Recibos"/>';
                 $strAcoesProcedimento .= '</a>';
@@ -109,6 +110,7 @@ class PENIntegracao extends SeiIntegracao
         //Apresenta o botão de cancelar trâmite
         $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
         if ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
+            $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
             $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_cancelar_tramite.gif" alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
             $strAcoesProcedimento .= '</a>';
@@ -387,7 +389,6 @@ class PENIntegracao extends SeiIntegracao
             break;
 
             case 'pen_apensados_auto_completar_expedir_procedimento':
-                //TODO: Validar parâmetros passados via ajax
                 $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
                 $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
                 $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
@@ -399,6 +400,13 @@ class PENIntegracao extends SeiIntegracao
                 require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
             break;
 
+            case 'pen_procedimento_expedir_cancelar':
+                $numIdTramite = $_POST['id_tramite'];
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                $result = json_encode($objProcessoEletronicoRN->cancelarTramite($numIdTramite));
+                InfraAjax::enviarJSON($result);
+                exit(0);
+            break;
 
             case 'pen_pesquisar_unidades_administrativas_estrutura_pai':
                 $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
@@ -406,9 +414,6 @@ class PENIntegracao extends SeiIntegracao
 
                 $objProcessoEletronicoRN = new ProcessoEletronicoRN();
                 $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
-
-                // Obtenção da hierarquia de siglas desativada por questões de desempenho
-                //$arrEstruturas = $this->obterHierarquiaEstruturaDeUnidadeExterna($idRepositorioEstruturaOrganizacional, $arrEstruturas);
 
                 print json_encode($arrEstruturas);
                 exit(0);
