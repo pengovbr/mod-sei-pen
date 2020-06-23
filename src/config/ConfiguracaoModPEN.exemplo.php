@@ -51,7 +51,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // Senha do certificado digital necessário para a aplicação descriptografar e acessar a sua chave privada
                 "SenhaCertificado" => "",
 
-                // Opcional
+                // Opcional, mas altamente desejável
                 // Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
                 // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para
                 // processamento paralelo. Caso este parâmetro não seja configurado ou o servidor este indisponível, o processamento será
