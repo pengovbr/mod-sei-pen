@@ -7,7 +7,6 @@ require_once $dirSeiWeb . '/SEI.php';
 // TODO: Substituir declaração por pcntl_async_signal no php 7
 declare(ticks=1);
 
-
 $bolEmExecucao = true;
 function tratarSinalInterrupcaoMonitoramento($sinal)
 {
@@ -33,12 +32,20 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     try {
         SessaoSEI::getInstance(false);
-        $arrParametros = getopt("md", array("monitorar", "segundo-plano"));
+        $arrParametros = getopt("fd", array("monitorar", "segundo-plano", "debug", "wsdl-cache:"));
         $bolMonitorar = array_key_exists("f", $arrParametros) || array_key_exists("monitorar", $arrParametros);
         $parBolSegundoPlano = array_key_exists("d", $arrParametros) || array_key_exists("segundo-plano", $arrParametros);
+        $parBoldebug = array_key_exists("debug", $arrParametros);
+        $parStrWsdlCacheDir = array_key_exists("wsdl-cache", $arrParametros) ? $arrParametros["wsdl-cache"] : null;
+
+        if(is_dir($parStrWsdlCacheDir)){
+            ini_set('soap.wsdl_cache_dir', $parStrWsdlCacheDir);
+        }
+
         $objPendenciasTramiteRN = new PendenciasTramiteRN("MONITORAMENTO");
-        $resultado = $objPendenciasTramiteRN->encaminharPendencias($bolMonitorar, $parBolSegundoPlano);
+        $resultado = $objPendenciasTramiteRN->encaminharPendencias($bolMonitorar, $parBolSegundoPlano, $parBoldebug);
         exit($resultado);
+
     } finally {
         InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);

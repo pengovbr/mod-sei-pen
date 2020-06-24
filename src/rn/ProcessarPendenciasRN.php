@@ -316,7 +316,7 @@ class ProcessarPendenciasRN extends InfraRN
      *
      * @return void
      */
-    public static function inicializarWorkers($parNumQtdeWorkers=self::NUMERO_WORKERS_GEARMAN)
+    public static function inicializarWorkers($parNumQtdeWorkers=null)
     {
         $bolInicializado = false;
         $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_WORKERS_GEARMAN;
@@ -329,7 +329,7 @@ class ProcessarPendenciasRN extends InfraRN
         if(!empty($strGearmanServidor)){
             try {
                 if(self::verificarGearmanAtivo($strGearmanServidor, $strGearmanPorta)) {
-                    for ($worker=0; $worker < self::NUMERO_WORKERS_GEARMAN ; $worker++) {
+                    for ($worker=0; $worker < $parNumQtdeWorkers ; $worker++) {
                         $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
                         exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
 
@@ -349,7 +349,7 @@ class ProcessarPendenciasRN extends InfraRN
                 $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento PEN via Gearman";
                 $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
                 $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
-                LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
             }
         }
 

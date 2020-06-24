@@ -163,7 +163,7 @@ class VerificadorInstalacaoRN extends InfraRN
     public function verificarCompatibilidadeBanco($bolGerarExcecao=true)
     {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $strVersaoBancoModulo = $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
 
         $objPENIntegracao = new PENIntegracao();
         $strVersaoModulo = $objPENIntegracao->getVersao();

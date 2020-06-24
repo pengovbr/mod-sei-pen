@@ -2,6 +2,9 @@
 
 class PENIntegracao extends SeiIntegracao
 {
+    const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
+    const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
+
     private static $instance = null;
 
     public static function getInstance()
@@ -25,7 +28,7 @@ class PENIntegracao extends SeiIntegracao
 
 
     public function getInstituicao() {
-        return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
+        return 'Ministério da Economia - ME (Projeto Colaborativo no Portal do SPB)';
     }
 
 

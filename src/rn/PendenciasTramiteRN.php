@@ -1,14 +1,6 @@
 <?php
 
-// if(!defined("DIR_SEI_WEB")){
-//     define("DIR_SEI_WEB", getenv("DIR_SEI_WEB"));
-// }
-
 require_once DIR_SEI_WEB.'/SEI.php';
-
-// PHP internal, faz com que o tratamento de sinais funcione corretamente
-// TODO: Substituir declaração por pcntl_async_signal no php 7
-//declare(ticks=1);
 
 class PendenciasTramiteRN extends InfraRN
 {
@@ -19,6 +11,12 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_MAXIMO_LOG_ERROS = 500;
     const CODIGO_EXECUCAO_SUCESSO = 0;
     const CODIGO_EXECUCAO_ERRO = 1;
+    const NUMERO_PROCESSOS_MONITORAMENTO = 1;
+    const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%02d %s %s %s %s >/dev/null 2>&1 &';
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
+
 
     private $objPenDebug = null;
     private $strEnderecoServico = null;
@@ -74,7 +72,7 @@ class PendenciasTramiteRN extends InfraRN
      * @param boolean $parBolMonitorarPendencias Indicador para ativar a esculta de eventos do Barramento
      * @return int  Código de resultado do processamento, sendo 0 para sucesso e 1 em caso de erros
      */
-    public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false)
+    public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false, $parBolDebug=false)
     {
         try{
             global $bolEmExecucao;
@@ -143,11 +141,30 @@ class PendenciasTramiteRN extends InfraRN
 
         // Caso não esteja sendo realizado o monitoramente de pendências,
         // lança exceção diretamente na página para apresentação ao usuário
-        if(!$parBolMonitorarPendencias && isset($objInfraException)){
-            $objInfraException->lancarValidacoes();
+        if(!$parBolMonitorarPendencias){
+            $this->salvarLogDebug($parBolDebug);
+
+            if(isset($objInfraException)){
+                $objInfraException->lancarValidacoes();
+            }
         }
 
         return self::CODIGO_EXECUCAO_SUCESSO;
+    }
+
+    /**
+     * Grava log de debug nas tabelas de log do SEI, caso o debug esteja habilitado
+     *
+     * @return void
+     */
+    private function salvarLogDebug($parBolDebugAtivado)
+    {
+        if($parBolDebugAtivado){
+            $strTextoDebug = InfraDebug::getInstance()->getStrDebug();
+            if(!InfraString::isBolVazia($strTextoDebug)){
+                LogSEI::getInstance()->gravar(utf8_decode($strTextoDebug), LogSEI::$DEBUG);
+            }
+        }
     }
 
     private function configurarRequisicao()
@@ -306,7 +323,6 @@ class PendenciasTramiteRN extends InfraRN
     }
 
 
-
     /**
      * Envia a pendência de trâmite para a fila de processamento do tarefas de acordo com a estratégia definida
      *
@@ -442,39 +458,61 @@ class PendenciasTramiteRN extends InfraRN
             LogSEI::getInstance()->gravar($strMensagemErro);
         }
     }
+
+    /**
+     * Inicia o recebimento de tarefas de Barramento do PEN em novo processo separado,
+     * evitando o bloqueio da thread da aplicação
+     *
+     * @param int $parNumQtdeWorkers Quantidade de processos paralelos que serão iniciados
+     * @param boolean $parBolMonitorar Indicação se o novo processo ficará monitorando o Barramento do PEN
+     * @param boolean $parBolSegundoPlano Indicação se será utilizado o processamento das tarefas em segundo plano com o Gearman
+     * @return bool Monitoramento iniciado com sucesso
+     */
+    public static function iniciarMonitoramentoPendencias($parNumQtdeWorkers=null, $parBolMonitorar=false, $parBolSegundoPlano=false, $parBolDebugAtivo=false)
+    {
+        $bolInicializado = false;
+        $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_PROCESSOS_MONITORAMENTO;
+
+        try {
+            for ($worker=0; $worker < $parNumQtdeWorkers; $worker++) {
+                $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
+                exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
+
+                if($numCodigoResposta != 0){
+                    $strLocalizacaoScript = realpath(SELF::LOCALIZACAO_SCRIPT_WORKER);
+                    $strParametroMonitorar = $parBolMonitorar ? "--monitorar" : '';
+                    $strParametroSegundoPlano = $parBolSegundoPlano ? "--segundo-plano" : "";
+                    $strParametroDebugAtivo = $parBolDebugAtivo ? "--debug" : "";
+                    $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
+                    $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
+                    $strComandoInicializacao = sprintf(
+                        self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $worker,
+                        $strParametroMonitorar, $strParametroSegundoPlano, $strParametroDebugAtivo, $strParametroWsdlCache
+                    );
+
+
+                    shell_exec($strComandoInicializacao);
+
+                    // Verifica se monitoramento de tarefas foi iniciado corretamente, finalizando o laço para não
+                    // permitir que mais de um monitoramento esteja iniciado
+                    sleep(1);
+                    exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
+                    if($numCodigoResposta == 0){
+                        break;
+                    }
+                }
+            }
+
+            // Confirma se existe algum worker ativo
+            exec(self::COMANDO_IDENTIFICACAO_WORKER, $strSaida, $numCodigoRespostaAtivacao);
+            $bolInicializado = $numCodigoRespostaAtivacao == 0;
+
+        } catch (\Exception $e) {
+            $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
+            $objInfraException = new InfraException($strMensagem, $e);
+            LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
+        }
+
+        return $bolInicializado;
+    }
 }
-
-
-// $bolEmExecucao = true;
-// function tratarSinalInterrupcaoMonitoramento($sinal)
-// {
-//     global $bolEmExecucao;
-//     $bolEmExecucao = false;
-//     printf("\nAtenção: Sinal de interrupção do monitoramento de pendências recebido. Finalizando processamento ...%s", PHP_EOL);
-// }
-
-// // Garante que código abaixo foi executado unicamente via linha de comando
-// if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
-//     pcntl_signal(SIGINT, 'tratarSinalInterrupcaoMonitoramento');
-//     pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoMonitoramento');
-//     pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento');
-
-//     InfraDebug::getInstance()->setBolLigado(true);
-//     InfraDebug::getInstance()->setBolDebugInfra(false);
-//     InfraDebug::getInstance()->setBolEcho(true);
-//     InfraDebug::getInstance()->limpar();
-
-//     try {
-//         SessaoSEI::getInstance(false);
-//         $arrParametros = getopt("md", array("monitorar", "segundo-plano"));
-//         $bolMonitorar = array_key_exists("f", $arrParametros) || array_key_exists("monitorar", $arrParametros);
-//         $parBolSegundoPlano = array_key_exists("d", $arrParametros) || array_key_exists("segundo-plano", $arrParametros);
-//         $objPendenciasTramiteRN = new PendenciasTramiteRN("MONITORAMENTO");
-//         $resultado = $objPendenciasTramiteRN->encaminharPendencias($bolMonitorar, $parBolSegundoPlano);
-//         exit($resultado);
-//     } finally {
-//         InfraDebug::getInstance()->setBolLigado(false);
-//         InfraDebug::getInstance()->setBolDebugInfra(false);
-//         InfraDebug::getInstance()->setBolEcho(false);
-//     }
-// }

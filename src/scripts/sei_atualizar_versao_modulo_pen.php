@@ -5,9 +5,6 @@ require_once $dirSeiWeb . '/SEI.php';
 
 class PenAtualizarSeiRN extends PenAtualizadorRN {
 
-    const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
-    const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
-
     private $objInfraMetaBD = null;
 
     public function __construct() {
@@ -48,7 +45,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
-            $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+            $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
             switch ($strVersaoModuloPen) {
                 case '':      $this->instalarV100(); // Nenhuma versão instalada
                 case '1.0.0': $this->instalarV101();
@@ -171,7 +168,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     private function atualizarNumeroVersao($parStrNumeroVersao)
     {
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(array(self::PARAMETRO_VERSAO_MODULO, self::PARAMETRO_VERSAO_MODULO_ANTIGO), InfraDTO::$OPER_IN);
+        $objInfraParametroDTO->setStrNome(array(PENIntegracao::PARAMETRO_VERSAO_MODULO, PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO), InfraDTO::$OPER_IN);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
@@ -1043,7 +1040,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
 
         $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
+        $objInfraParametroDTO->setStrNome(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO);
         $objInfraParametroDTO->setStrValor('1.0.0');
         $objInfraParametroBD = new InfraParametroBD(BancoSEI::getInstance());
         $objInfraParametroBD->cadastrar($objInfraParametroDTO);
@@ -1208,7 +1205,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV111() {
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
-        BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
+        BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . PENIntegracao::PARAMETRO_VERSAO_MODULO . "' where nome = '" . PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
         $this->atualizarNumeroVersao("1.1.1");
     }

@@ -187,7 +187,8 @@ class PENAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->limpar();
 
         try {
-            $bolDebugAtivado = array_key_exists('debug', $arrParametros) && $arrParametros['debug'][0] != false;
+            $bolDebugAtivo = array_key_exists('debug', $arrParametros) && $arrParametros['debug'][0] != false;
+            $bolMonitoramentoAtivado = array_key_exists('monitorar', $arrParametros) && $arrParametros['monitorar'][0] != false;
             $strValorWorkers = array_key_exists('workers', $arrParametros) ? $arrParametros['workers'][0] : null;
             $strValorWorkers = (is_null($strValorWorkers) && array_key_exists('worker', $arrParametros)) ? $arrParametros['worker'][0] : $strValorWorkers;
             $numValorWorkers = is_numeric($strValorWorkers) ? intval($strValorWorkers) : null;
@@ -204,14 +205,11 @@ class PENAgendamentoRN extends InfraRN
             }
 
             // Consulta e processamento de pendências de recebimento de trâmites
-            $objPendenciaTramiteRN = new PendenciasTramiteRN();
+            //$objPendenciaTramiteRN = new PendenciasTramiteRN();
+            //$objPendenciaTramiteRN->encaminharPendencias(false, $bolGearmanConfigurado);
 
-            //TODO: Avaliar possibilidade de avaliar se existe algum worker ativo antes de enviar
-            $objPendenciaTramiteRN->encaminharPendencias(false, $bolGearmanConfigurado);
+            PendenciasTramiteRN::iniciarMonitoramentoPendencias(1, $bolMonitoramentoAtivado, $bolGearmanConfigurado, $bolDebugAtivo);
 
-            if($bolDebugAtivado){
-                LogSEI::getInstance()->gravar(utf8_decode(InfraDebug::getInstance()->getStrDebug()) ,LogSEI::$DEBUG);
-            }
 
         }catch(Exception $e){
             InfraDebug::getInstance()->setBolLigado(false);
