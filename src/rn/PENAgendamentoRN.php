@@ -208,7 +208,7 @@ class PENAgendamentoRN extends InfraRN
             //$objPendenciaTramiteRN = new PendenciasTramiteRN();
             //$objPendenciaTramiteRN->encaminharPendencias(false, $bolGearmanConfigurado);
 
-            PendenciasTramiteRN::iniciarMonitoramentoPendencias(1, $bolMonitoramentoAtivado, $bolGearmanConfigurado, $bolDebugAtivo);
+            PendenciasTramiteRN::iniciarMonitoramentoPendencias($strValorWorkers, $bolMonitoramentoAtivado, $bolGearmanConfigurado, $bolDebugAtivo);
 
 
         }catch(Exception $e){

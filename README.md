@@ -6,23 +6,20 @@ A utilização deste módulo adicionará novas funcionalidades ao SEI, permitind
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o ConectaGov e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
+Para maiores informações sobre o Barramento de Serviços e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
 
 Este documento está estruturado nas seguintes seções:
 
 1. **[Instalação](#instalação)**:
 Procedimentos de instalação do módulo nos servidores de aplicação e atualização do banco de dados.
 
-2. **[Script de Monitoramento](#script-de-monitoramento)**:
-Procedimentos para configuração de um monitor para a fila de pendências do barramento e seu reboot automático quando necessário
+2. **[Atualização](#atualização)**:
+Procedimentos para realizar a atualização para uma nova versão do módulo
 
-3. **[Atualização](#atualização)**:
-Procedimentos para realizar a atualização de uma nova versão do módulo
-
-4. **[Utilização](#utilização)**:
+3. **[Utilização](#utilização)**:
 Apresentação das funcionalidades que permitem o trâmite externo de processos e o acompanhamento de seu histórico.
  
-5. **[Suporte](#suporte)**:
+4. **[Suporte](#suporte)**:
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
 
 ## Instalação
@@ -244,8 +241,6 @@ python3 -m pip install supervisor==4.*
 mkdir -p /etc/supervisor/ /var/log/supervisor/
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
-
-
 
 ##### Configuração da inicialização automática do Supervisord no Linux
 A inicialização automática do Supervisor não é configurada durante sua instalação, portanto, é necessário configurar um script de inicialização para o serviço. No repositório oficial do projeto existe uma exemplos de scripts de inicialização do Supervisor específico para cada distribuição Linux. Estes script podem ser encontrados no endereço: https://github.com/Supervisor/initscripts
