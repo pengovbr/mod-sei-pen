@@ -1776,9 +1776,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Ajustes em parâmetros de configuração do módulo
         $objInfraMetaBD->alterarColuna('md_pen_parametro','valor', $objInfraMetaBD->tipoTextoGrande(), 'null');
+
         $objPenParametroDTO = new PenParametroDTO();
         $objPenParametroDTO->setStrNome("PEN_ID_REPOSITORIO_ORIGEM");
         $objPenParametroDTO->setStrDescricao("Repositório de Estruturas do Órgão");
+        $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
+        $objPenParametroBD->alterar($objPenParametroDTO);
+
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome("PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO");
+        $objPenParametroDTO->setStrDescricao("Unidade SEI para Representação de Órgãos Externos");
         $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
         $objPenParametroBD->alterar($objPenParametroDTO);
 

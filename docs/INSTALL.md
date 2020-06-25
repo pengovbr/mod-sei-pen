@@ -13,7 +13,7 @@ Este documento está estruturado nas seguintes seções:
 1. **[Instalação](#instalação)**:
 Procedimentos destinados à Equipe Técnica responsáveis pela instalação do módulo nos servidores web e atualização do banco de dados.
 
-2. **[Configuração](#configuracao)**:
+2. **[Configuração](#configuração)**:
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
 3. **[Configurações Técnicas Adicionais](#configuracoes-técnicas-adicionais)**:
