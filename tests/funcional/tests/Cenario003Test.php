@@ -6,7 +6,7 @@ class Cenario003Test extends CenarioBaseTestCase
 {
 
     public function test_tramitar_processo_contendo_documento_gerado_e_externo()
-    {        
+    {
         // Configuração do dados para teste do cenário
         $remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
@@ -22,7 +22,7 @@ class Cenario003Test extends CenarioBaseTestCase
         $strProtocoloTeste = $this->cadastrarProcesso($processoTeste);
 
         // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoExterno($documentoExternoTeste);    
+        $this->cadastrarDocumentoExterno($documentoExternoTeste);
 
         // 4 - Assinar documento interno criado anteriormente
         $this->cadastrarDocumentoInterno($documentoInternoTeste);
@@ -33,10 +33,10 @@ class Cenario003Test extends CenarioBaseTestCase
             $testCase->window($this->windowHandles()[1]);
             $testCase->assertContains('Trâmite externo do processo finalizado com sucesso!', $testCase->byCssSelector('body')->text());
             $testCase->closeWindow();
-            $testCase->window('');            
+            $testCase->window('');
             return true;
         });
-         
+
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
@@ -44,7 +44,7 @@ class Cenario003Test extends CenarioBaseTestCase
             $paginaProcesso = new PaginaProcesso($testCase);
             $testCase->assertNotContains('Processo em trâmite externo para ', $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());            
+            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
         }, PEN_WAIT_TIMEOUT);
 
@@ -59,18 +59,18 @@ class Cenario003Test extends CenarioBaseTestCase
 
         // 10 - Acessar sistema de REMETENTE do processo
         $this->paginaBase->sairSistema();
-        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);    
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // 11 - Abrir protocolo na tela de controle de processos
         $this->abrirProcesso($strProtocoloTeste);
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
-                   
+
         // 12 - Validar dados  do processo
         $processoTeste['OBSERVACOES'] = $orgaosDiferentes ? 'Tipo de processo no órgão de origem: ' . $processoTeste['TIPO_PROCESSO'] : null;
         $this->validarDadosProcesso($processoTeste['DESCRICAO'], $processoTeste['RESTRICAO'], $processoTeste['OBSERVACOES'], array($processoTeste['INTERESSADOS']));
-        
+
         // 13 - Verificar recibos de trâmite
-        $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);        
+        $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
         // 14 - Validar dados do documento
         $this->assertTrue(count($listaDocumentos) == 2);
@@ -83,7 +83,7 @@ class Cenario003Test extends CenarioBaseTestCase
      * @large
      */
     public function test_tramitar_processo_contendo_varios_documentos_gerados_e_externos()
-    {        
+    {
         // Configuração do dados para teste do cenário
         $remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
@@ -94,19 +94,19 @@ class Cenario003Test extends CenarioBaseTestCase
                 array_fill(0, 10, $this->gerarDadosDocumentoExternoTeste($remetente))
             );
 
-            shuffle($documentosTeste);
-        
+        shuffle($documentosTeste);
+
         $this->realizarTramiteExternoComValidacaoNoRemetente($processoTeste, $documentosTeste, $remetente, $destinatario);
 
         $this->paginaBase->sairSistema();
 
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario);
-    }   
+    }
 
 
     //TODO: Erro grave ocorrendo na implementação do módulo que impede o recebimento de qualquer novo processo
     public function test_tramitar_processo_contendo_documento_e_externo_gerado_mesmo_orgao()
-    {        
+    {
         // Configuração do dados para teste do cenário
         $remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         $processoTeste = $this->gerarDadosProcessoTeste($remetente);
@@ -115,15 +115,15 @@ class Cenario003Test extends CenarioBaseTestCase
         $documentosTeste[] = $this->gerarDadosDocumentoExternoTeste($remetente);
 
         //Configuração da unidade destinatário como outra unidade do mesmo órgão
-        $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);        
+        $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         $destinatario['SIGLA_UNIDADE'] = CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA;
         $destinatario['NOME_UNIDADE'] = CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA;
         $destinatario['SIGLA_UNIDADE_HIERARQUIA'] = CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA;
-        
+
         $this->realizarTramiteExternoComValidacaoNoRemetente($processoTeste, $documentosTeste, $remetente, $destinatario);
 
         $this->paginaBase->sairSistema();
 
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario);
-    }   
+    }
 }

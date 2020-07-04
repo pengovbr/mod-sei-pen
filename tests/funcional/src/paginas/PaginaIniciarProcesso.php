@@ -1,7 +1,8 @@
 <?php
 
 use \utilphp\util;
-use PHPUnit_Extensions_Selenium2TestCase_Keys as Keys;
+use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+
 
 class PaginaIniciarProcesso extends PaginaTeste
 {
@@ -22,7 +23,7 @@ class PaginaIniciarProcesso extends PaginaTeste
             $this->test->byLinkText($tipoProcesso)->click();
         }
         catch (Exception $e){
-            $this->test->byId("imgExibirTiposProcedimento")->click();    
+            $this->test->byId("imgExibirTiposProcedimento")->click();
             $this->test->byId('txtFiltro')->value($tipoProcesso);
             sleep(2);
             $this->test->byLinkText($tipoProcesso)->click();
@@ -69,7 +70,7 @@ class PaginaIniciarProcesso extends PaginaTeste
             if($staNivelRestricao === self::STA_NIVEL_ACESSO_PUBLICO) {
                 $this->test->byId("optPublico")->click();
             }
-            else if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO) {               
+            else if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO) {
                 $this->test->byId("optRestrito")->click();
             }
             else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO) {
@@ -80,7 +81,7 @@ class PaginaIniciarProcesso extends PaginaTeste
         if($this->test->byId("optPublico")->selected())
             return self::STA_NIVEL_ACESSO_PUBLICO;
         else if($this->test->byId("optRestrito")->selected())
-            return self::STA_NIVEL_ACESSO_RESTRITO; 
+            return self::STA_NIVEL_ACESSO_RESTRITO;
         else if($this->test->byId("optSigiloso")->selected())
             return self::STA_NIVEL_ACESSO_SIGILOSO;
 
@@ -101,7 +102,7 @@ class PaginaIniciarProcesso extends PaginaTeste
         }
     }
 
-    public function listarInteressados() 
+    public function listarInteressados()
     {
         return  $this->test->select($this->test->byId('selInteressadosProcedimento'))->selectedLabels();
     }
@@ -116,7 +117,7 @@ class PaginaIniciarProcesso extends PaginaTeste
     	if(isset($staNivelRestricao))
     	{
             $this->restricao($staNivelRestricao);
-            
+
             if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO)
 	    	{
 				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
@@ -153,8 +154,8 @@ class PaginaIniciarProcesso extends PaginaTeste
 
         $paginaIniciarProcesso = new PaginaIniciarProcesso($test);
         $paginaIniciarProcesso->selecionarTipoProcesso($dadosProcesso["TIPO_PROCESSO"]);
-        $paginaIniciarProcesso->descricao($dadosProcesso["DESCRICAO"]);        
-        $paginaIniciarProcesso->observacoes($dadosProcesso["OBSERVACOES"]);        
+        $paginaIniciarProcesso->descricao($dadosProcesso["DESCRICAO"]);
+        $paginaIniciarProcesso->observacoes($dadosProcesso["OBSERVACOES"]);
         $paginaIniciarProcesso->selecionarRestricao($dadosProcesso["RESTRICAO"], $dadosProcesso["HIPOTESE_LEGAL"]);
         $paginaIniciarProcesso->adicionarInteressado($dadosProcesso["INTERESSADOS"]);
 

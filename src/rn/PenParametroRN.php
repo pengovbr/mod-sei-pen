@@ -4,12 +4,11 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Regra de negócio para o parâmetros do módulo PEN
- *
- *
  */
 class PenParametroRN extends InfraRN {
 
-    protected function inicializarObjInfraIBanco(){
+    protected function inicializarObjInfraIBanco()
+    {
         return BancoSEI::getInstance();
     }
 
@@ -92,7 +91,6 @@ class PenParametroRN extends InfraRN {
         }
     }
 
-    //TODO: Refatorar nome de função para obterValorParametro(...)
     /**
      * Resgata o valor do parâmetro configura
      * @param string $strNome
@@ -122,7 +120,7 @@ class PenParametroRN extends InfraRN {
             $objPenParametroRN = new PenParametroRN();
             $objPenParametroDTO = new PenParametroDTO();
             $objPenParametroDTO->setStrNome($parStrNome);
-            
+
             if($objPenParametroRN->contar($objPenParametroDTO) == 0){
                 $objPenParametroDTO->setStrValor($parStrValor);
                 $objPenParametroDTO->setStrDescricao($parStrDescricao);
@@ -131,12 +129,12 @@ class PenParametroRN extends InfraRN {
             } else {
                 $objPenParametroDTO->setStrValor($parStrValor);
                 $objPenParametroDTO->setStrDescricao($parStrDescricao);
-                $objPenParametroDTO->setNumSequencia($parNumSequencia);                
+                $objPenParametroDTO->setNumSequencia($parNumSequencia);
                 $objPenParametroRN->alterar($objPenParametroDTO);
             }
         }
         catch (Exception $e) {
             throw new InfraException("Erro ao persistir parâmetro $parStrNome", $e);
-        }        
+        }
     }
 }

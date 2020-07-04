@@ -2,24 +2,25 @@
 
 class DatabaseUtils
 {
-	protected static function getInstance()
-	{
-		$connection = new PDO(DB_SEI_DSN, DB_SEI_USER, DB_SEI_PASSWORD);
+    private $connection;
 
-		if (!$connection){
-  			throw new InfraException('Não foi possível abrir conexão com o banco de dados.');
-		}
+    function __construct($nomeContexto)
+    {
+        $dns = constant($nomeContexto . '_DB_SEI_DSN');
+        $user = constant($nomeContexto . '_DB_SEI_USER');
+        $password = constant($nomeContexto . '_DB_SEI_PASSWORD');
+        $this->connection = new PDO($dns, $user, $password);
+    }
 
-		return $connection;
-	}
 
-	public static function execute($sql, $params){
-		$statement = self::getInstance()->prepare($sql);
+	public function execute($sql, $params){
+		$statement = $this->connection->prepare($sql);
 		return $statement->execute($params);
 	}
 
-	public static function query($sql, $params){
-		$statement = self::getInstance()->prepare($sql);
+
+	public function query($sql, $params){
+		$statement = $this->connection->prepare($sql);
 		$statement->execute($params);
 		return $statement->fetchAll();
 	}

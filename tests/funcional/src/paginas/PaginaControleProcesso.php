@@ -9,21 +9,22 @@ class PaginaControleProcesso extends PaginaTeste
 
     protected function obterLinhasProcessos($processosGerados, $processosRecebidos)
     {
-        $paineisPesquisa = array();     
+        $paineisPesquisa = array();
         if($processosGerados) $paineisPesquisa[] = 'tblProcessosGerados';
         if($processosRecebidos) $paineisPesquisa[] = 'tblProcessosRecebidos';
 
         $resultado = array();
-        foreach ($paineisPesquisa as $painel) {            
-            $resultado = array_merge($resultado, $this->test->byId($painel)->elements($this->test->using('css selector')->value('tr')));
+        foreach ($paineisPesquisa as $painel) {
+            try {
+                $resultado = array_merge($resultado, $this->test->byId($painel)->elements($this->test->using('css selector')->value('tr')));
+            } catch (\Throwable $th) { }
         }
 
         return $resultado;
     }
 
-    //TODO: Implementar a navegação por páginas (parâmetro $pagina)
-    protected function listarProcessos($processosGerados, $processosRecebidos) 
-    {   
+    protected function listarProcessos($processosGerados, $processosRecebidos)
+    {
         $listaProtocolos = array();
         $processosRows = $this->obterLinhasProcessos($processosGerados, $processosRecebidos);
         if(isset($processosRows) && count($processosRows) > 0){
@@ -54,16 +55,16 @@ class PaginaControleProcesso extends PaginaTeste
     public function contemAlertaProcessoRecusado($numeroProcesso)
     {
         $processosRows = $this->obterLinhasProcessos(true, true);
-        foreach ($processosRows as $row) {                        
+        foreach ($processosRows as $row) {
             try{
                 if(strpos($row->text(), $numeroProcesso) !== false){
                     foreach ($row->elements($this->test->using('css selector')->value('img')) as $icone) {
                         if(strpos($icone->attribute("src"), 'pen_tramite_recusado.png') !== false)
                             return true;
                     }
-                }                
+                }
             }
-            catch(Exception $e) {                
+            catch(Exception $e) {
                 return false;
             }
         }

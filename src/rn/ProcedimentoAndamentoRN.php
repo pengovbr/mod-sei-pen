@@ -7,7 +7,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
  *
  *
  */
-class ProcedimentoAndamentoRN extends InfraRN 
+class ProcedimentoAndamentoRN extends InfraRN
 {
     protected $isSetOpts = false;
     protected $dblIdProcedimento;
@@ -82,10 +82,10 @@ class ProcedimentoAndamentoRN extends InfraRN
             $objProcedimentoAndamentoDTO->setDblIdTramite($parNumIdentificacaoTramite);
             $objProcedimentoAndamentoDTO->setNumTarefa($numIdTarefa);
             $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
-            
+
             $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
             $objProcedimentoAndamentoDTORet = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
-            
+
             if(!is_null($objProcedimentoAndamentoDTORet)){
                 $this->objPenDebug->gravar("Sincronizando o recebimento de processos concorrentes...", 1);
                 $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->bloquear($objProcedimentoAndamentoDTORet);
@@ -93,7 +93,7 @@ class ProcedimentoAndamentoRN extends InfraRN
             }
 
             return true;
-    
+
         } catch(InfraException $e){
             // Erros de lock significam que outro processo concorrente já está processando a requisição
             return false;
@@ -103,7 +103,7 @@ class ProcedimentoAndamentoRN extends InfraRN
 
     /**
      * Sinaliza o início de recebimento de um trâmite de processo, recibo de conclusão de trâmite ou uma recusa
-     * 
+     *
      * Esta sinalização é utilizada para sincronizar o processamento concorrente que possa existir entre todos os nós de aplicação do sistema,
      * evitando inconsistências provocadas pelo cadastramentos simultâneos no sistema
      *
@@ -119,12 +119,18 @@ class ProcedimentoAndamentoRN extends InfraRN
         if(!$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $numIdTramite, $numIdTarefa)){
             $this->gravarLogDebug("Trâmite de recebimento $numIdTramite já se encontra em processamento", 3);
             return false;
-        }        
+        }
 
         $this->setOpts($strNumeroRegistro, $numIdTramite, $numIdTarefa);
-        $this->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Iniciando recebimento de processo externo', 'S'));        
+        $this->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Iniciando recebimento de processo externo', 'S'));
 
         return true;
+    }
+
+    protected function listarConectado($parObjProcedimentoAndamentoDTO)
+    {
+        $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
+        return $objProcedimentoAndamentoBD->listar($parObjProcedimentoAndamentoDTO);
     }
 
 }

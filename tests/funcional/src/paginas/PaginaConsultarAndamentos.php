@@ -7,15 +7,15 @@ class PaginaConsultarAndamentos extends PaginaTeste
         parent::__construct($test);
     }
 
-    public function contemTramite($mensagemTramite) 
+    public function contemTramite($mensagemTramite)
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
-        //$this->test->assertContains($mensagemTramite, $this->test->byCssSelector('body')->text());
+        //$this->test->assertStringContainsString($mensagemTramite, $this->test->byCssSelector('body')->text());
         return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
     }
 
-    public function contemTramiteProcessoEmTramitacao($strUnidadeDestino) 
+    public function contemTramiteProcessoEmTramitacao($strUnidadeDestino)
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
@@ -23,7 +23,7 @@ class PaginaConsultarAndamentos extends PaginaTeste
         return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
     }
 
-    public function contemTramiteProcessoRecebido($strUnidadeDestino) 
+    public function contemTramiteProcessoRecebido($strUnidadeDestino)
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
@@ -31,11 +31,11 @@ class PaginaConsultarAndamentos extends PaginaTeste
         return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
     }
 
-    public function contemTramiteProcessoRejeitado($strUnidadeDestino, $strMotivo) 
+    public function contemTramiteProcessoRejeitado($strUnidadeDestino, $strMotivo)
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
         $mensagemTramite = "O processo foi recusado pelo orgão $strUnidadeDestino pelo seguinte motivo: $strMotivo";
         return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
-    }    
+    }
 }

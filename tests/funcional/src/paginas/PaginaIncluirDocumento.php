@@ -14,8 +14,6 @@ class PaginaIncluirDocumento extends PaginaTeste
 	public function __construct($test)
     {
         parent::__construct($test);
-        $test->frame(NULL);
-        $test->frame("ifrVisualizacao");
     }
 
     public function selecionarTipoDocumento($tipoDocumento)
@@ -45,28 +43,25 @@ class PaginaIncluirDocumento extends PaginaTeste
     }
 
     public function tipoDocumento($value)
-    {                
-        $input = $this->test->byId("selSerie");        
+    {
+        $input = $this->test->byId("selSerie");
         $this->test->select($input)->selectOptionByLabel($value);
-        //TODO: Necessário corrigir retorno do função
-        //return $this->test->select($input)->selectedLabel();
     }
 
     public function formato($value)
     {
         if($value != self::STA_FORMATO_NATO_DIGITAL)
             throw new Exception("Outros formatos não implementados em PaginaIncluirDocumento");
-            
+
         $this->test->byId("divOptNato")->click();
     }
 
-    #return $this->test->byXPath("//table[@id='tblAnexos']//tr[2]/td[2]")->text();
     public function anexo($arquivo)
-    {   
-        $input = $this->test->byId("filArquivo"); 
+    {
+        $input = $this->test->byId("filArquivo");
         $input->value($arquivo);
         $this->test->waitUntil(function($testCase) use($arquivo) {
-            $testCase->assertContains(basename($arquivo), $testCase->byCssSelector('body')->text());
+            $testCase->assertStringContainsString(basename($arquivo), $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
     }
@@ -127,7 +122,7 @@ class PaginaIncluirDocumento extends PaginaTeste
         sleep(2);
 
         $dadosDocumento = $dadosDocumento ?: array();
-        $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Ofício";
+        $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Of�cio";
         $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: util::random_string(20);
         $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: util::random_string(100);
         $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: util::random_string(40);
@@ -144,18 +139,18 @@ class PaginaIncluirDocumento extends PaginaTeste
         $url = parse_url($this->test->byId("ifrArvoreHtml")->attribute("src"));
         parse_str($url['query'], $query);
         $dadosDocumento["ID_DOCUMENTO"] = $query["id_documento"];
-        
+
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");                
-        $this->test->window($this->test->windowHandles()[1]);        
+        $this->test->frame("ifrVisualizacao");
+        $this->test->window($this->test->windowHandles()[1]);
         $this->test->closeWindow();
         $this->test->window('');
 
         $this->test->frame(NULL);
         $this->test->frame("ifrArvore");
-        
+
         return trim($this->test->byId('anchor' . $query["id_documento"])->text());
-    }    
+    }
 
     public function gerarDocumentoExternoTeste(array $dadosDocumento)
     {
@@ -165,10 +160,10 @@ class PaginaIncluirDocumento extends PaginaTeste
         sleep(2);
 
         $dadosDocumento = $dadosDocumento ?: array();
-        $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Ofício";
+        $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Of�cio";
         $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: util::random_string(20);
         $dadosDocumento["DATA_ELABORACAO"] = @$dadosDocumento["DATA_ELABORACAO"] ?: date("d/m/Y");
-        $dadosDocumento["FORMATO_DOCUMENTO"] = @$dadosDocumento["FORMATO_DOCUMENTO"] ?: self::STA_FORMATO_NATO_DIGITAL;        
+        $dadosDocumento["FORMATO_DOCUMENTO"] = @$dadosDocumento["FORMATO_DOCUMENTO"] ?: self::STA_FORMATO_NATO_DIGITAL;
         $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: util::random_string(100);
         $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: util::random_string(40);
         $dadosDocumento["RESTRICAO"] = @$dadosDocumento["RESTRICAO"] ?: PaginaIncluirDocumento::STA_NIVEL_ACESSO_PUBLICO;
@@ -177,8 +172,8 @@ class PaginaIncluirDocumento extends PaginaTeste
         $this->selecionarTipoDocumentoExterno();
         sleep(2);
         $this->tipoDocumento($dadosDocumento["TIPO_DOCUMENTO"]);
-        sleep(2);        
-        
+        sleep(2);
+
         $this->dataElaboracao($dadosDocumento["DATA_ELABORACAO"]);
         $this->formato($dadosDocumento["FORMATO_DOCUMENTO"]);
         $this->anexo($dadosDocumento["ARQUIVO"]);
@@ -188,5 +183,5 @@ class PaginaIncluirDocumento extends PaginaTeste
 
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
-    }        
+    }
 }

@@ -1,6 +1,6 @@
 <?php
 
-use PHPUnit_Extensions_Selenium2TestCase_Keys as Keys;
+use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 class PaginaAssinaturaDocumento extends PaginaTeste
 {

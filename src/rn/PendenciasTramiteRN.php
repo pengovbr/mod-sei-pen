@@ -14,9 +14,8 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_PROCESSOS_MONITORAMENTO = 1;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%02d %s %s %s %s >/dev/null 2>&1 &';
+    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s --worker=%02d %s %s %s %s >/dev/null 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
-
 
     private $objPenDebug = null;
     private $strEnderecoServico = null;
@@ -51,14 +50,6 @@ class PendenciasTramiteRN extends InfraRN
         $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
         $this->strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
         $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
-
-        if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-            throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
-        }
-
-        if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
-        }
     }
 
 
@@ -78,6 +69,8 @@ class PendenciasTramiteRN extends InfraRN
             global $bolEmExecucao;
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
+
+            $this->validarCertificado();
 
             PENIntegracao::validarCompatibilidadeModulo();
 
@@ -150,6 +143,27 @@ class PendenciasTramiteRN extends InfraRN
         }
 
         return self::CODIGO_EXECUCAO_SUCESSO;
+    }
+
+
+    /**
+     * Valida a correta parametrização do certificado digital
+     *
+     * @return void
+     */
+    private function validarCertificado()
+    {
+        if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
+            throw new InfraException('Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informado.');
+        }
+
+        if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
+            throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
+        }
+
+        if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
+            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
+        }
     }
 
     /**
@@ -490,13 +504,12 @@ class PendenciasTramiteRN extends InfraRN
                         $strParametroMonitorar, $strParametroSegundoPlano, $strParametroDebugAtivo, $strParametroWsdlCache
                     );
 
-
                     shell_exec($strComandoInicializacao);
 
                     // Verifica se monitoramento de tarefas foi iniciado corretamente, finalizando o laço para não
                     // permitir que mais de um monitoramento esteja iniciado
-                    sleep(1);
                     exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
+
                     if($numCodigoResposta == 0){
                         break;
                     }

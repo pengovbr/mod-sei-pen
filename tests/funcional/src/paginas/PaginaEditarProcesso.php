@@ -1,7 +1,7 @@
 <?php
 
 use \utilphp\util;
-use PHPUnit_Extensions_Selenium2TestCase_Keys as Keys;
+use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 class PaginaEditarProcesso extends PaginaTeste
 {
@@ -26,7 +26,7 @@ class PaginaEditarProcesso extends PaginaTeste
         $input = $this->test->byId("txaObservacoes");
         if(isset($value)) $input->value($value);
         return $input->value();
-    }    
+    }
 
     public function protocoloInformado($value = null)
     {
@@ -60,7 +60,7 @@ class PaginaEditarProcesso extends PaginaTeste
         if($this->test->byId("optPublico")->selected())
             return self::STA_NIVEL_ACESSO_PUBLICO;
         else if($this->test->byId("optRestrito")->selected())
-            return self::STA_NIVEL_ACESSO_RESTRITO; 
+            return self::STA_NIVEL_ACESSO_RESTRITO;
         else if($this->test->byId("optSigiloso")->selected())
             return self::STA_NIVEL_ACESSO_SIGILOSO;
 
@@ -81,7 +81,7 @@ class PaginaEditarProcesso extends PaginaTeste
         }
     }
 
-    public function listarInteressados() 
+    public function listarInteressados()
     {
         $options = $this->test->byId('selInteressadosProcedimento')->elements($this->test->using('css selector')->value('option'));
         return array_map(function($opt) {return $opt->text();}, $options);
@@ -97,7 +97,7 @@ class PaginaEditarProcesso extends PaginaTeste
         if(isset($staNivelRestricao))
         {
             $this->restricao($staNivelRestricao);
-            
+
             if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO)
             {
                 $select = $this->test->select($this->byId('selHipoteseLegal'));

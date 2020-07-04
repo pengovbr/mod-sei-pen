@@ -15,16 +15,17 @@ class PaginaDocumento extends PaginaTeste
     public function navegarParaAssinarDocumento()
     {
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
+        $this->test->frame("ifrVisualizacao");
     	$this->test->byXPath("//img[@alt='Assinar Documento']")->click();
     }
 
     public function navegarParaConsultarDocumento()
     {
+        sleep(2);
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
+        $this->test->frame("ifrVisualizacao");
         $this->test->byXPath("//img[contains(@alt, 'Consultar/Alterar Documento')]")->click();
-    }    
+    }
 
     public function descricao($value = null)
     {
@@ -41,7 +42,7 @@ class PaginaDocumento extends PaginaTeste
     }
 
     public function observacoesNaTabela($value = null)
-    {   
+    {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
         return $this->test->byXPath("//table[@class='infraTable']//tr[2]/td[2]")->text();
@@ -54,7 +55,7 @@ class PaginaDocumento extends PaginaTeste
         return $input->value();
     }
 
-    public function nomeAnexo() 
+    public function nomeAnexo()
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
@@ -76,7 +77,7 @@ class PaginaDocumento extends PaginaTeste
         }
     }
 
-    public function listarInteressados() 
+    public function listarInteressados()
     {
         $options = $this->test->byId('selInteressadosProcedimento')->elements($this->test->using('css selector')->value('option'));
         return array_map(function($opt) {return $opt->text();}, $options);
@@ -100,7 +101,7 @@ class PaginaDocumento extends PaginaTeste
         if($this->test->byId("optPublico")->selected())
             return self::STA_NIVEL_ACESSO_PUBLICO;
         else if($this->test->byId("optRestrito")->selected())
-            return self::STA_NIVEL_ACESSO_RESTRITO; 
+            return self::STA_NIVEL_ACESSO_RESTRITO;
         else if($this->test->byId("optSigiloso")->selected())
             return self::STA_NIVEL_ACESSO_SIGILOSO;
 
@@ -111,7 +112,7 @@ class PaginaDocumento extends PaginaTeste
         if(isset($staNivelRestricao))
         {
             $this->restricao($staNivelRestricao);
-            
+
             if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO)
             {
                 $select = $this->test->select($this->byId('selHipoteseLegal'));
@@ -139,5 +140,5 @@ class PaginaDocumento extends PaginaTeste
     public function salvarDocumento()
     {
         $this->test->byId("btnSalvar")->click();
-    }    
+    }
 }

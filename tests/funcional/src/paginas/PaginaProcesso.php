@@ -21,45 +21,45 @@ class PaginaProcesso extends PaginaTeste
     public function incluirDocumento()
     {
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
+        $this->test->frame("ifrVisualizacao");
         $incluirDocumentoButton = $this->test->byXPath("//img[@alt='Incluir Documento']");
         $incluirDocumentoButton->click();
     }
 
     public function enviarProcesso()
-    {        
+    {
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
+        $this->test->frame("ifrVisualizacao");
         $this->test->byXPath("//img[@alt='Enviar Processo']")->click();
     }
 
     public function cancelarTramitacaoExterna()
     {
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
+        $this->test->frame("ifrVisualizacao");
         $this->test->byXPath("//img[@alt='Cancelar Tramitação Externa']")->click();
     }
 
     public function navegarParaEditarProcesso()
     {
         $this->test->frame(null);
-        $this->test->frame("ifrVisualizacao");        
-        $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar/Alterar Processo']");   
+        $this->test->frame("ifrVisualizacao");
+        $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar/Alterar Processo']");
         $this->editarProcessoButton->click();
     }
 
     public function navegarParaTramitarProcesso()
     {
         $this->test->waitUntil(function($testCase) {
-            // Selecionar processo na árvore
+            // Selecionar processo na �rvore
             $this->selecionarProcesso();
 
             $this->test->frame(null);
-            $this->test->frame("ifrVisualizacao");  
-            $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Envio Externo de Processo']");   
+            $this->test->frame("ifrVisualizacao");
+            $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Envio Externo de Processo']");
             $this->editarProcessoButton->click();
             sleep(2);
-            $testCase->assertContains('Envio Externo de Processo', $testCase->byCssSelector('body')->text());
+            $testCase->assertStringContainsString('Envio Externo de Processo', $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
     }
@@ -68,13 +68,13 @@ class PaginaProcesso extends PaginaTeste
     {
         $this->test->waitUntil(function($testCase) {
             $this->test->frame(null);
-            $this->test->frame("ifrArvore");      
+            $this->test->frame("ifrArvore");
             $testCase->byLinkText('Consultar Andamento')->click();
 
             $this->test->frame(null);
-            $this->test->frame("ifrVisualizacao");  
-            sleep(2);              
-            $testCase->assertContains('Histórico do Processo', $testCase->byCssSelector('body')->text());
+            $this->test->frame("ifrVisualizacao");
+            sleep(2);
+            $testCase->assertStringContainsString('Histórico do Processo', $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
     }
@@ -86,14 +86,14 @@ class PaginaProcesso extends PaginaTeste
             $this->selecionarProcesso();
 
             $this->test->frame(null);
-            $this->test->frame("ifrVisualizacao");  
-            $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar Recibos']");   
+            $this->test->frame("ifrVisualizacao");
+            $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar Recibos']");
             $this->editarProcessoButton->click();
             sleep(2);
-            $testCase->assertContains('Consultar Recibos', $testCase->byCssSelector('body')->text());
+            $testCase->assertStringContainsString('Consultar Recibos', $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
-    }    
+    }
 
     public function informacao()
     {
@@ -135,7 +135,7 @@ class PaginaProcesso extends PaginaTeste
     private function selecionarItemArvore($nomeArvore)
     {
         $this->test->frame(null);
-        $this->test->frame("ifrArvore");     
+        $this->test->frame("ifrArvore");
         $this->test->byLinkText($nomeArvore)->click();
     }
 
@@ -150,7 +150,7 @@ class PaginaProcesso extends PaginaTeste
         sleep(1);
     }
 
-    public function listarDocumentos() 
+    public function listarDocumentos()
     {
         $itens = $this->listarArvoreProcesso();
         return (count($itens) > 1) ? array_slice($itens, 1) : null;

@@ -1,0 +1,2 @@
+https://archive.org/download/arquivo_pdf_testes/arquivo_pequeno.txt
+https://archive.org/download/arquivo_pdf_testes/arquivo_corrompimento_besimplesoap.pdf

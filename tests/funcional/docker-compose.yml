@@ -1,0 +1,109 @@
+version: '2'
+
+services:
+
+### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
+  smtp:
+      image: guilhermeadc/sei3_mailcatcher
+      container_name: smtp
+      ports:
+        - "1080:1080"
+
+  memcached:
+    image: guilhermeadc/sei3_memcached
+    container_name: memcached
+    ports:
+      - "11211:11211"
+
+  proxy:
+    image: diouxx/apache-proxy
+    container_name: proxy
+    ports:
+      - "80:80"
+    volumes:
+      - ./conf/proxy/:/opt/proxy-conf
+    links:
+      - org1-http:org1-http
+      - org2-http:org2-http
+
+  selenium:
+    image: selenium/standalone-chrome-debug
+    container_name: selenium
+    links:
+      - proxy:org1-http
+      - proxy:org2-http
+    ports:
+      - "4444:4444"
+      - "5900:5900"
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./conf/fixtures/test_files_index.txt:/tmp/test_files_index.txt
+
+
+### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
+
+  org1-database:
+    image: ${ORG1_DATABASE_IMAGE}
+    container_name: org1-${ORG1_DATABASE_NAME}
+    ports:
+      - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
+      
+  org1-http:
+    image: guilhermeadc/sei3_httpd-2.4
+    container_name: org1-http
+    dns: "8.8.8.8"
+    volumes:
+      - ${SEI_PATH}:/opt
+      - /var/sei/arquivos
+      - ../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../src/bin:/opt/sei/bin/mod-pen
+      - ../../src:/opt/sei/web/modulos/pen
+      - ./conf/config:/opt/sei/config/mod-pen
+      - ./conf/cron.d:/etc/cron.d
+    environment:
+      - SEI_HOST_URL=http://${ORG1_HOSTNAME}
+      - CERTIFICADO=${ORG1_CERTIFICADO}
+      - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
+      - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+    extra_hosts:
+      - "${ORG1_HOSTNAME}:127.0.0.1"
+    links:
+      - memcached:memcached    
+      - smtp:smtp      
+      - org1-database:${ORG1_DATABASE_NAME}
+
+
+### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
+
+  org2-database:
+    image: ${ORG2_DATABASE_IMAGE}
+    container_name: org2-${ORG2_DATABASE_NAME}
+    ports:
+      - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
+
+
+  org2-http:
+    image: guilhermeadc/sei3_httpd-2.4
+    container_name: org2-http
+    dns: "8.8.8.8"
+    volumes:
+      - ${SEI_PATH}:/opt
+      - /var/sei/arquivos
+      - ../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../src/bin:/opt/sei/bin/mod-pen
+      - ../../src:/opt/sei/web/modulos/pen
+      - ./conf/config:/opt/sei/config/mod-pen
+      - ./conf/cron.d:/etc/cron.d
+    environment:
+      - SEI_HOST_URL=http://${ORG2_HOSTNAME}
+      - CERTIFICADO=${ORG2_CERTIFICADO}
+      - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+      - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+    extra_hosts:
+      - "${ORG2_HOSTNAME}:127.0.0.1"
+    links:
+      - memcached:memcached    
+      - smtp:smtp      
+      - org2-database:${ORG2_DATABASE_NAME}

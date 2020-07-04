@@ -27,7 +27,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);
-    InfraDebug::getInstance()->setBolEcho(true);
+    InfraDebug::getInstance()->setBolEcho(false);
     InfraDebug::getInstance()->limpar();
 
     try {

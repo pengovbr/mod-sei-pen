@@ -9,10 +9,17 @@ class ParameterUtils{
     const PARAM_NUMERO_INFORMADO_PROTOCOLO = 1;
     const PARAM_NUMERO_INFORMADO_UNIDADES = 2;
 
+    private $databaseUtils;
+
+    function __construct($nomeContexto)
+    {
+        $this->databaseUtils = new DatabaseUtils($nomeContexto);
+    }
+
 	public function getParameter($parameter){
 		$result = null;
-		$query = "SELECT valor FROM sei.infra_parametro WHERE nome = ?";
-		$values = DatabaseUtils::query($query, array($parameter));
+		$query = "SELECT valor FROM sei.md_pen_parametro WHERE nome = ?";
+		$values = $this->databaseUtils->query($query, array($parameter));
 
 		if(isset($values)){
 			$result = $values[0]["valor"];
@@ -22,8 +29,8 @@ class ParameterUtils{
 	}
 
 	public function setParameter($parameter, $value){
-		$query = "UPDATE sei.infra_parametro SET valor = ? WHERE nome = ?";
-		DatabaseUtils::execute($query, array($value, $parameter));
+		$query = "UPDATE sei.md_pen_parametro SET valor = ? WHERE nome = ?";
+		$this->databaseUtils->execute($query, array($value, $parameter));
 		return $value;
 	}
 }

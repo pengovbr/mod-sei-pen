@@ -160,10 +160,6 @@ try {
     $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'].'&id_procedimento='.$_GET['id_procedimento'];
     $strTitulo = 'Consultar Recibos';
 
-    //$arrComandos = array();
-    //$arrComandos[] = '<button type="button" accesskey="P" onclick="pesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-    //$arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-
     if(!array_key_exists('id_procedimento', $_GET) || empty($_GET['id_procedimento'])) {
 
         throw new InfraException('Código do procedimento não foi informado');
@@ -183,11 +179,10 @@ try {
 
     $objPaginaSEI = PaginaSEI::getInstance();
     $objPaginaSEI->setTipoPagina(InfraPagina::$TIPO_PAGINA_SIMPLES);
-    //$objPaginaSEI->prepararOrdenacao($objProcedimentoAndamentoDTO, 'IdProcedimento', InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPaginaSEI->prepararPaginacao($objProcedimentoAndamentoDTO);
 
-    $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
-    $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->listar($objProcedimentoAndamentoDTO);
+    $objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
+    $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoRN->listar($objProcedimentoAndamentoDTO);
 
     $objPaginaSEI->processarPaginacao($objProcedimentoAndamentoDTO);
 
@@ -288,16 +283,17 @@ $objPaginaSEI->abrirStyle();
 
 #lblContextoSubstituicao {position:absolute;left:0%;top:62%;}
 #txtContextoSubstituicao {position:absolute;left:0%;top:77%;width:50%;}
-</style>
-<?php $objPaginaSEI->montarJavaScript(); ?>
-<script type="text/javascript">
+
+<?php
+$objPaginaSEI->fecharStyle();
+$objPaginaSEI->montarJavaScript();
+$objPaginaSEI->abrirJavaScript();
+?>
+
 var objAutoCompletarInteressadoRI1225 = null;
 
 function inicializar(){
-
   infraEfeitoTabelas();
-  document.getElementById('txtTextoPesquisa').focus();
-
 }
 
 function toggleTr(number, obj) {
@@ -323,19 +319,13 @@ function tratarEnter(ev){
     return true;
 }
 <?php
-$objPaginaSEI->fecharStyle();
+$objPaginaSEI->fecharJavaScript();
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
 <form id="frmAcompanharEstadoProcesso" method="post" action="<?php print $objSessaoSEI->assinarLink($strProprioLink); ?>">
   <?php if($numRegistros > 0): ?>
-        <?php //$objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
-        <?php /*$objPaginaSEI->abrirAreaDados('12em'); ?>
-        <label id="lblTextoPesquisa" class="infraLabel" tabindex="<?=$objPaginaSEI->getProxTabDados()?>">Pesquisar em ação:</label>
-        <input type="text" name="txtTextoPesquisa" id="txtTextoPesquisa" onkeyup="return tratarEnter(event);" class="infraText" value="<?php echo $_POST['txtTextoPesquisa']; ?>"/>
-        <?php $objPaginaSEI->fecharAreaDados();*/ ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
-        <?php //$objPaginaSEI->montarAreaDebug(); ?>
     <?php else: ?>
         <div style="clear:both"></div>
         <p>Nenhum trâmite realizado para esse processo.</p>
