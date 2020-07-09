@@ -47,7 +47,6 @@ class ReceberReciboTramiteRN extends InfraRN
                 "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
             );
 
-            //if($this->sinalizarInicioRecebimento($arrChavesSincronizacao)){
             if($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)){
                 $this->receberReciboDeTramiteInterno($objReciboTramite);
             }

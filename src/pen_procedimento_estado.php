@@ -87,7 +87,6 @@ try {
 
                 break;
 
-            // @join_tec US008.03 (#23092)
             case 'baixarReciboRecebimento':
                 header('Content-Disposition: attachment; filename="recibo_de_conclusao_do_tramite.xml"');
 
@@ -206,10 +205,7 @@ try {
 
         $strResultado = '';
         $strResultado .= '<table width="99%" class="infraTable">'."\n";
-        //$strResultado .= '<caption class="infraCaption">'.$objPaginaSEI->gerarCaptionTabela('estados do processo', $numRegistros).'</caption>';
-
         $strResultado .= '<tr>';
-        //$strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
         $strResultado .= '<th class="infraTh" width="20%">Data</th>'."\n";
         $strResultado .= '<th class="infraTh">Operação</th>'."\n";
         $strResultado .= '<th class="infraTh" width="15%">Situação</th>'."\n";
@@ -218,22 +214,18 @@ try {
 
         $idCount = 1;
         foreach($arrAgruparProcedimentoAndamentoDTO as $key => $arrObjProcedimentoAndamentoDTO) {
-
             list($dblIdTramite, $numIdEstrutura, $numTarefa) = explode('-', $key);
-
             $objReturn = PenAtividadeRN::retornaAtividadeDoTramiteFormatado($dblIdTramite, $numIdEstrutura, $numTarefa);
-
             $strResultado .= '<tr>';
             $strResultado .= '<td valign="middle" colspan="2">'
                 . '<img class="imagPlus" align="absbottom" src="/infra_js/arvore/plus.gif" onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
                 . ''.$objReturn->strMensagem.'</td>';
             $strResultado .= '<td valign="middle" align="center">';
 
-            // @join_tec US008.03 (#23092) | @join_tec US008.13 (#23092)
             if($numTarefa == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
                 $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboEnvio&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_red.png" alt="Recibo de Confirmação de Envio" title="Recibo de Confirmação de Envio" /></a>';
             }
-            // @join_tec US008.01 (#23092)
+
             if($objReturn->bolReciboExiste) {
                 $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboRecebimento&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_green.png" alt="Recibo de Conclusão de Trâmite" title="Recibo de Conclusão de Trâmite" /></a>';
             }

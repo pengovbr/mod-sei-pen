@@ -15,7 +15,8 @@ class DatabaseUtils
 
 	public function execute($sql, $params){
 		$statement = $this->connection->prepare($sql);
-		return $statement->execute($params);
+        $result = $statement->execute($params);
+        return $result;
 	}
 
 

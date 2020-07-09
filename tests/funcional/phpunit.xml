@@ -12,7 +12,7 @@
     <const name="PHPUNIT_PORT" value="4444"/>  
     <const name="PHPUNIT_BROWSER" value="chrome"/>
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
-    <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.pen.api.trafficmanager.net/interoperabilidade/soap/v2/?wsdl"/>
+    <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/?wsdl"/>
 
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" /> 
@@ -39,10 +39,10 @@
     <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO" value="Ofício" />
     <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO" value="Voto" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
-    <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
+    <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_A_CARGO_ASSINATURA" value="Assessor(a)" />       
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-    <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="arquivos/certificado_digital.pem" />
+    <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org1.pem" />
     <const name="CONTEXTO_ORGAO_A_SENHA_CERTIFICADO_DIGITAL" value="1234" />
     <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33061;dbname=sei;" />
     <const name="CONTEXTO_ORGAO_A_DB_SEI_USER" value="sei_user" />
@@ -68,28 +68,46 @@
     <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO" value="Ofício" />
     <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO" value="Nota" />           
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />    
-    <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Operações Bancárias (Art. 1º da Lei Complementar nº 105/2001)" />
+    <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_B_CARGO_ASSINATURA" value="Assessor(a)" />       
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-    <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="arquivos/certificado_digital.pem" />
+    <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org2.pem" />
     <const name="CONTEXTO_ORGAO_B_SENHA_CERTIFICADO_DIGITAL" value="1234" />
     <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33062;dbname=sei;" />
     <const name="CONTEXTO_ORGAO_B_DB_SEI_USER" value="sei_user" />
     <const name="CONTEXTO_ORGAO_B_DB_SEI_PASSWORD" value="sei_user" />
   </php>
+<!-- 
+  <filter>
+      <whitelist processUncoveredFilesFromWhitelist="true">
+          <directory suffix=".php">../../../src</directory>
+      </whitelist>
+  </filter> 
+-->
 
   <testsuites>
-    <testsuite name="all">
+    <testsuite name="funcional">
         <file>tests/TramiteProcessoContendoDocumentoGeradoTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest.php</file>        
+        <file>tests/TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoExternoTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest.php</file>
+        <file>tests/TramiteProcessoValidacaoEnvioTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoInternoExternoTest.php</file>
         <file>tests/TramiteProcessoContendoVariosDocumentosTest.php</file>
         <file>tests/TramiteProcessoComDevolucaoTest.php</file>
-        <file>tests/TramiteProcessoDocumentoNaoMapeadoOrigemTest.php</file>      
-        <file>tests/TramiteProcessoDocumentoNaoMapeadoDestinoTest.php</file>              
+        <file>tests/TramiteProcessoDocumentoNaoMapeadoOrigemTest.php</file>
+        <file>tests/TramiteProcessoDocumentoNaoMapeadoDestinoTest.php</file>
+        <file>tests/TramiteProcessoRestritoTest.php</file>
+        <file>tests/TramiteProcessoComDocumentoRestritoTest.php</file>
+        <file>tests/TramiteProcessoRestritoHipotesePadraoTest.php</file>
+        <file>tests/TramiteProcessoComDocumentoRestritoHipotesePadraoTest.php</file>
+        <file>tests/CancelamentoTramiteProcessoTest.php</file>
+        <file>TramiteProcessoExtensaoNaoMapeadoDestinoTest</file>
+        <file>TramiteProcessoComDevolucaoUnidadeDiferenteTest</file>
+        <file>TramiteProcessoContendoDocumentoExternoParticionadoTest</file>
+        <file>TramiteProcessoTamanhoAcimaLimiteDestinoTest</file>
+        <file>tests/RecebimentoDocumentoAvulsoTest.php</file>
     </testsuite>
   </testsuites>
 </phpunit>

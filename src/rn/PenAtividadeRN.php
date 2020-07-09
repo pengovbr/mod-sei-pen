@@ -2,6 +2,9 @@
 /**
  *
  */
+
+use SebastianBergmann\Exporter\Exporter;
+
 require_once DIR_SEI_WEB.'/SEI.php';
 
 class PenAtividadeRN extends AtividadeRN {
@@ -91,6 +94,9 @@ class PenAtividadeRN extends AtividadeRN {
                         $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objBancoSEI);
                         $objReturn->bolReciboExiste = ($objReciboTramiteBD->contar($objReciboTramiteDTO) > 0) ? true : false;
                         break;
+
+                        default:
+                            throw new Exception("IDTarefa: numIdTarefa");
                 }
 
                 $objAtributoAndamentoDTO = new AtributoAndamentoDTO();

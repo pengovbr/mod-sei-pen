@@ -14,6 +14,7 @@ class ProcessarPendenciasRN extends InfraRN
     const TIMEOUT_PROCESSAMENTO_EVENTOS = 5000;
 
     const NUMERO_WORKERS_GEARMAN = 4;
+    const MAXIMO_WORKERS_GEARMAN = 10;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_EXECUCAO_WORKER = 'nohup php %s --worker=%02d >/dev/null 2>&1 &';
@@ -319,7 +320,7 @@ class ProcessarPendenciasRN extends InfraRN
     public static function inicializarWorkers($parNumQtdeWorkers=null)
     {
         $bolInicializado = false;
-        $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_WORKERS_GEARMAN;
+        $parNumQtdeWorkers = min($parNumQtdeWorkers ?: self::NUMERO_WORKERS_GEARMAN, self::MAXIMO_WORKERS_GEARMAN);
 
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);

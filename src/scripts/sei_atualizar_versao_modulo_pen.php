@@ -1790,6 +1790,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objPenParametroBD->alterar($objPenParametroDTO);
 
         try{
+            $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS PEN");
+            $objPENAgendamentoRN = new PENAgendamentoRN();
+            $objPENAgendamentoRN->atualizarHipotesesLegais();
+        } catch (\Exception $th) {
+            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do PEN pois serviço encontra-se inacessível\n";
+            $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+            $this->logar($strMensagemErroMapeamentoAutomatico);
+        }
+
+        try{
             $objPENAgendamentoRN = new PENAgendamentoRN();
             $objPENAgendamentoRN->atualizarEspeciesDocumentais();
         } catch (\Exception $th) {

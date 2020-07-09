@@ -222,7 +222,7 @@ class ReceberProcedimentoRN extends InfraRN
                 $parObjMetadadosProcedimento
             );
 
-            $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), $objProcedimentoDTO->getDblIdProcedimento());
+            $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $numIdTramite, $numIdTarefa, $objProcedimentoDTO->getDblIdProcedimento());
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Obtendo metadados do processo', 'S'));
 
             $this->gravarLogDebug("Registrando trâmite externo do processo", 2);
@@ -468,31 +468,6 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
 
-    /**
-     * Sinaliza o início de recebimento de um trâmite de processo, recibo de conclusão de trâmite ou uma recusa
-     *
-     * Esta sinalização é utilizada para sincronizar o processamento concorrente que possa existir entre todos os nós de aplicação do sistema,
-     * evitando inconsistências provocadas pelo cadastramentos simultâneos no sistema
-     *
-     * @param array $parArrChavesSincronizacao Chaves que serã utilizadas na sincronização do processamento
-     * @return void
-     */
-    // protected function sinalizarInicioRecebimentoControlado($parArrChavesSincronizacao)
-    // {
-    //     $strNumeroRegistro = $parArrChavesSincronizacao["NumeroRegistro"];
-    //     $numIdTramite = $parArrChavesSincronizacao["IdTramite"];
-    //     $numIdTarefa = $parArrChavesSincronizacao["IdTarefa"];
-
-    //     if(!$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $numIdTramite, $numIdTarefa)){
-    //         $this->gravarLogDebug("Trâmite de recebimento $numIdTramite já se encontra em processamento", 3);
-    //         return false;
-    //     }
-
-    //     $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $numIdTramite, $numIdTarefa);
-    //     $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Iniciando recebimento de processo externo', 'S'));
-
-    //     return true;
-    // }
 
     protected function listarPendenciasConectado()
     {

@@ -11,10 +11,11 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_MAXIMO_LOG_ERROS = 500;
     const CODIGO_EXECUCAO_SUCESSO = 0;
     const CODIGO_EXECUCAO_ERRO = 1;
-    const NUMERO_PROCESSOS_MONITORAMENTO = 1;
+    const NUMERO_PROCESSOS_MONITORAMENTO = 10;
+    const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s --worker=%02d %s %s %s %s >/dev/null 2>&1 &';
+    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s %s %s %s %s %s >/dev/null 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
 
     private $objPenDebug = null;
@@ -482,10 +483,10 @@ class PendenciasTramiteRN extends InfraRN
      * @param boolean $parBolSegundoPlano Indicação se será utilizado o processamento das tarefas em segundo plano com o Gearman
      * @return bool Monitoramento iniciado com sucesso
      */
-    public static function iniciarMonitoramentoPendencias($parNumQtdeWorkers=null, $parBolMonitorar=false, $parBolSegundoPlano=false, $parBolDebugAtivo=false)
+    public static function inicializarMonitoramentoPendencias($parNumQtdeWorkers=null, $parBolMonitorar=false, $parBolSegundoPlano=false, $parBolDebugAtivo=false, $parStrUsuarioProcesso=null)
     {
         $bolInicializado = false;
-        $parNumQtdeWorkers = $parNumQtdeWorkers ?: self::NUMERO_PROCESSOS_MONITORAMENTO;
+        $parNumQtdeWorkers = min($parNumQtdeWorkers ?: self::NUMERO_PROCESSOS_MONITORAMENTO, self::MAXIMO_PROCESSOS_MONITORAMENTO);
 
         try {
             for ($worker=0; $worker < $parNumQtdeWorkers; $worker++) {
@@ -498,9 +499,11 @@ class PendenciasTramiteRN extends InfraRN
                     $strParametroSegundoPlano = $parBolSegundoPlano ? "--segundo-plano" : "";
                     $strParametroDebugAtivo = $parBolDebugAtivo ? "--debug" : "";
                     $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
+                    $strIdWorker = sprintf("--worker=%02d", $worker);
+
                     $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
                     $strComandoInicializacao = sprintf(
-                        self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $worker,
+                        self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $strIdWorker,
                         $strParametroMonitorar, $strParametroSegundoPlano, $strParametroDebugAtivo, $strParametroWsdlCache
                     );
 

@@ -3,11 +3,15 @@
 use \utilphp\util;
 use PHPUnit\Extensions\Selenium2TestCase;
 
+use function PHPSTORM_META\map;
+
 /**
 * Classe base contendo rotinas comuns utilizadas nos casos de teste do módulo
 */
 class CenarioBaseTestCase extends Selenium2TestCase
 {
+    const PASTA_ARQUIVOS_TESTE = "/tmp";
+
     //Referência para unidades que serão consideradas no fluxo de trâmite (Remetente -> Destinatário)
     protected static $urlSistemaRemetente = null;
     protected static $siglaOrgaoRemetente = null;
@@ -50,11 +54,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     public static function setUpBeforeClass(): void
     {
-        // CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 1
+        /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 1 *****************/
         $parametrosOrgaoA = new ParameterUtils(CONTEXTO_ORGAO_A);
         $parametrosOrgaoA->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS);
         $parametrosOrgaoA->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
         $parametrosOrgaoA->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
+        $parametrosOrgaoA->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         // Configuração do mapeamento de unidades
@@ -68,13 +73,21 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select id_serie from serie where nome = ?', array($nomeSerieNaoMapeada));
         $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["id_serie"]));
+        $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(1, 3, 3, 'E', 'S'));
+        $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(2, 4, 4, 'E', 'S'));
+        $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(3, 3, 3, 'R', 'S'));
+
+        // Habilitação da extensão docx
+        $bancoOrgaoA->execute("update arquivo_extensao set sin_ativo=? where extensao=?", array('S', 'docx'));
 
 
-        // CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2
+        /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2 *****************/
         $parametrosOrgaoB = new ParameterUtils(CONTEXTO_ORGAO_B);
         $parametrosOrgaoB->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS);
         $parametrosOrgaoB->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
         $parametrosOrgaoB->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
+        $parametrosOrgaoB->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
+
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         // Configuração do mapeamento de unidades
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
@@ -86,6 +99,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select id_serie from serie where nome = ?', array($nomeSerieNaoMapeada));
         $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["id_serie"]));
+        $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
+        $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
     }
 
     public static function tearDownAfterClass(): void
@@ -145,7 +160,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_NAO_MAPEADO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_NAO_MAPEADO'),
             'REP_ESTRUTURAS' => constant($nomeContexto . '_REP_ESTRUTURAS'),
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
-            'LOCALIZACAO_CERTIFICADO_DIGITAL' => constant($nomeContexto . '_LOCALIZACAO_CERTIFICADO_DIGITAL'),
+            'LOCALIZACAO_CERTIFICADO_DIGITAL' => realpath(__DIR__ . constant($nomeContexto . '_LOCALIZACAO_CERTIFICADO_DIGITAL')),
             'SENHA_CERTIFICADO_DIGITAL' => constant($nomeContexto . '_SENHA_CERTIFICADO_DIGITAL'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
@@ -171,6 +186,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->byLinkText("Controle de Processos")->click();
         $this->paginaControleProcesso->abrirProcesso($protocolo);
+    }
+
+    protected function abrirProcessoPelaDescricao($descricao)
+    {
+        $this->byLinkText("Controle de Processos")->click();
+        $protocolo = $this->paginaControleProcesso->localizarProcessoPelaDescricao($descricao);
+        if($protocolo){
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+        }
+        return $protocolo;
     }
 
     protected function cadastrarDocumentoInterno($dadosDocumentoInterno)
@@ -301,7 +326,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
     }
 
-    protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria = false, $hipoteseLegal = null)
+    protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria=false, $hipoteseLegal=null)
     {
         sleep(2);
         $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
@@ -315,10 +340,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
             }
         } else {
             $this->assertNotNull($this->paginaDocumento->nomeAnexo());
-            $this->assertStringContainsString(basename($dadosDocumento['ARQUIVO']), $this->paginaDocumento->nomeAnexo());
-            if($hipoteseLegal != null){
-                $hipoteseLegalDocumento = $this->paginaDocumento->recuperarHipoteseLegal();
-                $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
+            $contemVariosComponentes = is_array($dadosDocumento['ARQUIVO']);
+            if(!$contemVariosComponentes) {
+                $nomeArquivo = $dadosDocumento['ARQUIVO'][0];
+                $this->assertStringContainsString(basename($nomeArquivo), $this->paginaDocumento->nomeAnexo());
+                if($hipoteseLegal != null){
+                    $hipoteseLegalDocumento = $this->paginaDocumento->recuperarHipoteseLegal();
+                    $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
+                }
             }
         }
     }
@@ -365,8 +394,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomeArquivo='arquivo_pequeno.txt')
+    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt')
     {
+        // Tratamento para lista de arquivos em casos de documentos com mais de um componente digital
+        $pasta = self::PASTA_ARQUIVOS_TESTE;
+        $arquivos = is_array($nomesArquivos) ? array_map(function($item) use ($pasta) { return "$pasta/$item";}, $nomesArquivos) : "$pasta/$nomesArquivos";
+
         return array(
             'TIPO' => 'R', // Documento do tipo Recebido pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
@@ -376,7 +409,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "OBSERVACOES" => util::random_string(100),
             "INTERESSADOS" => util::random_string(40),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
-            "ARQUIVO" => "/tmp/$nomeArquivo",
+            "ARQUIVO" => $arquivos,
             "ORIGEM" => $contextoProducao['URL'],
         );
     }
@@ -478,6 +511,39 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
         // 14 - Validar dados do documento
+        $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
+        $this->assertEquals(count($listaDocumentos), count($documentosTeste));
+
+        for ($i=0; $i < count($listaDocumentos); $i++) {
+            $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
+        }
+    }
+
+    public function realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentosTeste, $destinatario, $devolucao=false, $unidadeSecundaria=false)
+    {
+        $strProtocoloTeste = null;
+        $strDescricao = $documentosTeste['DESCRICAO'];
+
+        // Acessar sistema de REMETENTE do processo
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
+
+        // Abrir protocolo na tela de controle de processos pelo texto da descrição
+        $this->waitUntil(function($testCase) use ($strDescricao, &$strProtocoloProcesso){
+            sleep(5);
+            $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
+            $this->assertNotFalse($strProtocoloTeste);
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+
+        // Validar dados  do processo
+        $this->validarDadosProcesso($documentosTeste['DESCRICAO'], $documentosTeste['RESTRICAO'], null, array($documentosTeste['INTERESSADOS']));
+
+        // Verificar recibos de trâmite
+        $this->validarRecibosTramite("Recebimento do Documento $strProtocoloTeste", false, true);
+
+        // Validar dados do documento
         $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
         $this->assertEquals(count($listaDocumentos), count($documentosTeste));
 

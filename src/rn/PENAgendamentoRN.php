@@ -4,6 +4,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class PENAgendamentoRN extends InfraRN
 {
+    const WSDL_SERVICOS_PEN = 'http://127.0.0.1/sei/controlador_ws.php?servico=modpen';
+
     protected function inicializarObjInfraIBanco() {
         return BancoSEI::getInstance();
     }
@@ -197,19 +199,24 @@ class PENAgendamentoRN extends InfraRN
 
             $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
             $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
-            $bolGearmanConfigurado = !empty(trim(@$arrObjGearman["Servidor"] ?: null));
+            $bolExecutarEmSegundoPlano = !empty(trim(@$arrObjGearman["Servidor"] ?: null));
+
+            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on'){
+                $strServidor = str_replace('http://','https://',self::WSDL_SERVICOS_PEN);
+              }else{
+                $strServidor = str_replace('https://','http://',self::WSDL_SERVICOS_PEN);
+              }
+
+
+            $objPENWS = new SoapClient($strServidor, array('encoding'=>'ISO-8859-1'));
 
             // Inicializa workers do Gearman caso este componente esteja configurado e não desativado no agendamento do sistema
-            if($bolAtivaWorker && $bolGearmanConfigurado){
-                ProcessarPendenciasRN::inicializarWorkers($numValorWorkers);
+            if($bolAtivaWorker && $bolExecutarEmSegundoPlano){
+                $objPENWS->inicializarWorkers($numValorWorkers);
             }
 
-            // Consulta e processamento de pendências de recebimento de trâmites
-            //$objPendenciaTramiteRN = new PendenciasTramiteRN();
-            //$objPendenciaTramiteRN->encaminharPendencias(false, $bolGearmanConfigurado);
-
-            PendenciasTramiteRN::iniciarMonitoramentoPendencias($strValorWorkers, $bolMonitoramentoAtivado, $bolGearmanConfigurado, $bolDebugAtivo);
-
+            // Faz uma requisição para o controlador do sistema
+            $objPENWS->inicializarMonitoramentoPendencias($numValorWorkers, $bolMonitoramentoAtivado, $bolExecutarEmSegundoPlano, $bolDebugAtivo);
 
         }catch(Exception $e){
             InfraDebug::getInstance()->setBolLigado(false);

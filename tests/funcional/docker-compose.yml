@@ -21,7 +21,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./conf/proxy/:/opt/proxy-conf
+      - ./assets/proxy/:/opt/proxy-conf
     links:
       - org1-http:org1-http
       - org2-http:org2-http
@@ -37,7 +37,8 @@ services:
       - "5900:5900"
     volumes:
       - /dev/shm:/dev/shm
-      - ./conf/fixtures/test_files_index.txt:/tmp/test_files_index.txt
+      - ./assets/arquivos/test_files_index.txt:/tmp/test_files_index.txt
+      - /tmp:/tmp
 
 
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
@@ -59,8 +60,8 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
-      - ./conf/config:/opt/sei/config/mod-pen
-      - ./conf/cron.d:/etc/cron.d
+      - ./assets/config:/opt/sei/config/mod-pen
+      - ./assets/cron.d:/etc/cron.d
     environment:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
@@ -94,8 +95,8 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
-      - ./conf/config:/opt/sei/config/mod-pen
-      - ./conf/cron.d:/etc/cron.d
+      - ./assets/config:/opt/sei/config/mod-pen
+      - ./assets/cron.d:/etc/cron.d
     environment:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}

@@ -4,7 +4,6 @@ $dirSeiWeb = !defined("DIR_SEI_WEB") ? getenv("DIR_SEI_WEB") ?: __DIR__."/../../
 require_once $dirSeiWeb . '/SEI.php';
 
 // PHP internal, faz com que o tratamento de sinais funcione corretamente
-// TODO: Substituir declaração por pcntl_async_signal no php 7
 declare(ticks=1);
 
 $bolEmExecucao = true;
@@ -27,7 +26,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);
-    InfraDebug::getInstance()->setBolEcho(false);
+    InfraDebug::getInstance()->setBolEcho(true);
     InfraDebug::getInstance()->limpar();
 
     try {

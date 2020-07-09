@@ -1649,41 +1649,43 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $idProcedimento não informado.');
         }
 
+        $arrObjDocumentoDTO = null;
         $arrIdDocumentos = $this->listarSequenciaDocumentos($idProcedimento);
 
-        $objDocumentoDTO = new DocumentoDTO();
-        $objDocumentoDTO->retStrDescricaoUnidadeGeradoraProtocolo();
-        $objDocumentoDTO->retNumIdOrgaoUnidadeGeradoraProtocolo();
-        $objDocumentoDTO->retStrProtocoloProcedimentoFormatado();
-        $objDocumentoDTO->retStrSiglaUnidadeGeradoraProtocolo();
-        $objDocumentoDTO->retStrStaNivelAcessoLocalProtocolo();
-        $objDocumentoDTO->retStrProtocoloDocumentoFormatado();
-        $objDocumentoDTO->retNumIdUsuarioGeradorProtocolo();
-        $objDocumentoDTO->retStrStaProtocoloProtocolo();
-        $objDocumentoDTO->retNumIdUnidadeResponsavel();
-        $objDocumentoDTO->retStrStaEstadoProtocolo();
-        $objDocumentoDTO->retStrDescricaoProtocolo();
-        $objDocumentoDTO->retStrConteudoAssinatura();
-        $objDocumentoDTO->retDtaGeracaoProtocolo();
-        $objDocumentoDTO->retDblIdProcedimento();
-        $objDocumentoDTO->retDblIdDocumento();
-        $objDocumentoDTO->retStrNomeSerie();
-        $objDocumentoDTO->retNumIdSerie();
-        $objDocumentoDTO->retStrNumero();
-        $objDocumentoDTO->retNumIdTipoConferencia();
-        $objDocumentoDTO->retStrStaDocumento();
-        $objDocumentoDTO->retNumIdHipoteseLegalProtocolo();
-        $objDocumentoDTO->setDblIdDocumento($arrIdDocumentos, InfraDTO::$OPER_IN);
+        if(!empty($arrIdDocumentos)){
+            $objDocumentoDTO = new DocumentoDTO();
+            $objDocumentoDTO->retStrDescricaoUnidadeGeradoraProtocolo();
+            $objDocumentoDTO->retNumIdOrgaoUnidadeGeradoraProtocolo();
+            $objDocumentoDTO->retStrProtocoloProcedimentoFormatado();
+            $objDocumentoDTO->retStrSiglaUnidadeGeradoraProtocolo();
+            $objDocumentoDTO->retStrStaNivelAcessoLocalProtocolo();
+            $objDocumentoDTO->retStrProtocoloDocumentoFormatado();
+            $objDocumentoDTO->retNumIdUsuarioGeradorProtocolo();
+            $objDocumentoDTO->retStrStaProtocoloProtocolo();
+            $objDocumentoDTO->retNumIdUnidadeResponsavel();
+            $objDocumentoDTO->retStrStaEstadoProtocolo();
+            $objDocumentoDTO->retStrDescricaoProtocolo();
+            $objDocumentoDTO->retStrConteudoAssinatura();
+            $objDocumentoDTO->retDtaGeracaoProtocolo();
+            $objDocumentoDTO->retDblIdProcedimento();
+            $objDocumentoDTO->retDblIdDocumento();
+            $objDocumentoDTO->retStrNomeSerie();
+            $objDocumentoDTO->retNumIdSerie();
+            $objDocumentoDTO->retStrNumero();
+            $objDocumentoDTO->retNumIdTipoConferencia();
+            $objDocumentoDTO->retStrStaDocumento();
+            $objDocumentoDTO->retNumIdHipoteseLegalProtocolo();
+            $objDocumentoDTO->setDblIdDocumento($arrIdDocumentos, InfraDTO::$OPER_IN);
 
-        $arrObjDocumentoDTOBanco = $this->objDocumentoRN->listarRN0008($objDocumentoDTO);
-        $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
+            $arrObjDocumentoDTOBanco = $this->objDocumentoRN->listarRN0008($objDocumentoDTO);
+            $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
 
-        //Mantem ordenação definida pelo usuário
-        $arrObjDocumentoDTO = array();
-        foreach($arrIdDocumentos as $dblIdDocumento){
-            if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
-                //$arrObjDocumentoDTO[$dblIdDocumento] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
-                $arrObjDocumentoDTO[] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+            //Mantem ordenação definida pelo usuário
+            $arrObjDocumentoDTO = array();
+            foreach($arrIdDocumentos as $dblIdDocumento){
+                if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
+                    $arrObjDocumentoDTO[] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+                }
             }
         }
 
@@ -1942,7 +1944,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     {
         $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
         if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
-            $objInfraException->adicionarValidacao('Não é possível trâmitar um processo sem documentos', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('Não é possível tramitar um processo sem documentos', $strAtributoValidacao);
         }
     }
 
@@ -1960,11 +1962,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function validarDadosDocumentos(InfraException $objInfraException, $arrDocumentoDTO, $strAtributoValidacao = null)
     {
         if(!empty($arrDocumentoDTO)) {
-
             $objDocMapDTO = new PenRelTipoDocMapEnviadoDTO();
             $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
             $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
-
             $strMapeamentoEnvioPadrao = $this->objPenParametroRN->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
 
             foreach($arrDocumentoDTO as $objDocumentoDTO) {
@@ -1982,13 +1982,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                 }
 
                 if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
-
                     $objHipoteseLegalDTO = new HipoteseLegalDTO();
                     $objHipoteseLegalDTO->setNumIdHipoteseLegal($objDocumentoDTO->getNumIdHipoteseLegalProtocolo());
                     $objHipoteseLegalDTO->retStrNome();
                     $objHipoteseLegalRN = new HipoteseLegalRN();
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-
                     $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
                 }
             }
@@ -2008,14 +2006,14 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
             $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
-            $objInfraException->adicionarValidacao("Não é possível trâmitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
+            $objInfraException->adicionarValidacao("Não é possível tramitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
         }
     }
 
     private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
     {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
-            $objInfraException->adicionarValidacao('Não é possível trâmitar um processo com informações sigilosas.', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('Não é possível tramitar um processo com informações sigilosas.', $strAtributoValidacao);
         }
     }
 
@@ -2025,10 +2023,21 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param ProcedimentoDTO $objProcedimentoDTO
     * @param string $strAtributoValidacao
     */
-    private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null) {
+    private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao=null)
+    {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
-                $objInfraException->adicionarValidacao('Não é possível trâmitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+                $objInfraException->adicionarValidacao('Não é possível tramitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+            }
+
+            $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+            if (!empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()))) {
+                $objHipoteseLegalDTO = new HipoteseLegalDTO();
+                $objHipoteseLegalDTO->setNumIdHipoteseLegal($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
+                $objHipoteseLegalDTO->retStrNome();
+                $objHipoteseLegalRN = new HipoteseLegalRN();
+                $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+                $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
             }
         }
     }
@@ -2064,7 +2073,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         if($bolAssinaturaCorretas !== true) {
-            $objInfraException->adicionarValidacao('Não é possível trâmitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('Não é possível tramitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
         }
     }
 
@@ -2076,7 +2085,6 @@ class ExpedirProcedimentoRN extends InfraRN {
     */
     public function validarPreCondicoesExpedirProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
     {
-        //TODO: Validar pr-condies dos processos e documentos apensados
         $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
 

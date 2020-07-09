@@ -9,6 +9,7 @@ SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-VERSAO.zip
 PEN_TEST_FUNC = tests/funcional
+HOST_IP=$$(hostname -I | cut -d' ' -f1)
 
 
 all: clean build
@@ -34,7 +35,7 @@ build:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALL.md sei/ sip/
+	@cd dist/ && zip -r mod-sei-pen-VERSAO INSTALL.md sei/ sip/
 	@rm -rf dist/sei dist/sip dist/INSTALL.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
@@ -53,8 +54,7 @@ install:
 
 
 test-provision:	
-	export HOST_IP=$$(hostname -I | cut -d' ' -f1)	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
@@ -73,16 +73,22 @@ test-provision-destroy:
 
 
 test-funcional:
-	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite all
+	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 
 
-test-funcional-parelelo:
-	tests/funcional/vendor/bin/paratest --runner=WrapperRunner -p7 -c phpunit.xml --testsuite all
+test-funcional-paralelo:
+	tests/funcional/vendor/bin/paratest --runner=WrapperRunner -p7 -c tests/funcional/phpunit.xml --testsuite funcional
 
 
 bash_org1:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash
 	
+
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
+
+test:
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"	
+	composer -d $(PEN_TEST_FUNC) install
+
 

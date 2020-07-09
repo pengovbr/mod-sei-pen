@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<wsdl:definitions
+    name="ModPenWS"
+    targetNamespace="ModPen"
+    xmlns="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+    xmlns:xmime="http://www.w3.org/2005/05/xmlmime"
+    xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+    xmlns:tns="ModPen">
+
+  <wsdl:message name="inicializarMonitoramentoPendenciasRequest">
+    <wsdl:part name="QtdeWorkers" type="xsd:int"/>
+    <wsdl:part name="MonitoramentoAtivado" type="xsd:boolean"/>
+    <wsdl:part name="SegundoPlano" type="xsd:boolean"/>
+    <wsdl:part name="DebugAtivo" type="xsd:boolean"/>
+  </wsdl:message>
+
+  <wsdl:message name="inicializarMonitoramentoPendenciasResponse">
+    <wsdl:part name="parametros" type="xsd:boolean"/>
+  </wsdl:message>
+
+  <wsdl:message name="inicializarWorkersRequest">
+    <wsdl:part name="QtdeWorkers" type="xsd:int"/>
+  </wsdl:message>
+
+  <wsdl:message name="inicializarWorkersResponse">
+    <wsdl:part name="parametros" type="xsd:boolean"/>
+  </wsdl:message>
+
+  <wsdl:portType name="ModPenPortType">
+    <wsdl:operation name="inicializarMonitoramentoPendencias">
+      <wsdl:documentation>Serviço web de inicialização do monitoramento e processamento de tarefas do Barramento do PEN.</wsdl:documentation>
+      <wsdl:input message="tns:inicializarMonitoramentoPendenciasRequest"/>
+      <wsdl:output message="tns:inicializarMonitoramentoPendenciasResponse"/>
+    </wsdl:operation>
+    <wsdl:operation name="inicializarWorkers">
+      <wsdl:documentation>Serviço web de inicialização dos workers do gearman resposáveis pelo processamento do recebimento de processos do Barramento do PEN.</wsdl:documentation>
+      <wsdl:input message="tns:inicializarWorkersRequest"/>
+      <wsdl:output message="tns:inicializarWorkersResponse"/>
+    </wsdl:operation>    
+  </wsdl:portType>
+
+  <wsdl:binding name="ModPenBinding" type="tns:ModPenPortType">
+    <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="inicializarMonitoramentoPendencias">
+      <soap:operation soapAction="ModPenAction" />
+      <wsdl:input>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="inicializarWorkers">
+      <soap:operation soapAction="ModPenAction" />
+      <wsdl:input>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>    
+  </wsdl:binding>
+
+  <wsdl:service name="ModPenService">
+    <wsdl:port name="ModPenPortService" binding="tns:ModPenBinding">
+      <soap:address location="[servidor]/modulos/pen/ws/ModPenWS.php"/>
+    </wsdl:port>
+  </wsdl:service>
+
+</wsdl:definitions>

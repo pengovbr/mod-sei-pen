@@ -17,7 +17,7 @@ class PaginaControleProcesso extends PaginaTeste
         foreach ($paineisPesquisa as $painel) {
             try {
                 $resultado = array_merge($resultado, $this->test->byId($painel)->elements($this->test->using('css selector')->value('tr')));
-            } catch (\Throwable $th) { }
+            } catch (\Exception $th) { }
         }
 
         return $resultado;
@@ -64,7 +64,25 @@ class PaginaControleProcesso extends PaginaTeste
                     }
                 }
             }
-            catch(Exception $e) {
+            catch(\Exception $e) {
+                return false;
+            }
+        }
+
+        return false;
+    }
+
+    public function localizarProcessoPelaDescricao($descricao)
+    {
+        $processosRows = $this->obterLinhasProcessos(true, true);
+        foreach ($processosRows as $row) {
+            try{
+                foreach ($row->elements($this->test->using('css selector')->value('a')) as $link) {
+                    if(strpos($link->attribute("onmouseover"), $descricao) !== false)
+                        return $link->text();
+                }
+            }
+            catch(\Exception $e) {
                 return false;
             }
         }

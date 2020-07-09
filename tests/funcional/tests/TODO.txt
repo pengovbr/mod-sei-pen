@@ -3,7 +3,7 @@
 ################################################################################################################################################
 
 # TODO: Implementar testa para simular erro quando unidades não estão mapeadas em md_pen_unidade
-# TODO: Implementar teste para simular se botão trâmitar continua aparecendo, mesmo com Barramento indisponível
+# TODO: Implementar teste para simular se botão tramitar continua aparecendo, mesmo com Barramento indisponível
 # TODO: Testar se processo está abrindo normalmente quando não existe comunicação com o barramento
 # TODO: Não está sendo tratado as permissões de acesso ao botão de visualizar recibos de trâmite
 # TODO: Implementar testes com envio de processo e problema no envio de recibo de conclusão pelo destinatário por questões de indisponibilidade do barramento

@@ -2,6 +2,8 @@
 
 class PENIntegracao extends SeiIntegracao
 {
+    const VERSAO_MODULO = "2.0.0";
+
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -16,14 +18,13 @@ class PENIntegracao extends SeiIntegracao
         return self::$instance;
     }
 
-
     public function getNome() {
         return 'Integração Processo Eletrônico Nacional - PEN';
     }
 
 
     public function getVersao() {
-        return '2.0.0';
+        return self::VERSAO_MODULO;
     }
 
 
@@ -465,9 +466,21 @@ class PENIntegracao extends SeiIntegracao
     }
 
 
+    public function processarControladorWebServices($servico)
+    {
+        $strArq = null;
+        switch ($_GET['servico']) {
+          case 'modpen':
+            $strArq =  dirname(__FILE__) . '/ws/modpen.wsdl';
+            break;
+        }
+
+        return $strArq;
+    }
+
+
     /**
     * Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
-    * @author Josinaldo J<FA>nior <josinaldo.junior@basis.com.br>
     * @param $idRepositorioEstruturaOrganizacional
     * @param $arrEstruturas
     * @return mixed
