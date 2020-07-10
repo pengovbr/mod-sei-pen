@@ -5,7 +5,9 @@
   backupGlobals="true" 
   colors="true" 
   verbose="true"
-  executionOrder="no-depends">
+  cacheResult="true"
+  executionOrder="no-depends,defects"
+  >
   
   <php>
     <const name="PHPUNIT_HOST" value="127.0.0.1"/>
@@ -19,6 +21,7 @@
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="720000" /> 
 
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
+    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
     <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" /> 
     <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http/sei"/>
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
@@ -45,10 +48,12 @@
     <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org1.pem" />
     <const name="CONTEXTO_ORGAO_A_SENHA_CERTIFICADO_DIGITAL" value="1234" />
     <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33061;dbname=sei;" />
+    <!-- <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="sqlsrv:server=localhost,14331 ; Database=sei" /> -->
+    <!-- <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=15211))(CONNECT_DATA=(SERVICE_NAME=XE)))" /> -->    
     <const name="CONTEXTO_ORGAO_A_DB_SEI_USER" value="sei_user" />
     <const name="CONTEXTO_ORGAO_A_DB_SEI_PASSWORD" value="sei_user" />
 
-
+    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http/sei"/>
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
@@ -74,16 +79,11 @@
     <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org2.pem" />
     <const name="CONTEXTO_ORGAO_B_SENHA_CERTIFICADO_DIGITAL" value="1234" />
     <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33062;dbname=sei;" />
+    <!-- <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="sqlsrv:server=localhost,14332; Database=sei" /> -->
+    <!-- <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=15212))(CONNECT_DATA=(SERVICE_NAME=XE)))" /> -->
     <const name="CONTEXTO_ORGAO_B_DB_SEI_USER" value="sei_user" />
     <const name="CONTEXTO_ORGAO_B_DB_SEI_PASSWORD" value="sei_user" />
   </php>
-<!-- 
-  <filter>
-      <whitelist processUncoveredFilesFromWhitelist="true">
-          <directory suffix=".php">../../../src</directory>
-      </whitelist>
-  </filter> 
--->
 
   <testsuites>
     <testsuite name="funcional">
@@ -94,8 +94,8 @@
         <file>tests/TramiteProcessoValidacaoEnvioTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoInternoExternoTest.php</file>
-        <file>tests/TramiteProcessoContendoVariosDocumentosTest.php</file>
-        <file>tests/TramiteProcessoComDevolucaoTest.php</file>
+        <file>tests/TramiteProcessoContendoVariosDocumentosTest.php</file> 
+        <file>tests/funcional/tests/TramiteProcessoComDevolucaoTest.php</file> 
         <file>tests/TramiteProcessoDocumentoNaoMapeadoOrigemTest.php</file>
         <file>tests/TramiteProcessoDocumentoNaoMapeadoDestinoTest.php</file>
         <file>tests/TramiteProcessoRestritoTest.php</file>

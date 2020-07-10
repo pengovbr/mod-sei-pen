@@ -32,7 +32,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
         $this->cadastrarDocumentoExterno(self::$documentoTeste);
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, null, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES
+            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, null, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES);
         );
     }
 

@@ -18,7 +18,7 @@ class ParameterUtils{
 
 	public function getParameter($parameter){
 		$result = null;
-		$query = "SELECT valor FROM sei.md_pen_parametro WHERE nome = ?";
+		$query = "SELECT valor FROM md_pen_parametro WHERE nome = ?";
 		$values = $this->databaseUtils->query($query, array($parameter));
 
 		if(isset($values)){
@@ -29,8 +29,7 @@ class ParameterUtils{
 	}
 
 	public function setParameter($parameter, $value){
-		$query = "UPDATE sei.md_pen_parametro SET valor = ? WHERE nome = ?";
-		$this->databaseUtils->execute($query, array($value, $parameter));
-		return $value;
+		$query = "UPDATE md_pen_parametro SET valor = ? WHERE nome = ?";
+		return $this->databaseUtils->execute($query, array($value, $parameter));
 	}
 }

@@ -89,12 +89,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             }
 
             $this->finalizar('FIM');
-            InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
             InfraDebug::getInstance()->setBolLigado(false);
             InfraDebug::getInstance()->setBolDebugInfra(false);
             InfraDebug::getInstance()->setBolEcho(false);
-            throw new InfraException('Erro atualizando VERSAO.', $e);
+            throw new InfraException("Erro atualizando VERSAO: $e", $e);
         }
     }
 
@@ -1771,11 +1770,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function instalarV2000()
     {
+        $objMetaBD = $this->objMeta;
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
         $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");
 
         // Ajustes em parâmetros de configuração do módulo
-        $objInfraMetaBD->alterarColuna('md_pen_parametro','valor', $objInfraMetaBD->tipoTextoGrande(), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_parametro', 'valor_novo', $objInfraMetaBD->tipoTextoGrande(), 'null');
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set valor_novo = valor");
+        $objInfraMetaBD->excluirColuna('md_pen_parametro', 'valor');
+        $objInfraMetaBD->adicionarColuna('md_pen_parametro', 'valor', $objInfraMetaBD->tipoTextoGrande(), 'null');
+        BancoSEI::getInstance()->executarSql("update md_pen_parametro set valor = valor_novo");
+        $objInfraMetaBD->excluirColuna('md_pen_parametro', 'valor_novo');
 
         $objPenParametroDTO = new PenParametroDTO();
         $objPenParametroDTO->setStrNome("PEN_ID_REPOSITORIO_ORIGEM");
@@ -1788,33 +1793,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objPenParametroDTO->setStrDescricao("Unidade SEI para Representação de Órgãos Externos");
         $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
         $objPenParametroBD->alterar($objPenParametroDTO);
-
-        try{
-            $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS PEN");
-            $objPENAgendamentoRN = new PENAgendamentoRN();
-            $objPENAgendamentoRN->atualizarHipotesesLegais();
-        } catch (\Exception $th) {
-            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do PEN pois serviço encontra-se inacessível\n";
-            $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
-            $this->logar($strMensagemErroMapeamentoAutomatico);
-        }
-
-        try{
-            $objPENAgendamentoRN = new PENAgendamentoRN();
-            $objPENAgendamentoRN->atualizarEspeciesDocumentais();
-        } catch (\Exception $th) {
-            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do PEN pois serviço encontra-se inacessível\n";
-            $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
-            $this->logar($strMensagemErroMapeamentoAutomatico);
-        }
-
-        $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
-        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
-        $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
-
-        $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
-        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
-        $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
         $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");
         // Remove agendamento de tarefas de atualização de hipóteses legais
@@ -1873,9 +1851,65 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
         }
 
+        // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
         $this->logar("REMOÇÃO DE COLUNAS DE DESATIVAÇÃO DE MAPEAMENTO DE ESPÉCIES NÃO MAIS UTILIZADOS");
-        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_enviado", "sin_padrao");
-        $objInfraMetaBD->excluirColuna("md_pen_rel_doc_map_recebido", "sin_padrao");
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_rel_doc_map_enviado_tmp',
+            'cols' => array(
+                'id_mapeamento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO)
+            )
+        ));
+
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_enviado_tmp (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_enviado");
+        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_enviado");
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_rel_doc_map_enviado',
+            'cols' => array(
+                'id_mapeamento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            ),
+            'pk' => array('cols'=>array('id_mapeamento')),
+            'fks' => array(
+                'serie' => array('nome' => 'fk_md_pen_rel_doc_map_env_seri', 'cols' => array('id_serie', 'id_serie')),
+                'md_pen_especie_documental' => array('nome' => 'fk_md_pen_rel_doc_map_env_espe', 'cols' => array('id_especie', 'codigo_especie')),
+            )
+        ));
+
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_enviado (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_enviado_tmp");
+        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_enviado_tmp");
+
+        // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_rel_doc_map_recebido_tmp',
+            'cols' => array(
+                'id_mapeamento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            )
+        ));
+
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido_tmp (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido");
+        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido");
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_rel_doc_map_recebido',
+            'cols' => array(
+                'id_mapeamento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_serie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            ),
+            'pk' => array('cols'=>array('id_mapeamento')),
+            'fks' => array(
+                'serie' => array('nome' => 'fk_md_pen_rel_doc_map_rec_seri', 'cols' => array('id_serie', 'id_serie')),
+                'md_pen_especie_documental' => array('nome' => 'fk_md_pen_rel_doc_map_rec_espe', 'cols' => array('id_especie', 'codigo_especie')),
+            )
+        ));
+
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido_tmp");
+        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido_tmp");
+
 
         // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
         PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");
@@ -1888,6 +1922,33 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $this->removerParametro("PEN_SENHA_CERTIFICADO_DIGITAL");
         $this->removerParametro("PEN_LOCALIZACAO_CERTIFICADO_DIGITAL");
         $this->removerParametro("PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO");
+
+        try{
+            $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS PEN");
+            $objPENAgendamentoRN = new PENAgendamentoRN();
+            $objPENAgendamentoRN->atualizarHipotesesLegais();
+        } catch (\Exception $th) {
+            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do PEN pois serviço encontra-se inacessível\n";
+            $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+            $this->logar($strMensagemErroMapeamentoAutomatico);
+        }
+
+        try{
+            $objPENAgendamentoRN = new PENAgendamentoRN();
+            $objPENAgendamentoRN->atualizarEspeciesDocumentais();
+        } catch (\Exception $th) {
+            $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do PEN pois serviço encontra-se inacessível\n";
+            $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+            $this->logar($strMensagemErroMapeamentoAutomatico);
+        }
+
+        $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
+        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+        $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
+
+        $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
+        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+        $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
         $this->atualizarNumeroVersao("2.0.0");
     }

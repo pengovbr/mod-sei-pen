@@ -39,6 +39,11 @@ class TramiteProcessoValidacaoEnvioTest extends CenarioBaseTestCase
         self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
 
         $this->expectExceptionMessage(utf8_encode("Não é possível tramitar um processo sem documentos"));
-        $this->tramitarProcessoExternamente(self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        $this->tramitarProcessoExternamente(
+            self::$protocoloTeste,
+            self::$destinatario['REP_ESTRUTURAS'],
+            self::$destinatario['NOME_UNIDADE'],
+            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+        );
     }
 }

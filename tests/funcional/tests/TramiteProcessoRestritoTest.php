@@ -43,14 +43,7 @@ class TramiteProcessoRestritoTest extends CenarioBaseTestCase
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
                 self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, function($testCase) {
-            $mensagemSucesso = utf8_encode('Trâmite externo do processo finalizado com sucesso!');
-            $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-            $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
-            $btnFechar->click();
-            $testCase->frame(null);
-            return true;
-        });
+                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
     }
 
 

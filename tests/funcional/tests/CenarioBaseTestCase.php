@@ -71,8 +71,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
-        $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select id_serie from serie where nome = ?', array($nomeSerieNaoMapeada));
-        $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["id_serie"]));
+        $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
+        $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(1, 3, 3, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(2, 4, 4, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(3, 3, 3, 'R', 'S'));
@@ -89,16 +89,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $parametrosOrgaoB->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
 
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
-        // Configuração do mapeamento de unidades
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
-        // Configuração do prefíxo de processos
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
         $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasPEN'", null);
 
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
-        $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select id_serie from serie where nome = ?', array($nomeSerieNaoMapeada));
-        $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["id_serie"]));
+        $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
+        $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
     }
@@ -246,16 +244,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
             }
         }
 
-        // Aguardar finalização do trâmite
-        $callbackEnvio = $callbackEnvio ?: function($testCase) {
-            $mensagemSucesso = utf8_encode('Trâmite externo do processo finalizado com sucesso!');
-            $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-            $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
-            $btnFechar->click();
-            $testCase->frame(null);
-            return true;
-        };
-
         try{ $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true); }
         catch(Exception $e){ }
 
@@ -263,8 +251,22 @@ class CenarioBaseTestCase extends Selenium2TestCase
             throw new Exception($mensagemAlerta);
         }
 
+        $callbackEnvio = $callbackEnvio ?: function($testCase) {
+            try {
+                $testCase->frame('ifrEnvioProcesso');
+                $mensagemSucesso = utf8_encode('Trâmite externo do processo finalizado com sucesso!');
+                $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
+                $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                $btnFechar->click();
+            } finally {
+                $testCase->frame(null);
+                $testCase->frame("ifrVisualizacao");
+            }
+
+            return true;
+        };
+
         try {
-            $this->frame('ifrEnvioProcesso');
             $this->waitUntil($callbackEnvio, $timeout);
         } finally {
             $this->frame(null);
@@ -445,12 +447,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
         $paginaTramitar = $this->paginaTramitar;
-        $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, function($testCase) use ($paginaTramitar){
-            $testCase->assertStringContainsString(utf8_encode('Trâmite externo do processo finalizado com sucesso!'), $testCase->byCssSelector('body')->text());
-            $paginaTramitar->fecharBarraProgresso();
-            $testCase->frame(null);
-            return true;
-        });
+        $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
         if($validarTramite) {
             // 6 - Verificar se situação atual do processo está como bloqueado

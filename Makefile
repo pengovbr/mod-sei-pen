@@ -2,17 +2,20 @@
 
 include tests/funcional/.env
 
+#HOST_IP := $$(hostname -I | cut -d' ' -f1)
+HOST_IP := $(shell hostname -I | cut -d' ' -f1)
+VERSAO_MODULO := $(shell grep 'const VERSAO_MODULO' src/PENIntegracao.php | cut -d'"' -f2)
+
 SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
 SEI_CONFIG_DIR = dist/sei/config/mod-pen
 SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
-PEN_MODULO_COMPACTADO = mod-sei-pen-VERSAO.zip
+PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO)
 PEN_TEST_FUNC = tests/funcional
-HOST_IP=$$(hostname -I | cut -d' ' -f1)
-
 
 all: clean build
+
 
 build: 
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
@@ -35,9 +38,10 @@ build:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r mod-sei-pen-VERSAO INSTALL.md sei/ sip/
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALL.md sei/ sip/	
 	@rm -rf dist/sei dist/sip dist/INSTALL.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
+
 
 clean:
 	@rm -rf $(SEI_SCRIPTS_DIR)/*;   if [ -d $(SEI_SCRIPTS_DIR) ]; then rmdir -p --ignore-fail-on-non-empty $(SEI_SCRIPTS_DIR); fi
@@ -55,29 +59,31 @@ install:
 
 test-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
+	echo "Sleeping..."; sleep 60;
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php		
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chown -R root:root /etc/cron.d/
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"	
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"
 	composer -d $(PEN_TEST_FUNC) install
 
 
 test-provision-destroy:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml  --env-file $(PEN_TEST_FUNC)/.env stop
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml  --env-file $(PEN_TEST_FUNC)/.env rm
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm
 
 
 test-funcional:
-	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
+	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
+	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 
 
 test-funcional-paralelo:
-	tests/funcional/vendor/bin/paratest --runner=WrapperRunner -p7 -c tests/funcional/phpunit.xml --testsuite funcional
+	tests/funcional/vendor/bin/paratest --runner=WrapperRunner -p4 -c tests/funcional/phpunit.xml tests/funcional/tests/
 
 
 bash_org1:
@@ -86,9 +92,5 @@ bash_org1:
 
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
-
-test:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"	
-	composer -d $(PEN_TEST_FUNC) install
 
 
