@@ -1,0 +1,9 @@
+# Ignorar pasta de distribuição de arquivos do módulo
+dist/
+tests/funcional/vendor/
+config/*.pem
+config/ConfiguracaoModPEN.php
+
+**/*.lock
+**/*.log
+**/*.out
