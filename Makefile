@@ -1,4 +1,4 @@
-.PHONY: .env help clean build test all install-dev test-selenium-init test-provision test-provision-destroy
+.PHONY: .env help clean build all test-provision test-funcional-paralelo test-provision-destroy bash_org1 bash_org2
 
 include tests/funcional/.env
 

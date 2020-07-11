@@ -1,0 +1,14 @@
+name: Publicar Release
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    name: Publicar
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: make build
+      - name: Criar Release
+        run: le ./dist/
