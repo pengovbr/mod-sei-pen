@@ -11,7 +11,6 @@ class ReceberProcedimentoRN extends InfraRN
     private $objPenRelTipoDocMapRecebidoRN;
     private $objProcedimentoAndamentoRN;
     private $objRelProtocoloProtocoloRN;
-    private $objProtocoloRN;
     private $objPenParametroRN;
     private $objProcedimentoRN;
     public $destinatarioReal;

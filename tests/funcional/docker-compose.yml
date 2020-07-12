@@ -55,13 +55,14 @@ services:
     dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}:/opt
-      - /var/sei/arquivos
+      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/config:/opt/sei/config/mod-pen
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen
-      - ./assets/config:/opt/sei/config/mod-pen
-      - ./assets/cron.d:/etc/cron.d
+      - ../../src:/opt/sei/web/modulos/pen      
+      - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro   
     environment:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
@@ -90,13 +91,14 @@ services:
     dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}:/opt
-      - /var/sei/arquivos
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config:/opt/sei/config/mod-pen
       - ./assets/cron.d:/etc/cron.d
+      - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}
