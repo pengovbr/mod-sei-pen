@@ -4,6 +4,7 @@ tests/funcional/vendor/
 config/*.pem
 config/ConfiguracaoModPEN.php
 
+**/.env
 **/*.cache
 **/*.lock
 **/*.log

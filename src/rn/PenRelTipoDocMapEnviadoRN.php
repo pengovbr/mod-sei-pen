@@ -2,7 +2,7 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class PenRelTipoDocMapEnviadoRN extends InfraRN 
+class PenRelTipoDocMapEnviadoRN extends InfraRN
 {
     public function __construct() {
         parent::__construct();
@@ -28,11 +28,11 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         }catch(Exception $e){
             throw new InfraException('Erro listando mapeamento de Tipos de Documento para envio.',$e);
         }
-    }       
+    }
 
-    protected function consultarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO) 
+    protected function consultarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO)
     {
-        try {        
+        try {
             $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
             return $objPenRelTipoDocMapEnviadoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
         }catch(Exception $e){
@@ -40,10 +40,10 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         }
     }
 
-    
-    protected function listarEmUsoConectado($dblIdSerie = 0) 
+
+    protected function listarEmUsoConectado($dblIdSerie)
     {
-        $arrNumIdSerie = array();        
+        $arrNumIdSerie = array();
         $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapEnviadoDTO();
         $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
         $objPenRelTipoDocMapRecebidoDTO->setDistinct(true);
@@ -58,42 +58,42 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
             }
         }
 
-        if ($dblIdSerie > 0) {
+        if (!is_null($dblIdSerie) && $dblIdSerie > 0) {
             // Tira da lista de ignorados o que foi selecionado, em caso de edição
             $numIndice = array_search($dblIdSerie, $arrNumIdSerie);
             if ($numIndice !== false) {
                 unset($arrNumIdSerie[$numIndice]);
             }
         }
-        
+
         return $arrNumIdSerie;
     }
-    
+
     public function cadastrarConectado(PenRelTipoDocMapEnviadoDTO $objParamDTO)
-    {        
+    {
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-        
-        if($objParamDTO->isSetDblIdMap()) {            
+
+        if($objParamDTO->isSetDblIdMap()) {
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_alterar', __METHOD__, $objParamDTO);
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
             $objDTO->setDblIdMap($objParamDTO->getDblIdMap());
             $objDTO->retTodos();
 
             $objDTO = $objBD->consultar($objDTO);
-            
+
             if(empty($objDTO)) {
-                throw new InfraException(sprintf('Nenhum Registro foi localizado com ao ID %s', $objParamDTO->getNumIdSerie()));   
+                throw new InfraException(sprintf('Nenhum Registro foi localizado com ao ID %s', $objParamDTO->getNumIdSerie()));
             }
-                        
-            $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie()); 
-            $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie()); 
+
+            $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie());
+            $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie());
             $objBD->alterar($objDTO);
         }
-        else { 
+        else {
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_cadastrar', __METHOD__, $objParamDTO);
             $objDTO = new PenRelTipoDocMapEnviadoDTO();
-            $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie()); 
-            $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie()); 
+            $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie());
+            $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie());
             $objBD->cadastrar($objDTO);
         }
     }
@@ -112,13 +112,13 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
             foreach ($parArrObjPenRelTipoDocMapEnviadoDTO as $objPenRelTipoDocMapEnviadoDTO) {
                 $objPenRelTipoDocMapEnviadoBD->excluir($objPenRelTipoDocMapEnviadoDTO);
-            }            
+            }
         }catch(Exception $e){
             throw new InfraException('Erro excluindo Mapeamento de Tipos de Documento para envio.',$e);
         }
-    }      
+    }
 
-    
+
 
 
     /**
@@ -128,17 +128,17 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
      * @return void
      */
     protected function excluirPorEspecieDocumentalControlado($parNumIdEspecieDocumental)
-    {        
+    {
         try {
             $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
             $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
             $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($parNumIdEspecieDocumental);
             $objPenRelTipoDocMapEnviadoDTO->retDblIdMap();
-            
+
             foreach ($objPenRelTipoDocMapEnviadoBD->listar($objPenRelTipoDocMapEnviadoDTO) as $objDTO) {
                 $objPenRelTipoDocMapEnviadoBD->excluir($objDTO);
             }
-                                    
+
           }catch(Exception $e){
             throw new InfraException('Erro removendo Mapeamento de Tipos de Documento para envio pelo código de espécie.',$e);
           }
@@ -152,11 +152,11 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         }catch(Exception $e){
           throw new InfraException('Erro contando Mapeamento de Tipos de Documento para Envio.',$e);
         }
-    }        
+    }
 
     /**
      * Registra o mapeamento de Tipos de Documentos para ENVIO com as espécies documentais similares do Barramento do PEN
-     * 
+     *
      * A análise de simularidade utiliza o algorítmo para calcular a distãncia entre os dois nomes
      * Mais informações sobre o algorítmo podem ser encontradas no link abaixo:
      * https://www.php.net/manual/pt_BR/function.similar-text.php
@@ -164,7 +164,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
      * @return void
      */
     protected function mapearEspeciesDocumentaisEnvioControlado()
-    {        
+    {
         $objTipoDocMapRN = new TipoDocMapRN();
         $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
 
@@ -177,9 +177,9 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         foreach ($arrEspecies as $numCodigo => $strItem) {
             foreach (preg_split('/\//', $strItem) as $strNomeEspecie) {
                 $arrEspeciesDocumentais[] = array("codigo" => $numCodigo, "nome" => $strNomeEspecie);
-            }            
-        }                
-        
+            }
+        }
+
         $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
         $arrTiposDocumentos = $objTipoDocMapRN->listarParesSerie($objPenRelTipoDocMapEnviadoRN->listarEmUso(null), true);
 
@@ -193,8 +193,8 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
                 $numIdEspecieDocumental = $objEspecieDocumental["codigo"];
                 $strNomeEspecieDocumental = $objEspecieDocumental["nome"];
                 $numSimilaridade = 0;
-                
-                $numTamNomeEspecie = strlen($strNomeEspecieDocumental);                
+
+                $numTamNomeEspecie = strlen($strNomeEspecieDocumental);
                 $numPosEspacoAdicional = strpos($strNomeTipoDocumento, ' ', min($numTamNomeEspecie, $numTamNomeTipoDoc));
                 if($numPosEspacoAdicional){
                     // Avaliação com tamanho reduzido, caso seja um termo composto
@@ -202,7 +202,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
                     $strNomeTipoDocReduzido = substr($strNomeTipoDocumento, 0, $numTamanhoReducao);
                     similar_text(strtolower($strNomeEspecieDocumental), strtolower($strNomeTipoDocReduzido), $numSimilaridadeReduzido);
                     $numSimilaridade = $numSimilaridadeReduzido;
-                    
+
                 } else {
                     // Avaliação de termo em tamanho normal
                     similar_text(strtolower($strNomeEspecieDocumental), strtolower($strNomeTipoDocumento), $numSimilaridadeNormal);
@@ -214,7 +214,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
                     $numIdEspecieSimilar = $numIdEspecieDocumental;
                 }
             }
-            
+
             if(isset($numMelhorSimilaridade)){
                 // Realiza o mapeamento do tipo de documento com a espécie documental similar
                 $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
@@ -224,8 +224,8 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
                     $objPenRelTipoDocMapEnviadoRN->cadastrar($objPenRelTipoDocMapEnviadoDTO);
                 }
             }
-        }            
-    }    
+        }
+    }
 
     /**
      * Recupera espécie documental padrão para envio de processos, verificando se o mesmo se encontra ativo
@@ -233,16 +233,16 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
      * @return num
      */
     protected function consultarEspeciePadraoConectado()
-    {       
-        $objEspecieDocumentalDTO = null; 
+    {
+        $objEspecieDocumentalDTO = null;
         $objPenParametro = new PenParametroRN();
         $strIdEspeciePadrao = $objPenParametro->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
 
-        if(!empty($strIdEspeciePadrao)) {            
+        if(!empty($strIdEspeciePadrao)) {
             $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
             $objEspecieDocumentalDTO->retDblIdEspecie();
             $objEspecieDocumentalDTO->setDblIdEspecie($strIdEspeciePadrao);
-            
+
             $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
             $objEspecieDocumentalDTO = $objGenericoBD->consultar($objEspecieDocumentalDTO);
         }
@@ -263,7 +263,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
             $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
         }catch(Exception $e){
             throw new InfraException('Erro atribuindo Espécie Documental padrão para envio.',$e);
-        }        
+        }
     }
 
 }

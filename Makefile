@@ -11,11 +11,10 @@ SEI_CONFIG_DIR = dist/sei/config/mod-pen
 SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
-PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO)
+PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
 PEN_TEST_FUNC = tests/funcional
 
 all: clean build
-
 
 build: 
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
@@ -25,7 +24,9 @@ build:
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
 	@cp -R src/* $(SEI_MODULO_DIR)/
-	@cp docs/INSTALL.md dist/
+	@cp docs/INSTALL.md dist/INSTALACAO.md
+	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
+	@cp docs/changelogs/CHANGELOGS-$(VERSAO_MODULO).md dist/NOTAS_VERSAO.md
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
@@ -38,8 +39,8 @@ build:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALL.md sei/ sip/	
-	@rm -rf dist/sei dist/sip dist/INSTALL.md
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md sei/ sip/	
+	@rm -rf dist/sei dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md dist/NOTAS_VERSAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
 

@@ -1254,7 +1254,8 @@ class PenAtualizarSipRN extends InfraRN {
         ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
         ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
 
-        $this->atualizarNumeroVersao('2.0.0');
+        //$this->atualizarNumeroVersao('2.0.0');
+        $this->atualizarNumeroVersao("2.0.0-beta1");
     }
 }
 

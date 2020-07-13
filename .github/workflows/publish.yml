@@ -11,4 +11,4 @@ jobs:
       - name: Build
         run: make build
       - name: Criar Release
-        run: le ./dist/
+        run: ls ./dist/

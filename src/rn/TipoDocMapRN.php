@@ -4,7 +4,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Repositório para métodos para Tipo de Documento Mapeados pelo módulo PEN
- * 
+ *
  *
  */
 class TipoDocMapRN extends InfraRN {
@@ -16,13 +16,13 @@ class TipoDocMapRN extends InfraRN {
     /**
      * Retorna um array de chave => valor, onde a chave é a ID e o valor é a descrição
      * do registro no banco de dados
-     * 
+     *
      * @param bool $bolRemoverUtilizados remover os que já tem alguma relação
      * @param int $dblCodigoEspecie Código do Tipo de Documento. Só funciona em
      * conjunto com o primeiro paramêtro
      * @return array
      */
-    protected function listarParesEspecieConectado($arrNumCodigoEspecie = array()) 
+    protected function listarParesEspecieConectado($arrNumCodigoEspecie = array())
     {
         try {
             $objInfraIBanco = $this->inicializarObjInfraIBanco();
@@ -50,21 +50,21 @@ class TipoDocMapRN extends InfraRN {
             }
             return $arrRetorno;
         } catch (InfraException $e) {
-            
+            throw $e;
         }
     }
-    
+
     /**
      * Retorna um array de chave => valor, onde a chave é a ID e o valor é a descrição
      * do registro no banco de dados.
      * Utilizado na View, então processa as exception na página de erro
-     * 
-     * @param int $dblIdSerie Código selecionado da Espécie Documental. 
+     *
+     * @param int $dblIdSerie Código selecionado da Espécie Documental.
      * Só funciona em conjunto com o primeiro paramêtro
      * @return array
      */
     public function listarParesSerie($arrNumIdSerie = array(), $bolListarTodos = false)
-    {         
+    {
         try {
             $arrRetorno = array();
             $objInfraIBanco = $this->inicializarObjInfraIBanco();
@@ -72,7 +72,7 @@ class TipoDocMapRN extends InfraRN {
             $objSerieDTO = new SerieDTO();
             $objSerieDTO->retNumIdSerie();
             $objSerieDTO->retStrNome();
-            
+
             if($bolListarTodos === false) {
                 $objSerieDTO->setStrStaAplicabilidade('I', InfraDTO::$OPER_DIFERENTE);
             }
@@ -80,23 +80,23 @@ class TipoDocMapRN extends InfraRN {
 
             if(!empty($arrNumIdSerie)) {
                 $objSerieDTO->setNumIdSerie($arrNumIdSerie, InfraDTO::$OPER_NOT_IN);
-            } 
+            }
 
             $objSerieRN = new SerieRN($objInfraIBanco);
             $arrObjSerieDTO = $objSerieRN->listarRN0646($objSerieDTO);
-                        
-            if(!empty($arrObjSerieDTO)) {                
+
+            if(!empty($arrObjSerieDTO)) {
                 foreach($arrObjSerieDTO as $objSerieDTO) {
                     $strChave = strval($objSerieDTO->getNumIdSerie());
                     $strValor = InfraString::formatarXML($objSerieDTO->getStrNome());
                     $arrRetorno[$strChave] = $strValor;
-                }            
-            } 
-            return $arrRetorno;        
+                }
+            }
+            return $arrRetorno;
         }
         catch (InfraException $e) {
-            PaginaSEI::getInstance()->processarExcecao($e);
+            throw $e;
         }
-    } 
+    }
 
 }

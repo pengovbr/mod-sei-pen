@@ -30,8 +30,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSEI::getInstance()), true);
             }
 
-
-            //PENIntegracao::validarCompatibilidadeModulo();
+            SessaoSEI::getInstance(false)->simularLogin(SessaoSEI::$USUARIO_SEI, SessaoSEI::$UNIDADE_TESTE);
 
             //testando permissoes de criações de tabelas
             $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -1963,7 +1962,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
         $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
-        $this->atualizarNumeroVersao("2.0.0");
+        //$this->atualizarNumeroVersao("2.0.0");
+        $this->atualizarNumeroVersao("2.0.0-beta1");
     }
 }
 
