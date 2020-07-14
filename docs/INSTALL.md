@@ -130,7 +130,7 @@ Endereço do Web Service principal de integração com o Barramento de Serviços
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
 
 
-* **LocalizaçãoCertificado**  
+* **LocalizacaoCertificado**  
 Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
 Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
 ```
@@ -153,7 +153,7 @@ Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-
 
 
 * **NumeroTentativasErro** _(opcional)_
-Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
+Quantidade de tentativas de requisição dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
 Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *Valor padrão: 3*
 
 * **WebServicePendencias** _(opcional)_  

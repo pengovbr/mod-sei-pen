@@ -141,7 +141,7 @@ Endereço do Web Service principal de integração com o Barramento de Serviços
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
 
 
-* **LocalizaçãoCertificado**  
+* **LocalizacaoCertificado**  
 Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
 Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
 ```
@@ -164,13 +164,13 @@ Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-
 
 
 * **NumeroTentativasErro** _(opcional)_
-Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
+Quantidade de tentativas de requisição dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
 Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *Valor padrão: 3*
 
 * **WebServicePendencias** _(opcional)_  
-Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN.
+Endereço do Webservice de monitoramente de pendências de trâmite no Barramento de Serviços do PEN.
 Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Barramento de Serviços do PEN.  
-Para maiores informações sobre como utilzar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações.  
+Para maiores informações sobre como utilizar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações.  
 Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
     * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
@@ -180,7 +180,7 @@ Os endereços disponíveis são os seguintes (verifique se houve atualizações 
 
 ### 1.7. Atualizar a base de dados do SIP com as tabelas do mod-sei-pen
 
-A atualização realizada no SIP não cria nenhuma tabela específica para o módulo, apenas é aplicada a criarção os recursos, permissões e menus de sistema utilizados pelo mod-sei-pen. Todos os novos recursos criados possuem o prefixo **pen_** para fácil localização pelas funcionalidades de gerenciamento de recursos do SIP.
+A atualização realizada no SIP não cria nenhuma tabela específica para o módulo, apenas é aplicada a criação os recursos, permissões e menus de sistema utilizados pelo mod-sei-pen. Todos os novos recursos criados possuem o prefixo **pen_** para fácil localização pelas funcionalidades de gerenciamento de recursos do SIP.
 
 O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php```
 
@@ -192,7 +192,7 @@ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/m
 
 ### 1.8. Atualizar a base de dados do SEI com as tabelas do mod-sei-pen
 
-Nesta etapa é instalado/atualizado as tabelas de banco de dados vinculadas do mod-sei-pen. Todas estas tabelas possuem o prefixo **md_pen_** para organização e fácil localização no banco de dados.
+Nesta etapa é instalado/atualizado às tabelas de banco de dados vinculadas do mod-sei-pen. Todas estas tabelas possuem o prefixo **md_pen_** para organização e fácil localização no banco de dados.
 
 O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php```
 
@@ -327,7 +327,7 @@ Para maiores informações sobre problemas conhecidos e os procedimentos que dev
 
 ## 6. SUPORTE
 
-Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
+Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em contato pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
 - Portal de Atendimento (PEN): Canal de Atendimento - Módulo do Barramento
