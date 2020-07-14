@@ -218,20 +218,20 @@ Para:
 Portanto, a periodicidade do serviço CRON deve estar configurado como:
 
 ```
-# ┌───────────── minutos (0 - 59)
-# │ ┌───────────── horas (0 - 23)
-# │ │ ┌───────────── dias do mês (1 - 31)
-# │ │ │ ┌───────────── mês (1 - 12)
-# │ │ │ │ ┌───────────── dia da semana (0 - 6) (Domingo à Sábado)
+# ┌───────────── todos os minutos (0 - 59)
+# │ ┌───────────── todas as horas horas (0 - 23)
+# │ │ ┌───────────── todos os dias do mês (1 - 31)
+# │ │ │ ┌───────────── todos os meses (1 - 12)
+# │ │ │ │ ┌───────────── todos os dia da semana (0 - 6) (Domingo à Sábado)
 # │ │ │ │ │
 # │ │ │ │ │
-# * * * * * <command to execute>
+# * * * * * <comando para execução>
 ``` 
 
 
 ---
 
-### 1.9. Verificação e testes da instalação do módulo
+### 1.10. Verificação e testes da instalação do módulo
 
 A versão 2.0.0 do **mod-sei-pen** adiciona um novo script utilitário ao SEI para que seja realizada uma verificação de todos os passos da instalação, assim como as configurações aplicadas. Estas verificações funcionam como um diagnóstico do correto funcionamento do sistema.
 
