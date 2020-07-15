@@ -5,6 +5,8 @@ tests/funcional/vendor/
 config/*.pem
 config/ConfiguracaoModPEN.php
 
+.vscode
+
 **/.env
 **/*.cache
 **/*.lock

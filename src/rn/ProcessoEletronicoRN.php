@@ -2,6 +2,9 @@
 
 class ProcessoNaoPodeSerDesbloqueadoException extends Exception {}
 
+/**
+ * Classe representando a interface de comunicação com os serviços do Barramento do PEN
+ */
 class ProcessoEletronicoRN extends InfraRN
 {
     /* TAREFAS DE EXPEDIÇÃO DE PROCESSOS */
@@ -87,10 +90,13 @@ class ProcessoEletronicoRN extends InfraRN
         "99" => "Outro"
     );
 
-    private $objPenWs = null;
-    private $strWSDL = null;
-    private $options = null;
-    private $numTentativasErro = null;
+    private $objPenWs;
+    private $strWSDL;
+    private $options;
+    private $numTentativasErro;
+    private $strComumXSD;
+    private $strLocalCert;
+    private $strLocalCertPassword;
 
     public function __construct()
     {
@@ -137,45 +143,22 @@ class ProcessoEletronicoRN extends InfraRN
         return BancoSEI::getInstance();
     }
 
+
     /**
-    * Verifica se o uma url esta ativa
-    *
-    * @param string $strUrl url a ser testada
-    * @param string $strLocalCert local físico do certificado .pem
-    * @throws InfraException
-    * @return null
-    */
-    private function testaUrl($strUrl='', $strLocalCert='')
-    {
-        //$arrParseUrl = parse_url($this->strWSDL);
-        //$strUrl = $arrParseUrl['scheme'].'://'.$arrParseUrl['host'];
-        $strUrl = $this->strWSDL;
-
-        $strCommand = sprintf('curl --insecure --cert %s --connect-timeout %s %s 2>&1',
-            $this->options['local_cert'], $this->options['connection_timeout'], $strUrl);
-
-        $numRetorno = 0;
-        $arrOutput = array();
-
-        @exec($strCommand, $arrOutput, $numRetorno);
-
-        if($numRetorno > 0){
-            $strMensagem = "Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.";
-            throw new InfraException($strMensagem);
-        }
-    }
-
-
+     * Construtor do objeto SoapClien utilizado para comunicação Webservice SOAP
+     *
+     * @return void
+     */
     private function getObjPenWs()
     {
         if($this->objPenWs == null) {
-            $this->testaUrl($this->strWSDL, $this->options['local_cert']);
+            $this->validarDiponibilidade();
 
             try {
                 $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
             } catch (Exception $e) {
                 $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-                $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional. " . $detalhes;
+                $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;
                 throw new \SoapFault("HTTP", $mensagem);
             }
         }
@@ -184,6 +167,12 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
 
+    /**
+     * Consulta a lista de repositório de estruturas disponíveis no Barramento de Serviços do PEN
+     *
+     * @param int $numIdentificacaoDoRepositorioDeEstruturas Código de identificação do repositório de estruturas do PEN
+     * @return void
+     */
     public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
     {
         $objRepositorioDTO = null;
@@ -192,7 +181,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
             $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = false;
 
-            //$result = $this->getObjPenWs()->consultarRepositoriosDeEstruturas($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
             });
@@ -221,6 +209,11 @@ class ProcessoEletronicoRN extends InfraRN
         return $objRepositorioDTO;
     }
 
+    /**
+     * Lista todo os repositórios de estruturas disponíveis no Barramento de Serviços do PEN
+     *
+     * @return void
+     */
     public function listarRepositoriosDeEstruturas()
     {
         $arrObjRepositorioDTO = array();
@@ -230,7 +223,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
             $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;
 
-            //$result = $this->getObjPenWs()->consultarRepositoriosDeEstruturas($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
             });
@@ -259,7 +251,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável por consultar as estruturas das unidades externas no barramento
-    * Josinaldo Júnior <josinaldo.junior@gmail.com>
     * @param $idRepositorioEstrutura
     * @param $numeroDeIdentificacaoDaEstrutura
     * @param bool $bolRetornoRaw
@@ -275,14 +266,11 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
             $parametros->filtroDeEstruturas->apenasAtivas = false;
 
-            //$result = $this->getObjPenWs()->consultarEstruturas($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarEstruturas($parametros);
             });
 
-
             if ($result->estruturasEncontradas->totalDeRegistros == 1) {
-
                 $arrObjEstrutura = is_array($result->estruturasEncontradas->estrutura) ? $result->estruturasEncontradas->estrutura : array($result->estruturasEncontradas->estrutura);
                 $objEstrutura = current($arrObjEstrutura);
 
@@ -322,7 +310,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável por recuperar pela estutura pai a estrutura de filhos de uma unidade
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $idRepositorioEstrutura
     * @param null $numeroDeIdentificacaoDaEstrutura
     * @param bool $bolRetornoRaw
@@ -341,7 +328,6 @@ class ProcessoEletronicoRN extends InfraRN
             }
 
             $parametros->filtroDeEstruturasPorEstruturaPai->apenasAtivas = true;
-            //$result = $this->getObjPenWs()->consultarEstruturasPorEstruturaPai($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarEstruturasPorEstruturaPai($parametros);
             });
@@ -407,7 +393,6 @@ class ProcessoEletronicoRN extends InfraRN
                 $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
             }
 
-            //$result = $this->getObjPenWs()->consultarEstruturas($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarEstruturas($parametros);
             });
@@ -455,7 +440,7 @@ class ProcessoEletronicoRN extends InfraRN
 
         try{
             curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
-            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_HEADER, false);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
             curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
@@ -463,7 +448,6 @@ class ProcessoEletronicoRN extends InfraRN
             curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
-            //$output = curl_exec($curl);
             $output = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($curl) {
                 return curl_exec($curl);
             });
@@ -548,7 +532,6 @@ class ProcessoEletronicoRN extends InfraRN
             });
 
         } catch (\SoapFault $e) {
-            //$mensagem = "Falha no envio externo do processo: ";
             $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
                 $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
@@ -650,7 +633,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável por realizar o envio da parte de um componente digital
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $parametros
     * @return mixed
     * @throws InfraException
@@ -658,12 +640,10 @@ class ProcessoEletronicoRN extends InfraRN
     public function enviarParteDeComponenteDigital($parametros)
     {
         try {
-            //return $this->getObjPenWs()->enviarParteDeComponenteDigital($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use (&$parametros) {
                 return $objPenWs->enviarParteDeComponenteDigital($parametros);
             });
         } catch (\Exception $e) {
-            //$mensagem = "Falha no envio de parte componente digital";
             $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             throw new InfraException($mensagem, $e);
         }
@@ -671,7 +651,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável por sinalizar o término do envio das partes de um componente digital
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $parametros
     * @return mixed
     * @throws InfraException
@@ -844,7 +823,6 @@ class ProcessoEletronicoRN extends InfraRN
         $idProcedimento = $parObjProcessoEletronicoDTO->getDblIdProcedimento();
 
         //Registra os dados do processo eletrônico
-        //TODO: Revisar a forma como o barramento tratar o NRE para os processos apensados
         $objProcessoEletronicoDTOFiltro = new ProcessoEletronicoDTO();
         $objProcessoEletronicoDTOFiltro->setStrNumeroRegistro($parObjProcessoEletronicoDTO->getStrNumeroRegistro());
         $objProcessoEletronicoDTOFiltro->setDblIdProcedimento($parObjProcessoEletronicoDTO->getDblIdProcedimento());
@@ -1145,7 +1123,6 @@ class ProcessoEletronicoRN extends InfraRN
                 $parametros->filtroDeConsultaDeTramites->protocolo = $parProtocolo;
             }
 
-            //$objTramitesEncontrados = $this->getObjPenWs()->consultarTramites($parametros);
             $objTramitesEncontrados = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarTramites($parametros);
             });
@@ -1175,7 +1152,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDeConsultaDeTramites = new stdClass();
             $parametros->filtroDeConsultaDeTramites->protocolo = $parProtocoloFormatado;
 
-            //$objTramitesEncontrados = $this->getObjPenWs()->consultarTramites($parametros);
             $objTramitesEncontrados = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarTramites($parametros);
             });
@@ -1261,7 +1237,6 @@ class ProcessoEletronicoRN extends InfraRN
         $objFiltro->filtroDeConsultaDeTramites = new stdClass();
         $objFiltro->filtroDeConsultaDeTramites->IDT = $objTramiteDTO->getNumIdTramite();
 
-        //$objResultado = $this->getObjPenWs()->consultarTramites($objFiltro);
         $objResultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($objFiltro) {
             return $objPenWs->consultarTramites($objFiltro);
         });
@@ -1400,7 +1375,6 @@ class ProcessoEletronicoRN extends InfraRN
         try {
             $parametros = new stdClass();
             $parametros->IDT = $parNumIdTramite;
-            //$resultado = $this->getObjPenWs()->receberReciboDeEnvio($parametros);
             $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->receberReciboDeEnvio($parametros);
             });
@@ -1492,12 +1466,10 @@ class ProcessoEletronicoRN extends InfraRN
     */
     public function cancelarTramite($idTramite)
     {
-        //Requisita o cancelamento
         $parametros = new stdClass();
         $parametros->IDT = $idTramite;
 
         try{
-            //$this->getObjPenWs()->cancelarEnvioDeTramite($parametros);
             $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->cancelarEnvioDeTramite($parametros);
             });
@@ -1527,7 +1499,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
             $parametros->recusaDeTramite->motivo = $motivo;
 
-            //$resultado = $this->getObjPenWs()->recusarTramite($parametros);
             $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->recusarTramite($parametros);
             });
@@ -1599,7 +1570,6 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->filtroDeConsultaDeTramites->remetente->identificacaoDoRepositorioDeEstruturas = $numIdRespositorio;
             $parametros->filtroDeConsultaDeTramites->remetente->numeroDeIdentificacaoDaEstrutura = $objPenUnidadeDTO->getNumIdUnidadeRH();
 
-            //$objMeta = $this->getObjPenWs()->consultarTramites($parametros);
             $objMeta = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarTramites($parametros);
             });
@@ -1630,7 +1600,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     public function consultarHipotesesLegais() {
         try{
-            //$hipoteses = $this->getObjPenWs()->consultarHipotesesLegais();
             $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) {
                 return $objPenWs->consultarHipotesesLegais();
             });
@@ -1784,7 +1753,6 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável por obter os componentes digitais do documento
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $parObjDocumento
     * @return array
     */
@@ -1862,5 +1830,37 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
         return $objProcessoPrincipal;
+    }
+
+
+    /**
+     * Testa a disponibilidade do Barramento de Serviços do PEN
+     *
+     * @return void
+     */
+    public function validarDiponibilidade()
+    {
+        $curl = curl_init($this->strWSDL);
+
+        try{
+            curl_setopt($curl, CURLOPT_URL, $this->strWSDL);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_NOBODY, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+            curl_exec($curl);
+
+            if(curl_errno($curl)){
+                throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
+            }
+
+            return true;
+        } finally{
+            curl_close($curl);
+        }
     }
 }
