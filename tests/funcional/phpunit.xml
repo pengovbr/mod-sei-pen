@@ -6,7 +6,7 @@
   colors="true" 
   verbose="true"
   cacheResult="true"
-  executionOrder="no-depends,defects"
+  executionOrder="no-depends"
   >
   
   <php>
@@ -18,7 +18,7 @@
 
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" /> 
-    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="720000" /> 
+    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" /> 
 
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
@@ -95,7 +95,7 @@
         <file>tests/TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest.php</file>
         <file>tests/TramiteProcessoContendoDocumentoInternoExternoTest.php</file>
         <file>tests/TramiteProcessoContendoVariosDocumentosTest.php</file> 
-        <file>tests/funcional/tests/TramiteProcessoComDevolucaoTest.php</file> 
+        <file>tests/TramiteProcessoComDevolucaoTest.php</file> 
         <file>tests/TramiteProcessoDocumentoNaoMapeadoOrigemTest.php</file>
         <file>tests/TramiteProcessoDocumentoNaoMapeadoDestinoTest.php</file>
         <file>tests/TramiteProcessoRestritoTest.php</file>
@@ -103,10 +103,10 @@
         <file>tests/TramiteProcessoRestritoHipotesePadraoTest.php</file>
         <file>tests/TramiteProcessoComDocumentoRestritoHipotesePadraoTest.php</file>
         <file>tests/CancelamentoTramiteProcessoTest.php</file>
-        <file>TramiteProcessoExtensaoNaoMapeadoDestinoTest</file>
-        <file>TramiteProcessoComDevolucaoUnidadeDiferenteTest</file>
-        <file>TramiteProcessoContendoDocumentoExternoParticionadoTest</file>
-        <file>TramiteProcessoTamanhoAcimaLimiteDestinoTest</file>
+        <file>tests/TramiteProcessoExtensaoNaoMapeadoDestinoTest.php</file>
+        <file>tests/TramiteProcessoComDevolucaoUnidadeDiferenteTest.php</file>
+        <file>tests/TramiteProcessoContendoDocumentoExternoParticionadoTest.php</file>
+        <file>tests/TramiteProcessoTamanhoAcimaLimiteDestinoTest.php</file>
         <file>tests/RecebimentoDocumentoAvulsoTest.php</file>
     </testsuite>
   </testsuites>

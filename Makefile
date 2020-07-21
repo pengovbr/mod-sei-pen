@@ -55,7 +55,7 @@ clean:
 
 
 install: 
-	unzip -o -d $(SEI_PATH) dist/mod-sei-pen-VERSAO.zip
+	unzip -o -d $(SEI_PATH) dist/$(PEN_MODULO_COMPACTADO)
 
 
 test-provision:	
