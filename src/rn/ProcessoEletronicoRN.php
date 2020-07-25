@@ -532,7 +532,7 @@ class ProcessoEletronicoRN extends InfraRN
             });
 
         } catch (\SoapFault $e) {
-            $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            $mensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
                 $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }
@@ -585,6 +585,7 @@ class ProcessoEletronicoRN extends InfraRN
             $strWsException = $fault->detail->interoperabilidadeException;
             $mensagem = utf8_decode($strWsException->mensagem);
 
+            // Fixação de mensagem de erro para quando já existe um trâmite em andamento
             if($strWsException->codigoErro == "0044"){
                 $mensagem = 'Processo já possui um trâmite em andamento';
             }
