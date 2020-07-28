@@ -70,7 +70,7 @@ test-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"
-	composer -d $(PEN_TEST_FUNC) install 
+	composer install -d $(PEN_TEST_FUNC)
 
 
 test-provision-destroy:
@@ -79,8 +79,8 @@ test-provision-destroy:
 
 
 test-funcional:
-	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
-	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
+	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
+	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 
 
 test-funcional-paralelo:
