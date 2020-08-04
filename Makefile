@@ -83,10 +83,6 @@ test-funcional:
 	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 
 
-test-funcional-paralelo:
-	tests/funcional/vendor/bin/paratest --runner=WrapperRunner -p4 -c tests/funcional/phpunit.xml tests/funcional/tests/
-
-
 bash_org1:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash
 	
