@@ -112,7 +112,9 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.5.0': $this->instalarV1501();
                 case '1.5.1': $this->instalarV1502();
                 case '1.5.2': $this->instalarV1503();
-                case '1.5.3': $this->instalarV2000();
+                case '1.5.3': $this->instalarV2000_beta1();
+                case '2.0.0-beta1': $this->instalarV2000_beta2();
+                case '2.0.0-beta2': $this->instalarV2000_beta3();
 
                 break;
                 default:
@@ -1175,7 +1177,7 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
-    private function instalarV2000()
+    private function instalarV2000_beta1()
     {
         // Criar novos recursos de configuração de espécie documental padrão para envio de processos
         $this->logar('ATRIBUIÇÃO DE PERMISSÃO DE ATRIBUÍÇÃO DE ESPÉCIES/TIPO DE DOCUMENTO PADRÃO AO PERFIL ADMINISTRADOR');
@@ -1254,8 +1256,25 @@ class PenAtualizarSipRN extends InfraRN {
         ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
         ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
 
-        //$this->atualizarNumeroVersao('2.0.0');
         $this->atualizarNumeroVersao("2.0.0-beta1");
+    }
+
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
+     */
+    protected function instalarV2000_beta2()
+    {
+        $this->atualizarNumeroVersao("2.0.0-beta2");
+    }
+
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
+     */
+    protected function instalarV2000_beta3()
+    {
+        $this->atualizarNumeroVersao("2.0.0-beta3");
     }
 }
 
