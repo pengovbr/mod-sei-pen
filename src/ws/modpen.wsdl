@@ -31,6 +31,13 @@
     <wsdl:part name="parametros" type="xsd:boolean"/>
   </wsdl:message>
 
+  <wsdl:message name="verificarAcessoRequest">
+  </wsdl:message>
+
+  <wsdl:message name="verificarAcessoResponse">
+    <wsdl:part name="parametros" type="xsd:boolean"/>
+  </wsdl:message>
+
   <wsdl:portType name="ModPenPortType">
     <wsdl:operation name="inicializarMonitoramentoPendencias">
       <wsdl:documentation>Serviço web de inicialização do monitoramento e processamento de tarefas do Barramento do PEN.</wsdl:documentation>
@@ -41,7 +48,12 @@
       <wsdl:documentation>Serviço web de inicialização dos workers do gearman resposáveis pelo processamento do recebimento de processos do Barramento do PEN.</wsdl:documentation>
       <wsdl:input message="tns:inicializarWorkersRequest"/>
       <wsdl:output message="tns:inicializarWorkersResponse"/>
-    </wsdl:operation>    
+    </wsdl:operation>
+    <wsdl:operation name="verificarAcesso">
+      <wsdl:documentation>Serviço de verificação de funcionamento do acesso local dos serviços web do mod-sei-pen</wsdl:documentation>
+      <wsdl:input message="tns:verificarAcessoRequest"/>
+      <wsdl:output message="tns:verificarAcessoResponse"/>
+    </wsdl:operation>        
   </wsdl:portType>
 
   <wsdl:binding name="ModPenBinding" type="tns:ModPenPortType">
@@ -56,6 +68,15 @@
       </wsdl:output>
     </wsdl:operation>
     <wsdl:operation name="inicializarWorkers">
+      <soap:operation soapAction="ModPenAction" />
+      <wsdl:input>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="verificarAcesso">
       <soap:operation soapAction="ModPenAction" />
       <wsdl:input>
         <soap:body namespace="ModPen" use="encoded" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>

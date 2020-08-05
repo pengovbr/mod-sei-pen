@@ -4,7 +4,17 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class PENAgendamentoRN extends InfraRN
 {
-    const WSDL_SERVICOS_PEN = 'http://127.0.0.1/sei/controlador_ws.php?servico=modpen';
+    const WSDL_FILE_LOCATION = "/../ws/modpen.wsdl";
+    const MOD_PEN_DEFAULT_SERVICE_LOCATION = "http://127.0.0.1/sei/modulos/pen/ws/ModPenWS.php";
+
+    private $wsdlServicosPen;
+
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->wsdlServicosPen = realpath(__DIR__ . "../ws/modpen.wsdl");
+    }
 
     protected function inicializarObjInfraIBanco() {
         return BancoSEI::getInstance();
@@ -50,7 +60,7 @@ class PENAgendamentoRN extends InfraRN
                     $objDTO->setStrAtivo('N');
                 }
 
-                //Caso n?o exista a hipótese irá cadastra-la no sei.
+                //Caso não exista a hipótese irá cadastra-la no sei.
                 if (empty($objConsulta)) {
 
                     $objBD->cadastrar($objDTO);
@@ -174,7 +184,6 @@ class PENAgendamentoRN extends InfraRN
         }
     }
 
-
     /**
      * Processa tarefas recebidas pelo Barramento de Serviços do PEN para receber novos processos/documentos,
      * notificações de conclusão de trâmites ou notificação de recusa de processos
@@ -200,15 +209,10 @@ class PENAgendamentoRN extends InfraRN
             $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
             $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
             $bolExecutarEmSegundoPlano = !empty(trim(@$arrObjGearman["Servidor"] ?: null));
+            $strWsdl = realpath(__DIR__ . self::WSDL_FILE_LOCATION);
 
-            if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS']=='on'){
-                $strServidor = str_replace('http://','https://',self::WSDL_SERVICOS_PEN);
-              }else{
-                $strServidor = str_replace('https://','http://',self::WSDL_SERVICOS_PEN);
-              }
-
-
-            $objPENWS = new SoapClient($strServidor, array('encoding'=>'ISO-8859-1'));
+            $strModPenServiceLocation = $objConfiguracaoModPEN->getValor("PEN", "ServicoLocalModSeiPen", null) ?: self::MOD_PEN_DEFAULT_SERVICE_LOCATION;
+            $objPENWS = $this->getObjServicoLocalPEN($strModPenServiceLocation);
 
             // Inicializa workers do Gearman caso este componente esteja configurado e não desativado no agendamento do sistema
             if($bolAtivaWorker && $bolExecutarEmSegundoPlano){
@@ -226,6 +230,31 @@ class PENAgendamentoRN extends InfraRN
             throw new InfraException('Erro processando pendências de trâmites do Barramento de Serviços do PEN.',$e);
         }
     }
+
+
+    private function getObjServicoLocalPEN($parStrModPenServiceLocation)
+    {
+        try{
+            $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$parStrModPenServiceLocation));
+            $objPENWS->verificarAcesso();
+        } catch (Exception $ex1) {
+            try{
+                $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>self::MOD_PEN_DEFAULT_SERVICE_LOCATION));
+                $objPENWS->verificarAcesso();
+            } catch (Exception $ex2) {
+                try{
+                    $strModPenServiceLocation = str_replace('http://','https://',self::MOD_PEN_DEFAULT_SERVICE_LOCATION);
+                    $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$strModPenServiceLocation));
+                    $objPENWS->verificarAcesso();
+                } catch (Exception $ex3){
+                   $strMensagem = "Não foi possível acessar localmente o webservice do mod-sei-pen em $strModPenServiceLocation.\n";
+                   $strMensagem .= "Necessário configuração manual do parâmetro ServicoLocalModSeiPen (ConfiguracaoModPen.php) com um endereço válido.";
+                   throw new InfraException($strMensagem);
+                }
+            }
+        }
+    }
+
 
     private function foiIniciadoPeloTerminal()
     {

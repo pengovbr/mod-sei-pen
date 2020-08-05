@@ -35,6 +35,16 @@ class ModPenWS extends InfraWS {
         }
     }
 
+    /**
+     * Método de verificação de correto acesso local ao serviços web do mod-sei-pen
+     *
+     * @return boolean
+     */
+    protected function verificarAcessoMonitorado()
+    {
+        return true;
+    }
+
 
     /**
      * Serviço web de inicialização dos workers do gearman resposáveis pelo processamento do recebimento de
