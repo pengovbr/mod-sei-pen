@@ -490,6 +490,15 @@ Neste passo será configurado o serviço de monitoramento de pendências de trâ
 
 Para configurar este serviço, será necessário incluir as configurações do módulo ao arquivo de configuração do Supervisor, localizado em /etc/supervisor/supervisord.conf.
 
+O arquivo de configuração do supervisor para utilização no SEI **supervisor.exemplo.ini** vem com o sufixo **exemplo** justamente para não substituir o arquivo principal contendo as configurações vigentes do módulo.
+
+Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini**, renomeie o arquivo de exemplo.
+
+```
+cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/
+mv supervisor.exemplo.ini supervisor.ini
+```
+
 Na chave de configuração *files* da seção *[include]*, informe o caminho completo para o arquivo **supervisor.ini**, configurações do supervisor preparadas exclusivamente para o módulo. Este arquivo fica localizado na pasta de configurações do SEI (```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini```)
 
 Exemplo: 
@@ -501,7 +510,7 @@ Exemplo:
 files = <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini
 ```
 
-As configurações contidas no arquivo **supervisor.ini** devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação a chave de configuração *[user]*, que deverá ser configurado com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache)
+As configurações contidas no arquivo **supervisor.ini** devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação as chaves de configurações *[user]* e *[directory]*, que deverão ser configurados respectivamente com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache) e com o diretório em que o sei está instalado
 
 
 #### 3.2.4. Iniciar o serviço **Supervisor*

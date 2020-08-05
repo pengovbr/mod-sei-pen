@@ -4,6 +4,7 @@ html/
 tests/funcional/vendor/
 config/*.pem
 config/ConfiguracaoModPEN.php
+config/supervisor.ini
 
 .vscode
 
