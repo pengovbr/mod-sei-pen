@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "2.0.0-beta3";
+    const VERSAO_MODULO = "2.0.0-beta4";
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -37,7 +37,12 @@ class PENIntegracao extends SeiIntegracao
         $strDirSEIWeb = realpath(DIR_SEI_CONFIG.'/../web');
         define('DIR_SEI_WEB', $strDirSEIWeb);
 
-        include_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        $strArquivoConfiguracaoModulo = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        if(!file_exists($strArquivoConfiguracaoModulo)){
+            throw new InfraException("Arquivo de configuração do módulo '{$this->getNome()}' não pode ser localizado em '$strArquivoConfiguracaoModulo'");
+        }
+
+        include_once $strArquivoConfiguracaoModulo;
 
         PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
         PENIntegracao::validarArquivoConfiguracao();
