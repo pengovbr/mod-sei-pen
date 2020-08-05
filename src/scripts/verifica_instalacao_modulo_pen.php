@@ -71,7 +71,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         }
 
         $fnPrint("", 0);
-        $fnPrint("** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN FINALIZADA COM SECESSO **", 0);
+        $fnPrint("** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN FINALIZADA COM SUCESSO **", 0);
 
         exit(0);
     } finally {
