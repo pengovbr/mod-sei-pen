@@ -77,10 +77,16 @@ gearadmin --shutdown
 supervisorctl shutdown
 ``` 
 
-Para resetar as configurações do Supervisor, execute o seguinte comando:
+Para resetar as configurações do Supervisor, execute o seguinte comando apontando para o seu arquivo de configuração.
+PS: O arquivo de configuração do supervisor pode estar localizado em locais diferentes dependendo de sua distribuição. Verifique o local correto antes de executar este comando.
 
 ```bash
+
+# Ex: Centos
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
+
+# Ex: RedHat
+echo_supervisord_conf > /etc/supervisord.conf
 ``` 
 
 ---
@@ -173,7 +179,7 @@ Configuração necessária somente quando o módulo é configurado para utiliza�
 Para maiores informações sobre como utilizar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações.  
 Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
-    * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
+    * Produção: https://pendencias.conectagov.processoeletronico.gov.br/
 
 ---
 
@@ -185,7 +191,7 @@ A atualização realizada no SIP não cria nenhuma tabela específica para o mó
 O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php```
 
 ```bash
-php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 ```
 
 ---
