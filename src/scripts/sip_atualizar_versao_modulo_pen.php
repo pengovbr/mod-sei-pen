@@ -115,6 +115,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.5.3': $this->instalarV2000_beta1();
                 case '2.0.0-beta1': $this->instalarV2000_beta2();
                 case '2.0.0-beta2': $this->instalarV2000_beta3();
+                case '2.0.0-beta3': $this->instalarV2000_beta4();
 
                 break;
                 default:
@@ -1270,11 +1271,19 @@ class PenAtualizarSipRN extends InfraRN {
 
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
+     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
      */
     protected function instalarV2000_beta3()
     {
         $this->atualizarNumeroVersao("2.0.0-beta3");
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
+     */
+    protected function instalarV2000_beta4()
+    {
+        $this->atualizarNumeroVersao("2.0.0-beta4");
     }
 }
 

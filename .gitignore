@@ -12,3 +12,4 @@ config/ConfiguracaoModPEN.php
 **/*.lock
 **/*.log
 **/*.out
+**/*.swp

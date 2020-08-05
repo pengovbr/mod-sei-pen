@@ -85,6 +85,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '1.5.3': $this->instalarV2000_beta1();
                 case '2.0.0-beta1': $this->instalarV2000_beta2();
                 case '2.0.0-beta2': $this->instalarV2000_beta3();
+                case '2.0.0-beta3': $this->instalarV2000_beta4();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1896,7 +1897,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
         $objMetaBD->criarTabela(array(
-            'tabela' => 'md_pen_rel_doc_map_recebido_tmp',
+            'tabela' => 'md_pen_rel_doc_map_recebido_tm',
             'cols' => array(
                 'id_mapeamento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
                 'codigo_especie' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
@@ -1904,7 +1905,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             )
         ));
 
-        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido_tmp (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido");
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido_tm (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido");
         BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido");
         $objMetaBD->criarTabela(array(
             'tabela' => 'md_pen_rel_doc_map_recebido',
@@ -1920,9 +1921,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             )
         ));
 
-        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido_tmp");
-        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido_tmp");
-
+        BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido_tm");
+        BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido_tm");
 
         // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
         PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");
@@ -1974,6 +1974,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV2000_beta3()
     {
         $this->atualizarNumeroVersao("2.0.0-beta3");
+    }
+
+    protected function instalarV2000_beta4()
+    {
+        $this->atualizarNumeroVersao("2.0.0-beta4");
     }
 
 }

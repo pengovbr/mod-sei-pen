@@ -12,7 +12,7 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 O foco desta versão foi a implementação de diversas simplificações nos procedimentos de instalação e configuração do módulo, deixando alguns passos opcionais e aplicando várias configurações de forma automática, possibilitando ao administrador modificar caso necessário.
 
-### Suporte ao SEI 3.1.x
+#### Suporte ao SEI 3.1.5
 
 Adicionado o suporte ao SEI 3.1.5 nas três diferentes bases de dados suportadas pela sistema (Mysql, Oracle, SQLServer).
 
