@@ -13,14 +13,15 @@ Este repositório no GitHub é o local oficial onde será mantido todo o desenvo
 O download do pacote de instalação/atualização do mod-sei-pen pode ser encontrado na seção Releases deste projeto no GitHub. 
 Acesse o link https://github.com/spbgovbr/mod-sei-pen/releases
 
-**[DOWNLOAD PACOTE DE INSTALAÇÃO/ATUALIZAÇÃO MOD-SEI-PEN](https://github.com/spbgovbr/mod-sei-pen/releases)** 
+**[DOWNLOAD PACOTE DE INSTALAÇÃO MOD-SEI-PEN](https://github.com/spbgovbr/mod-sei-pen/releases)** 
 
 
 ## DOCUMENTAÇÃO
 
 As instruções de instalação e atualização do módulo, assim com o manual de utilização do usuário,  podem ser encontradas na pasta `docs/`.
 
-* **[MANUAL DE INSTALAÇÃO E ATUALIZAÇÃO](docs/INSTALL.md)**
+* **[MANUAL DE INSTALAÇÃO](docs/INSTALL.md)**
+* **[MANUAL DE ATUALIZAÇÃO](docs/UPGRADE.md)**
 * **[MANUAL DE UTILIZAÇÃO](docs/USAGE.md)**
 
 ## PROJETOS RELACIONADOS

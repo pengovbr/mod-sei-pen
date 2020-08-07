@@ -384,7 +384,12 @@ Os procedimentos detalhados de instalação do Gearman podem ser encontrados no 
 Como exemplo de instalação das bibliotecas do Gearman considerando uma distribuição CENTOS do Linux, execute os comandos abaixo:
 
 ```bash
-$ yum install gearmand
+# CentoOS/RHEL/Fedora
+yum install gearmand
+
+# Debian/Ubuntu
+apt-get install gearman-job-server
+
 ```
 
 #### 3.1.2. Instalar as bibliotecas PHP de coneção ao Gearman
@@ -396,9 +401,31 @@ Maiores detalhes de como instalar as extensões PHP para uso no Gearman podem se
 Como exemplo de instalação das bibliotecas do Gearman considerando uma distribuição CENTOS do Linux, execute os comandos abaixo:
 
 ```bash
-$ yum install epel-release && yum update
-$ yum install libgearman libgearman-devel php56*-pecl-gearman
+# CentoOS/RHEL/Fedora
+yum install epel-release && yum update
+yum install libgearman libgearman-devel php56*-pecl-gearman
+
+# Debian/Ubuntu
+apt-get install libgearman libgearman-dev
+pecl install gearman
+
 ```
+
+Para verificar se a biblioteca do Gearman foi corretamente instalada e caregada pelo PHP, execute o seguinte comando:
+
+```bash
+php -i | grep gearman
+
+```
+
+O resultado esperado é a informação da versão da biblioteca do Gearman que foi carregada e a indicação de que ela se encontra carregada (enabled). 
+
+Caso a instalação tenha sido realizada com sucesso mas o PHP não reconheceu as bibliotecas do GEARMAN, é provável que extensão não foi devidamente configurada no arquivo de configuração do PHP e será necessário adicionar a linha abaixo no arquivo ´´´php.ini´´´.
+
+´´´
+extension="gearman.so"
+´´´
+
 
 #### 3.1.3. Configurar o módulo para acesso ao Gearman
 
@@ -510,7 +537,7 @@ Exemplo:
 files = <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini
 ```
 
-As configurações contidas no arquivo **supervisor.ini** devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação as chaves de configurações *[user]* e *[directory]*, que deverão ser configurados respectivamente com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache) e com o diretório em que o sei está instalado
+As configurações contidas no arquivo **supervisor.ini** devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação as chaves de configurações *[user]* e *[directory]*, que deverão ser configurados respectivamente com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache) e com o diretório em que o sei está instalado.
 
 
 #### 3.2.4. Iniciar o serviço **Supervisor*

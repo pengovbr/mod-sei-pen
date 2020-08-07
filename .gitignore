@@ -1,10 +1,9 @@
-# Ignorar pasta de distribuição de arquivos do módulo
 dist/
 html/
 tests/funcional/vendor/
-config/*.pem
-config/ConfiguracaoModPEN.php
-config/supervisor.ini
+**/config/*.pem
+src/config/ConfiguracaoModPEN.php
+src/config/supervisor.ini
 
 .vscode
 
