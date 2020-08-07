@@ -46,7 +46,7 @@ Todos os procedimentos de manutenção do sistema devem ser precedidos de backup
 
 ### 1.2. Remover os arquivos desatualizados de versões anteriores
 
-Para evitar a permanência de arquivos desatualizados dE versões anteriores do módulo **mod-sei-pen**, sugerimos que o diretório do módulo seja removido da instalação, assim como os script de atualização do banco de dados do módulo:
+Para evitar a permanência de arquivos desatualizados de versões anteriores do  **mod-sei-pen**, sugerimos que o diretório do módulo seja removido, assim como os script de atualização do banco de dados do módulo:
 
 O diretório de instalação da versão anterior está localizada em:
 
@@ -54,11 +54,17 @@ O diretório de instalação da versão anterior está localizada em:
 <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/web/modulos/pen
 ``` 
 
-E os scripts de atualização do banco de dados estão em:
+Os scripts de atualização do banco de dados estão em:
 
 ```bash 
-<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/sei_atualizar_versao_modulo_pen.php
-<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/sip_atualizar_versao_modulo_pen.php
+rm <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/sei_atualizar_versao_modulo_pen.php
+rm <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/sip_atualizar_versao_modulo_pen.php
+``` 
+
+E o script verifica-servico.sh localizado na pasta bin:
+
+```bash 
+rm <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/bin/verificar-servicos.sh
 ``` 
 
 ---
@@ -81,11 +87,13 @@ Para resetar as configurações do Supervisor, execute o seguinte comando aponta
 PS: O arquivo de configuração do supervisor pode estar localizado em locais diferentes dependendo de sua distribuição. Verifique o local correto antes de executar este comando.
 
 ```bash
-
-# Ex: Centos
+# Exemplo:
+# Centos
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 
-# Ex: RedHat
+# Ou
+
+# RedHat
 echo_supervisord_conf > /etc/supervisord.conf
 ``` 
 
@@ -143,8 +151,8 @@ Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ 
 
 * **WebService**  
 Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/*
-    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
+    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
+    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
 
 
 * **LocalizacaoCertificado**  
@@ -216,8 +224,11 @@ Necessário reiniciar os serviços de monitoramento de pendências de trâmite (
 Reinicialização do Gearmand:
 
 ```bash
-systemctl restart gearmand          # CentOS, Redhat
-service gearman-job-server restart  # Debian 
+# CentOS, Redhat
+systemctl restart gearmand
+
+# Debian 
+service gearman-job-server restart
 ```
 
 Reinicialização do Supervisord:
