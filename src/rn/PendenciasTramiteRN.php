@@ -80,7 +80,8 @@ class PendenciasTramiteRN extends InfraRN
             }
 
             $objPenParametroRN = new PenParametroRN();
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
             $mensagemInicioMonitoramento = 'Iniciando serviço de monitoramento de pendências de trâmites de processos';
             $this->gravarLogDebug($mensagemInicioMonitoramento, 0);
@@ -303,22 +304,22 @@ class PendenciasTramiteRN extends InfraRN
         try {
             if(!empty($this->strGearmanServidor)) {
                 if(!class_exists("GearmanClient")){
-                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
+                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN.\n" .
                         "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+                }
+
+                try{
+                    $objGearmanClient = new GearmanClient();
+                    $objGearmanClient->addServer($this->strGearmanServidor, $this->strGearmanPorta);
+                    $bolAtivo = $objGearmanClient->ping("health");
+                } catch (\Exception $e) {
+                    $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
+                    $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
+                    LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
                 }
             }
         } catch (\InfraException $e) {
             $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, InfraException::inspecionar($e));
-            LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
-        }
-
-        try{
-            $objGearmanClient = new GearmanClient();
-            $objGearmanClient->addServer($this->strGearmanServidor, $this->strGearmanPorta);
-            $bolAtivo = $objGearmanClient->ping("health");
-        } catch (\Exception $e) {
-            $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
-            $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
             LogSEI::getInstance()->gravar($strMensagem, LogSEI::$AVISO);
         }
 

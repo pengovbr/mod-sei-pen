@@ -209,7 +209,6 @@ class PENAgendamentoRN extends InfraRN
             $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
             $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
             $bolExecutarEmSegundoPlano = !empty(trim(@$arrObjGearman["Servidor"] ?: null));
-            $strWsdl = realpath(__DIR__ . self::WSDL_FILE_LOCATION);
 
             $strModPenServiceLocation = $objConfiguracaoModPEN->getValor("PEN", "ServicoLocalModSeiPen", null) ?: self::MOD_PEN_DEFAULT_SERVICE_LOCATION;
             $objPENWS = $this->getObjServicoLocalPEN($strModPenServiceLocation);
@@ -232,27 +231,39 @@ class PENAgendamentoRN extends InfraRN
     }
 
 
+    /**
+     * Função para criação de instância de SoapClient para conexão aos webservices do mod-sei-pen
+     *
+     * @param str $parStrModPenServiceLocation Endereço de serviço soap definido nos arquivos de configuração
+     * @return obj Instância do SoapClient para acesso ao webservice do módulo PEN
+     */
     private function getObjServicoLocalPEN($parStrModPenServiceLocation)
     {
+        $strWsdl = realpath(__DIR__ . self::WSDL_FILE_LOCATION);
+        $strLocalModPenService = $parStrModPenServiceLocation ?: self::MOD_PEN_DEFAULT_SERVICE_LOCATION;
+
         try{
-            $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$parStrModPenServiceLocation));
+            $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$strLocalModPenService));
             $objPENWS->verificarAcesso();
         } catch (Exception $ex1) {
             try{
-                $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>self::MOD_PEN_DEFAULT_SERVICE_LOCATION));
+                $strLocalAlternativoModPenService = self::MOD_PEN_DEFAULT_SERVICE_LOCATION;
+                $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$strLocalAlternativoModPenService));
                 $objPENWS->verificarAcesso();
             } catch (Exception $ex2) {
                 try{
-                    $strModPenServiceLocation = str_replace('http://','https://',self::MOD_PEN_DEFAULT_SERVICE_LOCATION);
-                    $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$strModPenServiceLocation));
+                    $strLocalAlternativoModPenService = str_replace('http://','https://',self::MOD_PEN_DEFAULT_SERVICE_LOCATION);
+                    $objPENWS = new SoapClient($strWsdl, array('encoding'=>'ISO-8859-1', 'location'=>$strLocalAlternativoModPenService));
                     $objPENWS->verificarAcesso();
                 } catch (Exception $ex3){
-                   $strMensagem = "Não foi possível acessar localmente o webservice do mod-sei-pen em $strModPenServiceLocation.\n";
+                   $strMensagem = "Não foi possível acessar localmente o webservice do mod-sei-pen em $strLocalModPenService.\n";
                    $strMensagem .= "Necessário configuração manual do parâmetro ServicoLocalModSeiPen (ConfiguracaoModPen.php) com um endereço válido.";
                    throw new InfraException($strMensagem);
                 }
             }
         }
+
+        return $objPENWS;
     }
 
 

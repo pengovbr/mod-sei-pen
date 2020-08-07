@@ -85,8 +85,6 @@ class ReceberProcedimentoRN extends InfraRN
     protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
         try {
-            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
-
             $objPenParametroRN = new PenParametroRN();
             $numIdTramite = $parObjMetadadosProcedimento->IDT;
             $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
@@ -112,8 +110,8 @@ class ReceberProcedimentoRN extends InfraRN
             // habilitados, funcionando como uma área dedicada unicamente para o recebimento de processos e documentos.
             // Isto é necessário para que o processo recebido não seja criado diretamente dentro da unidade de destino, o que permitiria a alteração de
             // todos os metadados do processo, comportamento não permitido pelas regras de negócio do PEN.
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
-
+            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
             //Substituir a unidade destinatária pela unidade centralizadora definida pelo Gestor de Protocolo no PEN
             $this->substituirDestinoParaUnidadeReceptora($parObjMetadadosProcedimento, $numIdTramite);
@@ -286,7 +284,8 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
         }
 
-        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+        //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+        ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
         $this->gravarLogDebug("Solicitando dados do trâmite " . $parNumIdentificacaoTramite, 1);
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
@@ -325,7 +324,8 @@ class ReceberProcedimentoRN extends InfraRN
     protected function receberTramitesRecusadosInternoControlado($parObjTramite)
     {
         try {
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
             $tramite = $parObjTramite;
             $numIdTramite = $parObjTramite->IDT;
@@ -841,11 +841,13 @@ class ReceberProcedimentoRN extends InfraRN
                 $this->gravarLogDebug("Processo $parDblIdProcedimento não pode ser desbloqueado", 2);
             }
 
-            $numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            //$numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
             $this->enviarProcedimentoUnidade($objProcedimentoDTO, $numUnidadeReceptora);
 
         } finally {
-            $numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            //$numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
             SessaoSEI::getInstance()->setNumIdUnidadeAtual($numUnidadeReceptora);
         }
 
@@ -1050,7 +1052,8 @@ class ReceberProcedimentoRN extends InfraRN
             $strNumeroProcesso = $this->objProtocoloRN->gerarNumeracaoProcesso();
         }
         finally{
-            SessaoSEI::getInstance(false)->setNumIdUnidadeAtual($parObjPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            //SessaoSEI::getInstance(false)->setNumIdUnidadeAtual($parObjPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            ModPenUtilsRN::simularLoginUnidadeRecebimento();
         }
 
         return $strNumeroProcesso;

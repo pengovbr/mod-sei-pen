@@ -62,7 +62,8 @@ class ReceberReciboTramiteRN extends InfraRN
 
     protected function receberReciboDeTramiteInternoControlado($objReciboTramite)
     {
-        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+        //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+        ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
         $strNumeroRegistro = $objReciboTramite->recibo->NRE;
         $numIdTramite = $objReciboTramite->recibo->IDT;

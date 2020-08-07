@@ -152,7 +152,7 @@ class ProcessoEletronicoRN extends InfraRN
     private function getObjPenWs()
     {
         if($this->objPenWs == null) {
-            $this->validarDiponibilidade();
+            $this->validarDisponibilidade();
 
             try {
                 $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
@@ -1839,7 +1839,7 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return void
      */
-    public function validarDiponibilidade()
+    public function validarDisponibilidade()
     {
         $curl = curl_init($this->strWSDL);
 

@@ -80,7 +80,9 @@ class ProcessarPendenciasRN extends InfraRN
             ini_set('memory_limit','-1');
 
             PENIntegracao::validarCompatibilidadeModulo();
-            SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+
+            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
+            ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
             $numProcID = getmygid();
             $mensagemInicioProcessamento = "Iniciando serviço de processamento de pendências de trâmites de processos ($numProcID)";
