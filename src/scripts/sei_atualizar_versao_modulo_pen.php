@@ -86,6 +86,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '2.0.0-beta1': $this->instalarV2000_beta2();
                 case '2.0.0-beta2': $this->instalarV2000_beta3();
                 case '2.0.0-beta3': $this->instalarV2000_beta4();
+                case '2.0.0-beta4': $this->instalarV2000_beta5();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1979,6 +1980,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV2000_beta4()
     {
         $this->atualizarNumeroVersao("2.0.0-beta4");
+    }
+
+    protected function instalarV2000_beta5()
+    {
+        $this->atualizarNumeroVersao("2.0.0-beta5");
     }
 
 }
