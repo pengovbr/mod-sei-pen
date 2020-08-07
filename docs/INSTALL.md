@@ -402,7 +402,7 @@ Como exemplo de instalação das bibliotecas do Gearman considerando uma distrib
 
 ```bash
 # CentoOS/RHEL/Fedora
-yum install epel-release && yum update
+yum install epel-release && yum update # Caso necessário
 yum install libgearman libgearman-devel php56*-pecl-gearman
 
 # Debian/Ubuntu
@@ -499,9 +499,10 @@ Para maiores orientações sobre como realizar a instalação em diferentes dist
 Como exemplo de instalação do Supervisor considerando uma distribuição CENTOS do Linux, execute os comandos abaixo:
 
 ```bash
-yum install python36 # Obrigatório uso do python 3.x
-python3 -m ensurepip
-python3 -m pip install supervisor==4.* # Obrigatório uso do Supervisor 4.x
+# Acessar http://supervisord.org/installing.html para maiores detalhes
+
+# Obrigatório uso do Python 3 e Supervisor 4.x
+pip install supervisor>=4
 mkdir -p /etc/supervisor/ /var/log/supervisor/
 echo_supervisord_conf > /etc/supervisor/supervisord.conf
 ```
