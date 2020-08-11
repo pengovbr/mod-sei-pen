@@ -9,11 +9,11 @@ class PENIntegracao extends SeiIntegracao {
     }
 
     public function getVersao() {
-        return '1.5.3';
+        return '1.5.4';
     }
 
     public function getInstituicao() {
-        return 'Ministério do Planejamento - MPDG (Projeto Colaborativo no Portal do SPB)';
+        return 'Ministério da Economia - ME (Projeto Colaborativo no Github)';
     }
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO) {

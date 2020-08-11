@@ -110,6 +110,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.5.0': $this->instalarV1501();
                 case '1.5.1': $this->instalarV1502();
                 case '1.5.2': $this->instalarV1503();
+                case '1.5.3': $this->instalarV1504();
 
                 break;
                 default:
@@ -1171,6 +1172,14 @@ class PenAtualizarSipRN extends InfraRN {
     private function instalarV1503()
     {
         $this->atualizarNumeroVersao('1.5.3');
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 1.5.4
+     */
+    private function instalarV1504()
+    {
+        $this->atualizarNumeroVersao('1.5.4');
     }
 }
 
