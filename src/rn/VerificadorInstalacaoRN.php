@@ -52,7 +52,6 @@ class VerificadorInstalacaoRN extends InfraRN
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/MonitoramentoTarefasPEN.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/ProcessamentoTarefasPEN.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../config/mod-pen/ConfiguracaoModPEN.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../config/mod-pen/supervisor.ini');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-reboot-fila.sh');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-pendencias-represadas.py');
         return true;
@@ -262,9 +261,13 @@ class VerificadorInstalacaoRN extends InfraRN
     {
         // Processa uma chamada ao Barramento de Serviços para certificar que o atual certificado está corretamente vinculado à um
         // comitê de protocolo válido
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objProcessoEletronicoRN->listarPendencias(false);
-        return true;
+        try{
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $objProcessoEletronicoRN->listarPendencias(false);
+            return true;
+        } catch(Exception $e){
+            throw new InfraException("Falha no acesso aos serviços de integração do Barramento de Serviços do PEN: $e");
+        }
     }
 
     /**
@@ -285,7 +288,7 @@ class VerificadorInstalacaoRN extends InfraRN
         }
 
         if(!class_exists("GearmanClient")){
-            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
+            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN." .
                 "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
         }
 
