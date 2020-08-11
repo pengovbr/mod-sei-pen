@@ -304,7 +304,7 @@ class PendenciasTramiteRN extends InfraRN
         try {
             if(!empty($this->strGearmanServidor)) {
                 if(!class_exists("GearmanClient")){
-                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN.\n" .
+                    throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN. " .
                         "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
                 }
 
