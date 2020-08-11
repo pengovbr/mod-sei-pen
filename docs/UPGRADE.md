@@ -1,8 +1,8 @@
 # Manual de Atualização do Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-**O objetivo deste documento é descrever os procedimento para ATUALIZAÇÃO do Módulo de Integração com o Barramento de Serviços do PEN (mod-sei-pen) previamente instalado e configurado no Sistema Eletrônico de Informações (SEI).**
+O objetivo deste documento é descrever os procedimento para ATUALIZAÇÃO do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-pen**) previamente instalado e configurado no Sistema Eletrônico de Informações (SEI).
 
-**ATENÇÃO: Caso esta seja a primeira instalação do módulo no SEI, veja as instruções detalhadas de instalação no documento INSTALACAO.md presente no arquivo de distribuição do módulo (```mod-sei-pen-VERSAO.zip```)**
+**ATENÇÃO: Caso esta seja a primeira instalação do módulo no SEI, veja as instruções detalhadas de instalação no documento INSTALACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
 
  
 Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento

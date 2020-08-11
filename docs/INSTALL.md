@@ -1,9 +1,8 @@
 # Manual de Instalação do Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-**O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).**
+O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).
 
-**ATENÇÃO: Caso o módulo já se encontre instalado em uma versão anterior e a intensão é apenas atualizá-lo, veja as instruções detalhadas de atualização no documento ATUALIZACAO.md presente no arquivo de distribuição do módulo (```**mod-sei-pen**-VERSAO.ziP```)**
-
+**ATENÇÃO: Caso o módulo já se encontre instalado em uma versão anterior, siga as instruções detalhadas de atualização no documento ATUALIZACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
 
 O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simplificada e segura.
 
@@ -126,8 +125,8 @@ Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ 
 
 * **WebService**  
 Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/*
-    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/*
+    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
+    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
 
 
 * **LocalizacaoCertificado**  
@@ -392,9 +391,9 @@ apt-get install gearman-job-server
 
 ```
 
-#### 3.1.2. Instalar as bibliotecas PHP de coneção ao Gearman
+#### 3.1.2. Instalar as bibliotecas PHP de conexão ao Gearman
 
-Instalar as bibliotecas PHP para coneção ao servidor do Gearman em todos os nós de aplicação do SEI, ou seja, em todos os nós de aplicação em que o servidor web (apache).
+Instalar as bibliotecas PHP para conexão ao servidor do Gearman em todos os nós de aplicação do SEI, ou seja, em todos os nós de aplicação em que o servidor web (apache).
 
 Maiores detalhes de como instalar as extensões PHP para uso no Gearman podem ser encontradas em http://gearman.org/download/#php
 
