@@ -88,11 +88,11 @@ class ProcessoEletronicoRN extends InfraRN
     );
 
     private $objPenWs = null;
-    private $strWSDL = null;    
+    private $strWSDL = null;
     private $options = null;
     private $numTentativasErro = null;
 
-    public function __construct() 
+    public function __construct()
     {
         $objPenParametroRN = new PenParametroRN();
         $strEnderecoWebService = $objPenParametroRN->getParametro('PEN_ENDERECO_WEBSERVICE');
@@ -137,47 +137,12 @@ class ProcessoEletronicoRN extends InfraRN
         return BancoSEI::getInstance();
     }
 
-    /**
-    * Verifica se o uma url esta ativa
-    *
-    * @param string $strUrl url a ser testada
-    * @param string $strLocalCert local físico do certificado .pem
-    * @throws InfraException
-    * @return null
-    */
-    private function testaUrl($strUrl='', $strLocalCert='')
-    {
-        $arrParseUrl = parse_url($this->strWSDL);
-        $strUrl = $arrParseUrl['scheme'].'://'.$arrParseUrl['host'];
-
-        $strCommand = sprintf('curl %s --insecure --cert %s 2>&1', $strUrl, $this->options['local_cert']);
-        $numRetorno = 0;
-        $arrOutput = array();
-
-        @exec($strCommand, $arrOutput, $numRetorno);
-
-        if($numRetorno > 0){
-            $strMensagem = "Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.";
-            throw new InfraException($strMensagem);
-        }
-    }
-
-    public function testarDisponibilidade()
-    {
-        try{
-            $this->testaUrl($this->strWSDL, $this->options['local_cert']);
-            return true;
-        } catch (Exception $ex) {
-            return false;
-        }
-    }
-
     private function getObjPenWs()
     {
         if($this->objPenWs == null) {
-            $this->testaUrl($this->strWSDL, $this->options['local_cert']);
+            $this->validarDisponibilidade();
 
-            try {                
+            try {
                 $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
             } catch (Exception $e) {
                 $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -190,7 +155,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
 
-    public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas) 
+    public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
     {
         $objRepositorioDTO = null;
         try{
@@ -234,7 +199,7 @@ class ProcessoEletronicoRN extends InfraRN
         try{
             $parametros = new stdClass();
             $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
-            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;           
+            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;
 
             //$result = $this->getObjPenWs()->consultarRepositoriosDeEstruturas($parametros);
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
@@ -272,7 +237,7 @@ class ProcessoEletronicoRN extends InfraRN
     * @return EstruturaDTO|mixed
     * @throws InfraException
     */
-    public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw=false) 
+    public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw=false)
     {
         try {
             $parametros = new stdClass();
@@ -285,7 +250,7 @@ class ProcessoEletronicoRN extends InfraRN
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->consultarEstruturas($parametros);
             });
-            
+
 
             if ($result->estruturasEncontradas->totalDeRegistros == 1) {
 
@@ -468,7 +433,7 @@ class ProcessoEletronicoRN extends InfraRN
             curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
-            
+
             //$output = curl_exec($curl);
             $output = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($curl) {
                 return curl_exec($curl);
@@ -526,7 +491,7 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros = new stdClass();
             $parametros->filtroDePendencias = new stdClass();
             $parametros->filtroDePendencias->todasAsPendencias = $bolTodasPendencias;
-            
+
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->listarPendencias($parametros);
             });
@@ -638,7 +603,7 @@ class ProcessoEletronicoRN extends InfraRN
         try {
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
-            });            
+            });
         } catch (\Exception $e) {
             $mensagem = "Falha em sinalizar o término de envio das partes do componente digital";
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -651,11 +616,11 @@ class ProcessoEletronicoRN extends InfraRN
         try {
             $parametros = new stdClass();
             $parametros->IDT = $parNumIdentificacaoTramite;
-            
+
             //return $this->getObjPenWs()->solicitarMetadados($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->solicitarMetadados($parametros);
-            });                        
+            });
         } catch (\Exception $e) {
             $mensagem = "Falha na solicitação de metadados do processo";
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -915,7 +880,7 @@ class ProcessoEletronicoRN extends InfraRN
             $objComponenteDigitalDTO = new ComponenteDigitalDTO();
             $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
             //TODO: Error utilizar idProcedimentoSEI devido processos apensados
-            $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI); 
+            $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
             $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
             $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
             $objComponenteDigitalDTO->setNumOrdem($objComponenteDigital->ordem);
@@ -979,9 +944,9 @@ class ProcessoEletronicoRN extends InfraRN
                 $objComponenteDigitalDTO = new ComponenteDigitalDTO();
                 $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
                 //TODO: Error utilizar idProcedimentoSEI devido processos apensados
-                $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);                
-                $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);                
-                $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);                
+                $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
+                $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
+                $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
                 $objComponenteDigitalDTO->setNumOrdem(1);
                 $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
                 $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
@@ -1357,7 +1322,7 @@ class ProcessoEletronicoRN extends InfraRN
     * @param int $parNumIdTramite
     * @return ReciboTramiteEnviadoDTO
     */
-    public function receberReciboDeEnvio($parNumIdTramite) 
+    public function receberReciboDeEnvio($parNumIdTramite)
     {
         try {
             $parametros = new stdClass();
@@ -1488,7 +1453,7 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros->recusaDeTramite->IDT = $idTramite;
             $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
             $parametros->recusaDeTramite->motivo = $motivo;
-            
+
             //$resultado = $this->getObjPenWs()->recusarTramite($parametros);
             $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->recusarTramite($parametros);
@@ -1631,7 +1596,7 @@ class ProcessoEletronicoRN extends InfraRN
                 return $this->tentarNovamenteSobErroHTTP($callback, ++$numTentativa);
             } else {
                 throw $fault;
-            }            
+            }
         }
     }
 
@@ -1673,8 +1638,8 @@ class ProcessoEletronicoRN extends InfraRN
             foreach ($arrObjProtocolo as $objProtocolo) {
                 $bolEhProcessoAnexado = $objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
                 if($parBolExtrairAnexados && $bolEhProcessoAnexado){
-                    $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);                    
-                    $arrObjDocumento = array_merge($arrObjDocumento, $arrProtocolosAnexados);                    
+                    $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);
+                    $arrObjDocumento = array_merge($arrObjDocumento, $arrProtocolosAnexados);
                 } else {
                     if(!$bolEhProcessoAnexado){
                         $objProtocolo->idProcedimentoSEI = $parObjProtocolo->idProcedimentoSEI;
@@ -1690,11 +1655,11 @@ class ProcessoEletronicoRN extends InfraRN
             $parObjProtocolo->ordemAjustada = 1;
             return array($parObjProtocolo);
         }
-        
+
         if($parBolExtrairAnexados){
             usort($arrObjDocumento, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
         }
-        
+
         return ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
     }
 
@@ -1763,24 +1728,24 @@ class ProcessoEletronicoRN extends InfraRN
 
     /**
     * Método responsável pelo desmembramento de processos anexados
-    * 
+    *
     * Método responsável por desmembrar os metadados do processo recebido caso ele possua outros processos anexados
-    * O desmembramento é necessário para que o processo possa ser recriado na mesma estrutura original, ou seja, em vários 
+    * O desmembramento é necessário para que o processo possa ser recriado na mesma estrutura original, ou seja, em vários
     * processos diferentes, um anexado ao outro
-    * 
+    *
     * @param object $parObjProtocolo
-    * 
+    *
     * @return list($objProtocoloPrincipal, $arrProtocolosAnexados)
     */
-    public static function desmembrarProcessosAnexados($parObjProtocolo) 
+    public static function desmembrarProcessosAnexados($parObjProtocolo)
     {
         $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
 
         // Função anônima de identificação se um determinado documento faz parte de um processo anexado
         $funcDocumentoFoiAnexado = function($parObjDocumento) use ($parObjProtocolo){
             return (
-                isset($parObjDocumento->protocoloDoProcessoAnexado) && 
-                !empty($parObjDocumento->protocoloDoProcessoAnexado) && 
+                isset($parObjDocumento->protocoloDoProcessoAnexado) &&
+                !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
                 $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
             );
         };
@@ -1789,7 +1754,7 @@ class ProcessoEletronicoRN extends InfraRN
         $bolExisteProcessoAnexado = array_reduce($arrObjDocumentos, function($bolExiste, $objDoc) use ($funcDocumentoFoiAnexado){
             return $bolExiste || $funcDocumentoFoiAnexado($objDoc);
         });
-        
+
         if(!$bolExisteProcessoAnexado){
             return $parObjProtocolo;
         }
@@ -1799,14 +1764,14 @@ class ProcessoEletronicoRN extends InfraRN
         $objProcessoPrincipal->documento = array();
         $arrObjDocumentosOrdenados = $arrObjDocumentos;
         usort($arrObjDocumentosOrdenados, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
-                
+
         // Agrupamento dos documentos por processo
         foreach ($arrObjDocumentosOrdenados as $objDocumento) {
-            $bolDocumentoAnexado = $funcDocumentoFoiAnexado($objDocumento);            
+            $bolDocumentoAnexado = $funcDocumentoFoiAnexado($objDocumento);
             $strProtocoloProcAnexado = ($bolDocumentoAnexado) ? $objDocumento->protocoloDoProcessoAnexado : $objProcessoPrincipal->protocolo;
-            
+
             // Cria uma nova presentação para o processo anexado identico ao processo principal
-            // As informações do processo anexado não são consideradas pois não existem metadados no modelo do PEN, 
+            // As informações do processo anexado não são consideradas pois não existem metadados no modelo do PEN,
             // existe apenas o número do protocolo de referência
             if($bolDocumentoAnexado && !array_key_exists($strProtocoloProcAnexado, $arrObjRefProcessosAnexados)){
                 $objProcessoAnexado = clone $objProcessoPrincipal;
@@ -1816,13 +1781,44 @@ class ProcessoEletronicoRN extends InfraRN
                 $objProcessoPrincipal->documento[] = $objProcessoAnexado;
                 $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] = $objProcessoAnexado;
             }
-            
+
             $objProcessoDoDocumento = ($bolDocumentoAnexado) ? $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] : $objProcessoPrincipal;
             $objDocumentoReposicionado = clone $objDocumento;
             $objDocumentoReposicionado->ordemAjustada = count($objProcessoDoDocumento->documento) + 1;
             $objProcessoDoDocumento->documento[] = $objDocumentoReposicionado;
-        }    
-        
+        }
+
         return $objProcessoPrincipal;
-    }    
+    }
+
+    /**
+     * Testa a disponibilidade do Barramento de Serviços do PEN
+     *
+     * @return void
+     */
+    public function validarDisponibilidade()
+    {
+        $curl = curl_init($this->strWSDL);
+
+        try{
+            curl_setopt($curl, CURLOPT_URL, $this->strWSDL);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_NOBODY, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+            curl_exec($curl);
+
+            if(curl_errno($curl)){
+                throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
+            }
+
+            return true;
+        } finally{
+            curl_close($curl);
+        }
+    }
 }
