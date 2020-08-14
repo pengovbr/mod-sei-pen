@@ -72,6 +72,24 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         }
     }
 
+
+    /**
+     * Consulta os mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN para recebimento
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return void
+     */
+    protected function consultarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
+    {
+        try {
+            $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+            return $objPenRelTipoDocMapRecebidoBD->consultar($parObjPenRelTipoDocMapRecebidoDTO);
+        }catch(Exception $e){
+            throw new InfraException('Erro consultando mapeamento de documentos para recebimento.',$e);
+        }
+    }
+
+
     /**
      * Remove uma espécie documental da base de dados do SEI baseado em um código de espécie do Barramento
      *
