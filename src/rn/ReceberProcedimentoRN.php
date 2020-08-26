@@ -175,6 +175,7 @@ class ReceberProcedimentoRN extends InfraRN
                         $numOrdemComponente, $numIdTramite, $objTramite, $arrObjComponenteDigitalIndexado
                     );
                     $arrAnexosComponentes[$key][$componentePendente] = $objAnexoDTO;
+                    $this->criarDiretorioAnexo($objAnexoDTO);
 
                     $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$componentePendente];
                     $objAnexoBaixadoPraPastaTemp->hash = $componentePendente;
@@ -2121,32 +2122,6 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
 
-    // private function sincronizarRecebimentoProcessos($parStrNumeroRegistro, $parNumIdentificacaoTramite, $numIdTarefa)
-    // {
-    //     try{
-    //         $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
-    //         $objProcedimentoAndamentoDTO->retTodos();
-    //         $objProcedimentoAndamentoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-    //         $objProcedimentoAndamentoDTO->setDblIdTramite($parNumIdentificacaoTramite);
-    //         $objProcedimentoAndamentoDTO->setNumTarefa($numIdTarefa);
-    //         $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
-
-    //         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
-    //         $objProcedimentoAndamentoDTORet = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
-
-    //         if(!is_null($objProcedimentoAndamentoDTORet)){
-    //             $this->gravarLogDebug("Sincronizando o recebimento de processos concorrentes...", 1);
-    //             $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->bloquear($objProcedimentoAndamentoDTORet);
-    //             $this->gravarLogDebug("Liberando processo concorrente de recebimento de processo ...", 1);
-    //         }
-
-    //         return true;
-
-    //     } catch(InfraException $e){
-    //         // Erros de lock significam que outro processo concorrente já está processando a requisição
-    //         return false;
-    //     }
-    // }
 
     /**
     * Verifica se existe documentos com pendência de download de seus componentes digitais
@@ -2173,7 +2148,6 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
         $recordset = $this->getObjInfraIBanco()->consultarSql($sql);
-
         $bolDocumentoPendente = !empty($recordset);
 
         //Verifica especificamente um determinado hash através da verificação do hash do componente, caso parâmetro tenha sido informado
@@ -2340,6 +2314,19 @@ class ReceberProcedimentoRN extends InfraRN
             $parObjMetadadosTramite->metadados->destinatario->numeroDeIdentificacaoDaEstrutura = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
             $numUnidadeReceptora = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
             $this->gravarLogDebug("Atribuindo unidade receptora $numUnidadeReceptora para o trâmite $parNumIdentificacaoTramite", 2);
+        }
+    }
+
+    private function criarDiretorioAnexo($parObjAnexoDTO)
+    {
+
+        $objAnexoRN = new AnexoRN();
+        $strDiretorio = $objAnexoRN->obterDiretorio($parObjAnexoDTO);
+        if (is_dir($strDiretorio) === false){
+            umask(0);
+            if (mkdir($strDiretorio,0777,true) === false){
+                throw new InfraException('Erro criando diretório "' .$strDiretorio.'".');
+            }
         }
     }
 
