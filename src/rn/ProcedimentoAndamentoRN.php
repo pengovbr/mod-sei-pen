@@ -117,7 +117,7 @@ class ProcedimentoAndamentoRN extends InfraRN
         $numIdTarefa = $parArrChavesSincronizacao["IdTarefa"];
 
         if(!$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $numIdTramite, $numIdTarefa)){
-            $this->gravarLogDebug("Trâmite de recebimento $numIdTramite já se encontra em processamento", 3);
+            $this->objPenDebug->gravar("Trâmite de recebimento $numIdTramite já se encontra em processamento", 3, false);
             return false;
         }
 
@@ -132,5 +132,4 @@ class ProcedimentoAndamentoRN extends InfraRN
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
         return $objProcedimentoAndamentoBD->listar($parObjProcedimentoAndamentoDTO);
     }
-
 }
