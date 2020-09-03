@@ -73,30 +73,25 @@ class ProcessarPendenciasRN extends InfraRN
     public function processarPendencias()
     {
         try{
-            global $bolInterromper;
             $this->inicializarGearman();
 
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
             PENIntegracao::validarCompatibilidadeModulo();
-
-            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
             ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
             $numProcID = getmygid();
             $mensagemInicioProcessamento = "Iniciando serviço de processamento de pendências de trâmites de processos ($numProcID)";
             $this->gravarLogDebug($mensagemInicioProcessamento, 0, true);
 
-            while(!$bolInterromper)
+            while($this->objGearmanWorker->work())
             {
                 try {
-                    $this->objGearmanWorker->work();
                     $numReturnCode = $this->objGearmanWorker->returnCode();
 
                     switch ($numReturnCode) {
                         case GEARMAN_SUCCESS:
-
                             break;
 
                         case GEARMAN_TIMEOUT:

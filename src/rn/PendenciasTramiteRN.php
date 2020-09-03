@@ -67,7 +67,6 @@ class PendenciasTramiteRN extends InfraRN
     public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false, $parBolDebug=false)
     {
         try{
-            global $bolEmExecucao;
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
@@ -126,7 +125,7 @@ class PendenciasTramiteRN extends InfraRN
                     $this->carregarParametrosIntegracao();
                 }
 
-            } while($parBolMonitorarPendencias && $bolEmExecucao);
+            } while($parBolMonitorarPendencias);
         }
         catch(Exception $e) {
             $this->gravarLogDebug(InfraException::inspecionar($e));

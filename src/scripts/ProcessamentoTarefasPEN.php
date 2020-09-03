@@ -3,19 +3,6 @@
 $dirSeiWeb = !defined("DIR_SEI_WEB") ? getenv("DIR_SEI_WEB") ?: __DIR__."/../../web" : DIR_SEI_WEB;
 require_once $dirSeiWeb . '/SEI.php';
 
-// PHP internal, faz com que o tratamento de sinais funcione corretamente
-// TODO: Substituir declaração por pcntl_async_signal no php 7
-declare(ticks=1);
-
-$bolInterromper = false;
-function tratarSinalInterrupcaoProc($sinal)
-{
-    global $bolInterromper;
-    $bolInterromper = true;
-    printf("\nAtenção: Sinal de interrupção do processamento de pendências recebido. Finalizando processamento ...%s", PHP_EOL);
-}
-
-
 class ProcessamentoTarefasPEN
 {
     private static $instance = null;
@@ -31,10 +18,6 @@ class ProcessamentoTarefasPEN
     {
         ini_set('max_execution_time','0');
         ini_set('memory_limit','-1');
-
-        pcntl_signal(SIGINT, 'tratarSinalInterrupcaoProc');
-        pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoProc');
-        pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoProc');
     }
 
 

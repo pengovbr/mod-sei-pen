@@ -3,26 +3,11 @@
 $dirSeiWeb = !defined("DIR_SEI_WEB") ? getenv("DIR_SEI_WEB") ?: __DIR__."/../../web" : DIR_SEI_WEB;
 require_once $dirSeiWeb . '/SEI.php';
 
-// PHP internal, faz com que o tratamento de sinais funcione corretamente
-declare(ticks=1);
-
-$bolEmExecucao = true;
-function tratarSinalInterrupcaoMonitoramento($sinal)
-{
-    global $bolEmExecucao;
-    $bolEmExecucao = false;
-    printf("\nAtenção: Sinal de interrupção do monitoramento de pendências recebido. Finalizando processamento ...%s", PHP_EOL);
-}
-
 // Garante que código abaixo foi executado unicamente via linha de comando
 if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     ini_set('max_execution_time','0');
     ini_set('memory_limit','-1');
-
-    pcntl_signal(SIGINT, 'tratarSinalInterrupcaoMonitoramento');
-    pcntl_signal(SIGTERM, 'tratarSinalInterrupcaoMonitoramento');
-    pcntl_signal(SIGHUP, 'tratarSinalInterrupcaoMonitoramento');
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);
