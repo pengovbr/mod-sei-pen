@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "2.0.1";
+    const VERSAO_MODULO = "2.1.0";
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -242,10 +242,69 @@ class PENIntegracao extends SeiIntegracao
     }
 
 
-    public static function getDiretorio() {
-        $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
-        $strModulo = $arrConfig['PENIntegracao'];
-        return "modulos/".$strModulo;
+
+    public function montarIconeDocumento(ProcedimentoAPI $objProcedimentoAPI, $arrObjDocumentoAPI)
+    {
+        $arrIcones = array();
+
+        if ($objProcedimentoAPI->getCodigoAcesso() > 0) {
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+
+            $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objProcedimentoAPI->getIdProcedimento());
+            $objUltimoTramiteRecebidoDTO = $objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+
+            if (!is_null($objUltimoTramiteRecebidoDTO)) {
+                if ($objProcessoEletronicoRN->possuiComponentesComDocumentoReferenciado($objUltimoTramiteRecebidoDTO)) {
+                    $arrObjComponentesDigitaisDTO = $objProcessoEletronicoRN->listarComponentesDigitais($objUltimoTramiteRecebidoDTO);
+                    $arrObjCompIndexadoPorOrdemDTO = InfraArray::indexarArrInfraDTO($arrObjComponentesDigitaisDTO, 'OrdemDocumento');
+                    $arrObjCompIndexadoPorIdDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjComponentesDigitaisDTO, 'IdDocumento');
+
+                    $arrObjDocumentoAPIIndexado = array();
+                    foreach ($arrObjDocumentoAPI as $objDocumentoAPI) {
+                        $arrObjDocumentoAPIIndexado[$objDocumentoAPI->getIdDocumento()] = $objDocumentoAPI;
+
+                        if ($objDocumentoAPI->getCodigoAcesso() > 0) {
+                            $dblIdDocumento = $objDocumentoAPI->getIdDocumento();
+                            if (array_key_exists($dblIdDocumento, $arrObjCompIndexadoPorIdDocumentoDTO)) {
+                                $objComponenteDTO = $arrObjCompIndexadoPorIdDocumentoDTO[$dblIdDocumento];
+                                if (!is_null($objComponenteDTO->getNumOrdemDocumentoReferenciado())) {
+                                    $arrIcones[$dblIdDocumento] = array();
+
+                                    $objComponenteReferenciadoDTO = $arrObjCompIndexadoPorOrdemDTO[$objComponenteDTO->getNumOrdemDocumentoReferenciado()];
+                                    $objDocumentoReferenciadoAPI = $arrObjDocumentoAPIIndexado[$objComponenteReferenciadoDTO->getDblIdDocumento()];
+
+                                    $strTextoInformativo = sprintf("Anexo do %s \(%s\)",
+                                        $objDocumentoReferenciadoAPI->getNomeSerie(),
+                                        $objDocumentoReferenciadoAPI->getNumeroProtocolo()
+                                    );
+
+                                    $objSerieDTO = $objPenRelTipoDocMapRecebidoRN->obterSerieMapeada($objComponenteDTO->getNumCodigoEspecie());
+                                    if(!is_null($objSerieDTO)){
+                                        $strTextoInformativo .= " - " . $objSerieDTO->getStrNome();
+                                    }
+
+                                    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+                                    $objArvoreAcaoItemAPI->setTipo('MD_PEN_DOCUMENTO_REFERENCIADO');
+                                    $objArvoreAcaoItemAPI->setId('MD_PEN_DOC_REF' . $dblIdDocumento);
+                                    $objArvoreAcaoItemAPI->setIdPai($dblIdDocumento);
+                                    $objArvoreAcaoItemAPI->setTitle($strTextoInformativo);
+                                    $objArvoreAcaoItemAPI->setIcone('imagens/anexos.gif');
+                                    $objArvoreAcaoItemAPI->setTarget(null);
+                                    $objArvoreAcaoItemAPI->setHref("javascript:alert('$strTextoInformativo');");
+                                    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+                                    $arrIcones[$dblIdDocumento][] = $objArvoreAcaoItemAPI;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return $arrIcones;
     }
 
 
@@ -437,8 +496,6 @@ class PENIntegracao extends SeiIntegracao
                 $offset       = $_POST['offset'] * $registrosPorPagina;
 
                 $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-                //print "Texto: " . $numeroDeIdentificacaoDaEstrutura;
-                //$siglaUnidade = 'CGPRO';
                 $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
 
                 $interface = new ProcessoEletronicoINT();
@@ -508,12 +565,18 @@ class PENIntegracao extends SeiIntegracao
         return $arrEstruturas;
     }
 
+    public static function getDiretorio()
+    {
+        $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
+        $strModulo = $arrConfig['PENIntegracao'];
+        return "modulos/".$strModulo;
+    }
 
     /**
     * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada
     *
     * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
-    * @return boolean                  Indicardor se base de dados é compatível
+    * @return boolean Indicardor se base de dados é compatível
     */
     public static function validarCompatibilidadeBanco($bolGerarExcecao=true)
     {

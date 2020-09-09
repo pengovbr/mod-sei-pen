@@ -2,8 +2,8 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class PenRelTipoDocMapRecebidoRN extends InfraRN {
-
+class PenRelTipoDocMapRecebidoRN extends InfraRN
+{
     public function __construct() {
         parent::__construct();
     }
@@ -20,7 +20,6 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         $objDTO = new PenRelTipoDocMapRecebidoDTO();
         $objDTO->retNumCodigoEspecie();
         $objDTO->setDistinct(true);
-        //$objDTO->setOrdNumCodigoEspecie(InfraDTO::$TIPO_ORDENACAO_ASC);
         $objDTO->setBolExclusaoLogica(false);
 
         $objGenericoBD = new GenericoBD($objInfraIBanco);
@@ -178,7 +177,6 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
     protected function mapearEspeciesDocumentaisRecebimentoControlado()
     {
         $objTipoDocMapRN = new TipoDocMapRN();
-        $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
 
         //Persentual de similaridade mínimo aceito para que a espécie documental possa ser automaticamente mapeada
         $numPercentualSimilaridadeValido = 85;
@@ -188,7 +186,7 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         // Obter todas as espécies documentais do Barramento de Serviços do PEN
         // Antes separa as espécies com nomes separados por '/' em itens diferentes
         $arrEspeciesDocumentais = array();
-        $arrEspecies = $objTipoDocMapRN->listarParesEspecie($objPenRelTipoDocMapRecebidoRN->listarEmUso(null));
+        $arrEspecies = $objTipoDocMapRN->listarParesEspecie($this->listarEmUso(null));
         foreach ($arrEspecies as $numCodigo => $strItem) {
             foreach (preg_split('/\//', $strItem) as $strNomeEspecie) {
                 $arrEspeciesDocumentais[] = array("codigo" => $numCodigo, "nome" => $strNomeEspecie);
@@ -230,9 +228,9 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
                 // Realiza o mapeamento do tipo de documento com a espécie documental similar
                 $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
                 $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numIdEspecieDocumental);
-                if($objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO) == 0){
+                if($this->contar($objPenRelTipoDocMapRecebidoDTO) == 0){
                     $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie($numIdTipDocumentoSimilar);
-                    $objPenRelTipoDocMapRecebidoRN->cadastrar($objPenRelTipoDocMapRecebidoDTO);
+                    $this->cadastrar($objPenRelTipoDocMapRecebidoDTO);
                 }
             }
         }
@@ -274,6 +272,30 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN {
         }catch(Exception $e){
             throw new InfraException('Erro atribuindo Tipos de Documento padrão para recebimento.',$e);
         }
+    }
+
+    protected function obterSerieMapeadaConectado($numCodigoEspecie)
+    {
+        $objSerieDTO = null;
+        $objMapDTO = new PenRelTipoDocMapRecebidoDTO();
+        $objMapDTO->setNumCodigoEspecie($numCodigoEspecie);
+        $objMapDTO->retNumIdSerie();
+
+        // Busca mapeamento de tipos de documento definido pelo
+        $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
+        $objMapDTO = $objGenericoBD->consultar($objMapDTO);
+
+        $numIdSerieMapeada = (isset($objMapDTO)) ? $objMapDTO->getNumIdSerie() : $this->consultarTipoDocumentoPadrao();
+        if(!empty($numIdSerieMapeada)) {
+            $objSerieDTO = new SerieDTO();
+            $objSerieDTO->retStrNome();
+            $objSerieDTO->retNumIdSerie();
+            $objSerieDTO->setNumIdSerie($numIdSerieMapeada);
+            $objSerieRN = new SerieRN();
+            $objSerieDTO = $objSerieRN->consultarRN0644($objSerieDTO);
+        }
+
+        return $objSerieDTO;
     }
 
 }

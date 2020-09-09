@@ -28,6 +28,7 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeEspecieProdutor', 'nome_especie_produtor');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Ordem', 'ordem');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumento', 'ordem_documento');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoReferenciado', 'ordem_documento_referenciado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoAnexado', 'ordem_documento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
 

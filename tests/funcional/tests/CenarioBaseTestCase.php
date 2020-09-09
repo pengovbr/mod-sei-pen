@@ -331,6 +331,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria=false, $hipoteseLegal=null)
     {
         sleep(2);
+
+        $bolPossuiDocumentoReferenciado = !is_null($dadosDocumento['ORDEM_DOCUMENTO_REFERENCIADO']);
+        $this->assertTrue($this->paginaProcesso->deveSerDocumentoAnexo($bolPossuiDocumentoReferenciado, $nomeDocArvore));
+
         $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
         $this->paginaDocumento->navegarParaConsultarDocumento();
         $mesmoOrgao = $dadosDocumento['ORIGEM'] == $destinatario['URL'];
@@ -374,7 +378,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         return array(
             "TIPO_PROCESSO" => $contextoProducao['TIPO_PROCESSO'],
             "DESCRICAO" => util::random_string(20),
-            "OBSERVACOES" => util::random_string(100),
+            "OBSERVACOES" => null,
             "INTERESSADOS" => util::random_string(40),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             "ORIGEM" => $contextoProducao['URL'],
@@ -388,15 +392,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
             "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
             "DESCRICAO" => util::random_string(20),
-            "OBSERVACOES" => util::random_string(100),
+            "OBSERVACOES" => null,
             "INTERESSADOS" => util::random_string(40),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "ORDEM_DOCUMENTO_REFERENCIADO" => null,
             "ARQUIVO" => ".html",
             "ORIGEM" => $contextoProducao['URL'],
         );
     }
 
-    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt')
+    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt', $ordemDocumentoReferenciado=null)
     {
         // Tratamento para lista de arquivos em casos de documentos com mais de um componente digital
         $pasta = self::PASTA_ARQUIVOS_TESTE;
@@ -410,6 +415,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "DESCRICAO" => util::random_string(20),
             "OBSERVACOES" => util::random_string(100),
             "INTERESSADOS" => util::random_string(40),
+            "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             "ARQUIVO" => $arquivos,
             "ORIGEM" => $contextoProducao['URL'],
@@ -494,7 +500,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // 11 - Abrir protocolo na tela de controle de processos
-        $this->abrirProcesso($strProtocoloTeste);
+        $this->waitUntil(function($testCase) use ($strProtocoloTeste){
+            sleep(5);
+            $this->abrirProcesso($strProtocoloTeste);
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // 12 - Validar dados  do processo

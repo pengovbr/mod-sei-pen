@@ -31,6 +31,24 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 
 
 
+    public function test_recebimento_documento_avulso_com_2_componentes_digitais()
+    {
+        // Simular um trâmite chamando a API do Barramento diretamente
+        $documentoTeste = $this->gerarDadosDocumentoExternoTeste($this->remetente, array(self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B));
+
+        // Simular um trâmite chamando a API do Barramento diretamente
+        $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste($documentoTeste);
+        $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, $this->remetente, $this->destinatario, $metadadosDocumentoTeste);
+        $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $metadadosDocumentoTeste);
+        $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
+
+        //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
+        $this->assertNotNull($novoTramite);
+        $this->assertNotNull($reciboTramite);
+        $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentoTeste, $this->destinatario);
+    }
+
+
     /**
      * Teste de verificação do correto recebimento do documento avulso
      *
@@ -54,36 +72,6 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentoTeste, $this->destinatario);
     }
 
-    public function test_recebimento_documento_avulso_com_2_componentes_digitais()
-    {
-        // Simular um trâmite chamando a API do Barramento diretamente
-        $documentoTeste = $this->gerarDadosDocumentoExternoTeste($this->remetente, array(self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B));
-
-        // Simular um trâmite chamando a API do Barramento diretamente
-        $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste($documentoTeste);
-        $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, $this->remetente, $this->destinatario, $metadadosDocumentoTeste);
-        $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $metadadosDocumentoTeste);
-        $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
-
-        //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
-        $this->assertNotNull($novoTramite);
-        $this->assertNotNull($reciboTramite);
-        $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentoTeste, $this->destinatario);
-    }
-
-    // public function test_recebimento_documento_avulso_com_2_componentes_digitais_maiores_50mb()
-    // {
-    //     // Simular um trâmite chamando a API do Barramento diretamente
-    //     $documentoTeste = $this->construirDocumentoTeste(array(self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C));
-    //     $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, $this->remetente, $this->destinatario, $documentoTeste);
-    //     $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $documentoTeste);
-    //     $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
-
-    //     //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
-    //     //TODO: Implementar todas as validações no sistema de destino
-    //     $this->assertNotNull($novoTramite);
-    //     $this->assertNotNull($reciboTramite);
-    // }
 
     private function receberReciboEnvio($servicoPEN, $novoTramite)
     {
@@ -207,60 +195,6 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 
             'interessado' => array(
                 'nome' => $documentoTeste['INTERESSADOS'],
-            ),
-
-            'componenteDigital' => $componentes,
-        );
-    }
-
-
-    private function construirMetadadosDocumentoTeste_old($listaComponentes)
-    {
-        $componentes = array();
-        foreach ($listaComponentes as $ordem => $nomeArquivo) {
-
-            $caminhoArquivo = dirname(__FILE__) . "/../assets/arquivos/$nomeArquivo";
-            $caminhoArquivo = realpath($caminhoArquivo);
-            $fp = fopen($caminhoArquivo, "rb");
-            try{
-                $conteudo = fread($fp, filesize($caminhoArquivo));
-                $tamanhoDocumento = strlen($conteudo);
-                $hashDocumento = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $conteudo, true));
-                $componentes[] = array(
-                    'nome' => basename($nomeArquivo),
-                    'hash' => new SoapVar("<hash algoritmo='SHA256'>$hashDocumento</hash>", XSD_ANYXML),
-                    'tipoDeConteudo' => 'txt',
-                    'mimeType' => 'text/plain',
-                    'tamanhoEmBytes' => $tamanhoDocumento,
-                    'ordem' => $ordem,
-
-                    // Chaves abaixo adicionadas apenas para simplificaçÃ£o dos testes
-                    'valorHash' => $hashDocumento,
-                    'conteudo' => $conteudo,
-                );
-            } finally {
-               fclose($fp);
-            }
-        }
-
-        return array(
-            'protocolo' => '13990.000181/2020-00',
-            'nivelDeSigilo' => 1,
-            'descricao' => utf8_encode(util::random_string(20)),
-            'dataHoraDeProducao' => '2017-05-15T03:41:13',
-            'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
-
-            'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
-            ),
-
-            'especie' => array(
-                'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
-            ),
-
-            'interessado' => array(
-                'nome' => utf8_encode(util::random_string(20)),
             ),
 
             'componenteDigital' => $componentes,

@@ -877,14 +877,12 @@ class ProcessoEletronicoRN extends InfraRN
             //Verifica se o documento foi inserido pelo trâmite atual
             if($objComponenteDigitalDTO->getDblIdDocumento() != null){
                 $objComponenteDigitalDTO->setDblIdProcedimento($idProcedimento);
-
                 $objComponenteDigitalDTOFiltro = new ComponenteDigitalDTO();
+                $objComponenteDigitalDTOFiltro->setNumIdTramite($objComponenteDigitalDTO->getNumIdTramite());
                 $objComponenteDigitalDTOFiltro->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
                 $objComponenteDigitalDTOFiltro->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
                 $objComponenteDigitalDTOFiltro->setDblIdDocumento($objComponenteDigitalDTO->getDblIdDocumento());
                 $objComponenteDigitalDTOFiltro->setNumOrdem($objComponenteDigitalDTO->getNumOrdem());
-                $objComponenteDigitalDTOFiltro->setNumIdTramite($objComponenteDigitalDTO->getNumIdTramite());
-
 
                 if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) == 0){
                     $objComponenteDigitalDTO = $objComponenteDigitalBD->cadastrar($objComponenteDigitalDTO);
@@ -1007,6 +1005,10 @@ class ProcessoEletronicoRN extends InfraRN
                 $objComponenteDigitalDTO->setNumOrdem(1);
                 $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
                 $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
+
+                if(isset($objDocumento->ordemDoDocumentoReferenciado)){
+                    $objComponenteDigitalDTO->setNumOrdemDocumentoReferenciado(intval($objDocumento->ordemDoDocumentoReferenciado));
+                }
 
                 if(isset($objDocumento->idProcedimentoAnexadoSEI)){
                     $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($objDocumento->idProcedimentoAnexadoSEI);
@@ -1864,4 +1866,43 @@ class ProcessoEletronicoRN extends InfraRN
             curl_close($curl);
         }
     }
+
+
+    /**
+     * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
+     *
+     * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
+     * @return void
+     */
+    public function consultarUltimoTramiteRecebidoConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+    {
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        return $objTramiteBD->consultarUltimoTramiteRecebido($parObjProcessoEletronicoDTO);
+    }
+
+
+    /**
+     * Lista componentes digitais de determinado trâmite
+     *
+     * @param TramiteDTO $parObjTramiteDTO
+     * @return void
+     */
+    public function listarComponentesDigitais(TramiteDTO $parObjTramiteDTO)
+    {
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        return $objComponenteDigitalBD->listarComponentesDigitais($parObjTramiteDTO);
+    }
+
+    /**
+     * Verifica a existência de algum documento contendo outro referenciado no próprio processo
+     *
+     * @param TramiteDTO $parObjTramiteDTO
+     * @return void
+     */
+    public function possuiComponentesComDocumentoReferenciadoConectado(TramiteDTO $parObjTramiteDTO)
+    {
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        return $objComponenteDigitalBD->possuiComponentesComDocumentoReferenciado($parObjTramiteDTO);
+    }
+
 }

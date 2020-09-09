@@ -132,6 +132,23 @@ class PaginaProcesso extends PaginaTeste
         }
     }
 
+    public function deveSerDocumentoAnexo($bolDevePossuir, $nomeDocumentoArvore)
+    {
+    	try
+    	{
+            $this->test->frame(null);
+            $this->test->frame("ifrArvore");
+            if($bolDevePossuir){
+                $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//following-sibling::a[1]/img[@src='imagens/anexos.gif']");
+            }
+            return true;
+    	}
+    	catch(Exception $e)
+    	{
+			return false;
+    	}
+    }
+
     private function selecionarItemArvore($nomeArvore)
     {
         $this->test->frame(null);

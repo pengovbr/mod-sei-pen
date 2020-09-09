@@ -851,9 +851,19 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Documentos não encontrados.');
         }
 
+        $arrObjCompIndexadoPorIdDocumentoDTO = array();
+        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+        if(!is_null($objUltimoTramiteRecebidoDTO)){
+            if ($this->objProcessoEletronicoRN->possuiComponentesComDocumentoReferenciado($objUltimoTramiteRecebidoDTO)) {
+                $arrObjComponentesDigitaisDTO = $this->objProcessoEletronicoRN->listarComponentesDigitais($objUltimoTramiteRecebidoDTO);
+                $arrObjCompIndexadoPorIdDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjComponentesDigitaisDTO, 'IdDocumento');
+            }
+        }
+
         $objProcesso->documento = array();
         foreach ($arrDocumentosDTO as $ordem => $documentoDTO) {
-
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
@@ -892,6 +902,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $documento->produtor->unidade->nome = utf8_encode($unidadeDTO->getStrDescricao());
                 $documento->produtor->unidade->tipo = self::STA_TIPO_PESSOA_ORGAOPUBLICO;
                 //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
+            }
+
+            if(array_key_exists($documentoDTO->getDblIdDocumento(), $arrObjCompIndexadoPorIdDocumentoDTO)){
+                $objComponenteDigitalDTO = $arrObjCompIndexadoPorIdDocumentoDTO[$documentoDTO->getDblIdDocumento()];
+                if(!empty($objComponenteDigitalDTO->getNumOrdemDocumentoReferenciado())){
+                    $documento->ordemDoDocumentoReferenciado = $objComponenteDigitalDTO->getNumOrdemDocumentoReferenciado();
+                }
             }
 
             $documento->produtor->numeroDeIdentificacao = $documentoDTO->getStrProtocoloDocumentoFormatado();

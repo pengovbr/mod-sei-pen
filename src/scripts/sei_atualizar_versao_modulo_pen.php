@@ -93,6 +93,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '2.0.0-beta4': $this->instalarV2000_beta5();
                 case '2.0.0-beta5': $this->instalarV2000();
                 case '2.0.0': $this->instalarV2001();
+                case '2.0.1': $this->instalarV2100();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2001,6 +2002,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV2001()
     {
         $this->atualizarNumeroVersao("2.0.1");
+    }
+
+    protected function instalarV2100()
+    {
+        // Nova coluna para registro de ordem do documento referênciado, apresentado como doc anexado na árvore de processo
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital','ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
+        $this->atualizarNumeroVersao("2.1.0");
     }
 }
 
