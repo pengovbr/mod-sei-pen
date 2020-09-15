@@ -1309,11 +1309,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                 try {
                     $strMimeType = finfo_file($finfo, $strCaminhoAnexo);
                     $strDadosComplementaresDoTipoDeArquivo = "";
-                    if(!array_search($strMimeType, $this->arrPenMimeTypes)){
+                    if(array_search($strMimeType, $this->arrPenMimeTypes) === false){
                         $strDadosComplementaresDoTipoDeArquivo = $strMimeType;
                         $strMimeType = 'outro';
                     }
-
 
                     finfo_close($finfo);
                 } catch(Exception $e) {
