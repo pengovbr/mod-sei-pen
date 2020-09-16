@@ -1,15 +1,15 @@
 dist/
 html/
 tests/funcional/vendor/
-**/config/*.pem
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
 
 .vscode
 
-**/.env
-**/*.cache
-**/*.lock
-**/*.log
-**/*.out
-**/*.swp
+.env
+*.pem
+*.cache
+*.lock
+*.log
+*.out
+*.swp
