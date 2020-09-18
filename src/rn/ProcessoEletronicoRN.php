@@ -1839,34 +1839,17 @@ class ProcessoEletronicoRN extends InfraRN
     /**
      * Testa a disponibilidade do Barramento de Serviços do PEN
      *
-     * @return void
+     * @return bool
      */
     public function validarDisponibilidade()
     {
-        $curl = curl_init($this->strWSDL);
-
-        try{
-            curl_setopt($curl, CURLOPT_URL, $this->strWSDL);
-            curl_setopt($curl, CURLOPT_HEADER, false);
-            curl_setopt($curl, CURLOPT_NOBODY, true);
-            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
-            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
-            curl_exec($curl);
-
-            if(curl_errno($curl)){
-                throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
-            }
-
-            return true;
-        } finally{
-            curl_close($curl);
+        try {
+            $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
+            $objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN();
+        } catch (\Exception $e) {
+            throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
         }
     }
-
 
     /**
      * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
