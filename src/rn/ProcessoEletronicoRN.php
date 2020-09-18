@@ -1905,4 +1905,29 @@ class ProcessoEletronicoRN extends InfraRN
         return $objComponenteDigitalBD->possuiComponentesComDocumentoReferenciado($parObjTramiteDTO);
     }
 
+    /**
+     * Aplica redução do texto de uma propriedade do modelo de dados, adicionando reticências ao final da string
+     *
+     * @param str $parStrTexto Texto a ser reduzido pela função
+     * @param int $parNumTamanho Tamanho do texto para redução
+     * @return void
+     */
+    public function reduzirCampoTexto($parStrTexto, $parNumTamanho)
+    {
+        $strTexto = $parStrTexto;
+        if(!is_null($parStrTexto) && strlen($parStrTexto) > $parNumTamanho){
+            $strReticencias = ' ...';
+            $numTamanhoMaximoPalavra = 20;
+
+            $strTexto = substr($parStrTexto, 0, $parNumTamanho);
+            $arrStrTokens = explode(' ', $strTexto);
+            $strUltimaPalavra = $arrStrTokens[count($arrStrTokens) - 1];
+
+            $numTamanhoUltimaPalavra = strlen($strUltimaPalavra) > $numTamanhoMaximoPalavra ? strlen($strReticencias) : strlen($strUltimaPalavra);
+            $strTexto = substr($parStrTexto, 0, $parNumTamanho - $numTamanhoUltimaPalavra);
+            $strTexto = trim($strTexto) . $strReticencias;
+        }
+
+        return $strTexto;
+    }
 }

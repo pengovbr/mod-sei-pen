@@ -2,7 +2,6 @@
 
 include tests/funcional/.env
 
-#HOST_IP := $$(hostname -I | cut -d' ' -f1)
 HOST_IP := $(shell hostname -I | cut -d' ' -f1)
 VERSAO_MODULO := $(shell grep 'const VERSAO_MODULO' src/PENIntegracao.php | cut -d'"' -f2)
 
@@ -13,6 +12,7 @@ SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
 PEN_TEST_FUNC = tests/funcional
+PEN_TEST_UNIT = tests/unitario
 
 all: clean build
 
@@ -71,6 +71,7 @@ test-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"
 	composer install -d $(PEN_TEST_FUNC)
+	composer install -d $(PEN_TEST_UNIT)
 
 
 test-provision-destroy:
@@ -81,6 +82,11 @@ test-provision-destroy:
 test-funcional:
 	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
 	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
+
+test-unitario:
+	composer install -d $(PEN_TEST_UNIT)
+	#tests/unitario/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml --stop-on-failure $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php
+	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
 
 
 bash_org1:

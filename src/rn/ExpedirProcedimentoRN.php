@@ -468,8 +468,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objProcesso->staTipoProtocolo = ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
         $objProcesso->protocolo = utf8_encode($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
         $objProcesso->nivelDeSigilo = $this->obterNivelSigiloPEN($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo());
-        $objProcesso->processoDeNegocio  = utf8_encode($objProcedimentoDTO->getStrNomeTipoProcedimento());
-        $objProcesso->descricao          = utf8_encode($objProcedimentoDTO->getStrDescricaoProtocolo());
+        $objProcesso->processoDeNegocio  = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objProcedimentoDTO->getStrNomeTipoProcedimento(), 100));
+        $objProcesso->descricao          = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objProcedimentoDTO->getStrDescricaoProtocolo(), 100));
         $objProcesso->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($objProcedimentoDTO->getDtaGeracaoProtocolo());
         if($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
             $objProcesso->hipoteseLegal = new stdClass();
@@ -804,8 +804,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objUsuarioProdutor = $this->consultarUsuario($dblIdProcedimento);
         if(isset($objUsuarioProdutor)) {
             //Dados do produtor do processo
-            $objProcesso->produtor->nome = utf8_encode($objUsuarioProdutor->getStrNome());
-            //TODO: Obter tipo de pessoa fsica dos contatos do SEI
+            $objProcesso->produtor->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objUsuarioProdutor->getStrNome(), 150));
+            //TODO: Obter tipo de pessoa física dos contatos do SEI
             $objProcesso->produtor->numeroDeIdentificacao = $objUsuarioProdutor->getDblCpfContato();
             $objProcesso->produtor->tipo = self::STA_TIPO_PESSOA_FISICA;
             //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
@@ -814,7 +814,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objUnidadeGeradora = $this->consultarUnidade($dblIdProcedimento);
         if(isset($objUnidadeGeradora)){
             $objProcesso->produtor->unidade = new stdClass();
-            $objProcesso->produtor->unidade->nome = utf8_encode($objUnidadeGeradora->getStrDescricao());
+            $objProcesso->produtor->unidade->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objUnidadeGeradora->getStrDescricao(), 150));
             $objProcesso->produtor->unidade->tipo = self::STA_TIPO_PESSOA_ORGAOPUBLICO;
             //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
         }
@@ -833,7 +833,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             foreach ($arrParticipantesDTO as $participanteDTO) {
                 $interessado = new stdClass();
-                $interessado->nome = utf8_encode($participanteDTO->getStrNomeContato());
+                $interessado->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($participanteDTO->getStrNomeContato(), 150));
                 $objProcesso->interessado[] = $interessado;
             }
         }
@@ -872,7 +872,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
 
             $documento->ordem = $ordem + 1;
-            $documento->descricao = utf8_encode($strDescricaoDocumento);
+            $documento->descricao = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strDescricaoDocumento, 100));
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
 
@@ -890,7 +890,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->produtor = new stdClass();
             $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
             if(isset($usuarioDTO)) {
-                $documento->produtor->nome = utf8_encode($usuarioDTO->getStrNome());
+                $documento->produtor->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($usuarioDTO->getStrNome(), 150));
                 $documento->produtor->numeroDeIdentificacao = $usuarioDTO->getDblCpfContato();
                 //TODO: Obter tipo de pessoa fsica dos contextos/contatos do SEI
                 $documento->produtor->tipo = self::STA_TIPO_PESSOA_FISICA;;
@@ -899,7 +899,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $unidadeDTO = $this->consultarUnidade($documentoDTO->getNumIdUnidadeResponsavel());
             if(isset($unidadeDTO)) {
                 $documento->produtor->unidade = new stdClass();
-                $documento->produtor->unidade->nome = utf8_encode($unidadeDTO->getStrDescricao());
+                $documento->produtor->unidade->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($unidadeDTO->getStrDescricao(), 150));
                 $documento->produtor->unidade->tipo = self::STA_TIPO_PESSOA_ORGAOPUBLICO;
                 //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
             }

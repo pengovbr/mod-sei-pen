@@ -377,9 +377,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         return array(
             "TIPO_PROCESSO" => $contextoProducao['TIPO_PROCESSO'],
-            "DESCRICAO" => util::random_string(20),
+            "DESCRICAO" => util::random_string(100),
             "OBSERVACOES" => null,
-            "INTERESSADOS" => util::random_string(40),
+            "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             "ORIGEM" => $contextoProducao['URL'],
         );
@@ -391,9 +391,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
             "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
-            "DESCRICAO" => util::random_string(20),
+            "DESCRICAO" => str_repeat(util::random_string(9) . ' ', 10),
             "OBSERVACOES" => null,
-            "INTERESSADOS" => util::random_string(40),
+            "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             "ORDEM_DOCUMENTO_REFERENCIADO" => null,
             "ARQUIVO" => ".html",
@@ -412,9 +412,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
             "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
             "DATA_ELABORACAO" => '01/01/2017',
-            "DESCRICAO" => util::random_string(20),
-            "OBSERVACOES" => util::random_string(100),
-            "INTERESSADOS" => util::random_string(40),
+            "DESCRICAO" => str_repeat(util::random_string(9) . ' ', 10),
+            "OBSERVACOES" => util::random_string(500),
+            "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             "ARQUIVO" => $arquivos,

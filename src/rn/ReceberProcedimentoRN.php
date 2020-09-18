@@ -923,7 +923,7 @@ class ReceberProcedimentoRN extends InfraRN
         //TODO: Validar cada uma das informações de entrada do webservice
         $objProtocoloDTO = new ProtocoloDTO();
         $objProtocoloDTO->setDblIdProtocolo(null);
-        $objProtocoloDTO->setStrDescricao(utf8_decode($parObjProtocolo->descricao));
+        $objProtocoloDTO->setStrDescricao(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100)));
         $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo));
 
         if($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
@@ -1472,8 +1472,8 @@ class ReceberProcedimentoRN extends InfraRN
                 $objProtocoloDTO->setStrStaProtocolo(ProtocoloRN::$TP_DOCUMENTO_RECEBIDO);
 
                 if($objDocumento->descricao != '***'){
-                    $objProtocoloDTO->setStrDescricao(utf8_decode($objDocumento->descricao));
-                    $objDocumentoDTO->setStrNumero(utf8_decode($objDocumento->descricao));
+                    $objProtocoloDTO->setStrDescricao(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 100)));
+                    $objDocumentoDTO->setStrNumero(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 50)));
                 }else{
                     $objProtocoloDTO->setStrDescricao("");
                     $objDocumentoDTO->setStrNumero("");

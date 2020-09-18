@@ -60,9 +60,9 @@ services:
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen      
+      - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
-      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro   
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}

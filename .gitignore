@@ -1,6 +1,6 @@
 dist/
 html/
-tests/funcional/vendor/
+vendor/
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
 
