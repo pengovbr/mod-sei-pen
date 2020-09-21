@@ -79,12 +79,11 @@ test-provision-destroy:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm
 
 
-test-funcional:
+test-functional:
 	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
 	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 
-test-unitario:
-	composer install -d $(PEN_TEST_UNIT)
+test-unit:
 	#tests/unitario/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml --stop-on-failure $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php
 	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
 

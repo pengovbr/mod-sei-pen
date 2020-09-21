@@ -353,7 +353,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     public function listarEstruturas($idRepositorioEstrutura, $nome='', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
-        $nomeUnidade = null, $siglaUnidade = null, $offset = null, $registrosPorPagina = null)
+        $nomeUnidade=null, $siglaUnidade=null, $offset=null, $registrosPorPagina=null, $parBolPermiteRecebimento=null, $parBolPermiteEnvio=null)
     {
         $arrObjEstruturaDTO = array();
 
@@ -391,6 +391,14 @@ class ProcessoEletronicoRN extends InfraRN
                 $parametros->filtroDeEstruturas->paginacao = new stdClass();
                 $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
                 $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
+            }
+
+            if(!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true){
+                $parametros->filtroDeEstruturas->permiteRecebimento = true;
+            }
+
+            if(!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true){
+                $parametros->filtroDeEstruturas->permiteEnvio = true;
             }
 
             $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
