@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 2.0.1)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 2.1.0)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o Barramento de Serviços do PEN. 
 
@@ -12,17 +12,29 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 ## Lista de Melhorias e Correções de Problemas
 
-O foco desta versão foi a implementação de diversas simplificações nos procedimentos de instalação e configuração do módulo, deixando alguns passos opcionais e aplicando várias configurações de forma automática, possibilitando ao administrador modificar caso necessário.
+O foco desta versão foi o ajuste nas pesquisas de unidades no Barramento para recuperar somente aquelas em que o Gestor de Protocolo permitiu o recebimento de processos e documento através de configuração adicional do Portal do Barramento de Serviços do PEN, nova possibilidade disponível na última versão do PEN.
 
 
-#### [Issue #5] Correção de erro na edição dos mapeamentos de tipos de documentos para recebimento
+#### [Issue #17] Recebimento de documentos anexados
 
-Ao acessar a funcionalidade de alteração de mapeamento de tipos de documentos para recebimento, era apresentado erro "Método \[PenRelTipoDocMapRecebidoRN.consultar\]" não encontrado. 
+Implementação de recebimento de processos contendo documentos anexados (documentos com referência a outro no mesmo processo). Apesar de não existir este conceito nos metadados do SEI, outros sistemas enviam documentos anexados a outro pelo Barramento, sendo necessário esta melhoria.
 
-#### [Issue #7] Correção de rejeição de processo por Método [ProcedimentoAndamentoRN.gravarLogDebug] não encontrado
 
-Identificado erro durante o recebimento de processos em acertas circunstâncias em que é necessário realizar o particionamento de arquivos grandes. O problema ocorria no sistema destinatário do processo, o que provoca a sua rejeição para o sistema remetente.
+#### [Issue #22] Consulta rápida filtrar apenas unidades que podem receber trâmites externos
 
-#### [Issue #8] Não foi possível acessar localmente o webservice do mod-sei-pen em http://[endereco]/sei/modulos/pen/ws/ModPenWS.php
+Ajuste no módulo para que a consulta de unidades retorne apenas aquelas unidades que foram configuradas no Portal do Barramento de Serviços para permitir o recebimento de processos e documentos.
 
-Erro ocorria sempre que o servidor Apache estava configurado com certificado digital HTTPS para criptografia da comunicação, fato comum em produção. Alterado implementação para executar toda a rotina de recebimento localmente, sem precisar de chamadas de webservice internas no mod-sei-pen.
+
+#### [Issue #16] Erro em classificação de tipo de conteúdo PDF como outros
+
+Correção de falha na classificação correta do tipo de componente digital PDF que estava sendo classificado como tipo desconhecido OUTROS.
+
+
+#### [Issue #11] Erro Método \[PenRelHipoteseLegalRecebidoRN.cadastrar\] existe como Conectado e Controlado
+
+Corrigido falha ao cadastrar ou alterar um novo mapeamento de hipótese legal de para recebimento.
+
+
+#### [Issue #9] Erro de Processos e Recibos não sendo recebidos na versão 2.0.0 (status 2 e 5)
+
+Correção de problema no módulo (versão 2.0.0 e 2.0.1) em que os processos não estão sendo recebidos (parado em status 2) e nem os recibos de conclusão do trâmite (parado em status 5) devido ao uso de função do PHP desabilitada por padrão em algumas distribuições da linguagem.
