@@ -14,7 +14,7 @@ class TramiteBD extends InfraBD {
      * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
      * @return void
      */
-    public function consultarUltimoTramiteRecebido(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+    public function consultarUltimoTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite=null)
     {
         if(is_null($parObjProcessoEletronicoDTO)){
             throw new InfraException('Parâmetro [parObjProcessoEletronicoDTO] não informado');
@@ -27,9 +27,12 @@ class TramiteBD extends InfraBD {
         $objTramiteDTOPesquisa = new TramiteDTO();
         $objTramiteDTOPesquisa->retTodos();
         $objTramiteDTOPesquisa->setStrStaTipoProtocolo(ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO);
-        $objTramiteDTOPesquisa->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
         $objTramiteDTOPesquisa->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
         $objTramiteDTOPesquisa->setNumMaxRegistrosRetorno(1);
+
+        if(!is_null($parStrStaTipoTramite)){
+            $objTramiteDTOPesquisa->setStrStaTipoTramite($parStrStaTipoTramite);
+        }
 
         if($parObjProcessoEletronicoDTO->isSetDblIdProcedimento()){
             $objTramiteDTOPesquisa->setNumIdProcedimento($parObjProcessoEletronicoDTO->getDblIdProcedimento());

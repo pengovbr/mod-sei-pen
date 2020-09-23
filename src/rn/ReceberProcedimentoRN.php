@@ -14,6 +14,7 @@ class ReceberProcedimentoRN extends InfraRN
     private $objRelProtocoloProtocoloRN;
     private $objPenParametroRN;
     private $objProcedimentoRN;
+    private $objDocumentoRN;
     public $destinatarioReal;
     private $objPenDebug;
     private $objProtocoloRN;
@@ -25,6 +26,7 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objSeiRN = new SeiRN();
         $this->objProtocoloRN = new ProtocoloRN();
         $this->objProcedimentoRN = new ProcedimentoRN();
+        $this->objDocumentoRN = new DocumentoRN();
         $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
@@ -255,7 +257,7 @@ class ReceberProcedimentoRN extends InfraRN
 
             $this->enviarProcedimentoUnidade($objProcedimentoDTO, null, $bolProcedimentoExistente);
 
-            $this->validarPosCondicoesTramite($parObjMetadadosProcedimento->metadados, $objProcedimentoDTO);
+            $this->validarPosCondicoesTramite($parObjMetadadosProcedimento, $objProcedimentoDTO);
 
             $this->gravarLogDebug("Enviando recibo de conclusão do trâmite $numIdTramite", 2);
             $objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
@@ -1373,6 +1375,13 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->retDblIdProcedimentoAnexado();
         $objComponenteDigitalDTO->retStrProtocoloProcedimentoAnexado();
 
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objUltimoTramiteDTO = $this->objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+        if(!is_null($objUltimoTramiteDTO)){
+            $objComponenteDigitalDTO->setNumIdTramite($objUltimoTramiteDTO->getNumIdTramite());
+        }
+
         if(!isset($parDblIdProcedimentoAnexado)){
             $objComponenteDigitalDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
             $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
@@ -2268,6 +2277,16 @@ class ReceberProcedimentoRN extends InfraRN
         if($this->documentosPendenteRegistro($parObjProcedimentoDTO->getDblIdProcedimento())){
             $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
             $strMensagemErro = "- Componente digital de pelo menos um dos documentos do processo [$strProtocoloFormatado] não pode ser recebido. \n";
+        }
+
+        $objDocumentoDTO = new DocumentoDTO();
+        $objDocumentoDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
+        $numDocumentosProcesso = intval($this->objDocumentoRN->contarRN0007($objDocumentoDTO));
+        $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
+        $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
+        if($numDocumentosProcesso <> count($arrObjDocumento)){
+            $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+            $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
         }
 
         if(!InfraString::isBolVazia($strMensagemErro)){

@@ -1860,7 +1860,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     /**
-     * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
+     * Recupera os dados do último trâmite de recebimento válido realizado para determinado número de processo eletrônico
      *
      * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
      * @return void
@@ -1868,7 +1868,19 @@ class ProcessoEletronicoRN extends InfraRN
     public function consultarUltimoTramiteRecebidoConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
     {
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        return $objTramiteBD->consultarUltimoTramiteRecebido($parObjProcessoEletronicoDTO);
+        return $objTramiteBD->consultarUltimoTramite($parObjProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+    }
+
+    /**
+     * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
+     *
+     * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
+     * @return void
+     */
+    public function consultarUltimoTramiteConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+    {
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        return $objTramiteBD->consultarUltimoTramite($parObjProcessoEletronicoDTO);
     }
 
 
@@ -1910,12 +1922,12 @@ class ProcessoEletronicoRN extends InfraRN
             $strReticencias = ' ...';
             $numTamanhoMaximoPalavra = 20;
 
-            $strTexto = substr($parStrTexto, 0, $parNumTamanho);
+            $strTexto = trim(substr($parStrTexto, 0, $parNumTamanho));
             $arrStrTokens = explode(' ', $strTexto);
             $strUltimaPalavra = $arrStrTokens[count($arrStrTokens) - 1];
 
             $numTamanhoUltimaPalavra = strlen($strUltimaPalavra) > $numTamanhoMaximoPalavra ? strlen($strReticencias) : strlen($strUltimaPalavra);
-            $strTexto = substr($parStrTexto, 0, $parNumTamanho - $numTamanhoUltimaPalavra);
+            $strTexto = substr($strTexto, 0, strlen($strTexto) - $numTamanhoUltimaPalavra);
             $strTexto = trim($strTexto) . $strReticencias;
         }
 

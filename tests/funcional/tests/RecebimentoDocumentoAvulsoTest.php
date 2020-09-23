@@ -147,6 +147,16 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         return $cabecalho;
     }
 
+
+    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt', $ordemDocumentoReferenciado=null)
+    {
+        $dadosDocumentoTest = parent::gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos, $ordemDocumentoReferenciado);
+        $dadosDocumentoTest['INTERESSADOS'] = trim(substr($dadosDocumentoTest['INTERESSADOS'], 0, 15));
+        $dadosDocumentoTest['DESCRICAO'] = trim(substr($dadosDocumentoTest['DESCRICAO'], 0, 10));
+        return $dadosDocumentoTest;
+
+    }
+
     private function construirMetadadosDocumentoTeste($documentoTeste)
     {
         $componentes = array();
@@ -166,7 +176,7 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
                     'tipoDeConteudo' => 'txt',
                     'mimeType' => 'text/plain',
                     'tamanhoEmBytes' => $tamanhoDocumento,
-                    'ordem' => $ordem,
+                    'ordem' => $ordem + 1,
 
                     // Chaves abaixo adicionadas apenas para simplificaçÃ£o dos testes
                     'valorHash' => $hashDocumento,

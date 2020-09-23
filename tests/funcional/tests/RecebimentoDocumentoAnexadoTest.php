@@ -181,6 +181,21 @@ class RecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
         return $cabecalho;
     }
 
+    public function gerarDadosProcessoTeste($contextoProducao)
+    {
+        $processoTeste = parent::gerarDadosProcessoTeste($contextoProducao);
+        $processoTeste['INTERESSADOS'] = trim(substr($processoTeste['INTERESSADOS'], 0, 15));
+        $processoTeste['DESCRICAO'] = trim(substr($processoTeste['DESCRICAO'], 0, 10));
+        return $processoTeste;
+    }
+
+    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt', $ordemDocumentoReferenciado=null)
+    {
+        $dadosDocumentoTeste = parent::gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos, $ordemDocumentoReferenciado);
+        $dadosDocumentoTeste['INTERESSADOS'] = trim(substr($dadosDocumentoTeste['INTERESSADOS'], 0, 15));
+        $dadosDocumentoTeste['DESCRICAO'] = trim(substr($dadosDocumentoTeste['DESCRICAO'], 0, 10));
+        return $dadosDocumentoTeste;
+    }
 
     private function construirMetadadosProcessoTeste($processoTeste, $documentosTeste)
     {

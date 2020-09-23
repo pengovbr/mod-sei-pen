@@ -24,41 +24,55 @@ final class ProcessoEletronicoRNTest extends TestCase
         $strResultadoEsperado = "aaaaaaaaa bbbbbbbbb ccccccccc ddddddddd eeeeeeeee ...";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
 
         // Teste considerando um texto longo com apenas uma palavra
         $strTexto =             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoEsperado = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ...";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
 
         // Teste considerando um texto longo com uma palavra grande ao final
         $strTexto =             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoEsperado = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ...";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
 
         // Teste considerando texto longo e palavro curta ao finals
         $strTexto =             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa aaaaaaaa aaaaaaaaaaaaaaa aaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoEsperado = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ...";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
 
         // Teste considerando um texto curto abaixo do limite
         $strTexto =             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoEsperado = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
 
         // Teste considerando um texto longo com apenas um caracter fora do limite
         $strTexto =             "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         $strResultadoEsperado = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ...";
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
+
+        // Teste considerando um texto longo com apenas um caracter fora do limite
+        $strTexto =             "aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa a";
+        $strResultadoEsperado = "aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa aaaaaaaaa ...";
+        $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 150);
+        $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= 150);
 
         // Teste considerando um texto nulo
         $strTexto = null;
         $strResultadoEsperado = null;
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
     }
 }

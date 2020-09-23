@@ -229,7 +229,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
     }
 
+    private function listarComponenteDigitaisDesatualizados()
+    {
+        $objInfraBanco = BancoSEI::getInstance();
+        $sql = "select a.numero_registro, a.protocolo, a.id_procedimento, a.id_documento, a.id_tramite, a.ordem, a.ordem_documento
+                from md_pen_componente_digital a
+                where not exists(
+                    select b.numero_registro, b.id_procedimento, b.id_documento, b.id_tramite, count(b.id_anexo)
+                    from md_pen_componente_digital b
+                    where a.numero_registro = b.numero_registro and
+                          a.id_procedimento = b.id_procedimento and
+                          a.id_documento = b.id_documento and
+                          a.id_tramite = b.id_tramite
+                    group by b.numero_registro, b.id_procedimento, b.id_documento, b.id_tramite
+                    having count(b.id_anexo) > 1
+                ) and a.ordem <> 1 and a.ordem_documento = 1";
 
+        return $objInfraBanco->consultarSql($sql);
+    }
 
 
     /* Contêm atualizações da versao 1.0.0 do modulo */
@@ -1681,7 +1698,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBD = $this->objMeta;
 
         $objMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
-        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem_documento = 1");
+        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem_documento = ordem");
+        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem = 1");
         $objMetaBD->alterarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::NNULLO);
 
         // Adiciona a coluna para identificar se a criação do processo se deu por documento avulso (D) ou processo (P)
@@ -2006,9 +2024,41 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function instalarV2100()
     {
+        // Ajuste da coluna de ordem dos documentos e componentes digitais do processo
+        $recordset = $this->listarComponenteDigitaisDesatualizados();
+        if(!empty($recordset)){
+            foreach ($recordset as $item) {
+                BancoSEI::getInstance()->executarSql("
+                    update md_pen_componente_digital
+                    set ordem_documento = ordem
+                    where
+                        numero_registro = '".$item['numero_registro']."' and
+                        id_procedimento = ".$item['id_procedimento']." and
+                        id_documento = ".$item['id_documento']." and
+                        id_tramite = ".$item['id_tramite']." and
+                        ordem = ".$item['ordem']." and
+                        ordem_documento = ".$item['ordem_documento']."
+                ");
+            }
+
+            foreach ($recordset as $item) {
+                BancoSEI::getInstance()->executarSql("
+                    update md_pen_componente_digital
+                    set ordem = 1
+                    where
+                        numero_registro = '".$item['numero_registro']."' and
+                        id_procedimento = ".$item['id_procedimento']." and
+                        id_documento = ".$item['id_documento']." and
+                        id_tramite = ".$item['id_tramite']." and
+                        ordem = ".$item['ordem']."
+                ");
+            }
+        }
+
         // Nova coluna para registro de ordem do documento referênciado, apresentado como doc anexado na árvore de processo
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital','ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
+        //$objInfraMetaBD->adicionarColuna('md_pen_componente_digital','ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
+
         $this->atualizarNumeroVersao("2.1.0");
     }
 }

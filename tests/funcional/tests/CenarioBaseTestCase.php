@@ -316,7 +316,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
         $this->assertEquals(utf8_encode($descricao), $this->paginaEditarProcesso->descricao());
         $this->assertEquals($restricao, $this->paginaEditarProcesso->restricao());
-        $this->assertEquals($listaInteressados, $this->paginaEditarProcesso->listarInteressados());
+
+        for ($i=0; $i < count($listaInteressados); $i++) {
+            $this->assertStringStartsWith(substr($listaInteressados[$i], 0, 100), $this->paginaEditarProcesso->listarInteressados()[$i]);
+        }
 
         if($observacoes){
             $this->assertStringContainsString($observacoes, $this->byCssSelector('body')->text());
@@ -391,7 +394,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
             "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
-            "DESCRICAO" => str_repeat(util::random_string(9) . ' ', 10),
+            "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
