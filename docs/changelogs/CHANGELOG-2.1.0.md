@@ -25,16 +25,21 @@ Implementação de recebimento de processos contendo documentos anexados (docume
 Ajuste no módulo para que a consulta de unidades retorne apenas aquelas unidades que foram configuradas no Portal do Barramento de Serviços para permitir o recebimento de processos e documentos.
 
 
-#### [Issue #16] Erro em classificação de tipo de conteúdo PDF como outros
+#### [Issue #23] Correção de Erro Espécie do documento de ordem X não confere #23
+
+Correção de inconsistência após atualização do mod-sei-pen, versão 2.0.0, com retransmissão de processos recebidos em versões antigas do módulo.
+
+
+#### [Issue #16] Correção de Erro em classificação de tipo de conteúdo PDF como outros
 
 Correção de falha na classificação correta do tipo de componente digital PDF que estava sendo classificado como tipo desconhecido OUTROS.
 
 
-#### [Issue #11] Erro Método \[PenRelHipoteseLegalRecebidoRN.cadastrar\] existe como Conectado e Controlado
+#### [Issue #11] Correção de Erro Método \[PenRelHipoteseLegalRecebidoRN.cadastrar\] existe como Conectado e Controlado
 
 Corrigido falha ao cadastrar ou alterar um novo mapeamento de hipótese legal de para recebimento.
 
 
-#### [Issue #9] Erro de Processos e Recibos não sendo recebidos na versão 2.0.0 (status 2 e 5)
+#### [Issue #9] Correção de Erro de Processos e Recibos não sendo recebidos na versão 2.0.0 (status 2 e 5)
 
 Correção de problema no módulo (versão 2.0.0 e 2.0.1) em que os processos não estão sendo recebidos (parado em status 2) e nem os recibos de conclusão do trâmite (parado em status 5) devido ao uso de função do PHP desabilitada por padrão em algumas distribuições da linguagem.

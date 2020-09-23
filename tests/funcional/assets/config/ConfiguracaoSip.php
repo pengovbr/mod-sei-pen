@@ -16,7 +16,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
  	      'Sip' => array(
  	          'URL' => getenv('SEI_HOST_URL').'/sip',
  	          'Producao' => false),
- 	       
+
  	      'PaginaSip' => array('NomeSistema' => 'SIP'),
 
  	      'SessaoSip' => array(
@@ -25,7 +25,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
  	          'PaginaLogin' => getenv('SEI_HOST_URL').'/sip/login.php',
  	          'SipWsdl' => 'http://localhost/sip/controlador_ws.php?servico=wsdl',
  	          'https' => false),
- 	       
+
  	      'BancoSip'  => array(
  	          'Servidor' => 'mysql',
  	          'Porta' => '3306',
@@ -33,7 +33,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
  	          'Usuario' => 'sip_user',
  	          'Senha' => 'sip_user',
  	          'UsuarioScript' => 'sip_user',
- 	          'SenhaScript' => 'sip_user', 	          
+ 	          'SenhaScript' => 'sip_user',
  	          'Tipo' => 'MySql'), //MySql, SqlServer ou Oracle
 
 	    //   'BancoSip'  => array(
@@ -43,7 +43,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
 	    //       'Usuario' => 'sip',
 	    //       'Senha' => 'sip_user',
 	    //       'UsuarioScript' => 'sip',
-	    //       'SenhaScript' => 'sip_user', 	      
+	    //       'SenhaScript' => 'sip_user',
 	    //       'Tipo' => 'Oracle'), //MySql, SqlServer ou Oracle
 
 	    //   'BancoSip'  => array(
@@ -53,7 +53,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
 	    //       'Usuario' => 'sip_user',
 	    //       'Senha' => 'sip_user',
 	    //       'UsuarioScript' => 'sip_user',
-	    //       'SenhaScript' => 'sip_user', 	      
+	    //       'SenhaScript' => 'sip_user',
 	    //       'Tipo' => 'SqlServer'), //MySql, SqlServer ou Oracle
 
 

@@ -2057,7 +2057,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
         // Nova coluna para registro de ordem do documento referênciado, apresentado como doc anexado na árvore de processo
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        //$objInfraMetaBD->adicionarColuna('md_pen_componente_digital','ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital','ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
 
         $this->atualizarNumeroVersao("2.1.0");
     }
