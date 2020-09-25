@@ -10,7 +10,7 @@ A utilização deste módulo adicionará novas funcionalidades ao SEI, permitind
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o Barramento de Serviços e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
+Para maiores informações sobre o Barramento de Serviços e o PEN, acesse https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen.
 
 Este documento está estruturado nas seguintes seções:
 
@@ -46,7 +46,7 @@ Para iniciar os procedimentos de configuração, será necessário registrar no 
  - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
  - **Produção:** [http://conectagov.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
 
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
+Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.economia.gov.br/citsmart/login/login.load.
 
 ### Procedimentos:
 

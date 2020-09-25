@@ -29,11 +29,11 @@ As instruções de instalação e atualização do módulo, assim com o manual d
 O mod-sei-pen trata-se de um módulo adicional ao Sistema Eletrônico de Informações (SEI) para adição de novas funcionalidades relacionadas ao trâmite de processos e documentos entre instituições integradas ao Processo Eletrônico Nacional (PEN). Para a sua utilização, é necessário que a instituição possua o sistema SEI e tenha aderido ao Barramendo de Serviços do PEN.
 
 Para informações sobre como aderir ao SEI, acesse: 
-http://processoeletronico.gov.br/index.php/assuntos/produtos/sistema-eletronico-de-informacoes
+https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/conteudo/sistema-eletronico-de-informacoes-sei
 
 
 Para informações sobre como aderir ao Barramento de Serviços do PEN, acesse:
-http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
+https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen
 
 
 ## CONTRIBUIÇÃO
@@ -45,7 +45,11 @@ Existem diversas formas de colaborar neste projeto:
 * Ajudar na correção de erros ou melhoria da base de código. Para isto, faça um fork do projeto no GitHub e posteriormente nos envie um [Pull Request](https://github.com/spbgovbr/mod-sei-pen/pulls)
 
 
+
 ## SUPORTE
 
-Para maiores informações e suporte ao PEN, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.planejamento.gov.br
+Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
+Para mais informações, contate a equipe responsável por meio dos seguintes canais:
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.economia.gov.br) - Módulo do Barramento
+- Telefone: 0800 978 9005
