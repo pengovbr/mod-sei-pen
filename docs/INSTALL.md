@@ -10,7 +10,7 @@ A utilização deste módulo adicionará novas funcionalidades ao SEI, permitind
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o Barramento de Serviços e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
+Para maiores informações sobre o Barramento de Serviços e o PEN, acesse https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen.
 
 Este documento está estruturado nas seguintes seções:
 
@@ -46,7 +46,7 @@ Para iniciar os procedimentos de configuração, será necessário registrar no 
  - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
  - **Produção:** [http://conectagov.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
 
-Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento
+Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.economia.gov.br/citsmart/login/login.load.
 
 ### Procedimentos:
 
@@ -580,7 +580,7 @@ Elaboramos duas rotinas adicionais, que opcionalmente poderão ser configuradas 
 
 Essas rotinas podem ter que sofrer alguns ajustes em seus comandos a depender do SO utilizado.
 A sugestão acima foi testada em CentOs7.3. A rotina em python foi testada em python 2 e python 3.
-Dúvidas com as rotinas favor abrir chamado em [http://processoeletronico.gov.br/index.php/conteudo/suporte](http://processoeletronico.gov.br/index.php/conteudo/suporte). De posse do número do chamado pode ligar para 61 2020-8711 (falar com Marcelo)
+Dúvidas com as rotinas favor abrir chamado em [https://portaldeservicos.economia.gov.br](https://portaldeservicos.economia.gov.br). De posse do número do chamado pode ligar para 61 2020-8711 (falar com Marcelo)
 
 ---
 ---
@@ -682,7 +682,6 @@ Recursos:
 Em caso de dúvidas ou problemas durante o procedimento de atualização, favor entrar em conta pelos canais de atendimento disponibilizados na Central de Atendimento do Processo Eletrônico Nacional, que conta com uma equipe para avaliar e responder esta questão de forma mais rápida possível.
 
 Para mais informações, contate a equipe responsável por meio dos seguintes canais:
-- Portal de Atendimento (PEN): Canal de Atendimento - Módulo do Barramento
+- [Portal de Atendimento (PEN): Canal de Atendimento](https://portaldeservicos.economia.gov.br) - Módulo do Barramento
 - Telefone: 0800 978 9005
 
-Outras informações podem ser encontradas em https://softwarepublico.gov.br/social/sei
