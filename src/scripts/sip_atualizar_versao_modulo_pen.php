@@ -124,6 +124,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '2.0.0-beta5': $this->instalarV2000();
                 case '2.0.0': $this->instalarV2001();
                 case '2.0.1': $this->instalarV2100();
+                case '2.1.0': $this->instalarV2101();
 
                 break;
                 default:
@@ -182,7 +183,7 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return int
      */
-    protected function getNumIdSistema($strSigla = 'SIP') {
+    protected function getNumIdSistema($strSigla='SIP') {
 
         $objDTO = new SistemaDTO();
         $objDTO->setStrSigla($strSigla);
@@ -617,12 +618,12 @@ class PenAtualizarSipRN extends InfraRN {
         $numIdItemMenu = $this->criarMenu('Recebimento', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
         // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alteração de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alteração de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
         // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
-        $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Exclusão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
+        $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Exclusão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
         $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
@@ -1318,12 +1319,28 @@ class PenAtualizarSipRN extends InfraRN {
         $this->atualizarNumeroVersao("2.0.1");
     }
 
+<<<<<<< HEAD
     /**
      * Instala/Atualiza os módulo PEN para versão 2.1.0
      */
     protected function instalarV2100()
     {
-        $this->atualizarNumeroVersao("2.1.0");
+	$this->atualizarNumeroVersao("2.1.0");
+    }
+
+    /**
+     * Instala/Atualiza os módulo PEN para versão 2.0.2
+     */
+    protected function instalarV2101()
+    {
+        // Adição de recursos relacionados à consulta de mapeamento de hipóteses legais de envio e recebimento
+        $numIdSistemaSei = $this->getNumIdSistema('SEI');
+        $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
+        $this->criarRecurso('pen_map_hipotese_legal_recebimento_consultar', 'Consulta de mapeamento de Hipóteses Legais de Recebimento', $numIdSistemaSei);
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_hipotese_legal_recebimento_consultar');
+        $this->criarRecurso('pen_map_hipotese_legal_envio_consultar', 'Consulta de mapeamento de Hipóteses Legais de Envio', $numIdSistemaSei);
+        ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_hipotese_legal_envio_consultar');
+        $this->atualizarNumeroVersao("2.1.1");
     }
 }
 

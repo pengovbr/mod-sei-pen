@@ -8,28 +8,33 @@ require_once DIR_SEI_WEB.'/SEI.php';
  *
  */
 class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
-    
+
     protected function listarConectado(PenRelHipoteseLegalDTO $objDTO){
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_listar', __METHOD__, $objDTO);
-        return parent::listarConectado($objDTO);
+        return parent::listarInterno($objDTO);
     }
 
-    protected function alterar(PenRelHipoteseLegalDTO $objDTO){
+    protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO){
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
+        return parent::consultarInterno($objDTO);
+    }
+
+    protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO){
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
-        return parent::alterarConectado($objDTO);
+        return parent::alterarInterno($objDTO);
     }
 
-    protected function cadastrar(PenRelHipoteseLegalDTO $objDTO){
+    protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO){
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
-        return parent::cadastrarConectado($objDTO);
+        return parent::cadastrarInterno($objDTO);
     }
 
-    protected function excluir(PenRelHipoteseLegalDTO $objDTO){
+    protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO){
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
-        return parent::excluirConectado($objDTO);
+        return parent::excluirInterno($objDTO);
     }
 
-    
+
     /**
      * Pega o ID hipotese sei para buscar o ID do barramento
      * @param integer $numIdHipoteseSEI
@@ -38,15 +43,15 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
     protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
         $objBanco = BancoSEI::getInstance();
         $objGenericoBD = new GenericoBD($objBanco);
-        
+
         // Mapeamento da hipotese legal remota
         $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
         $objPenRelHipoteseLegalDTO->setStrTipo('E');
         $objPenRelHipoteseLegalDTO->retNumIdentificacao();
         $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseSEI);
-                
+
         $objPenRelHipoteseLegal = $objGenericoBD->consultar($objPenRelHipoteseLegalDTO);
-        
+
         if ($objPenRelHipoteseLegal) {
             return $objPenRelHipoteseLegal->getNumIdentificacao();
         } else {

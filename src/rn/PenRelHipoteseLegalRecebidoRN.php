@@ -11,22 +11,27 @@ class PenRelHipoteseLegalRecebidoRN extends PenRelHipoteseLegalRN {
 
     protected function listarConectado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_listar', __METHOD__, $objDTO);
-        return parent::listarConectado($objDTO);
+        return parent::listarInterno($objDTO);
+    }
+
+    protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO) {
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_consultar', __METHOD__, $objDTO);
+        return parent::consultarInterno($objDTO);
     }
 
     protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_alterar', __METHOD__, $objDTO);
-        return parent::alterarConectado($objDTO);
+        return parent::alterarInterno($objDTO);
     }
 
     protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_cadastrar', __METHOD__, $objDTO);
-        return parent::cadastrarConectado($objDTO);
+        return parent::cadastrarInterno($objDTO);
     }
 
     protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO) {
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_recebimento_excluir', __METHOD__, $objDTO);
-        return parent::excluirConectado($objDTO);
+        return parent::excluirInterno($objDTO);
     }
 
     /**
@@ -44,7 +49,7 @@ class PenRelHipoteseLegalRecebidoRN extends PenRelHipoteseLegalRN {
         $objPenHipoteseLegalDTO = $objGenericoBD->consultar($objPenHipoteseLegalDTO);
 
         if ($objPenHipoteseLegalDTO) {
-        
+
             // Mapeamento da hipotese legal remota
             $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
             $objPenRelHipoteseLegalDTO->setStrTipo('R');
@@ -52,7 +57,7 @@ class PenRelHipoteseLegalRecebidoRN extends PenRelHipoteseLegalRN {
             $objPenRelHipoteseLegalDTO->setNumIdBarramento($objPenHipoteseLegalDTO->getNumIdHipoteseLegal());
 
             $objPenRelHipoteseLegal = $objGenericoBD->consultar($objPenRelHipoteseLegalDTO);
-            
+
             if ($objPenRelHipoteseLegal) {
                 return $objPenRelHipoteseLegal->getNumIdHipoteseLegal();
             } else {

@@ -2,66 +2,64 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-/**
- * Description of PenRelHipoteseLegalRN
- *
- * @author michael
- */
 abstract class PenRelHipoteseLegalRN extends InfraRN {
 
     protected function inicializarObjInfraIBanco(){
         return BancoSEI::getInstance();
     }
 
-    protected function listarConectado(PenRelHipoteseLegalDTO $objDTO){
-
+    protected function listarInternoConectado(PenRelHipoteseLegalDTO $objDTO)
+    {
         try {
-
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-
             return $objBD->listar($objDTO);
         }
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro ao listar mapeamento de hipóteses legais', $e);
         }
     }
 
-    protected function alterarConectado(PenRelHipoteseLegalDTO $objDTO){
-
+    protected function consultarInternoConectado(PenRelHipoteseLegalDTO $objDTO)
+    {
         try {
-
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+            return $objBD->consultar($objDTO);
+        }
+        catch (Exception $e) {
+            throw new InfraException('Erro ao consultar mapeamento de hipóteses legais', $e);
+        }
+    }
 
+    protected function alterarInternoControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
+        try {
+            $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
             return $objBD->alterar($objDTO);
         }
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro ao alterar mapeamento de hipótese legal', $e);
         }
     }
 
-    protected function cadastrarConectado(PenRelHipoteseLegalDTO $objDTO){
-
+    protected function cadastrarInternoControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
         try {
-
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-
             return $objBD->cadastrar($objDTO);
         }
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro ao cadastrar mapeamento de hipótese legal', $e);
         }
     }
 
-    protected function excluirConectado(PenRelHipoteseLegalDTO $objDTO){
-
+    protected function excluirInternoControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
         try {
-
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-
             return $objBD->excluir($objDTO);
         }
         catch (Exception $e) {
-            throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+            throw new InfraException('Erro ao excluir mapeamento de hipóteses legais', $e);
         }
     }
 
