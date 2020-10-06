@@ -1093,7 +1093,6 @@ class ProcessoEletronicoRN extends InfraRN
                 $parametros->parametrosParaRecebimentoDeComponenteDigital->parte = $parObjParteComponente;
             }
 
-            //return $this->getObjPenWs()->receberComponenteDigital($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->receberComponenteDigital($parametros);
             });

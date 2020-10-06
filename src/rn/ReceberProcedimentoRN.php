@@ -2279,12 +2279,21 @@ class ReceberProcedimentoRN extends InfraRN
             $strMensagemErro = "- Componente digital de pelo menos um dos documentos do processo [$strProtocoloFormatado] não pode ser recebido. \n";
         }
 
-        $objDocumentoDTO = new DocumentoDTO();
-        $objDocumentoDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
-        $numDocumentosProcesso = intval($this->objDocumentoRN->contarRN0007($objDocumentoDTO));
+        //Valida se a quantidade de documentos registrados confere com a quantidade informada nos metadados
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setStrNumeroRegistro($parObjMetadadosProcedimento->metadados->NRE);
+        $objUltimoTramiteDTO = $this->objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->setStrNumeroRegistro($objUltimoTramiteDTO->getStrNumeroRegistro());
+        $objComponenteDigitalDTO->setNumIdTramite($objUltimoTramiteDTO->getNumIdTramite());
+        $objComponenteDigitalDTO->retDblIdDocumento();
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $arrObjComponenteDitigaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+        $arrDblIdDocumentos = InfraArray::converterArrInfraDTO($arrObjComponenteDitigaisDTO, 'IdDocumento', 'IdDocumento');
+
         $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
         $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
-        if($numDocumentosProcesso <> count($arrObjDocumento)){
+        if(count($arrDblIdDocumentos) <> count($arrObjDocumento)){
             $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
             $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
         }

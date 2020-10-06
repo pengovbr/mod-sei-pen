@@ -1319,7 +1319,6 @@ class PenAtualizarSipRN extends InfraRN {
         $this->atualizarNumeroVersao("2.0.1");
     }
 
-<<<<<<< HEAD
     /**
      * Instala/Atualiza os módulo PEN para versão 2.1.0
      */
