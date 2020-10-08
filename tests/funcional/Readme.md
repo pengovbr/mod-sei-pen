@@ -60,6 +60,8 @@ $ ./vendor/bin/phpunit --testsuite funcional
 
 ### 2.1. Compilar os testes
 
+Após o provisionamento do ambiente com o comando "make test-provision"
+
 Compile os testes com o seguinte comando:
 
 ``` 
