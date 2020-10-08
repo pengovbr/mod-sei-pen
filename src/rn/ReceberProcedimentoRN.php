@@ -88,7 +88,6 @@ class ReceberProcedimentoRN extends InfraRN
     protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
         try {
-            $objPenParametroRN = new PenParametroRN();
             $numIdTramite = $parObjMetadadosProcedimento->IDT;
             $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
             $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
@@ -143,6 +142,7 @@ class ReceberProcedimentoRN extends InfraRN
 
             // TODO: Refatorar código abaixo, encapsulando um nova função para realizar o download dos componentes
             // $this->baixarComponentesDigitais(...)
+            //$this->baixarComponentesDigitais($objProtocolo);
 
             // Lista todos os componentes digitais presente no protocolo
             // Esta verificação é necessária pois existem situações em que a lista de componentes
@@ -165,7 +165,8 @@ class ReceberProcedimentoRN extends InfraRN
                     $arrayHash[] = $componentePendente;
                     $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $componentePendente);
                     $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
-                    $nrTamanhoMegasMaximo  = $objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                    //$nrTamanhoMegasMaximo  = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                    $nrTamanhoMegasMaximo  = 100;
                     $nrTamanhoBytesMaximo  = $nrTamanhoMegasMaximo * pow(1024, 2);
 
                     $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
@@ -204,7 +205,6 @@ class ReceberProcedimentoRN extends InfraRN
             $objTramite = $arrObjTramite[0];
 
             //Verifica se o trâmite está recusado
-            //TODO: Testar o erro de interrupção forçado para certificar que o rollback está sendo realizado da forma correta
             if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
                 throw new InfraException("Trâmite $numIdTramite já se encontra recusado. Cancelando o recebimento do processo");
             }
@@ -269,6 +269,69 @@ class ReceberProcedimentoRN extends InfraRN
             $this->gravarLogDebug($mensagemErro);
             LogSEI::getInstance()->gravar($mensagemErro);
             throw $e;
+        }
+    }
+
+
+    /**
+     * Método responsável por realizar o download dos componentes digitais do processo
+     *
+     * @return void
+     */
+    private function baixarComponentesDigitais($parObjProtocolo)
+    {
+        // Lista todos os componentes digitais presente no protocolo
+        // Esta verificação é necessária pois existem situações em que a lista de componentes
+        // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
+        // mantida pela aplicação.
+        //$arrHashPendentesDownload = $objTramite->componenteDigitalPendenteDeRecebimento;
+        $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($parObjProtocolo);
+
+        // Percorre os componentes que precisam ser recebidos
+        $arrayObjAnexoBaixadoPraPastaTemp = array();
+        foreach($arrHashComponentesProtocolo as $key => $strHashComponentePendente){
+
+            $numOrdemComponente = $key + 1;
+            if(!is_null($strHashComponentePendente)) {
+                //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
+                //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
+                //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
+                $arrayHash[] = $strHashComponentePendente;
+                $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($parObjProtocolo, $strHashComponentePendente);
+                $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
+                $nrTamanhoMegasMaximo  = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+                $nrTamanhoBytesMaximo  = $nrTamanhoMegasMaximo * pow(1024, 2);
+
+                $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($parObjProtocolo);
+                $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($parObjProtocolo, $strHashComponentePendente);
+
+                //Obter os dados do componente digital particionado
+                $this->gravarLogDebug("Baixando componente digital $numOrdemComponente particionado", 3);
+                $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
+                    $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $nrTamanhoMegasMaximo,
+                    $numOrdemComponente, $numIdTramite, $objTramite, $arrObjComponenteDigitalIndexado
+                );
+                $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
+                $this->criarDiretorioAnexo($objAnexoDTO);
+
+                $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$strHashComponentePendente];
+                $objAnexoBaixadoPraPastaTemp->hash = $strHashComponentePendente;
+                array_push($arrayObjAnexoBaixadoPraPastaTemp, $objAnexoBaixadoPraPastaTemp);
+
+                //Valida a integridade do componente via hash
+                $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 4);
+                $numTempoInicialValidacao = microtime(true);
+                $this->objReceberComponenteDigitalRN->validarIntegridadeDoComponenteDigital(
+                    $arrAnexosComponentes[$key][$strHashComponentePendente], $strHashComponentePendente, $numIdTramite, $numOrdemComponente
+                );
+                $numTempoTotalValidacao = round(microtime(true) - $numTempoInicialValidacao, 2);
+                $numVelocidade = round($nrTamanhoArquivoKB / max([$numTempoTotalValidacao, 1]), 2);
+                $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 4);
+            }
+        }
+
+        if(count($arrAnexosComponentes) > 0){
+            $this->objReceberComponenteDigitalRN->setArrAnexos($arrAnexosComponentes);
         }
     }
 
@@ -804,8 +867,6 @@ class ReceberProcedimentoRN extends InfraRN
         $numIdUnidade = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($parDblIdProcedimento);
         SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidade);
 
-        $objPenParametroRN = new PenParametroRN();
-
         try {
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->retDthConclusao();
@@ -842,12 +903,12 @@ class ReceberProcedimentoRN extends InfraRN
                 $this->gravarLogDebug("Processo $parDblIdProcedimento não pode ser desbloqueado", 2);
             }
 
-            //$numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            //$numUnidadeReceptora = $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
             $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
             $this->enviarProcedimentoUnidade($objProcedimentoDTO, $numUnidadeReceptora);
 
         } finally {
-            //$numUnidadeReceptora = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+            //$numUnidadeReceptora = $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
             $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
             SessaoSEI::getInstance()->setNumIdUnidadeAtual($numUnidadeReceptora);
         }
@@ -989,8 +1050,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setStrSinGerarPendencia('S');
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
-        $objPenParametroRN = new PenParametroRN();
-        $numIdTipoProcedimento = $objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
+        $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
         $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $parObjProtocolo->processoDeNegocio);
 
         // Obtém código da unidade através de mapeamento entre SEI e Barramento
@@ -1012,7 +1072,7 @@ class ReceberProcedimentoRN extends InfraRN
 
         // Verifica se o protocolo é do tipo documento avulso, se for gera um novo número de protocolo
         if($parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO) {
-            $strNumProtocoloDocumentoAvulso = $this->gerarNumeroProtocoloDocumentoAvulso($objUnidadeDTO, $objPenParametroRN);
+            $strNumProtocoloDocumentoAvulso = $this->gerarNumeroProtocoloDocumentoAvulso($objUnidadeDTO, $this->objPenParametroRN);
             $objProcedimentoDTO->getObjProtocoloDTO()->setStrProtocoloFormatado($strNumProtocoloDocumentoAvulso);
         }
 
@@ -1053,7 +1113,6 @@ class ReceberProcedimentoRN extends InfraRN
             $strNumeroProcesso = $this->objProtocoloRN->gerarNumeracaoProcesso();
         }
         finally{
-            //SessaoSEI::getInstance(false)->setNumIdUnidadeAtual($parObjPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
             ModPenUtilsRN::simularLoginUnidadeRecebimento();
         }
 
@@ -1073,8 +1132,7 @@ class ReceberProcedimentoRN extends InfraRN
 
             if($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao) == ProtocoloRN::$NA_RESTRITO){
                 $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-                $objPenParametroRN = new PenParametroRN();
-                $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+                $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
                 if (!isset($parObjProtocolo->hipoteseLegal) || (isset($parObjProtocolo->hipoteseLegal) && empty($parObjProtocolo->hipoteseLegal->identificacao))) {
                     $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
@@ -1539,8 +1597,7 @@ class ReceberProcedimentoRN extends InfraRN
 
                 if ($this->obterNivelSigiloSEI($objDocumento->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
                     $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-                    $objPenParametroRN = new PenParametroRN();
-                    $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+                    $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
                     if (!isset($objDocumento->hipoteseLegal) || (isset($objDocumento->hipoteseLegal) && empty($objDocumento->hipoteseLegal->identificacao))) {
                         $objDocumentoDTO->getObjProtocoloDTO()->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
@@ -1678,7 +1735,8 @@ class ReceberProcedimentoRN extends InfraRN
 
     private function atribuirProcessosAnexados($parObjProtocolo)
     {
-        if($parObjProtocolo->staTipoProtocolo != ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO){
+        $bolExisteProcessoAnexado = ProcessoEletronicoRN::existeProcessoAnexado($parObjProtocolo);
+        if($parObjProtocolo->staTipoProtocolo != ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO && $bolExisteProcessoAnexado){
             $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
             $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
             $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN ::$TA_PROCEDIMENTO_ANEXADO);
@@ -1758,8 +1816,7 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException("Parâmetro $objDestinatario não informado.");
         }
 
-        $objPenParametroRN = new PenParametroRN();
-        $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $numIdRepositorioOrigem = $this->objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
         $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
 
@@ -1793,8 +1850,7 @@ class ReceberProcedimentoRN extends InfraRN
     private function obterHipoteseLegalSEI($parNumIdHipoteseLegalPEN) {
         //Atribuí a hipótese legal
         $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
-        $objPenParametroRN = new PenParametroRN();
-        $numIdHipoteseLegalPadrao = $objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+        $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
 
         $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parNumIdHipoteseLegalPEN);
 
@@ -1919,7 +1975,6 @@ class ReceberProcedimentoRN extends InfraRN
     private function enviarProcedimentoUnidade(ProcedimentoDTO $parObjProcedimentoDTO, $parUnidadeDestino=null, $retransmissao=false)
     {
         $objAtividadeRN = new PenAtividadeRN();
-        $objPenParametroRN = new PenParametroRN();
         $objInfraException = new InfraException();
 
         $strEnviaEmailNotificacao = 'N';
@@ -1941,7 +1996,7 @@ class ReceberProcedimentoRN extends InfraRN
             $numIdUnidade = $objUnidadeDTO->getNumIdUnidade();
 
             //Somente considera regra de envio de e-mail para unidades vinculadas ao processo
-            $strEnviaEmailNotificacao = $objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
+            $strEnviaEmailNotificacao = $this->objPenParametroRN->getParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
         }
 
 
@@ -2209,7 +2264,7 @@ class ReceberProcedimentoRN extends InfraRN
             $numTempoTotalDownload = round(microtime(true) - $numTempoInicialDownload, 2);
             $numTamanhoArquivoKB = round(strlen($objComponenteDigital->conteudoDoComponenteDigital) / 1024, 2);
             $numVelocidade = round($numTamanhoArquivoKB / max([$numTempoTotalDownload, 1]), 2);
-            $this->gravarLogDebug("Recuperado parte $i de $qtdPartes do componente digital $numComponente. Taxa de transferência: {$numVelocidade} kb/s", 4);
+            $this->gravarLogDebug("Recuperado parte $i de $qtdPartes do componente digital $numComponente ($numTamanhoArquivoKB kbs). Taxa de transferência: {$numVelocidade} kb/s", 4);
 
             //Verifica se é a primeira execução do laço, se for cria do arquivo na pasta temporaria, senão incrementa o conteudo no arquivo
             if($i == 1) {

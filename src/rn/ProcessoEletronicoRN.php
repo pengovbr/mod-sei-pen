@@ -125,11 +125,11 @@ class ProcessoEletronicoRN extends InfraRN
             'soap_version' => SOAP_1_1
             , 'local_cert' => $this->strLocalCert
             , 'passphrase' => $this->strLocalCertPassword
-            , 'resolve_wsdl_remote_includes' => true
+            , 'resolve_wsdl_remote_includes' => false
             , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
             , CURLOPT_TIMEOUT => self::WS_TIMEOUT_CONEXAO
             , CURLOPT_CONNECTTIMEOUT => self::WS_TIMEOUT_CONEXAO
-            , 'trace' => true
+            , 'trace' => false
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
@@ -1786,39 +1786,23 @@ class ProcessoEletronicoRN extends InfraRN
     *
     * @param object $parObjProtocolo
     *
-    * @return list($objProtocoloPrincipal, $arrProtocolosAnexados)
+    * @return $objProtocolo
     */
     public static function desmembrarProcessosAnexados($parObjProtocolo)
     {
-        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
-
-        // Função anônima de identificação se um determinado documento faz parte de um processo anexado
-        $funcDocumentoFoiAnexado = function($parObjDocumento) use ($parObjProtocolo){
-            return (
-                isset($parObjDocumento->protocoloDoProcessoAnexado) &&
-                !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-                $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
-            );
-        };
-
-        // Verifica se existe algum processo anexado, retornando a referência original do processo caso não exista
-        $bolExisteProcessoAnexado = array_reduce($arrObjDocumentos, function($bolExiste, $objDoc) use ($funcDocumentoFoiAnexado){
-            return $bolExiste || $funcDocumentoFoiAnexado($objDoc);
-        });
-
-        if(!$bolExisteProcessoAnexado){
+        if(!ProcessoEletronicoRN::existeProcessoAnexado($parObjProtocolo)){
             return $parObjProtocolo;
         }
 
         $arrObjRefProcessosAnexados = array();
         $objProcessoPrincipal = clone $parObjProtocolo;
         $objProcessoPrincipal->documento = array();
-        $arrObjDocumentosOrdenados = $arrObjDocumentos;
+        $arrObjDocumentosOrdenados = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
         usort($arrObjDocumentosOrdenados, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
 
         // Agrupamento dos documentos por processo
         foreach ($arrObjDocumentosOrdenados as $objDocumento) {
-            $bolDocumentoAnexado = $funcDocumentoFoiAnexado($objDocumento);
+            $bolDocumentoAnexado = ProcessoEletronicoRN::documentoFoiAnexado($parObjProtocolo, $objDocumento);
             $strProtocoloProcAnexado = ($bolDocumentoAnexado) ? $objDocumento->protocoloDoProcessoAnexado : $objProcessoPrincipal->protocolo;
 
             // Cria uma nova presentação para o processo anexado identico ao processo principal
@@ -1842,6 +1826,37 @@ class ProcessoEletronicoRN extends InfraRN
         return $objProcessoPrincipal;
     }
 
+    /**
+     * Identifica se o protocolo recebido possui outros processos anexados
+     *
+     * @param stdClass $parObjProtocolo
+     * @return bool
+     */
+    public static function existeProcessoAnexado($parObjProtocolo)
+    {
+        $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
+
+        // Verifica se existe algum processo anexado, retornando a referência original do processo caso não exista
+        $bolExisteProcessoAnexado = array_reduce($arrObjDocumentos, function($bolExiste, $objDoc) {
+            return $bolExiste || ProcessoEletronicoRN::documentoFoiAnexado($parObjProtocolo, $objDoc);
+        });
+
+        return $bolExisteProcessoAnexado;
+    }
+
+    /**
+     * Identifica se um determinado documento recebido pelo PEN originou-se de uma anexação de processos
+     *
+     * @return bool
+     */
+    private static function documentoFoiAnexado($parObjProtocolo, $parObjDocumento)
+    {
+        return (
+            isset($parObjDocumento->protocoloDoProcessoAnexado) &&
+            !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
+            $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
+        );
+    }
 
     /**
      * Testa a disponibilidade do Barramento de Serviços do PEN
