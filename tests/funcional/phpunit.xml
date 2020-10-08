@@ -10,7 +10,7 @@
   >
   
   <php>
-    <const name="PHPUNIT_HOST" value="127.0.0.1"/>
+    <const name="PHPUNIT_HOST" value="selenium"/>
     <const name="PHPUNIT_PORT" value="4444"/>  
     <const name="PHPUNIT_BROWSER" value="chrome"/>
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
@@ -47,7 +47,7 @@
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
     <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org1.pem" />
     <const name="CONTEXTO_ORGAO_A_SENHA_CERTIFICADO_DIGITAL" value="sefUkgJSjDVREgYI" />
-    <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33061;dbname=sei;" />   
+    <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="mysql:host=org1-mysql;port=3306;dbname=sei;" />   
     <!-- <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="sqlsrv:server=localhost,14331 ; Database=sei" /> -->
     <!-- <const name="CONTEXTO_ORGAO_A_DB_SEI_DSN" value="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=15211))(CONNECT_DATA=(SERVICE_NAME=XE)))" /> -->
     <const name="CONTEXTO_ORGAO_A_DB_SEI_USER" value="sei_user" />
@@ -78,7 +78,7 @@
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
     <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org2.pem" />
     <const name="CONTEXTO_ORGAO_B_SENHA_CERTIFICADO_DIGITAL" value="7h0emevqnAGcoNEa" />
-    <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33062;dbname=sei;" />
+    <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="mysql:host=org2-mysql;port=3306;dbname=sei;" />
     <!-- <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="sqlsrv:server=localhost,14332; Database=sei" /> -->
     <!-- <const name="CONTEXTO_ORGAO_B_DB_SEI_DSN" value="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=15212))(CONNECT_DATA=(SERVICE_NAME=XE)))" /> -->
     <const name="CONTEXTO_ORGAO_B_DB_SEI_USER" value="sei_user" />

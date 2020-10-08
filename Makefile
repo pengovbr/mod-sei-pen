@@ -61,31 +61,31 @@ install:
 test-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 60 seconds ..."; sleep 60;
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sei
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sip
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chown -R root:root /etc/cron.d/
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sei
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sip
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /tmp/test_files_index.txt -P /tmp/"
-	composer install -d $(PEN_TEST_FUNC)
-	composer install -d $(PEN_TEST_UNIT)
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http bash -c "printenv | sed -e 's|^|export |' > /root/crond_env.sh"
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http chown -R root:root /etc/cron.d/
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http chmod 0644 /etc/cron.d/sei
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http chmod 0644 /etc/cron.d/sip
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http bash -c "printenv | sed -e 's|^|export |' > /root/crond_env.sh"
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http chown -R root:root /etc/cron.d/
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http chmod 0644 /etc/cron.d/sei
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http chmod 0644 /etc/cron.d/sip
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T selenium bash -c "wget --progress=dot:mega -i /tmp/test_files_index.txt -P /tmp/"
+	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -w /t  linhares/php72-cli-mysql-ora-sqls:1 composer --ansi install -o
+	#docker run --rm -it -v ${PWD}/$(PEN_TEST_UNIT):/t -w /t  linhares/php72-cli-mysql-ora-sqls:1 composer --ansi install -o
 
 
 test-provision-destroy:
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T selenium bash -c "rm -rf /tmp/arquivo*"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm -f
 
 
 test-functional:
-	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
-	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
+	docker run --rm -i --network funcional_mod-sei-pen-net -v ${PWD}/$(PEN_TEST_FUNC):/t -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_A.pdf:/tmp/arquivo_pequeno_A.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_B.pdf:/tmp/arquivo_pequeno_B.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_C.pdf:/tmp/arquivo_pequeno_C.pdf -w /t linhares/php72-cli-mysql-ora-sqls:1 sh -c 'php vendor/bin/phpunit -c phpunit.xml  --stop-on-failure --testsuite funcional'
 	
 	
 test-unit:
