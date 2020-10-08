@@ -16,7 +16,7 @@ PEN_TEST_UNIT = tests/unitario
 
 all: clean build
 
-build:
+build: 
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
 	@mkdir -p $(SEI_SCRIPTS_DIR)
 	@mkdir -p $(SEI_CONFIG_DIR)
@@ -31,7 +31,7 @@ build:
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
-	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/	
 	@mv $(SEI_MODULO_DIR)/config/ConfiguracaoModPEN.exemplo.php $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/supervisor.exemplo.ini $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/bin/verificar-reboot-fila.sh $(SEI_BIN_DIR)/
@@ -39,7 +39,7 @@ build:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md sei/ sip/
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md sei/ sip/	
 	@rm -rf dist/sei dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
@@ -54,12 +54,12 @@ clean:
 	@echo "Limpeza do diretório de distribuição do realizada com sucesso"
 
 
-install:
+install: 
 	unzip -o -d $(SEI_PATH) dist/$(PEN_MODULO_COMPACTADO)
 
 
-test-provision:
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d
+test-provision:	
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 60 seconds ..."; sleep 60;
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http bash -c "printenv | sed -e 's|^|export |' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org1-http chown -R root:root /etc/cron.d/
@@ -74,10 +74,8 @@ test-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T selenium bash -c "wget --progress=dot:mega -i /tmp/test_files_index.txt -P /tmp/"
-	#composer install -d $(PEN_TEST_FUNC)
-	#composer install -d $(PEN_TEST_UNIT)
 	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -w /t  linhares/php72-cli-mysql-ora-sqls:1 composer --ansi install -o
-	#docker run --rm -it -v ${PWD}/$(PEN_TEST_UNIT):/t -w /t  prooph/composer:7.2 --ansi install -o
+	#docker run --rm -it -v ${PWD}/$(PEN_TEST_UNIT):/t -w /t  linhares/php72-cli-mysql-ora-sqls:1 composer --ansi install -o
 
 
 test-provision-destroy:
@@ -87,18 +85,19 @@ test-provision-destroy:
 
 
 test-functional:
-	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
-	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
 	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_A.pdf:/tmp/arquivo_pequeno_A.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_B.pdf:/tmp/arquivo_pequeno_B.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_C.pdf:/tmp/arquivo_pequeno_C.pdf -w /t linhares/php72-cli-mysql-ora-sqls:1 sh -c 'php vendor/bin/phpunit -c phpunit.xml  --stop-on-failure --testsuite funcional'
-
+	
+	
 test-unit:
 	#tests/unitario/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml --stop-on-failure $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php
-	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php
+	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
 
 
 bash_org1:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash
-
+	
 
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
+
+
