@@ -85,7 +85,7 @@ test-provision-destroy:
 
 
 test-functional:
-	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_A.pdf:/tmp/arquivo_pequeno_A.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_B.pdf:/tmp/arquivo_pequeno_B.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_C.pdf:/tmp/arquivo_pequeno_C.pdf -w /t linhares/php72-cli-mysql-ora-sqls:1 sh -c 'php vendor/bin/phpunit -c phpunit.xml  --stop-on-failure --testsuite funcional'
+	docker run --rm -i --network funcional_mod-sei-pen-net -v ${PWD}/$(PEN_TEST_FUNC):/t -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_A.pdf:/tmp/arquivo_pequeno_A.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_B.pdf:/tmp/arquivo_pequeno_B.pdf -v ${PWD}/$(PEN_TEST_FUNC)/assets/arquivos/arquivo_pequeno_C.pdf:/tmp/arquivo_pequeno_C.pdf -w /t linhares/php72-cli-mysql-ora-sqls:1 sh -c 'php vendor/bin/phpunit -c phpunit.xml  --stop-on-failure --testsuite funcional'
 	
 	
 test-unit:
