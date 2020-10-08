@@ -6,12 +6,16 @@ services:
   smtp:
       image: guilhermeadc/sei3_mailcatcher
       container_name: smtp
+      networks:
+      - mod-sei-pen-net
       ports:
         - "1080:1080"
 
   memcached:
     image: guilhermeadc/sei3_memcached
     container_name: memcached
+    networks:
+      - mod-sei-pen-net
     ports:
       - "11211:11211"
 
@@ -20,6 +24,8 @@ services:
     container_name: proxy
     ports:
       - "80:80"
+    networks:
+      - mod-sei-pen-net
     volumes:
       - ./assets/proxy/:/opt/proxy-conf
     links:
@@ -35,6 +41,8 @@ services:
     ports:
       - "4444:4444"
       - "5900:5900"
+    networks:
+      - mod-sei-pen-net
     volumes:
       - /dev/shm:/dev/shm
       - ./assets/arquivos/test_files_index.txt:/tmp/test_files_index.txt
@@ -46,16 +54,20 @@ services:
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}
     container_name: org1-${ORG1_DATABASE_NAME}
+    networks:
+      - mod-sei-pen-net
     ports:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
-      
+
   org1-http:
     image: guilhermeadc/sei3_httpd-2.4
     container_name: org1-http
     dns: "8.8.8.8"
+    networks:
+      - mod-sei-pen-net
     volumes:
       - ${SEI_PATH}:/opt
-      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/cron.d:/etc/cron.d
       - ./assets/config:/opt/sei/config/mod-pen
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
@@ -71,8 +83,8 @@ services:
     extra_hosts:
       - "${ORG1_HOSTNAME}:127.0.0.1"
     links:
-      - memcached:memcached    
-      - smtp:smtp      
+      - memcached:memcached
+      - smtp:smtp
       - org1-database:${ORG1_DATABASE_NAME}
 
 
@@ -81,6 +93,8 @@ services:
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}
     container_name: org2-${ORG2_DATABASE_NAME}
+    networks:
+      - mod-sei-pen-net
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
@@ -89,6 +103,8 @@ services:
     image: guilhermeadc/sei3_httpd-2.4
     container_name: org2-http
     dns: "8.8.8.8"
+    networks:
+      - mod-sei-pen-net
     volumes:
       - ${SEI_PATH}:/opt
       - ../../src/scripts:/opt/sei/scripts/mod-pen
@@ -107,6 +123,8 @@ services:
     extra_hosts:
       - "${ORG2_HOSTNAME}:127.0.0.1"
     links:
-      - memcached:memcached    
-      - smtp:smtp      
+      - memcached:memcached
+      - smtp:smtp
       - org2-database:${ORG2_DATABASE_NAME}
+networks:
+  mod-sei-pen-net:
