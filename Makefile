@@ -76,7 +76,7 @@ test-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T selenium bash -c "wget --progress=dot:mega -i /tmp/test_files_index.txt -P /tmp/"
 	#composer install -d $(PEN_TEST_FUNC)
 	#composer install -d $(PEN_TEST_UNIT)
-	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -w /t  prooph/composer:7.2 --ansi install -o
+	docker run --rm -i -v ${PWD}/$(PEN_TEST_FUNC):/t -w /t  linhares/php72-cli-mysql-ora-sqls:1 composer --ansi install -o
 	#docker run --rm -it -v ${PWD}/$(PEN_TEST_UNIT):/t -w /t  prooph/composer:7.2 --ansi install -o
 
 
