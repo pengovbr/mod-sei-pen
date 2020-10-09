@@ -126,8 +126,7 @@ class ProcessoEletronicoRN extends InfraRN
             , 'local_cert' => $this->strLocalCert
             , 'passphrase' => $this->strLocalCertPassword
             , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
-            , CURLOPT_TIMEOUT => self::WS_TIMEOUT_CONEXAO
-            , CURLOPT_CONNECTTIMEOUT => self::WS_TIMEOUT_CONEXAO
+            , 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
             , 'trace' => false
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
@@ -136,6 +135,7 @@ class ProcessoEletronicoRN extends InfraRN
             )
         );
     }
+
 
     protected function inicializarObjInfraIBanco()
     {

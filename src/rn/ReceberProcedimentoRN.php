@@ -239,10 +239,15 @@ class ReceberProcedimentoRN extends InfraRN
     /**
      * Método responsável por realizar o download dos componentes digitais do processo
      *
-     * @return void
+     * @param stdClass $parObjTramite
+     * @param stdClass $parObjMetadadosProcedimento
+     *
+     * @return array
      */
     private function baixarComponentesDigitais($parObjTramite, $parObjMetadadosProcedimento)
     {
+        // TODO: Migrar funções baixarComponenteDigital, receberComponenteDigital e receberComponenteDigitalParticionado
+        // para classe ReceberComponenteDigitalRN
         $arrAnexosComponentes = array();
         $arrHashComponentesBaixados = array();
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
@@ -261,7 +266,6 @@ class ReceberProcedimentoRN extends InfraRN
 
         // Percorre os componentes que precisam ser recebidos
         foreach($arrHashComponentesProtocolo as $key => $strHashComponentePendente){
-
             $numOrdemComponente = $key + 1;
             if(!is_null($strHashComponentePendente)) {
                 //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
@@ -276,6 +280,7 @@ class ReceberProcedimentoRN extends InfraRN
 
                 //Obter os dados do componente digital particionado
                 $this->gravarLogDebug("Baixando componente digital $numOrdemComponente particionado", 3);
+
                 $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
                     $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
                     $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
@@ -296,6 +301,7 @@ class ReceberProcedimentoRN extends InfraRN
                 $numVelocidade = round($nrTamanhoArquivoKB / max([$numTempoTotalValidacao, 1]), 2);
                 $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 4);
             }
+
         }
 
         if(count($arrAnexosComponentes) > 0){
@@ -1807,19 +1813,19 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
 
-    private function validarDadosDestinatario($objMetadadosProcedimento)
+    private function validarDadosDestinatario($parObjMetadadosProcedimento)
     {
         $objInfraException = new InfraException();
 
-        $objDestinatario = $objMetadadosProcedimento->metadados->destinatario;
+        $objDestinatario = $parObjMetadadosProcedimento->metadados->destinatario;
 
         if(!isset($objDestinatario)){
             throw new InfraException("Parâmetro $objDestinatario não informado.");
         }
 
         $numIdRepositorioOrigem = $this->objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
-        if (isset($parObjMetadadosTramite->metadados->unidadeReceptora)) {
-            $unidadeReceptora = $parObjMetadadosTramite->metadados->unidadeReceptora;
+        if (isset($parObjMetadadosProcedimento->metadados->unidadeReceptora)) {
+            $unidadeReceptora = $parObjMetadadosProcedimento->metadados->unidadeReceptora;
             $numIdRepositorioDestinoProcesso = $unidadeReceptora->identificacaoDoRepositorioDeEstruturas;
             $numeroDeIdentificacaoDaEstrutura = $unidadeReceptora->numeroDeIdentificacaoDaEstrutura;
         } else {
