@@ -84,11 +84,9 @@ class EnviarReciboTramiteRN extends InfraRN
         }
     }
 
-  public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash = null, $parDthRecebimento = null)
+  public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash, $parDthRecebimento = null)
   {
     try{
-
-        //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
         date_default_timezone_set('America/Sao_Paulo');
 

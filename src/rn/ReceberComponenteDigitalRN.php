@@ -296,7 +296,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         $strHashInformado = $strHashConteudo;
         $strHashInformado = base64_decode($strHashInformado);
 
-        $objAnexoRN = new AnexoRN();
+        //$objAnexoRN = new AnexoRN();
         $strCaminhoAnexo = DIR_SEI_TEMP.'/'.$objAnexoDTO->getNumIdAnexo();
         $strHashDoArquivo = hash_file("sha256", $strCaminhoAnexo, true);
 

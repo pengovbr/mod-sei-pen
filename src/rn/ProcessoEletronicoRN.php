@@ -125,7 +125,6 @@ class ProcessoEletronicoRN extends InfraRN
             'soap_version' => SOAP_1_1
             , 'local_cert' => $this->strLocalCert
             , 'passphrase' => $this->strLocalCertPassword
-            , 'resolve_wsdl_remote_includes' => false
             , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
             , CURLOPT_TIMEOUT => self::WS_TIMEOUT_CONEXAO
             , CURLOPT_CONNECTTIMEOUT => self::WS_TIMEOUT_CONEXAO
@@ -134,7 +133,7 @@ class ProcessoEletronicoRN extends InfraRN
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
                 'allow_self_signed' => true,
-            ),
+            )
         );
     }
 
