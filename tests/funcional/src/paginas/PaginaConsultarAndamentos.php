@@ -11,7 +11,6 @@ class PaginaConsultarAndamentos extends PaginaTeste
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
-        //$this->test->assertStringContainsString($mensagemTramite, $this->test->byCssSelector('body')->text());
         return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
     }
 

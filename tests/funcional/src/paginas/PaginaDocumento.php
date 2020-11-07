@@ -2,7 +2,6 @@
 
 class PaginaDocumento extends PaginaTeste
 {
-
     const STA_NIVEL_ACESSO_PUBLICO  = 0;
     const STA_NIVEL_ACESSO_RESTRITO = 1;
     const STA_NIVEL_ACESSO_SIGILOSO = 2;
@@ -27,10 +26,28 @@ class PaginaDocumento extends PaginaTeste
         $this->test->byXPath("//img[contains(@alt, 'Consultar/Alterar Documento')]")->click();
     }
 
+    public function ehProcessoAnexado()
+    {
+        sleep(2);
+
+        try {
+            $this->test->frame(null);
+            $this->test->frame("ifrVisualizacao");
+            $this->test->byXPath("//div[@id='divInformacao']/a[contains(@href, 'acao=procedimento_trabalhar')]");
+            $this->test->byXPath("//img[contains(@alt, 'Desanexar Processo')]");
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
     public function descricao($value = null)
     {
         $input = $this->test->byId("txtDescricao");
-        if(isset($value)) $input->value($value);
+        if(isset($value)) {
+            $input->value($value);
+        }
+
         return $input->value();
     }
 

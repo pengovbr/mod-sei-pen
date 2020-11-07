@@ -26,7 +26,7 @@ class TramiteBD extends InfraBD {
 
         $objTramiteDTOPesquisa = new TramiteDTO();
         $objTramiteDTOPesquisa->retTodos();
-        $objTramiteDTOPesquisa->setStrStaTipoProtocolo(ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO);
+        $objTramiteDTOPesquisa->setStrStaTipoProtocolo(array(ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO, ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO), InfraDTO::$OPER_IN);
         $objTramiteDTOPesquisa->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
         $objTramiteDTOPesquisa->setNumMaxRegistrosRetorno(1);
 
