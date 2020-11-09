@@ -35,6 +35,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAssinaturaDocumento = null;
     protected $paginaIncluirDocumento = null;
     protected $paginaProcessosTramitadosExternamente = null;
+    protected $paginaAnexarProcesso = null;
 
     public function setUpPage(): void
     {
@@ -49,6 +50,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaControleProcesso = new PaginaControleProcesso($this);
         $this->paginaIncluirDocumento = new PaginaIncluirDocumento($this);
         $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
+        $this->paginaAnexarProcesso = new PaginaAnexarProcesso($this);
         $this->currentWindow()->maximize();
     }
 
@@ -222,6 +224,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaAssinaturaDocumento->assinarComLoginSenha($loginSenha);
         $this->window('');
         sleep(2);
+    }
+
+    protected function anexarProcesso($protocoloProcessoAnexado)
+    {
+        $this->paginaProcesso->navegarParaAnexarProcesso();
+        $this->paginaAnexarProcesso->anexarProcesso($protocoloProcessoAnexado);
     }
 
     protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente=false, $callbackEnvio=null, $timeout=PEN_WAIT_TIMEOUT)

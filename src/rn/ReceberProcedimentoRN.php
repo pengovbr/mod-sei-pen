@@ -727,7 +727,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objInfraException->lancarValidacoes();
 
         // Verificar se procedimento já existia na base de dados do sistema
-        $dblIdProcedimento = $this->consultarProcedimentoExistente($parStrNumeroRegistro, $parObjProtocolo->protocolo);
+        list($dblIdProcedimento, ) = $this->consultarProcedimentoExistente($parStrNumeroRegistro, $parObjProtocolo->protocolo);
         $bolProcedimentoExistente = isset($dblIdProcedimento);
 
         if($bolProcedimentoExistente){
@@ -797,7 +797,6 @@ class ReceberProcedimentoRN extends InfraRN
         $arrObjProcessoEletronicoDTO = $objProcessoEletronicoBD->listar($objProcessoEletronicoDTO);
 
         if(!empty($arrObjProcessoEletronicoDTO)){
-
             $arrObjProcessoEletronicoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjProcessoEletronicoDTO, "IdProcedimento");
 
             // Nos casos em que mais de um NRE for encontrado, somente o último trâmite deverá ser considerado
@@ -807,12 +806,15 @@ class ReceberProcedimentoRN extends InfraRN
             $objTramiteDTOPesquisa->setStrNumeroRegistro($arrStrNumeroRegistro, InfraDTO::$OPER_IN);
             $objTramiteDTOPesquisa->setNumMaxRegistrosRetorno(1);
             $objTramiteDTOPesquisa->retNumIdProcedimento();
+            $objTramiteDTOPesquisa->retStrNumeroRegistro();
             $objTramiteDTOPesquisa->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
 
             $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
             $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTOPesquisa);
             if(isset($objTramiteDTO)){
                 $dblIdProcedimento = $objTramiteDTO->getNumIdProcedimento();
+                $strNumeroRegistro = $objTramiteDTO->getStrNumeroRegistro();
+
                 $strProtocoloFormatado = $arrObjProcessoEletronicoDTOIndexado[$dblIdProcedimento]->getStrProtocoloProcedimentoFormatado();
                 if($strProtocoloFormatado !== $parStrProtocolo){
                     throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo PEN: $parStrProtocolo)"));
@@ -820,7 +822,7 @@ class ReceberProcedimentoRN extends InfraRN
             }
         }
 
-        return $dblIdProcedimento;
+        return array($dblIdProcedimento, $strNumeroRegistro);
     }
 
 
@@ -851,7 +853,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
 
-    private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $parObjProtocolo)
+    private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $parObjProtocolo, $parNumeroRegistroAnterior=null)
     {
         if(!isset($parDblIdProcedimento)){
             throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
@@ -927,12 +929,11 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
 
-        $strNumeroRegistro = $objMetadadosProcedimento->metadados->NRE;
+        $strNumeroRegistro = $parNumeroRegistroAnterior ?: $objMetadadosProcedimento->metadados->NRE;
         $this->atribuirDocumentos($objProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $objMetadadosProcedimento, $strNumeroRegistro);
 
         $this->registrarProcedimentoNaoVisualizado($objProcedimentoDTO);
 
-        //TODO: Avaliar necessidade de restringir referência circular entre processos
         //TODO: Registrar que o processo foi recebido com outros apensados. Necessário para posterior reenvio
         $this->atribuirProcessosApensados($objProcedimentoDTO, $parObjProtocolo->processoApensado, $objMetadadosProcedimento);
 
@@ -1173,7 +1174,6 @@ class ReceberProcedimentoRN extends InfraRN
 
     private function removerAndamentosProcedimento($parObjProtocoloDTO)
     {
-        //TODO: Remover apenas as atividades geradas pelo recebimento do processo, não as atividades geradas anteriormente
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->retNumIdAtividade();
         $objAtividadeDTO->setDblIdProtocolo($parObjProtocoloDTO->getDblIdProcedimento());
@@ -1468,7 +1468,8 @@ class ReceberProcedimentoRN extends InfraRN
             if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
                 // Definição da ordem do documento para avaliação do posicionamento
-                $numOrdemDocumento = $objDocumento->ordem;
+                //$numOrdemDocumento = $objDocumento->ordem;
+                $numOrdemDocumento = $objDocumento->ordemAjustada ?: $objDocumento->ordem;
 
                 //TODO: Erro na verificação da ordem dos documentos faz com que os documentos sejam duplicados. Ordem ajustada deverá ser considerada
                 if(array_key_exists($numOrdemDocumento, $arrObjComponenteDigitalDTOIndexado)){
@@ -1666,20 +1667,20 @@ class ReceberProcedimentoRN extends InfraRN
                 // - O segundo caso é identificar que dois processos independentes foram tramitados para o órgão B e estes
                 // foram retornados como anexados
 
-                // Verificar se procedimento já existia no sistema como um processo anexado
-                $objProcedimentoDTOAnexado = $this->consultarProcedimentoAnexadoExistente($strNumeroRegistro, $objProcessoAnexado->protocolo);
+                // Verificar se procedimento já existia no sistema como um processo anexado vinculado ao NRE atual
+                $strNumeroRegistroPrincipal = $parObjMetadadosProcedimento->metadados->NRE;
+                $objProcedimentoDTOAnexado = $this->consultarProcedimentoAnexadoExistente($strNumeroRegistroPrincipal, $objProcessoAnexado->protocolo);
                 if(isset($objProcedimentoDTOAnexado)){
                     // Verifica se este processo já existia como anexo do processo que está sendo recebido, fazendo as devidas atualizações se necessário
                     $dblIdProcedimentoAnexado = $objProcedimentoDTOAnexado->getDblIdProcedimento();
                     $objProcessoAnexado->idProcedimentoSEI = $objProcedimentoDTOAnexado->getDblIdProcedimento();
-                    $this->atribuirDocumentos($objProcedimentoDTOAnexado, $objProcessoAnexado, $objUnidadeDTO, $parObjMetadadosProcedimento, $strNumeroRegistro, $dblIdProcedimentoAnexado);
+                    $this->atribuirDocumentos($objProcedimentoDTOAnexado, $objProcessoAnexado, $objUnidadeDTO, $parObjMetadadosProcedimento, $strNumeroRegistroPrincipal, $dblIdProcedimentoAnexado);
                 } else {
                     // Busca por um outro processo tramitado anteriormente e que agora está sendo devolvido como anexo de outro
                     // Neste caso, o processo anterior deve ser localizado, atualizado e anexado ao principal
-                    $dblIdProcedimentoDTOExistente = $this->consultarProcedimentoExistente(null, $objProcessoAnexado->protocolo);
+                    list($dblIdProcedimentoDTOExistente, $strNumeroRegistroAnterior) = $this->consultarProcedimentoExistente(null, $objProcessoAnexado->protocolo);
                     if(isset($dblIdProcedimentoDTOExistente)){
-                        //TODO: Repassar NRE do processo antigo para o correto recebimento
-                        $this->atualizarProcedimento($dblIdProcedimentoDTOExistente, $parObjMetadadosProcedimento, $objProcessoAnexado);
+                        $this->atualizarProcedimento($dblIdProcedimentoDTOExistente, $parObjMetadadosProcedimento, $objProcessoAnexado, $strNumeroRegistroAnterior);
                     } else {
                         $this->gerarProcedimento($parObjMetadadosProcedimento, $objProcessoAnexado);
                     }
@@ -2348,24 +2349,14 @@ class ReceberProcedimentoRN extends InfraRN
             $strMensagemErro = "- Componente digital de pelo menos um dos documentos do processo [$strProtocoloFormatado] não pode ser recebido. \n";
         }
 
-        //Valida se a quantidade de documentos registrados confere com a quantidade informada nos metadados
-        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoDTO->setStrNumeroRegistro($parObjMetadadosProcedimento->metadados->NRE);
-        $objUltimoTramiteDTO = $this->objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
-        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-        $objComponenteDigitalDTO->setStrNumeroRegistro($objUltimoTramiteDTO->getStrNumeroRegistro());
-        $objComponenteDigitalDTO->setNumIdTramite($objUltimoTramiteDTO->getNumIdTramite());
-        $objComponenteDigitalDTO->retDblIdDocumento();
-        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        $arrObjComponenteDitigaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-        $arrDblIdDocumentos = InfraArray::converterArrInfraDTO($arrObjComponenteDitigaisDTO, 'IdDocumento', 'IdDocumento');
-
-        $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
-        $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
-        if(count($arrDblIdDocumentos) <> count($arrObjDocumento)){
-            $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-            $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
-        }
+       // Valida se a quantidade de documentos registrados confere com a quantidade informada nos metadados
+       $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarSequenciaDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
+       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
+       $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
+       if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)){
+           $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+           $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
+       }
 
         if(!InfraString::isBolVazia($strMensagemErro)){
             throw new InfraException($strMensagemPadrao . $strMensagemErro);

@@ -730,7 +730,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         //----------------------------------------------------------------------
         $objDTO = new TarefaDTO();
 
-        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD) {
+        $fnCadastrar = function($strNome='', $strHistoricoResumido='N', $strHistoricoCompleto='N', $strFecharAndamentosAbertos='N', $strLancarAndamentoFechado='N', $strPermiteProcessoFechado='N', $strIdTarefaModulo='') use($objDTO, $objBD) {
 
             $objDTO->unSetTodos();
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
@@ -745,7 +745,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
                 $objDTO->setStrNome($strNome);
-                $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
+                $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
                 $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
                 $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
                 $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
@@ -987,7 +987,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objBD = new TarefaBD(BancoSEI::getInstance());
         $objDTO = new TarefaDTO();
 
-        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD) {
+        $fnCadastrar = function($strNome='', $strHistoricoResumido='N', $strHistoricoCompleto='N', $strFecharAndamentosAbertos='N', $strLancarAndamentoFechado='N', $strPermiteProcessoFechado='N', $strIdTarefaModulo='') use($objDTO, $objBD) {
 
             $objDTO->unSetTodos();
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
@@ -1002,7 +1002,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
                 $objDTO->setStrNome($strNome);
-                $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
+                $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
                 $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
                 $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
                 $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
@@ -1669,7 +1669,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objBD = new TarefaBD(BancoSEI::getInstance());
         $objDTO = new TarefaDTO();
 
-        $fnCadastrar = function($strNome = '', $strHistoricoCompleto = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use($objDTO, $objBD) {
+        $fnCadastrar = function($strNome='', $strHistoricoResumido='N', $strHistoricoCompleto='N', $strFecharAndamentosAbertos='N', $strLancarAndamentoFechado='N', $strPermiteProcessoFechado='N', $strIdTarefaModulo='') use($objDTO, $objBD) {
 
             $objDTO->unSetTodos();
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
@@ -1683,7 +1683,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
                 $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
                 $objDTO->setStrNome($strNome);
-                $objDTO->setStrSinHistoricoResumido($strHistoricoCompleto);
+                $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
                 $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
                 $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
                 $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);

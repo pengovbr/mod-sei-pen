@@ -14,8 +14,9 @@ class PaginaTramitarProcesso extends PaginaTeste
     {
         $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
 
-        if(isset($siglaRepositorio))
+        if(isset($siglaRepositorio)){
             $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
+        }
 
         return $this->test->byId('selRepositorioEstruturas')->value();
     }

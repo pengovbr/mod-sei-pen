@@ -37,7 +37,7 @@ class PaginaProcesso extends PaginaTeste
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
-        $this->test->byXPath("//img[@alt='Cancelar TramitaÃ§Ã£o Externa']")->click();
+        $this->test->byXPath(utf8_encode("//img[@alt='Cancelar Tramitação Externa']"))->click();
     }
 
     public function navegarParaEditarProcesso()
@@ -51,7 +51,6 @@ class PaginaProcesso extends PaginaTeste
     public function navegarParaTramitarProcesso()
     {
         $this->test->waitUntil(function($testCase) {
-            // Selecionar processo na árvore
             $this->selecionarProcesso();
 
             $this->test->frame(null);
@@ -74,7 +73,7 @@ class PaginaProcesso extends PaginaTeste
             $this->test->frame(null);
             $this->test->frame("ifrVisualizacao");
             sleep(2);
-            $testCase->assertStringContainsString('HistÃ³rico do Processo', $testCase->byCssSelector('body')->text());
+            $testCase->assertStringContainsString(utf8_encode('Histórico do Processo'), $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
     }
@@ -91,6 +90,21 @@ class PaginaProcesso extends PaginaTeste
             $this->editarProcessoButton->click();
             sleep(2);
             $testCase->assertStringContainsString('Consultar Recibos', $testCase->byCssSelector('body')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    public function navegarParaAnexarProcesso()
+    {
+        $this->test->waitUntil(function($testCase) {
+            $this->selecionarProcesso();
+
+            $this->test->frame(null);
+            $this->test->frame("ifrVisualizacao");
+            $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Anexar Processo']");
+            $this->editarProcessoButton->click();
+            sleep(2);
+            $testCase->assertStringContainsString(utf8_encode('Anexação de Processos'), $testCase->byCssSelector('body')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
     }

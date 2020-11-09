@@ -22,6 +22,7 @@ Otimizado o fluxo de recebimento de trâmites de processo para abrir conexões e
 
 Corrigido a funcionalidade de envio de processos e documentos avulsos para limitar o campo de complemento da identificação do documento para impedir ultrapassar o tamanho máximo de 100 caracteres, limitação definida no modelo de dados do Barramento do PEN.
 
+
 #### Issue #25 - Número de documentos do processo não confere com o registrado nos dados do processo bug
 
 Correção de regra de pós-validação de integridade do processo para evitar falso-positivos em trâmites de processos anexados. A rotina estava considerando apenas os documentos do processo principal durante a validação da integridade.

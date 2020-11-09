@@ -1946,4 +1946,48 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $strTexto;
     }
+
+    /**
+     * Recupera a lista de todos os documentos do processo, principal ou anexados, mantendo a ordem correta entre eles
+     *
+     * @param Num $idProcedimento
+     * @return array Lista de Ids dos documentos do processo em ordem
+     */
+    public function listarSequenciaDocumentos($idProcedimento)
+    {
+        if(!isset($idProcedimento)){
+            throw new InfraException('Parâmetro $idProcedimento não informado.');
+        }
+
+        //Recupera toda a lista de documentos vinculados ao processo, considerando a ordenação definida pelo usuário
+        $arrTipoAssociacao = array(
+            RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO, RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_ANEXADO
+        );
+
+        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+        $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
+        $objRelProtocoloProtocoloDTO->retDblIdProtocolo1();
+        $objRelProtocoloProtocoloDTO->retDblIdProtocolo2();
+        $objRelProtocoloProtocoloDTO->retStrStaAssociacao();
+        $objRelProtocoloProtocoloDTO->setStrStaAssociacao($arrTipoAssociacao, InfraDTO::$OPER_IN);
+        $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($idProcedimento);
+        $objRelProtocoloProtocoloDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+        $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+        $arrObjRelProtocoloProtocoloDTO = $objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO);
+
+        $arrIdDocumentos = array();
+        foreach($arrObjRelProtocoloProtocoloDTO as $objRelProtocoloProtocoloDTO) {
+            if (in_array($objRelProtocoloProtocoloDTO->getStrStaAssociacao(), [RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO, RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO])) {
+                // Adiciona documentos em ordem presentes diretamente ao processo
+                $arrIdDocumentos[] = $objRelProtocoloProtocoloDTO->getDblIdProtocolo2();
+            } elseif($objRelProtocoloProtocoloDTO->getStrStaAssociacao() == RelProtocoloProtocoloRN::$TA_PROCEDIMENTO_ANEXADO) {
+                // Adiciona documentos presente no processo anexado, mantendo a ordem de todo o conjunto
+                $numIdProtocoloAnexado = $objRelProtocoloProtocoloDTO->getDblIdProtocolo2();
+                $arrIdDocumentosAnexados = $this->listarSequenciaDocumentos($numIdProtocoloAnexado);
+                $arrIdDocumentos = array_merge($arrIdDocumentos, $arrIdDocumentosAnexados);
+            }
+        }
+        return $arrIdDocumentos;
+    }
 }

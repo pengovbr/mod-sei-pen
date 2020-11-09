@@ -125,12 +125,11 @@ class PenAtualizarSipRN extends InfraRN {
                 case '2.0.0': $this->instalarV2001();
                 case '2.0.1': $this->instalarV2100();
                 case '2.1.0': $this->instalarV2101();
+                    break;
 
-                break;
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
                     break;
-
             }
 
             $this->finalizar('FIM');
