@@ -37,7 +37,7 @@ services:
       - "5900:5900"
     volumes:
       - /dev/shm:/dev/shm
-      - ./assets/arquivos/test_files_index.txt:/tmp/test_files_index.txt
+      - ./assets/arquivos/test_files_index.txt:/test_files_index.txt
       - /tmp:/tmp
 
 

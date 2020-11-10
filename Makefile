@@ -1,4 +1,4 @@
-.PHONY: .env help clean build all test-provision test-funcional-paralelo test-provision-destroy bash_org1 bash_org2
+.PHONY: .env help clean build all test-enviroment-provision test-enviroment-destroy test-enviroment-up test-enviroment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2
 
 include tests/funcional/.env
 
@@ -92,13 +92,16 @@ test-enviroment-down:
 
 
 test-functional:
-	#tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --testsuite funcional
-	tests/funcional/vendor/phpunit/phpunit/phpunit -c tests/funcional/phpunit.xml --stop-on-failure --testsuite funcional
-	
+	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure --testsuite funcional
+
+test-functional-parallel:
+	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --bootstrap $(PEN_TEST_FUNC)/bootstrap.php -p 3 -f
+	  
 	
 test-unit:
-	#tests/unitario/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml --stop-on-failure $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php
 	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
+
+test: test-unit teste-functional
 
 
 bash_org1:
