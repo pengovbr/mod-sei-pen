@@ -131,9 +131,6 @@ class ReceberProcedimentoRN extends InfraRN
             // Obtém situação do trâmite antes de iniciar o recebimento dos documentos
             $objTramite = $this->consultarTramite($numIdTramite);
 
-            // Obtém situação atualizada do trâmite após o recebimento dos documentos
-            $objTramite = $this->consultarTramite($numIdTramite);
-
             //Verifica se o trâmite está recusado
             if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
                 throw new InfraException("Trâmite $numIdTramite já se encontra recusado. Cancelando o recebimento do processo");
@@ -597,7 +594,6 @@ class ReceberProcedimentoRN extends InfraRN
         $arrHashsComponentesDigitais = array();
         $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
         foreach($arrObjDocumento as $objDocumento){
-
             //Desconsidera os componendes digitais de documentos cancelados
             if(!isset($objDocumento->retirado) || $objDocumento->retirado == false) {
                 if(!isset($objDocumento->componenteDigital)){
@@ -1519,7 +1515,8 @@ class ReceberProcedimentoRN extends InfraRN
 
                 $objDocumentoDTO->setDblIdDocumentoEdoc(null);
                 $objDocumentoDTO->setDblIdDocumentoEdocBase(null);
-                $objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
+                //$objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
+                $objDocumentoDTO->setNumIdUnidadeResponsavel(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
                 $objDocumentoDTO->setNumIdTipoConferencia(null);
                 $objDocumentoDTO->setStrConteudo(null);
                 $objDocumentoDTO->setStrStaDocumento(DocumentoRN::$TD_EXTERNO);
@@ -1547,7 +1544,7 @@ class ReceberProcedimentoRN extends InfraRN
 
                 //TODO: Analisar se o modelo de dados do PEN possui destinatários específicos para os documentos
                 //caso não possua, analisar o repasse de tais informações via parâmetros adicionais
-                $arrObservacoes = $this->adicionarObservacoesSobreNumeroDocumento($arrObservacoes, $objDocumento);
+                $arrObservacoes = $this->adicionarObservacoesSobreNumeroDocumento($objDocumento);
                 $objProtocoloDTO->setArrObjObservacaoDTO($arrObservacoes);
 
                 $bolReabriuAutomaticamente = false;
@@ -1673,7 +1670,7 @@ class ReceberProcedimentoRN extends InfraRN
             }
         }
 
-        $this->cancelarDocumentosProcesso($arrIdDocumentosRetirados);
+        $this->cancelarDocumentosProcesso($parObjProcedimentoDTO->getDblIdProcedimento(), $arrIdDocumentosRetirados);
 
         $parObjProcedimentoDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);
         return $parObjProcedimentoDTO;
@@ -1686,7 +1683,7 @@ class ReceberProcedimentoRN extends InfraRN
      * @param array $parArrIdDocumentosCancelamento Lista de documentos que ser<E3>o cancelados
      * @return void
      */
-    private function cancelarDocumentosProcesso($parArrIdDocumentosCancelamento)
+    private function cancelarDocumentosProcesso($parDblIdProcedimento, $parArrIdDocumentosCancelamento)
     {
         foreach($parArrIdDocumentosCancelamento as $numIdDocumento){
             $objProtocoloDTO = new ProtocoloDTO();
@@ -1694,10 +1691,18 @@ class ReceberProcedimentoRN extends InfraRN
             $objProtocoloDTO->retStrStaEstado();
             $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
 
-            if($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+            // Verifica se documento está atualmente associado ao processo e não foi movido para outro
+            $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+            $objRelProtocoloProtocoloDTO->retNumSequencia();
+            $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+            $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parDblIdProcedimento);
+            $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($numIdDocumento);
+            $bolDocumentoMovidoProcesso = $this->objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+
+            if(!$bolDocumentoMovidoProcesso && ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)){
                 $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
                 $objEntradaCancelarDocumentoAPI->setIdDocumento($numIdDocumento);
-                $objEntradaCancelarDocumentoAPI->setMotivo('Cancelado pelo remetente');
+                $objEntradaCancelarDocumentoAPI->setMotivo('Documento retirado do processo pelo remetente');
                 $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
             }
         }
@@ -2335,7 +2340,7 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
        // Valida se a quantidade de documentos registrados confere com a quantidade informada nos metadados
-       $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarSequenciaDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
+       $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
        $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
        $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
        if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)){
@@ -2403,7 +2408,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
 
-    private function adicionarObservacoesSobreNumeroDocumento($parArrObservacoes, $parObjDocumento)
+    private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
         $arrObjObservacoes = array();
         $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor->numeroDeIdentificacao;

@@ -178,6 +178,20 @@ class PaginaProcesso extends PaginaTeste
     	}
     }
 
+    public function ehDocumentoMovido($nomeDocumentoArvore)
+    {
+    	try
+    	{
+            $this->test->frame(null);
+            $this->test->frame("ifrArvore");
+            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[@src='imagens/sei_documento_movido.gif']");
+            return true;
+    	}
+    	catch(Exception $e)
+    	{
+			return false;
+    	}
+    }
 
     private function selecionarItemArvore($nomeArvore)
     {

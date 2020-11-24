@@ -1,7 +1,5 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
-
 class PaginaAnexarProcesso extends PaginaTeste
 {
     public function __construct($test)

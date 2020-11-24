@@ -822,9 +822,10 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $objProcesso não informado.');
         }
 
-        $arrDocumentosDTO = $this->listarDocumentos($dblIdProcedimento);
+        //$arrDocumentosDTO = $this->listarDocumentos($dblIdProcedimento);
+        $arrDocumentosRelacionados = $this->listarDocumentosRelacionados($dblIdProcedimento);
 
-        if(!isset($arrDocumentosDTO)) {
+        if(!isset($arrDocumentosRelacionados)) {
             throw new InfraException('Documentos não encontrados.');
         }
 
@@ -840,7 +841,10 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         $objProcesso->documento = array();
-        foreach ($arrDocumentosDTO as $ordem => $documentoDTO) {
+        foreach ($arrDocumentosRelacionados as $ordem => $objDocumentosRelacionados) {
+            $documentoDTO = $objDocumentosRelacionados["Documento"];
+            $staAssociacao = $objDocumentosRelacionados["StaAssociacao"];
+
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
@@ -853,9 +857,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
 
+            //Verifica se o documento faz parte de outro processo devido à sua anexação ou à sua movimentação
             if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
-                $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
-                $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
+                if($staAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
+                    // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
+                    $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
+                    $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
+                } else {
+                    // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
+                    $documento->retirado = true;
+                }
             }
 
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
@@ -1592,14 +1603,36 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $this->objUsuarioRN->consultarRN0489($objUsuarioDTO);
     }
 
+    /**
+     * Recupera a lista de documentos do processo, mantendo sua ordem conforme definida pelo usuário após reordenações e
+     * movimentações de documentos
+     *
+     * Esta função basicamente aplica a desestruturação do retorno da função listarDocumentosRelacionados para obter somente
+     * as instãncias dos objetos DocumentoDTO
+     *
+     * @param num $idProcedimento
+     * @return array
+     */
     public function listarDocumentos($idProcedimento)
+    {
+        return array_map(
+            function($item){
+                return $item["Documento"];
+            },
+            $this->listarDocumentosRelacionados($idProcedimento)
+        );
+    }
+
+
+    public function listarDocumentosRelacionados($idProcedimento)
     {
         if(!isset($idProcedimento)){
             throw new InfraException('Parâmetro $idProcedimento não informado.');
         }
 
         $arrObjDocumentoDTO = null;
-        $arrIdDocumentos = $this->objProcessoEletronicoRN->listarSequenciaDocumentos($idProcedimento);
+        $arrAssociacaoDocumentos = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($idProcedimento);
+        $arrIdDocumentos = array_map(function($item){ return $item["IdProtocolo"];}, $arrAssociacaoDocumentos);
 
         if(!empty($arrIdDocumentos)){
             $objDocumentoDTO = new DocumentoDTO();
@@ -1629,11 +1662,15 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrObjDocumentoDTOBanco = $this->objDocumentoRN->listarRN0008($objDocumentoDTO);
             $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
 
-            //Mantem ordenação definida pelo usuário
+            //Mantem ordenação definida pelo usuário, indicando qual a sua associação com o processo
             $arrObjDocumentoDTO = array();
-            foreach($arrIdDocumentos as $dblIdDocumento){
+            foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
+                $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
                 if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
-                    $arrObjDocumentoDTO[] = $arrObjDocumentoDTOIndexado[$dblIdDocumento];
+                    $arrObjDocumentoDTO[] = array(
+                        "Documento" => $arrObjDocumentoDTOIndexado[$dblIdDocumento],
+                        "StaAssociacao" => $objAssociacaoDocumento["StaAssociacao"]
+                    );
                 }
             }
         }
