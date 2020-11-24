@@ -203,7 +203,6 @@ class ReceberProcedimentoRN extends InfraRN
             $arrComponentesDigitaisProtocoloDTO = $this->listarComponentesDigitais($strNumeroRegistro, $numIdTramite);
             $arrHashComponentesDigitais = InfraArray::converterArrInfraDTO($arrComponentesDigitaisProtocoloDTO, 'HashConteudo');
             $this->objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdTramite, $arrHashComponentesDigitais);
-            //$this->objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdTramite, $arrayHash);
 
             $this->gravarLogDebug("Registrando a conclusão do recebimento do trâmite $numIdTramite", 2);
         } catch (Exception $e) {
@@ -1407,7 +1406,6 @@ class ReceberProcedimentoRN extends InfraRN
         return $objUnidadeDTOEnvio;
     }
 
-    // Avaliar a refatoração para impedir a duplicação de código
     private function atribuirDocumentos($parObjProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $parObjMetadadosProcedimento, $parStrNumeroRegistro, $parDblIdProcedimentoAnexado=null)
     {
         if(!isset($parObjProtocolo)) {
@@ -1426,6 +1424,7 @@ class ReceberProcedimentoRN extends InfraRN
         $bolDocumentoAvulso = $parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO;
         $objProcessoPrincipal = !$bolDocumentoAvulso ? $parObjMetadadosProcedimento->metadados->processo : null;
         $strNumeroRegistro = $parStrNumeroRegistro;
+        $bolEhProcedimentoAnexadoAnteriormente = isset($parDblIdProcedimentoAnexado);
 
         //Obter dados dos documentos já registrados no sistema
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1448,6 +1447,7 @@ class ReceberProcedimentoRN extends InfraRN
         if(!isset($parDblIdProcedimentoAnexado)){
             $objComponenteDigitalDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
             $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
+            $objComponenteDigitalDTO->setDblIdProcedimentoAnexado(null);
         } else {
             // Avaliação de componentes digitais específicos para o processo anexado
             $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
@@ -1468,10 +1468,9 @@ class ReceberProcedimentoRN extends InfraRN
             if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
                 // Definição da ordem do documento para avaliação do posicionamento
-                //$numOrdemDocumento = $objDocumento->ordem;
-                $numOrdemDocumento = $objDocumento->ordemAjustada ?: $objDocumento->ordem;
+                $numOrdemDocumento = !$bolEhProcedimentoAnexadoAnteriormente ? $objDocumento->ordemAjustada : $objDocumento->ordem;
+                $numOrdemDocumento = $numOrdemDocumento ?: $objDocumento->ordem;
 
-                //TODO: Erro na verificação da ordem dos documentos faz com que os documentos sejam duplicados. Ordem ajustada deverá ser considerada
                 if(array_key_exists($numOrdemDocumento, $arrObjComponenteDigitalDTOIndexado)){
                     $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$numOrdemDocumento];
                     $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);

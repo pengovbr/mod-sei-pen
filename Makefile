@@ -1,4 +1,4 @@
-.PHONY: .env help clean build all test-enviroment-provision test-enviroment-destroy test-enviroment-up test-enviroment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2
+.PHONY: .env help clean build all test-environment-provision test-environment-destroy test-environment-up test-environment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2
 
 include tests/funcional/.env
 
@@ -58,7 +58,7 @@ install:
 	unzip -o -d $(SEI_PATH) dist/$(PEN_MODULO_COMPACTADO)
 
 
-test-enviroment-provision:	
+test-environment-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 60 seconds ..."; sleep 60;
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
@@ -78,28 +78,30 @@ test-enviroment-provision:
 	composer install -d $(PEN_TEST_UNIT)
 
 
-test-enviroment-destroy:
+test-environment-destroy:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm
 
 
-test-enviroment-up:	
+test-environment-up:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 
 
-test-enviroment-down:	
+test-environment-down:	
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
 
 
 test-functional:
 	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure --testsuite funcional
 
+
 test-functional-parallel:
-	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --bootstrap $(PEN_TEST_FUNC)/bootstrap.php -p 3 -f
+	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --bootstrap $(PEN_TEST_FUNC)/bootstrap.php --testsuite funcional -p 4
 	  
 	
 test-unit:
 	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
+
 
 test: test-unit teste-functional
 
@@ -110,5 +112,4 @@ bash_org1:
 
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
-
 

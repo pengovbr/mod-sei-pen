@@ -51,7 +51,6 @@ class ReceberComponenteDigitalRN extends InfraRN
         $this->cadastrarComponenteDigital($parObjComponenteDigitalDTO, $objAnexoDTO);
 
         //Registrar anexo relacionado com o componente digital
-        //$this->registrarAnexoDoComponenteDigital($parObjComponenteDigitalDTO, $objAnexoDTO);
         $this->atualizarAnexoDoComponenteDigital($parObjComponenteDigitalDTO, $objAnexoDTO);
     }
 
@@ -232,18 +231,6 @@ class ReceberComponenteDigitalRN extends InfraRN
         }
     }
 
-
-    private function registrarAnexoDoComponenteDigital($parObjComponenteDigitalDTO, $parObjAnexoDTO)
-    {
-        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-        $objComponenteDigitalDTO->setNumIdTramite($parObjComponenteDigitalDTO->getNumIdTramite());
-        $objComponenteDigitalDTO->setStrNumeroRegistro($parObjComponenteDigitalDTO->getStrNumeroRegistro());
-        $objComponenteDigitalDTO->setDblIdDocumento($parObjComponenteDigitalDTO->getDblIdDocumento());
-        $objComponenteDigitalDTO->setNumIdAnexo($parObjAnexoDTO->getNumIdAnexo());
-        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        $objComponenteDigitalDTO = $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
-    }
-
     /**
      * @param $parObjComponenteDigitalDTO
      * @param $parObjAnexoDTO
@@ -317,7 +304,6 @@ class ReceberComponenteDigitalRN extends InfraRN
      * @param ComponenteDigitalDTO $parObjComponenteDigitalDTO
      * @param AnexoDTO $parObjAnexoDTO
      * @throws InfraException
-     * @deprecated
      */
     public function cadastrarComponenteDigital(ComponenteDigitalDTO $parObjComponenteDigitalDTO, AnexoDTO $parObjAnexoDTO)
     {

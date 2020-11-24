@@ -174,8 +174,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
     }
 
+    protected function sairSistema()
+    {
+        $this->paginaBase->sairSistema();
+    }
+
     protected function cadastrarProcesso(&$dadosProcesso)
     {
+        $this->paginaBase->navegarParaControleProcesso();
         $protocoloGerado = PaginaIniciarProcesso::gerarProcessoTeste($this, $dadosProcesso);
         $dadosProcesso['PROTOCOLO'] = $protocoloGerado;
         sleep(2);
@@ -184,13 +190,13 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function abrirProcesso($protocolo)
     {
-        $this->byLinkText("Controle de Processos")->click();
+        $this->paginaBase->navegarParaControleProcesso();
         $this->paginaControleProcesso->abrirProcesso($protocolo);
     }
 
     protected function abrirProcessoPelaDescricao($descricao)
     {
-        $this->byLinkText("Controle de Processos")->click();
+        $this->paginaBase->navegarParaControleProcesso();
         $protocolo = $this->paginaControleProcesso->localizarProcessoPelaDescricao($descricao);
         if($protocolo){
             $this->paginaControleProcesso->abrirProcesso($protocolo);
