@@ -163,6 +163,22 @@ class PaginaProcesso extends PaginaTeste
     	}
     }
 
+    public function ehDocumentoCancelado($nomeDocumentoArvore)
+    {
+    	try
+    	{
+            $this->test->frame(null);
+            $this->test->frame("ifrArvore");
+            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[@src='imagens/protocolo_cancelado.gif']");
+            return true;
+    	}
+    	catch(Exception $e)
+    	{
+			return false;
+    	}
+    }
+
+
     private function selecionarItemArvore($nomeArvore)
     {
         $this->test->frame(null);

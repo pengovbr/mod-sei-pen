@@ -87,29 +87,7 @@
 
   <testsuites>
     <testsuite name="funcional">
-        <file>tests/TramiteProcessoContendoDocumentoGeradoTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoExternoTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest.php</file>
-        <file>tests/TramiteProcessoValidacaoEnvioTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoInternoExternoTest.php</file>
-        <file>tests/TramiteProcessoContendoVariosDocumentosTest.php</file> 
-        <file>tests/TramiteProcessoComDevolucaoTest.php</file> 
-        <file>tests/TramiteProcessoDocumentoNaoMapeadoOrigemTest.php</file>
-        <file>tests/TramiteProcessoDocumentoNaoMapeadoDestinoTest.php</file>
-        <file>tests/TramiteProcessoRestritoTest.php</file>
-        <file>tests/TramiteProcessoComDocumentoRestritoTest.php</file>
-        <file>tests/TramiteProcessoRestritoHipotesePadraoTest.php</file>
-        <file>tests/TramiteProcessoComDocumentoRestritoHipotesePadraoTest.php</file>
-        <file>tests/CancelamentoTramiteProcessoTest.php</file>
-        <file>tests/TramiteProcessoExtensaoNaoMapeadoDestinoTest.php</file>
-        <file>tests/TramiteProcessoComDevolucaoUnidadeDiferenteTest.php</file>
-        <file>tests/TramiteProcessoContendoDocumentoExternoParticionadoTest.php</file>
-        <file>tests/TramiteProcessoTamanhoAcimaLimiteDestinoTest.php</file>
-        <file>tests/RecebimentoDocumentoAvulsoTest.php</file>
-        <file>tests/RecebimentoDocumentoAnexadoTest.php</file>
-        <file>tests/TramiteProcessoAnexadoTest.php</file>
+      <directory>tests</directory>
     </testsuite>
   </testsuites>
 </phpunit>

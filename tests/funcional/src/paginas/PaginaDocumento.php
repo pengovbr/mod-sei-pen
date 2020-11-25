@@ -26,6 +26,14 @@ class PaginaDocumento extends PaginaTeste
         $this->test->byXPath("//img[contains(@alt, 'Consultar/Alterar Documento')]")->click();
     }
 
+    public function navegarParaCancelarDocumento()
+    {
+        sleep(2);
+        $this->test->frame(null);
+        $this->test->frame("ifrVisualizacao");
+        $this->test->byXPath("//img[contains(@alt, 'Cancelar Documento')]")->click();
+    }
+
     public function ehProcessoAnexado()
     {
         sleep(2);

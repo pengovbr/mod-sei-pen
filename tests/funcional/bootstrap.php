@@ -22,5 +22,6 @@ require_once __DIR__ . '/src/paginas/PaginaProcessosTramitadosExternamente.php';
 require_once __DIR__ . '/src/paginas/PaginaReciboTramite.php';
 require_once __DIR__ . '/src/paginas/PaginaEditarProcesso.php';
 require_once __DIR__ . '/src/paginas/PaginaAnexarProcesso.php';
+require_once __DIR__ . '/src/paginas/PaginaCancelarDocumento.php';
 
 require_once __DIR__ . '/tests/CenarioBaseTestCase.php';

@@ -36,6 +36,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaIncluirDocumento = null;
     protected $paginaProcessosTramitadosExternamente = null;
     protected $paginaAnexarProcesso = null;
+    protected $paginaCancelarDocumento = null;
 
     public function setUpPage(): void
     {
@@ -51,6 +52,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaIncluirDocumento = new PaginaIncluirDocumento($this);
         $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
         $this->paginaAnexarProcesso = new PaginaAnexarProcesso($this);
+        $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->currentWindow()->maximize();
     }
 
@@ -345,10 +347,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
     }
 
+    protected function validarDocumentoCancelado($nomeDocArvore)
+    {
+        sleep(2);
+        $this->assertTrue($this->paginaProcesso->ehDocumentoCancelado($nomeDocArvore));
+    }
+
+
     protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria=false, $hipoteseLegal=null)
     {
         sleep(2);
 
+        // Verifica se documento possui marcação de documento anexado
         $bolPossuiDocumentoReferenciado = !is_null($dadosDocumento['ORDEM_DOCUMENTO_REFERENCIADO']);
         $this->assertTrue($this->paginaProcesso->deveSerDocumentoAnexo($bolPossuiDocumentoReferenciado, $nomeDocArvore));
 

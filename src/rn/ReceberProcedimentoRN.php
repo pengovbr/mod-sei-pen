@@ -128,18 +128,8 @@ class ReceberProcedimentoRN extends InfraRN
             //Substituir a unidade destinatária pela unidade centralizadora definida pelo Gestor de Protocolo no PEN
             $this->substituirDestinoParaUnidadeReceptora($parObjMetadadosProcedimento, $numIdTramite);
 
-            // Validação dos dados do processo recebido
-            //$this->validarDadosDestinatario($parObjMetadadosProcedimento);
-
             // Obtém situação do trâmite antes de iniciar o recebimento dos documentos
             $objTramite = $this->consultarTramite($numIdTramite);
-
-            //$this->validarComponentesDigitais($objProtocolo, $numIdTramite);
-            //$this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
-            //$this->verificarPermissoesDiretorios($numIdTramite);
-
-            //$arrayHash = $this->baixarComponentesDigitais($objTramite, $parObjMetadadosProcedimento);
-            $arrayHash = $arrHashComponenteBaixados;
 
             // Obtém situação atualizada do trâmite após o recebimento dos documentos
             $objTramite = $this->consultarTramite($numIdTramite);
@@ -189,7 +179,7 @@ class ReceberProcedimentoRN extends InfraRN
                 throw new InfraException("Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual);
             }
 
-            $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrayHash, $objProtocolo);
+            $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrHashComponenteBaixados, $objProtocolo);
 
             $this->atribuirObservacoesSobreDocumentoReferenciado($objProcedimentoDTO, $objProtocolo);
 
@@ -200,9 +190,7 @@ class ReceberProcedimentoRN extends InfraRN
             $this->validarPosCondicoesTramite($parObjMetadadosProcedimento, $objProcedimentoDTO);
 
             $this->gravarLogDebug("Enviando recibo de conclusão do trâmite $numIdTramite", 2);
-            $arrComponentesDigitaisProtocoloDTO = $this->listarComponentesDigitais($strNumeroRegistro, $numIdTramite);
-            $arrHashComponentesDigitais = InfraArray::converterArrInfraDTO($arrComponentesDigitaisProtocoloDTO, 'HashConteudo');
-            $this->objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdTramite, $arrHashComponentesDigitais);
+            $this->objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdTramite, $arrHashComponenteBaixados);
 
             $this->gravarLogDebug("Registrando a conclusão do recebimento do trâmite $numIdTramite", 2);
         } catch (Exception $e) {
@@ -212,7 +200,6 @@ class ReceberProcedimentoRN extends InfraRN
             throw $e;
         }
     }
-
 
     /**
      * Validação preliminar dos metadados do protocolo
@@ -250,7 +237,6 @@ class ReceberProcedimentoRN extends InfraRN
         $arrAnexosComponentes = array();
         $arrHashComponentesBaixados = array();
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
-        $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
         $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
         $numParamTamMaxDocumentoMb = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 

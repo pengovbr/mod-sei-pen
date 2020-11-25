@@ -103,10 +103,6 @@ class PendenciasTramiteRN extends InfraRN
                         } catch (\Exception $e) {
                             $this->gravarAmostraErroLogSEI($e);
                             $this->gravarLogDebug(InfraException::inspecionar($e));
-                            if(!$parBolMonitorarPendencias && count($objInfraException->getArrObjInfraValidacao()) < 10){
-                                $strMensagemErro = "Falha no trâmite $numIdTramite: $e";
-                                $objInfraException->adicionarValidacao($strMensagemErro);
-                            }
                         }
                     }
 
@@ -133,14 +129,9 @@ class PendenciasTramiteRN extends InfraRN
             return self::CODIGO_EXECUCAO_ERRO;
         }
 
-        // Caso não esteja sendo realizado o monitoramente de pendências,
-        // lança exceção diretamente na página para apresentação ao usuário
+        // Caso não esteja sendo realizado o monitoramente de pendências, lança exceção diretamente na página para apresentação ao usuário
         if(!$parBolMonitorarPendencias){
             $this->salvarLogDebug($parBolDebug);
-
-            if(isset($objInfraException)){
-                $objInfraException->lancarValidacoes();
-            }
         }
 
         return self::CODIGO_EXECUCAO_SUCESSO;
@@ -341,7 +332,7 @@ class PendenciasTramiteRN extends InfraRN
     /**
      * Envia a pendência de trâmite para a fila de processamento do tarefas de acordo com a estratégia definida
      *
-     * @param [type] $objPendencia
+     * @param stdClass $objPendencia
      * @return void
      */
     private function enviarPendenciaProcessamento($objPendencia, $parBolSegundoPlano)
