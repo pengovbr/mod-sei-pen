@@ -125,9 +125,9 @@ class ProcessoEletronicoRN extends InfraRN
             'soap_version' => SOAP_1_1
             , 'local_cert' => $this->strLocalCert
             , 'passphrase' => $this->strLocalCertPassword
+            , 'resolve_wsdl_remote_includes' => true
             , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
             , 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
-            , 'trace' => false
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(

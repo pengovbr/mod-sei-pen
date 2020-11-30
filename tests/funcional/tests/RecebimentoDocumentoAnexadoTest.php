@@ -103,12 +103,10 @@ class RecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
             'soap_version' => SOAP_1_1
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
-            , 'resolve_wsdl_remote_includes' => false
-            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
+            , 'resolve_wsdl_remote_includes' => true
             , 'connection_timeout' => $connectionTimeout
             , CURLOPT_TIMEOUT => $connectionTimeout
             , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
-            , 'trace' => true
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
