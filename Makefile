@@ -13,6 +13,7 @@ SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
 PEN_TEST_FUNC = tests/funcional
 PEN_TEST_UNIT = tests/unitario
+PARALLEL_TEST_NODES = 5
 
 all: clean build
 
@@ -73,7 +74,7 @@ test-environment-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sip
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec selenium bash -c "wget -i /test_files_index.txt -P /tmp"
+	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P /tmp
 	composer install -d $(PEN_TEST_FUNC)
 	composer install -d $(PEN_TEST_UNIT)
 
@@ -92,7 +93,7 @@ test-environment-down:
 
 
 test-functional:
-	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure --testsuite funcional
+	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional
 
 
 test-functional-parallel:
@@ -103,7 +104,7 @@ test-unit:
 	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
 
 
-test: test-unit teste-functional
+test: test-unit test-functional
 
 
 bash_org1:

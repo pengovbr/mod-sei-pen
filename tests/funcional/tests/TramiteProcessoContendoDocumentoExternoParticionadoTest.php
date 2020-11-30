@@ -29,7 +29,16 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
+
+        // Altera tamanho máximo permitido para permitir o envio de arquivo superior à 50MBs
+        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+        try {
+            $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
+            $this->cadastrarDocumentoExterno(self::$documentoTeste);
+        } finally {
+            $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+        }
+
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, null, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES

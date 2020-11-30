@@ -95,7 +95,11 @@ try {
                     if(array_key_exists('id_tramite', $_GET) && array_key_exists('id_tarefa', $_GET)) {
 
                         $objReciboTramiteRN = new ReciboTramiteRN();
-                        $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($_GET['id_tramite'], $_GET['id_tarefa']);
+                        $arrParametros = array(
+                            "id_tramite" => $_GET['id_tramite'],
+                            "id_tarefa" => $_GET['id_tarefa']
+                        );
+                        $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($arrParametros);
 
                         if(empty($arrObjReciboTramiteDTO)) {
                             throw new InfraException('O recibo ainda não foi recebido.');

@@ -100,6 +100,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
         $bancoOrgaoB->execute("update unidade set sin_protocolo=? where sigla=?", array('S', CONTEXTO_ORGAO_B_SIGLA_UNIDADE));
         $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasPEN'", null);
+        $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
@@ -123,7 +124,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->setDesiredCapabilities(
             array(
                 'platform' => 'LINUX',
-                'chromeOptions' => array('w3c' => false)
+                'chromeOptions' => array(
+                    'w3c' => false,
+                    'args' => [
+                        '--profile-directory=' . uniqid(),
+                        '--disable-features=TranslateUI',
+                        '--disable-translate',
+                    ],
+                )
             )
         );
     }

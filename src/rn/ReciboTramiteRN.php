@@ -16,17 +16,16 @@ class ReciboTramiteRN extends InfraRN {
     }
 
     /**
-     * retorna um array de recibos de tramites ( geralmente é somente um )
+     * Retorna um array de recibos de tramites
      *
-     * @param string $strAtividade pode ser RECEBER ou ENVIAR
      * @return array
      */
-    public function listarPorAtividade($numIdTramite, $numIdTarefa = 501) {
-
-        $objInfraIBanco = $this->inicializarObjInfraIBanco();
+    protected function listarPorAtividadeConectado($parArrParametros)
+    {
+        $numIdTramite = $parArrParametros['id_tramite'];
+        $numIdTarefa = $parArrParametros['id_tarefa'];
 
         $arrObjDTO = array();
-
         switch ($numIdTarefa) {
             case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
                 $objReciboTramiteDTO = new ReciboTramiteDTO();
@@ -37,7 +36,7 @@ class ReciboTramiteRN extends InfraRN {
                 $objReciboTramiteDTO->retStrHashAssinatura();
                 $objReciboTramiteDTO->retStrCadeiaCertificado();
 
-                $objReciboTramiteBD = new ReciboTramiteBD($objInfraIBanco);
+                $objReciboTramiteBD = new ReciboTramiteBD($this->getObjInfraIBanco());
                 $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
                 break;
 
@@ -51,7 +50,7 @@ class ReciboTramiteRN extends InfraRN {
                 $objReciboTramiteDTO->retStrHashAssinatura();
                 $objReciboTramiteDTO->retStrCadeiaCertificado();
 
-                $objReciboTramiteBD = new ReciboTramiteRecebidoBD($objInfraIBanco);
+                $objReciboTramiteBD = new ReciboTramiteRecebidoBD($this->getObjInfraIBanco());
                 $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
                 break;
         }
@@ -59,7 +58,7 @@ class ReciboTramiteRN extends InfraRN {
         return $arrObjDTO;
     }
 
-    public function downloadReciboEnvio($numIdTramite) {
+    protected function downloadReciboEnvioConectado($numIdTramite) {
 
         $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
         $objReciboTramiteDTO->setNumIdTramite($numIdTramite);

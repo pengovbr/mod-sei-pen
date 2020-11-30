@@ -1630,7 +1630,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $idProcedimento não informado.');
         }
 
-        $arrObjDocumentoDTO = null;
+        $arrObjDocumentoDTO = array();
         $arrAssociacaoDocumentos = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($idProcedimento);
         $arrIdDocumentos = array_map(function($item){ return $item["IdProtocolo"];}, $arrAssociacaoDocumentos);
 
