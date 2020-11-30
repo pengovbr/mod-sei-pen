@@ -125,6 +125,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '2.0.0': $this->instalarV2001();
                 case '2.0.1': $this->instalarV2100();
                 case '2.1.0': $this->instalarV2101();
+                case '2.1.1': $this->instalarV2102();
                     break;
 
                 default:
@@ -1339,6 +1340,11 @@ class PenAtualizarSipRN extends InfraRN {
         $this->criarRecurso('pen_map_hipotese_legal_envio_consultar', 'Consulta de mapeamento de Hipóteses Legais de Envio', $numIdSistemaSei);
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_hipotese_legal_envio_consultar');
         $this->atualizarNumeroVersao("2.1.1");
+    }
+
+    protected function instalarV2102()
+    {
+	    $this->atualizarNumeroVersao("2.1.2");
     }
 }
 
