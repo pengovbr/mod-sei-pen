@@ -28,8 +28,25 @@ try {
     $retParametros = $objPenParametroRN->listar($objPenParametroDTO);
 
     /* Busca os dados para montar dropdown ( TIPO DE PROCESSO EXTERNO ) */
+    /*Filtra os processos que podem ser Sigilosos ou não possuem Assunto */
+    $objNivelAcessoPermitidoDTO = new NivelAcessoPermitidoDTO();
+    $objNivelAcessoPermitidoDTO->setStrStaNivelAcesso(ProtocoloRN::$NA_SIGILOSO);
+    $objNivelAcessoPermitidoDTO->setDistinct(true);
+    $objNivelAcessoPermitidoDTO->retNumIdTipoProcedimento();
+    $objNivelAcessoPermitidoRN = new NivelAcessoPermitidoRN();
+    $arrObjNivelAcessoPermitido=InfraArray::converterArrInfraDTO($objNivelAcessoPermitidoRN->listar($objNivelAcessoPermitidoDTO),"IdTipoProcedimento");
+
+    $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
+    $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
+    $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
+    $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
+    $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO),"IdTipoProcedimento");
+
+    $arrayFiltro=array_diff($arrObjTipoProcedimentoAssunto,$arrObjNivelAcessoPermitido);
+
     $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
     $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
+    $objTipoProcedimentoDTO->setNumIdTipoProcedimento($arrayFiltro,InfraDTO::$OPER_IN);
     $objTipoProcedimentoDTO->retStrNome();
     $objTipoProcedimentoDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
     $objTipoProcedimentoRN = new TipoProcedimentoRN();
@@ -162,7 +179,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
         echo '<div class="container">';
         //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
-            ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label><br> <?php
+            ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?php
         }
 
         //Constrói o campo de valor
@@ -173,12 +190,14 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
                     $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
                     $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
-                    echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
+                    $textoAjuda="Selecionar o repositório que seu órgão faz parte";
+                    echo "<a " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                    echo '<br><select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
                             echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
                     echo '</select>';
                 } catch (Exception $e) {
                     // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
-                    echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText input-field load_error" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                    echo '<br><input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText input-field load_error" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                     echo '<img class="erro_pen" src="imagens/sei_erro.png" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no PEN devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
                 }
 
@@ -186,26 +205,32 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
 
             case 'PEN_TIPO_PROCESSO_EXTERNO':
-                echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraText input-field" >';
+                $textoAjuda="Selecionar o tipo de processo que será utilizado no envio. Nesta listagem não será possível selecionar tipos que permitem a classificação como sigilosos ou não possuam assunto associado";
+                echo "<a " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '<br><select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraText input-field" >';
                 echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome');
                 echo '<select>';
                 break;
 
             case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
-                echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraText input-field" >';
+                $textoAjuda="Selecionar a unidade que representa os órgãos externos";
+                echo "<a " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '<br><select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraText input-field" >';
                 echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjUnidade, 'IdUnidade', 'Sigla');
                 echo '<select>';
                 break;
 
             case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
-                echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraText input-field" >';
+                $textoAjuda="Selecionar caso queira receber notificações";
+                echo "<a " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '<br><select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraText input-field" >';
                 echo '    <option value="S" ' . ($parametro->getStrValor() == 'S' ? 'selected="selected"' : '') . '>Sim</option>';
                 echo '    <option value="N" ' . ($parametro->getStrValor() == 'N' ? 'selected="selected"' : '') . '>Não</option>';
                 echo '<select>';
                 break;
 
             default:
-                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                echo '<br><input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                 break;
         }
 
