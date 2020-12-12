@@ -110,7 +110,9 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_excluir', __METHOD__, $parArrObjPenRelTipoDocMapEnviadoDTO);
             $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
 
-            foreach ($parArrObjPenRelTipoDocMapEnviadoDTO as $objPenRelTipoDocMapEnviadoDTO) {
+            foreach ($parArrObjPenRelTipoDocMapEnviadoDTO as $IdMap) {
+                $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+                $objPenRelTipoDocMapEnviadoDTO->setDblIdMap($IdMap);
                 $objPenRelTipoDocMapEnviadoBD->excluir($objPenRelTipoDocMapEnviadoDTO);
             }
         }catch(Exception $e){
