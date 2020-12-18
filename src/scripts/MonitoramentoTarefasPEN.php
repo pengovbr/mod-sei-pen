@@ -30,7 +30,11 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         $resultado = $objPendenciasTramiteRN->encaminharPendencias($bolMonitorar, $parBolSegundoPlano, $parBoldebug);
         exit($resultado);
 
-    } finally {
+    } catch(Exception $e){
+        $this->gravarLogDebug(InfraException::inspecionar($e));
+    } 
+    
+    finally {
         InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
