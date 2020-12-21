@@ -46,6 +46,33 @@ try {
     if ($objPenParametroDTO===null){
         throw new InfraException("Registros não encontrados.");
     }
+    
+    $objPenParametroRN = new PenParametroRN();
+    $objPenParametroDTO=new PenParametroDTO();
+    $objPenParametroDTO->setStrNome("PHP_INI_WEB");
+    $objPenParametroDTO->retStrValor();
+    $phpIniWeb=$objPenParametroRN->consultar($objPenParametroDTO);
+    $phpIniWeb=$phpIniWeb==null? null : $phpIniWeb->getStrValor();
+    
+    if($phpIniWeb==null){
+        $phpIniWeb=php_ini_loaded_file();
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome("PHP_INI_WEB");
+        $objPenParametroDTO->setStrValor($phpIniWeb);
+        $objPenParametroDTO->setStrDescricao("php.ini utilizado pelo servidor web do órgao");
+        $objPenParametroRN = new PenParametroRN();
+        $objPenParametroRN->cadastrar($objPenParametroDTO);
+
+    }elseif($phpIniWeb!=php_ini_loaded_file()){
+
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome("PHP_INI_WEB");
+        $objPenParametroDTO->setStrValor(php_ini_loaded_file());
+        $objPenParametroDTO->setStrDescricao("php.ini utilizado pelo servidor web do órgao");
+        $objPenParametroRN = new PenParametroRN();
+        $objPenParametroRN->alterar($objPenParametroDTO);
+    }
+
 
     switch ($_GET['acao']) {
         case 'pen_parametros_configuracao_salvar':
@@ -211,8 +238,15 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
         echo '</div>';
     }
-    ?>
+
+?>
 </form>
+
+    <label id="lblPhpIni" for="phpIniWeb" class="infraLabelObrigatorio">Caminho do php.ini utilizado (apenas para consulta):</label><br> 
+    <?php
+    echo '<input type="text" id="phpIniWeb" name="phpIniWeb" class="infraText infraReadOnly " value="'.$phpIniWeb .'" readonly />';
+    
+    ?>
 
 <?
 $objPagina->fecharBody();

@@ -15,7 +15,7 @@ class PendenciasTramiteRN extends InfraRN
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s %s %s %s %s %s > /dev/null 2>&1 &';
+    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php -c %s %s %s %s %s %s %s > /dev/null 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
 
     private $objPenDebug = null;
@@ -480,6 +480,20 @@ class PendenciasTramiteRN extends InfraRN
         $parNumQtdeWorkers = min($parNumQtdeWorkers ?: self::NUMERO_PROCESSOS_MONITORAMENTO, self::MAXIMO_PROCESSOS_MONITORAMENTO);
 
         try {
+
+            $objPenParametroDTO=new PenParametroDTO();
+            $objPenParametroDTO->setStrNome("PHP_INI_WEB");
+            $objPenParametroDTO->retStrValor();
+            $objPenParametroRN = new PenParametroRN();
+            $phpIniWeb=$objPenParametroRN->consultar($objPenParametroDTO);
+            
+            if($phpIniWeb==null){
+                throw new Exception("O php.ini não foi configurado ainda no PenParametros, favor acessar a página "
+                 ." de parâmetros do Pen (Administração>Processo Eletrônico Nacional>Parâmetros de Configuração) que a persistência do caminho do php.ini será feita automaticamente em background."); 
+            }else{
+                $phpIniWeb=$phpIniWeb->getStrValor();
+            }
+
             for ($worker=0; $worker < $parNumQtdeWorkers; $worker++) {
                 $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
                 exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
@@ -494,7 +508,7 @@ class PendenciasTramiteRN extends InfraRN
 
                     $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
                     $strComandoInicializacao = sprintf(
-                        self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $strIdWorker,
+                        self::COMANDO_EXECUCAO_WORKER, $phpIniWeb, $strLocalizacaoScript, $strIdWorker,
                         $strParametroMonitorar, $strParametroSegundoPlano, $strParametroDebugAtivo, $strParametroWsdlCache
                     );
 
@@ -515,9 +529,11 @@ class PendenciasTramiteRN extends InfraRN
             $bolInicializado = $numCodigoRespostaAtivacao == 0;
 
         } catch (\Exception $e) {
-            $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
+            $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN. ";
             $objInfraException = new InfraException($strMensagem, $e);
             LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
+            //forçar a falha do agendamento, devemos lançar outra Exceção, caso contrário aparece como "Sucesso" e apenas grava em log
+            throw new InfraException($strMensagem . $e->getMessage());
         }
 
         return $bolInicializado;

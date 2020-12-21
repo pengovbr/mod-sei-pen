@@ -8,6 +8,8 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     ini_set('max_execution_time','0');
     ini_set('memory_limit','-1');
+    ini_set("log_errors", 1);
+    ini_set("error_log", "/root/infra_agendamento_sei.log");
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);
