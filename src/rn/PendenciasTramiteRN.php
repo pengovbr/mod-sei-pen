@@ -528,7 +528,6 @@ class PendenciasTramiteRN extends InfraRN
         } catch (\Exception $e) {
             $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
             $objInfraException = new InfraException($strMensagem, $e);
-            LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
             throw $objInfraException;
         }
 
