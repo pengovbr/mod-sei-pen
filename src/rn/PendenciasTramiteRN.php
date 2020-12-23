@@ -13,10 +13,10 @@ class PendenciasTramiteRN extends InfraRN
     const CODIGO_EXECUCAO_ERRO = 1;
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s %s %s %s %s %s > /dev/null 2>&1 &';
-    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
+    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s %s %s %s %s %s %s > /tmp/mod-sei-pen.log 2>&1 &';
 
     private $objPenDebug = null;
     private $strEnderecoServico = null;
@@ -52,7 +52,6 @@ class PendenciasTramiteRN extends InfraRN
         $this->strGearmanServidor = trim(@$arrObjGearman["Servidor"] ?: null);
         $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
     }
-
 
     /**
      * Busca pendências de recebimento de trâmites de processos e encaminha para processamento
@@ -491,11 +490,19 @@ class PendenciasTramiteRN extends InfraRN
                     $strParametroDebugAtivo = $parBolDebugAtivo ? "--debug" : "";
                     $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
                     $strIdWorker = sprintf("--worker=%02d", $worker);
+                    $strPhpIni = php_ini_loaded_file();
+                    $strPhpIni = $strPhpIni ? "-c $strPhpIni" : "";
 
                     $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
                     $strComandoInicializacao = sprintf(
-                        self::COMANDO_EXECUCAO_WORKER, $strLocalizacaoScript, $strIdWorker,
-                        $strParametroMonitorar, $strParametroSegundoPlano, $strParametroDebugAtivo, $strParametroWsdlCache
+                        self::COMANDO_EXECUCAO_WORKER,
+                        $strPhpIni,
+                        $strLocalizacaoScript,
+                        $strIdWorker,
+                        $strParametroMonitorar,
+                        $strParametroSegundoPlano,
+                        $strParametroDebugAtivo,
+                        $strParametroWsdlCache
                     );
 
                     shell_exec($strComandoInicializacao);
@@ -518,6 +525,7 @@ class PendenciasTramiteRN extends InfraRN
             $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
             $objInfraException = new InfraException($strMensagem, $e);
             LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
+            throw $objInfraException;
         }
 
         return $bolInicializado;
