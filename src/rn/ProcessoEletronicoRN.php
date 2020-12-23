@@ -91,7 +91,7 @@ class ProcessoEletronicoRN extends InfraRN
     );
 
     private $objPenWs;
-    private $strWSDL;
+    private $strEnderecoWebService;
     private $options;
     private $numTentativasErro;
     private $strComumXSD;
@@ -107,16 +107,10 @@ class ProcessoEletronicoRN extends InfraRN
         $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro");
         $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_RECONEXAO;
 
-        if (InfraString::isBolVazia($strEnderecoWebService)) {
-            throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
-        }
 
-        if (InfraString::isBolVazia($strSenhaCertificadoDigital)) {
-            throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
-        }
 
-        $this->strWSDL = $strEnderecoWebService . '?wsdl';
-        $this->strComumXSD = $strEnderecoWebService . '?xsd=comum.xsd';
+        $this->strEnderecoWebService = $strEnderecoWebService;
+        $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
         $this->strLocalCert = $strLocalizacaoCertificadoDigital;
         $this->strLocalCertPassword = $strSenhaCertificadoDigital;
         $this->numTentativasErro = $numTentativasErro;
@@ -151,10 +145,20 @@ class ProcessoEletronicoRN extends InfraRN
     private function getObjPenWs()
     {
         if($this->objPenWs == null) {
+
+            if (InfraString::isBolVazia($this->strEnderecoWebService)) {
+                throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
+            }
+
+            if (InfraString::isBolVazia($this->strLocalCertPassword)) {
+                throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
+            }
+
             $this->validarDisponibilidade();
 
             try {
-                $this->objPenWs = new BeSimple\SoapClient\SoapClient($this->strWSDL, $this->options);
+                $strWSDL = $this->strEnderecoWebService . '?wsdl';
+                $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
             } catch (Exception $e) {
                 $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
                 $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;

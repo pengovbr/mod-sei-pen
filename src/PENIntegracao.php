@@ -34,18 +34,13 @@ class PENIntegracao extends SeiIntegracao
 
     public function inicializar($strVersaoSEI)
     {
-        $strDirSEIWeb = realpath(DIR_SEI_CONFIG.'/../web');
-        define('DIR_SEI_WEB', $strDirSEIWeb);
+        define('DIR_SEI_WEB', realpath(DIR_SEI_CONFIG.'/../web'));
 
-        $strArquivoConfiguracaoModulo = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
-        if(!file_exists($strArquivoConfiguracaoModulo)){
-            throw new InfraException("Arquivo de configuração do módulo '{$this->getNome()}' não pode ser localizado em '$strArquivoConfiguracaoModulo'");
-        }
-
-        include_once $strArquivoConfiguracaoModulo;
-
-        PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
+        // Aplicação de validações pertinentes à instalação e inicialização do módulo
+        // Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
+        // caso de indisponibilidade momentânea do Barramento de Serviços.
         PENIntegracao::validarArquivoConfiguracao();
+        PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
     }
 
 
