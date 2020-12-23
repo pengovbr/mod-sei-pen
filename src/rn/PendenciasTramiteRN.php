@@ -483,7 +483,7 @@ class PendenciasTramiteRN extends InfraRN
                 $strComandoIdentificacaoWorker = sprintf(self::COMANDO_IDENTIFICACAO_WORKER_ID, $worker);
                 exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
 
-                if($numCodigoResposta != 0){
+                if ($numCodigoResposta != 0) {
                     $strLocalizacaoScript = realpath(self::LOCALIZACAO_SCRIPT_WORKER);
                     $strPhpExec = empty(PHP_BINARY) ? "php" : PHP_BINARY;
                     $strPhpIni = php_ini_loaded_file();
@@ -514,7 +514,7 @@ class PendenciasTramiteRN extends InfraRN
                     // permitir que mais de um monitoramento esteja iniciado
                     exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
 
-                    if($numCodigoResposta == 0){
+                    if ($numCodigoResposta == 0) {
                         break;
                     }
                 }
