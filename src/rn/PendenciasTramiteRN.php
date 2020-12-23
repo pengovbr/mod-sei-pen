@@ -508,7 +508,6 @@ class PendenciasTramiteRN extends InfraRN
                         "/tmp/mod-pen-monitoramento.log" // Localização de log adicinal para registros de falhas não salvas pelo SEI no BD
                     );
 
-                    throw new Exception($strComandoMonitoramentoTarefas);
                     shell_exec($strComandoMonitoramentoTarefas);
 
                     // Verifica se monitoramento de tarefas foi iniciado corretamente, finalizando o laço para não
