@@ -13,10 +13,10 @@ class PendenciasTramiteRN extends InfraRN
     const CODIGO_EXECUCAO_ERRO = 1;
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
+    const COMANDO_EXECUCAO_WORKER = 'nohup %s %s %s %s %s %s %s %s > %s 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup /usr/bin/php %s %s %s %s %s %s %s > /tmp/mod-sei-pen.log 2>&1 &';
 
     private $objPenDebug = null;
     private $strEnderecoServico = null;
@@ -484,28 +484,32 @@ class PendenciasTramiteRN extends InfraRN
                 exec($strComandoIdentificacaoWorker, $strSaida, $numCodigoResposta);
 
                 if($numCodigoResposta != 0){
-                    $strLocalizacaoScript = realpath(SELF::LOCALIZACAO_SCRIPT_WORKER);
+                    $strLocalizacaoScript = realpath(self::LOCALIZACAO_SCRIPT_WORKER);
+                    $strPhpExec = empty(PHP_BINARY) ? "php" : PHP_BINARY;
+                    $strPhpIni = php_ini_loaded_file();
+                    $strPhpIni = $strPhpIni ? "-c $strPhpIni" : "";
+                    $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
+                    $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
+                    $strIdWorker = sprintf("--worker=%02d", $worker);
                     $strParametroMonitorar = $parBolMonitorar ? "--monitorar" : '';
                     $strParametroSegundoPlano = $parBolSegundoPlano ? "--segundo-plano" : "";
                     $strParametroDebugAtivo = $parBolDebugAtivo ? "--debug" : "";
-                    $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
-                    $strIdWorker = sprintf("--worker=%02d", $worker);
-                    $strPhpIni = php_ini_loaded_file();
-                    $strPhpIni = $strPhpIni ? "-c $strPhpIni" : "";
 
-                    $strParametroWsdlCache = "--wsdl-cache='$strWsdlCacheDir'";
-                    $strComandoInicializacao = sprintf(
+                    $strComandoMonitoramentoTarefas = sprintf(
                         self::COMANDO_EXECUCAO_WORKER,
-                        $strPhpIni,
-                        $strLocalizacaoScript,
-                        $strIdWorker,
-                        $strParametroMonitorar,
-                        $strParametroSegundoPlano,
-                        $strParametroDebugAtivo,
-                        $strParametroWsdlCache
+                        $strPhpExec,               // Binário do PHP utilizado no contexto de execução do script atual (ex: /usr/bin/php)
+                        $strPhpIni,                // Arquivo de configucação o PHP utilizado no contexto de execução do script atual (ex: /etc/php.ini)
+                        $strLocalizacaoScript,     // Path absoluto do script de monitoramento de tarefas do Barramento
+                        $strIdWorker,              // Identificador sequencial do processo paralelo a ser iniciado
+                        $strParametroMonitorar,    // Parâmetro para executar processo em modo de monitoramente ativo
+                        $strParametroSegundoPlano, // Parâmetro para executar processo em segundo plano com Gearman
+                        $strParametroDebugAtivo,   // Parâmetro para executar processo em modo de debug
+                        $strParametroWsdlCache,    // Diretório de cache de wsdl utilizado no contexto de execução do script atual (ex: /tmp/)
+                        "/tmp/mod-pen-monitoramento.log" // Localização de log adicinal para registros de falhas não salvas pelo SEI no BD
                     );
 
-                    shell_exec($strComandoInicializacao);
+                    throw new Exception($strComandoMonitoramentoTarefas);
+                    shell_exec($strComandoMonitoramentoTarefas);
 
                     // Verifica se monitoramento de tarefas foi iniciado corretamente, finalizando o laço para não
                     // permitir que mais de um monitoramento esteja iniciado
@@ -524,7 +528,6 @@ class PendenciasTramiteRN extends InfraRN
         } catch (\Exception $e) {
             $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
             $objInfraException = new InfraException($strMensagem, $e);
-            LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);
             throw $objInfraException;
         }
 
