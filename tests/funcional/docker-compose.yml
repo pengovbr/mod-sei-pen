@@ -4,13 +4,13 @@ services:
 
 ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
-      image: guilhermeadc/sei3_mailcatcher
+      image: guilhermeadc/sei3_mailcatcher:7.2
       container_name: smtp
       ports:
         - "1080:1080"
 
   memcached:
-    image: guilhermeadc/sei3_memcached
+    image: guilhermeadc/sei3_memcached:7.2
     container_name: memcached
     ports:
       - "11211:11211"
@@ -44,13 +44,13 @@ services:
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 
   org1-database:
-    image: ${ORG1_DATABASE_IMAGE}
+    image: ${ORG1_DATABASE_IMAGE}:7.2
     container_name: org1-${ORG1_DATABASE_NAME}
     ports:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
       
   org1-http:
-    image: guilhermeadc/sei3_httpd-2.4
+    image: guilhermeadc/sei3_httpd-2.4:7.2
     container_name: org1-http
     dns: "8.8.8.8"
     volumes:
@@ -79,14 +79,14 @@ services:
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
   org2-database:
-    image: ${ORG2_DATABASE_IMAGE}
+    image: ${ORG2_DATABASE_IMAGE}:7.2
     container_name: org2-${ORG2_DATABASE_NAME}
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
 
   org2-http:
-    image: guilhermeadc/sei3_httpd-2.4
+    image: guilhermeadc/sei3_httpd-2.4:7.2
     container_name: org2-http
     dns: "8.8.8.8"
     volumes:
@@ -104,6 +104,7 @@ services:
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+        
     extra_hosts:
       - "${ORG2_HOSTNAME}:127.0.0.1"
     links:
