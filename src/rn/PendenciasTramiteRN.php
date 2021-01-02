@@ -13,7 +13,7 @@ class PendenciasTramiteRN extends InfraRN
     const CODIGO_EXECUCAO_ERRO = 1;
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
-    const COMANDO_EXECUCAO_WORKER = 'nohup %s %s %s %s %s %s %s %s > %s 2>&1 &';
+    const COMANDO_EXECUCAO_WORKER = '%s %s %s %s %s %s %s %s > %s 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
@@ -505,7 +505,7 @@ class PendenciasTramiteRN extends InfraRN
                         $strParametroSegundoPlano, // Parâmetro para executar processo em segundo plano com Gearman
                         $strParametroDebugAtivo,   // Parâmetro para executar processo em modo de debug
                         $strParametroWsdlCache,    // Diretório de cache de wsdl utilizado no contexto de execução do script atual (ex: /tmp/)
-                        "/tmp/mod-pen-monitoramento.log" // Localização de log adicinal para registros de falhas não salvas pelo SEI no BD
+                        "/dev/null" // Localização de log adicinal para registros de falhas não salvas pelo SEI no BD
                     );
 
                     shell_exec($strComandoMonitoramentoTarefas);

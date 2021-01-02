@@ -50,10 +50,12 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $this->paginaBase->navegarParaControleProcesso();
         self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
         $this->cadastrarDocumentoExterno(self::$documentoTeste1);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste2);
 
         // Realizar a anexação de processos
         $this->anexarProcesso(self::$protocoloTesteAnexado);
+
+        $this->cadastrarDocumentoExterno(self::$documentoTeste2);
+
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -96,9 +98,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
         $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
         $this->validarRecibosTramite($mensagemRecibo, true, true);
-
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
-
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
@@ -117,9 +117,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-
         $this->abrirProcesso(self::$protocoloTestePrincipal);
-
         $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
         $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
@@ -136,7 +134,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
         $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
-        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste2, self::$destinatario);
 
         $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
         $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());

@@ -1,6 +1,6 @@
 <?php
 
-class TramiteProcessoRestritoHipoteseNaoMapeadaTest extends CenarioBaseTestCase
+class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;

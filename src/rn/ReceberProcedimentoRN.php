@@ -1403,10 +1403,11 @@ class ReceberProcedimentoRN extends InfraRN
             throw new InfraException('Lista de documentos do processo não informada.');
         }
 
-        $bolDocumentoAvulso = $parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO;
-        $objProcessoPrincipal = !$bolDocumentoAvulso ? $parObjMetadadosProcedimento->metadados->processo : null;
         $strNumeroRegistro = $parStrNumeroRegistro;
-        $bolEhProcedimentoAnexadoAnteriormente = isset($parDblIdProcedimentoAnexado);
+        $bolDocumentoAvulso = $parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO;
+        $objProcessoPrincipal = !$bolDocumentoAvulso ? ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento) : null;
+        $bolEhProcedimentoAnexado = !$bolDocumentoAvulso && $objProcessoPrincipal->protocolo !== $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+        $bolEhProcedimentoAnexadoAnteriormente = $bolEhProcedimentoAnexado && isset($parDblIdProcedimentoAnexado);
 
         //Obter dados dos documentos já registrados no sistema
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1450,7 +1451,7 @@ class ReceberProcedimentoRN extends InfraRN
             if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
                 // Definição da ordem do documento para avaliação do posicionamento
-                $numOrdemDocumento = !$bolEhProcedimentoAnexadoAnteriormente ? $objDocumento->ordemAjustada : $objDocumento->ordem;
+                $numOrdemDocumento = ($bolEhProcedimentoAnexado && !$bolEhProcedimentoAnexadoAnteriormente) ? $objDocumento->ordemAjustada : $objDocumento->ordem;
                 $numOrdemDocumento = $numOrdemDocumento ?: $objDocumento->ordem;
 
                 if(array_key_exists($numOrdemDocumento, $arrObjComponenteDigitalDTOIndexado)){

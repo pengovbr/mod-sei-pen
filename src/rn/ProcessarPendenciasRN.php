@@ -17,7 +17,7 @@ class ProcessarPendenciasRN extends InfraRN
     const MAXIMO_WORKERS_GEARMAN = 10;
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'ProcessamentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_EXECUCAO_WORKER = 'nohup %s %s %s --worker=%02d > %s 2>&1 &';
+    const COMANDO_EXECUCAO_WORKER = '%s %s %s --worker=%02d > %s 2>&1 &';
     const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/ProcessamentoTarefasPEN.php";
 
     protected function inicializarObjInfraIBanco()
@@ -343,7 +343,7 @@ class ProcessarPendenciasRN extends InfraRN
                                $strPhpIni,              // Arquivo de configucação o PHP utilizado no contexto de execução do script atual (ex: /etc/php.ini)
                                $strLocalizacaoScript,   // Path absoluto do script de processamento de tarefas do Barramento
                                $worker,                 // Identificador sequencial do processo paralelo a ser iniciado
-                               "/tmp/mod-pen-processamento.log" // Localização de log adicinal para registros de falhas não salvas pelo SEI no BDsss
+                               "/dev/null"              // Localização de log adicinal para registros de falhas não salvas pelo SEI no BDsss
                             );
 
                             shell_exec($strComandoProcessamentoTarefas);

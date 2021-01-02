@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 2.1.2)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 2.1.3)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o Barramento de Serviços do PEN. 
 
@@ -36,7 +36,12 @@ do processo se encontrava inconsistênte durante o recebimento. Esta falha na va
 que não eram contabilizados nesta verificação.
 
 
-#### Issue #36 - Correção de erro no download dos recibos de envio e conclusão do trâmite
+#### Issue #47 - Correção de erro ao tentar excluir mapeamento de tipos de documentos para envio bug
 
 Correção de falha que ocorrina na página de download dos recibos de envio e conclusão do trâmite do processo, gerando erro de falha na download dos dados do recibo devido a problema na abertura de conexão com o banco de dados.
+
+
+#### Issue #55 - Rejeição de processo por inconsistência em processos anexados
+
+Correção de falha no recebimento de processos anexados em cenário em que o mesmo é tramitado mais de uma vez para a mesma instituição. Quando esta situação ocorria, documentos adicionados recentemente ao processo não eram identificados corretamente e o módulo tentava inseri-los novamente, o que gera inconsistência e rejeição do trâmite.
 

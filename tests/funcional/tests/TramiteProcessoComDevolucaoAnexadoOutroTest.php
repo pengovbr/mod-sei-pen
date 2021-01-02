@@ -77,12 +77,13 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
+        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
         // Incluir novos documentos relacionados no processo anexado
         $this->abrirProcesso(self::$protocoloTesteAnexado);
-        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         $this->cadastrarDocumentoExterno(self::$documentoTeste3);
 
         // Gerar dados de testes para representar o processo principal
@@ -94,8 +95,11 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
         self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
         $this->cadastrarDocumentoInterno(self::$documentoTeste4);
         $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
+
         $this->anexarProcesso(self::$protocoloTesteAnexado);
+
+        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
+
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -120,9 +124,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
     public function test_verificar_devolucao_origem_processo_anexado()
     {
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
@@ -173,7 +175,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
         $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste4, self::$destinatario);
-        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste5, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste5, self::$destinatario);
 
         $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
         $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
