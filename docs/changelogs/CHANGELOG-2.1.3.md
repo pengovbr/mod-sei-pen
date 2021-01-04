@@ -13,29 +13,6 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 ## Lista de Melhorias e Correções de Problemas
 
 
-#### Issue #31 - Correção de erro no trâmite de processos contendo documento movido
-
-Correção de falha na rotina de envio de processos que informava ao Barramento de Serviços do PEN que um documento movido dentro do processo 
-se tratava de um documento dentro de outro processo anexado. Esta falha fazia com que o documento movido fosse recebido pela instituição 
-destinatária como um processo anexado. A correção aplicada faz com que os documentos nesta situação sejam assinalados como retirados do processo, 
-sendo reconhecido pela instituição destinatária como cancelados.
-
-
-#### Issue #34 - Correção de erro com a devolução de processos anexados para o sistema de origem
-
-Correção de rotina de recebimento de processos anexados que foram devolvidos pela instituição destinatária do trâmite. 
-Esta falha provocava uma tentativa de recadastramento dos documentos do processo anexado por não identificá-los como pré-existentes no processo. Neste 
-caso, o recebimento do processo acabava sendo rejeitado pela rotina de validação final devido à inconsistência dos documentos, evitando 
-problemas de falta de integridade, mas rejeitando recebimento do mesmo.
-
-
-#### Issue #35 - Correção de erro no trâmite de processos contendos documentos cancelados
-
-Correção de falha na rotina de validação de integridade do trâmite de processos, gerando um falso-positivo indicando que a quantidade de documentos 
-do processo se encontrava inconsistênte durante o recebimento. Esta falha na validação ocorria em processos com documentos contendo documentos cancelados 
-que não eram contabilizados nesta verificação.
-
-
 #### Issue #47 - Correção de erro ao tentar excluir mapeamento de tipos de documentos para envio bug
 
 Correção de falha que ocorrina na página de download dos recibos de envio e conclusão do trâmite do processo, gerando erro de falha na download dos dados do recibo devido a problema na abertura de conexão com o banco de dados.
@@ -45,3 +22,12 @@ Correção de falha que ocorrina na página de download dos recibos de envio e c
 
 Correção de falha no recebimento de processos anexados em cenário em que o mesmo é tramitado mais de uma vez para a mesma instituição. Quando esta situação ocorria, documentos adicionados recentemente ao processo não eram identificados corretamente e o módulo tentava inseri-los novamente, o que gera inconsistência e rejeição do trâmite.
 
+
+#### Issue #53 - Correção de erro em todo sistema por falta de configuração do módulo
+
+Correção de falha provocada em diversos pontos do sistema por falta de determinadas configurações por parte do módulo. Modificado comportamento para validar apenas aqueles parâmetros básicos da instalação.
+
+
+#### Issue #51 - Ajustes para considerar o php.ini correto na inicialização de processo de recebimento
+
+Implementado ajuste na rotina de recebimento de pendências do Barramento de Serviços do PEN para iniciar o script paralelo de recebimento utilizando a configuração correta do php.ini definida no contexto da execução.
