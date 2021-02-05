@@ -58,6 +58,12 @@ clean:
 install: 
 	unzip -o -d $(SEI_PATH) dist/$(PEN_MODULO_COMPACTADO)
 
+install-dev: 
+	ln -sf $(PWD)/src/bin $(SEI_PATH)/sei/bin/mod-pen
+	ln -sf $(PWD)/src/config $(SEI_PATH)/sei/config/mod-pen
+	ln -sf $(PWD)/src/scripts $(SEI_PATH)/sei/scripts/mod-pen
+	ln -sf $(PWD)/src/ $(SEI_PATH)/sei/web/modulos/pen
+	
 
 test-environment-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
@@ -93,7 +99,7 @@ test-environment-down:
 
 
 test-functional:
-	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional
+	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure  --testsuite funcional
 
 
 test-functional-parallel:
