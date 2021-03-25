@@ -1510,8 +1510,59 @@ class Editor3011RN extends InfraRN
     return $html;
   }
 
-  protected function consultarHtmlVersaoConectado(EditorDTO $parObjEditorDTO)
+  private function consultarHtmlIdentificacaoVersao3015(EditorDTO $parObjEditorDTO)
   {
+
+    $objVersaoSecaoDocumentoDTO = new VersaoSecaoDocumentoDTO();
+    $objVersaoSecaoDocumentoDTO->setDistinct(true);
+    $objVersaoSecaoDocumentoDTO->retNumVersao();
+    $objVersaoSecaoDocumentoDTO->retStrSiglaUsuario();
+    $objVersaoSecaoDocumentoDTO->retStrNomeUsuario();
+    $objVersaoSecaoDocumentoDTO->retDthAtualizacao();
+
+    $objVersaoSecaoDocumentoDTO->setDblIdDocumentoSecaoDocumento($parObjEditorDTO->getDblIdDocumento());
+    $objVersaoSecaoDocumentoDTO->setNumIdBaseConhecimentoSecaoDocumento($parObjEditorDTO->getNumIdBaseConhecimento());
+
+    if ($parObjEditorDTO->isSetNumVersao()) {
+      $objVersaoSecaoDocumentoDTO->setNumVersao($parObjEditorDTO->getNumVersao(), InfraDTO::$OPER_MENOR_IGUAL);
+    }
+
+    $objVersaoSecaoDocumentoDTO->setOrdNumVersao(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+
+    $objVersaoSecaoDocumentoRN = new VersaoSecaoDocumentoRN();
+    $arrObjVersaoSecaoDocumentoDTO = $objVersaoSecaoDocumentoRN->listar($objVersaoSecaoDocumentoDTO);
+
+    $qtdVersoes = count($arrObjVersaoSecaoDocumentoDTO);
+    $numVersao = 0;
+    if ($qtdVersoes) {
+      $strSiglaUsuarioGerador = $arrObjVersaoSecaoDocumentoDTO[0]->getStrSiglaUsuario();
+      $strNomeUsuarioGerador = $arrObjVersaoSecaoDocumentoDTO[0]->getStrNomeUsuario();
+
+      $strSiglaUsuarioVersao = $arrObjVersaoSecaoDocumentoDTO[$qtdVersoes - 1]->getStrSiglaUsuario();
+      $strNomeUsuarioVersao = $arrObjVersaoSecaoDocumentoDTO[$qtdVersoes - 1]->getStrNomeUsuario();
+      $numVersao = $arrObjVersaoSecaoDocumentoDTO[$qtdVersoes - 1]->getNumVersao();
+      $dthVersao = $arrObjVersaoSecaoDocumentoDTO[$qtdVersoes - 1]->getDthAtualizacao();
+    }
+
+    $html = '<hr style="border:1px solid #c0c0c0;" />';
+    $html .= 'Criado por ';
+    $html .= '<a onclick="alert(\'' . PaginaSEI::getInstance()->formatarParametrosJavaScript($strNomeUsuarioGerador) . '\')" alt="' . $strNomeUsuarioGerador . '" title="' . $strNomeUsuarioGerador . '" style="color:#0066cc;text-decoration:none;cursor:pointer;">' . $strSiglaUsuarioGerador . '</a>';
+    $html .= ', versão ' . $numVersao . ' por ';
+    $html .= '<a onclick="alert(\'' . PaginaSEI::getInstance()->formatarParametrosJavaScript($strNomeUsuarioVersao) . '\')" alt="' . $strNomeUsuarioVersao . '" title="' . $strNomeUsuarioVersao . '" style="color:#0066cc;text-decoration:none;cursor:pointer;">' . $strSiglaUsuarioVersao . '</a>';
+    $html .= ' em ' . $dthVersao . '.' . "\n";
+
+    //$html = '<hr style="border:1px solid #c0c0c0;" />';
+    //$html .= 'Criado por  '. $strSiglaUsuarioGerador . ', versão ' . $numVersao . ' por '.$strSiglaUsuarioVersao . ' em ' . $dthVersao . '.' . "\n";
+
+    return $html;
+  }
+
+  protected function consultarHtmlVersaoConectado($dados)
+  {
+    $parObjEditorDTO=$dados["parObjEditorDTO"];
+    $montarTarja=$dados["montarTarja"];
+    $controleURL=$dados["controleURL"];
 
 
     if ($parObjEditorDTO->getDblIdDocumento()!=null) {
@@ -1687,15 +1738,28 @@ class Editor3011RN extends InfraRN
         }
 
         if ($objDocumentoDTO!=null) {
-          $objAssinaturaRN = new AssinaturaRN();
-          $strHtml .= $objAssinaturaRN->montarTarjas($objDocumentoDTO);
+          if(!$montarTarja){
+            $objAssinaturaRN = new AssinaturaRN();
+            $strHtml .= $objAssinaturaRN->montarTarjas($objDocumentoDTO);
+          }else{
+            $objAssinaturaRN = new AssinaturaHashRN();
+            $dados=[
+              "objDocumentoDTO"=>$objDocumentoDTO,
+              "controleURL"=>$controleURL
+            ];
+            $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
+          }
         }
       }
     }
 
 
     if ($parObjEditorDTO->getStrSinIdentificacaoVersao()=='S') {
+      if(!$montarTarja){
       $strHtml .= $this->consultarHtmlIdentificacaoVersao($parObjEditorDTO);
+      }else{
+        $strHtml .= $this->consultarHtmlIdentificacaoVersao3015($parObjEditorDTO);
+      }
     }
 
     $strHtml .= '</body>' . "\n";

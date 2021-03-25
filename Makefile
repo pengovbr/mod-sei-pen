@@ -92,6 +92,8 @@ test-environment-destroy:
 
 test-environment-up:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
+	@echo "Sleeping for 5 seconds ..."; sleep 5;
+	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
 
 
 test-environment-down:	
@@ -120,3 +122,5 @@ bash_org1:
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
 
+atualizaSequencia:
+	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 

@@ -69,6 +69,14 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 //     "Servidor" => "",
                 //     "Porta" => "", //Padrão: 4730
                 // )
+
+                "ControleURL" => array(
+                    "atual"=>"servidor.gov.br",
+                    "antigos"=>array(
+                        "[servidor_php]",
+                        "[servidor_php2]",
+                    )
+                )
             )
         );
     }
