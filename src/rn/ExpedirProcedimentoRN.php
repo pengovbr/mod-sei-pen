@@ -1253,6 +1253,25 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), true);
             }
 
+            //Testa o hash com a tarja de validação contendo antigos URLs do órgão
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+            $arrControleURL = $objConfiguracaoModPEN->getValor("PEN", "ControleURL", false);
+
+            if($arrControleURL!=null && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+
+                foreach($arrControleURL["antigos"] as $urlAntigos){
+                    $dadosURL=[
+                        "atual"=>$arrControleURL["atual"],
+                        "antigo"=>$urlAntigos,
+                    ];
+                    $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+                    if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                        $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), false,false,$dadosURL);
+                    }
+                }
+            }
+
             //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
@@ -1369,7 +1388,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
     * @return String                     Conteúdo completo do documento para envio
     */
-    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false)
+    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null)
     {
         $objEditorDTO = new EditorDTO();
         $objEditorDTO->setDblIdDocumento($parDblIdDocumento);
@@ -1397,16 +1416,32 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objEditorDTO->setStrSinCarimboPublicacao('N');
         }
 
-        $objEditorRN = new EditorRN();
-        $strResultado = $objEditorRN->consultarHtmlVersao($objEditorDTO);
 
+        //para o caso de URLs antigos do órgão, ele testa o html com a tarja antiga
+        $dados=[
+            "parObjEditorDTO" => $objEditorDTO,
+            "montarTarja" => $dadosURL==null?false:true,
+            "controleURL" => $dadosURL
+        ];
+
+        if($dadosURL!=null){  
+            $objEditorRN = new Editor3011RN();
+            $strResultado = $objEditorRN->consultarHtmlVersao($dados);
+            return $strResultado;
+        }
+            
+            
         //fix-107. Gerar doc exatamente da forma como estava na v3.0.11
         //Raramente vai entrar aqui e para diminuir a complexidade ciclomatica
         //n encadeei com elseif nas instrucoes acima
         if($bolFormatoLegado3011){
             $objEditor3011RN = new Editor3011RN();
-            $strResultado = $objEditor3011RN->consultarHtmlVersao($objEditorDTO);
+            $strResultado = $objEditor3011RN->consultarHtmlVersao($dados);
+            return $strResultado;
         }
+
+        $objEditorRN = new EditorRN();
+        $strResultado = $objEditorRN->consultarHtmlVersao($objEditorDTO);
 
         return $strResultado;
     }

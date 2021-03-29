@@ -673,6 +673,27 @@ Recursos:
     * pen_procedimento_expedido_listar  
     * pen_procedimento_expedir
 ~~~~
+
+### 4.6. Ajuste para órgãos que alterem a URL de acesso do SEI
+
+Caso o órgão tenha alterado a URL de acesso, seja ajuste de protocolo http para https ou de hostname, será necessário adicionar o array abaixo no ConfiguracaoModPEN.php dentro da chave "PEN":
+
+```php
+'PEN' => array(
+    'WebService' => ...,
+    'WebServicePendencias' => ...,
+    'LocalizacaoCertificado' => ...,
+    'SenhaCertificado' => ...,
+    'NumeroTentativasErro' => ...,
+    'ControleURL' => array(
+                    "atual"=>"https://[servidor_php_atual]",
+                    "antigos"=>array(
+                                     "http://[servidor_php]",
+                                     "http://[servidor_php2]",
+                                     )
+    )
+```
+
     
 ---
 ---
