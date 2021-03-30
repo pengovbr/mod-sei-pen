@@ -1682,6 +1682,13 @@ class ProcessoEletronicoRN extends InfraRN
         return $numOrdemDocumento1 - $numOrdemDocumento2;
     }
 
+    public static function comparacaoOrdemComponenteDigitais($parComponenteDigital1, $parComponenteDigital2)
+    {
+        $numOrdemComponenteDigital1 = intval($parComponenteDigital1->ordem);
+        $numOrdemComponenteDigital2 = intval($parComponenteDigital2->ordem);
+        return $numOrdemComponenteDigital1 - $numOrdemComponenteDigital2;
+    }
+
     public static function obterDocumentosProtocolo($parObjProtocolo, $parBolExtrairAnexados=false)
     {
         $arrObjDocumento = array();
@@ -1715,9 +1722,30 @@ class ProcessoEletronicoRN extends InfraRN
             usort($arrObjDocumento, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
         }
 
-        return ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
+
+        $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
+
+        foreach ($arrObjDocumentoPadronizados as $objDocumento) {
+            $objDocumento->componenteDigital = self::obterComponentesDocumentos($objDocumento);
+        }
+
+        return $arrObjDocumentoPadronizados;
     }
 
+
+    public static function obterComponentesDocumentos($parObjDocumento)
+    {
+        $arrObjComponenteDigital=array();
+        if(isset($parObjDocumento->componenteDigital)){
+            
+            $arrObjComponenteDigital = is_array($parObjDocumento->componenteDigital) ? $parObjDocumento->componenteDigital : array($parObjDocumento->componenteDigital);
+            usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
+        } 
+        
+        
+        return $arrObjComponenteDigital;
+
+    }
 
     /**
      * Retorna a referência para o processo ou documento avulso

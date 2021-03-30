@@ -684,15 +684,24 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
         //Não valida informações do componente digital caso o documento esteja cancelado
-        foreach($arrObjDocumentos as $objDocumento) {
-            if(!isset($objDocumento->retirado) || $objDocumento->retirado === false){
-                if (is_null($objDocumento->componenteDigital->tamanhoEmBytes) || $objDocumento->componenteDigital->tamanhoEmBytes == 0){
-                    throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+        foreach ($arrObjDocumentos as $objDocumento) {
+            // if(isset($objDocumento->retirado) && $objDocumento->retirado === true){ //errado
+            if (!isset($objDocumento->retirado) || $objDocumento->retirado === false) {
+
+                foreach ($objDocumento->componenteDigital as $objComponenteDigital) {
+                    $this->validaTamanhoComponenteDigital($objComponenteDigital);
                 }
             }
         }
     }
 
+    private function validaTamanhoComponenteDigital($objComponenteDigital){
+
+        if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0){
+            throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+        }
+
+    }
 
 
 
