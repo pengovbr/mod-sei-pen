@@ -693,15 +693,12 @@ class ReceberProcedimentoRN extends InfraRN
         }
     }
 
-    private function validaTamanhoComponenteDigital($objComponenteDigital){
-
+    private function validaTamanhoComponenteDigital($objComponenteDigital)
+    {
         if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0){
             throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
         }
-
     }
-
-
 
     private function registrarProcesso($parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjMetadadosProcedimento)
     {

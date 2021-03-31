@@ -1715,13 +1715,13 @@ class ProcessoEletronicoRN extends InfraRN
             //Quando se tratar de um Documento Avulso, a ordem será sempre 1
             $parObjProtocolo->ordem = 1;
             $parObjProtocolo->ordemAjustada = 1;
+            $parObjProtocolo->componenteDigital = self::obterComponentesDocumentos($parObjProtocolo);
             return array($parObjProtocolo);
         }
 
         if($parBolExtrairAnexados){
             usort($arrObjDocumento, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
         }
-
 
         $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
 
@@ -1737,12 +1737,12 @@ class ProcessoEletronicoRN extends InfraRN
     {
         $arrObjComponenteDigital=array();
         if(isset($parObjDocumento->componenteDigital)){
-            
+
             $arrObjComponenteDigital = is_array($parObjDocumento->componenteDigital) ? $parObjDocumento->componenteDigital : array($parObjDocumento->componenteDigital);
             usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
-        } 
-        
-        
+        }
+
+
         return $arrObjComponenteDigital;
 
     }

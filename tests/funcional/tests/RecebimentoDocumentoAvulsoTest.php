@@ -30,7 +30,6 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
     }
 
 
-
     public function test_recebimento_documento_avulso_com_2_componentes_digitais()
     {
         // Simular um trâmite chamando a API do Barramento diretamente
