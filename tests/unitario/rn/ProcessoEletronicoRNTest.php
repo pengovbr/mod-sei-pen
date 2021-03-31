@@ -74,5 +74,13 @@ final class ProcessoEletronicoRNTest extends TestCase
         $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, $numTamanhoMaximo);
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
         $this->assertTrue(strlen($strResultadoAtual) <= $numTamanhoMaximo);
+
+        // Teste considerando um texto longo com ultima palavra menor que a reticencias
+        $strTexto =             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniamr quis";
+        $strResultadoEsperado = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniam ...";
+        $strResultadoAtual = $this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 150);
+        $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen($strResultadoAtual) <= 150);
+
     }
 }

@@ -1972,6 +1972,7 @@ class ProcessoEletronicoRN extends InfraRN
             $strUltimaPalavra = $arrStrTokens[count($arrStrTokens) - 1];
 
             $numTamanhoUltimaPalavra = strlen($strUltimaPalavra) > $numTamanhoMaximoPalavra ? strlen($strReticencias) : strlen($strUltimaPalavra);
+            $numTamanhoUltimaPalavra = $numTamanhoUltimaPalavra < strlen($strReticencias) ? strlen($strReticencias) : $numTamanhoUltimaPalavra;
             $strTexto = substr($strTexto, 0, strlen($strTexto) - $numTamanhoUltimaPalavra);
             $strTexto = trim($strTexto) . $strReticencias;
         }
