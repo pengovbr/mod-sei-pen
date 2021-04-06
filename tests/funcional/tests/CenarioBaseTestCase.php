@@ -80,13 +80,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
         $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
+
+        // Inserção de mapeamentos de hipóteses legais pra o órgão A
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(1, 3, 3, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(2, 4, 4, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(3, 3, 3, 'R', 'S'));
 
         // Habilitação da extensão docx
         $bancoOrgaoA->execute("update arquivo_extensao set sin_ativo=? where extensao=?", array('S', 'docx'));
-
 
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2 *****************/
         $parametrosOrgaoB = new ParameterUtils(CONTEXTO_ORGAO_B);
@@ -105,6 +106,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
+
+        // Inserção de mapeamentos de hipóteses legais pra o órgão B
         $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
@@ -163,6 +166,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'LOGIN' => constant($nomeContexto . '_USUARIO_LOGIN'),
             'SENHA' => constant($nomeContexto . '_USUARIO_SENHA'),
             'TIPO_PROCESSO' => constant($nomeContexto . '_TIPO_PROCESSO'),
+            'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
             'TIPO_DOCUMENTO' => constant($nomeContexto . '_TIPO_DOCUMENTO'),
             'TIPO_DOCUMENTO_NAO_MAPEADO' => constant($nomeContexto . '_TIPO_DOCUMENTO_NAO_MAPEADO'),
             'CARGO_ASSINATURA' => constant($nomeContexto . '_CARGO_ASSINATURA'),
@@ -174,6 +178,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_NAO_MAPEADO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_NAO_MAPEADO'),
             'REP_ESTRUTURAS' => constant($nomeContexto . '_REP_ESTRUTURAS'),
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
+            'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
+            'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
             'LOCALIZACAO_CERTIFICADO_DIGITAL' => realpath(__DIR__ . constant($nomeContexto . '_LOCALIZACAO_CERTIFICADO_DIGITAL')),
             'SENHA_CERTIFICADO_DIGITAL' => constant($nomeContexto . '_SENHA_CERTIFICADO_DIGITAL'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),

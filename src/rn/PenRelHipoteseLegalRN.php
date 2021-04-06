@@ -33,6 +33,12 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
     protected function alterarInternoControlado(PenRelHipoteseLegalDTO $objDTO)
     {
         try {
+
+            //Regras de Negocio
+            $objInfraException = new InfraException();
+            $this->validarCadastroExistente($objDTO, $objInfraException);
+            $objInfraException->lancarValidacoes();
+
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
             return $objBD->alterar($objDTO);
         }
@@ -44,6 +50,12 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
     protected function cadastrarInternoControlado(PenRelHipoteseLegalDTO $objDTO)
     {
         try {
+
+            //Regras de Negocio
+            $objInfraException = new InfraException();
+            $this->validarCadastroExistente($objDTO, $objInfraException);
+            $objInfraException->lancarValidacoes();
+
             $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
             return $objBD->cadastrar($objDTO);
         }
@@ -60,6 +72,20 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         }
         catch (Exception $e) {
             throw new InfraException('Erro ao excluir mapeamento de hipóteses legais', $e);
+        }
+    }
+
+    private function validarCadastroExistente(PenRelHipoteseLegalDTO $objDTO, InfraException $objInfraException){
+
+        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($objDTO->getNumIdHipoteseLegal());
+        $objPenRelHipoteseLegalDTO->setStrTipo($objDTO->getStrTipo());
+        $objPenRelHipoteseLegalDTO->retDblIdMap();
+
+        $ret = $this->consultarInterno($objPenRelHipoteseLegalDTO);
+
+        if(!empty($ret)){
+            $objInfraException->adicionarValidacao('já cadastrada.');
         }
     }
 

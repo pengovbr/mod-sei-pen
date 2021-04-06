@@ -1968,23 +1968,34 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objDocMapDTO->unSetTodos();
                 $objDocMapDTO->setNumIdSerie($objDocumentoDTO->getNumIdSerie());
 
-                if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
-                    $strDescricao = sprintf(
-                        'Não existe mapeamento de envio para %s no documento %s',
-                        $objDocumentoDTO->getStrNomeSerie(),
-                        $objDocumentoDTO->getStrProtocoloDocumentoFormatado()
-                    );
+                if($objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                    if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
+                        $strDescricao = sprintf(
+                            'Não existe mapeamento de envio para %s no documento %s',
+                            $objDocumentoDTO->getStrNomeSerie(),
+                            $objDocumentoDTO->getStrProtocoloDocumentoFormatado()
+                        );
 
-                    $objInfraException->adicionarValidacao($strDescricao, $strAtributoValidacao);
-                }
+                        $objInfraException->adicionarValidacao($strDescricao, $strAtributoValidacao);
+                    }
 
-                if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
                     $objHipoteseLegalDTO = new HipoteseLegalDTO();
                     $objHipoteseLegalDTO->setNumIdHipoteseLegal($objDocumentoDTO->getNumIdHipoteseLegalProtocolo());
+                    $objHipoteseLegalDTO->setBolExclusaoLogica(false);
                     $objHipoteseLegalDTO->retStrNome();
+                    $objHipoteseLegalDTO->retStrSinAtivo();
                     $objHipoteseLegalRN = new HipoteseLegalRN();
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-                    $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
+
+                    if ($objDocumentoDTO->getStrStaNivelAcessoLocalProtocolo()!=ProtocoloRN::$NA_PUBLICO){
+                        if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
+                            $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
+                        }else{
+                            if($dados->getStrSinAtivo() == 'N'){
+                                $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' está inativa', $strAtributoValidacao);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -2002,7 +2013,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
 
         if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
-            $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
+            $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO1($arrObjAtividadeDTO, 'SiglaUnidade'));
             $objInfraException->adicionarValidacao("Não é possível tramitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
         }
     }
@@ -2027,14 +2038,23 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objInfraException->adicionarValidacao('Não é possível tramitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
             }
 
+            $objHipoteseLegalDTO = new HipoteseLegalDTO();
+            $objHipoteseLegalDTO->setNumIdHipoteseLegal($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
+            $objHipoteseLegalDTO->setBolExclusaoLogica(false);
+            $objHipoteseLegalDTO->retStrNome();
+            $objHipoteseLegalDTO->retStrSinAtivo();
+            $objHipoteseLegalRN = new HipoteseLegalRN();
+            $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+
             $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
-            if (!empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()))) {
-                $objHipoteseLegalDTO = new HipoteseLegalDTO();
-                $objHipoteseLegalDTO->setNumIdHipoteseLegal($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo());
-                $objHipoteseLegalDTO->retStrNome();
-                $objHipoteseLegalRN = new HipoteseLegalRN();
-                $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-                $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
+            if(!empty($dados)){
+                if (!empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()))) {
+                    $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
+                }else{
+                    if($dados->getStrSinAtivo() == 'N'){
+                        $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' está inativa', $strAtributoValidacao);
+                    }
+                }
             }
         }
     }

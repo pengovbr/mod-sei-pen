@@ -66,14 +66,18 @@ try {
         $objPenRelHipoteseLegalDTO->setStrTipo('E');// Enviado
 
         $numIdMapeamento = 0;
-        if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
-            $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
-            $mapeamento = $objPenRelHipoteseLegalRN->alterar($objPenRelHipoteseLegalDTO);
-            $numIdMapeamento = $_GET[PEN_PAGINA_GET_ID];
-        }
-        else {
-            $mapeamento = $objPenRelHipoteseLegalRN->cadastrar($objPenRelHipoteseLegalDTO);
-            $numIdMapeamento = $mapeamento->getDblIdMap();
+
+        try {
+            if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+                $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
+                $mapeamento = $objPenRelHipoteseLegalRN->alterar($objPenRelHipoteseLegalDTO);
+            }
+            else {
+                $mapeamento = $objPenRelHipoteseLegalRN->cadastrar($objPenRelHipoteseLegalDTO);
+            }
+        } catch (\Exception $e) {
+            $arrObjInfraValidacao = $e->getArrObjInfraValidacao(0);
+            $objPagina->adicionarMensagem(sprintf('%s '. $arrObjInfraValidacao[0]->getStrDescricao(), PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
         }
 
         header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdMapeamento.PaginaSEI::getInstance()->montarAncora($numIdMapeamento)));
