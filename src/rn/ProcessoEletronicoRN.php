@@ -355,6 +355,11 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
+    /**
+     * Serviço responsável por pesquisar a listas de estruturas do Barramento de Serviços do PEN baseado nos critérios de pesquisa
+     * informados pelo usuário.
+     *
+     */
     public function listarEstruturas($idRepositorioEstrutura, $nome='', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
         $nomeUnidade=null, $siglaUnidade=null, $offset=null, $registrosPorPagina=null, $parBolPermiteRecebimento=null, $parBolPermiteEnvio=null)
     {
@@ -396,11 +401,11 @@ class ProcessoEletronicoRN extends InfraRN
                 $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
             }
 
-            if(!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true){
+            if($parBolPermiteRecebimento === true){
                 $parametros->filtroDeEstruturas->permiteRecebimento = true;
             }
 
-            if(!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true){
+            if($parBolPermiteEnvio === true){
                 $parametros->filtroDeEstruturas->permiteEnvio = true;
             }
 
