@@ -1968,23 +1968,25 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objDocMapDTO->unSetTodos();
                 $objDocMapDTO->setNumIdSerie($objDocumentoDTO->getNumIdSerie());
 
-                if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
-                    $strDescricao = sprintf(
-                        'Não existe mapeamento de envio para %s no documento %s',
-                        $objDocumentoDTO->getStrNomeSerie(),
-                        $objDocumentoDTO->getStrProtocoloDocumentoFormatado()
-                    );
+                if($objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
+                    if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
+                        $strDescricao = sprintf(
+                            'Não existe mapeamento de envio para %s no documento %s',
+                            $objDocumentoDTO->getStrNomeSerie(),
+                            $objDocumentoDTO->getStrProtocoloDocumentoFormatado()
+                        );
 
-                    $objInfraException->adicionarValidacao($strDescricao, $strAtributoValidacao);
-                }
+                        $objInfraException->adicionarValidacao($strDescricao, $strAtributoValidacao);
+                    }
 
-                if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
-                    $objHipoteseLegalDTO = new HipoteseLegalDTO();
-                    $objHipoteseLegalDTO->setNumIdHipoteseLegal($objDocumentoDTO->getNumIdHipoteseLegalProtocolo());
-                    $objHipoteseLegalDTO->retStrNome();
-                    $objHipoteseLegalRN = new HipoteseLegalRN();
-                    $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-                    $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
+                    if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
+                        $objHipoteseLegalDTO = new HipoteseLegalDTO();
+                        $objHipoteseLegalDTO->setNumIdHipoteseLegal($objDocumentoDTO->getNumIdHipoteseLegalProtocolo());
+                        $objHipoteseLegalDTO->retStrNome();
+                        $objHipoteseLegalRN = new HipoteseLegalRN();
+                        $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+                        $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
+                    }
                 }
             }
         }
@@ -2034,7 +2036,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objHipoteseLegalDTO->retStrNome();
                 $objHipoteseLegalRN = new HipoteseLegalRN();
                 $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-                $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
+                if (!empty($dados)) {
+                    $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
+                }else{
+                    $objInfraException->adicionarValidacao('Verificar se a Hipótese legal do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' está ativa.', $strAtributoValidacao);
+                }
             }
         }
     }

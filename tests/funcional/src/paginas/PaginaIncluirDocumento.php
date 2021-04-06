@@ -108,8 +108,8 @@ class PaginaIncluirDocumento extends PaginaTeste
 				$input = $this->test->byId("optSigiloso")->click();
 				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
 				$select->selectOptionByLabel($strHipoteseLegal);
-				$select = $this->test->select($this->test->byId('selGrauSigilo'));
-				$select->selectOptionByLabel($strGrauSigilo);
+				/*$select = $this->test->select($this->test->byId('selGrauSigilo'));
+				$select->selectOptionByLabel($strGrauSigilo);*/
 	    	}
     	}
     }
