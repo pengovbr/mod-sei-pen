@@ -615,40 +615,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(), $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(), true
         );
 
-        if (isset($objEstrutura->hierarquia)) {
-
-            $arrObjNivel = $objEstrutura->hierarquia->nivel;
-
-            $nome = "";
-            $siglasUnidades = array();
-            $siglasUnidades[] = $objEstrutura->sigla;
-
-            foreach ($arrObjNivel as $key => $objNivel) {
-                $siglasUnidades[] = $objNivel->sigla;
-            }
-
-            for ($i = 1; $i <= 3; $i++) {
-                if (isset($siglasUnidades[count($siglasUnidades) - 1])) {
-                    unset($siglasUnidades[count($siglasUnidades) - 1]);
-                }
-            }
-
-            foreach ($siglasUnidades as $key => $nomeUnidade) {
-                if ($key == (count($siglasUnidades) - 1)) {
-                    $nome .= $nomeUnidade . " ";
-                } else {
-                    $nome .= $nomeUnidade . " / ";
-                }
-            }
-
-            $objNivel = current($arrObjNivel);
+            $dados=ProcessoEletronicoINT::formatarHierarquia($objEstrutura);
+            $nome=$dados['nome'];
+            $objNivel=$dados['objNivel'];
 
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
             $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO_HIRARQUIA');
             $objAtributoAndamentoDTO->setStrValor($nome);
             $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-        }
+        
 
         //Seta a unidade de destino
         $arrUnidadeDestino = preg_split('/\s?\/\s?/', $objExpedirProcedimentoDTO->getStrUnidadeDestino());
