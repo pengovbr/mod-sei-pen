@@ -85,7 +85,7 @@
     <const name="CONTEXTO_ORGAO_B_DB_SEI_PASSWORD" value="sei_user" />
 
 
-    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 3, caso de sem hierarquia pai -->
+    <!-- CONFIGURAÃ‡Ã•ES DE TESTE Ã“rgÃ£o 3, caso de sem hierarquia pai -->
     <const name="CONTEXTO_ORGAO_C" value="CONTEXTO_ORGAO_C" />
     <const name="CONTEXTO_ORGAO_C_URL" value="http://xxxxx/sei"/>
     <const name="CONTEXTO_ORGAO_C_SIGLA_ORGAO" value="ABC" />
@@ -101,15 +101,15 @@
     <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE_SECUNDARIA" value="" />  
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO" value="Arrecadação: Cobrança" />    
-    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO" value="Ofício" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO" value="ArrecadaÃ§Ã£o: CobranÃ§a" />    
+    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO" value="OfÃ­cio" />
     <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO_NAO_MAPEADO" value="Nota" />           
-    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO" value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />    
-    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO" value="Documento PreparatÃ³rio (Art. 7Âº, Â§ 3Âº, da Lei nÂº 12.527/2011)" />    
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="InformaÃ§Ã£o Pessoal (Art. 31 da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />       
-    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-    <const name="CONTEXTO_ORGAO_C_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org2.pem" />
-    <const name="CONTEXTO_ORGAO_C_SENHA_CERTIFICADO_DIGITAL" value="n2TjrsC3TSFy9cRg" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, Â§ 3Âº, da Lei nÂº 10.180/2001)" />
+    <const name="CONTEXTO_ORGAO_C_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org3.pem" />
+    <const name="CONTEXTO_ORGAO_C_SENHA_CERTIFICADO_DIGITAL" value="" />
     <const name="CONTEXTO_ORGAO_C_DB_SEI_DSN" value="mysql:host=127.0.0.1;port=33062;dbname=sei;" />
     <!-- <const name="CONTEXTO_ORGAO_C_DB_SEI_DSN" value="sqlsrv:server=localhost,14332; Database=sei" /> -->
     <!-- <const name="CONTEXTO_ORGAO_C_DB_SEI_DSN" value="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=15212))(CONNECT_DATA=(SERVICE_NAME=XE)))" /> -->
