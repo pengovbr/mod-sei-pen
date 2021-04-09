@@ -60,4 +60,45 @@ class ProcessoEletronicoINT extends InfraINT {
         $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         return $objExpedirProcedimentoRN->listarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa);
     }
+
+
+    public static function formatarHierarquia($ObjEstrutura)
+    {
+        $nome = "";
+
+        if(isset($ObjEstrutura->hierarquia)) {
+            
+            $arrObjNivel = $ObjEstrutura->hierarquia->nivel;
+
+            $siglasUnidades = array();
+            $siglasUnidades[] = $ObjEstrutura->sigla;
+
+            foreach($arrObjNivel as $key => $objNivel){
+                $siglasUnidades[] = $objNivel->sigla  ;
+            }
+
+            for($i = 1; $i <= 3; $i++){
+                if(isset($siglasUnidades[count($siglasUnidades) - 1])){
+                    unset($siglasUnidades[count($siglasUnidades) - 1]);
+                }
+            }
+
+            foreach($siglasUnidades as $key => $nomeUnidade){
+                if($key == (count($siglasUnidades) - 1)){
+                    $nome .= $nomeUnidade." ";
+                }else{
+                    $nome .= $nomeUnidade." / ";
+                }
+            }
+
+            $objNivel=current($arrObjNivel);
+
+        }
+        $dados=["nome"=>$nome,"objNivel"=>$objNivel];
+
+        return $dados;
+
+    }
+
+    
 }
