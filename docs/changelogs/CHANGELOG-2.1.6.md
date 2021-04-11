@@ -17,7 +17,6 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 O módulo estáva retornado no histórico '@UNIDADE_DESTINO_HIRARQUIA@' nos casos que não encontrava uma hierarquia superior. Agora retornará vazio.
 
 
-
 #### Issue #63 - Ajuste em lógica para truncar textos longos
 
 A lógica atual apresentava erros se a última palavra era menor que a reticência.
@@ -37,3 +36,6 @@ O sistema estava permitindo a configuração de processos sigilosos ou desativad
 
 O sistema estava permitindo a configuração de processos sem configuração de assuntos, o que provocava erro posteriormente durante o recebimento
 
+#### Issue #70 - Homologação do mod-sei-pen para funcionamento com SEI 3.1.7
+
+Homologação e liberação do funcionamento do módulo para a versão 3.1.7 do SEI

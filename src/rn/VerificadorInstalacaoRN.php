@@ -30,7 +30,7 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class VerificadorInstalacaoRN extends InfraRN
 {
     // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X
-    const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6');
+    const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7');
 
     public function __construct() {
         parent::__construct();
