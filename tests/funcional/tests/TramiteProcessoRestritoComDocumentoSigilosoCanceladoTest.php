@@ -10,7 +10,7 @@ class TramiteProcessoRestritoComDocumentoSigilosoCanceladoTest extends CenarioBa
     public static $protocoloTeste;
 
     /**
-     * Teste de trâmite externo de processo com documentos restritos
+     * Teste de trâmite externo de processo com documento sigiloso cancelado
      *
      * @group envio
      *
@@ -121,7 +121,7 @@ class TramiteProcessoRestritoComDocumentoSigilosoCanceladoTest extends CenarioBa
 
 
     /**
-     * Teste de verificação do correto recebimento do processo contendo um documento cancelado com hipótese legal inativa
+     * Teste de verificação do correto recebimento do processo contendo um documento sigiloso cancelado
      *
      * @group verificacao_recebimento
      *

@@ -10,7 +10,7 @@ class TramiteProcessoRestritoComDocumentoRestritoCanceladoComHipoteseInativaTest
     public static $protocoloTeste;
 
     /**
-     * Teste de trâmite externo de processo com documentos restritos
+     * Teste de trâmite externo de processo com documento restrito com hipótese legal inativa cancelado
      *
      * @group envio
      *
@@ -111,7 +111,7 @@ class TramiteProcessoRestritoComDocumentoRestritoCanceladoComHipoteseInativaTest
 
 
     /**
-     * Teste de verificação do correto recebimento do processo contendo um documento cancelado com hipótese legal inativa
+     * Teste de verificação do correto recebimento do processo contendo um documento com hipótese legal inativa cancelado
      *
      * @group verificacao_recebimento
      *
