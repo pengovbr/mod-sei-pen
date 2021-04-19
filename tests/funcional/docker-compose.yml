@@ -4,13 +4,13 @@ services:
 
 ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
-      image: guilhermeadc/sei3_mailcatcher:7.2
+      image: processoeletronico/vagrant-sei4_mailcatcher:9.0
       container_name: smtp
       ports:
         - "1080:1080"
 
   memcached:
-    image: guilhermeadc/sei3_memcached:7.2
+    image: processoeletronico/vagrant-sei4_memcached:9.0
     container_name: memcached
     ports:
       - "11211:11211"
@@ -19,7 +19,7 @@ services:
     image: diouxx/apache-proxy
     container_name: proxy
     ports:
-      - "80:80"
+      - "8000:8000"
     volumes:
       - ./assets/proxy/:/opt/proxy-conf
     links:
@@ -44,13 +44,13 @@ services:
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 
   org1-database:
-    image: ${ORG1_DATABASE_IMAGE}:7.2
-    container_name: org1-${ORG1_DATABASE_NAME}
+    image: ${ORG1_DATABASE_IMAGE}:9.0
+    container_name: org1-${ORG1_DATABASE_HOST}
     ports:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
       
   org1-http:
-    image: guilhermeadc/sei3_httpd-2.4:7.2
+    image: processoeletronico/vagrant-sei4_httpd:9.0
     container_name: org1-http
     dns: "8.8.8.8"
     volumes:
@@ -64,29 +64,49 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
-      - SEI_HOST_URL=http://${ORG1_HOSTNAME}
+      - HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - APP_SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
+      - APP_SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
+
+      - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
+      - DATABASE_HOST=${ORG1_DATABASE_HOST}
+      - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT}
+
+      - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
+      - SEI_DATABASE_USER=${SEI_DATABASE_USER}
+      - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
+      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
+      
+      - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
+      - SIP_DATABASE_USER=${SIP_DATABASE_USER}
+      - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
+      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
+      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
+
+
     extra_hosts:
       - "${ORG1_HOSTNAME}:127.0.0.1"
     links:
       - memcached:memcached    
       - smtp:smtp      
-      - org1-database:${ORG1_DATABASE_NAME}
+      - org1-database:${ORG1_DATABASE_HOST}
 
 
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
   org2-database:
-    image: ${ORG2_DATABASE_IMAGE}:7.2
+    image: ${ORG2_DATABASE_IMAGE}:9.0
     container_name: org2-${ORG2_DATABASE_NAME}
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
 
   org2-http:
-    image: guilhermeadc/sei3_httpd-2.4:7.2
+    image: processoeletronico/vagrant-sei4_httpd:9.0
     container_name: org2-http
     dns: "8.8.8.8"
     volumes:
@@ -110,4 +130,4 @@ services:
     links:
       - memcached:memcached    
       - smtp:smtp      
-      - org2-database:${ORG2_DATABASE_NAME}
+      - org2-database:${ORG2_DATABASE_HOST}
