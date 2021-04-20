@@ -96,36 +96,52 @@ services:
 
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
-  # org2-database:
-  #   image: ${ORG2_DATABASE_IMAGE}:9.0
-  #   container_name: org2-${ORG2_DATABASE_NAME}
-  #   ports:
-  #     - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
+  org2-database:
+    image: ${ORG2_DATABASE_IMAGE}:9.0
+    container_name: org2-${ORG2_DATABASE_HOST}
+    ports:
+      - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
+    
+  org2-http:
+    image: processoeletronico/vagrant-sei4_httpd:9.0
+    container_name: org2-http
+    dns: "8.8.8.8"
+    volumes:
+      - ${SEI_PATH}:/opt
+      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/config:/opt/sei/config/mod-pen
+      - ../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../src/bin:/opt/sei/bin/mod-pen
+      - ../../src:/opt/sei/web/modulos/pen
+      - ${SEI_CONFIG}:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ${SIP_CONFIG}:/opt/sip/config/ConfiguracaoSip.php:ro
+    environment:
+      - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
+      - CERTIFICADO=${ORG2_CERTIFICADO}
+      - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+      - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - APP_SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
+      - APP_SEI_CHAVE_ACESSO=${ORG2_APP_SEI_CHAVE_ACESSO}
+      - DATABASE_TYPE=${ORG2_DATABASE_TYPE}
+      - DATABASE_HOST=${ORG2_DATABASE_HOST}
+      - DATABASE_PORT=${ORG2_DATABASE_GUEST_PORT}
 
+      - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
+      - SEI_DATABASE_USER=${SEI_DATABASE_USER}
+      - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
+      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
+      
+      - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
+      - SIP_DATABASE_USER=${SIP_DATABASE_USER}
+      - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
+      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
+      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
 
-  # org2-http:
-  #   image: processoeletronico/vagrant-sei4_httpd:9.0
-  #   container_name: org2-http
-  #   dns: "8.8.8.8"
-  #   volumes:
-  #     - ${SEI_PATH}:/opt
-  #     - ../../src/scripts:/opt/sei/scripts/mod-pen
-  #     - ../../src/scripts:/opt/sip/scripts/mod-pen
-  #     - ../../src/bin:/opt/sei/bin/mod-pen
-  #     - ../../src:/opt/sei/web/modulos/pen
-  #     - ./assets/config:/opt/sei/config/mod-pen
-  #     - ./assets/cron.d:/etc/cron.d
-  #     - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
-  #     - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-  #   environment:
-  #     - SEI_HOST_URL=http://${ORG2_HOSTNAME}
-  #     - CERTIFICADO=${ORG2_CERTIFICADO}
-  #     - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-  #     - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
-        
-  #   extra_hosts:
-  #     - "${ORG2_HOSTNAME}:127.0.0.1"
-  #   links:
-  #     - memcached:memcached    
-  #     - smtp:smtp      
-  #     - org2-database:${ORG2_DATABASE_HOST}
+    extra_hosts:
+      - "${ORG2_HOSTNAME}:127.0.0.1"
+    links:
+      - memcached:memcached    
+      - smtp:smtp      
+      - org2-database:${ORG2_DATABASE_HOST}
