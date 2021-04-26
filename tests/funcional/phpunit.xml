@@ -11,6 +11,7 @@
   
   <php>
     <const name="PHPUNIT_HOST" value="127.0.0.1"/>
+    <env name="VERSAO_SEI_MAJOR" value="4"/>
     <const name="PHPUNIT_PORT" value="4444"/>  
     <const name="PHPUNIT_BROWSER" value="chrome"/>
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
@@ -23,7 +24,7 @@
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
     <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" /> 
-    <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http/sei"/>
+    <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http:8000/sei"/>
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="951" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="1" />
@@ -55,7 +56,7 @@
 
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
-    <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http/sei"/>
+    <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei"/>
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />    
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />

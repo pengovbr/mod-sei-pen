@@ -78,7 +78,7 @@ class ProcessoExpedidoRN extends InfraRN {
 
         $arrProcessosExpedidos = array();
         $objProtocoloDTO->setNumTotalRegistros($total);
-        $objProtocoloDTO->setNumRegistrosPaginaAtual(count($pag));
+        $objProtocoloDTO->setNumRegistrosPaginaAtual($total);
 
         foreach ($objPaginacao['registrosPagina'] as $res) {
             $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);

@@ -24,7 +24,7 @@ services:
       - ./assets/proxy/:/opt/proxy-conf
     links:
       - org1-http:org1-http
-      # - org2-http:org2-http
+      - org2-http:org2-http
 
   selenium:
     image: selenium/standalone-chrome-debug
@@ -63,11 +63,14 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ${SEI_CONFIG}:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ${SIP_CONFIG}:/opt/sip/config/ConfiguracaoSip.php:ro
+      - ./assets/config/xdebug.ini:/etc/php.d/xdebug.ini
     environment:
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
       - CERTIFICADO=${ORG1_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug
       - APP_SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - APP_SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
       - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
@@ -116,11 +119,14 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ${SEI_CONFIG}:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ${SIP_CONFIG}:/opt/sip/config/ConfiguracaoSip.php:ro
+      - ./assets/config/xdebug.ini:/etc/php.d/xdebug.ini
     environment:
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug
       - APP_SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
       - APP_SEI_CHAVE_ACESSO=${ORG2_APP_SEI_CHAVE_ACESSO}
       - DATABASE_TYPE=${ORG2_DATABASE_TYPE}

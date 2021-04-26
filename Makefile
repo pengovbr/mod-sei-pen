@@ -69,6 +69,8 @@ install-dev:
 test-environment-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 up -d	
 	@echo "Sleeping for 60 seconds ..."; sleep 60;
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 exec org1-http yum install -y php-xdebug
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 exec org2-http yum install -y php-xdebug
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 exec org1-http chown -R root:root /etc/cron.d/
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 exec org1-http chmod 0644 /etc/cron.d/sei
@@ -94,7 +96,8 @@ test-environment-destroy:
 test-environment-up:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env_sei4 up -d	
 	@echo "Sleeping for 5 seconds ..."; sleep 5;
-	# sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
 
 
 test-environment-down:	
@@ -125,3 +128,15 @@ bash_org2:
 
 atualizaSequencia:
 	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+
+deletarHttpProxy:
+	sudo docker container rm proxy org1-http org2-http
+
+tramitar-pendencias:
+	i=1; while [ "$$i" -le 2 ]; do \
+    	echo "Executando $$i"; \
+		sudo docker exec -it org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		sudo docker exec -it org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		i=$$((i + 1));\
+  	done
