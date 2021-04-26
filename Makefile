@@ -122,5 +122,16 @@ bash_org1:
 bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
 
-atualizaSequencia:
-	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+
+atualiza_sequencia:
+	sudo docker exec -it org1-http php /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org1-http php /opt/sei/scripts/atualizar_sequencias.php 
+
+tramitar-pendencias:
+	i=1; while [ "$$i" -le 2 ]; do \
+    	echo "Executando $$i"; \
+		sudo docker exec -it org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		sudo docker exec -it org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		i=$$((i + 1));\
+  	done
+

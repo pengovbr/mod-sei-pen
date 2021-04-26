@@ -144,7 +144,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             //Construção do cabeçalho para envio do processo
             $objTramitesAnteriores = $this->consultarTramitesAnteriores($objMetadadosProcessoTramiteAnterior->NRE);
-            $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $objTramitesAnteriores);
+            $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $objTramitesAnteriores,$dblIdProcedimento);
 
             //Construção do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
@@ -396,7 +396,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
         }
 
-        private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $parObjTramitesAnteriores)
+        private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $parObjTramitesAnteriores,$dblIdProcedimento=null)
         {
             if(!isset($objExpedirProcedimentoDTO)){
                 throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
@@ -451,7 +451,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
             $objExpedirProcedimentoDTO->getBolSinUrgente(),
             $objExpedirProcedimentoDTO->getNumIdMotivoUrgencia(),
-            false /*obrigarEnvioDeTodosOsComponentesDigitais*/
+            false /*obrigarEnvioDeTodosOsComponentesDigitais*/,
+            $dblIdProcedimento
         );
     }
 
@@ -481,6 +482,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->atribuirDocumentos($objProcesso, $dblIdProcedimento, $parObjMetadadosTramiteAnterior);
         $this->atribuirDadosInteressados($objProcesso, $dblIdProcedimento);
         $this->adicionarProcessosApensados($objProcesso, $arrIdProcessoApensado);
+        $this->atribuirDadosHistorico($objProcesso, $dblIdProcedimento);
 
         $objProcesso->idProcedimentoSEI = $dblIdProcedimento;
         return $objProcesso;
@@ -492,7 +494,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objProcedimentoHistoricoDTO = new ProcedimentoHistoricoDTO();
         $objProcedimentoHistoricoDTO->setDblIdProcedimento($dblIdProcedimento);
         $objProcedimentoHistoricoDTO->setStrStaHistorico(ProcedimentoRN::$TH_TOTAL);
-
+        $objProcedimentoHistoricoDTO->setStrSinGerarLinksHistorico('N');
+        
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoDTO = $objProcedimentoRN->consultarHistoricoRN1025($objProcedimentoHistoricoDTO);
         $arrObjAtividadeDTO = $objProcedimentoDTO->getArrObjAtividadeDTO();
@@ -504,22 +507,21 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjOperacao = array();
         foreach ($arrObjAtividadeDTO as $objAtividadeDTO) {
 
-            //TODO: Avaliar necessidade de repassar dados da pessoa que realizou a operao
             $objOperacao = new stdClass();
-
-            //TODO: Adicionar demais informações da pessoa e sua unidade
-            $objOperacao->pessoa = new stdClass();
-            $objOperacao->pessoa->nome = utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem());
-            $objOperacao->codigo = $this->objProcessoEletronicoRN->obterCodigoOperacaoPENMapeado($objAtividadeDTO->getNumIdTarefa());
-            $objOperacao->dataHora = $this->objProcessoEletronicoRN->converterDataWebService($objAtividadeDTO->getDthAbertura());
-            $strComplemento = strip_tags($objAtividadeDTO->getStrNomeTarefa());
-            $objOperacao->complemento = utf8_encode($strComplemento);
-
+            $objOperacao->dataHoraOperacao = $this->objProcessoEletronicoRN->converterDataWebService($objAtividadeDTO->getDthAbertura());
+            $objOperacao->unidadeOperacao = utf8_encode($objAtividadeDTO->getStrDescricaoUnidade());
+            $objOperacao->operacao = $this->objProcessoEletronicoRN->reduzirCampoTexto(strip_tags(utf8_encode($objAtividadeDTO->getStrNomeTarefa())),1000);
+            $objOperacao->usuario = utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem());            
             $arrObjOperacao[] = $objOperacao;
         }
 
-        $objProcesso->historico = new stdClass();
-        $objProcesso->historico->operacao = $arrObjOperacao;
+        usort($arrObjOperacao,function($obj1,$obj2){
+            $dt1=new DateTime($obj1->dataHoraOperacao);
+            $dt2=new DateTime($obj2->dataHoraOperacao);
+            return $dt1>$dt2;
+            });
+
+        $objProcesso->historico = $arrObjOperacao;
     }
 
     /**
