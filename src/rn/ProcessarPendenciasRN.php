@@ -238,6 +238,63 @@ class ProcessarPendenciasRN extends InfraRN
         $objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdentificacaoTramite);
     }
 
+    /**
+     * Processa a mensagem de pendência de Envio de Processo
+     *
+     * @param object $idProcedimento Contexto com informações para processamento da tarefa
+     * @return void
+     */
+    public function expedirLote($idProcedimento)
+    {
+        try {
+
+            $this->gravarLogDebug("Processando envio de protocolo [expedirProcedimento] com IDProcedimento " . $idProcedimento, 0, true);
+            $numTempoInicialEnvio = microtime(true);
+
+            $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+            $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
+            $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
+            $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
+            $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
+            $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
+            $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+            $objPenLoteProcedimentoDTO->retDblIdProcedimento();
+            $objPenLoteProcedimentoDTO->retNumIdLote();
+            $objPenLoteProcedimentoDTO->retNumIdAtividade();
+            $objPenLoteProcedimentoDTO->retNumIdUnidade();
+            $objPenLoteProcedimentoDTO->setDblIdProcedimento(intval($idProcedimento));
+            $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+
+            $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+            $objLoteProcedimento = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+
+            $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+            $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($objLoteProcedimento->getNumIdRepositorioOrigem());
+            $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($objLoteProcedimento->getNumIdUnidadeOrigem());
+
+            $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($objLoteProcedimento->getNumIdRepositorioDestino());
+            $objExpedirProcedimentoDTO->setStrRepositorioDestino($objLoteProcedimento->getStrRepositorioDestino());
+            $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($objLoteProcedimento->getNumIdUnidadeDestino());
+            $objExpedirProcedimentoDTO->setStrUnidadeDestino($objLoteProcedimento->getStrUnidadeDestino());
+            $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+            $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+            $objExpedirProcedimentoDTO->setDblIdProcedimento($objLoteProcedimento->getDblIdProcedimento());
+            $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+            $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(true);
+            $objExpedirProcedimentoDTO->setNumIdLote($objLoteProcedimento->getNumIdLote());
+            $objExpedirProcedimentoDTO->setNumIdAtividade($objLoteProcedimento->getNumIdAtividade());
+            $objExpedirProcedimentoDTO->setNumIdUnidade($objLoteProcedimento->getNumIdUnidade());
+
+            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+            $objExpedirProcedimentoRN->expedirProcedimento($objExpedirProcedimentoDTO);
+
+            $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
+            $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);            
+
+        } catch (\Exception $e) {
+            throw new InfraException('Falha ao expedir processso em lote.', $e);
+        }
+    }
 
     private function configurarCallbacks()
     {
@@ -267,6 +324,10 @@ class ProcessarPendenciasRN extends InfraRN
 
         $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function($job) {
             $this->enviarReciboTramiteProcesso($job->workload());
+        }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
+
+        $this->objGearmanWorker->addFunction("expedirLote", function($job) {
+            $this->expedirLote($job->workload());
         }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
     }

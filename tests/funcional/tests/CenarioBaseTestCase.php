@@ -37,6 +37,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaProcessosTramitadosExternamente = null;
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
+    protected $paginaTramitarProcessoEmLote = null;
 
     public function setUpPage(): void
     {
@@ -54,6 +55,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaAnexarProcesso = new PaginaAnexarProcesso($this);
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
+        $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
         $this->currentWindow()->maximize();
     }
 
@@ -255,7 +257,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente=false, $callbackEnvio=null, $timeout=PEN_WAIT_TIMEOUT)
     {
         // Acessar funcionalidade de trâmite externo
-        $this->paginaProcesso->navegarParaTramitarProcesso();
+        try{
+            $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
+        } catch(Exception $e){
+            $this->paginaProcesso->navegarParaTramitarProcesso();
+        }
 
         // Preencher parâmetros do trâmite
         $this->paginaTramitar->repositorio($repositorio);
@@ -287,8 +293,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {
-                $testCase->frame(null);
-                $testCase->frame("ifrVisualizacao");
+                try{
+                    $this->frame(null);
+                    $this->frame("ifrVisualizacao");
+                } catch(Exception $e){}   
             }
 
             return true;
@@ -297,8 +305,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         try {
             $this->waitUntil($callbackEnvio, $timeout);
         } finally {
-            $this->frame(null);
-            $this->frame("ifrVisualizacao");
+            try{
+                $this->frame(null);
+                $this->frame("ifrVisualizacao");
+            } catch(Exception $e){}            
         }
 
         sleep(1);
@@ -610,4 +620,22 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaBase->navegarParaControleProcesso();
         $this->assertFalse($this->paginaControleProcesso->contemProcesso($processoTeste['PROTOCOLO'], false, false));
     }
+
+    protected function selecionarProcessos()
+    {
+        $this->paginaBase->navegarParaControleProcesso();
+        $this->paginaTramitarProcessoEmLote->selecionarProcessos();
+        sleep(2);
+    }
+
+    protected function visualizarProcessoTramitadosEmLote($test)
+    {
+        $this->paginaBase->navegarParaControleProcesso();
+        $test->byLinkText("Processos Tramitados em Lote")->click();
+    }
+
+    protected function selecionarSituacao()
+    {
+        $this->paginaTramitarProcessoEmLote->selecionarSituacao();
+    }    
 }

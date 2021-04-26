@@ -51,6 +51,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $barraProgresso;
     private $objProcedimentoAndamentoRN;
     private $fnEventoEnvioMetadados;
+    private $objPenDebug;
 
     private $arrPenMimeTypes = array(
         "application/pdf",
@@ -103,6 +104,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
         $this->objAssinaturaRN = new AssinaturaRN();
         $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
+        $this->objPenDebug = DebugPen::getInstance("PROCESSAMENTO");
 
         $this->barraProgresso = new InfraBarraProgresso();
         $this->barraProgresso->setNumMin(0);
@@ -113,6 +115,11 @@ class ExpedirProcedimentoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
+    private function gravarLogDebug($parStrMensagem, $parNumIdentacao=0, $parBolLogTempoProcessamento=true)
+    {
+        $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
+    }
+
     protected function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
         $numIdTramite = 0;
@@ -121,8 +128,26 @@ class ExpedirProcedimentoRN extends InfraRN {
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
             $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
-            $this->barraProgresso->exibir();
-            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
+            $bolSinProcessamentoEmLote = $objExpedirProcedimentoDTO->getBolSinProcessamentoEmLote();
+            $numIdLote = $objExpedirProcedimentoDTO->getNumIdLote();
+            $numIdAtividade = $objExpedirProcedimentoDTO->getNumIdAtividade();
+            $numIdUnidade = $objExpedirProcedimentoDTO->getNumIdUnidade();
+
+            if(!$bolSinProcessamentoEmLote){
+                $this->barraProgresso->exibir();
+                $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);
+            }else{
+                $this->gravarLogDebug("Processando envio de processo [expedirProcedimento] com Procedimento $dblIdProcedimento", 0, true);
+                $numTempoInicialRecebimento = microtime(true);
+
+                $this->gravarLogDebug(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO, 2);
+                $objLoteProcedimentoRN = new PenLoteProcedimentoRN();
+
+                $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+                $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
+                $objPenLoteProcedimentoDTO->setNumIdLote($numIdLote);
+
+            }
 
             $objInfraException = new InfraException();
             //Carregamento dos dados de processo e documento para validação e envio externo
@@ -134,9 +159,26 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             //Apresentao da mensagens de validao na janela da barra de progresso
             if($objInfraException->contemValidacoes()){
-                $this->barraProgresso->mover(0);
-                $this->barraProgresso->setStrRotulo('Erro durante validação dos dados do processo.');
-                $objInfraException->lancarValidacoes();
+                if(!$bolSinProcessamentoEmLote){
+                    $this->barraProgresso->mover(0);
+                    $this->barraProgresso->setStrRotulo('Erro durante validação dos dados do processo.');
+                    $objInfraException->lancarValidacoes();
+                }else{
+
+                    $arrErros = array();
+                    foreach($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+                        $strAtributo = $objInfraValidacao->getStrAtributo();
+                        if(!array_key_exists($strAtributo, $arrErros)){
+                            $arrErros[$strAtributo] = array();
+                        }
+                        $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+                    }
+
+                    $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $$arrErros), 2);
+                    $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento); 
+
+                    return false;
+                }
             }
 
             //Busca metadados do processo registrado em trâmite anterior
@@ -152,12 +194,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Obtém o tamanho total da barra de progreso
             $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
 
-            //Atribui o tamanho máximo da barra de progresso
-            $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
+            if(!$bolSinProcessamentoEmLote){
+                //Atribui o tamanho máximo da barra de progresso
+                $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
 
-            //Exibe a barra de progresso após definir o seu tamanho
-            $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
-            $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+                //Exibe a barra de progresso após definir o seu tamanho
+                $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
+                $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+            }else{
+                $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+            }
 
             //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
             if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)){
@@ -180,7 +226,15 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 try {
                     $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
-                    $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
+
+                    if($bolSinProcessamentoEmLote){
+                        $this->gravarLogDebug(sprintf('Envio do metadados do processo %s', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+                        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+                        $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+                        $idAtividadeExpedicao = $numIdAtividade;
+                    }else{
+                        $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
+                    }
 
                     $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
                         $objProcesso->idProcedimentoSEI,
@@ -194,7 +248,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
                         $objProcesso,
                         $objTramite->ticketParaEnvioDeComponentesDigitais,
-                        $objTramite->componentesDigitaisSolicitados);
+                        $objTramite->componentesDigitaisSolicitados,
+                        $bolSinProcessamentoEmLote,
+                        $numIdUnidade);
 
 
                         $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
@@ -206,7 +262,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                         //componentes precisam ser baixados, semelhante ao que ocorre no enviarProcesso onde o barramento informa quais os componentes
                         //que precisam ser enviados
 
-                        $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $objProcesso->protocolo);
+                        $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $objProcesso->protocolo, $bolSinProcessamentoEmLote);
 
                         //TODO: Ao enviar o processo e seus documentos, necessrio bloquear os documentos para alterao
                         //pois eles j foram visualizados
@@ -217,12 +273,24 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                         //TODO: Alterar atualizao para somente apresentar ao final de todo o trâmite
                         //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
-                        $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-                        $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+
+                        if(!$bolSinProcessamentoEmLote){
+                            $this->barraProgresso->mover($this->barraProgresso->getNumMax());
+                            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+                        }else{
+                            $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
+                            $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
+                            $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+                        }
 
                         $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
                         $this->receberReciboDeEnvio($objTramite->IDT);
+
+                        $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+
+                        $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
+                        $this->gravarLogDebug("Finalizado o envio de protocolo número " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
                     }
                     catch (\Exception $e) {
                         //Realiza o desbloqueio do processo
@@ -1748,7 +1816,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         return $this->objDocumentoRN->consultarRN0005($documentoDTO);
     }
 
-    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo)
+    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmLote=false)
     {
         if (!isset($strNumeroRegistro)) {
             throw new InfraException('Parâmetro $strNumeroRegistro não informado.');
@@ -1784,7 +1852,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Construir objeto Componentes digitais
             $arrHashComponentesEnviados = array();
             foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
-                $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+
+                if(!$bolSinProcessamentoEmLote){
+                    $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+                }else{
+                    $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 2);
+                } 
 
                 $dadosDoComponenteDigital = new stdClass();
                 $dadosDoComponenteDigital->ticketParaEnvioDeComponentesDigitais = $objComponenteDigitalDTO->getNumTicketEnvioComponentes();
@@ -1819,7 +1892,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                             //Método que irá particionar o arquivo em partes para realizar o envio
                             $this->particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb,
-                            $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite);
+                            $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmLote);
 
                             //Finalizar o envio das partes do componente digital
                             $parametros = new stdClass();
@@ -1834,8 +1907,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                             $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                             $result = $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                            $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
-                            $this->contadorDaBarraDeProgresso++;
+                            if(!$bolSinProcessamentoEmLote){
+                                $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                                $this->contadorDaBarraDeProgresso++;
+                            }
                         }
 
                         $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
@@ -2266,7 +2341,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @throws InfraException
     */
     private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
-    $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite)
+    $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmLote=false)
     {
         //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
         $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
@@ -2281,7 +2356,9 @@ class ExpedirProcedimentoRN extends InfraRN {
             $fim = $inicio + $tamanhoParteArquivo;
             try{
                 $this->enviarParteDoComponenteDigital($inicio, $fim, $parteDoArquivo, $dadosDoComponenteDigital);
-                $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                if(!$bolSinProcessamentoEmLote){
+                    $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
+                }
                 $this->contadorDaBarraDeProgresso++;
             }catch (Exception $e){
                 //Armazena as partes que não foram enviadas para tentativa de reenvio posteriormente
@@ -2493,87 +2570,115 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objPenUnidadeDTO = $objGenericoBD->consultar($objPenUnidadeDTO);
 
-        $objTramiteDTO = new TramiteDTO();
-        $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
-        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
-        $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-        $objTramiteDTO->retNumIdTramite();
-
-        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-
-        if(!isset($objTramiteDTO)){
-            throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
-        }
-
-        //Armazena o id do protocolo
         $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
 
-        $tramites = $this->objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, $objPenUnidadeDTO->getNumIdUnidadeRH(), null, null, $numIdRespositorio);
-        $tramite = $tramites ? $tramites[0] : null;
+        $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+        $objPenLoteProcedimentoDTO->retTodos();
+        $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
-        if (!$tramite) {
-            $numIdTramite = $objTramiteDTO->getNumIdTramite();
-            $numIdProtoloco = $objDtoProtocolo->getDblIdProtocolo();
-            throw new InfraException("Trâmite $numIdTramite não encontrado para o processo $numIdProtoloco.");
+        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+        $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+        $cancelarLote=false;
+
+        if(is_object($objPenLoteProcedimentoDTO)){
+            $cancelarLote=true;
         }
 
-        //Verifica se o trâmite est com o status de iniciado
-        if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
-            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
-            return true;
-        }
+        if(!$cancelarLote){
 
-        //Busca o processo eletrônico
-        $objDTOFiltro = new ProcessoEletronicoDTO();
-        $objDTOFiltro->setDblIdProcedimento($dblIdProcedimento);
-        $objDTOFiltro->retStrNumeroRegistro();
-        $objDTOFiltro->setNumMaxRegistrosRetorno(1);
+            $objTramiteDTO = new TramiteDTO();
+            $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
+            $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+            $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+            $objTramiteDTO->retNumIdTramite();
+    
+            $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+    
+            if(!isset($objTramiteDTO)){
+                throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
+            }
 
-        $objBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
-        $objProcessoEletronicoDTO = $objBD->consultar($objDTOFiltro);
+            $tramites = $this->objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, $objPenUnidadeDTO->getNumIdUnidadeRH(), null, null, $numIdRespositorio);
+            $tramite = $tramites ? $tramites[0] : null;
 
-        if (empty($objProcessoEletronicoDTO)) {
-            throw new InfraException('Não foi encontrado o processo pelo ID ' . $dblIdProcedimento);
-        }
+            if (!$tramite) {
+                $numIdTramite = $objTramiteDTO->getNumIdTramite();
+                $numIdProtoloco = $objDtoProtocolo->getDblIdProtocolo();
+                throw new InfraException("Trâmite $numIdTramite não encontrado para o processo $numIdProtoloco.");
+            }
 
-        //Armazena a situao atual
-        $numSituacaoAtual = $tramite->situacaoAtual;
+            //Verifica se o trâmite est com o status de iniciado
+            if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
+                $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
+                return true;
+            }
 
-        //Valida os status
-        switch ($numSituacaoAtual) {
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                throw new InfraException("O sistema destinatário já iniciou o recebimento desse processo, portanto não é possível realizar o cancelamento");
-            break;
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-                throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
-            break;
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                throw new InfraException("O trâmite externo para esse processo encontra-se recusado.");
-            break;
-        }
+            //Busca o processo eletrônico
+            $objDTOFiltro = new ProcessoEletronicoDTO();
+            $objDTOFiltro->setDblIdProcedimento($dblIdProcedimento);
+            $objDTOFiltro->retStrNumeroRegistro();
+            $objDTOFiltro->setNumMaxRegistrosRetorno(1);
 
-        //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
-        if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
-            $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
+            $objBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+            $objProcessoEletronicoDTO = $objBD->consultar($objDTOFiltro);
+
+            if (empty($objProcessoEletronicoDTO)) {
+                throw new InfraException('Não foi encontrado o processo pelo ID ' . $dblIdProcedimento);
+            }
+
+            //Armazena a situao atual
+            $numSituacaoAtual = $tramite->situacaoAtual;
+
+            //Valida os status
+            switch ($numSituacaoAtual) {
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+                    throw new InfraException("O sistema destinatário já iniciou o recebimento desse processo, portanto não é possível realizar o cancelamento");
+                break;
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
+                    throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
+                break;
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+                    throw new InfraException("O trâmite externo para esse processo encontra-se recusado.");
+                break;
+            }
+
+            //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
+            if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
+                $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
+            }
         }
 
         //Desbloqueia o processo
         ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
 
-        $objDTOFiltro = new TramiteDTO();
-        $objDTOFiltro->setNumIdTramite($tramite->IDT);
-        $objDTOFiltro->setNumMaxRegistrosRetorno(1);
-        $objDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objDTOFiltro->retNumIdTramite();
-        $objDTOFiltro->retStrNumeroRegistro();
+        if(is_object($objPenLoteProcedimentoDTO)){
 
-        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        $objTramiteDTO = $objTramiteBD->consultar($objDTOFiltro);
+            $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
+            $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
+            $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
+            $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
 
-        $objTramiteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
-        $objTramiteDTO = $objTramiteBD->alterar($objTramiteDTO);
+            $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+            $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+        }        
+
+        if(!$cancelarLote){
+            $objDTOFiltro = new TramiteDTO();
+            $objDTOFiltro->setNumIdTramite($tramite->IDT);
+            $objDTOFiltro->setNumMaxRegistrosRetorno(1);
+            $objDTOFiltro->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objDTOFiltro->retNumIdTramite();
+            $objDTOFiltro->retStrNumeroRegistro();
+
+            $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+            $objTramiteDTO = $objTramiteBD->consultar($objDTOFiltro);
+
+            $objTramiteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
+            $objTramiteDTO = $objTramiteBD->alterar($objTramiteDTO);
+        }
 
         //Cria o Objeto que registrar a Atividade de cancelamento
         $objAtividadeDTO = new AtividadeDTO();
