@@ -466,8 +466,33 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    protected function realizarTramiteExterno(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite)
+
+    public function gerarDadosDocumentoExternoGrandeTeste($contextoProducao,$tamanhoMB=100 , $nomesArquivo='arquivo_grande_gerado.txt',  $ordemDocumentoReferenciado=null)
     {
+        // Tratamento para lista de arquivos em casos de documentos com mais de um componente digital
+        $pasta = self::PASTA_ARQUIVOS_TESTE;
+        shell_exec('dd if=/dev/zero of=' . self::PASTA_ARQUIVOS_TESTE . '/' . $nomesArquivo . ' bs=1M count=' . $tamanhoMB);
+        $arquivos = "$pasta/$nomesArquivo";
+
+        return array(
+            'TIPO' => 'R', // Documento do tipo Recebido pelo sistema
+            "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
+            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
+            "DATA_ELABORACAO" => '01/01/2017',
+            "DESCRICAO" => str_repeat(util::random_string(9) . ' ', 10),
+            "OBSERVACOES" => util::random_string(500),
+            "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
+            "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
+            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "ARQUIVO" => $arquivos,
+            "ORIGEM" => $contextoProducao['URL'],
+        );
+    }
+
+
+    protected function realizarTramiteExterno(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite,$maxTimeOut=1)
+    {
+        $novoTimeOut=PEN_WAIT_TIMEOUT*$maxTimeOut;
         $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         // 1 - Acessar sistema do REMETENTE do processo
@@ -509,7 +534,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
                 $testCase->assertFalse($paginaProcesso->processoAberto());
                 $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
                 return true;
-            }, PEN_WAIT_TIMEOUT);
+            }, $novoTimeOut);
 
             // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
             $unidade = mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1");
@@ -531,12 +556,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     }
 
-    public function realizarTramiteExternoComValidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
+    public function realizarTramiteExternoComValidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario,$maxTimeOut=1)
     {
-        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, true);
+        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, true,$maxTimeOut);
     }
 
-    public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false)
+    public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false, $validarDocumentos=true)
     {
         $strProtocoloTeste = $processoTeste['PROTOCOLO'];
 
@@ -563,11 +588,13 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
         // 14 - Validar dados do documento
-        $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
-        $this->assertEquals(count($listaDocumentos), count($documentosTeste));
+        if($validarDocumentos){
+            $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
+            $this->assertEquals(count($listaDocumentos), count($documentosTeste));
 
-        for ($i=0; $i < count($listaDocumentos); $i++) {
-            $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
+            for ($i=0; $i < count($listaDocumentos); $i++) {
+                $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
+            }
         }
     }
 
