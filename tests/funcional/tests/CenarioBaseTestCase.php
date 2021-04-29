@@ -550,9 +550,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
     }
 
-    public function realizarTramiteExternoSemvalidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
+    public function realizarTramiteExternoSemvalidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario,$maxTimeOut=1)
     {
-        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, false);
+        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, false,$maxTimeOut);
 
     }
 
@@ -561,8 +561,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, true,$maxTimeOut);
     }
 
-    public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false, $validarDocumentos=true)
+    public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false, $validarDocumentos=true,$maxTimeOut=1)
     {
+        $novoTimeOut=PEN_WAIT_TIMEOUT*$maxTimeOut;
         $strProtocoloTeste = $processoTeste['PROTOCOLO'];
 
         // 10 - Acessar sistema de REMETENTE do processo
@@ -573,7 +574,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             sleep(5);
             $this->abrirProcesso($strProtocoloTeste);
             return true;
-        }, PEN_WAIT_TIMEOUT);
+        }, $novoTimeOut);
 
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
@@ -636,5 +637,21 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
         $this->paginaBase->navegarParaControleProcesso();
         $this->assertFalse($this->paginaControleProcesso->contemProcesso($processoTeste['PROTOCOLO'], false, false));
+    }
+
+    public function duplicaProcessoCriado($processo)
+    {
+       $this->paginaProcesso->duplicarProcesso($processo);
+       return true;
+    }
+
+
+    public function realizarTramiteExternoProcessoAberto($dadosProcesso,$destinatario)
+    {
+        $this->tramitarProcessoExternamente(null, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        $this->frame(null);
+        $this->frame("ifrArvore");
+        $protocoloProcesso = trim($this->byXPath("//span[@title='". $dadosProcesso["TIPO_PROCESSO"] ."']")->text());
+        return $protocoloProcesso;
     }
 }

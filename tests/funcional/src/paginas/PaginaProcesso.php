@@ -1,5 +1,8 @@
 <?php
 
+use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+
+
 class PaginaProcesso extends PaginaTeste
 {
 	const STA_STATUS_PROCESSO_ABERTO = 1;
@@ -224,5 +227,31 @@ class PaginaProcesso extends PaginaTeste
         $itens = $this->test->elements($this->test->using('css selector')->value('div.infraArvore > a > span'));
         return array_map(function($item) {return $item->text();}, $itens);
     }
+
+    public function duplicarProcesso($processo)
+    {
+       
+            // Selecionar processo na árvore
+            $this->selecionarProcesso();
+
+            $this->test->frame(null);
+            $this->test->frame("ifrVisualizacao");
+            $this->duplicaButton = $this->test->byXPath("//img[@alt='Duplicar Processo']");
+            $this->duplicaButton->click();
+            sleep(2);
+
+            $input = $this->test->byId('txtInteressado');
+            $input->value($processo['INTERESSADOS']);
+            $this->test->keys(Keys::ENTER);
+            $this->test->acceptAlert();
+            sleep(2);
+
+            $this->duplicaButtonAdicionar = $this->test->byId('btnDuplicarProcesso');
+            $this->duplicaButtonAdicionar->click();
+
+            return true;
+        
+    }
+
 
 }
