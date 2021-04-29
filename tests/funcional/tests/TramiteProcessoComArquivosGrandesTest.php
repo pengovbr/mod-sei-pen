@@ -9,6 +9,14 @@ class TramiteProcessoComArquivosGrandesTest extends CenarioBaseTestCase
     public static $protocoloTeste;
     public static $numerosProcessos=array();
 
+
+    public static function tearDownAfterClass() :void {
+
+        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);    
+        $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+
+    }
+
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
@@ -22,13 +30,16 @@ class TramiteProcessoComArquivosGrandesTest extends CenarioBaseTestCase
          //Aumenta o tempo de timeout devido à quantidade de arquivos
          $this->setSeleniumServerRequestsTimeout(7200);
 
+         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);    
+         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(120, 'SEI_TAM_MB_DOC_EXTERNO'));
+
          // Configuração do dados para teste do cenário
          self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
          self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
          self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
          self::$documentosTeste = array_merge(
             //  array_fill(0, 30, $this->gerarDadosDocumentoInternoTeste(self::$remetente)),
-             array_fill(0, 1, $this->gerarDadosDocumentoExternoGrandeTeste(self::$remetente,5))
+             array_fill(0, 10, $this->gerarDadosDocumentoExternoGrandeTeste(self::$remetente,100))
          );
  
          shuffle(self::$documentosTeste);
