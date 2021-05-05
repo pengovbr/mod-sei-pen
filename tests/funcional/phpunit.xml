@@ -19,6 +19,9 @@
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" /> 
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" /> 
+    <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value="sudo docker exec -it org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;"/> 
+    <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value="sudo docker exec -it org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;"/> 
+
 
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
