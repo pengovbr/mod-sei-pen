@@ -39,7 +39,7 @@ class TramiteProcessoComArquivosGrandesTest extends CenarioBaseTestCase
          self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
          self::$documentosTeste = array_merge(
             //  array_fill(0, 30, $this->gerarDadosDocumentoInternoTeste(self::$remetente)),
-             array_fill(0, 10, $this->gerarDadosDocumentoExternoGrandeTeste(self::$remetente,100))
+             array_fill(0, 10 , $this->gerarDadosDocumentoExternoGrandeTeste(self::$remetente,100))
          );
  
          shuffle(self::$documentosTeste);
@@ -47,9 +47,20 @@ class TramiteProcessoComArquivosGrandesTest extends CenarioBaseTestCase
         $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, self::$documentosTeste, self::$remetente, self::$destinatario,20);
         self::$numerosProcessos[]=self::$processoTeste['PROTOCOLO'];
 
-        $this->duplicaProcessoCriado(self::$processoTeste);
+        $novoTimeOut=PEN_WAIT_TIMEOUT*20;
 
-        self::$numerosProcessos[]=$this->realizarTramiteExternoProcessoAberto(self::$processoTeste,self::$destinatario);      
+        for($proc=0;$proc<9;$proc++){
+        $this->duplicaProcessoCriado(self::$processoTeste);
+        for($i=0;$i<2;$i++){
+            $this->waitUntil(function(){
+                exec(PEN_SCRIPT_MONITORAMENTO_ORG1);
+                exec(PEN_SCRIPT_MONITORAMENTO_ORG2);
+                return true;
+                }, $novoTimeOut);
+            }
+            
+            self::$numerosProcessos[]=$this->realizarTramiteExternoProcessoAberto(self::$processoTeste,self::$destinatario);      
+        }
 
     }
 
