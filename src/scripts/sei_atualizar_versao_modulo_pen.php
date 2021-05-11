@@ -1371,7 +1371,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         SessaoInfra::setObjInfraSessao(SessaoSEI::getInstance());
         BancoInfra::setObjInfraIBanco(BancoSEI::getInstance());
 
-        #[Fix-35] Correção de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
+        //[Fix-35] Correção de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
         $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', array('id_serie'), true);
         $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_recebido', 'ak1_rel_doc_map_recebido', array('codigo_especie'), true);
 
@@ -2101,6 +2101,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function instalarV2107()
     {
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objInfraMetaBD->criarIndice('md_pen_rel_hipotese_legal', 'ak1_rel_hipotese_legal', array('id_hipotese_legal', 'id_hipotese_legal_pen', 'tipo'), true);
         $this->atualizarNumeroVersao("2.1.7");
     }
 }

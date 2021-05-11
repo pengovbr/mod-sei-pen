@@ -624,7 +624,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAtributoAndamentoDTO->setStrValor($nome);
             $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
             $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-        
+
 
         //Seta a unidade de destino
         $arrUnidadeDestino = preg_split('/\s?\/\s?/', $objExpedirProcedimentoDTO->getStrUnidadeDestino());
@@ -1400,13 +1400,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             "controleURL" => $dadosURL
         ];
 
-        if($dadosURL!=null){  
+        if($dadosURL!=null){
             $objEditorRN = new Editor3011RN();
             $strResultado = $objEditorRN->consultarHtmlVersao($dados);
             return $strResultado;
         }
-            
-            
+
+
         //fix-107. Gerar doc exatamente da forma como estava na v3.0.11
         //Raramente vai entrar aqui e para diminuir a complexidade ciclomatica
         //n encadeei com elseif nas instrucoes acima
@@ -2013,7 +2013,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
 
         if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
-            $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO1($arrObjAtividadeDTO, 'SiglaUnidade'));
+            $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
             $objInfraException->adicionarValidacao("Não é possível tramitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
         }
     }
