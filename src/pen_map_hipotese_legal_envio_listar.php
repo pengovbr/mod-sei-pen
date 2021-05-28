@@ -176,11 +176,11 @@ try {
             
             //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
             if($objSessao->verificarPermissao('pen_map_hipotese_legal_envio_alterar')) {
-                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/alterar.gif" title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
             }
             
             if($objSessao->verificarPermissao('pen_map_hipotese_legal_envio_excluir')) {
-                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src="imagens/excluir.gif" title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
             }
             
             $strResultado .= '</td>';
@@ -320,7 +320,7 @@ function onClickBtnExcluir(){
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
 ?>
-<form id="frmAcompanharEstadoProcesso" method="post" action="<?php// print $objSessao->assinarLink($strProprioLink); ?>">
+<form id="frmAcompanharEstadoProcesso" method="post" action="<?php // print $objSessao->assinarLink($strProprioLink); ?>">
     
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>
@@ -343,7 +343,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
         <?php $objPagina->montarAreaTabela($strResultado, $numRegistros); ?>
         <?php //$objPagina->montarAreaDebug(); ?>
     <?php else: ?>
-        <div style="clear:both"></div>
+        <div style="clear:both;margin:2em"></div>
         <p>Nenhum mapeamento foi encontrado</p>
     <?php endif; ?>
 </form>

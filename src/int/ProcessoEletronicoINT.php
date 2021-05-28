@@ -100,5 +100,85 @@ class ProcessoEletronicoINT extends InfraINT {
 
     }
 
+
+    public static function getCaminhoIcone($imagem,$relPath=null)
+    {
+        $versao=substr(SEI_VERSAO,0,1);
+
+        if ($versao>3){
+
+            switch ($imagem) {
+                case 'imagens/consultar.gif':
+                    return '/infra_css/svg/consultar.svg';
+                    break;
+                case 'imagens/alterar.gif':
+                    return '/infra_css/svg/alterar.svg';
+                    break;
+                case 'imagens/excluir.gif':
+                    return '/infra_css/svg/excluir.svg';
+                    break;
+                case '/pen_expedir_procedimento.gif':
+                    // return '/infra_css/svg/upload.svg';
+                    // return 'svg/arquivo_mapeamento_assunto.svg';
+                    return 'modulos/pen/imagens/pen_enviar.png';
+                    break;
+                case '/pen_consultar_recibos.gif':
+                    // return '/infra_css/svg/pesquisar.svg';
+                    return 'modulos/pen/imagens/processo_pesquisar_pen.png';
+                    break;
+                case '/pen_cancelar_tramite.gif':
+                    // return '/infra_css/svg/remover.svg';
+                    return 'modulos/pen/imagens/pen_cancelar_envio.png';
+                    break;
+                case '/infra_js/arvore/plus.gif':
+                    return '/infra_css/svg/mais.svg';
+                    break;
+                case '/infra_js/arvore/minus.gif':
+                    return '/infra_css/svg/menos.svg';
+                    break;
+                case 'imagens/anexos.gif':
+                    return '/infra_css/imagens/anexos.gif';
+                    break;
+                
+                
+                default:
+                    $caminho=$relPath==null? $caminho : $relPath . $caminho;
+                    return $caminho;
+                    break;
+            }
+
+
+        }
+
+
+        $caminho=$relPath==null? $caminho : $relPath . $caminho;
+        
+        return $caminho;
+
+
+
+    }
+
+    public static function getCssCompatibilidadeSEI4($arquivo)
+    {
+
+        $versao = substr(SEI_VERSAO, 0, 1);
+
+        if ($versao > 3) {
+
+            switch ($arquivo) {
+                case 'pen_procedimento_expedir':
+                    return 'pen_procedimento_expedir_sei4';
+                    break;
+
+                default:
+                    return $arquivo;
+                    break;
+            }
+        }
+
+        return $arquivo;
+    }
+
     
 }
