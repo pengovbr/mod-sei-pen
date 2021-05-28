@@ -1245,6 +1245,14 @@ class ExpedirProcedimentoRN extends InfraRN {
                     if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), false,false,$dadosURL);
                     }
+
+                    //verificar versao SEI4
+                    $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+                    if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                        $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), false,false,$dadosURL,true);
+                    }
+
+
                 }
             }
 
@@ -1364,7 +1372,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
     * @return String                     Conteúdo completo do documento para envio
     */
-    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null)
+    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false)
     {
         $objEditorDTO = new EditorDTO();
         $objEditorDTO->setDblIdDocumento($parDblIdDocumento);
@@ -1400,13 +1408,19 @@ class ExpedirProcedimentoRN extends InfraRN {
             "controleURL" => $dadosURL
         ];
 
-        if($dadosURL!=null){
+        if($dadosURL!=null && $bolSeiVersao4==false){  
             $objEditorRN = new Editor3011RN();
             $strResultado = $objEditorRN->consultarHtmlVersao($dados);
             return $strResultado;
         }
 
-
+        if($dadosURL!=null && $bolSeiVersao4==true){  
+            $objEditorRN = new EditorSEI4RN();
+            $strResultado = $objEditorRN->consultarHtmlVersao($dados);
+            return $strResultado;
+        }
+            
+            
         //fix-107. Gerar doc exatamente da forma como estava na v3.0.11
         //Raramente vai entrar aqui e para diminuir a complexidade ciclomatica
         //n encadeei com elseif nas instrucoes acima
