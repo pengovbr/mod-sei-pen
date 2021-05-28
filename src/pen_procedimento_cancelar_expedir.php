@@ -50,7 +50,7 @@ $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody();
 ?>
 <link rel="stylesheet" href="<?php print PENIntegracao::getDiretorio(); ?>/css/style-modulos.css" type="text/css" />
-<?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
+<?php //$objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
 <script type="text/javascript">
     alert('<?php echo $strMensagem ?>');
     parent.location.reload();

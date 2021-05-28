@@ -222,7 +222,7 @@ try {
             $objReturn = PenAtividadeRN::retornaAtividadeDoTramiteFormatado($dblIdTramite, $numIdEstrutura, $numTarefa);
             $strResultado .= '<tr>';
             $strResultado .= '<td valign="middle" colspan="2">'
-                . '<img class="imagPlus" align="absbottom" src="/infra_js/arvore/plus.gif" onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
+                . '<img class="imagPlus" align="absbottom" src=' . ProcessoEletronicoINT::getCaminhoIcone("/infra_js/arvore/plus.gif") . ' onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
                 . ''.$objReturn->strMensagem.'</td>';
             $strResultado .= '<td valign="middle" align="center">';
 
@@ -295,9 +295,9 @@ function inicializar(){
 function toggleTr(number, obj) {
     jQuery('.extra_hidden_'+number).toggle();
     if (jQuery('.extra_hidden_'+number).is(':hidden')) {
-        jQuery(obj).attr('src', '/infra_js/arvore/plus.gif');
+        jQuery(obj).attr('src', <?php ProcessoEletronicoINT::getCaminhoIcone("/infra_js/arvore/plus.gif") ?>);
     } else {
-        jQuery(obj).attr('src', '/infra_js/arvore/minus.gif');
+        jQuery(obj).attr('src', <?php ProcessoEletronicoINT::getCaminhoIcone("/infra_js/arvore/minus.gif") ?>);
     }
 }
 
