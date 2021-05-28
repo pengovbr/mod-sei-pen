@@ -68,6 +68,8 @@ install-dev:
 test-environment-provision:	
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 60 seconds ..."; sleep 60;
+	# docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http yum install -y php-xdebug
+	# docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http yum install -y php-xdebug
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sei
@@ -80,8 +82,8 @@ test-environment-provision:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sip
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
-	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P /tmp
+	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
+	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
 	composer install -d $(PEN_TEST_FUNC)
 	composer install -d $(PEN_TEST_UNIT)
 
@@ -95,6 +97,7 @@ test-environment-up:
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 5 seconds ..."; sleep 5;
 	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
 
 
 test-environment-down:	
@@ -105,9 +108,21 @@ test-functional:
 	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional
 
 
+test-functional-internal:	
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml --stop-on-failure  --testsuite funcional
+
+
 test-functional-parallel:
 	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --bootstrap $(PEN_TEST_FUNC)/bootstrap.php --testsuite funcional -p 4
 	  
+
+test-functional-parallel-internal:
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --bootstrap /tests/bootstrap.php --testsuite funcional -p 4
+
+
+test-parallel-otimizado:
+	make -j2 test-functional-parallel tramitar-pendencias-silent
+	
 	
 test-unit:
 	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
@@ -125,3 +140,40 @@ bash_org2:
 
 atualizaSequencia:
 	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+
+deletarHttpProxy:
+	sudo docker container rm proxy org1-http org2-http
+
+tramitar-pendencias:
+	i=1; while [ "$$i" -le 2 ]; do \
+    	echo "Executando T1 $$i"; \
+		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		i=$$((i + 1));\
+  	done & i=1; while [ "$$i" -le 2 ]; do \
+    	echo "Executando T2 $$i"; \
+		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		i=$$((i + 1));\
+  	done
+
+tramitar-pendencias-silent:
+	i=1; while [ "$$i" -le 30 ]; do \
+    	echo "Executando $$i" >/dev/null 2>&1; \
+		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
+		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
+		i=$$((i + 1));\
+  	done 
+
+#comando para executar apenas 1 teste
+run-test-xdebug:
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml --stop-on-failure /tests/tests_sei4/$(addsuffix .php,$(teste))
+
+#deve ser rodado em outro terminal
+stop-test-container:
+	sudo docker stop $$(sudo docker ps -a -q --filter="name=php-test")
+
+
+
+
