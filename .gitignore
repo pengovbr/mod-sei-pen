@@ -3,6 +3,7 @@ html/
 vendor/
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
+tests/funcional/.tmp
 
 .vscode
 

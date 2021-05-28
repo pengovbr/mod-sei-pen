@@ -976,18 +976,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             $objMetaBD->removerTabela('md_pen_rel_serie_especie');
         }
 
-
         /* ---------- antigo método (instalarV004R003S003IW002) ---------- */
-        $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
-        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
-        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
-        $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
-        $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
-
-        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
-        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
-        $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
-        $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+        try {
+            $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
+            $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+            BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
+            $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
+            $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+    
+            $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+            BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
+            $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
+            $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
+    
+          }catch(Exception $e){
+            if (strpos($e->__toString(),'Caution: Changing any part of an object name could break scripts and stored procedures.')===false){
+              throw $e;
+            }
+          }
 
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new TarefaBD(BancoSEI::getInstance());
