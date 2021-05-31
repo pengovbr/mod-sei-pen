@@ -109,11 +109,11 @@ test-functional:
 
 
 test-functional-internal:	
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml --stop-on-failure  --testsuite funcional
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml  --testsuite funcional
 
 
 test-functional-parallel:
-	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --bootstrap $(PEN_TEST_FUNC)/bootstrap.php --testsuite funcional -p 4
+	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional -p 4
 	  
 
 test-functional-parallel-internal:
@@ -159,7 +159,7 @@ tramitar-pendencias:
   	done
 
 tramitar-pendencias-silent:
-	i=1; while [ "$$i" -le 30 ]; do \
+	i=1; while [ "$$i" -le 300 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
 		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
 		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
@@ -167,13 +167,17 @@ tramitar-pendencias-silent:
   	done 
 
 #comando para executar apenas 1 teste
+# make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
 run-test-xdebug:
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml --stop-on-failure /tests/tests_sei4/$(addsuffix .php,$(teste))
+	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests_sei4/$(addsuffix .php,$(teste))
 
 #deve ser rodado em outro terminal
 stop-test-container:
 	sudo docker stop $$(sudo docker ps -a -q --filter="name=php-test")
 
+# make teste=TramiteProcessoComDevolucaoTest sei3-run-test-xdebug
+sei3-run-test-xdebug:
+	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml $(PEN_TEST_FUNC)/tests/$(addsuffix .php,$(teste))
 
 
 

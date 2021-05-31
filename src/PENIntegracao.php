@@ -105,7 +105,7 @@ class PENIntegracao extends SeiIntegracao
             if($objProcessoEletronicoRN->contar($objProcessoEletronicoDTO) != 0){
                 $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
                 $strAcoesProcedimento .= '<a href="' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_estado&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1') . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_consultar_recibos.gif",$this->getDiretorioImagens()) . ' alt="Consultar Recibos" title="Consultar Recibos"/>';
+                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_consultar_recibos.png",$this->getDiretorioImagens()) . ' alt="Consultar Recibos" title="Consultar Recibos"/>';
                 $strAcoesProcedimento .= '</a>';
             }
         }
