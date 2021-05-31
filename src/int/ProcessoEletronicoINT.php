@@ -122,7 +122,7 @@ class ProcessoEletronicoINT extends InfraINT {
                     // return 'svg/arquivo_mapeamento_assunto.svg';
                     return 'modulos/pen/imagens/pen_enviar.png';
                     break;
-                case '/pen_consultar_recibos.gif':
+                case '/pen_consultar_recibos.png':
                     // return '/infra_css/svg/pesquisar.svg';
                     return 'modulos/pen/imagens/processo_pesquisar_pen.png';
                     break;
@@ -142,18 +142,20 @@ class ProcessoEletronicoINT extends InfraINT {
                 
                 
                 default:
-                    $caminho=$relPath==null? $caminho : $relPath . $caminho;
-                    return $caminho;
+                    if($relPath==null){
+                        return $imagem;
+                    }        
+                    return $relPath . $imagem;
                     break;
             }
 
 
         }
 
-
-        $caminho=$relPath==null? $caminho : $relPath . $caminho;
-        
-        return $caminho;
+        if($relPath==null){
+            return $imagem;
+        }        
+        return $relPath . $imagem;
 
 
 
@@ -167,8 +169,8 @@ class ProcessoEletronicoINT extends InfraINT {
         if ($versao > 3) {
 
             switch ($arquivo) {
-                case 'pen_procedimento_expedir':
-                    return 'pen_procedimento_expedir_sei4';
+                case 'pen_procedimento_expedir.css':
+                    return 'pen_procedimento_expedir_sei4.css';
                     break;
 
                 default:
