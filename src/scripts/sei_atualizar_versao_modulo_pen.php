@@ -101,6 +101,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '2.1.4': $this->instalarV2105();
                 case '2.1.5': $this->instalarV2106();
                 case '2.1.6': $this->instalarV2107();
+                case '2.1.7': $this->instalarV3000();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -977,23 +978,28 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         }
 
         /* ---------- antigo método (instalarV004R003S003IW002) ---------- */
+        
+        $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
+        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
+        $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
         try {
-            $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
-            $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
-            BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite set cadeia_certificado_temp = cadeia_certificado");
-            $objMetaBanco->excluirColuna('md_pen_recibo_tramite', 'cadeia_certificado');
             $objMetaBanco->renomearColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
-    
-            $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
-            BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
-            $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
+        }catch(Exception $e){
+            if (strpos($e->__toString(),'Caution: Changing any part of an object name could break scripts and stored procedures.')===false){
+                throw $e;
+            }
+        }
+        $objMetaBanco->adicionarColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
+        BancoSEI::getInstance()->executarSql("update md_pen_recibo_tramite_enviado set cadeia_certificado_temp = cadeia_certificado");
+        $objMetaBanco->excluirColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado');
+        try { 
             $objMetaBanco->renomearColuna('md_pen_recibo_tramite_enviado', 'cadeia_certificado_temp', 'cadeia_certificado', $strTipo);
-    
-          }catch(Exception $e){
+        }catch(Exception $e){
             if (strpos($e->__toString(),'Caution: Changing any part of an object name could break scripts and stored procedures.')===false){
               throw $e;
             }
-          }
+        }
 
         /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
         $objBD = new TarefaBD(BancoSEI::getInstance());
@@ -2110,6 +2116,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
         $objInfraMetaBD->criarIndice('md_pen_rel_hipotese_legal', 'ak1_rel_hipotese_legal', array('id_hipotese_legal', 'id_hipotese_legal_pen', 'tipo'), true);
         $this->atualizarNumeroVersao("2.1.7");
+    }
+    protected function instalarV3000()
+    {
+        $this->atualizarNumeroVersao("3.0.0");
     }
 }
 
