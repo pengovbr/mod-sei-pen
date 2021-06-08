@@ -44,7 +44,7 @@ Todos os itens descritos nesta seção são destinados à equipe de tecnologia d
 Para iniciar os procedimentos de configuração, será necessário registrar no **Barramento de Serviços do PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo**, previamente habilitado no portal do **Barramento de Serviços**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
  - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
- - **Produção:** [http://conectagov.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
+ - **Produção:** [https://gestaopen.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
 
 Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.economia.gov.br/citsmart/login/login.load.
 
