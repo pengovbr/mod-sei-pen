@@ -1563,6 +1563,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objProcedimentoDTO->retStrStaEstadoProtocolo();
         $objProcedimentoDTO->retDblIdProcedimento();
         $objProcedimentoDTO->retNumIdHipoteseLegalProtocolo();
+        $objProcedimentoDTO->retStrProtocoloProcedimentoFormatadoPesquisa();
 
         return $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
     }
@@ -2108,6 +2109,30 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
+    private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao = null) {
+
+        $bolProcedimentoCompartilhado = false;
+
+        $objProtocoloFederacaoDTO = new ProtocoloFederacaoDTO();
+        $objProtocoloFederacaoDTO->setStrProtocoloFormatadoPesquisa($objProcedimentoDTO->getStrProtocoloProcedimentoFormatadoPesquisa());
+        $objProtocoloFederacaoDTO->retStrProtocoloFormatado();
+
+        $objProtocoloFederacaoRN = new ProtocoloFederacaoRN();
+        $arrObjProtocoloFederacaoDTO = (array) $objProtocoloFederacaoRN->listar($objProtocoloFederacaoDTO);
+
+        if(!empty($arrObjProtocoloFederacaoDTO)) {
+
+            if (count($arrObjProtocoloFederacaoDTO) > 0){
+                $bolProcedimentoCompartilhado = true;
+            }
+
+        }
+
+        if($bolProcedimentoCompartilhado) {
+            $objInfraException->adicionarValidacao('Não é possível tramitar o processo pois ele foi compartilhado através do SEI Federação.', $strAtributoValidacao);
+        }
+    }    
+
     /**
     * Validao das pr-conidies necessrias para que um processo e seus documentos possam ser expedidos para outra entidade
     * @param  InfraException  $objInfraException  Instncia da classe de exceo para registro dos erros
@@ -2124,6 +2149,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+        $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
     }
 
 
