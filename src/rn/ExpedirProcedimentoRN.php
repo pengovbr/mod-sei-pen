@@ -2149,7 +2149,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+        if (substr(SEI_VERSAO, 0, 1) > 3) {
         $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+        }
     }
 
 
