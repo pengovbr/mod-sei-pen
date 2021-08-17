@@ -133,6 +133,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '2.1.6': $this->instalarV2107();
                 case '2.1.7': $this->instalarV3000();
                 case '3.0.0': $this->instalarV3001();
+                case '3.0.1': $this->instalarV3002();
                     break;
 
                 default:
@@ -1404,6 +1405,22 @@ class PenAtualizarSipRN extends InfraRN {
     protected function instalarV3001()
     {
 	    $this->atualizarNumeroVersao("3.0.1");
+    }
+    protected function instalarV3002()
+    {
+        $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
+        $numIdSistema = $this->getNumIdSistema('SEI');
+        $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+        $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+        $this->criarRecurso('pen_expedir_lote', 'Expedir Procedimento em Lote', $numIdSistema);
+        ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote');
+
+        $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
+        $this->criarMenu('Processos Tramitados em Lote', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+        ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote_listar');
+
+	    $this->atualizarNumeroVersao("3.0.2");
     }
 }
 

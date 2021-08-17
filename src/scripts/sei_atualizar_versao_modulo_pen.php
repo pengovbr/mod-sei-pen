@@ -103,6 +103,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '2.1.6': $this->instalarV2107();
                 case '2.1.7': $this->instalarV3000();
                 case '3.0.0': $this->instalarV3001();
+                case '3.0.1': $this->instalarV3002();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2125,6 +2126,52 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV3001()
     {
         $this->atualizarNumeroVersao("3.0.1");
+    }
+    protected function instalarV3002()
+    {
+        $objInfraBanco = BancoSEI::getInstance();
+        $objMetaBD = $this->objMeta;
+
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_expedir_lote',
+            'cols' => array(
+                'id_lote' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_repositorio_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'str_repositorio_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+                'id_repositorio_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_unidade_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_unidade_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'str_unidade_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+                'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'dth_registro' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+            ),
+            'pk' => array('cols'=>array('id_lote')),
+            'fks' => array(
+                'usuario' => array('nome' => 'fk_md_pen_expedir_lote_usuario', 'cols' => array('id_usuario', 'id_usuario')),
+                'unidade' => array('nome' => 'fk_md_pen_expedir_lote_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+            )
+        ));
+
+        //Sequência: md_pen_seq_lote
+        $objInfraBanco->criarSequencialNativa('md_pen_seq_expedir_lote', 0);
+
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_rel_expedir_lote_procedimento',
+            'cols' => array(
+                'id_lote' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_procedimento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+                'id_andamento' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_atividade_expedicao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO)
+            ),
+            'pk' => array('cols'=>array('id_procedimento','id_lote')),
+            'fks' => array(
+                'md_pen_expedir_lote' => array('nome' => 'fk_md_pen_rel_expedir_lote', 'cols' => array('id_lote', 'id_lote')),
+                'procedimento' => array('nome' => 'fk_md_pen_rel_expedir_lote_procedimento', 'cols' => array('id_procedimento', 'id_procedimento')),
+            )
+        ));        
+
+        $this->atualizarNumeroVersao("3.0.2");
     }
 }
 
