@@ -125,8 +125,8 @@ Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ 
 
 * **WebService**  
 Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v2/
-    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
+    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
+    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/
 
 
 * **LocalizacaoCertificado**  
