@@ -1206,7 +1206,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
 
         //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
-        $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v2/', 'Endereço do Web Service');
+        $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v3/', 'Endereço do Web Service');
         $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
         $this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de Notificação de Recebimento');
         $this->criarParametro('PEN_ID_REPOSITORIO_ORIGEM', '1', 'ID do Repositório de Origem');
