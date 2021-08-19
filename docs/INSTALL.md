@@ -569,20 +569,51 @@ Caso os dois serviços mencionados anteriormente não estiverem com status _RUNN
 
 ### 3.3. Opcional: Script de Monitoramento
 
-Atualmente o script verificar-servicos.sh monitora se os serviços gearmand e supervisord estão no ar. 
-Identificamos que além dos serviços estarem no ar, uma verificação adicional faz-se necessária para garantir que não haja pendências a serem processadas no barramento.
-
 Elaboramos duas rotinas adicionais, que opcionalmente poderão ser configuradas ao ambiente para monitoramento e reboot automático da fila:
 
-1. A rotina "verificar-pendencias-represadas.py" é uma rotina verificadora para notificar ferramentas de monitoramento (ex.: Nagios) sobre trâmites parados sem processamento há xx minutos no barramento. Maiores detalhes de seu uso podem ser lidos no comentário dentro do próprio arquivo;
+1. A rotina "verificar-pendencias-represadas.py" é uma rotina verificadora para notificar ferramentas de monitoramento (ex.: Nagios) sobre trâmites parados sem processamento há xx minutos no barramento. Maiores detalhes de seu uso podem ser lidos no comentário dentro do próprio arquivo; Envie essa rotina para o pessoal do monitoramento e informe que precisa que a infra seja notificada quando houver trâmites parados no barramento por muito tempo
 
-2. A rotina "verificar-reboot-fila.sh" poderá ser configurada no crontab do nó onde roda o supervisor. Através da rotina 1 acima, vai rebootar a fila e evitar que sejam necessários reboots manuais no supervisor caso haja alguma eventual paralisação no processamento;
+2. A rotina "verificar-reboot-fila.sh" ou "verificar-reboot-fila-sem-supervisor.sh" serve para automaticamente rebootar o processo de recebimento de processo, quando houver pendências paradas há muito tempo. Poderá ser configurada no crontab do nó onde roda o agendador do sei ou supervisor, dependendo de cada caso. Através da rotina 1 acima, vai rebootar a fila e evitar que sejam necessários reboots manuais no supervisor/agendador caso haja alguma eventual paralisação no processamento;
 
 Essas rotinas podem ter que sofrer alguns ajustes em seus comandos a depender do SO utilizado.
 A sugestão acima foi testada em CentOs7.3. A rotina em python foi testada em python 2 e python 3.
-Dúvidas com as rotinas favor abrir chamado em [https://portaldeservicos.economia.gov.br](https://portaldeservicos.economia.gov.br). De posse do número do chamado pode ligar para 61 2020-8711 (falar com Marcelo)
+
+**Para quem não usa supervisor:**
+
+O agendador do SEI vai colocar no ar workers para processar a fila. São processos php que ficam rodando em background. Em alguns casos esses processos podem parar e não serem retirados da memória. Caso isso aconteça o processamento da fila pára e não recebe mais processos. O envio de processos continua normal, porém o recebimento está travado.
+
+Sendo assim, é aconselhável o agendamento da seguinte rotina no nó onde roda o agendador do SEI.
+Essa rotina vai retirar do ar os processos travados caso ela identifique que existam processos parados no barramento há mais de x minutos. O valor de x default é 90 minutos mas pode ser alterado basta ler as orientações dentro do arquivo 1 acima.
+
+Uma forma de agendar essa rotina no crontab pode ser feita assim:
+- copie para a mesma pasta verificar-pendencias-represadas.py, verificar-reboot-fila-sem-supervisor.sh
+- copie para essa pasta o certificado de cliente usado para conectar no barramento. O cert deve estar sem senha, caso o seu use uma senha, basta rodar os comandos ssl para retirar a senha. O certificado de cliente deve estar junto da chave privada no mesmo arquivo e estar com o nome certall.pem. Você pode usar o cert em outra pasta ou sem estar com a chave privada, mas para isso terá q alterar a rotina ou passar os parametros de forma correta. Se for o caso leia o comentário dentro do arquivo verificar-pendencias-represadas.py para maiores informações
+- essa mesma pasta deve ter possibilidade de leitura e escrita pelo usuário que executa o agendamento, bem como o usuário deverá ter a permissão de dar kill nos processos
+- feito isso basta agendar no crontab, por exemplo: 
+```
+* * * * * /opt/sei/bin/mod-pen/verificar-reboot-fila-sem-supervisor.sh >> /var/log/sei-fila-rebootter.log 2>&1
+```
+
+O arquivo /var/log/sei-fila-rebootter.log vai logar a atividade da rotina. E caso haja algum processo na memória travado há muito tempo ele vai limpar e o agendador do SEI subirá um novo destravado para processar a fila.
+
+**Para quem usa supervisor:**
+
+Atualmente o script verificar-servicos.sh monitora se os serviços gearmand e supervisord estão no ar. 
+Identificamos que além dos serviços estarem no ar, uma verificação adicional faz-se necessária para garantir que não haja pendências a serem processadas no barramento.
+
+Uma forma de agendar essa rotina no crontab pode ser feita assim:
+- copie para a mesma pasta verificar-pendencias-represadas.py, verificar-reboot-fila.sh
+- copie para essa pasta o certificado de cliente usado para conectar no barramento. O cert deve estar sem senha, caso o seu use uma senha, basta rodar os comandos ssl para retirar a senha. O certificado de cliente deve estar junto da chave privada no mesmo arquivo e estar com o nome certall.pem. Você pode usar o cert em outra pasta ou sem estar com a chave privada, mas para isso terá q alterar a rotina ou passar os parametros de forma correta. Se for o caso leia o comentário dentro do arquivo verificar-pendencias-represadas.py para maiores informações
+- essa mesma pasta deve ter possibilidade de leitura e escrita pelo usuário que executa o agendamento, bem como o usuário deverá ter a permissão de dar kill nos processos
+- feito isso basta agendar no crontab, por exemplo: 
+```
+* * * * * /opt/sei/bin/mod-pen/verificar-reboot-fila.sh >> /var/log/sei-fila-rebootter.log 2>&1
+```
 
 ---
+
+Dúvidas com as rotinas favor abrir chamado em [https://portaldeservicos.economia.gov.br](https://portaldeservicos.economia.gov.br). Se necessário, pode solicitar ao atendente que acione algum técnico do PEN para orientações mais elaboradas.
+
 ---
 
 
