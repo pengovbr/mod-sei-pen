@@ -65,7 +65,7 @@ class PENIntegracao extends SeiIntegracao
             if ($numRegistros > 0) {
                 $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
                 $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . $this->getDiretorioImagens() . '/pen_expedir_procedimento.gif" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em" />';
+                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif",$this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em Lote" />';
             }
         }
 

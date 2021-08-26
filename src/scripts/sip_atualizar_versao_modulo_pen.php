@@ -1417,8 +1417,7 @@ class PenAtualizarSipRN extends InfraRN {
         ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote');
 
         $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
-        $this->criarMenu('Processos Tramitados em Lote', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
-        ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote_listar');
+        ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
 
 	    $this->atualizarNumeroVersao("3.0.2");
     }
