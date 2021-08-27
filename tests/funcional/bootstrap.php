@@ -24,5 +24,6 @@ require_once __DIR__ . '/src_sei4/paginas/PaginaEditarProcesso.php';
 require_once __DIR__ . '/src_sei4/paginas/PaginaAnexarProcesso.php';
 require_once __DIR__ . '/src_sei4/paginas/PaginaCancelarDocumento.php';
 require_once __DIR__ . '/src_sei4/paginas/PaginaMoverDocumento.php';
+require_once __DIR__ . '/src_sei4/paginas/PaginaTramitarProcessoEmLote.php';
 
 require_once __DIR__ . '/tests_sei4/CenarioBaseTestCase.php';

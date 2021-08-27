@@ -203,6 +203,44 @@ class PendenciasTramiteRN extends InfraRN
         $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
         shuffle($arrObjPendenciasDTO);
 
+        $tableExists = BancoSEI::getInstance()->consultarSql("SELECT table_name FROM information_schema.tables WHERE table_schema = 'sei' AND table_name = 'md_pen_expedir_lote'");
+
+        if(count($tableExists) >0){
+
+            $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+            $objPenLoteProcedimentoDTO->retNumIdLote();
+            $objPenLoteProcedimentoDTO->retDblIdProcedimento();
+            $objPenLoteProcedimentoDTO->retNumIdAndamento();
+            $objPenLoteProcedimentoDTO->retNumIdAtividade();
+            $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
+            $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
+            $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
+            $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
+            $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+            $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
+            $objPenLoteProcedimentoDTO->retNumIdUsuario();
+            $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
+
+            $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+
+            $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+            $arrObjPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->obterPendenciasLote($objPenLoteProcedimentoDTO);
+
+            if (isset($arrObjPendenciasDTO)){
+                if (!is_array($arrObjPendenciasDTO)){
+                    $arrObjPendenciasDTO = array();
+                }
+            }                 
+
+            foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
+                $objPendenciaDTO = new PendenciaDTO();
+                $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProcedimento());
+                $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
+                $arrObjPendenciasDTO[] = $objPendenciaDTO;
+            }
+
+        }        
+
         $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 
         foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
@@ -358,6 +396,10 @@ class PendenciasTramiteRN extends InfraRN
             $objProcessarPendenciaRN = new ProcessarPendenciasRN();
 
             switch ($numStatus) {
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
+                    $objProcessarPendenciaRN->expedirLote($numIDT);
+                    break;
+
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
                     $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
                     break;
@@ -400,6 +442,10 @@ class PendenciasTramiteRN extends InfraRN
             $numStatus = strval($objPendencia->getStrStatus());
 
             switch ($numStatus) {
+
+                case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
+                    $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
+                    break;
 
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
                     $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);

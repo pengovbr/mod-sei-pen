@@ -170,6 +170,7 @@ tramitar-pendencias-silent:
 #comando para executar apenas 1 teste
 # make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
 run-test-xdebug:
+	sed -i 's/#HOSTIP/${HOST_IP}/g' tests/funcional/assets/config/xdebug.ini
 	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests_sei4/$(addsuffix .php,$(teste))
 
 #deve ser rodado em outro terminal

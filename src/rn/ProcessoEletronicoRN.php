@@ -27,6 +27,7 @@ class ProcessoEletronicoRN extends InfraRN
     public static $STA_SIGILO_SIGILOSO = '3';
 
     /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
+    public static $STA_SITUACAO_TRAMITE_NAO_INICIADO = 0;                       // Não Iniciado - Aguardando envio de Metadados pela solução
     public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
     public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
     public static $STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO = 3;    // Metadados recebidos pelo destinatário
@@ -606,7 +607,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
-        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false)
+        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false,$dblIdProcedimento=null)
     {
         $cabecalho = new stdClass();
 
@@ -626,7 +627,112 @@ class ProcessoEletronicoRN extends InfraRN
         $cabecalho->motivoDaUrgencia = $motivoUrgencia;
         $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
 
+        $this->atribuirInformacoesAssunto($cabecalho,$dblIdProcedimento);
+        $this->atribuirInformacoesModulo($cabecalho);
+
         return $cabecalho;
+    }
+
+    private function atribuirInformacoesModulo($objCabecalho)
+    {
+
+        try{
+
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $arrPropAdicionais=$objCabecalho->propriedadeAdicional;
+            $arrPropAdicionais[] = new SoapVar("<propriedadeAdicional 
+            chave='MODULO_PEN_VERSAO'>". $objInfraParametro->getValor('VERSAO_MODULO_PEN') . "</propriedadeAdicional>", XSD_ANYXML);
+
+            $objCabecalho->propriedadeAdicional= $arrPropAdicionais;
+                    
+        }catch(Exception $e){
+
+            throw new InfraException($mensagem, $e);
+        }
+
+
+    }
+
+    
+    private function atribuirInformacoesAssunto($objCabecalho,$dblIdProcedimento)
+    {
+
+       
+        try{
+
+
+        if(!isset($dblIdProcedimento)){
+            throw new InfraException('Parâmetro $dblIdProcedimento não informado.');
+        }
+
+        $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
+        $objRelProtocoloAssuntoDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objRelProtocoloAssuntoDTO->retStrDescricaoAssunto();
+        $objRelProtocoloAssuntoDTO->retTodos();
+        
+        
+        $objRelProtocoloAssuntoRN = new RelProtocoloAssuntoRN();
+        $arrobjRelProtocoloAssuntoDTO = $objRelProtocoloAssuntoRN->listarRN0188($objRelProtocoloAssuntoDTO);
+        
+        $arrDadosAssunto = array();
+        $contagem=1;
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        
+        foreach ($arrobjRelProtocoloAssuntoDTO as $objRelProtocoloAssuntoDTO) {
+            
+            $idAssunto = $objRelProtocoloAssuntoDTO->getNumIdAssuntoProxy();
+            $assuntoDTO = new AssuntoDTO();
+            $assuntoDTO->setNumIdAssunto($idAssunto);
+            $assuntoDTO->retNumPrazoCorrente();
+            $assuntoDTO->retNumPrazoIntermediario();
+            $assuntoDTO->retStrStaDestinacao();
+            $assuntoDTO->retStrObservacao();
+            $assuntoDTO->retStrCodigoEstruturado();
+            
+            $objAssuntoRN = new AssuntoRN();
+            $infoAssunto = $objAssuntoRN->consultarRN0256($assuntoDTO);
+            
+            switch ($infoAssunto->getStrStaDestinacao()) {
+                case AssuntoRN::$TD_ELIMINACAO:
+                    $destinacao = "Eliminação";
+                    break;
+                
+                case AssuntoRN::$TD_GUARDA_PERMANENTE:
+                    $destinacao = "Guarda Permanente";
+                    break;
+                }
+                    
+            
+           
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), 10000)) . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_CodigoEstruturado_" . $contagem . "'>" . utf8_encode($infoAssunto->getStrCodigoEstruturado()) . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_PrazoCorrente_" . $contagem . "'>" . (int) $infoAssunto->getNumPrazoCorrente() . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_PrazoIntermediario_" . $contagem . "'>" . (int) $infoAssunto->getNumPrazoIntermediario() . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . utf8_encode($destinacao) . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($infoAssunto->getStrObservacao(), 10000)) . "</propriedadeAdicional>", XSD_ANYXML);
+            
+            
+            $contagem++;
+        }
+
+        $objCabecalho->propriedadeAdicional= $arrDadosAssunto;
+                    
+        }catch(Exception $e){
+
+            throw new InfraException($mensagem, $e);
+        }
+
     }
 
     public function enviarComponenteDigital($parametros)
@@ -736,7 +842,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
-        $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null)
+        $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmLote = false, $numIdUnidade = null)
     {
         if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
             throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
@@ -805,7 +911,11 @@ class ProcessoEletronicoRN extends InfraRN
         $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
         $objTramiteDTO->setNumTicketEnvioComponentes($parNumTicketComponentesDigitais);
         $objTramiteDTO->setDthRegistro($this->converterDataSEI($parDthRegistroTramite));
-        $objTramiteDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        if($bolSinProcessamentoEmLote){
+            $objTramiteDTO->setNumIdUnidade($numIdUnidade);
+        }else{
+            $objTramiteDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        }
         $objTramiteDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
         $objTramiteDTO->setNumIdRepositorioOrigem($parNumIdRepositorioOrigem);
         $objTramiteDTO->setNumIdEstruturaOrigem($parNumIdEstruturaOrigem);

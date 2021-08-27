@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "3.0.1";
+    const VERSAO_MODULO = "3.1.0";
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -43,6 +43,34 @@ class PENIntegracao extends SeiIntegracao
         PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
     }
 
+    public function montarBotaoControleProcessos() {
+
+        $objSessaoSEI = SessaoSEI::getInstance();
+
+        $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
+        
+        if ($bolAcaoGerarPendencia) {
+            $objPaginaSEI = PaginaSEI::getInstance();
+
+            $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+            $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+            $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objPesquisaPendenciaDTO->setStrStaTipoAtribuicao(PaginaSEI::getInstance()->recuperarCampo('hdnMeusProcessos')); 
+            
+            $objAtividadeRN = new AtividadeRN();
+            $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+            $numRegistros = count($arrObjProcedimentoDTO);
+
+            //Apresenta o botão de expedir processo
+            if ($numRegistros > 0) {
+                $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+                $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+                $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif",$this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em Lote" />';
+            }
+        }
+
+        return array($strAcoesProcedimento);
+    }    
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
     {
@@ -306,7 +334,7 @@ class PENIntegracao extends SeiIntegracao
     public function processarControlador($strAcao)
     {
         //Configuração de páginas do contexto da árvore do processo para apresentação de erro de forma correta
-        $bolArvore = in_array($strAcao, array('pen_procedimento_expedir', 'pen_procedimento_estado'));
+        $bolArvore = in_array($strAcao, array('pen_procedimento_estado'));
         PaginaSEI::getInstance()->setBolArvore($bolArvore);
 
         if (strpos($strAcao, 'pen_') === false) {
@@ -427,6 +455,18 @@ class PENIntegracao extends SeiIntegracao
                 require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebimento_padrao.php';
             break;
 
+            case 'pen_envio_processo_lote_cadastrar':
+                require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
+            break;      
+            
+            case 'pen_expedir_lote':
+                require_once dirname(__FILE__) . '/pen_expedir_lote.php';
+            break;
+
+            case 'pen_expedir_lote_listar':
+                require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+            break;
+
             default:
                 return false;
 
@@ -460,6 +500,10 @@ class PENIntegracao extends SeiIntegracao
 
             case 'pen_procedimento_expedir_validar':
                 require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
+            break;
+
+            case 'pen_validar_expedir_lote':
+                require_once dirname(__FILE__) . '/pen_validar_expedir_lote.php';
             break;
 
             case 'pen_procedimento_expedir_cancelar':
