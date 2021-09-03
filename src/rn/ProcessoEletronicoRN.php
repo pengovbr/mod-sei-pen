@@ -703,24 +703,29 @@ class ProcessoEletronicoRN extends InfraRN
                 }
                     
             
-           
+            $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), 10000)):"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), 10000)) . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
+            $valorInput=$infoAssunto->getStrCodigoEstruturado()?utf8_encode($infoAssunto->getStrCodigoEstruturado()):"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_CodigoEstruturado_" . $contagem . "'>" . utf8_encode($infoAssunto->getStrCodigoEstruturado()) . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_CodigoEstruturado_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
+            $valorInput=$infoAssunto->getNumPrazoCorrente()? (int) $infoAssunto->getNumPrazoCorrente() :"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_PrazoCorrente_" . $contagem . "'>" . (int) $infoAssunto->getNumPrazoCorrente() . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_PrazoCorrente_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
+            $valorInput=$infoAssunto->getNumPrazoIntermediario()?(int) $infoAssunto->getNumPrazoIntermediario():"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_PrazoIntermediario_" . $contagem . "'>" . (int) $infoAssunto->getNumPrazoIntermediario() . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_PrazoIntermediario_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
+            $valorInput=$destinacao?utf8_encode($destinacao):"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . utf8_encode($destinacao) . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
+            $valorInput=$infoAssunto->getStrObservacao()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($infoAssunto->getStrObservacao(), 10000)):"NA";
             $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
-            chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($infoAssunto->getStrObservacao(), 10000)) . "</propriedadeAdicional>", XSD_ANYXML);
+            chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
             
             
             $contagem++;

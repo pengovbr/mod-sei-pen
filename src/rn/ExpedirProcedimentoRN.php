@@ -577,9 +577,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $objOperacao = new stdClass();
             $objOperacao->dataHoraOperacao = $this->objProcessoEletronicoRN->converterDataWebService($objAtividadeDTO->getDthAbertura());
-            $objOperacao->unidadeOperacao = utf8_encode($objAtividadeDTO->getStrDescricaoUnidade());
-            $objOperacao->operacao = $this->objProcessoEletronicoRN->reduzirCampoTexto(strip_tags(utf8_encode($objAtividadeDTO->getStrNomeTarefa())),1000);
-            $objOperacao->usuario = utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem());            
+            $objOperacao->unidadeOperacao = $objAtividadeDTO->getStrDescricaoUnidade()?utf8_encode($objAtividadeDTO->getStrDescricaoUnidade()):"NA";
+            $objOperacao->operacao = $objAtividadeDTO->getStrNomeTarefa()?$this->objProcessoEletronicoRN->reduzirCampoTexto(strip_tags(utf8_encode($objAtividadeDTO->getStrNomeTarefa())),1000):"NA";
+            $objOperacao->usuario = $objAtividadeDTO->getStrNomeUsuarioOrigem()?utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem()):"NA";          
             $arrObjOperacao[] = $objOperacao;
         }
 
@@ -2080,6 +2080,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
 
                     if ($objDocumentoDTO->getStrStaNivelAcessoLocalProtocolo()!=ProtocoloRN::$NA_PUBLICO){
+
+                        if(!$dados){
+                            return;
+                        }
+
                         if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
                             $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
                         }else{
