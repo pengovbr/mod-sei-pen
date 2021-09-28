@@ -1316,9 +1316,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), false,false,$dadosURL);
                     }
 
+                    $versaoSEIAtual=substr(SEI_VERSAO,0,1);
                     //verificar versao SEI4
                     $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-                    if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                    if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), false,false,$dadosURL,true);
                     }
 
