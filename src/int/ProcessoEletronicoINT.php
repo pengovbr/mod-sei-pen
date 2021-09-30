@@ -165,8 +165,11 @@ class ProcessoEletronicoINT extends InfraINT {
     {
 
         $versao = substr(SEI_VERSAO, 0, 1);
+        $numVersaoAtual = explode('.', SEI_VERSAO);
+        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+        $numVersaoAtual = intval(join($numVersaoAtual));
 
-        if ($versao > 3) {
+        if ($versao > 3 && $numVersaoAtual <= 40001 ) {
 
             switch ($arquivo) {
                 case 'pen_procedimento_expedir.css':
@@ -178,6 +181,21 @@ class ProcessoEletronicoINT extends InfraINT {
                     break;
             }
         }
+
+        if ($numVersaoAtual > 40001) {
+
+            switch ($arquivo) {
+                case 'pen_procedimento_expedir.css':
+                    return 'pen_procedimento_expedir_sei402.css';
+                    break;
+
+                default:
+                    return $arquivo;
+                    break;
+            }
+        }
+
+
 
         return $arquivo;
     }

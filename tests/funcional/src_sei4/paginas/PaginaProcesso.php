@@ -176,7 +176,7 @@ class PaginaProcesso extends PaginaTeste
     	{
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
-            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[@src='svg/documento_cancelado.svg?10']");
+            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_cancelado.svg?')]");
             return true;
     	}
     	catch(Exception $e)
@@ -191,7 +191,7 @@ class PaginaProcesso extends PaginaTeste
     	{
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
-            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[@src='svg/documento_movido.svg?10']");
+            $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_movido.svg?')]");
             return true;
     	}
     	catch(Exception $e)

@@ -1,0 +1,84 @@
+#ifrEnvioProcesso {
+    height: 100%;
+    width: 100%;
+}
+
+#divBarraProgresso {
+    background-color: rgba(252, 252, 252);
+    width: 590px;
+    height: 220px;
+    margin-top: 100px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    position:absolute;
+    left:31%;
+    top:17%;
+    border-radius: 20px;
+    padding-left: 12px;
+}
+
+#divInfraAreaGlobal{
+    margin-top: 42px;
+}
+
+#btnInfraTopo{
+    visibility: hidden;
+}
+
+div.infraBarraComandos{
+    border-top:0px !important; 
+    border-bottom: 0px !important;
+}
+
+@keyframes move{
+    0% { background-position: 0 0; }
+    100% { background-position: 50px 50px; }
+}
+
+div.infraBarraProgressoMiolo{
+    position: relative
+}
+
+div.infraBarraProgresso div.infraBarraProgressoMiolo:after { 
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, rgba(255, 255, 255, .2)), color-stop(.25, transparent), color-stop(.5, transparent), color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.75, rgba(255, 255, 255, .2)), color-stop(.75, transparent), to(transparent) );
+    background-image: -moz-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+    z-index: 1;
+    background-size: 50px 50px;
+    -webkit-background-size: 50px 50px;
+    -moz-background-size: 50px 50px;
+    animation: move 2s linear infinite;
+    -webkit-animation: move 2s linear infinite;
+    -moz-animation: move 2s linear infinite;
+    border-top-right-radius: 8px;
+    -webkit-border-top-right-radius: 8px;
+    -moz-border-radius-topright: 8px;
+    border-bottom-right-radius: 8px;
+    -moz-border-radius-bottomright: 8px;
+    -webkit-border-bottom-right-radius: 8px;
+    border-top-left-radius: 20px;
+    -webkit-border-top-left-radius: 20px;
+    -moz-border-radius-topleft: 20px;
+    border-bottom-left-radius: 20px;
+    -webkit-border-bottom-left-radius: 20px;
+    -moz-border-radius-bottomleft: 20px;
+    overflow: hidden;
+}
+
+.acaoBarraProgresso{
+    width: 100px;
+    /* position: absolute; */
+    bottom: 0px;
+    right: 2px;
+    margin-right: 25px;
+    margin-bottom: 25px;
+    margin-top: 12px;
+}
+
+#divInfraBarraLocalizacao{
+    font-size: 1.2rem !important; ;
+}

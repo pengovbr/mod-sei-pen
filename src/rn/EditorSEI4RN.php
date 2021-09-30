@@ -2013,6 +2013,10 @@ class EditorSEI4RN extends InfraRN
           }
         }
 
+        $numVersaoAtual = explode('.', SEI_VERSAO);
+        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+        $numVersaoAtual = intval(join($numVersaoAtual));
+
         if ($objDocumentoDTO!=null) {
           if(!$montarTarja){
             $objAssinaturaRN = new AssinaturaRN();
@@ -2023,7 +2027,12 @@ class EditorSEI4RN extends InfraRN
               "objDocumentoDTO"=>$objDocumentoDTO,
               "controleURL"=>$controleURL
             ];
-            $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
+            //na versao 4.0.3 houve uma alteracao na escrita da tarja
+            if($numVersaoAtual>40002){
+              $strHtml .= $objAssinaturaRN->montarTarjasURL403($dados);
+            }else{
+              $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
+            }
           }
         }
       }
