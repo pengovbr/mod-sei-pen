@@ -203,43 +203,37 @@ class PendenciasTramiteRN extends InfraRN
         $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
         shuffle($arrObjPendenciasDTO);
 
-        $tableExists = BancoSEI::getInstance()->consultarSql("SELECT table_name FROM information_schema.tables WHERE table_schema = 'sei' AND table_name = 'md_pen_expedir_lote'");
+        $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(); 
+        $objPenLoteProcedimentoDTO->retNumIdLote();
+        $objPenLoteProcedimentoDTO->retDblIdProcedimento();
+        $objPenLoteProcedimentoDTO->retNumIdAndamento();
+        $objPenLoteProcedimentoDTO->retNumIdAtividade();
+        $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
+        $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
+        $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
+        $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
+        $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+        $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
+        $objPenLoteProcedimentoDTO->retNumIdUsuario();
+        $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
 
-        if(count($tableExists) >0){
+        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
-            $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-            $objPenLoteProcedimentoDTO->retNumIdLote();
-            $objPenLoteProcedimentoDTO->retDblIdProcedimento();
-            $objPenLoteProcedimentoDTO->retNumIdAndamento();
-            $objPenLoteProcedimentoDTO->retNumIdAtividade();
-            $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
-            $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
-            $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
-            $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
-            $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
-            $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
-            $objPenLoteProcedimentoDTO->retNumIdUsuario();
-            $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
+        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+        $arrObjPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->obterPendenciasLote($objPenLoteProcedimentoDTO);
 
-            $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-
-            $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-            $arrObjPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->obterPendenciasLote($objPenLoteProcedimentoDTO);
-
-            if (isset($arrObjPendenciasDTO)){
-                if (!is_array($arrObjPendenciasDTO)){
-                    $arrObjPendenciasDTO = array();
-                }
-            }                 
-
-            foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
-                $objPendenciaDTO = new PendenciaDTO();
-                $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProcedimento());
-                $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
-                $arrObjPendenciasDTO[] = $objPendenciaDTO;
+        if (isset($arrObjPendenciasDTO)){
+            if (!is_array($arrObjPendenciasDTO)){
+                $arrObjPendenciasDTO = array();
             }
+        }                 
 
-        }        
+        foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
+            $objPendenciaDTO = new PendenciaDTO();
+            $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProcedimento());
+            $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
+            $arrObjPendenciasDTO[] = $objPendenciaDTO;
+        }    
 
         $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 
