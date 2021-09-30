@@ -135,9 +135,16 @@ try {
                     });
 
                     $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
+                    $bolBotaoFecharCss=false;
+                    $numVersaoAtual = explode('.', SEI_VERSAO);
+                    $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+                    $numVersaoAtual = intval(join($numVersaoAtual));
+                    if($numVersaoAtual > 40001){
+                        $bolBotaoFecharCss=true;
+                    }
 
                     // Muda situação da barra de progresso para Concluído
-                    echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento');</script> ";
+                    echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
                 } catch(\Exception $e) {
                     $objPaginaSEI->processarExcecao($e);
                     echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";

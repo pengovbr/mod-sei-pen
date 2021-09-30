@@ -4,7 +4,7 @@
  * 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function sinalizarStatusConclusao(linkProcedimento){
+function sinalizarStatusConclusao(linkProcedimento,versao402=false){
     let componente = document.querySelector('div.infraBarraProgresso');
     if(componente){
         componente.querySelector('.infraBarraProgressoMiolo').style.display = "none";
@@ -12,7 +12,9 @@ function sinalizarStatusConclusao(linkProcedimento){
 
         let btnFechar = _criarBotaoFechar(linkProcedimento);
         btnFechar.classList.add('acaoBarraProgresso');
-        btnFechar.classList.remove('infraButton');
+        if(!versao402){
+            btnFechar.classList.remove('infraButton');
+        }
         document.getElementById('divInfraAreaDadosDinamica').appendChild(btnFechar);
     }
 }
