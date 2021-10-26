@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "3.1.4";
+    const VERSAO_MODULO = "3.1.5";
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 

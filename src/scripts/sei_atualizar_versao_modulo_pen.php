@@ -108,6 +108,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '3.1.1': $this->instalarV3012();
                 case '3.1.2': $this->instalarV3013();
                 case '3.1.3': $this->instalarV3014();
+                case '3.1.4': $this->instalarV3015();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2158,10 +2159,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         ));
 
         //Sequência: md_pen_seq_lote
-        $objInfraBanco->criarSequencialNativa('md_pen_seq_expedir_lote', 0);
-
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id_lote) as total from md_pen_expedir_lote');
+        $numMaxId = $rs[0]['total'];
+        if ($numMaxId==null){
+            $numMaxId = 0;
+        }
+        $objInfraBanco->criarSequencialNativa('md_pen_seq_expedir_lote', $numMaxId + 1);
+        
         $objMetaBD->criarTabela(array(
-            'tabela' => 'md_pen_rel_expedir_lote_procedimento',
+            'tabela' => 'md_pen_rel_expedir_lote',
             'cols' => array(
                 'id_lote' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
                 'id_procedimento' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
@@ -2171,7 +2177,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
             'pk' => array('cols'=>array('id_procedimento','id_lote')),
             'fks' => array(
                 'md_pen_expedir_lote' => array('nome' => 'fk_md_pen_rel_expedir_lote', 'cols' => array('id_lote', 'id_lote')),
-                'procedimento' => array('nome' => 'fk_md_pen_rel_expedir_lote_procedimento', 'cols' => array('id_procedimento', 'id_procedimento')),
+                'procedimento' => array('nome' => 'fk_md_pen_rel_expedir_lote', 'cols' => array('id_procedimento', 'id_procedimento')),
             )
         ));        
 
@@ -2199,6 +2205,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
         $objInfraParametro = new InfraParametro($objInfraBanco);
         $objInfraParametro->setValor('SEI_FEDERACAO_NUMERO_PROCESSO', 0);
         $this->atualizarNumeroVersao("3.1.4");
+    }
+
+    protected function instalarV3015()
+    {
+        $this->atualizarNumeroVersao("3.1.5");
     }
 }
 

@@ -12,7 +12,7 @@ class PenLoteProcedimentoDTO extends InfraDTO
 
     public function getStrNomeTabela()
     {
-        return 'md_pen_rel_expedir_lote_procedimento';
+        return 'md_pen_rel_expedir_lote';
     }
 
     public function montar()
