@@ -109,6 +109,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '3.1.2': $this->instalarV3013();
                 case '3.1.3': $this->instalarV3014();
                 case '3.1.4': $this->instalarV3015();
+                case '3.1.5': $this->instalarV3016();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2210,6 +2211,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
     protected function instalarV3015()
     {
         $this->atualizarNumeroVersao("3.1.5");
+    }
+
+    protected function instalarV3016()
+    {
+        $this->atualizarNumeroVersao("3.1.6");
     }
 }
 
