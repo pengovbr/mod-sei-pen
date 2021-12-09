@@ -868,7 +868,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $objProcesso não informado.');
         }
 
-        //$arrDocumentosDTO = $this->listarDocumentos($dblIdProcedimento);
         $arrDocumentosRelacionados = $this->listarDocumentosRelacionados($dblIdProcedimento);
 
         if(!isset($arrDocumentosRelacionados)) {
@@ -1273,7 +1272,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         return (count($arrObjComponenteDigitalDTO) > 0) ? $arrObjComponenteDigitalDTO[0] : null;
     }
 
-    private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO)
+
+    private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO, $paramStrStaAssociacao)
     {
         if(!isset($objDocumentoDTO)){
             throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
@@ -1395,7 +1395,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $arrInformacaoArquivo['ID_ANEXO'] = $objAnexoDTO->getNumIdAnexo();
                 $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = $strDadosComplementaresDoTipoDeArquivo;
 
-            } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) {
+            } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $paramStrStaAssociacao == RelProtocoloProtocolo::TA_DOCUMENTO_MOVIDO) {
                 //Quando não é localizado um Anexo para um documento cancelado, os dados de componente digital precisam ser enviados
                 //pois o Barramento considera o componente digital do documento de forma obrigatória
                 $arrInformacaoArquivo['NOME'] = 'cancelado.html';
@@ -1727,7 +1727,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
 
-    public function listarDocumentosRelacionados($idProcedimento)
+    public function listarDocumentosRelacionados($idProcedimento, $paramDblIdDocumentoFiltro=null)
     {
         if(!isset($idProcedimento)){
             throw new InfraException('Parâmetro $idProcedimento não informado.');
@@ -1769,7 +1769,10 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrObjDocumentoDTO = array();
             foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
                 $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
-                if (isset($arrObjDocumentoDTOIndexado[$dblIdDocumento])){
+                $bolIdDocumentoExiste = array_key_exists($dblIdDocumento, $arrObjDocumentoDTOIndexado) && isset($arrObjDocumentoDTOIndexado[$dblIdDocumento]);
+                $bolIdDocumentoFiltrado = isnull($paramDblIdDocumentoFiltro) || ($dblIdDocumento == $paramDblIdDocumentoFiltro);
+                
+                if ($bolIdDocumentoExiste && $bolIdDocumentoFiltrado){
                     $arrObjDocumentoDTO[] = array(
                         "Documento" => $arrObjDocumentoDTOIndexado[$dblIdDocumento],
                         "StaAssociacao" => $objAssociacaoDocumento["StaAssociacao"]
@@ -1890,9 +1893,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $dadosDoComponenteDigital->protocolo = $objComponenteDigitalDTO->getStrProtocolo();
                 $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
 
-                $objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
+                //$objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
+                $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
+                $objDocumentoDTO = $arrObjDocumentoDTOAssociacao['Documento'];
+                $strStaAssociacao = $arrObjDocumentoDTOAssociacao['StaAssociacao'];                
                 $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
-                $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO, $strStaAssociacao);
 
                 //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
                 $nrTamanhoArquivoMb = 0;
@@ -1924,7 +1930,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                             $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
 
                         } else {
-                            $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+                            //$arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
                             $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($arrInformacaoArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
                             $parametros = new stdClass();
