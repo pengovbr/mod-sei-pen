@@ -2100,9 +2100,9 @@ class ProcessoEletronicoRN extends InfraRN
      * sua atual associação com o processo
      *
      * @param Num $idProcedimento
+     * @param Num parDblIdDocumento Filtro de dados de associação de um documento específico
      * @return array Lista de Ids dos documentos do processo em ordem
      */
-    //public function listarSequenciaDocumentos($idProcedimento)
     public function listarAssociacoesDocumentos($idProcedimento)
     {
         if(!isset($idProcedimento)){
