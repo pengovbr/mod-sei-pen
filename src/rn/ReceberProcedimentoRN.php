@@ -20,6 +20,7 @@ class ReceberProcedimentoRN extends InfraRN
     private $objProtocoloRN;
     private $objSeiRN;
     private $objEnviarReciboTramiteRN;
+    private $objExpedirProcedimentoRN;
 
     public function __construct()
     {
@@ -36,6 +37,7 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
         $this->objEnviarReciboTramiteRN = new EnviarReciboTramiteRN();
         $this->objPenParametroRN = new PenParametroRN();
+        $this->objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
         $this->objPenDebug = DebugPen::getInstance("PROCESSAMENTO");
     }
 
@@ -444,7 +446,7 @@ class ReceberProcedimentoRN extends InfraRN
                 $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
                 $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
                 $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
-                $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($tramite->justificativaDaRecusa));
+                $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($tramite->justificativaDaRecusa, 500)));
                 $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
 
                 //Faz o tratamento do processo e do trâmite recusado
@@ -2190,6 +2192,18 @@ class ReceberProcedimentoRN extends InfraRN
 
             $bolDocumentoPendente = false;
         }
+
+        //verifica se o documento que está sem o componente digital foi movido
+        if($bolDocumentoPendente) {
+            foreach ($recordset as $item) {
+                $arrObjDocumentoDTOAssociacao = $this->objExpedirProcedimentoRN->listarDocumentosRelacionados($parNumIdProcedimento, $item['id_documento']);
+                $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
+
+                if(!is_null($strStaAssociacao) && $strStaAssociacao == RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
+                    $bolDocumentoPendente = false;
+                }
+            }
+        }        
 
         return $bolDocumentoPendente;
     }

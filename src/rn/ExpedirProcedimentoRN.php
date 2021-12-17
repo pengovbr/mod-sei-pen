@@ -175,8 +175,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                     }
 
                     $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $$arrErros), 2);
-                    $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento); 
-
+                    PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
                     return false;
                 }
             }
@@ -189,7 +188,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $objTramitesAnteriores,$dblIdProcedimento);
 
             //Construção do processo para envio
-            $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
+            try{
+                $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
+            } catch (InfraException $ex) {
+                PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
+                return false;
+            }
 
             //Obtém o tamanho total da barra de progreso
             $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
@@ -980,10 +984,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                     }
 
                 }else{
-                    $this->atribuirComponentesDigitais($documento, $documentoDTO);
+                    $this->atribuirComponentesDigitais($documento, $documentoDTO, $dblIdProcedimento);
                 }
             }else{
-                $this->atribuirComponentesDigitais($documento, $documentoDTO);
+                $this->atribuirComponentesDigitais($documento, $documentoDTO, $dblIdProcedimento);
             }
 
             // TODO: Necessário tratar informações abaixo
@@ -1135,7 +1139,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function atribuirComponentesDigitais($objDocumento, DocumentoDTO $objDocumentoDTO)
+    private function atribuirComponentesDigitais($objDocumento, DocumentoDTO $objDocumentoDTO, $dblIdProcedimento=null)
     {
         if(!isset($objDocumento)){
             throw new InfraException('Parâmetro $objDocumento não informado.');
@@ -1145,7 +1149,10 @@ class ExpedirProcedimentoRN extends InfraRN {
             throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
         }
 
-        $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO);
+        $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($dblIdProcedimento, $objDocumentoDTO->getDblIdDocumento());
+        $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
+
+        $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO, $strStaAssociacao);
 
         if(!isset($arrInformacaoArquivo) || count($arrInformacaoArquivo) == 0){
             throw new InfraException('Erro durante obtenção de informações sobre o componente digital do documento {$objDocumentoDTO->getStrProtocoloDocumentoFormatado()}.');
@@ -1395,7 +1402,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $arrInformacaoArquivo['ID_ANEXO'] = $objAnexoDTO->getNumIdAnexo();
                 $arrInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = $strDadosComplementaresDoTipoDeArquivo;
 
-            } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $paramStrStaAssociacao == RelProtocoloProtocolo::TA_DOCUMENTO_MOVIDO) {
+            } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $paramStrStaAssociacao == RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
                 //Quando não é localizado um Anexo para um documento cancelado, os dados de componente digital precisam ser enviados
                 //pois o Barramento considera o componente digital do documento de forma obrigatória
                 $arrInformacaoArquivo['NOME'] = 'cancelado.html';
@@ -1770,7 +1777,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
                 $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
                 $bolIdDocumentoExiste = array_key_exists($dblIdDocumento, $arrObjDocumentoDTOIndexado) && isset($arrObjDocumentoDTOIndexado[$dblIdDocumento]);
-                $bolIdDocumentoFiltrado = isnull($paramDblIdDocumentoFiltro) || ($dblIdDocumento == $paramDblIdDocumentoFiltro);
+                $bolIdDocumentoFiltrado = is_null($paramDblIdDocumentoFiltro) || ($dblIdDocumento == $paramDblIdDocumentoFiltro);
                 
                 if ($bolIdDocumentoExiste && $bolIdDocumentoFiltrado){
                     $arrObjDocumentoDTO[] = array(
@@ -1895,8 +1902,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                 //$objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
                 $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
-                $objDocumentoDTO = $arrObjDocumentoDTOAssociacao['Documento'];
-                $strStaAssociacao = $arrObjDocumentoDTOAssociacao['StaAssociacao'];                
+                $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
+                $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
                 $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
                 $arrInformacaoArquivo = $this->obterDadosArquivo($objDocumentoDTO, $strStaAssociacao);
 

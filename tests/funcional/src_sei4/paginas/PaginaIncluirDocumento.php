@@ -152,7 +152,7 @@ class PaginaIncluirDocumento extends PaginaTeste
         return trim($this->test->byId('anchor' . $query["id_documento"])->text());
     }
 
-    public function gerarDocumentoExternoTeste(array $dadosDocumento)
+    public function gerarDocumentoExternoTeste(array $dadosDocumento, $comAnexo)
     {
         $this->test->frame(null);
         $this->test->frame("ifrVisualizacao");
@@ -176,7 +176,9 @@ class PaginaIncluirDocumento extends PaginaTeste
 
         $this->dataElaboracao($dadosDocumento["DATA_ELABORACAO"]);
         $this->formato($dadosDocumento["FORMATO_DOCUMENTO"]);
-        $this->anexo($dadosDocumento["ARQUIVO"]);
+        if($comAnexo){
+            $this->anexo($dadosDocumento["ARQUIVO"]);
+        }
         $this->observacoes($dadosDocumento["OBSERVACOES"]);
         $this->selecionarRestricao($dadosDocumento["RESTRICAO"], $dadosDocumento["HIPOTESE_LEGAL"]);
         $this->salvarDocumento();

@@ -246,10 +246,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(2);
     }
 
-    protected function cadastrarDocumentoExterno($dadosDocumentoExterno)
+    protected function cadastrarDocumentoExterno($dadosDocumentoExterno, $comAnexo=true)
     {
         $this->paginaProcesso->selecionarProcesso();
-        $this->paginaIncluirDocumento->gerarDocumentoExternoTeste($dadosDocumentoExterno);
+        $this->paginaIncluirDocumento->gerarDocumentoExternoTeste($dadosDocumentoExterno, $comAnexo);
         sleep(2);
     }
 
@@ -404,7 +404,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
 
         if($verificarProcessoRejeitado){
-            $this->assertTrue($this->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, utf8_encode($motivoRecusa)));
+
+            $motivoRecusa = utf8_encode($motivoRecusa);
+            $this->waitUntil(function($testCase) use ($unidadeDestino, $motivoRecusa) {
+                sleep(5);
+                $testCase->refresh();
+                $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+                $this->assertTrue($testCase->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa));
+                return true;
+            }, PEN_WAIT_TIMEOUT);
+
         }
     }
 
