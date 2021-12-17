@@ -61,8 +61,13 @@ class PENIntegracao extends SeiIntegracao
             $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
             $numRegistros = count($arrObjProcedimentoDTO);
 
+            $objPenUnidadeDTO = new PenUnidadeDTO();
+            $objPenUnidadeDTO->retNumIdUnidade();
+            $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objPenUnidadeRN = new PenUnidadeRN();
+
             //Apresenta o botão de expedir processo
-            if ($numRegistros > 0) {
+            if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
                 $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
                 $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
                 $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif",$this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em Lote" />';

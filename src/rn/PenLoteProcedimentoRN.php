@@ -98,12 +98,9 @@ class PenLoteProcedimentoRN extends InfraRN {
 
     }
 
-    protected function desbloquearProcessoLoteControlado($dblIdProcedimento)
+    public static function desbloquearProcessoLoteControlado($dblIdProcedimento)
     {
         try{
-
-            //Desbloqueia o processo
-            ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
 
             $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
             $objPenLoteProcedimentoDTO->retNumIdLote();
@@ -122,6 +119,13 @@ class PenLoteProcedimentoRN extends InfraRN {
 
             $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
             $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+
+            //Desbloqueia o processo
+            $objProtocoloRN = new ProtocoloRN();
+            $objProtocoloDTO = new ProtocoloDTO();
+            $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_NORMAL);
+            $objProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objProtocoloRN->alterarRN0203($objProtocoloDTO);
 
             //Cria o Objeto que registrar a Atividade de cancelamento
             $objAtividadeDTO = new AtividadeDTO();
