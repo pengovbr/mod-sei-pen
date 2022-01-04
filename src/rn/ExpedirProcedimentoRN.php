@@ -1340,6 +1340,18 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(),false,true);
             }
 
+            //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI4 e atualizado pra SEI4.0.3
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(),false,false,null,true,true);
+            }
+
+            //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI3 e atualizado pra SEI4.0.3
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(),false,false,null,false,true);
+            }
+
             //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
@@ -1456,7 +1468,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
     * @return String                     Conteúdo completo do documento para envio
     */
-    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false)
+    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false)
     {
         $objEditorDTO = new EditorDTO();
         $objEditorDTO->setDblIdDocumento($parDblIdDocumento);
@@ -1489,7 +1501,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $dados=[
             "parObjEditorDTO" => $objEditorDTO,
             "montarTarja" => $dadosURL==null?false:true,
-            "controleURL" => $dadosURL
+            "controleURL" => $dadosURL,
+            "bolTarjaLegada402" => $bolTarjaLegada402
         ];
 
         if($dadosURL!=null && $bolSeiVersao4==false){  
@@ -1500,6 +1513,18 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if($dadosURL!=null && $bolSeiVersao4==true){  
             $objEditorRN = new EditorSEI4RN();
+            $strResultado = $objEditorRN->consultarHtmlVersao($dados);
+            return $strResultado;
+        }
+
+        if($bolSeiVersao4 && $bolTarjaLegada402){  
+            $objEditorRN = new EditorSEI4RN();
+            $strResultado = $objEditorRN->consultarHtmlVersao($dados);
+            return $strResultado;
+        }
+
+        if(!$bolSeiVersao4 && $bolTarjaLegada402){  
+            $objEditorRN = new Editor3011RN();
             $strResultado = $objEditorRN->consultarHtmlVersao($dados);
             return $strResultado;
         }
