@@ -1563,6 +1563,7 @@ class Editor3011RN extends InfraRN
     $parObjEditorDTO=$dados["parObjEditorDTO"];
     $montarTarja=$dados["montarTarja"];
     $controleURL=$dados["controleURL"];
+    $bolTarjaLegada402=$dados["bolTarjaLegada402"];
 
 
     if ($parObjEditorDTO->getDblIdDocumento()!=null) {
@@ -1739,8 +1740,13 @@ class Editor3011RN extends InfraRN
 
         if ($objDocumentoDTO!=null) {
           if(!$montarTarja){
+            if($bolTarjaLegada402){
+              $objAssinaturaRN = new AssinaturaHashRN();
+              $strHtml .= $objAssinaturaRN->montarTarjasLegado($objDocumentoDTO);
+            }else{
             $objAssinaturaRN = new AssinaturaRN();
             $strHtml .= $objAssinaturaRN->montarTarjas($objDocumentoDTO);
+            }
           }else{
             $objAssinaturaRN = new AssinaturaHashRN();
             $dados=[
