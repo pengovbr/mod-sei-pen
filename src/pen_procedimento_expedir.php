@@ -44,13 +44,26 @@ try {
 
     $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
     $strLinkProcedimento = $objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=procedimento_controlar&acao_retorno=procedimento_controlar&id_procedimento='.$idProcedimento);
+    $strLinkVerificarBloqueioProcesso = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=verificar_bloqueio_processo&id_procedimento='.$idProcedimento);
+
+    //verifica se tem o módulo Utilidades e na versao ^1.5.0 para verificar se o processo será bloqueado na ação de bloquear
+    $configuracaoSEI = new ConfiguracaoSEI();
+    $arrConfig = $configuracaoSEI->getInstance()->getArrConfiguracoes();
+    $possuiUtilidades = isset($arrConfig['SEI']['Modulos']['UtilidadesIntegracao']);
+
+    $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+    $strVersaoModuloUtilidades = $objInfraParametro->getValor('VERSAO_MODULO_UTILIDADES', false);
+    $possuiVersaoUtilidades = $strVersaoModuloUtilidades >= "1.5.0";
+
+    $verificaBloquear =  $possuiUtilidades && $possuiVersaoUtilidades;
 
     switch ($_GET['acao']) {
 
         case 'pen_procedimento_expedir':
 
             $strTitulo = 'Envio Externo de Processo';
-            $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
+            $arrComandos[] = '<button type="button" accesskey="E" onclick="validarEnviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
+
             $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
             //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
@@ -97,13 +110,15 @@ try {
 
             //Carregar dados do procedimento na primeiro acesso à página
            if (!isset($_POST['hdnIdProcedimento'])) {
-                $objProcedimentoRN = new ProcedimentoRN();
-                $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
-                $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-                $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+
+               $objProcedimentoRN = new ProcedimentoRN();
+               $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
+               $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+               $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
             }
 
             if(isset($_POST['sbmExpedir'])) {
+
                 $numVersao = $objPaginaSEI->getNumVersao();
                 echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
                 echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
@@ -149,7 +164,6 @@ try {
                     $objPaginaSEI->processarExcecao($e);
                     echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
                 }
-
                 $objPaginaSEI->finalizarBarraProgresso(null, false);
             }
 
@@ -441,6 +455,31 @@ function tratarResultadoValidacao(resp, textStatus, jqXHR){
     abrirBarraProgresso(document.forms['frmExpedirProcedimento'], strAction, 600, 200);
 }
 
+function validarEnviarForm(event){
+
+    // se possuir o modulo utilidades instalado é validado antes de submeter o formulario para evitar bloquear processo
+    if('<?=$verificaBloquear ?>'){
+        console.log('entrou');
+        $.ajax({
+            url : '<?=$strLinkVerificarBloqueioProcesso ?>',
+            type : 'GET',
+            dataType: 'XML',
+            success: function(response){
+                if ($(response).find("Bloqueado").html() == 1){
+                    alert($(response).find("Msg").html());
+                    parent.location.reload();
+                } else {
+                    enviarForm(event);
+                }
+            },
+            error : function (e) {
+                console.error('Erro ao validar Procedimento: ' + e.responseText);
+            }
+        });
+    }else{
+        enviarForm(event);
+    }
+}
 
 function enviarForm(event){
     var button = jQuery(event.target);
