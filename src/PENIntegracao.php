@@ -2,7 +2,7 @@
 
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "3.1.9";
+    const VERSAO_MODULO = "3.1.10";
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -46,20 +46,21 @@ class PENIntegracao extends SeiIntegracao
     public function montarBotaoControleProcessos() {
 
         $objSessaoSEI = SessaoSEI::getInstance();
+        $strAcoesProcedimento = "";
 
         $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
         
         if ($bolAcaoGerarPendencia) {
             $objPaginaSEI = PaginaSEI::getInstance();
 
-            $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
-            $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-            $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-            $objPesquisaPendenciaDTO->setStrStaTipoAtribuicao(PaginaSEI::getInstance()->recuperarCampo('hdnMeusProcessos')); 
-            
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDistinct(true);
+            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objAtividadeDTO->setDthConclusao(null);
+            $objAtividadeDTO->retNumIdUnidade();
+    
             $objAtividadeRN = new AtividadeRN();
-            $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
-            $numRegistros = count($arrObjProcedimentoDTO);
+            $numRegistros = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
             $objPenUnidadeDTO = new PenUnidadeDTO();
             $objPenUnidadeDTO->retNumIdUnidade();
