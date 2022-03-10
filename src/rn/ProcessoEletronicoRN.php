@@ -668,9 +668,9 @@ class ProcessoEletronicoRN extends InfraRN
         $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
         $objRelProtocoloAssuntoDTO->setDblIdProtocolo($dblIdProcedimento);
         $objRelProtocoloAssuntoDTO->retStrDescricaoAssunto();
-        $objRelProtocoloAssuntoDTO->retTodos();
-        
-        
+        $objRelProtocoloAssuntoDTO->retNumIdAssunto();
+        $objRelProtocoloAssuntoDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
         $objRelProtocoloAssuntoRN = new RelProtocoloAssuntoRN();
         $arrobjRelProtocoloAssuntoDTO = $objRelProtocoloAssuntoRN->listarRN0188($objRelProtocoloAssuntoDTO);
         
@@ -680,7 +680,7 @@ class ProcessoEletronicoRN extends InfraRN
         
         foreach ($arrobjRelProtocoloAssuntoDTO as $objRelProtocoloAssuntoDTO) {
             
-            $idAssunto = $objRelProtocoloAssuntoDTO->getNumIdAssuntoProxy();
+            $idAssunto = $objRelProtocoloAssuntoDTO->getNumIdAssunto();
             $assuntoDTO = new AssuntoDTO();
             $assuntoDTO->setNumIdAssunto($idAssunto);
             $assuntoDTO->retNumPrazoCorrente();
