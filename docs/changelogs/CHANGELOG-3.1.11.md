@@ -19,4 +19,5 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 #### Issue #142 - Erro ao Salvar Assuntos como Propriedade Adicional no Barramento
 
-Assuntos modificados pelos usuários poderiam em alguns casos serem transmitidos com um outro código estruturador diferente do desejado
+Assuntos modificados pelos usuários poderiam em alguns casos serem transmitidos com um outro código estruturador diferente do desejado.
+Assuntos remapeados para uma nova tabela de assuntos também eram atingidos pelo Bug.
