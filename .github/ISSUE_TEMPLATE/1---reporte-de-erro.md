@@ -32,11 +32,10 @@ Se aplicável, adicione capturas de tela para ajudar a explicar seu problema. Su
 -----
 
 **Contexto da falha (Por favor, complete a seguinte informação):**
- - Ambiente: [nome e/ou endereço do sistema em que o erro foi identificado]
  - Versão do sistema: [ex: 1.0.1]
  - Navegador: [ex. chrome, safari]
  - Perfil do Usuário: [ex: colaborador, externo, coordenador, administrador, etc.]
-
+ - Banco de dados: [MySQL, SQLServer, Oracle ou PostgreSQL]
 -----
 
 **Informações adicionais**
