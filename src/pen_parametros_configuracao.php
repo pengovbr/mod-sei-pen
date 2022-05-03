@@ -117,9 +117,7 @@ $objPagina->montarStyle();
 $objPagina->abrirStyle();
 ?>
 .input-field {
-    width: 45%;
-    margin-bottom: 20px;
-    margin-top: 2px;
+    min-width: 200px;
 }
 
 .erro_pen{
@@ -131,14 +129,11 @@ $objPagina->abrirStyle();
 .div_input{
     display:flex; 
     align-items:center;
-    margin-top:10px;
     margin-bottom:10px;
-
 }
 
 .pen_ajuda{
     margin-left:10px;
-
 }
 
 
@@ -191,9 +186,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 <form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'_salvar&acao_origem='.$_GET['acao'])?>">
     <?
     $objPagina->montarBarraComandosSuperior($arrComandos);
+    $objPagina->getInstance()->abrirAreaDados('30em');
+    
     foreach ($retParametros as $parametro) {
-
-        echo '<div class="container">';
         //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
             ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?php
@@ -208,7 +203,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
                     $textoAjuda="Selecionar o repositório, configurado no Portal do PEN, que seu órgão faz parte";
                     echo '<div class="div_input">';
-                    echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect">';
+                    echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
                     echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
                     echo '</select>';
                     echo "<a class='pen_ajuda' id='ajuda_repositorio' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
@@ -224,7 +219,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             case 'PEN_TIPO_PROCESSO_EXTERNO':
                 $textoAjuda="Selecionar o tipo de processo que será utilizado no envio. Nesta listagem não estão presentes os tipos que permitem a classificação como sigilosos ou não possuam assunto associado";
                 echo '<div class="div_input">';
-                echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraSelect" >';
+                echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraSelect input-field" >';
                 echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome');
                 echo '<select>';
                 echo "<a class='pen_ajuda' id='ajuda_tipo_processo'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
@@ -234,7 +229,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
                 $textoAjuda="Selecionar a unidade que representa os órgãos externos";
                 echo '<div class="div_input">';
-                echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraSelect" >';
+                echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraSelect input-field" >';
                 echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjUnidade, 'IdUnidade', 'Sigla');
                 echo '<select>';
                 echo "<a class='pen_ajuda' id='ajuda_unidade'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
@@ -244,7 +239,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
                 $textoAjuda="Selecionar caso queira receber notificações de recebimento";
                 echo '<div class="div_input">';
-                echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraSelect" >';
+                echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraSelect input-field" >';
                 echo '    <option value="S" ' . ($parametro->getStrValor() == 'S' ? 'selected="selected"' : '') . '>Sim</option>';
                 echo '    <option value="N" ' . ($parametro->getStrValor() == 'N' ? 'selected="selected"' : '') . '>Não</option>';
                 echo '<select>';
@@ -253,11 +248,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 break;
 
             default:
-                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                 break;
         }
-
-        echo '</div>';
     }
     ?>
 </form>

@@ -30,8 +30,8 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class VerificadorInstalacaoRN extends InfraRN
 {
     // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X
-    const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7', '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.3.1');
-
+    const COMPATIBILIDADE_MODULO_SEI = array('3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7', '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.3.1', '4.0.4', '4.0.5', '4.0.6');
+ 
     public function __construct() {
         parent::__construct();
     }
@@ -56,6 +56,7 @@ class VerificadorInstalacaoRN extends InfraRN
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-pendencias-represadas.py');
         return true;
     }
+
 
     /**
      * Verifica se o módulo foi devidamente ativado nas configurações do sistema
@@ -136,7 +137,6 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
 
-
     /**
     * Verifica a compatibilidade da versão do módulo com a atual versão do SEI em que está sendo feita a instalação
     *
@@ -147,7 +147,8 @@ class VerificadorInstalacaoRN extends InfraRN
         $strVersaoSEI = SEI_VERSAO;
         if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
             $objPENIntegracao = new PENIntegracao();
-            throw new InfraException(sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI));
+            $strMensagem = sprintf("Módulo %s (versão %s) não é compatível com a versão %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI);
+            throw new ModuloIncompativelException($strMensagem);
         }
 
         return true;
@@ -159,7 +160,7 @@ class VerificadorInstalacaoRN extends InfraRN
     * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
     * @return boolean                  Indicardor se base de dados é compatível
     */
-    public function verificarCompatibilidadeBanco($bolGerarExcecao=true)
+    public function verificarCompatibilidadeBanco()
     {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
@@ -167,17 +168,17 @@ class VerificadorInstalacaoRN extends InfraRN
         $objPENIntegracao = new PENIntegracao();
         $strVersaoModulo = $objPENIntegracao->getVersao();
 
-        $bolBaseCompativel = ($strVersaoModulo === $strVersaoBancoModulo);
+        if($strVersaoModulo !== $strVersaoBancoModulo){
+            $strMensagem = sprintf(
+                "Base de dados do módulo '%s' (versão %s) encontra-se incompatível. A versão da base de dados atualmente instalada é a %s. \n ".
+                "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo
+            );
 
-        if(!$bolBaseCompativel && $bolGerarExcecao){
-            throw new ModuloIncompativelException(sprintf("Base de dados do módulo '%s' (versão %s) encontra-se incompatível. A versão da base de dados atualmente instalada é a %s. \n ".
-            "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo));
+            throw new ModuloIncompativelException($strMensagem);
         }
 
-        return $bolBaseCompativel;
+        return true;
     }
-
-
 
     /**
     * Verifica a validação do Certificado Digital, verificando sua localização e a validação das senhas de criptografia

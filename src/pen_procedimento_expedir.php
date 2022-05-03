@@ -500,7 +500,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
                 <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
                     value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
-                <button id="btnIdUnidade" type="button" class="infraText">Consultar</button>
+                <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
                 <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
             </div>
 
@@ -510,7 +510,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 	<div id="divProcedimentosApensados" class="infraAreaDados" style="height: 12em; display: none; ">
 		<label id="lblProcedimentosApensados" for="selProcedimentosApensados" class="infraLabelObrigatorio">Processos Apensados:</label>
         <input type="text" id="txtProcedimentoApensado" name="txtProcedimentoApensado" class="infraText" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-        <input type="hidden" id="hdnIdProcedimentoApensado" name="hdnIdProcedimentoApensado" class="infraText" value="" />
+        <input type="hidden" id="hdnIdProcedimentoApensado" name="hdnIdProcedimentoApensado" value="" />
         <select id="selProcedimentosApensados" name="selProcedimentosApensados[ ]" size="4" multiple="multiple" class="infraSelect" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>"></select>
         <img id="imgLupaProcedimentosApensados" onclick="objLupaProcedimentosApensados.selecionar(700,500);" src="/infra_css/imagens/lupa.gif" alt="Selecionar Processos Apensados" title="Selecionar Processos Apensados" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
         <img id="imgExcluirProcedimentosApensados" onclick="objLupaProcedimentosApensados.remover();" src="/infra_css/imagens/remover.gif" alt="Remover Processo Apensado" title="Remover Processo Apensado" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />

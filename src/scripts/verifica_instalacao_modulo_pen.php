@@ -44,7 +44,6 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
             $fnPrint("- Verificada a compatibilidade do mod-sei-pen com a atual versão do SEI", 1);
         }
 
-
         sleep(1);
         if($objVerificadorInstalacaoRN->verificarCertificadoDigital()){
             $fnPrint("- Certificado digital localizado e corretamente configurado", 1);

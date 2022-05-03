@@ -16,7 +16,6 @@ class PENAgendamentoRN extends InfraRN
     protected function atualizarHipotesesLegaisControlado()
     {
         try {
-            PENIntegracao::validarCompatibilidadeModulo();
             $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
             $processoEletronicoRN = new ProcessoEletronicoRN();
             $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
@@ -77,8 +76,6 @@ class PENAgendamentoRN extends InfraRN
     protected function atualizarEspeciesDocumentaisControlado()
     {
         try{
-            PENIntegracao::validarCompatibilidadeModulo();
-
             // Obtém lista de espécies documentais do Barramento de Serviços do PEN
             $processoEletronicoRN = new ProcessoEletronicoRN();
             $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();
@@ -153,6 +150,8 @@ class PENAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->limpar();
 
         try {
+            PENIntegracao::verificarCompatibilidadeConfiguracoes();
+
             $this->atualizarHipotesesLegais();
             $this->atualizarEspeciesDocumentais();
 
@@ -186,6 +185,8 @@ class PENAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->limpar();
 
         try {
+            PENIntegracao::verificarCompatibilidadeConfiguracoes();
+
             $bolDebugAtivo = array_key_exists('debug', $arrParametros) && $arrParametros['debug'][0] != false;
             $bolMonitoramentoAtivado = array_key_exists('monitorar', $arrParametros) && $arrParametros['monitorar'][0] != false;
             $strValorWorkers = array_key_exists('workers', $arrParametros) ? $arrParametros['workers'][0] : null;

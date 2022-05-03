@@ -35,12 +35,7 @@ class PENIntegracao extends SeiIntegracao
     public function inicializar($strVersaoSEI)
     {
         define('DIR_SEI_WEB', realpath(DIR_SEI_CONFIG.'/../web'));
-
-        // Aplicação de validações pertinentes à instalação e inicialização do módulo
-        // Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
-        // caso de indisponibilidade momentânea do Barramento de Serviços.
-        PENIntegracao::validarArquivoConfiguracao();
-        PENIntegracao::validarCompatibilidadeModulo($strVersaoSEI);
+        require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
     }
 
     public function montarBotaoControleProcessos() {
@@ -347,7 +342,7 @@ class PENIntegracao extends SeiIntegracao
             return false;
         }
 
-        PENIntegracao::validarCompatibilidadeModulo();
+        PENIntegracao::verificarCompatibilidadeConfiguracoes();
 
         switch ($strAcao) {
             case 'pen_procedimento_expedir':
@@ -618,42 +613,33 @@ class PENIntegracao extends SeiIntegracao
     }
 
     /**
-    * Método responsável pela validação da compatibilidade do banco de dados do módulo em relação ao versão instalada
-    *
-    * @param  boolean $bolGerarExcecao Flag para geração de exceção do tipo InfraException caso base de dados incompatível
-    * @return boolean Indicardor se base de dados é compatível
-    */
-    public static function validarCompatibilidadeBanco($bolGerarExcecao=true)
-    {
+     * Verifica a compatibilidade e correta configuracao do módulo de Barramento, registrando mensagem de alerta no log do sistema
+     * 
+     * Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
+     * caso de indisponibilidade momentânea do Barramento de Serviços.                        
+     */
+    public static function verificarCompatibilidadeConfiguracoes(){
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
-        return $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo($bolGerarExcecao);
+
+        try {
+            $objVerificadorInstalacaoRN->verificarArquivoConfiguracao();
+        } catch (\Exception $e) {
+            throw $e;
+        }
+        
+        try {
+            $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo();
+        } catch (\Exception $e) {
+            LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
+        }
+
+        try {
+            $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
+        } catch (\Exception $e) {
+            LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
+        }
     }
 
-
-    /**
-    * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
-    *
-    * @param string $parStrVersaoSEI
-    * @return void
-    */
-    public static function validarCompatibilidadeModulo($parStrVersaoSEI=null)
-    {
-        $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
-        $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo();
-    }
-
-
-    /**
-    * Método responsável pela validação da compatibilidade do módulo em relação à versão oficial do SEI
-    *
-    * @param string $parStrVersaoSEI
-    * @return void
-    */
-    public static function validarArquivoConfiguracao()
-    {
-        $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
-        $objVerificadorInstalacaoRN->verificarArquivoConfiguracao();
-    }
 
     public function processarPendencias()
     {

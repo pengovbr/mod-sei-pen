@@ -69,24 +69,18 @@ class PendenciasTramiteRN extends InfraRN
             ini_set('max_execution_time','0');
             ini_set('memory_limit','-1');
 
-            $this->validarCertificado();
-
-            PENIntegracao::validarCompatibilidadeModulo();
+            PENIntegracao::verificarCompatibilidadeConfiguracoes();
 
             if(empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)){
                 throw new InfraException("Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
             }
 
-            $objPenParametroRN = new PenParametroRN();
-            //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
             ModPenUtilsRN::simularLoginUnidadeRecebimento();
-
             $mensagemInicioMonitoramento = 'Iniciando serviço de monitoramento de pendências de trâmites de processos';
             $this->gravarLogDebug($mensagemInicioMonitoramento, 0);
 
             do{
                 try {
-                    PENIntegracao::validarCompatibilidadeBanco();
                     $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite($parBolMonitorarPendencias);
 
