@@ -358,7 +358,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
     
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('40px'); ?>
+    <?php $objPagina->abrirAreaDados('5em'); ?>
         
         <label for="id_barramento" class="infraLabelObrigatorio input-label-first">Hipótese Legal PEN:</label>
         <select name="id_barramento" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>

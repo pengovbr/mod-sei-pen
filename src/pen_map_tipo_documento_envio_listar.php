@@ -249,12 +249,12 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 <form id="frmAcompanharEstadoProcesso" method="post" action="">
     
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
-    <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
+    <?php $objPaginaSEI->abrirAreaDados('5em'); ?>
 
-        <label for="nome_serie" class="infraLabelObrigatorio input-label-first">Tipo de Documento SEI:</label>
+        <label for="nome_serie" class="infraLabelOpcional input-label-first">Tipo de Documento SEI:</label>
         <input type="text" name="nome_serie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_serie']; ?>"/>
         
-        <label for="nome_especie" class="infraLabelObrigatorio input-label-second">Espécie Documental PEN:</label>
+        <label for="nome_especie" class="infraLabelOpcional input-label-second">Espécie Documental PEN:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
 
     <?php $objPaginaSEI->fecharAreaDados(); ?>

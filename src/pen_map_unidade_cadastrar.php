@@ -175,15 +175,15 @@ $classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcar
 ?>
 <style type="text/css">
 
-.input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:15%;width:25%}
+#lblUnidadeSei{position:absolute;left:0%;top:0%;width:60%;min-width:250px;}
+#selUnidadeSei{position:absolute;left:0%;top:13%;width:60%;min-width:250px;}
 
-.input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
-.input-field-third {position:absolute;left:0%;top:55%;width:25%;}
-
-#txtUnidade {width:50%;border:.1em solid #666;}
+#lblUnidadePen{position:absolute;left:0%;top:40%;width:60%;}
+#txtUnidadePen{position:absolute;left:0%;top:53%;width:60%;}
+#btnUnidadeRh2{position:absolute;left:61%;top:53%;}
 
 </style>
+
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
 
@@ -191,14 +191,14 @@ var objAutoCompletarEstrutura = null;
 var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
 var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
 function inicializar(){
-    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('selUnidadeRh','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
     objAutoCompletarEstrutura.limparCampo = false;
     objAutoCompletarEstrutura.tempoAviso = 10000000;
 
     objAutoCompletarEstrutura.prepararExecucao = function(){
-        var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidade').value;
+        var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidadePen').value;
         parametros += '&id_repositorio=' + numIdRepositorioOrigem
         return parametros;
     };
@@ -207,8 +207,8 @@ function inicializar(){
         window.infraAvisoCancelar();
     };
 
-    $('#selUnidadeRh2').click(function() {
-        $('#selUnidadeRh').val('');
+    $('#btnUnidadeRh2').click(function() {
+        $('#hdnUnidadeRh').val('');
         objAutoCompletarEstrutura.executar();
         objAutoCompletarEstrutura.procurar();
     });
@@ -226,7 +226,7 @@ function onSubmit() {
         return false;
     }
 
-    field = jQuery('#selUnidadeRh', form);
+    field = jQuery('#hdnUnidadeRh', form);
 
     if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
         alert('Nenhum "ID da Unidade - PEN" foi selecionada');
@@ -245,21 +245,15 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
     <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('15em'); ?>
 
-    <div>
-        <label for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-        <select name="id_unidade" class="input-field-first" >
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
-        </select>
-    </div><br><br><br>
+    <label id="lblUnidadeSei" for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
+    <select id="selUnidadeSei" name="id_unidade" class="infraSelect" >
+        <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
+    </select>
 
-    <div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
-        <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
-        <div class="alinhamentoBotaoImput">
-            <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
-            <button id="selUnidadeRh2" type="button" class="infraText">Pesquisar</button>
-        </div>
-        <input type="hidden" id="selUnidadeRh" name="id_unidade_rh" class="infraText" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
-    </div>
+    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do PEN (Estruturas Organizacionais):</label>
+    <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
+    <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
+    <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
 
     <?php print $objPagina->fecharAreaDados(); ?>
 </form>

@@ -207,14 +207,11 @@ $objPagina->montarStyle();
 ?>
 <style type="text/css">
 
-.input-label-first{position:absolute;left:0%;top:0%;width:25%; color: #666!important}
-.input-field-first{position:absolute;left:0%;top:50%;width:25%}
+#lblSiglaUnidade{position:absolute;left:0%;top:0%;width:25%; }
+#txtSiglaUnidade{position:absolute;left:0%;top:50%;width:25%}
 
-.input-label-second{position:absolute;left:30%;top:0%;width:25%; color: #666!important}
-.input-field-second{position:absolute;left:30%;top:50%;width:25%;}
-
-.input-label-third {position:absolute;left:0%;top:40%;width:25%; color:#666!important}
-.input-field-third {position:absolute;left:0%;top:55%;width:25%;}
+#lblDescricaoUnidade{position:absolute;left:30%;top:0%;width:25%; }
+#txtDescricaoUnidade{position:absolute;left:30%;top:50%;width:25%;}
 
 </style>
 <?php $objPagina->montarJavaScript(); ?>
@@ -321,13 +318,13 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
 
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('40px'); ?>
+    <?php $objPagina->abrirAreaDados('5em'); ?>
 
-        <label for="sigla" class="infraLabelObrigatorio input-label-first">Sigla:</label>
-        <input type="text" class="input-field-first" name="sigla" value="<?= PaginaSEI::tratarHTML(isset($_POST['sigla']) ? $_POST['sigla'] : ''); ?>">
+        <label for="txtSiglaUnidade" id="lblSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
+        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset($_POST['sigla']) ? $_POST['sigla'] : ''); ?>">
 
-        <label for="descricao" class="infraLabelObrigatorio input-label-second">Descrição:</label>
-        <input type="text" class="input-field-second" name="descricao" value="<?= PaginaSEI::tratarHTML(isset($_POST['descricao']) ? $_POST['descricao'] : ''); ?>">
+        <label for="txtDescricaoUnidade" id="lblDescricaoUnidade" class="infraLabelOpcional">Descrição:</label>
+        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['descricao']) ? $_POST['descricao'] : ''); ?>">
 
     <?php $objPagina->fecharAreaDados(); ?>
 

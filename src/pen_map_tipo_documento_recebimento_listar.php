@@ -264,7 +264,7 @@ $objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
 <form id="frmAcompanharEstadoProcesso" method="post" action="">
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
-    <?php $objPaginaSEI->abrirAreaDados('40px'); ?>
+    <?php $objPaginaSEI->abrirAreaDados('5em'); ?>
         <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
 
