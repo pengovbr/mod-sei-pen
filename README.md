@@ -44,6 +44,9 @@ Existem diversas formas de colaborar neste projeto:
 * Revisar a documentação do projeto e enviar qualquer tipo de contribuição via [Pull Request](https://github.com/spbgovbr/mod-sei-pen/pulls)
 * Ajudar na correção de erros ou melhoria da base de código. Para isto, faça um fork do projeto no GitHub e posteriormente nos envie um [Pull Request](https://github.com/spbgovbr/mod-sei-pen/pulls)
 
+## DESENVOLVIMENTO
+
+Para maior informações de como configurar o ambiente de desenvolvimento do mod-sei-pen para apoiar o desenvolvimento do projeto, acesse a página [Configuração do Ambiente de Desenvolvimento](docs/DESENV.md)
 
 
 ## SUPORTE

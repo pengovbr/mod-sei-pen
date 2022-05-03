@@ -67,7 +67,9 @@ services:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug
     extra_hosts:
       - "${ORG1_HOSTNAME}:127.0.0.1"
     links:
@@ -76,14 +78,13 @@ services:
       - org1-database:${ORG1_DATABASE_NAME}
 
 
-### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
+  ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:7.2
     container_name: org2-${ORG2_DATABASE_NAME}
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
-
 
   org2-http:
     image: guilhermeadc/sei3_httpd-2.4:7.2
@@ -103,7 +104,9 @@ services:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG="idekey=default remote_enable=1 remote_mode=req remote_port=9000 remote_host=${HOST_IP} remote_connect_back=1"
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug
         
     extra_hosts:
       - "${ORG2_HOSTNAME}:127.0.0.1"

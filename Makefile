@@ -1,8 +1,7 @@
-.PHONY: .env help clean build all test-environment-provision test-environment-destroy test-environment-up test-environment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2
+.PHONY: .env help clean build all test-environment-provision test-environment-destroy test-environment-up test-environment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 include tests/funcional/.env
 
-HOST_IP := $(shell hostname -I | cut -d' ' -f1)
 VERSAO_MODULO := $(shell grep 'const VERSAO_MODULO' src/PENIntegracao.php | cut -d'"' -f2)
 
 SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
@@ -67,7 +66,7 @@ install-dev:
 	
 
 test-environment-provision:	
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
 	@echo "Sleeping for 45 seconds ..."; sleep 45;
 	# docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http yum install -y php-xdebug
 	# docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http yum install -y php-xdebug
@@ -89,16 +88,25 @@ test-environment-provision:
 	composer install -d $(PEN_TEST_UNIT)
 
 
+verify-config:
+	@echo "Verificando configurações do módulo para instância org1"
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	@echo "Verificando configurações do módulo para instância org2"
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+
 test-environment-destroy:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env rm
 
 
 test-environment-up:	
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
-	@echo "Sleeping for 5 seconds ..."; sleep 5;
-	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d
+	# TODO: mover rotina abaixo para target específico de atualização de base de dados do sistema para
+	# não solicitar senha de atualização toda vez que subir ambiente. Base de referência utilizada para testes
+	# não possui problemas de sequences, o que pode ser necessário para backups restaurados com problemas	
+	# @echo "Sleeping for 5 seconds ..."; sleep 5;
+	# docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	# docker exec -it org2-http php -c /opt/php.ini /opt/sip/scripts/atualizar_sequencias.php
 
 
 test-environment-down:	
@@ -110,7 +118,7 @@ test-functional:
 
 
 test-functional-internal:	
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml  --testsuite funcional
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml  --testsuite funcional
 
 
 test-functional-parallel:
@@ -118,7 +126,7 @@ test-functional-parallel:
 	  
 
 test-functional-parallel-internal:
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --bootstrap /tests/bootstrap.php --testsuite funcional -p 4
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --bootstrap /tests/bootstrap.php --testsuite funcional -p 4
 
 
 test-parallel-otimizado:
@@ -140,42 +148,41 @@ bash_org2:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
 
 atualizaSequencia:
-	sudo docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-	sudo docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
 
 deletarHttpProxy:
-	sudo docker container rm proxy org1-http org2-http
+	docker container rm proxy org1-http org2-http
 
 tramitar-pendencias:
 	i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T1 $$i"; \
-		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done & i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T2 $$i"; \
-		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done
 
 tramitar-pendencias-silent:
 	i=1; while [ "$$i" -le 300 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
-		sudo docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
-		sudo docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
+		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
+		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
 		i=$$((i + 1));\
   	done 
 
 #comando para executar apenas 1 teste
 # make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
 run-test-xdebug:
-	sed -i 's/#HOSTIP/${HOST_IP}/g' tests/funcional/assets/config/xdebug.ini
-	export HOST_IP=$(HOST_IP); docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests_sei4/$(addsuffix .php,$(teste))
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests_sei4/$(addsuffix .php,$(teste))
 
 #deve ser rodado em outro terminal
 stop-test-container:
-	sudo docker stop $$(sudo docker ps -a -q --filter="name=php-test")
+	docker stop $$(docker ps -a -q --filter="name=php-test")
 
 # make teste=TramiteProcessoComDevolucaoTest sei3-run-test-xdebug
 sei3-run-test-xdebug:
