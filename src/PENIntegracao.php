@@ -579,6 +579,10 @@ class PENIntegracao extends SeiIntegracao
         return $strArq;
     }
 
+    public function obterDiretorioIconesMenu() {
+        return self::getDiretorioImagens();
+    }
+
 
     /**
     * Método responsável por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
@@ -639,7 +643,6 @@ class PENIntegracao extends SeiIntegracao
             LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
         }
     }
-
 
     public function processarPendencias()
     {

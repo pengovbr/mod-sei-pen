@@ -19,6 +19,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
     protected function atualizarVersaoConectado() {
         try {
+            InfraDebug::getInstance()->setBolLigado(true);
+            InfraDebug::getInstance()->setBolDebugInfra(false);
+            InfraDebug::getInstance()->setBolEcho(true);
+            InfraDebug::getInstance()->limpar();
 
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI ' . SEI_VERSAO);
 
@@ -116,7 +120,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
                 case '3.1.9': $this->instalarV30110();
                 case '3.1.10': $this->instalarV30111();
                 case '3.1.11': $this->instalarV30112();
-                case '3.1.13': $this->instalarV30113();
+                case '3.1.12': $this->instalarV30113();
                     break;
                 default:
                 $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2262,23 +2266,33 @@ class PenAtualizarSeiRN extends PenAtualizadorRN {
 
 }
 
+
+/**
+ * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
+ * 
+ * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+ * - Se resultado for IGUAL a 0, versões iguais
+ * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
+ * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
+ */
+function compararVersoes($strVersao1, $strVersao2){
+    $numVersao1 = explode('.', $strVersao1);
+    $numVersao1 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao1);
+    $numVersao1 = intval(join($numVersao1));
+
+    $numVersao2 = explode('.', $strVersao2);
+    $numVersao2 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao2);
+    $numVersao2 = intval(join($numVersao2));
+
+    return $numVersao1 - $numVersao2;
+}
+
 try {
 
     $dirSeiWeb = !defined("DIR_SEI_WEB") ? getenv("DIR_SEI_WEB") ?: __DIR__."/../../web" : DIR_SEI_WEB;
     require_once $dirSeiWeb . '/SEI.php';
 
-    //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
-    $numVersaoAtual = explode('.', SEI_VERSAO);
-    $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
-    $numVersaoAtual = intval(join($numVersaoAtual));
-
-    //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.1.0 -> 030100)
-    // A partir da versão 3.1.0 é que o SEI passa a dar suporte ao UsuarioScript/SenhaScript
-    $numVersaoScript = explode('.', "3.1.0");
-    $numVersaoScript = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoScript);
-    $numVersaoScript = intval(join($numVersaoScript));
-
-    if ($numVersaoAtual >= $numVersaoScript) {
+    if (compararVersoes(SEI_VERSAO, "3.1.0") >= 0) {
         BancoSEI::getInstance()->setBolScript(true);
 
         if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI','UsuarioScript')){

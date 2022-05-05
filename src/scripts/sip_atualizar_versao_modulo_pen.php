@@ -3,6 +3,9 @@
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__."/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
 
+session_start();
+SessaoSip::getInstance(false);
+
 class PenAtualizarSipRN extends InfraRN {
 
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
@@ -26,21 +29,10 @@ class PenAtualizarSipRN extends InfraRN {
      * @return null
      */
     protected function inicializar($strTitulo) {
-
-        session_start();
-        SessaoSip::getInstance(false);
-
-        ini_set('max_execution_time', '0');
-        ini_set('memory_limit', '-1');
-        @ini_set('zlib.output_compression', '0');
-        @ini_set('implicit_flush', '1');
-        ob_implicit_flush();
-
-        $this->objDebug = InfraDebug::getInstance();
-        $this->objDebug->setBolLigado(true);
-        $this->objDebug->setBolDebugInfra(true);
-        $this->objDebug->setBolEcho(true);
-        $this->objDebug->limpar();
+        InfraDebug::getInstance()->setBolLigado(true);
+        InfraDebug::getInstance()->setBolDebugInfra(false);
+        InfraDebug::getInstance()->setBolEcho(true);
+        InfraDebug::getInstance()->limpar();
 
         $this->numSeg = InfraUtil::verificarTempoProcessamento();
         $this->logar($strTitulo);
@@ -65,13 +57,13 @@ class PenAtualizarSipRN extends InfraRN {
                 BancoSip::getInstance()->executarSql('CREATE TABLE pen_sip_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
             }
             BancoSip::getInstance()->executarSql('DROP TABLE pen_sip_teste');
-
-
+            
             $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
             $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+            
             switch ($strVersaoModuloPen) {
                 //case '' - Nenhuma versão instalada
                 case '':      $this->instalarV100();
@@ -146,15 +138,14 @@ class PenAtualizarSipRN extends InfraRN {
                 case '3.1.9': $this->instalarV30110();
                 case '3.1.10': $this->instalarV30111();
                 case '3.1.11': $this->instalarV30112();
-                case '3.1.13': $this->instalarV30113();
-
+                case '3.1.12': $this->instalarV30113();
                     break;
 
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
-                    break;
             }
 
+            
             $this->finalizar('FIM');
             InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
@@ -197,7 +188,7 @@ class PenAtualizarSipRN extends InfraRN {
      * @return null
      */
     protected function logar($strMsg) {
-        $this->objDebug->gravar($strMsg);
+        InfraDebug::getInstance()->gravar($strMsg);
     }
 
     /**
@@ -1497,24 +1488,70 @@ class PenAtualizarSipRN extends InfraRN {
 
     protected function instalarV30113()
     {
+        function atualizarIconeMenu($numIdSistema, $numIdMenuPai, $strNomeRecurso, $strIcone, $numSequencia){
+            $objRecursoDTO = new RecursoDTO();
+            $objRecursoDTO->setNumIdSistema($numIdSistema);
+            $objRecursoDTO->setStrNome($strNomeRecurso);
+            $objRecursoDTO->retNumIdRecurso();
+            $objRecursoBD = new RecursoBD(BancoSip::getInstance());
+            $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+
+            if(isset($objRecursoDTO)){
+                $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
+                $objItemMenuDTO = new ItemMenuDTO();
+                $objItemMenuDTO->setNumIdSistema($numIdSistema);
+                $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+                $objItemMenuDTO->setNumIdItemMenuPai(null);
+                $objItemMenuDTO->retNumIdMenu();
+                $objItemMenuDTO->retNumIdItemMenu();
+
+                $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+                $arrObjItemMenuDTO = $objItemMenuBD->listar($objItemMenuDTO);
+                if(isset($arrObjItemMenuDTO)){                
+                    foreach ($arrObjItemMenuDTO as $objItemMenuDTO) {                 
+                        $objItemMenuDTO->setStrIcone($strIcone);
+                        $objItemMenuDTO->setNumSequencia($numSequencia);                        
+                        $objItemMenuBD->alterar($objItemMenuDTO);    
+                    }
+                }
+            }
+        }
+
+        // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
+        if(compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
+            $numIdSistema = $this->getNumIdSistema('SEI');
+            $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
+
+            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_procedimento_expedido_listar', 'pen_tramite_externo_menu.svg', 55);
+            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote_menu.svg', 56);
+        }
+
 	    $this->atualizarNumeroVersao("3.1.13");
     }
 }
 
+/**
+ * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
+ * 
+ * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+ * - Se resultado for IGUAL a 0, versões iguais
+ * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
+ * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
+ */
+function compararVersoes($strVersao1, $strVersao2){
+    $numVersao1 = explode('.', $strVersao1);
+    $numVersao1 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao1);
+    $numVersao1 = intval(join($numVersao1));
+
+    $numVersao2 = explode('.', $strVersao2);
+    $numVersao2 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao2);
+    $numVersao2 = intval(join($numVersao2));
+
+    return $numVersao1 - $numVersao2;
+}
+
 try {
-
-    //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
-    $numVersaoAtual = explode('.', SIP_VERSAO);
-    $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
-    $numVersaoAtual = intval(join($numVersaoAtual));
-
-    //Normaliza o formato de número de versão considerando dois caracteres para cada item (2.1.0 -> 020100)
-    // A partir da versão 2.1.0 é que o SIP passa a dar suporte ao UsuarioScript/SenhaScript
-    $numVersaoScript = explode('.', "2.1.0");
-    $numVersaoScript = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoScript);
-    $numVersaoScript = intval(join($numVersaoScript));
-
-    if ($numVersaoAtual >= $numVersaoScript) {
+    if (compararVersoes(SIP_VERSAO, "2.1.0") >= 0) {
         BancoSip::getInstance()->setBolScript(true);
 
         if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
