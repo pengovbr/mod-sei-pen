@@ -7,14 +7,10 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
     * 3.1.0 até 3.1.7, 
-    * 4.0.0 até 4.0.6,
-
-* O módulo é compatível com as seguintes versões do **SUPER**:
-    * 4.0.3.1 até 4.0.3.2
-
-> Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
-
+    * 4.0.0 até 4.0.6
+    
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
+> Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
 
 * **INSTALACAO.md** - Procedimento de instalação e configuração do módulo
 * **ATUALIZACAO.md** - Procedimento específicos para atualização de uma versão anterior
@@ -22,6 +18,23 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 ## Lista de Melhorias e Correções de Problemas
 
-#### Issue #144 - Habilitar a instalação do módulo no SEI-SUPER
+### Issue #135 - Modificado regra de pre-validação de envio externo para conferir impedimentos de bloqueio
 
-Esta atualização habilita a instalação do módulo no SEI-SUPER
+Módulo não pré-validava se processo era possível de bloqueio, impedindo que regras do SEI e regras extendidas de módulos pudessem ser corretamente validadas antes do envio externo.
+
+### Issue #151 - Correção de formatação, estilos e layouts de páginas de configuração
+
+Algumas páginas de configuração do módulo apresentavam problemas de formatação após atualização de suporte para SEI 4.0.
+
+### Issue #150 - Remoção de validação de compatibilidade na inicialização do SEI
+
+Removido a validação da correta configuração do módulo e sua compatibilidade
+com de versões, o que impedia a correção inicialização do sistema. Modificado
+para apenas notificar o administrador sobre as incompatibilidades através dos
+logs do sistema.
+
+## Outros ajustes
+
+* Adição de documentação sobre preparação de ambiente de desenvolvimento do módulo
+* Ajuste em template de abertura de novas issues no github
+
