@@ -24,9 +24,7 @@ class ProcessoEletronicoINT extends InfraINT {
         }
 
         foreach($estruturas as &$estrutura) {
-
             if($estrutura->isSetArrHierarquia()) {
-                $siglas = $estrutura->getArrHierarquia();
                 $nome  = $estrutura->getStrNome();
                 $nome .= ' - ';
 

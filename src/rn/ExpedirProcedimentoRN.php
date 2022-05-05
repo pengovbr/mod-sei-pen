@@ -2074,7 +2074,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
         if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
@@ -2082,7 +2082,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarDadosProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    private function validarDadosProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         if($objProcedimentoDTO->isSetStrDescricaoProtocolo() && InfraString::isBolVazia($objProcedimentoDTO->getStrDescricaoProtocolo())) {
             $objInfraException->adicionarValidacao("Descrição do processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} não informado.", $strAtributoValidacao);
@@ -2093,7 +2093,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarDadosDocumentos(InfraException $objInfraException, $arrDocumentoDTO, $strAtributoValidacao = null)
+    private function validarDadosDocumentos(InfraException $objInfraException, $arrDocumentoDTO, $strAtributoValidacao)
     {
         if(!empty($arrDocumentoDTO)) {
             $objDocMapDTO = new PenRelTipoDocMapEnviadoDTO();
@@ -2125,7 +2125,6 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $dados = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
 
                     if ($objDocumentoDTO->getStrStaNivelAcessoLocalProtocolo()!=ProtocoloRN::$NA_PUBLICO){
-
                         if(!$dados){
                             return;
                         }
@@ -2143,7 +2142,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarProcessoAbertoUnidade(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    private function validarProcessoAbertoUnidade(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDistinct(true);
@@ -2160,7 +2159,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
             $objInfraException->adicionarValidacao('Não é possível tramitar um processo com informações sigilosas.', $strAtributoValidacao);
@@ -2173,7 +2172,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param ProcedimentoDTO $objProcedimentoDTO
     * @param string $strAtributoValidacao
     */
-    private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao=null)
+    private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
@@ -2201,7 +2200,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao = null) {
+    private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao) {
 
         $bolAssinaturaCorretas = true;
 
@@ -2236,10 +2235,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao = null) {
-
+    private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao) {
         $bolProcedimentoCompartilhado = false;
-
         $objProtocoloFederacaoDTO = new ProtocoloFederacaoDTO();
         $objProtocoloFederacaoDTO->setStrProtocoloFormatadoPesquisa($objProcedimentoDTO->getStrProtocoloProcedimentoFormatadoPesquisa());
         $objProtocoloFederacaoDTO->retStrProtocoloFormatado();
@@ -2252,7 +2249,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             if (count($arrObjProtocoloFederacaoDTO) > 0){
                 $bolProcedimentoCompartilhado = true;
             }
-
         }
 
         if($bolProcedimentoCompartilhado) {
@@ -2261,7 +2257,30 @@ class ExpedirProcedimentoRN extends InfraRN {
     }    
 
     /**
-    * Validao das pr-conidies necessrias para que um processo e seus documentos possam ser expedidos para outra entidade
+     * Valida se o processo pode ser bloqueado pelo sistema antes do seu envio
+     * 
+     * Regra necessária para evitar que regras internas do SEI ou módulos possam impedir o bloqueio do processo após o seu envio externo,
+     * exceção esta que pode deixar o processo aberto tanto no remetente como no destinatário. 
+     */
+    private function validarPossibilidadeBloqueio(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao){
+        try {
+            // Bloqueia temporariamente o processo para garantir que não exista restrições sobre ele
+            $objProcedimentoRN = new ProcedimentoRN();
+            $objProcedimentoRN->bloquear([$objProcedimentoDTO]);
+
+            // Desfaz a operação anterior para voltar ao estado original do processo
+            $objProtocoloDTOBanco = new ProcedimentoDTO();
+            $objProtocoloDTOBanco->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+            $objProtocoloDTOBanco->retStrStaEstado();
+            $objProtocoloDTOBanco = $objProcedimentoRN->consultarRN0201($objProtocoloDTOBanco);
+            $objProcedimentoRN->desbloquear([$objProcedimentoDTO]);
+        } catch (Exception $e) {
+            $objInfraException->adicionarValidacao($e, $strAtributoValidacao);
+        } 
+    }
+
+    /**
+    * Validação das pré-condições necessrias para que um processo e seus documentos possam ser expedidos para outra entidade
     * @param  InfraException  $objInfraException  Instncia da classe de exceo para registro dos erros
     * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser expedido
     * @param string $strAtributoValidacao indice para o InfraException separar os processos
@@ -2270,14 +2289,15 @@ class ExpedirProcedimentoRN extends InfraRN {
     {
         $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
-
         $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarProcessoAbertoUnidade($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+        $this->validarPossibilidadeBloqueio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+
         if (substr(SEI_VERSAO, 0, 1) > 3) {
-        $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+            $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         }
     }
 
