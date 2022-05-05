@@ -3,7 +3,7 @@
 Este documento descreve os passos necessários para configurar um ambiente de desenvolvimento do projeto **mod-sei-pen** para permitir colaborações no projeto.
 
 ## 1 - Configurar comitês de protocolo
-Para poder iniciar a colaboração de desenvolvimento e testes mo módulo ```mod-sei-pen```, será necessário configurar dois comitês de protocolo no ambiente de homologação Barramento de Serviços do PEN. Este passo é necessário para que possa ser emulado duas diferentes entidades durante os  trâmite de processos.
+Para colaborar com o desenvolvimento e testes do módulo ```mod-sei-pen```, será necessário configurar dois comitês de protocolo no ambiente de homologação Barramento de Serviços do PEN. Este passo é necessário para que possa ser emulado duas diferentes entidades durante os  trâmite de processos.
 
 Em casos específicos, apenas um comitê de protocolo de homologação poderá ser utilizado de forma  limitada. Neste caso, o ambiente de homologação público, disponíbilizado pelo Ministério da Economia, poderá ser utilizado para simular o trâmite de processo entre dois sistemas. Esse ambiente encontra-se disponível em https://sei-pen-mp.hom.nuvem.gov.br.
 
