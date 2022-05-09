@@ -2262,21 +2262,17 @@ class ExpedirProcedimentoRN extends InfraRN {
      * Regra necessária para evitar que regras internas do SEI ou módulos possam impedir o bloqueio do processo após o seu envio externo,
      * exceção esta que pode deixar o processo aberto tanto no remetente como no destinatário. 
      */
-    private function validarPossibilidadeBloqueio(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao){
-        try {
-            // Bloqueia temporariamente o processo para garantir que não exista restrições sobre ele
-            $objProcedimentoRN = new ProcedimentoRN();
-            $objProcedimentoRN->bloquear([$objProcedimentoDTO]);
+    protected function validarPossibilidadeBloqueioControlado($objProcedimentoDTO){
+        // Bloqueia temporariamente o processo para garantir que não exista restrições sobre ele
+        $objProcedimentoRN = new ProcedimentoRN();
+        $objProcedimentoRN->bloquear([$objProcedimentoDTO]);
 
-            // Desfaz a operação anterior para voltar ao estado original do processo
-            $objProtocoloDTOBanco = new ProcedimentoDTO();
-            $objProtocoloDTOBanco->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-            $objProtocoloDTOBanco->retStrStaEstado();
-            $objProtocoloDTOBanco = $objProcedimentoRN->consultarRN0201($objProtocoloDTOBanco);
-            $objProcedimentoRN->desbloquear([$objProcedimentoDTO]);
-        } catch (Exception $e) {
-            $objInfraException->adicionarValidacao($e, $strAtributoValidacao);
-        } 
+        // Desfaz a operação anterior para voltar ao estado original do processo
+        $objProtocoloDTOBanco = new ProcedimentoDTO();
+        $objProtocoloDTOBanco->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $objProtocoloDTOBanco->retStrStaEstadoProtocolo();
+        $objProtocoloDTOBanco = $objProcedimentoRN->consultarRN0201($objProtocoloDTOBanco);
+        $objProcedimentoRN->desbloquear([$objProcedimentoDTO]);
     }
 
     /**
@@ -2294,7 +2290,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-        $this->validarPossibilidadeBloqueio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+
+        try{
+            $this->validarPossibilidadeBloqueio($objProcedimentoDTO);
+        }catch(Exception $e){
+            $objInfraException->adicionarValidacao($e, $strAtributoValidacao);
+        }
 
         if (substr(SEI_VERSAO, 0, 1) > 3) {
             $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
