@@ -7,7 +7,7 @@ Para colaborar com o desenvolvimento e testes do módulo ```mod-sei-pen```, ser�
 
 Em casos específicos, apenas um comitê de protocolo de homologação poderá ser utilizado de forma  limitada. Neste caso, o ambiente de homologação público, disponíbilizado pelo Ministério da Economia, poderá ser utilizado para simular o trâmite de processo entre dois sistemas. Esse ambiente encontra-se disponível em https://sei-pen-mp.hom.nuvem.gov.br.
 
-Para realizar a configuração do comitê de protocolo para desenvolvimento, acesse o ambiente de homologação do PEN disponível em https://homolog.gestaopen.processoeletronico.gov.br
+Para realizar a configuração do comitê de protocolo para desenvolvimento, acesse o ambiente de homologação do PEN disponível em https://homolog.gestaopen.processoeletronico.gov.br/
 
 Exemplo:
 - Comitê de Protocolo 1: 

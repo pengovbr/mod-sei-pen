@@ -2276,10 +2276,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Validação das pré-condições necessrias para que um processo e seus documentos possam ser expedidos para outra entidade
+    * Validação das pré-condições necessárias para que um processo e seus documentos possam ser expedidos para outra entidade
     * @param  InfraException  $objInfraException  Instncia da classe de exceo para registro dos erros
     * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser expedido
-    * @param string $strAtributoValidacao indice para o InfraException separar os processos
+    * @param string $strAtributoValidacao índice para o InfraException separar os processos
     */
     public function validarPreCondicoesExpedirProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
     {

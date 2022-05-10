@@ -184,7 +184,5 @@ stop-test-container:
 
 # make teste=TramiteProcessoComDevolucaoTest sei3-run-test-xdebug
 sei3-run-test-xdebug:
-	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml $(PEN_TEST_FUNC)/tests/$(addsuffix .php,$(teste))
-
-
+	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure $(PEN_TEST_FUNC)/tests/$(addsuffix .php,$(teste))
 

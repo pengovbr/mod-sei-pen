@@ -34,9 +34,6 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
                     //'MdJulgarIntegracao' => 'trf4/julgamento',
                     //'MdWsSeiRest' => 'wssei',
                     'PENIntegracao' => 'pen',
-                    'MdAbcExemploIntegracao' => 'abc/exemplo',
-                    'MdAbcExemploIntegracao02' => 'abc/exemplo_02',
-                    'MdAbcExemploIntegracao03' => 'abc/exemplo_03',
                 ),
 			),
 			
