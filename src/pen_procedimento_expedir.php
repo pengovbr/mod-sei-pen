@@ -173,30 +173,37 @@ echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompa
 $objPaginaSEI->abrirStyle();
 ?>
 
+div.infraAreaDados {
+    margin-bottom: 10px;
+}
+
 #lblProtocoloExibir {position:absolute;left:0%;top:0%;}
 #txtProtocoloExibir {position:absolute;left:0%;top:38%;width:50%;}
 
-#lblRepositorioEstruturas {position:absolute;left:0%;top:10%;width:50%;}
-#selRepositorioEstruturas {position:absolute;left:0%;top:48%;width:51%;}
+#lblRepositorioEstruturas {position:absolute;left:0%;top:0%;width:50%;}
+#selRepositorioEstruturas {position:absolute;left:0%;top:38%;width:51%;}
 
-#lblUnidades {position:absolute;left:0%;top:10%;}
-#txtUnidade {left:0%;top:48%;width:50%;border:.1em solid #666;}
+#lblUnidades {position:absolute;left:0%;top:0%;}
+#txtUnidade {left:0%;top:38%;width:50%;border:.1em solid #666;}
 #imgLupaUnidades {position:absolute;left:52%;top:48%;}
+
 .alinhamentoBotaoImput{position:absolute;left:0%;top:48%;width:85%;};
+
 #btnIdUnidade {float: right;}
 #imgPesquisaAvancada {
     vertical-align: middle;
     margin-left: 10px;
 }
 
-#lblProcedimentosApensados {position:absolute;left:0%;top:10%;}
+#lblProcedimentosApensados {position:absolute;left:0%;top:0%;}
 #txtProcedimentoApensado {position:absolute;left:0%;top:25%;width:50%;border:.1em solid #666;}
+
 #selProcedimentosApensados {position:absolute;left:0%;top:43%;width:86%;}
 #imgLupaProcedimentosApensados {position:absolute;left:87%;top:43%;}
 #imgExcluirProcedimentosApensados {position:absolute;left:87%;top:60%;}
 
-#lblMotivosUrgencia {position:absolute;left:0%;top:10%;width:50%;}
-#selMotivosUrgencia {position:absolute;left:0%;top:48%;width:51%;}
+#lblMotivosUrgencia {position:absolute;left:0%;top:0%;width:50%;}
+#selMotivosUrgencia {position:absolute;left:0%;top:38%;width:51%;}
 
 <?php
 $objPaginaSEI->fecharStyle();

@@ -11,9 +11,9 @@ require_once DIR_SEI_WEB.'/SEI.php';
         $objPaginaSEI = PaginaSEI::getInstance();
 
         //////////////////////////////////////////////////////////////////////////////
-        InfraDebug::getInstance()->setBolLigado(false);
-        InfraDebug::getInstance()->setBolDebugInfra(true);
-        InfraDebug::getInstance()->limpar();
+        // InfraDebug::getInstance()->setBolLigado(false);
+        // InfraDebug::getInstance()->setBolDebugInfra(true);
+        // InfraDebug::getInstance()->limpar();
         //////////////////////////////////////////////////////////////////////////////
         SessaoSEI::getInstance()->validarLink();
 
@@ -77,9 +77,9 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
     $(document).ready(function(){
         var nomeUnidadeRaizSelecionada = window.opener.nomeUnidadeRaiz;
-
         idUnidadeRaizSelecionada = window.opener.idUnidadeRaiz;
-        idRepositorioDeEstuturaSelecionado = window.opener.opener.$("#selRepositorioEstruturas").val();
+        let parentWindow = window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
+        idRepositorioDeEstuturaSelecionado = $("#selRepositorioEstruturas", parentWindow.document).val();
         console.log('Unidade raiz selecionada:' + nomeUnidadeRaizSelecionada + ' ('+idUnidadeRaizSelecionada +')');
 
         $("#tabelaUnidades").hide();
@@ -291,9 +291,13 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
         //verifica se existem itens selecionados, se hover realiza o trasporte dos valores selecionados
         if(nomeUnidadeSelecionada != null && idUnidadeSelecionada != null){
-            window.opener.opener.$("#txtUnidade").val(nomeUnidadeSelecionada);
-            window.opener.opener.$("#hdnIdUnidade").val(idUnidadeSelecionada);
-            if(paramFechar){ window.close(); window.opener.close(); }
+            let parentWindow = window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
+            $("#txtUnidade", parentWindow.document).val(nomeUnidadeSelecionada);
+            $("#hdnIdUnidade", parentWindow.document).val(idUnidadeSelecionada);
+            if(paramFechar){                 
+                window.opener.infraFecharJanelaSelecao();
+                window.close(); 
+            }
         }else{
             alert('Nenhum item foi selecionado.');
         }
@@ -322,52 +326,52 @@ require_once DIR_SEI_WEB.'/SEI.php';
     });
 </script>
 <?
-    #PaginaSEI::getInstance()->fecharJavaScript();
     PaginaSEI::getInstance()->fecharHead();
-    #PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
 ?>
-    <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao" >Pesquisa textual de unidades externas</div> &nbsp;
-    <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_orgao='.$_GET['id_orgao'])?>">
-        <input type="hidden" id="hdnIdUnidadeRaiz" name="hdnIdUnidadeRaiz" value="" />
-        <?php
-            PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
-            PaginaSEI::getInstance()->abrirAreaDados('10em');
-        ?>
-            <label id="lblUnidadeRaiz" for="lblUnidadeRaiz" class="infraLabelOpcional">Unidade raiz da pesquisa:</label>
-            <input type="text" id="txtUnidadeRaiz" name="txtUnidadeRaiz" class="infraText" value="" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" disabled />
+    <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 10px;">
+        <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao" >Pesquisa textual de unidades externas</div> &nbsp;
+        <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_orgao='.$_GET['id_orgao'])?>">
+            <input type="hidden" id="hdnIdUnidadeRaiz" name="hdnIdUnidadeRaiz" value="" />
+            <?php
+                PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
+                PaginaSEI::getInstance()->abrirAreaDados('10em');
+            ?>
+                <label id="lblUnidadeRaiz" for="lblUnidadeRaiz" class="infraLabelOpcional">Unidade raiz da pesquisa:</label>
+                <input type="text" id="txtUnidadeRaiz" name="txtUnidadeRaiz" class="infraText" value="" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" disabled />
 
-            <label id="lblSiglaUnidade" for="txtSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-            <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText" value="<?=$strSiglaPesquisa?>" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
-            <label id="lblNomeUnidade" for="txtNomeUnidade" class="infraLabelOpcional">Nome:</label>
-            <input type="text" id="txtNomeUnidade" name="txtNomeUnidade" class="infraText" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="" />
-        <?php
-            PaginaSEI::getInstance()->fecharAreaDados();
-            PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
-            PaginaSEI::getInstance()->montarAreaDebug();
-            #PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
-        ?>
-        <div id="divInfraAreaPaginacaoInferior" class="infraAreaPaginacao">
-            <input type="hidden" name="nrTotalPaginas" id="nrTotalPaginas" value="">
-            <a id="lnkInfraPrimeiraPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('=',0);" title="Primeira Página" tabindex="56"><img src="/infra_css/imagens/primeira_pagina.gif" title="Primeira Página" alt="Primeira Página" class="infraImg"></a>&nbsp;&nbsp;
-            <a id="lnkInfraPaginaAnteriorInferior" href="javascript:void(0);" onclick="acaoPaginar('-',0);" title="Página Anterior" tabindex="57"><img src="/infra_css/imagens/pagina_anterior.gif" title="Página Anterior" alt="Página Anterior" class="infraImg"></a>&nbsp;&nbsp;
-            <select id="selInfraPaginacaoInferior" name="selInfraPaginacaoInferior" onchange="acaoPaginar('=', this.value);" class="infraSelect" tabindex="58" style="display:inline;"></select>&nbsp;&nbsp;
-            <a id="lnkInfraProximaPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('+',0);" title="Próxima Página" tabindex="59"><img src="/infra_css/imagens/proxima_pagina.gif" title="Próxima Página" alt="Próxima Página" class="infraImg"></a>&nbsp;&nbsp;
-            &nbsp;<a id="lnkInfraUltimaPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('>', 0)" title="Última Página" tabindex="60"><img src="/infra_css/imagens/ultima_pagina.gif" title="Última Página" alt="Última Página" class="infraImg"></a>
-        </div>
-        <div id="divInfraAvisoFundo" class="infraFundoTransparente" style="position: fixed; width: 100%; height: 100%; visibility: visible;">
-            <div id="divInfraAviso" class="infraAviso" style="top: 45%; left: 40%; width: 200px;">
-                <table border="0" width="100%" cellspacing="4">
-                    <tbody>
-                    <tr>
-                        <td><img id="imgInfraAviso" src="/infra_css/imagens/aguarde.gif" alt="..."></td>
-                        <td align="left"><span id="spnInfraAviso">Processando...</span>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
+                <label id="lblSiglaUnidade" for="txtSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
+                <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText" value="<?=$strSiglaPesquisa?>" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+                <label id="lblNomeUnidade" for="txtNomeUnidade" class="infraLabelOpcional">Nome:</label>
+                <input type="text" id="txtNomeUnidade" name="txtNomeUnidade" class="infraText" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="" />
+            <?php
+                PaginaSEI::getInstance()->fecharAreaDados();
+                PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
+                PaginaSEI::getInstance()->montarAreaDebug();
+                #PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
+            ?>
+            <div id="divInfraAreaPaginacaoInferior" class="infraAreaPaginacao">
+                <input type="hidden" name="nrTotalPaginas" id="nrTotalPaginas" value="">
+                <a id="lnkInfraPrimeiraPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('=',0);" title="Primeira Página" tabindex="56"><img src="/infra_css/imagens/primeira_pagina.gif" title="Primeira Página" alt="Primeira Página" class="infraImg"></a>&nbsp;&nbsp;
+                <a id="lnkInfraPaginaAnteriorInferior" href="javascript:void(0);" onclick="acaoPaginar('-',0);" title="Página Anterior" tabindex="57"><img src="/infra_css/imagens/pagina_anterior.gif" title="Página Anterior" alt="Página Anterior" class="infraImg"></a>&nbsp;&nbsp;
+                <select id="selInfraPaginacaoInferior" name="selInfraPaginacaoInferior" onchange="acaoPaginar('=', this.value);" class="infraSelect" tabindex="58" style="display:inline;"></select>&nbsp;&nbsp;
+                <a id="lnkInfraProximaPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('+',0);" title="Próxima Página" tabindex="59"><img src="/infra_css/imagens/proxima_pagina.gif" title="Próxima Página" alt="Próxima Página" class="infraImg"></a>&nbsp;&nbsp;
+                &nbsp;<a id="lnkInfraUltimaPaginaInferior" href="javascript:void(0);" onclick="acaoPaginar('>', 0)" title="Última Página" tabindex="60"><img src="/infra_css/imagens/ultima_pagina.gif" title="Última Página" alt="Última Página" class="infraImg"></a>
             </div>
-        </div>
-    </form>
+            <div id="divInfraAvisoFundo" class="infraFundoTransparente" style="position: fixed; width: 100%; height: 100%; visibility: visible;">
+                <div id="divInfraAviso" class="infraAviso" style="top: 45%; left: 40%; width: 200px;">
+                    <table border="0" width="100%" cellspacing="4">
+                        <tbody>
+                        <tr>
+                            <td><img id="imgInfraAviso" src="/infra_css/imagens/aguarde.gif" alt="..."></td>
+                            <td align="left"><span id="spnInfraAviso">Processando...</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
 <?php
     PaginaSEI::getInstance()->fecharHtml();
 ?>

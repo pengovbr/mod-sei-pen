@@ -644,6 +644,27 @@ class PENIntegracao extends SeiIntegracao
         }
     }
 
+    /**
+     * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
+     * 
+     * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+     * - Se resultado for IGUAL a 0, versões iguais
+     * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
+     * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
+     */
+    public static function compararVersoes($strVersao1, $strVersao2){
+        $numVersao1 = explode('.', $strVersao1);
+        $numVersao1 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao1);
+        $numVersao1 = intval(join($numVersao1));
+
+        $numVersao2 = explode('.', $strVersao2);
+        $numVersao2 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao2);
+        $numVersao2 = intval(join($numVersao2));
+
+        return $numVersao1 - $numVersao2;
+    }
+
+
     public function processarPendencias()
     {
         SessaoSEI::getInstance(false);

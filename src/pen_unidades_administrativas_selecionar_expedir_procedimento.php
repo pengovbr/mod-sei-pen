@@ -4,19 +4,21 @@
 */
 
     try {
-require_once DIR_SEI_WEB.'/SEI.php';
+        require_once DIR_SEI_WEB.'/SEI.php';
 
         session_start();
         $objSessaoSEI = SessaoSEI::getInstance();
         $objPaginaSEI = PaginaSEI::getInstance();
 
         //////////////////////////////////////////////////////////////////////////////
-        InfraDebug::getInstance()->setBolLigado(false);
-        InfraDebug::getInstance()->setBolDebugInfra(true);
-        InfraDebug::getInstance()->limpar();
+        // InfraDebug::getInstance()->setBolLigado(false);
+        // InfraDebug::getInstance()->setBolDebugInfra(true);
+        // InfraDebug::getInstance()->limpar();
         //////////////////////////////////////////////////////////////////////////////
 
         SessaoSEI::getInstance()->validarLink();
+        $bolVersaoSuperior4 = PENIntegracao::compararVersoes(SEI_VERSAO, '4.0.0') >= 0;
+        $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
         $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
         $arrComandos   = array();
         $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisa Textual" onclick="abrirTelaDePesquisaTextual()" class="infraButton" disabled="disabled"><span class="infraTeclaAtalho">P</span>esquisa Textual</button>';
@@ -37,29 +39,56 @@ require_once DIR_SEI_WEB.'/SEI.php';
 ?>
     .setaParaBaixo {
         vertical-align: top!important;
-        margin-top: 3px!important;
+        margin-top: 8px !important;
     }
 
     .setaParaCima {
         vertical-align: middle!important;
-        margin-bottom: 2px!important;
+        margin-bottom: 8px !important;
+    }
+
+    .infraFieldset{
+        height: 80vh;
+        overflow: auto;
     }
 
     div.infraArvore{
-        padding-left: 14px!important;
+        padding-left: 21px!important;
     }
 
-    .unidadeSelecionada{ background-color: #79e5e5 !important; }
+    div.infraArvore input {
+        margin: 4px 4px 4px 4px;
+    }    
+
+    img.joinBottom {
+        margin: 0px 0px 0px -10px
+    }
+
+    .unidadeSelecionada{ 
+        background-color: #79e5e5 !important; 
+    }
+
+    #btnPesquisar:disabled,
+    #btnPesquisar:disabled:hover {
+        transition: none;
+        background-color: white;
+        opacity: 0.5;
+        color: #495057;
+    }
+
 <?php
     PaginaSEI::getInstance()->fecharStyle();
     PaginaSEI::getInstance()->montarJavaScript();
 //    PaginaSEI::getInstance()->abrirJavaScript();
 ?>
-<script>
+<script>    
     var nivelEstrutura = 1;
     var mais  = '/infra_css/imagens/seta_abaixo.gif';
     var menos = '/infra_css/imagens/seta_acima.gif';
-    var vazio = '/infra_js/arvore/empty.gif';
+    var dirImagensArvore = '<?= $strImagensArvore ?>';
+    var vazio = `/infra_js/arvore/${dirImagensArvore}empty.gif`;
+    var joinBottonImg = `/infra_js/arvore/${dirImagensArvore}joinbottom.gif`;
+    var joinImg = `/infra_js/arvore/${dirImagensArvore}join.gif`;
     var objJanelaPesquisaTextual = null;
     var evnJanelaPesquisaTextual = null;
     var nomeUnidadeRaiz = null;
@@ -67,17 +96,16 @@ require_once DIR_SEI_WEB.'/SEI.php';
     var idRepositorioDeEstuturaSelecionado = null;
 
     $(document).ready(function(){
-       console.log('Repositorio selecionado:' + window.opener.$("#selRepositorioEstruturas").val());
-       idRepositorioDeEstuturaSelecionado = window.opener.$("#selRepositorioEstruturas").val();
-       recuperarEstruturaDeFilhosDeUnidadeExterna(null, 0, nivelEstrutura);
+        let parentWindow = parent.document.getElementById('ifrVisualizacao').contentWindow;
+        idRepositorioDeEstuturaSelecionado = $("#selRepositorioEstruturas", parentWindow.document).val();
+        recuperarEstruturaDeFilhosDeUnidadeExterna(null, 0, nivelEstrutura);
     });
 
     /**
      * Realiza a consulta dos filhos da unidade externa selecionada
      * Josinaldo Júnior <josinaldo.junior@basis.com.br>
      **/
-    function recuperarEstruturaDeFilhosDeUnidadeExterna(idUnidadeExterna, nrDivPai, paramNivelEstrutura) {
-        console.log('Unidade externa selecionada: '+idUnidadeExterna);
+    function recuperarEstruturaDeFilhosDeUnidadeExterna(idUnidadeExterna, nrDivPai, paramNivelEstrutura) {        
 
         if($('#controlador_'+idUnidadeExterna).val() != 1){
             //Exibe o gif de loading somente do nivel de estrutura 2 acima
@@ -87,8 +115,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
             var objData = {};
             objData['idRepositorioEstruturaOrganizacional'] = idRepositorioDeEstuturaSelecionado;
-            objData['numeroDeIdentificacaoDaEstrutura'] = idUnidadeExterna;
-            console.log('Post: ' + strUrl);
+            objData['numeroDeIdentificacaoDaEstrutura'] = idUnidadeExterna;            
 
             $.ajax({
                 url:strUrl,
@@ -98,8 +125,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
                 cache: false,
                 success:function(result) {
                     $('#controlador_'+idUnidadeExterna).val(1);
-                    //verifica se o resultado é null
-                    console.log(result);
+                    //verifica se o resultado é null                    
                     if(result[0] != null) {
                         nivelEstrutura++;
                         adicionarEstruturaDeFilhos(nrDivPai, result, paramNivelEstrutura);
@@ -108,8 +134,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
                     }
                 },
                 error: function (data) {
-                    alert("Não foi possível recuperar as unidades");
-                    console.log('error: ' + data);
+                    alert("Não foi possível recuperar as unidades");                    
                 }
             }).done(function(){
                 $("#loading").hide();
@@ -145,11 +170,10 @@ require_once DIR_SEI_WEB.'/SEI.php';
         var novoNivelDeEstrutura = (paramNivelEstrutura + 1);
 
         for(var j in arrFilho){
-
-            var imgArvore = (j == (arrFilho.length - 1) ? 'joinbottom' : 'join');
+            var imgArvore = (j == (arrFilho.length - 1) ? joinBottonImg : joinImg);
             var desabilitado = arrFilho[j]['aptoParaReceberTramites'] != 1 ?  ' disabled ' : '';
             var hint = arrFilho[j]['aptoParaReceberTramites'] != 1 ?  ' Unidade não está apta para receber tramitação.' : '';
-            var arvore = (paramNivelEstrutura == 1) ? '' : '<img src="/infra_js/arvore/' + imgArvore + '.gif">';
+            var arvore = (paramNivelEstrutura == 1) ? '' : `<img class='joinBottom' src="${imgArvore}">`;
 
             $('#divArvore' + nrDivPai).append('<div id="divArvore' + arrFilho[j]['numeroDeIdentificacaoDaEstrutura'] + '" class="infraArvore divPai'+nrDivPai+'" >' +
                  arvore +
@@ -191,6 +215,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
         //habilita o botão de pesquisa textual
         $("#btnPesquisar").attr('disabled', false);
+        $("#btnPesquisar").attr('class', 'infraButton');                
     }
 
     /**
@@ -322,9 +347,9 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
         //verifica se existem itens selecionados
         if(nomeUnidadeSelecionada != null && idUnidadeSelecionada != null){
-            console.log('Id repositorio de estruturas: ' + window.opener.$("#selRepositorioEstruturas").val());
-            window.opener.$("#txtUnidade").val(nomeUnidadeSelecionada);
-            window.opener.$("#hdnIdUnidade").val(idUnidadeSelecionada);
+            let parentWindow = parent.document.getElementById('ifrVisualizacao').contentWindow;            
+            $("#txtUnidade", parentWindow.document).val(nomeUnidadeSelecionada);
+            $("#hdnIdUnidade", parentWindow.document).val(idUnidadeSelecionada);
         }else{
             alert('Nenhum item foi selecionado.');
         }
@@ -338,30 +363,29 @@ require_once DIR_SEI_WEB.'/SEI.php';
         return encodeURIComponent(string);
     }
 </script>
-<?
+<?    
     PaginaSEI::getInstance()->fecharHead();
 ?>
-    <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao">Seleção de Unidade Externa</div>
-    <form id="frmApensadosLista" method="post" action="">
-        <?php
-            PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
-            PaginaSEI::getInstance()->abrirAreaDados();
-        ?>
-        <div>
-            <fieldset>
-                <legend><label>Unidades</label></legend>
-                <div id="divArvore0">
-                    <div style="position:absolute;left:50%;top:17.5%;" id="loading" width="99%"><img src="/infra_css/imagens/aguarde.gif"></div>
-                    <img src="" id="icon0" style="text-align: center;"/>
-                    <div id="divVazia">&nbsp;</div>
-                </div>
-            </fieldset>
-            <input type="hidden" id="hdnInfraNroItens" name="hdnInfraNroItens" value="" />
-        </div>
-        <?php
-            PaginaSEI::getInstance()->montarAreaDebug();
-        ?>
-    </form>
+    <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 10px;">
+        <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao">Seleção de Unidade Externa</div>
+        <form id="frmApensadosLista" method="post" action="">
+            <?php
+                PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
+                PaginaSEI::getInstance()->abrirAreaDados();
+            ?>
+            <div>
+                <fieldset class='infraFieldset'>
+                    <legend class="infraLegend">Unidades</legend>
+                    <div id="divArvore0">
+                        <div style="position:absolute;left:50%;top:50%;" id="loading" width="99%"><img src="/infra_css/imagens/aguarde.gif"></div>
+                        <img src="" id="icon0" style="text-align: center;"/>
+                        <div id="divVazia">&nbsp;</div>
+                    </div>
+                </fieldset>
+                <input type="hidden" id="hdnInfraNroItens" name="hdnInfraNroItens" value="" />
+            </div>
+        </form>
+    </div>
 <?php
     PaginaSEI::getInstance()->fecharHtml();
 ?>
