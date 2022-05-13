@@ -28,7 +28,7 @@ class PENIntegracao extends SeiIntegracao
 
 
     public function getInstituicao() {
-        return 'Ministério da Economia - ME (Projeto Colaborativo no Portal do SPB)';
+        return 'ME - Ministério da Economia';
     }
 
 
