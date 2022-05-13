@@ -1522,8 +1522,8 @@ class PenAtualizarSipRN extends InfraRN {
             $numIdSistema = $this->getNumIdSistema('SEI');
             $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
 
-            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_procedimento_expedido_listar', 'pen_tramite_externo_menu.svg', 55);
-            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote_menu.svg', 56);
+            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_procedimento_expedido_listar', 'pen_tramite_externo.svg', 55);
+            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote.svg', 56);
         }
 
 	    $this->atualizarNumeroVersao("3.1.13");

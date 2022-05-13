@@ -28,9 +28,12 @@ class PENIntegracao extends SeiIntegracao
 
 
     public function getInstituicao() {
-        return 'ME - Ministério da Economia';
+        return 'Ministério da Economia - ME';
     }
 
+    public function obterDiretorioIconesMenu() {
+        return self::getDiretorioImagens() . '/menu/';
+    }
 
     public function inicializar($strVersaoSEI)
     {
@@ -577,10 +580,6 @@ class PENIntegracao extends SeiIntegracao
         }
 
         return $strArq;
-    }
-
-    public function obterDiretorioIconesMenu() {
-        return self::getDiretorioImagens();
     }
 
 
