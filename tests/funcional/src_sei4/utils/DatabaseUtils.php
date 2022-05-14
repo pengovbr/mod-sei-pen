@@ -24,7 +24,7 @@ class DatabaseUtils
 		$statement = $this->connection->prepare($sql);
 		$statement->execute($params);
 		return $statement->fetchAll();
-	}
+	}   
 
     
     public function getBdType(){

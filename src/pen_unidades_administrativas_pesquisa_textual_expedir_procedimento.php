@@ -2,8 +2,9 @@
 /**
 * 10/04/2019 - criado por Josinaldo Júnior <josinaldo.junior@basis.com.br>
 **/
-    try {
 require_once DIR_SEI_WEB.'/SEI.php';
+
+try {
 
         session_start();
 
@@ -49,6 +50,10 @@ require_once DIR_SEI_WEB.'/SEI.php';
     PaginaSEI::getInstance()->montarStyle();
     PaginaSEI::getInstance()->abrirStyle();
 ?>
+    body {
+        margin: 8px 8px;
+    }      
+
     #lblSiglaUnidade {position:absolute;left:0%;top:45%;width:20%;}
     #txtSiglaUnidade {position:absolute;left:0%;top:65%;width:20%;}
 
@@ -76,9 +81,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
     var totalDePaginas = 0;
 
     $(document).ready(function(){
-        var nomeUnidadeRaizSelecionada = window.opener.nomeUnidadeRaiz;
-        idUnidadeRaizSelecionada = window.opener.idUnidadeRaiz;
-        let parentWindow = window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
+        const nomeUnidadeRaizSelecionada = window.opener.nomeUnidadeRaiz;
+        const parentWindow = window?.opener?.opener ?? window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
         idRepositorioDeEstuturaSelecionado = $("#selRepositorioEstruturas", parentWindow.document).val();
         console.log('Unidade raiz selecionada:' + nomeUnidadeRaizSelecionada + ' ('+idUnidadeRaizSelecionada +')');
 
@@ -291,11 +295,16 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
         //verifica se existem itens selecionados, se hover realiza o trasporte dos valores selecionados
         if(nomeUnidadeSelecionada != null && idUnidadeSelecionada != null){
-            let parentWindow = window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
+            const parentWindow = window?.opener?.opener ?? window.opener.parent.document.getElementById('ifrVisualizacao').contentWindow;
             $("#txtUnidade", parentWindow.document).val(nomeUnidadeSelecionada);
             $("#hdnIdUnidade", parentWindow.document).val(idUnidadeSelecionada);
-            if(paramFechar){                 
-                window.opener.infraFecharJanelaSelecao();
+            if(paramFechar){
+                if(window.opener){
+                    window.opener.close();
+                }
+                if(window.opener.infraFecharJanelaSelecao){
+                    window.opener.infraFecharJanelaSelecao();
+                }
                 window.close(); 
             }
         }else{
@@ -328,7 +337,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 <?
     PaginaSEI::getInstance()->fecharHead();
 ?>
-    <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 10px;">
+    <div id="divInfraAreaTela" class="infraAreaTela">
         <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao" >Pesquisa textual de unidades externas</div> &nbsp;
         <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_orgao='.$_GET['id_orgao'])?>">
             <input type="hidden" id="hdnIdUnidadeRaiz" name="hdnIdUnidadeRaiz" value="" />

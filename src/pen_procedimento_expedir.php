@@ -193,6 +193,8 @@ div.infraAreaDados {
 #imgPesquisaAvancada {
     vertical-align: middle;
     margin-left: 10px;
+    width: 18px;
+    height: 18px;
 }
 
 #lblProcedimentosApensados {position:absolute;left:0%;top:0%;}
@@ -204,6 +206,10 @@ div.infraAreaDados {
 
 #lblMotivosUrgencia {position:absolute;left:0%;top:0%;width:50%;}
 #selMotivosUrgencia {position:absolute;left:0%;top:38%;width:51%;}
+
+iframe#modal-frame {
+	margin: 0 10px;
+}
 
 <?php
 $objPaginaSEI->fecharStyle();

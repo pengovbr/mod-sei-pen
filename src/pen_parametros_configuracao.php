@@ -117,7 +117,9 @@ $objPagina->montarStyle();
 $objPagina->abrirStyle();
 ?>
 .input-field {
-    min-width: 200px;
+    width: 45%;
+    margin-top: 2px;
+    min-width: 180px;
 }
 
 .erro_pen{
@@ -135,7 +137,6 @@ $objPagina->abrirStyle();
 .pen_ajuda{
     margin-left:10px;
 }
-
 
 <?
 $objPagina->fecharStyle();
@@ -187,8 +188,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
     <?
     $objPagina->montarBarraComandosSuperior($arrComandos);
     $objPagina->getInstance()->abrirAreaDados('30em');
-    
     foreach ($retParametros as $parametro) {
+
+        //echo '<div class="container">';
         //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
             ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?php
@@ -210,8 +212,10 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     echo '</div>';
                 } catch (Exception $e) {
                     // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
-                    echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText load_error" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                    echo '<div class="div_input">';
+                    echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
                     echo '<img class="erro_pen" src="imagens/sei_erro.png" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no PEN devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
+                    echo '</div>';
                 }
                 break;
 
@@ -248,7 +252,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                 break;
 
             default:
+                echo '<div class="div_input">';
                 echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                echo '</div>';
                 break;
         }
     }
@@ -256,6 +262,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 </form>
 
 <?
+$objPagina->getInstance()->fecharAreaDados();  
 $objPagina->fecharBody();
 $objPagina->fecharHtml();
 ?>

@@ -2,7 +2,7 @@
 
 use \utilphp\util;
 
-class RecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
+class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';

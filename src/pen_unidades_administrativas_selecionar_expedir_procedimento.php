@@ -37,6 +37,7 @@
     PaginaSEI::getInstance()->montarStyle();
     PaginaSEI::getInstance()->abrirStyle();
 ?>
+
     .setaParaBaixo {
         vertical-align: top!important;
         margin-top: 8px !important;
@@ -61,7 +62,7 @@
     }    
 
     img.joinBottom {
-        margin: 0px 0px 0px -10px
+        margin: 0px 0px -3px -11px
     }
 
     .unidadeSelecionada{ 
@@ -96,7 +97,7 @@
     var idRepositorioDeEstuturaSelecionado = null;
 
     $(document).ready(function(){
-        let parentWindow = parent.document.getElementById('ifrVisualizacao').contentWindow;
+        const parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
         idRepositorioDeEstuturaSelecionado = $("#selRepositorioEstruturas", parentWindow.document).val();
         recuperarEstruturaDeFilhosDeUnidadeExterna(null, 0, nivelEstrutura);
     });
@@ -347,7 +348,7 @@
 
         //verifica se existem itens selecionados
         if(nomeUnidadeSelecionada != null && idUnidadeSelecionada != null){
-            let parentWindow = parent.document.getElementById('ifrVisualizacao').contentWindow;            
+            const parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
             $("#txtUnidade", parentWindow.document).val(nomeUnidadeSelecionada);
             $("#hdnIdUnidade", parentWindow.document).val(idUnidadeSelecionada);
         }else{
@@ -366,7 +367,7 @@
 <?    
     PaginaSEI::getInstance()->fecharHead();
 ?>
-    <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 10px;">
+    <div id="divInfraAreaTela" class="infraAreaTela">
         <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao">Seleção de Unidade Externa</div>
         <form id="frmApensadosLista" method="post" action="">
             <?php
