@@ -182,7 +182,7 @@ try {
 
     $objPaginaSEI = PaginaSEI::getInstance();
     $objPaginaSEI->setTipoPagina(InfraPagina::$TIPO_PAGINA_SIMPLES);
-    $objPaginaSEI->prepararPaginacao($objProcedimentoAndamentoDTO);
+    $objPaginaSEI->prepararPaginacao($objProcedimentoAndamentoDTO, 400);
 
     $objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
     $arrObjProcedimentoAndamentoDTO = $objProcedimentoAndamentoRN->listar($objProcedimentoAndamentoDTO);
