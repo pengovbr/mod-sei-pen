@@ -20,7 +20,8 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 ### Issue #135 - Modificado regra de pre-validação de envio externo para conferir impedimentos de bloqueio
 
-Módulo não pré-validava se processo era possível de bloqueio, impedindo que regras do SEI e regras extendidas de módulos pudessem ser corretamente validadas antes do envio externo.
+Módulo não pré-validava se processo era possível de bloqueio, impedindo que regras do SEI e regras extendidas de 
+módulos pudessem ser corretamente validadas antes do envio externo.
 
 ### Issue #151 - Correção de formatação, estilos e layouts de páginas de configuração
 
@@ -32,6 +33,22 @@ Removido a validação da correta configuração do módulo e sua compatibilidad
 com de versões, o que impedia a correção inicialização do sistema. Modificado
 para apenas notificar o administrador sobre as incompatibilidades através dos
 logs do sistema.
+
+### Correção de funcionamento da página de seleção de unidades para envio externo do processo
+
+Corrigido erro na página de navegação por árvores para seleção de unidades administrativas para envio externo do processo, 
+impedindo que os registros ficassem em carregamento por tempo indeterminado. Problema ocorria na versão 4.0 do SEI
+
+### Adição de ícones para os menus de módulo
+
+A partir do SEI 4.0, os menus laterais do sistema passaram a permitir a apresentação de ícones para representar 
+as funcionalidades, inclusive aquelas relacionadas aos módulos
+
+
+#### Compatibilidade com SEI 4.0.4 a 4.0.6
+
+Verificada a compatibilidade do módulo com as versões do SEI 4.0.4, 4.0.5 e 4.0.6
+
 
 ## Outros ajustes
 
