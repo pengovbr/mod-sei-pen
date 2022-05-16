@@ -76,6 +76,7 @@
         opacity: 0.5;
         color: #495057;
     }
+    
 
 <?php
     PaginaSEI::getInstance()->fecharStyle();
@@ -367,7 +368,7 @@
 <?    
     PaginaSEI::getInstance()->fecharHead();
 ?>
-    <div id="divInfraAreaTela" class="infraAreaTela">
+    <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 5px;">
         <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao">Seleção de Unidade Externa</div>
         <form id="frmApensadosLista" method="post" action="">
             <?php

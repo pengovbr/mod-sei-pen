@@ -56,6 +56,6 @@ div.infraBarraProgresso div.infraBarraProgressoMiolo:after {
     position: absolute;
     bottom: 0px;
     right: 0px;
-    margin-right: 20px;
+    margin-right: 5px;
     margin-bottom: 25px;
 }
