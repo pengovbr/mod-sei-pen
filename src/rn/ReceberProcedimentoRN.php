@@ -1279,6 +1279,8 @@ class ReceberProcedimentoRN extends InfraRN
             $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_REMETENTE);
             $objParticipanteDTO->setNumSequencia(0);
             $arrObjParticipantesDTO[] = $objParticipanteDTO;
+
+            $arrObjParticipantesDTO = InfraArray::distinctArrInfraDTO($arrObjParticipantesDTO, 'NomeContato');
             $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
         }
 
@@ -1307,6 +1309,7 @@ class ReceberProcedimentoRN extends InfraRN
             $arrObjParticipantesDTO[] = $objParticipanteDTO;
         }
 
+        $arrObjParticipantesDTO = InfraArray::distinctArrInfraDTO($arrObjParticipantesDTO, 'NomeContato');
         $arrObjParticipanteDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
         $objProtocoloDTO->setArrObjParticipanteDTO($arrObjParticipanteDTO);
     }
@@ -1586,7 +1589,9 @@ class ReceberProcedimentoRN extends InfraRN
                     }
                 }
 
-                $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($this->prepararParticipantes($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO()));
+                $arrObjParticipantesDTO = InfraArray::distinctArrInfraDTO($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO(), 'NomeContato');
+                $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
+                $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($arrObjParticipantesDTO);
 
                 $objDocumentoRN = new DocumentoRN();
                 $objDocumentoDTO->setStrConteudo(null);
