@@ -1,0 +1,2 @@
+Adicione nesta pasta o arquivo do certificado digital que representa o órgão 1 no contexto dos testes. 
+O arquivo deve se chamar certificado_org1.pem

@@ -1,18 +1,23 @@
 .PHONY: .env help clean build all test-environment-provision test-environment-destroy test-environment-up test-environment-down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
-include tests/funcional/.env
+
+# Parâmetros de execução do comando MAKE
+versao_sei = 4
+teste = *
 
 VERSAO_MODULO := $(shell grep 'const VERSAO_MODULO' src/PENIntegracao.php | cut -d'"' -f2)
-
 SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
 SEI_CONFIG_DIR = dist/sei/config/mod-pen
 SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests/funcional
-PEN_TEST_UNIT = tests/unitario
+PEN_TEST_FUNC = tests_sei$(versao_sei)/funcional
+PEN_TEST_UNIT = tests_sei$(versao_sei)/unitario
 PARALLEL_TEST_NODES = 5
+
+include $(PEN_TEST_FUNC)/.env
+
 
 all: clean build
 
@@ -111,12 +116,9 @@ test-environment-down:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
 
 
+# make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
 test-functional:
-	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional
-
-
-test-functional-internal:	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml  --testsuite funcional
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
 
 test-functional-parallel:
@@ -173,16 +175,7 @@ tramitar-pendencias-silent:
 		i=$$((i + 1));\
   	done 
 
-#comando para executar apenas 1 teste
-# make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
-run-test-xdebug:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/phpunit/phpunit/phpunit -c /tests/phpunit.xml /tests/tests_sei4/$(addsuffix .php,$(teste))
-
 #deve ser rodado em outro terminal
 stop-test-container:
 	docker stop $$(docker ps -a -q --filter="name=php-test")
-
-# make teste=TramiteProcessoComDevolucaoTest sei3-run-test-xdebug
-sei3-run-test-xdebug:
-	$(PEN_TEST_FUNC)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_FUNC)/phpunit.xml --stop-on-failure $(PEN_TEST_FUNC)/tests/$(addsuffix .php,$(teste))
 

@@ -1,0 +1,17 @@
+{
+    "config": {
+        "platform": {
+          "php": "7.3.12"
+        } 
+      },    
+
+    "autoload": {
+        "classmap": [
+            "../../src/rn/"
+        ]
+    },
+
+    "require-dev": {
+        "phpunit/phpunit": "5.*"
+    }
+}
