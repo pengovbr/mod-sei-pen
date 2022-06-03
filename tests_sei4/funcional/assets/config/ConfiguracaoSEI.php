@@ -143,7 +143,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 			),
 
             'InfraMail' => array(
-                'Tipo' => '1', //1 = sendmail (neste caso não é necessário configurar os atributos abaixo), 2 = SMTP
+                'Tipo' => '2', //1 = sendmail (neste caso não é necessário configurar os atributos abaixo), 2 = SMTP
                 'Servidor' => 'smtp',
                 'Porta' => '1025',
                 'Codificacao' => '8bit', //8bit, 7bit, binary, base64, quoted-printable

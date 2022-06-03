@@ -36,41 +36,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
     }
 
-
-    /**
-     * Teste de recebimento documento avulso com 2 componentes digitais
-     *
-     * @group verificacao_recebimento
-     * @large
-     *
-     * @return void
-     */
-    public function test_recebimento_documento_avulso_com_2_componentes_digitais()
-    {
-        // Simular um trâmite chamando a API do Barramento diretamente
-        $documentoTeste = $this->gerarDadosDocumentoExternoTeste($this->remetente, array(self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B));
-
-        // Simular um trâmite chamando a API do Barramento diretamente
-        $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste($documentoTeste);
-        $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, $this->remetente, $this->destinatario, $metadadosDocumentoTeste);
-        $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $metadadosDocumentoTeste);
-        $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
-
-        //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
-        $this->assertNotNull($novoTramite);
-        $this->assertNotNull($reciboTramite);
-        $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentoTeste, $this->destinatario);
-    }
-
-
     /**
      * Teste de verificação do correto recebimento do documento avulso
-     *
-     * @group verificacao_recebimento
-     * @large
-     * 
-     * @depends test_recebimento_documento_avulso_com_2_componentes_digitais
      *
      * @return void
      */

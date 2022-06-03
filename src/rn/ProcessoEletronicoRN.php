@@ -544,12 +544,13 @@ class ProcessoEletronicoRN extends InfraRN
             });
 
         } catch (\SoapFault $e) {
-            $mensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+            $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-                $mensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+                $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }
 
-            throw new InfraException($mensagem, $e);
+            $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+            throw new InfraException($strMensagem, $e, $strDetalhes);
         } catch (\Exception $e) {
             $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -2026,7 +2027,7 @@ class ProcessoEletronicoRN extends InfraRN
      * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
      * @return void
      */
-    public function consultarUltimoTramiteRecebidoConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+    protected function consultarUltimoTramiteRecebidoConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
     {
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         return $objTramiteBD->consultarUltimoTramite($parObjProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
@@ -2038,7 +2039,7 @@ class ProcessoEletronicoRN extends InfraRN
      * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
      * @return void
      */
-    public function consultarUltimoTramiteConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
+    protected function consultarUltimoTramiteConectado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
     {
         $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         return $objTramiteBD->consultarUltimoTramite($parObjProcessoEletronicoDTO);
@@ -2051,10 +2052,10 @@ class ProcessoEletronicoRN extends InfraRN
      * @param TramiteDTO $parObjTramiteDTO
      * @return void
      */
-    public function listarComponentesDigitais(TramiteDTO $parObjTramiteDTO)
+    protected function listarComponentesDigitaisConectado(TramiteDTO $parObjTramiteDTO, $dblIdDocumento=null)
     {
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        return $objComponenteDigitalBD->listarComponentesDigitais($parObjTramiteDTO);
+        return $objComponenteDigitalBD->listarComponentesDigitaisPeloTramite($parObjTramiteDTO, $dblIdDocumento);
     }
 
     /**
@@ -2063,7 +2064,7 @@ class ProcessoEletronicoRN extends InfraRN
      * @param TramiteDTO $parObjTramiteDTO
      * @return void
      */
-    public function possuiComponentesComDocumentoReferenciadoConectado(TramiteDTO $parObjTramiteDTO)
+    protected function possuiComponentesComDocumentoReferenciadoConectado(TramiteDTO $parObjTramiteDTO)
     {
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
         return $objComponenteDigitalBD->possuiComponentesComDocumentoReferenciado($parObjTramiteDTO);

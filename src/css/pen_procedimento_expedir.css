@@ -36,18 +36,18 @@ div.infraBarraProgresso div.infraBarraProgressoMiolo:after {
     animation: move 2s linear infinite;
     -webkit-animation: move 2s linear infinite;
     -moz-animation: move 2s linear infinite;
-    border-top-right-radius: 8px;
-    -webkit-border-top-right-radius: 8px;
-    -moz-border-radius-topright: 8px;
-    border-bottom-right-radius: 8px;
-    -moz-border-radius-bottomright: 8px;
-    -webkit-border-bottom-right-radius: 8px;
-    border-top-left-radius: 20px;
-    -webkit-border-top-left-radius: 20px;
-    -moz-border-radius-topleft: 20px;
-    border-bottom-left-radius: 20px;
-    -webkit-border-bottom-left-radius: 20px;
-    -moz-border-radius-bottomleft: 20px;
+    border-top-right-radius: 5px;
+    -webkit-border-top-right-radius: 5px;
+    -moz-border-radius-topright: 5px;
+    border-bottom-right-radius: 5px;
+    -moz-border-radius-bottomright: 5px;
+    -webkit-border-bottom-right-radius: 5px;
+    border-top-left-radius: 10px;
+    -webkit-border-top-left-radius: 10px;
+    -moz-border-radius-topleft: 10px;
+    border-bottom-left-radius: 10px;
+    -webkit-border-bottom-left-radius: 10px;
+    -moz-border-radius-bottomleft: 10px;
     overflow: hidden;
 }
 

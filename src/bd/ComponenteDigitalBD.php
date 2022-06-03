@@ -14,16 +14,13 @@ class ComponenteDigitalBD extends InfraBD {
      * @param TramiteDTO $parObjTramiteDTO
      * @return void
      */
-    public function listarComponentesDigitais(TramiteDTO $parObjTramiteDTO)
+    public function listarComponentesDigitaisPeloTramite($numIdTramite, $dblIdDocumento=null)
     {
-        if(is_null($parObjTramiteDTO)){
+        if(is_null($numIdTramite)){
             throw new InfraException('Parâmetro [parObjTramiteDTO] não informado');
         }
 
         $objComponenteDigitalPesquisaDTO = new ComponenteDigitalDTO();
-        $objComponenteDigitalPesquisaDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
-        $objComponenteDigitalPesquisaDTO->setNumIdTramite($parObjTramiteDTO->getNumIdTramite());
-
         $objComponenteDigitalPesquisaDTO->retStrNumeroRegistro();
         $objComponenteDigitalPesquisaDTO->retDblIdProcedimento();
         $objComponenteDigitalPesquisaDTO->retDblIdDocumento();
@@ -37,35 +34,15 @@ class ComponenteDigitalBD extends InfraBD {
         $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoReferenciado();
         $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoAnexado();
         $objComponenteDigitalPesquisaDTO->retNumOrdem();
+        $objComponenteDigitalPesquisaDTO->setNumIdTramite($numIdTramite);
+        $objComponenteDigitalPesquisaDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objComponenteDigitalPesquisaDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-        return $this->listar($objComponenteDigitalPesquisaDTO);
-
-
-
-        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-        $objComponenteDigitalDTO->retNumOrdem();
-        $objComponenteDigitalDTO->retDblIdProcedimento();
-        $objComponenteDigitalDTO->retDblIdDocumento();
-
-        $objComponenteDigitalDTO->retStrHashConteudo();
-        $objComponenteDigitalDTO->retNumOrdemDocumento();
-        $objComponenteDigitalDTO->retNumOrdemDocumentoAnexado();
-        $objComponenteDigitalDTO->retDblIdProcedimentoAnexado();
-        $objComponenteDigitalDTO->retStrProtocoloProcedimentoAnexado();
-
-        if(!isset($parDblIdProcedimentoAnexado)){
-            $objComponenteDigitalDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-            $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
-            $strCampoOrdenacao = "OrdemDocumento";
-        } else {
-            // Avaliação de componentes digitais específicos para o processo anexado
-            $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
-            $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($parDblIdProcedimentoAnexado);
-            $objComponenteDigitalDTO->setOrdNumOrdemDocumentoAnexado(InfraDTO::$TIPO_ORDENACAO_ASC);
-            $strCampoOrdenacao = "OrdemDocumento";
+        if(!is_null($dblIdDocumento)){
+            $objComponenteDigitalPesquisaDTO->setDblIdDocumento($dblIdDocumento);
         }
 
-
+        return $this->listar($objComponenteDigitalPesquisaDTO);
     }
 
     /**

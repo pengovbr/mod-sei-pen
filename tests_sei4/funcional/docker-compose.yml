@@ -96,12 +96,12 @@ services:
       - ${SEI_PATH}/infra:/opt/infra
       - ./assets/cron.d:/etc/cron.d      
       - ./assets/config:/opt/sei/config/mod-pen
+      - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
-      - ${SEI_CONFIG}:/opt/sei/config/ConfiguracaoSEI.php:ro
-      - ${SIP_CONFIG}:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -167,8 +167,8 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
-      - ${SEI_CONFIG}:/opt/sei/config/ConfiguracaoSEI.php:ro
-      - ${SIP_CONFIG}:/opt/sip/config/ConfiguracaoSip.php:ro
+      - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}

@@ -2361,30 +2361,6 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 
-    private function listarComponentesDigitais($parStrNumeroRegistro, $parNumIdTramite)
-    {
-        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-        $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-        $objComponenteDigitalDTO->setNumIdTramite($parNumIdTramite);
-        $objComponenteDigitalDTO->retStrNumeroRegistro();
-        $objComponenteDigitalDTO->retNumIdTramite();
-        $objComponenteDigitalDTO->retDblIdProcedimento();
-        $objComponenteDigitalDTO->retDblIdProcedimentoAnexado();
-        $objComponenteDigitalDTO->retDblIdDocumento();
-        $objComponenteDigitalDTO->retNumIdAnexo();
-        $objComponenteDigitalDTO->retStrHashConteudo();
-        $objComponenteDigitalDTO->retNumOrdem();
-        $objComponenteDigitalDTO->retNumOrdemDocumento();
-        $objComponenteDigitalDTO->retNumOrdemDocumentoReferenciado();
-        $objComponenteDigitalDTO->retNumOrdemDocumentoAnexado();
-
-        // Ordena obrigatoriamente pela ordem do documento (ordem documento) e depois pela ordem do componente digitial (ordem)
-        $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
-        $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
-
-        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        return  $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-    }
 
     private function substituirDestinoParaUnidadeReceptora($parObjMetadadosTramite, $parNumIdentificacaoTramite)
     {

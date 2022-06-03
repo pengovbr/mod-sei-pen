@@ -41,7 +41,9 @@ class ComponenteDigitalDTO extends InfraDTO {
 
 
     $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
+    // $this->configurarPK('IdProcedimento', InfraDTO::$TIPO_PK_INFORMADO);
     $this->configurarPK('IdDocumento', InfraDTO::$TIPO_PK_INFORMADO);
+    // $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
 
     $this->configurarFK('NumeroRegistro', 'md_pen_tramite', 'numero_registro', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OBRIGATORIA);
