@@ -1371,7 +1371,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strNomeComponenteDigital = "";
                 if($bolMultiplosComponentes){
                     $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-                    [$strCaminhoAnexoTemporario, $strNomeComponenteDigital] = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+                    list($strCaminhoAnexoTemporario, $strNomeComponenteDigital) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                     $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                 } else {
                     $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);  
@@ -1446,9 +1446,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $arrStrNomeArquivos = array();
         $zipArchive = new ZipArchive(); 
-        if($zipArchive->open($strCaminhoAnexoCompactado, ZipArchive::RDONLY)){
+        if($zipArchive->open($strCaminhoAnexoCompactado)){
             try {
-                for($i = 0; $i < $zipArchive->count(); $i++){ 
+                for($i = 0; $i < $zipArchive->numFiles; $i++){ 
                     $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i); 
                 }
         
@@ -2025,7 +2025,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                                 if($bolMultiplosComponentes){
                                     $numOrdemComponenteDigital = $objComponenteDigitalDTO->getNumOrdem();
                                     $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-                                    [$strCaminhoAnexoTemporario, ] = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+                                    list($strCaminhoAnexoTemporario, ) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                                     $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                                 } else {
                                     $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);  

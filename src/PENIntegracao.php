@@ -636,11 +636,13 @@ class PENIntegracao extends SeiIntegracao
             LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
         }
 
-        try {
-            $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
-        } catch (\Exception $e) {
-            LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
-        }
+        // Desativado verificações de compatibilidade do banco de dados por não ser todas as versões
+        // que necessitam mudanças no banco de dados
+        // try {
+        //     $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
+        // } catch (\Exception $e) {
+        //     LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
+        // }
     }
 
     /**
