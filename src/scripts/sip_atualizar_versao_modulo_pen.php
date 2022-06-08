@@ -139,6 +139,7 @@ class PenAtualizarSipRN extends InfraRN {
                 case '3.1.10': $this->instalarV30111();
                 case '3.1.11': $this->instalarV30112();
                 case '3.1.12': $this->instalarV30113();
+                case '3.1.13': $this->instalarV30114();
                     break;
 
                 default:
@@ -1527,6 +1528,11 @@ class PenAtualizarSipRN extends InfraRN {
         }
 
 	    $this->atualizarNumeroVersao("3.1.13");
+    }
+
+    protected function instalarV30114()
+    {
+	    $this->atualizarNumeroVersao("3.1.14");
     }
 }
 
