@@ -5,7 +5,7 @@
   backupGlobals="true" 
   colors="true" 
   verbose="true"
-  cacheResult="true"
+  cacheResult="false"
   executionOrder="no-depends"
   >
   

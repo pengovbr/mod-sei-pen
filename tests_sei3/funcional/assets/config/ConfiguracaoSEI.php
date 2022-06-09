@@ -66,9 +66,6 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 					//           'SenhaScript' => 'sei_user',
 					//           'Tipo' => 'SqlServer'), //MySql, SqlServer ou Oracle
 
-
-
-
 							'CacheSEI' => array('Servidor' => 'memcached',
 							'Porta' => '11211'),
 

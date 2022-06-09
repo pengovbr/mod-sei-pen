@@ -16,7 +16,7 @@ PEN_TEST_FUNC = tests_sei$(versao_sei)/funcional
 PEN_TEST_UNIT = tests_sei$(versao_sei)/unitario
 PARALLEL_TEST_NODES = 5
 
-all: clean build
+all: help
 
 build: 
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
@@ -60,12 +60,6 @@ clean:
 install: 
 	unzip -o -d $(SEI_PATH) dist/$(PEN_MODULO_COMPACTADO)
 
-install-dev: 
-	ln -sf $(PWD)/src/bin $(SEI_PATH)/sei/bin/mod-pen
-	ln -sf $(PWD)/src/config $(SEI_PATH)/sei/config/mod-pen
-	ln -sf $(PWD)/src/scripts $(SEI_PATH)/sei/scripts/mod-pen
-	ln -sf $(PWD)/src/ $(SEI_PATH)/sei/web/modulos/pen
-	
 
 test-environment-provision:	
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
@@ -117,13 +111,8 @@ test-environment-down:
 test-functional:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
-
 test-functional-parallel:
-	$(PEN_TEST_FUNC)/vendor/bin/paratest -c $(PEN_TEST_FUNC)/phpunit.xml --testsuite funcional -p 4
-	  
-
-test-functional-parallel-internal:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite funcional -p 4
+	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite funcional -p 8
 
 
 test-parallel-otimizado:

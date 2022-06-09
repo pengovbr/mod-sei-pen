@@ -49,7 +49,6 @@ class RecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         $novoTramite = $this->enviarMetadadosProcesso(self::$servicoPEN, self::$remetente, self::$destinatario, $processoTeste);
         $this->enviarComponentesDigitaisDoTramite(self::$servicoPEN, $novoTramite, $processoTeste);
         $reciboTramite = $this->receberReciboEnvio(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
 
         //Verifica recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);

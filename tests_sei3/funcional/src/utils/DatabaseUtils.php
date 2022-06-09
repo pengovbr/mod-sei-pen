@@ -6,9 +6,9 @@ class DatabaseUtils
 
     function __construct($nomeContexto)
     {
-        $dns = constant($nomeContexto . '_DB_SEI_DSN');
-        $user = constant($nomeContexto . '_DB_SEI_USER');
-        $password = constant($nomeContexto . '_DB_SEI_PASSWORD');
+        $dns = getenv($nomeContexto . '_DB_SEI_DSN');
+        $user = getenv("SEI_DATABASE_USER");
+        $password = getenv("SEI_DATABASE_PASSWORD");
         $this->connection = new PDO($dns, $user, $password);
     }
 
@@ -24,5 +24,10 @@ class DatabaseUtils
 		$statement = $this->connection->prepare($sql);
 		$statement->execute($params);
 		return $statement->fetchAll();
+	}   
+
+    
+    public function getBdType(){
+		return $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME);
 	}
 }

@@ -5,13 +5,11 @@ services:
 ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
       image: guilhermeadc/sei3_mailcatcher:7.2
-      container_name: smtp
       ports:
         - "1080:1080"
 
   memcached:
     image: guilhermeadc/sei3_memcached:7.2
-    container_name: memcached
     ports:
       - "11211:11211"
 
@@ -21,7 +19,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./assets/proxy/sei3/:/opt/proxy-conf
+      - ./assets/proxy:/opt/proxy-conf
     links:
       - org1-http:org1-http
       - org2-http:org2-http
@@ -40,6 +38,33 @@ services:
       - ./assets/arquivos/test_files_index.txt:/test_files_index.txt
       - /tmp:/tmp
 
+  php-test-functional:
+    image: processoeletronico/vagrant_sei4_httpd
+    depends_on: 
+      - org1-database
+      - org2-database
+      - selenium
+    dns: "8.8.8.8"
+    volumes:
+      - ${SEI_PATH}/sei:/opt/sei
+      - ${SEI_PATH}/sip:/opt/sip
+      - ${SEI_PATH}/infra:/opt/infra
+      - .:/tests
+      - /tmp:/tmp
+    environment:
+      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0
+      - CONTEXTO_ORGAO_A_DB_SEI_DSN=${CONTEXTO_ORGAO_A_DB_SEI_DSN}
+      - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
+      - SEI_DATABASE_USER=${SEI_DATABASE_USER}
+      - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+    extra_hosts:
+      - "${ORG1_HOSTNAME}:127.0.0.1"
+    links:   
+      - org1-database:${ORG1_DATABASE_HOST}
+      - org2-database:${ORG1_DATABASE_HOST}
+      - selenium:selenium
+    command: "true"
+    
 
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 
@@ -54,7 +79,9 @@ services:
     container_name: org1-http
     dns: "8.8.8.8"
     volumes:
-      - ${SEI_PATH}:/opt
+      - ${SEI_PATH}/sei:/opt/sei
+      - ${SEI_PATH}/sip:/opt/sip
+      - ${SEI_PATH}/infra:/opt/infra
       - ./assets/cron.d:/etc/cron.d      
       - ./assets/config:/opt/sei/config/mod-pen
       - ../../src/scripts:/opt/sei/scripts/mod-pen
@@ -67,9 +94,7 @@ services:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
-      - XDEBUG_SESSION=default
-      - XDEBUG_MODE=debug
+      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0
     extra_hosts:
       - "${ORG1_HOSTNAME}:127.0.0.1"
     links:
@@ -91,7 +116,9 @@ services:
     container_name: org2-http
     dns: "8.8.8.8"
     volumes:
-      - ${SEI_PATH}:/opt
+      - ${SEI_PATH}/sei:/opt/sei
+      - ${SEI_PATH}/sip:/opt/sip
+      - ${SEI_PATH}/infra:/opt/infra
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
@@ -104,10 +131,7 @@ services:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
-      - XDEBUG_SESSION=default
-      - XDEBUG_MODE=debug
-        
+      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0  
     extra_hosts:
       - "${ORG2_HOSTNAME}:127.0.0.1"
     links:

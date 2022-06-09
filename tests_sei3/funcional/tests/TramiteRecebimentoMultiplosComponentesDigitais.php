@@ -68,7 +68,6 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
         $this->enviarComponentesDigitaisDoProcesso(self::$servicoPEN, $novoTramite, $metadadosProcessoTeste);
         $reciboTramite = $this->receberReciboEnvioProcesso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -119,7 +118,6 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $novoTramite = $this->enviarMetadadosDocumento(self::$servicoPEN, $remetente, $destinatario, $metadadosDocumentoTeste);
         $this->enviarComponentesDigitaisDoDocumentoAvulso(self::$servicoPEN, $novoTramite, $metadadosDocumentoTeste);
         $reciboTramite = $this->receberReciboEnvioDocumentoAvulso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
