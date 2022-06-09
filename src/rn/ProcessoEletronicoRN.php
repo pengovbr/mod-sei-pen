@@ -2055,7 +2055,7 @@ class ProcessoEletronicoRN extends InfraRN
     protected function listarComponentesDigitaisConectado(TramiteDTO $parObjTramiteDTO, $dblIdDocumento=null)
     {
         $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-        return $objComponenteDigitalBD->listarComponentesDigitaisPeloTramite($parObjTramiteDTO, $dblIdDocumento);
+        return $objComponenteDigitalBD->listarComponentesDigitaisPeloTramite($parObjTramiteDTO->getNumIdTramite(), $dblIdDocumento);
     }
 
     /**
