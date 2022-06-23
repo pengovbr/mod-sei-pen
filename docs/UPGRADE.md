@@ -13,7 +13,7 @@ Este documento está estruturado nas seguintes seções:
 1. **[Atualização](#atualização)**:  
 Procedimentos para realizar a atualização de uma nova versão do módulo
 
-    **[1.1. Atualização Simples (versão 2.0.x -> 2.0.x)](#)**  
+    **[1.1. Atualização Simples (versão 2.0.x -> versão superior 2.0.x)](#)**  
     **[1.2. Atualização Completa (versão 1.5.x para 2.0.0)](#)**  
 
 2. **[Configuração](#configuração)**:  
