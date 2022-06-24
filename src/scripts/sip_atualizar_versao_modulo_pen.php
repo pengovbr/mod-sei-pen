@@ -437,6 +437,34 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     /**
+     * Obtém id do item de menu, baseado no sistema, rótulo e id do item superior
+     * 
+     * A mesma função disponibilizada pelas classe ScriptSip, não existe a possibilidade de filtra a pesquisa
+     * pelo id do item superior, o que pode gerar conflito entre diferentes módulos.
+     */
+    public function obterIdItemMenu($numIdSistema, $numIdMenu, $numIdMenuPai, $strRotulo){
+        try{
+          $objItemMenuDTO = new ItemMenuDTO();
+          $objItemMenuDTO->retNumIdItemMenu();
+          $objItemMenuDTO->setNumIdSistema($numIdSistema);
+          $objItemMenuDTO->setNumIdMenu($numIdMenu);
+          $objItemMenuDTO->setNumIdItemMenuPai($numIdMenuPai);
+          $objItemMenuDTO->setStrRotulo($strRotulo);
+    
+          $objItemMenuRN = new ItemMenuRN();
+          $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
+          if ($objItemMenuDTO == null){
+            throw new InfraException('Item de menu '.$strRotulo.' não encontrado.');
+          }
+    
+          return $objItemMenuDTO->getNumIdItemMenu();
+    
+        }catch (Exception $e){
+          throw new InfraException('Erro obtendo ID do item de menu.', $e);
+        }
+      }    
+
+    /**
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
     private function instalarV100() {
@@ -1250,19 +1278,23 @@ class PenAtualizarSipRN extends InfraRN {
 
         // Redefinir ordem de apresentação dos menus de administração do módulo
         $arrOrdemMenusAdministracaoPEN = array(
-            array("rotulo" => "Parâmetros de Configuração", "sequencia" => 10),
-            array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20),
-            array("rotulo" => "Mapeamento de Unidades", "sequencia" => 30),
-            array("rotulo" => "Mapeamento de Hipóteses Legais", "sequencia" => 40),
+            array("rotulo" => "Parâmetros de Configuração",        "sequencia" => 10, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
+            array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
+            array("rotulo" => "Mapeamento de Unidades",            "sequencia" => 30, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
+            array("rotulo" => "Mapeamento de Hipóteses Legais",    "sequencia" => 40, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
         );
 
         array_map(function($item) use ($numIdSistemaSei, $numIdMenuSEI){
             $objItemMenuRN = new ItemMenuRN();
-            $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotulo"]);
-            if(isset($numIdItemMenu)){
+            $numIdItemMenuPai = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotuloMenuSuperior"]);
+            
+            // Obtém id do item de menu, baseado no sistema, rótulo e, principalmente, ID DO ITEM SUPERIOR
+            $numIdItemMenu = $this->obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuPai, $item["rotulo"]);
+            if(isset($numIdItemMenu)){                
                 $objItemMenuDTO = new ItemMenuDTO();
                 $objItemMenuDTO->setNumIdMenu($numIdMenuSEI);
                 $objItemMenuDTO->setNumIdItemMenu($numIdItemMenu);
+                $objItemMenuDTO->setNumIdItemMenuPai($numIdItemMenuPai);
                 $objItemMenuDTO->setNumSequencia($item["sequencia"]);
                 $objItemMenuRN->alterar($objItemMenuDTO);
             }
