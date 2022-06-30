@@ -209,7 +209,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objRN = new SistemaRN();
         $objDTO = $objRN->consultar($objDTO);
 
-        return (empty($objDTO)) ? '0' : $objDTO->getNumIdSistema();
+        return (empty($objDTO)) ? null : $objDTO->getNumIdSistema();
     }
 
     /**
@@ -760,6 +760,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar rotulo do menu
         $objDTO = new ItemMenuDTO();
         $objDTO->setStrRotulo('Indicar Hiptese de Restrio Padro');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdItemMenu();
         $objDTO->retNumIdMenu();
         $objBD = new ItemMenuBD($this->getObjInfraIBanco());
@@ -772,6 +773,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_recebido_listar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -784,6 +786,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_recebido_excluir');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -796,6 +799,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_recebido_cadastrar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -808,6 +812,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_recebido_alterar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -820,6 +825,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_enviado_listar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -832,6 +838,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_enviado_excluir');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -844,6 +851,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_enviado_cadastrar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -856,6 +864,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_hipotese_legal_enviado_alterar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -889,6 +898,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso (recebido)
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_tipo_doc_recebido_cadastrar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -897,8 +907,10 @@ class PenAtualizarSipRN extends InfraRN {
             $objDTO->setStrCaminho('controlador.php?acao=pen_map_tipo_documento_recebimento_cadastrar');
             $objBD->alterar($objDTO);
         }
+
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_tipo_doc_enviado_visualizar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -909,6 +921,7 @@ class PenAtualizarSipRN extends InfraRN {
         }
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_tipo_doc_recebido_listar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -921,6 +934,7 @@ class PenAtualizarSipRN extends InfraRN {
         //Alterar nomeclatura do recurso (envio)
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_tipo_doc_enviado_cadastrar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -931,6 +945,7 @@ class PenAtualizarSipRN extends InfraRN {
         }
         $objDTO = new RecursoDTO();
         $objDTO->setStrNome('pen_map_tipo_doc_enviado_listar');
+        $objDTO->setNumIdSistema($numIdSistema);
         $objDTO->retNumIdRecurso();
         $objBD = new RecursoBD($this->getObjInfraIBanco());
         $objDTO = $objBD->consultar($objDTO);
@@ -1247,7 +1262,6 @@ class PenAtualizarSipRN extends InfraRN {
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_consultar');
 
         $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO PEN');
-        $numIdSistemaSei = $this->getNumIdSistema('SEI');
         $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
         $numIdMenuSEI = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
@@ -1523,7 +1537,7 @@ class PenAtualizarSipRN extends InfraRN {
 
     protected function instalarV30113()
     {
-        function atualizarIconeMenu($numIdSistema, $numIdMenuPai, $strNomeRecurso, $strIcone, $numSequencia){
+        $atualizarIconeMenu = function ($numIdSistema, $numIdMenuPai, $strNomeRecurso, $strIcone, $numSequencia){
             $objRecursoDTO = new RecursoDTO();
             $objRecursoDTO->setNumIdSistema($numIdSistema);
             $objRecursoDTO->setStrNome($strNomeRecurso);
@@ -1550,15 +1564,15 @@ class PenAtualizarSipRN extends InfraRN {
                     }
                 }
             }
-        }
+        };
 
         // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
         if(compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
             $numIdSistema = $this->getNumIdSistema('SEI');
             $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
 
-            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_procedimento_expedido_listar', 'pen_tramite_externo.svg', 55);
-            atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote.svg', 56);
+            $atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_procedimento_expedido_listar', 'pen_tramite_externo.svg', 55);
+            $atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote.svg', 56);
         }
 
 	    $this->atualizarNumeroVersao("3.1.13");
