@@ -40,7 +40,7 @@ class PenAtualizarSipRN extends InfraRN {
 
     protected function atualizarVersaoConectado() {
         try {
-            $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO 1.0.0');
+            $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO');
 
             //testando se esta usando BDs suportados
             if (!(BancoSip::getInstance() instanceof InfraMySql) &&
@@ -703,7 +703,7 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.1.0
+     * Instala/Atualiza os módulo PEN para versão 1.0.2
      */
     private function instalarV102() {
 
@@ -748,7 +748,7 @@ class PenAtualizarSipRN extends InfraRN {
         // ------------------ Atribui as permisses aos recursos e menus ----------------------//
         $this->atribuirPerfil($numIdSistema);
 
-        $this->atualizarNumeroVersao('1.1.0');
+        $this->atualizarNumeroVersao('1.0.2');
     }
 
     /**
