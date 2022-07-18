@@ -1,13 +1,57 @@
 <?php
 
-$dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__."/../../web" : DIR_SIP_WEB;
+$dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
 
 session_start();
 SessaoSip::getInstance(false);
 
-class PenAtualizarSipRN extends InfraRN {
+class VersaoSip4RN extends InfraScriptVersao
+{
+    public function __construct()
+    {
+        parent::__construct();
+    }
 
+    protected function inicializarObjInfraIBanco()
+    {
+        return BancoSip::getInstance();
+    }
+
+    protected function verificarVersaoInstaladaControlado()
+    {
+        $objInfraParametroDTOFiltro = new InfraParametroDTO();
+        $objInfraParametroDTOFiltro->setStrNome(PenAtualizarSipRN::PARAMETRO_VERSAO_MODULO);
+        $objInfraParametroDTOFiltro->retStrNome();
+
+        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
+        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTOFiltro);
+        if (is_null($objInfraParametroDTO)) {
+            $objInfraParametroDTO = new InfraParametroDTO();
+            $objInfraParametroDTO->setStrNome(PenAtualizarSipRN::PARAMETRO_VERSAO_MODULO);
+            $objInfraParametroDTO->setStrValor('0.0.0');
+            $objInfraParametroBD->cadastrar($objInfraParametroDTO);
+        }
+
+        return $objInfraParametroDTO->getStrNome();
+    }
+
+    public function versao_0_0_0($strVersaoAtual)
+    {
+    }
+
+    function atualizarVersaoCompatibilidade($strVersaoAtual)
+    {
+        $objAtualizarRN = new PenAtualizarSipRN();
+        $objAtualizarRN->atualizarVersao();
+    }
+}
+
+class PenAtualizarSipRN extends InfraRN
+{
+
+    const VERSAO_MODULO = "3.1.15";
+    const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -15,11 +59,13 @@ class PenAtualizarSipRN extends InfraRN {
     private $arrRecurso = array();
     private $arrMenu = array();
 
-    public function __construct(){
+    public function __construct()
+    {
         parent::__construct();
     }
 
-    protected function inicializarObjInfraIBanco(){
+    protected function inicializarObjInfraIBanco()
+    {
         return BancoSip::getInstance();
     }
 
@@ -28,9 +74,10 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return null
      */
-    protected function inicializar($strTitulo) {
+    protected function inicializar($strTitulo)
+    {
         InfraDebug::getInstance()->setBolLigado(true);
-        InfraDebug::getInstance()->setBolDebugInfra(false);
+        InfraDebug::getInstance()->setBolDebugInfra(true);
         InfraDebug::getInstance()->setBolEcho(true);
         InfraDebug::getInstance()->limpar();
 
@@ -38,16 +85,20 @@ class PenAtualizarSipRN extends InfraRN {
         $this->logar($strTitulo);
     }
 
-    protected function atualizarVersaoConectado() {
+    protected function atualizarVersaoConectado()
+    {
         try {
             $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO');
 
             //testando se esta usando BDs suportados
-            if (!(BancoSip::getInstance() instanceof InfraMySql) &&
-                    !(BancoSip::getInstance() instanceof InfraSqlServer) &&
-                    !(BancoSip::getInstance() instanceof InfraOracle)) {
+            if (
+                !(BancoSip::getInstance() instanceof InfraMySql) &&
+                !(BancoSip::getInstance() instanceof InfraSqlServer) &&
+                !(BancoSip::getInstance() instanceof InfraOracle)
+            ) {
 
                 $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSip::getInstance()), true);
+                return;
             }
 
             //testando permissoes de criações de tabelas
@@ -57,21 +108,28 @@ class PenAtualizarSipRN extends InfraRN {
                 BancoSip::getInstance()->executarSql('CREATE TABLE pen_sip_teste (id ' . $objInfraMetaBD->tipoNumero() . ' null)');
             }
             BancoSip::getInstance()->executarSql('DROP TABLE pen_sip_teste');
-            
+
             $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
             // Aplicação de scripts de atualização de forma incremental
             // Ausência de [break;] proposital para realizar a atualização incremental de versões
             $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-            
+
             switch ($strVersaoModuloPen) {
-                //case '' - Nenhuma versão instalada
-                case '':      $this->instalarV100();
-                case '1.0.0': $this->instalarV101();
-                case '1.0.1': $this->instalarV102();
-                case '1.0.2': $this->instalarV103();
-                case '1.0.3': $this->instalarV104();
-                case '1.0.4': $this->instalarV111();
+                    //case '' - Nenhuma versão instalada
+                case '':
+                case '0.0.0':
+                    $this->instalarV100();
+                case '1.0.0':
+                    $this->instalarV101();
+                case '1.0.1':
+                    $this->instalarV102();
+                case '1.0.2':
+                    $this->instalarV103();
+                case '1.0.3':
+                    $this->instalarV104();
+                case '1.0.4':
+                    $this->instalarV111();
                 case '1.1.1': //Não houve atualização no banco de dados
                 case '1.1.2': //Não houve atualização no banco de dados
                 case '1.1.3': //Não houve atualização no banco de dados
@@ -79,76 +137,137 @@ class PenAtualizarSipRN extends InfraRN {
                 case '1.1.5': //Não houve atualização no banco de dados
                 case '1.1.6': //Não houve atualização no banco de dados
                 case '1.1.7': //Não houve atualização no banco de dados
-                case '1.1.8': $this->instalarV119();
-                case '1.1.9': $this->instalarV1110();
-                case '1.1.10': $this->instalarV1111();
-                case '1.1.11': $this->instalarV1112();
-                case '1.1.12': $this->instalarV1113();
-                case '1.1.13': $this->instalarV1114();
-                case '1.1.14': $this->instalarV1115();
-                case '1.1.15': $this->instalarV1116();
-                case '1.1.16': $this->instalarV1117();
-                case '1.1.17': $this->instalarV1200();
-                case '1.2.0': $this->instalarV1201();
-                case '1.2.1': $this->instalarV1202();
-                case '1.2.2': $this->instalarV1203();
-                case '1.2.3': $this->instalarV1204();
-                case '1.2.4': $this->instalarV1205();
-                case '1.2.5': $this->instalarV1206();
-                case '1.2.6': $this->instalarV1300();
-                case '1.3.0': $this->instalarV1400();
-                case '1.4.0': $this->instalarV1401();
-                case '1.4.1': $this->instalarV1402();
-                case '1.4.2': $this->instalarV1403();
-                case '1.4.3': $this->instalarV1500();
-                case '1.5.0': $this->instalarV1501();
-                case '1.5.1': $this->instalarV1502();
-                case '1.5.2': $this->instalarV1503();
+                case '1.1.8':
+                    $this->instalarV119();
+                case '1.1.9':
+                    $this->instalarV1110();
+                case '1.1.10':
+                    $this->instalarV1111();
+                case '1.1.11':
+                    $this->instalarV1112();
+                case '1.1.12':
+                    $this->instalarV1113();
+                case '1.1.13':
+                    $this->instalarV1114();
+                case '1.1.14':
+                    $this->instalarV1115();
+                case '1.1.15':
+                    $this->instalarV1116();
+                case '1.1.16':
+                    $this->instalarV1117();
+                case '1.1.17':
+                    $this->instalarV1200();
+                case '1.2.0':
+                    $this->instalarV1201();
+                case '1.2.1':
+                    $this->instalarV1202();
+                case '1.2.2':
+                    $this->instalarV1203();
+                case '1.2.3':
+                    $this->instalarV1204();
+                case '1.2.4':
+                    $this->instalarV1205();
+                case '1.2.5':
+                    $this->instalarV1206();
+                case '1.2.6':
+                    $this->instalarV1300();
+                case '1.3.0':
+                    $this->instalarV1400();
+                case '1.4.0':
+                    $this->instalarV1401();
+                case '1.4.1':
+                    $this->instalarV1402();
+                case '1.4.2':
+                    $this->instalarV1403();
+                case '1.4.3':
+                    $this->instalarV1500();
+                case '1.5.0':
+                    $this->instalarV1501();
+                case '1.5.1':
+                    $this->instalarV1502();
+                case '1.5.2':
+                    $this->instalarV1503();
                 case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
                 case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
                 case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
                 case '1.5.6'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-                case '1.5.7': $this->instalarV2000_beta1();
-                case '2.0.0-beta1': $this->instalarV2000_beta2();
-                case '2.0.0-beta2': $this->instalarV2000_beta3();
-                case '2.0.0-beta3': $this->instalarV2000_beta4();
-                case '2.0.0-beta4': $this->instalarV2000_beta5();
-                case '2.0.0-beta5': $this->instalarV2000();
-                case '2.0.0': $this->instalarV2001();
-                case '2.0.1': $this->instalarV2100();
-                case '2.1.0': $this->instalarV2101();
-                case '2.1.1': $this->instalarV2102();
-                case '2.1.2': $this->instalarV2103();
-                case '2.1.3': $this->instalarV2104();
-                case '2.1.4': $this->instalarV2105();
-                case '2.1.5': $this->instalarV2106();
-                case '2.1.6': $this->instalarV2107();
-                case '2.1.7': $this->instalarV3000();
-                case '3.0.0': $this->instalarV3001();
-                case '3.0.1': $this->instalarV3010();
-                case '3.1.0': $this->instalarV3011();
-                case '3.1.1': $this->instalarV3012();
-                case '3.1.2': $this->instalarV3013();
-                case '3.1.3': $this->instalarV3014();
-                case '3.1.4': $this->instalarV3015();
-                case '3.1.5': $this->instalarV3016();
-                case '3.1.6': $this->instalarV3017();
-                case '3.1.7': $this->instalarV3018();
-                case '3.1.8': $this->instalarV3019();
-                case '3.1.9': $this->instalarV30110();
-                case '3.1.10': $this->instalarV30111();
-                case '3.1.11': $this->instalarV30112();
-                case '3.1.12': $this->instalarV30113();
-                case '3.1.13': $this->instalarV30114();
-                case '3.1.14': $this->instalarV30115();
+                case '1.5.7':
+                    $this->instalarV2000_beta1();
+                case '2.0.0-beta1':
+                    $this->instalarV2000_beta2();
+                case '2.0.0-beta2':
+                    $this->instalarV2000_beta3();
+                case '2.0.0-beta3':
+                    $this->instalarV2000_beta4();
+                case '2.0.0-beta4':
+                    $this->instalarV2000_beta5();
+                case '2.0.0-beta5':
+                    $this->instalarV2000();
+                case '2.0.0':
+                    $this->instalarV2001();
+                case '2.0.1':
+                    $this->instalarV2100();
+                case '2.1.0':
+                    $this->instalarV2101();
+                case '2.1.1':
+                    $this->instalarV2102();
+                case '2.1.2':
+                    $this->instalarV2103();
+                case '2.1.3':
+                    $this->instalarV2104();
+                case '2.1.4':
+                    $this->instalarV2105();
+                case '2.1.5':
+                    $this->instalarV2106();
+                case '2.1.6':
+                    $this->instalarV2107();
+                case '2.1.7':
+                    $this->instalarV3000();
+                case '3.0.0':
+                    $this->instalarV3001();
+                case '3.0.1':
+                    $this->instalarV3010();
+                case '3.1.0':
+                    $this->instalarV3011();
+                case '3.1.1':
+                    $this->instalarV3012();
+                case '3.1.2':
+                    $this->instalarV3013();
+                case '3.1.3':
+                    $this->instalarV3014();
+                case '3.1.4':
+                    $this->instalarV3015();
+                case '3.1.5':
+                    $this->instalarV3016();
+                case '3.1.6':
+                    $this->instalarV3017();
+                case '3.1.7':
+                    $this->instalarV3018();
+                case '3.1.8':
+                    $this->instalarV3019();
+                case '3.1.9':
+                    $this->instalarV30110();
+                case '3.1.10':
+                    $this->instalarV30111();
+                case '3.1.11':
+                    $this->instalarV30112();
+                case '3.1.12':
+                    $this->instalarV30113();
+                case '3.1.13':
+                    $this->instalarV30114();
+                case '3.1.14':
+                    $this->instalarV30115();
 
+
+                    // Ausência de [break;] proposital para realizar a atualização incremental de versões
                     break;
 
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
+                    return;
             }
 
-            
+
             $this->finalizar('FIM');
             InfraDebug::getInstance()->setBolDebugInfra(true);
         } catch (Exception $e) {
@@ -166,23 +285,23 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return null
      */
-    protected function finalizar($strMsg=null, $bolErro=false){
+    protected function finalizar($strMsg = null, $bolErro = false)
+    {
         if (!$bolErro) {
-          $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
-          $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
-        }else{
-          $strMsg = 'ERRO: '.$strMsg;
+            $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
+            $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
+        } else {
+            $strMsg = 'ERRO: ' . $strMsg;
         }
 
-        if ($strMsg!=null){
-          $this->logar($strMsg);
+        if ($strMsg != null) {
+            $this->logar($strMsg);
         }
 
         InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
         $this->numSeg = 0;
-        die;
     }
 
     /**
@@ -190,7 +309,8 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return null
      */
-    protected function logar($strMsg) {
+    protected function logar($strMsg)
+    {
         InfraDebug::getInstance()->gravar($strMsg);
     }
 
@@ -199,7 +319,8 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return int
      */
-    protected function getNumIdSistema($strSigla='SIP') {
+    protected function getNumIdSistema($strSigla = 'SIP')
+    {
 
         $objDTO = new SistemaDTO();
         $objDTO->setStrSigla($strSigla);
@@ -216,7 +337,8 @@ class PenAtualizarSipRN extends InfraRN {
      *
      * @return int Código do Menu
      */
-    protected function getNumIdMenu($strMenu = 'Principal', $numIdSistema = 0) {
+    protected function getNumIdMenu($strMenu = 'Principal', $numIdSistema = 0)
+    {
 
         $objDTO = new MenuDTO();
         $objDTO->setNumIdSistema($numIdSistema);
@@ -238,7 +360,8 @@ class PenAtualizarSipRN extends InfraRN {
      * Cria novo recurso no SIP
      * @return int Código do Recurso gerado
      */
-    protected function criarRecurso($strNome, $strDescricao, $numIdSistema) {
+    protected function criarRecurso($strNome, $strDescricao, $numIdSistema)
+    {
 
         $objDTO = new RecursoDTO();
         $objDTO->setNumIdSistema($numIdSistema);
@@ -267,7 +390,8 @@ class PenAtualizarSipRN extends InfraRN {
         return $objDTO->getNumIdRecurso();
     }
 
-    protected function renomearRecurso($numIdSistema, $strNomeAtual, $strNomeNovo){
+    protected function renomearRecurso($numIdSistema, $strNomeAtual, $strNomeNovo)
+    {
 
         $objRecursoDTO = new RecursoDTO();
         $objRecursoDTO->setBolExclusaoLogica(false);
@@ -279,9 +403,9 @@ class PenAtualizarSipRN extends InfraRN {
         $objRecursoRN = new RecursoRN();
         $objRecursoDTO = $objRecursoRN->consultar($objRecursoDTO);
 
-        if ($objRecursoDTO!=null){
+        if ($objRecursoDTO != null) {
             $objRecursoDTO->setStrNome($strNomeNovo);
-            $objRecursoDTO->setStrCaminho(str_replace($strNomeAtual,$strNomeNovo,$objRecursoDTO->getStrCaminho()));
+            $objRecursoDTO->setStrCaminho(str_replace($strNomeAtual, $strNomeNovo, $objRecursoDTO->getStrCaminho()));
             $objRecursoRN->alterar($objRecursoDTO);
         }
     }
@@ -297,7 +421,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objRecursoRN = new RecursoRN();
         $objRecursoDTO = $objRecursoRN->consultar($objRecursoDTO);
 
-        if ($objRecursoDTO == null){
+        if ($objRecursoDTO == null) {
             throw new InfraException("Recurso com nome {$strNomeRecurso} não pode ser localizado.");
         }
 
@@ -348,7 +472,8 @@ class PenAtualizarSipRN extends InfraRN {
 
 
     //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
-    public function addRecursosToPerfil($numIdPerfil, $numIdSistema) {
+    public function addRecursosToPerfil($numIdPerfil, $numIdSistema)
+    {
 
         if (!empty($this->arrRecurso)) {
 
@@ -369,7 +494,8 @@ class PenAtualizarSipRN extends InfraRN {
     }
 
     //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
-    public function addMenusToPerfil($numIdPerfil, $numIdSistema) {
+    public function addMenusToPerfil($numIdPerfil, $numIdSistema)
+    {
 
         if (!empty($this->arrMenu)) {
 
@@ -393,13 +519,14 @@ class PenAtualizarSipRN extends InfraRN {
         }
     }
 
-    public function atribuirPerfil($numIdSistema) {
+    public function atribuirPerfil($numIdSistema)
+    {
         $objDTO = new PerfilDTO();
         $objBD = new PerfilBD(BancoSip::getInstance());
         $objRN = $this;
 
         // Vincula a um perfil os recursos e menus adicionados nos métodos criarMenu e criarReturso
-        $fnCadastrar = function($strNome, $numIdSistema) use($objDTO, $objBD, $objRN) {
+        $fnCadastrar = function ($strNome, $numIdSistema) use ($objDTO, $objBD, $objRN) {
 
             $objDTO->unSetTodos();
             $objDTO->setNumIdSistema($numIdSistema);
@@ -431,9 +558,11 @@ class PenAtualizarSipRN extends InfraRN {
         $objInfraParametroDTO->setStrNome(array(self::PARAMETRO_VERSAO_MODULO, self::PARAMETRO_VERSAO_MODULO_ANTIGO), InfraDTO::$OPER_IN);
         $objInfraParametroDTO->retTodos();
         $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroDTO = $objInfraParametroBD->consultar($objInfraParametroDTO);
-        $objInfraParametroDTO->setStrValor($parStrNumeroVersao);
-        $objInfraParametroBD->alterar($objInfraParametroDTO);
+        $arrObjInfraParametroDTO = $objInfraParametroBD->listar($objInfraParametroDTO);
+        foreach ($arrObjInfraParametroDTO as $objInfraParametroDTO) {
+            $objInfraParametroDTO->setStrValor($parStrNumeroVersao);
+            $objInfraParametroBD->alterar($objInfraParametroDTO);
+        }
     }
 
     /**
@@ -442,32 +571,33 @@ class PenAtualizarSipRN extends InfraRN {
      * A mesma função disponibilizada pelas classe ScriptSip, não existe a possibilidade de filtra a pesquisa
      * pelo id do item superior, o que pode gerar conflito entre diferentes módulos.
      */
-    public function obterIdItemMenu($numIdSistema, $numIdMenu, $numIdMenuPai, $strRotulo){
-        try{
-          $objItemMenuDTO = new ItemMenuDTO();
-          $objItemMenuDTO->retNumIdItemMenu();
-          $objItemMenuDTO->setNumIdSistema($numIdSistema);
-          $objItemMenuDTO->setNumIdMenu($numIdMenu);
-          $objItemMenuDTO->setNumIdItemMenuPai($numIdMenuPai);
-          $objItemMenuDTO->setStrRotulo($strRotulo);
-    
-          $objItemMenuRN = new ItemMenuRN();
-          $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
-          if ($objItemMenuDTO == null){
-            throw new InfraException('Item de menu '.$strRotulo.' não encontrado.');
-          }
-    
-          return $objItemMenuDTO->getNumIdItemMenu();
-    
-        }catch (Exception $e){
-          throw new InfraException('Erro obtendo ID do item de menu.', $e);
+    public function obterIdItemMenu($numIdSistema, $numIdMenu, $numIdMenuPai, $strRotulo)
+    {
+        try {
+            $objItemMenuDTO = new ItemMenuDTO();
+            $objItemMenuDTO->retNumIdItemMenu();
+            $objItemMenuDTO->setNumIdSistema($numIdSistema);
+            $objItemMenuDTO->setNumIdMenu($numIdMenu);
+            $objItemMenuDTO->setNumIdItemMenuPai($numIdMenuPai);
+            $objItemMenuDTO->setStrRotulo($strRotulo);
+
+            $objItemMenuRN = new ItemMenuRN();
+            $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
+            if ($objItemMenuDTO == null) {
+                throw new InfraException('Item de menu ' . $strRotulo . ' não encontrado.');
+            }
+
+            return $objItemMenuDTO->getNumIdItemMenu();
+        } catch (Exception $e) {
+            throw new InfraException('Erro obtendo ID do item de menu.', $e);
         }
-      }    
+    }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
-    private function instalarV100() {
+    private function instalarV100()
+    {
         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
@@ -586,17 +716,14 @@ class PenAtualizarSipRN extends InfraRN {
             }
         }
 
-        $objInfraParametroDTO = new InfraParametroDTO();
-        $objInfraParametroDTO->setStrNome(self::PARAMETRO_VERSAO_MODULO_ANTIGO);
-        $objInfraParametroDTO->setStrValor('1.0.0');
-        $objInfraParametroBD = new InfraParametroBD(BancoSip::getInstance());
-        $objInfraParametroBD->cadastrar($objInfraParametroDTO);
+        $this->atualizarNumeroVersao('1.0.0');
     }
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.1
      */
-    private function instalarV101() {
+    private function instalarV101()
+    {
         // ---------- antigo método (instalarV006R004S001US039) ---------- //
         $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -612,7 +739,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
-        if(empty($objItemMenuDTO)) {
+        if (empty($objItemMenuDTO)) {
             throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
@@ -654,7 +781,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         $objDTO = $objBD->consultar($objDTO);
 
-        if(empty($objDTO)) {
+        if (empty($objDTO)) {
             throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
@@ -689,7 +816,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         $objDTO = $objBD->consultar($objDTO);
 
-        if(empty($objDTO)) {
+        if (empty($objDTO)) {
             throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
@@ -705,7 +832,8 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.2
      */
-    private function instalarV102() {
+    private function instalarV102()
+    {
 
         $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -723,7 +851,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         $objDTO = $objBD->consultar($objDTO);
 
-        if(empty($objDTO)) {
+        if (empty($objDTO)) {
             throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
         }
 
@@ -754,7 +882,8 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.3
      */
-    private function instalarV103() {
+    private function instalarV103()
+    {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Alterar rotulo do menu
@@ -883,7 +1012,8 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.4
      */
-    private function instalarV104() {
+    private function instalarV104()
+    {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Cadastrar recurso Mapeamento dos Tipo de documentos enviados
@@ -961,7 +1091,8 @@ class PenAtualizarSipRN extends InfraRN {
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.1
      */
-    private function instalarV111() {
+    private function instalarV111()
+    {
         $numIdSistema = $this->getNumIdSistema('SEI');
 
         //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
@@ -978,7 +1109,7 @@ class PenAtualizarSipRN extends InfraRN {
             $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_recebimento_excluir"),
             $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_recebimento_visualizar"),
             $this->consultarRecurso($numIdSistema, "pen_parametros_configuracao_alterar")
-            ));
+        ));
 
         $this->atribuirPerfil($numIdSistema);
 
@@ -988,7 +1119,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objPerfilDTO->setNumIdSistema($numIdSistema);
         $objPerfilDTO->setStrNome('Administrador');
         $objPerfilDTO = $objPerfilRN->consultar($objPerfilDTO);
-        if ($objPerfilDTO == null){
+        if ($objPerfilDTO == null) {
             throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
         }
 
@@ -1001,7 +1132,7 @@ class PenAtualizarSipRN extends InfraRN {
         $arrRecursosRemoverAdministrador = array(
             $this->consultarRecurso($numIdSistema, "pen_procedimento_expedido_listar"),
             $this->consultarRecurso($numIdSistema, "pen_procedimento_expedir"),
-            );
+        );
         $objRelPerfilRecursoDTO->setNumIdRecurso($arrRecursosRemoverAdministrador, InfraDTO::$OPER_IN);
         $objRelPerfilRecursoRN = new RelPerfilRecursoRN();
         $objRelPerfilRecursoRN->excluir($objRelPerfilRecursoRN->listar($objRelPerfilRecursoDTO));
@@ -1026,7 +1157,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objRecursoDTO->retNumIdRecurso();
         $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
         $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-        if(isset($objRecursoDTO)){
+        if (isset($objRecursoDTO)) {
             $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
             $objRecursoDTO->setStrDescricao('Processos Tramitados Externamente');
             $objRecursoBD->alterar($objRecursoDTO);
@@ -1041,7 +1172,7 @@ class PenAtualizarSipRN extends InfraRN {
         $objItemMenuDTO->retNumIdItemMenu();
         $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
         $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
-        if(isset($objItemMenuDTO)){
+        if (isset($objItemMenuDTO)) {
             $objItemMenuDTO->setStrDescricao('Processos Tramitados Externamente');
             $objItemMenuDTO->setStrRotulo('Processos Tramitados Externamente');
             $objItemMenuBD->alterar($objItemMenuDTO);
@@ -1267,7 +1398,7 @@ class PenAtualizarSipRN extends InfraRN {
 
         try {
             // Remove item de menu anterior e seus submenus configurados de forma errada
-            $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI,'Mapeamento de Tipos de Documento');
+            $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, 'Mapeamento de Tipos de Documento');
             ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuMapTipDoc);
         } catch (\Exception $e) {
             $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
@@ -1275,20 +1406,26 @@ class PenAtualizarSipRN extends InfraRN {
 
         // Recriar item de menu agrupador de mapeamento de tipos de documento
         $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
-        $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuPEN, null,
-            "Mapeamento de Tipos de Documentos", 20
+        $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu(
+            $numIdSistemaSei,
+            $numIdPerfilSeiAdministrador,
+            $numIdMenuSEI,
+            $numIdItemMenuPEN,
+            null,
+            "Mapeamento de Tipos de Documentos",
+            20
         );
 
         // Recriar item de menu de mapeamento de envio de documentos, acionando o recurso listar correspondente
         $numIdItemMenuMapeamento = $objItemMenuMapeamentoDTO->getNumIdItemMenu();
         $objRecursoMapEnvioListar = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, "pen_map_tipo_documento_envio_listar");
         $numIdRecursoMapEnvioListar = $objRecursoMapEnvioListar->getNumIdRecurso();
-        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapEnvioListar,"Envio", 10);
+        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapEnvioListar, "Envio", 10);
 
         // Recriar item de menu de mapeamento de recebimento de documentos, acionando o recurso listar correspondente
         $objRecursoMapRecebimentoListar = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, "pen_map_tipo_documento_recebimento_listar");
         $numIdRecursoMapRecebimentoListar = $objRecursoMapRecebimentoListar->getNumIdRecurso();
-        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapRecebimentoListar,"Recebimento", 20);
+        ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapRecebimentoListar, "Recebimento", 20);
 
         // Redefinir ordem de apresentação dos menus de administração do módulo
         $arrOrdemMenusAdministracaoPEN = array(
@@ -1298,13 +1435,13 @@ class PenAtualizarSipRN extends InfraRN {
             array("rotulo" => "Mapeamento de Hipóteses Legais",    "sequencia" => 40, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
         );
 
-        array_map(function($item) use ($numIdSistemaSei, $numIdMenuSEI){
+        array_map(function ($item) use ($numIdSistemaSei, $numIdMenuSEI) {
             $objItemMenuRN = new ItemMenuRN();
             $numIdItemMenuPai = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotuloMenuSuperior"]);
-            
+
             // Obtém id do item de menu, baseado no sistema, rótulo e, principalmente, ID DO ITEM SUPERIOR
             $numIdItemMenu = $this->obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuPai, $item["rotulo"]);
-            if(isset($numIdItemMenu)){                
+            if (isset($numIdItemMenu)) {
                 $objItemMenuDTO = new ItemMenuDTO();
                 $objItemMenuDTO->setNumIdMenu($numIdMenuSEI);
                 $objItemMenuDTO->setNumIdItemMenu($numIdItemMenu);
@@ -1319,7 +1456,7 @@ class PenAtualizarSipRN extends InfraRN {
         $strNomeMenuProcessosTramitados = "Processos Tramitados Externamente";
         $numIdSistemaSei = ScriptSip::obterIdSistema('SEI');
         $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
-        $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei,'Principal');
+        $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
         // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
         ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
@@ -1386,7 +1523,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2100()
     {
-	$this->atualizarNumeroVersao("2.1.0");
+        $this->atualizarNumeroVersao("2.1.0");
     }
 
     /**
@@ -1409,7 +1546,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2102()
     {
-	    $this->atualizarNumeroVersao("2.1.2");
+        $this->atualizarNumeroVersao("2.1.2");
     }
 
     /**
@@ -1417,7 +1554,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2103()
     {
-	    $this->atualizarNumeroVersao("2.1.3");
+        $this->atualizarNumeroVersao("2.1.3");
     }
 
     /**
@@ -1425,7 +1562,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2104()
     {
-	    $this->atualizarNumeroVersao("2.1.4");
+        $this->atualizarNumeroVersao("2.1.4");
     }
 
     /**
@@ -1433,7 +1570,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2105()
     {
-	    $this->atualizarNumeroVersao("2.1.5");
+        $this->atualizarNumeroVersao("2.1.5");
     }
 
     /**
@@ -1441,7 +1578,7 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2106()
     {
-	    $this->atualizarNumeroVersao("2.1.6");
+        $this->atualizarNumeroVersao("2.1.6");
     }
 
     /**
@@ -1449,16 +1586,16 @@ class PenAtualizarSipRN extends InfraRN {
      */
     protected function instalarV2107()
     {
-	    $this->atualizarNumeroVersao("2.1.7");
+        $this->atualizarNumeroVersao("2.1.7");
     }
 
     protected function instalarV3000()
     {
-	    $this->atualizarNumeroVersao("3.0.0");
+        $this->atualizarNumeroVersao("3.0.0");
     }
     protected function instalarV3001()
     {
-	    $this->atualizarNumeroVersao("3.0.1");
+        $this->atualizarNumeroVersao("3.0.1");
     }
     protected function instalarV3010()
     {
@@ -1473,71 +1610,71 @@ class PenAtualizarSipRN extends InfraRN {
         $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
         ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
 
-	    $this->atualizarNumeroVersao("3.1.0");
+        $this->atualizarNumeroVersao("3.1.0");
     }
     protected function instalarV3011()
     {
-	    $this->atualizarNumeroVersao("3.1.1");
+        $this->atualizarNumeroVersao("3.1.1");
     }
 
     protected function instalarV3012()
     {
-	    $this->atualizarNumeroVersao("3.1.2");
+        $this->atualizarNumeroVersao("3.1.2");
     }
 
     protected function instalarV3013()
     {
-	    $this->atualizarNumeroVersao("3.1.3");
+        $this->atualizarNumeroVersao("3.1.3");
     }
 
     protected function instalarV3014()
     {
-	    $this->atualizarNumeroVersao("3.1.4");
+        $this->atualizarNumeroVersao("3.1.4");
     }
 
     protected function instalarV3015()
     {
-	    $this->atualizarNumeroVersao("3.1.5");
+        $this->atualizarNumeroVersao("3.1.5");
     }
 
     protected function instalarV3016()
     {
-	    $this->atualizarNumeroVersao("3.1.6");
+        $this->atualizarNumeroVersao("3.1.6");
     }
 
     protected function instalarV3017()
     {
-	    $this->atualizarNumeroVersao("3.1.7");
+        $this->atualizarNumeroVersao("3.1.7");
     }
 
     protected function instalarV3018()
     {
-	    $this->atualizarNumeroVersao("3.1.8");
+        $this->atualizarNumeroVersao("3.1.8");
     }
 
     protected function instalarV3019()
     {
-	    $this->atualizarNumeroVersao("3.1.9");
+        $this->atualizarNumeroVersao("3.1.9");
     }
 
     protected function instalarV30110()
     {
-	    $this->atualizarNumeroVersao("3.1.10");
+        $this->atualizarNumeroVersao("3.1.10");
     }
 
     protected function instalarV30111()
     {
-	    $this->atualizarNumeroVersao("3.1.11");
+        $this->atualizarNumeroVersao("3.1.11");
     }
 
     protected function instalarV30112()
     {
-	    $this->atualizarNumeroVersao("3.1.12");
+        $this->atualizarNumeroVersao("3.1.12");
     }
 
     protected function instalarV30113()
     {
-        $atualizarIconeMenu = function ($numIdSistema, $numIdMenuPai, $strNomeRecurso, $strIcone, $numSequencia){
+        $atualizarIconeMenu = function ($numIdSistema, $numIdMenuPai, $strNomeRecurso, $strIcone, $numSequencia) {
             $objRecursoDTO = new RecursoDTO();
             $objRecursoDTO->setNumIdSistema($numIdSistema);
             $objRecursoDTO->setStrNome($strNomeRecurso);
@@ -1545,7 +1682,7 @@ class PenAtualizarSipRN extends InfraRN {
             $objRecursoBD = new RecursoBD(BancoSip::getInstance());
             $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
 
-            if(isset($objRecursoDTO)){
+            if (isset($objRecursoDTO)) {
                 $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
                 $objItemMenuDTO = new ItemMenuDTO();
                 $objItemMenuDTO->setNumIdSistema($numIdSistema);
@@ -1556,18 +1693,18 @@ class PenAtualizarSipRN extends InfraRN {
 
                 $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
                 $arrObjItemMenuDTO = $objItemMenuBD->listar($objItemMenuDTO);
-                if(isset($arrObjItemMenuDTO)){                
-                    foreach ($arrObjItemMenuDTO as $objItemMenuDTO) {                 
+                if (isset($arrObjItemMenuDTO)) {
+                    foreach ($arrObjItemMenuDTO as $objItemMenuDTO) {
                         $objItemMenuDTO->setStrIcone($strIcone);
-                        $objItemMenuDTO->setNumSequencia($numSequencia);                        
-                        $objItemMenuBD->alterar($objItemMenuDTO);    
+                        $objItemMenuDTO->setNumSequencia($numSequencia);
+                        $objItemMenuBD->alterar($objItemMenuDTO);
                     }
                 }
             }
         };
 
         // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
-        if(compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
+        if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
             $numIdSistema = $this->getNumIdSistema('SEI');
             $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
 
@@ -1575,18 +1712,18 @@ class PenAtualizarSipRN extends InfraRN {
             $atualizarIconeMenu($numIdSistema, $numIdMenuPai, 'pen_expedir_lote_listar', 'pen_tramite_externo_lote.svg', 56);
         }
 
-	    $this->atualizarNumeroVersao("3.1.13");
+        $this->atualizarNumeroVersao("3.1.13");
     }
 
     protected function instalarV30114()
     {
-	    $this->atualizarNumeroVersao("3.1.14");
+        $this->atualizarNumeroVersao("3.1.14");
     }
 
     protected function instalarV30115()
     {
-	    $this->atualizarNumeroVersao("3.1.15");
-    } 
+        $this->atualizarNumeroVersao("3.1.15");
+    }
 }
 
 /**
@@ -1597,45 +1734,83 @@ class PenAtualizarSipRN extends InfraRN {
  * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
  * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
  */
-function compararVersoes($strVersao1, $strVersao2){
+function compararVersoes($strVersao1, $strVersao2)
+{
     $numVersao1 = explode('.', $strVersao1);
-    $numVersao1 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao1);
+    $numVersao1 = array_map(function ($item) {
+        return str_pad($item, 2, '0', STR_PAD_LEFT);
+    }, $numVersao1);
     $numVersao1 = intval(join($numVersao1));
 
     $numVersao2 = explode('.', $strVersao2);
-    $numVersao2 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersao2);
+    $numVersao2 = array_map(function ($item) {
+        return str_pad($item, 2, '0', STR_PAD_LEFT);
+    }, $numVersao2);
     $numVersao2 = intval(join($numVersao2));
 
     return $numVersao1 - $numVersao2;
 }
 
 try {
-    if (compararVersoes(SIP_VERSAO, "2.1.0") >= 0) {
+
+    if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
+        $objInfraParametro = new InfraParametro(BancoSip::getInstance());
+
+        SessaoSip::getInstance(false);
         BancoSip::getInstance()->setBolScript(true);
 
-        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','UsuarioScript')){
+        $objVersaoSipRN = new VersaoSip4RN();
+        $objVersaoSipRN->verificarVersaoInstalada();
+        $strVersaoModuloPen = $objInfraParametro->getValor(PenAtualizarSipRN::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSipRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        $objVersaoSipRN->setStrNome(PenAtualizarSipRN::NOME_MODULO);
+        $objVersaoSipRN->setStrParametroVersao(PenAtualizarSipRN::PARAMETRO_VERSAO_MODULO);
+        $objVersaoSipRN->setArrVersoes(
+            array(
+                '0.0.0' => 'versao_0_0_0',
+                $strVersaoModuloPen => 'atualizarVersaoCompatibilidade',
+                PenAtualizarSipRN::VERSAO_MODULO => 'atualizarVersaoCompatibilidade',
+            )
+        );
+
+        $objVersaoSipRN->setStrVersaoAtual(PenAtualizarSipRN::VERSAO_MODULO);
+        $objVersaoSipRN->setStrVersaoInfra('1.595.1');
+        $objVersaoSipRN->setBolMySql(true);
+        $objVersaoSipRN->setBolOracle(true);
+        $objVersaoSipRN->setBolSqlServer(true);
+        $objVersaoSipRN->setBolPostgreSql(true);
+        $objVersaoSipRN->setBolErroVersaoInexistente(false);
+
+        $objVersaoSipRN->atualizarVersao();
+    } else {
+        BancoSip::getInstance()->setBolScript(true);
+
+        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'UsuarioScript')) {
             throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
         }
 
-        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','UsuarioScript'))){
+        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'UsuarioScript'))) {
             throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
         }
 
-        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip','SenhaScript')){
+        if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'SenhaScript')) {
             throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
         }
 
-        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip','SenhaScript'))){
+        if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'SenhaScript'))) {
             throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
         }
+
+        $objAtualizarRN = new PenAtualizarSipRN();
+        $objAtualizarRN->atualizarVersao();
     }
 
-    $objAtualizarRN = new PenAtualizarSipRN($arrArgs);
-    $objAtualizarRN->atualizarVersao();
     exit(0);
 } catch (Exception $e) {
-    print InfraException::inspecionar($e);
+    echo (InfraException::inspecionar($e));
+    try {
+        LogSip::getInstance()->gravar(InfraException::inspecionar($e));
+    } catch (Exception $e) {
+    }
+
     exit(1);
 }
-
-print PHP_EOL;

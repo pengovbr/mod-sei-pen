@@ -98,7 +98,6 @@ abstract class PenAtualizadorRN extends InfraRN {
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
         $this->numSeg = 0;
-        die;
     }
 
     /**
@@ -111,8 +110,8 @@ abstract class PenAtualizadorRN extends InfraRN {
         parent::__construct();
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
-        @ini_set('zlib.output_compression', '0');
-        @ini_set('implicit_flush', '1');
+        // ini_set('zlib.output_compression', '0');
+        ini_set('implicit_flush', '1');
         ob_implicit_flush();
 
         $this->inicializarObjInfraIBanco();
