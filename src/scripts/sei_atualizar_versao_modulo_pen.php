@@ -67,7 +67,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
         try {
             InfraDebug::getInstance()->setBolLigado(true);
-            InfraDebug::getInstance()->setBolDebugInfra(false);
+            InfraDebug::getInstance()->setBolDebugInfra(true);
             InfraDebug::getInstance()->setBolEcho(true);
             InfraDebug::getInstance()->limpar();
 
@@ -237,6 +237,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                     $this->instalarV30114();
                 case '3.1.14':
                     $this->instalarV30115();
+                case '3.1.15':
+                    $this->instalarV30116();         
 
 
                     // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2417,6 +2419,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
         $this->atualizarNumeroVersao("3.1.15");
     }
+
+
+    protected function instalarV30116()
+    {
+        $this->atualizarNumeroVersao("3.1.16");
+    }    
 }
 
 

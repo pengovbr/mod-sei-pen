@@ -1,10 +1,11 @@
 <?php
 
+// Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
+define("VERSAO_MODULO_PEN", "3.1.16");
+
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
 
-session_start();
-SessaoSip::getInstance(false);
 
 class VersaoSip4RN extends InfraScriptVersao
 {
@@ -49,8 +50,6 @@ class VersaoSip4RN extends InfraScriptVersao
 
 class PenAtualizarSipRN extends InfraRN
 {
-
-    const VERSAO_MODULO = "3.1.15";
     const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
@@ -77,7 +76,7 @@ class PenAtualizarSipRN extends InfraRN
     protected function inicializar($strTitulo)
     {
         InfraDebug::getInstance()->setBolLigado(true);
-        InfraDebug::getInstance()->setBolDebugInfra(false);
+        InfraDebug::getInstance()->setBolDebugInfra(true);
         InfraDebug::getInstance()->setBolEcho(true);
         InfraDebug::getInstance()->limpar();
 
@@ -257,6 +256,8 @@ class PenAtualizarSipRN extends InfraRN
                     $this->instalarV30114();
                 case '3.1.14':
                     $this->instalarV30115();
+                case '3.1.15':
+                    $this->instalarV30116();                    
 
 
                     // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -1724,6 +1725,11 @@ class PenAtualizarSipRN extends InfraRN
     {
         $this->atualizarNumeroVersao("3.1.15");
     }
+
+    protected function instalarV30116()
+    {
+        $this->atualizarNumeroVersao("3.1.16");
+    }    
 }
 
 /**
@@ -1751,7 +1757,12 @@ function compararVersoes($strVersao1, $strVersao2)
     return $numVersao1 - $numVersao2;
 }
 
+
 try {
+    session_start();
+    SessaoSip::getInstance(false);
+    $objVersaoSipRN = null;
+
 
     if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
         $objInfraParametro = new InfraParametro(BancoSip::getInstance());
@@ -1768,11 +1779,11 @@ try {
             array(
                 '0.0.0' => 'versao_0_0_0',
                 $strVersaoModuloPen => 'atualizarVersaoCompatibilidade',
-                PenAtualizarSipRN::VERSAO_MODULO => 'atualizarVersaoCompatibilidade',
+                VERSAO_MODULO_PEN => 'atualizarVersaoCompatibilidade',
             )
         );
 
-        $objVersaoSipRN->setStrVersaoAtual(PenAtualizarSipRN::VERSAO_MODULO);
+        $objVersaoSipRN->setStrVersaoAtual(VERSAO_MODULO_PEN);
         $objVersaoSipRN->setStrVersaoInfra('1.595.1');
         $objVersaoSipRN->setBolMySql(true);
         $objVersaoSipRN->setBolOracle(true);

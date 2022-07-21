@@ -125,7 +125,7 @@ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/m
 
 ### 1.1.6. Verificação e testes da instalação
 
-A versão 2.0.0 do **mod-sei-pen** adiciona um novo script utilitário para que seja realizada uma verificação de todos os passos da instalação, assim como as configurações aplicadas. Estas verificações funcionam como um diagnóstico do correto funcionamento do sistema.
+A partir da versão 2.0.0, o **mod-sei-pen** adiciona um novo script utilitário para que seja realizada uma verificação de todos os passos da instalação, assim como as configurações aplicadas. Estas verificações funcionam como um diagnóstico do correto funcionamento do sistema.
 
 Para executar a verificação, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretório de scripts do SEI ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/```.
 
