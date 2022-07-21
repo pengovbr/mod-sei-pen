@@ -1,8 +1,12 @@
 <?php
 
+// Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
+define("VERSAO_MODULO_PEN", "3.1.16");
+
+
 class PENIntegracao extends SeiIntegracao
 {
-    const VERSAO_MODULO = "3.1.15";
+    const VERSAO_MODULO = VERSAO_MODULO_PEN;
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 

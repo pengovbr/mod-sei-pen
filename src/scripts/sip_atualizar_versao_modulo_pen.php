@@ -1,10 +1,10 @@
 <?php
 
+define("VERSAO_MODULO_PEN", "3.1.15");
+
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
 
-session_start();
-SessaoSip::getInstance(false);
 
 class VersaoSip4RN extends InfraScriptVersao
 {
@@ -49,8 +49,6 @@ class VersaoSip4RN extends InfraScriptVersao
 
 class PenAtualizarSipRN extends InfraRN
 {
-
-    const VERSAO_MODULO = "3.1.15";
     const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
@@ -562,6 +560,10 @@ class PenAtualizarSipRN extends InfraRN
         foreach ($arrObjInfraParametroDTO as $objInfraParametroDTO) {
             $objInfraParametroDTO->setStrValor($parStrNumeroVersao);
             $objInfraParametroBD->alterar($objInfraParametroDTO);
+        }
+
+        if(isset($objVersaoSipRN)){
+            $objVersaoSipRN->setStrVersaoAtual($parStrNumeroVersao);
         }
     }
 
@@ -1751,7 +1753,12 @@ function compararVersoes($strVersao1, $strVersao2)
     return $numVersao1 - $numVersao2;
 }
 
+
 try {
+    session_start();
+    SessaoSip::getInstance(false);
+    $objVersaoSipRN = null;
+
 
     if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
         $objInfraParametro = new InfraParametro(BancoSip::getInstance());
@@ -1768,11 +1775,11 @@ try {
             array(
                 '0.0.0' => 'versao_0_0_0',
                 $strVersaoModuloPen => 'atualizarVersaoCompatibilidade',
-                PenAtualizarSipRN::VERSAO_MODULO => 'atualizarVersaoCompatibilidade',
+                VERSAO_MODULO_PEN => 'atualizarVersaoCompatibilidade',
             )
         );
 
-        $objVersaoSipRN->setStrVersaoAtual(PenAtualizarSipRN::VERSAO_MODULO);
+        $objVersaoSipRN->setStrVersaoAtual(VERSAO_MODULO_PEN);
         $objVersaoSipRN->setStrVersaoInfra('1.595.1');
         $objVersaoSipRN->setBolMySql(true);
         $objVersaoSipRN->setBolOracle(true);

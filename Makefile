@@ -5,7 +5,7 @@
 versao_sei=4
 teste=
 
-VERSAO_MODULO := $(shell grep 'const VERSAO_MODULO' src/PENIntegracao.php | cut -d'"' -f2)
+VERSAO_MODULO := $(shell grep 'define."VERSAO_MODULO_PEN"' src/PENIntegracao.php | cut -d'"' -f4)
 SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
 SEI_CONFIG_DIR = dist/sei/config/mod-pen
 SEI_BIN_DIR = dist/sei/bin/mod-pen
