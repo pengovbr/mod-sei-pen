@@ -88,18 +88,13 @@ verify-config:
 	@echo "Verificando configurações do módulo para instância org2"
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 
+
 test-environment-destroy:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env down --volumes
 
 
 test-environment-up:	
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d
-	# TODO: mover rotina abaixo para target específico de atualização de base de dados do sistema para
-	# não solicitar senha de atualização toda vez que subir ambiente. Base de referência utilizada para testes
-	# não possui problemas de sequences, o que pode ser necessário para backups restaurados com problemas	
-	# @echo "Sleeping for 5 seconds ..."; sleep 5;
-	# docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-	# docker exec -it org2-http php -c /opt/php.ini /opt/sip/scripts/atualizar_sequencias.php
 
 
 test-environment-down:	
@@ -109,6 +104,7 @@ test-environment-down:
 # make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
 test-functional:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
+
 
 test-functional-parallel:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite funcional -p 8
