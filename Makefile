@@ -101,7 +101,7 @@ test-environment-down:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
 
 
-# make teste=TramiteProcessoComDevolucaoTest run-test-xdebug
+# make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional:
 	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
