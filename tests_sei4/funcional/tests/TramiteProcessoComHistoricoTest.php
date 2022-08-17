@@ -110,7 +110,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
      //      return ($a->dataHoraOperacao < $b->dataHoraOperacao? -1: 1);
      //     });
 
-        $this->assertEquals(5, sizeof($saida->processo->itensHistorico) );
+        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
 
 
 

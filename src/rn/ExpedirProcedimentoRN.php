@@ -1034,7 +1034,16 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->retNumCodigoEspecie();
         $objComponenteDigitalDTO->retStrNomeEspecieProdutor();
-        $objComponenteDigitalDTO->setDblIdProcedimento($dblIdProcedimento);
+        
+        // Verifica se o documento é de um processo anexado ou não e busca no
+        // campo correto
+        if(isset($parMetaDocumento->idProcedimentoAnexadoSEI)){
+            $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($dblIdProcedimento);
+        }
+        else{
+            $objComponenteDigitalDTO->setDblIdProcedimento($dblIdProcedimento);
+        }
+        
         $objComponenteDigitalDTO->setDblIdDocumento($dblIdDocumento);
         $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
         $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
