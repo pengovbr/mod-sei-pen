@@ -1,4 +1,4 @@
-<?php
+    <?php
 try {
     require_once DIR_SEI_WEB . '/SEI.php';
 
@@ -109,7 +109,7 @@ try {
                     $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
                     break;
                 default:
-                    $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em tramitação" alt="Em tramitação" />';
+                    $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
                     break;
             }
             
