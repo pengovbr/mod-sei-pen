@@ -1150,7 +1150,7 @@ class ProcessoEletronicoRN extends InfraRN
                 }
 
                 $objComponenteDigital = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital[0] : $objDocumento->componenteDigital;
-                $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
+                $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
 
                 if(isset($objDocumento->especie)){
                     $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
