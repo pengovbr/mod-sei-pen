@@ -44,7 +44,6 @@ services:
       - org1-database
       - org2-database
       - selenium
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -77,7 +76,6 @@ services:
   org1-http:
     image: guilhermeadc/sei3_httpd-2.4:7.2
     container_name: org1-http
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -114,7 +112,6 @@ services:
   org2-http:
     image: guilhermeadc/sei3_httpd-2.4:7.2
     container_name: org2-http
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip

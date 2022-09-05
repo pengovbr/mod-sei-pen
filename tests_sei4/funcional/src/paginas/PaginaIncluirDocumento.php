@@ -24,7 +24,7 @@ class PaginaIncluirDocumento extends PaginaTeste
             $this->test->byLinkText($tipoDocumento)->click();
         }
         catch (Exception $e){
-            $this->test->byId("imgExibirSeries")->click();
+            $this->test->byXPath("//img[@id='imgExibirSeries'] | //a[@id='ancExibirSeries']")->click();
             $this->test->byId('txtFiltro')->value($tipoDocumento);
             sleep(2);
             $this->test->byLinkText($tipoDocumento)->click();

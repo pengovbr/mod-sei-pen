@@ -6,8 +6,7 @@ require_once $dirSeiWeb . '/SEI.php';
 // Garante que código abaixo foi executado unicamente via linha de comando
 if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
-    ini_set('max_execution_time','0');
-    ini_set('memory_limit','-1');
+    LimiteSEI::getInstance()->configurarNivel3();
 
     InfraDebug::getInstance()->setBolLigado(true);
     InfraDebug::getInstance()->setBolDebugInfra(false);

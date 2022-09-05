@@ -47,11 +47,11 @@ services:
       - org1-database
       - org2-database
       - selenium
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
+      - ./assets/config:/opt/sei/config/mod-pen      
       - .:/tests
       - /tmp:/tmp
     environment:
@@ -62,6 +62,11 @@ services:
       - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+      - ORG1_CERTIFICADO=${ORG1_CERTIFICADO}
+      - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
+      - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
+      - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+
     extra_hosts:
       - "${ORG1_HOSTNAME}:127.0.0.1"
     links:   
@@ -89,7 +94,6 @@ services:
     restart: always
     depends_on: 
       - org1-database
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -156,7 +160,6 @@ services:
     restart: always
     depends_on: 
       - org2-database
-    dns: "8.8.8.8"
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip

@@ -2064,7 +2064,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));
 
-        $objEnviarProcessoDTO->setStrSinManterAberto('N');
+        $objEnviarProcessoDTO->setStrSinManterAberto('S');
         $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
         $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
         $objEnviarProcessoDTO->setDtaPrazo(null);
@@ -2072,6 +2072,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objEnviarProcessoDTO->setStrSinDiasUteis('N');
 
         $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
+
+        $objProcedimentoRN->concluir(array($objProcedimentoDTO));
     }
 
 

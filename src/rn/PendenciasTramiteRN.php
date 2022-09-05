@@ -66,8 +66,7 @@ class PendenciasTramiteRN extends InfraRN
     public function encaminharPendencias($parBolMonitorarPendencias=false, $parBolSegundoPlano=false, $parBolDebug=false)
     {
         try{
-            ini_set('max_execution_time','0');
-            ini_set('memory_limit','-1');
+            LimiteSEI::getInstance()->configurarNivel3();
 
             PENIntegracao::verificarCompatibilidadeConfiguracoes();
 
@@ -84,7 +83,7 @@ class PendenciasTramiteRN extends InfraRN
                     $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
                     $arrObjPendenciasDTO = $this->obterPendenciasTramite($parBolMonitorarPendencias);
 
-                    $objInfraException = new InfraException();
+
                     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
                         $numIdTramite = $objPendenciaDTO->getNumIdentificacaoTramite();
                         $strStatusTramite = $objPendenciaDTO->getStrStatus();

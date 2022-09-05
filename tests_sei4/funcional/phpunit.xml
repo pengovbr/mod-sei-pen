@@ -52,8 +52,6 @@
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_INATIVA" value="Situação Econômico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nº 5.172/1966 - CTN)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_SIGILOSO" value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
-    <const name="CONTEXTO_ORGAO_A_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org1.pem" />
-    <const name="CONTEXTO_ORGAO_A_SENHA_CERTIFICADO_DIGITAL" value="" />
 
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
@@ -83,9 +81,7 @@
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_SIGILOSO" value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />    
     <const name="CONTEXTO_ORGAO_B_CARGO_ASSINATURA" value="Assessor(a)" />       
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-    <const name="CONTEXTO_ORGAO_B_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org2.pem" />
-    <const name="CONTEXTO_ORGAO_B_SENHA_CERTIFICADO_DIGITAL" value="" />
-
+    
 
     <!-- CONFIGURAÇÕES DE TESTE Órgão 3, caso de sem hierarquia pai -->
     <const name="CONTEXTO_ORGAO_C" value="CONTEXTO_ORGAO_C" />
@@ -110,8 +106,6 @@
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO" value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />       
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO" value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-    <const name="CONTEXTO_ORGAO_C_LOCALIZACAO_CERTIFICADO_DIGITAL" value="/../assets/config/certificado_org3.pem" />
-    <const name="CONTEXTO_ORGAO_C_SENHA_CERTIFICADO_DIGITAL" value="" />
   </php>
 
   <testsuites>

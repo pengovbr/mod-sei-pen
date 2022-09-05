@@ -159,7 +159,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function definirContextoTeste($nomeContexto)
     {
-        return array(
+        $objContexto = array(
             'URL' => constant($nomeContexto . '_URL'),
             'ORGAO' => constant($nomeContexto . '_SIGLA_ORGAO'),
             'SIGLA_UNIDADE' =>constant($nomeContexto . '_SIGLA_UNIDADE'),
@@ -182,12 +182,30 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
-            'LOCALIZACAO_CERTIFICADO_DIGITAL' => realpath(__DIR__ . constant($nomeContexto . '_LOCALIZACAO_CERTIFICADO_DIGITAL')),
-            'SENHA_CERTIFICADO_DIGITAL' => constant($nomeContexto . '_SENHA_CERTIFICADO_DIGITAL'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
         );
+
+        switch ($nomeContexto) {
+            case CONTEXTO_ORGAO_A:
+                $objContexto['LOCALIZACAO_CERTIFICADO_DIGITAL'] = getenv('ORG1_CERTIFICADO');
+                $objContexto['SENHA_CERTIFICADO_DIGITAL'] = getenv('ORG1_CERTIFICADO_SENHA');
+                break;
+
+            case CONTEXTO_ORGAO_B:
+                $objContexto['LOCALIZACAO_CERTIFICADO_DIGITAL'] = getenv('ORG2_CERTIFICADO');
+                $objContexto['SENHA_CERTIFICADO_DIGITAL'] = getenv('ORG2_CERTIFICADO_SENHA');
+                break;
+
+            default:
+                $objContexto['LOCALIZACAO_CERTIFICADO_DIGITAL'] = getenv('ORG1_CERTIFICADO');
+                $objContexto['SENHA_CERTIFICADO_DIGITAL'] = getenv('ORG1_CERTIFICADO_SENHA');
+                break;
+        }
+
+        return $objContexto;
     }
+
 
     protected function acessarSistema($url, $siglaUnidade, $login, $senha)
     {
