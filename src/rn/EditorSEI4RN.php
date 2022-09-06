@@ -2035,8 +2035,10 @@ class EditorSEI4RN extends InfraRN
               "controleURL"=>$controleURL
             ];
             //na versao 4.0.3 houve uma alteracao na escrita da tarja
-            if($numVersaoAtual>40002){
+            if($numVersaoAtual==40003){
               $strHtml .= $objAssinaturaRN->montarTarjasURL403($dados);
+            }elseif($numVersaoAtual>40003){
+              $strHtml .= $objAssinaturaRN->montarTarjasURL404($dados);
             }else{
               $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
             }
