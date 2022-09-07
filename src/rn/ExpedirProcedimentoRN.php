@@ -174,7 +174,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
                     }
 
-                    $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $$arrErros), 2);
+                    $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
                     PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
                     return false;
                 }
@@ -313,10 +313,9 @@ class ExpedirProcedimentoRN extends InfraRN {
             } catch (\Exception $e) {
                 if($bolSinProcessamentoEmLote){
                     PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
-                    LogSEI::getInstance()->gravar($e);
-                    return false;                
                 }
 
+                $this->gravarLogDebug("Erro processando envio de processo [expedirProcedimento]: $e", 0, true);
                 throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
             }
         }

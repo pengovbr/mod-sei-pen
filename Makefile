@@ -18,7 +18,7 @@ PEN_TEST_FUNC = tests_sei$(versao_sei)/funcional
 PEN_TEST_UNIT = tests_sei$(versao_sei)/unitario
 PARALLEL_TEST_NODES = 5
 
-include $(PEN_TEST_FUNC)/.env
+-include $(PEN_TEST_FUNC)/.env
 
 CMD_INSTALACAO_SEI = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php atualizar_versao_sei.php
 CMD_INSTALACAO_SIP = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_versao_sip.php
