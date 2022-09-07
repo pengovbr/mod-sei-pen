@@ -1626,7 +1626,7 @@ class ProcessoEletronicoRN extends InfraRN
             $parametros = new stdClass();
             $parametros->recusaDeTramite = new stdClass();
             $parametros->recusaDeTramite->IDT = $idTramite;
-            $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
+            $parametros->recusaDeTramite->justificativa = utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000));
             $parametros->recusaDeTramite->motivo = $motivo;
 
             $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
