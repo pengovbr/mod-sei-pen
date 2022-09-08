@@ -1,0 +1,11 @@
+php-compatibility 5.4:
+  stage: test
+  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
+  variables:
+    PHPVERSION: "5.4"
+  script:
+    - >-
+      phpcs -s -p --colors
+      --standard=PHPCompatibility
+      --extensions=php
+      --runtime-set testVersion ${PHPVERSION} .
