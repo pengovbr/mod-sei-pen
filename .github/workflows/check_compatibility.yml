@@ -1,11 +1,18 @@
-php-compatibility 5.4:
-  stage: test
-  image: registry.gitlab.com/pipeline-components/php-codesniffer:latest
-  variables:
-    PHPVERSION: "5.4"
-  script:
-    - >-
-      phpcs -s -p --colors
-      --standard=PHPCompatibility
-      --extensions=php
-      --runtime-set testVersion ${PHPVERSION} .
+name: "CI"
+
+on:
+  push:
+    paths:
+      - "**.php"
+      - "phpcs.xml"
+      - ".github/workflows/check_compatibility.yml"
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Getting your configuration from GitHub
+        uses: actions/checkout@v1
+      - name: php-codesniffer
+        uses: pipeline-components/php-codesniffer@v0.12.3
+
