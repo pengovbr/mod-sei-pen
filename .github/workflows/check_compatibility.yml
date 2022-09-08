@@ -16,5 +16,6 @@ jobs:
       - name: php-codesniffer
         uses: pipeline-components/php-codesniffer@v0.12.3
         with:
-          options: "-p -s --colors --standard=PHPCompatibility --runtime-set testVersion 5.4"
+          directory: "./src/"
+          options: "-p -s --colors --standard=PHPCompatibility --runtime-set testVersion 5.6"
 
