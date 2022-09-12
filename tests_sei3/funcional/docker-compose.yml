@@ -57,7 +57,7 @@ services:
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
     extra_hosts:
-      - "${ORG1_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:   
       - org1-database:${ORG1_DATABASE_HOST}
       - org2-database:${ORG1_DATABASE_HOST}
@@ -94,7 +94,7 @@ services:
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0
     extra_hosts:
-      - "${ORG1_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:
       - memcached:memcached    
       - smtp:smtp      
@@ -130,7 +130,7 @@ services:
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0  
     extra_hosts:
-      - "${ORG2_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:
       - memcached:memcached    
       - smtp:smtp      

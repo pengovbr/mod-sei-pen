@@ -68,7 +68,7 @@ services:
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
 
     extra_hosts:
-      - "${ORG1_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:   
       - org1-database:${ORG1_DATABASE_HOST}
       - org2-database:${ORG1_DATABASE_HOST}
@@ -136,7 +136,7 @@ services:
       - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
 
     extra_hosts:
-      - "${ORG1_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:
       - memcached:memcached    
       - smtp:smtp      
@@ -202,7 +202,7 @@ services:
       - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
 
     extra_hosts:
-      - "${ORG2_HOSTNAME}:127.0.0.1"
+      - "host.docker.internal:host-gateway"
     links:
       - memcached:memcached    
       - smtp:smtp      
