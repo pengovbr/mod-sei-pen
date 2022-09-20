@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.1.17");
+define("VERSAO_MODULO_PEN", "3.1.18");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -260,6 +260,8 @@ class PenAtualizarSipRN extends InfraRN
                     $this->instalarV30116();            
                 case '3.1.16':
                     $this->instalarV30117();
+                case '3.1.17':
+                    $this->instalarV30118();
 
                     // Ausência de [break;] proposital para realizar a atualização incremental de versões
                     break;
@@ -1736,6 +1738,11 @@ class PenAtualizarSipRN extends InfraRN
     {
         $this->atualizarNumeroVersao("3.1.17");
     }    
+
+    protected function instalarV30118()
+    {
+        $this->atualizarNumeroVersao("3.1.18");
+    } 
 
 }
 
