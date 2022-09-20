@@ -1257,7 +1257,7 @@ class ProcessoEletronicoRN extends InfraRN
                 return $objPenWs->consultarTramites($parametros);
             });
 
-            if(isset($objTramitesEncontrados->tramitesEncontrados)) {
+            if(isset($objTramitesEncontrados->tramitesEncontrados) && isset($objTramitesEncontrados->tramitesEncontrados->tramite)) {
                 $arrObjTramite = $objTramitesEncontrados->tramitesEncontrados->tramite;
                 if(!is_array($arrObjTramite)) {
                     $arrObjTramite = array($objTramitesEncontrados->tramitesEncontrados->tramite);

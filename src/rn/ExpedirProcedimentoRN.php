@@ -184,7 +184,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
             //Construção do cabeçalho para envio do processo
-            $objTramitesAnteriores = $this->consultarTramitesAnteriores($objMetadadosProcessoTramiteAnterior->NRE);
+            $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+            $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+            $strNRE = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+
+            $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNRE);
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $objTramitesAnteriores,$dblIdProcedimento);
 
             //Construção do processo para envio
@@ -350,9 +355,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             catch(Exception $e){
                 //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
                 //que os metadados do protocolo não pode ser obtida
-                $objMetadadosProtocolo = null;
-                LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.");
-                throw $e;
+                LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
             }
 
             return $objMetadadosProtocolo;
@@ -1057,7 +1060,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         //Caso a informação sobre mapeamento esteja nulo, necessário buscar tal informação no Barramento
         //A lista de documentos recuperada do trâmite anterior será indexada pela sua ordem no protocolo e
-        //a espécie documental e o nome no produtar serão obtidos para atribuição ao documento
+        //a espécie documental e o nome do produtor serão obtidos para atribuição ao documento
         if($objComponenteDigitalDTO != null && $numCodigoEspecie == null) {
             if(isset($parObjMetadadosTramiteAnterior)){
                 $arrObjMetaDocumentosTramiteAnterior = [];
