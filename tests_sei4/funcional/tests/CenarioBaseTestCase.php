@@ -732,10 +732,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertFalse($this->paginaControleProcesso->contemProcesso($processoTeste['PROTOCOLO'], false, false));
     }
 
-    protected function selecionarProcessos()
+    protected function selecionarProcessos($numProtocolo=null)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramitarProcessoEmLote->selecionarProcessos();
+        $this->paginaTramitarProcessoEmLote->selecionarProcessos($numProtocolo);
         sleep(2);
     }
 
@@ -745,10 +745,17 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $test->byLinkText("Processos Tramitados em Lote")->click();
     }
 
-    protected function selecionarSituacao()
+    protected function navegarProcessoEmLote($selAndamento, $numProtocolo=null)
     {
-        $this->paginaTramitarProcessoEmLote->selecionarSituacao();
-    }
+        if($selAndamento == 0){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_PROCESSAMENTO;
+        }if($selAndamento == 2){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CONCLUIDO;
+        }if($selAndamento == 7){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
+        }
+        $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
+    }    
 
     public function atualizarTramitesPEN($bolOrg1 = true, $bolOrg2 = true, $org2Primeiro = true, $quantidade = 1)
     {

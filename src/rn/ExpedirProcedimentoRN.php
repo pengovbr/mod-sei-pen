@@ -154,7 +154,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
             $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
             $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
-            $this->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
+            $this->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, null, $bolSinProcessamentoEmLote);
             $this->validarParametrosExpedicao($objInfraException, $objExpedirProcedimentoDTO);
 
             //Apresentao da mensagens de validao na janela da barra de progresso
@@ -2399,7 +2399,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser expedido
     * @param string $strAtributoValidacao índice para o InfraException separar os processos
     */
-    public function validarPreCondicoesExpedirProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null)
+    public function validarPreCondicoesExpedirProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null, $bolSinProcessamentoEmLote = false)
     {
         $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
@@ -2410,7 +2410,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
 
         try{
-            $this->validarPossibilidadeBloqueio($objProcedimentoDTO);
+            if(!$bolSinProcessamentoEmLote){
+                $this->validarPossibilidadeBloqueio($objProcedimentoDTO);
+            }
         }catch(Exception $e){
             $objInfraException->adicionarValidacao($e, $strAtributoValidacao);
         }
