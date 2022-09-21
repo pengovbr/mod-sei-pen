@@ -1623,6 +1623,7 @@ class ProcessoEletronicoRN extends InfraRN
     public function recusarTramite($idTramite, $justificativa, $motivo)
     {
         try {
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
             $parametros = new stdClass();
             $parametros->recusaDeTramite = new stdClass();
             $parametros->recusaDeTramite->IDT = $idTramite;
