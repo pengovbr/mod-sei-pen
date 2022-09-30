@@ -675,6 +675,69 @@ class PENIntegracao extends SeiIntegracao
         SessaoSEI::getInstance(false);
         ProcessarPendenciasRN::getInstance()->processarPendencias();
     }
+
+
+    public function obterConfiguracoesAssinatura(ConfiguracoesAssinaturaAPI $objConfiguracoesAssinaturaAPI)
+    {
+
+        if ($objConfiguracoesAssinaturaAPI->getNomeModulo() != "PEN") return false;
+
+
+        if ($objConfiguracoesAssinaturaAPI->getNomeModulo() == "PEN") {
+            $objConfiguracoesAssinaturaAPI->setBolTipoAssinaturaCertificado(false);
+            $objConfiguracoesAssinaturaAPI->setBolGerarAgrupador(false);
+            $objConfiguracoesAssinaturaAPI->setBolGerarIndexacao(true);
+            $objConfiguracoesAssinaturaAPI->setBolUtilizaRevalidacao(false);
+            $objConfiguracoesAssinaturaAPI->setBolUsuarioComCpf(false);
+            //alternativa para link de validacao
+            $objConfiguracoesAssinaturaAPI->setStrLinkValidacao('https://verificador.pensei.gov.br/');
+            $objConfiguracoesAssinaturaAPI->setStrTipoTarjaAssinatura('P');
+            $objConfiguracoesAssinaturaAPI->setStrTipoTarjaAutenticacao('X');
+        }
+        return $objConfiguracoesAssinaturaAPI;
+    }
+
+    public function montarTipoTarjaAssinaturaCustomizada()
+    {
+        $TT_ASSINATURA_PEN = 'P';
+        $TT_AUTENTICACAO_PEN = 'X';
+
+        $objArrTipoDTO = array();
+        $objTipoDTO = new TipoDTO();
+        $objTipoDTO->setStrStaTipo($TT_ASSINATURA_PEN);
+        $objTipoDTO->setStrDescricao('Assinatura PEN');
+        $objArrTipoDTO[] = $objTipoDTO;
+
+        $objTipoDTO = new TipoDTO();
+        $objTipoDTO->setStrStaTipo($TT_AUTENTICACAO_PEN);
+        $objTipoDTO->setStrDescricao('Autenticação com PEN');
+        $objArrTipoDTO[] = $objTipoDTO;
+
+        return $objArrTipoDTO;
+    }
+
+    public function substituirVariaveisTarja(TarjaAPI $objTarjaAPI)
+    {
+        
+        $strTarja=$objTarjaAPI->getTextoTarja();
+        $idDocumento=$objTarjaAPI->getIdDocumento();
+
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->setDblIdDocumento($idDocumento);
+        $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
+        $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objComponenteDigitalDTO->retTodos();
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+        $arrObjComponentesDigitaisDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+        
+        if(!empty($arrObjComponentesDigitaisDTO)){
+            $textoTarja=$arrObjComponentesDigitaisDTO[0]->getStrTextoTarja();
+            $strTarja = preg_replace("/@pen_assinatura_externa@/s", InfraString::transformarCaixaBaixa($textoTarja), $strTarja);
+        }
+        return $strTarja;
+    }
+    
 }
 
 class ModuloIncompativelException extends InfraException { }

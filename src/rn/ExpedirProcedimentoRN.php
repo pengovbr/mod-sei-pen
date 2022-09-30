@@ -1368,6 +1368,30 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(), true, true);
             }
 
+
+            //logica que não envia a tarja de assinatura junto com o documento
+            $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+            $objComponenteDigitalDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+            $objComponenteDigitalDTO->setStrTarjaLegada("S");
+            $objComponenteDigitalDTO->retTodos();
+
+            $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+            $arrComponenteDigital=$objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+            if(empty($arrComponenteDigital)){
+
+                $novoConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO->getDblIdDocumento(),false,false,null,false,false,true);
+                $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $novoConteudoAssinatura, true));
+                $objComponenteDigital = $this->consultarComponenteDigital($objDocumentoDTO->getDblIdDocumento());
+                $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
+
+                
+                if($hashDoComponenteDigitalAnterior == $hashDoComponenteDigital || !isset($hashDoComponenteDigitalAnterior)){
+                    $strConteudoAssinatura=$novoConteudoAssinatura;
+                }
+
+            }
+
             $objInformacaoArquivo['NOME'] = $strProtocoloDocumentoFormatado . ".html";
             $objInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
             $objInformacaoArquivo['TAMANHO'] = strlen($strConteudoAssinatura);
@@ -1548,8 +1572,21 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
     * @return String                     Conteúdo completo do documento para envio
     */
-    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false)
+    private function obterConteudoInternoAssinatura($parDblIdDocumento, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false, $bolDocumentoSemTarja=false)
     {
+
+        if($bolDocumentoSemTarja){
+            //nova tarja
+            $objDocumentoConteudoDTO = new DocumentoConteudoDTO();
+            $objDocumentoConteudoDTO->setDblIdDocumento($parDblIdDocumento);
+            $objDocumentoConteudoDTO->retStrConteudoAssinatura();
+            
+            $objMapBD = new GenericoBD($this->getObjInfraIBanco());
+            $objMapDTO = $objMapBD->consultar($objDocumentoConteudoDTO);
+
+            return $objMapDTO->getStrConteudoAssinatura();
+        }
+
         $objEditorDTO = new EditorDTO();
         $objEditorDTO->setDblIdDocumento($parDblIdDocumento);
         $objEditorDTO->setNumIdBaseConhecimento(null);

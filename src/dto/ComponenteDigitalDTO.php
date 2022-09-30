@@ -31,6 +31,9 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoReferenciado', 'ordem_documento_referenciado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoAnexado', 'ordem_documento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'TextoTarja', 'texto_tarja');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'TextoTarjaValidacao', 'texto_tarja_validacao');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'TarjaLegada', 'tarja_legada');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaTipoTramite', 'sta_tipo_tramite', 'md_pen_tramite');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'TicketEnvioComponentes', 'ticket_envio_componentes', 'md_pen_tramite');

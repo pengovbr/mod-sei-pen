@@ -2450,6 +2450,49 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     protected function instalarV30120()
     {
         $this->atualizarNumeroVersao("3.1.20");
+
+
+                //tarja assinatura
+                $objTarjaAssinaturaBD = new TarjaAssinaturaBD(BancoSEI::getInstance());
+                $objTarjaAssinaturaDTOBanco = new TarjaAssinaturaDTO();
+                $objTarjaAssinaturaDTOBanco->retStrLogo();
+                $objTarjaAssinaturaDTOBanco->setStrStaTarjaAssinatura("C");
+                $objTarjaAssinaturaDTOBanco = $objTarjaAssinaturaBD->consultar($objTarjaAssinaturaDTOBanco);
+        
+                $dto = new TarjaAssinaturaDTO();
+                $dto->setStrSinAtivo('S');
+                $dto->setStrStaTarjaAssinatura("P");
+                $dto->setStrTexto('<hr style="margin: 0 0 4px 0;" />  <table>    <tr>      <td>  @logo_assinatura@      </td>      <td>  <p style="margin:0;text-align: left; font-size:11pt;font-family: Calibri;">Documento assinado eletronicamente por <b>@pen_assinatura_externa@</b>   </td>    </tr>  </table>');
+                $dto->setStrLogo($objTarjaAssinaturaDTOBanco->getStrLogo());            
+                $objTarjaAssinaturaBD->cadastrar($dto);
+        
+        
+                //tarja autenticacao
+                $objTarjaAssinaturaDTOBanco = new TarjaAssinaturaDTO();
+                $objTarjaAssinaturaDTOBanco->retStrLogo();
+                $objTarjaAssinaturaDTOBanco->setStrStaTarjaAssinatura("A");
+                $objTarjaAssinaturaDTOBanco = $objTarjaAssinaturaBD->consultar($objTarjaAssinaturaDTOBanco);
+        
+                $dto = new TarjaAssinaturaDTO();
+                $dto->setStrSinAtivo('S');
+                $dto->setStrStaTarjaAssinatura("X");
+                $dto->setStrTexto('<hr style="margin: 0 0 4px 0;" />  <table>    <tr>      <td>  @logo_assinatura@      </td>      <td>  <p style="margin:0;text-align: left; font-size:11pt;font-family: Calibri;">Documento autenticado eletronicamente por <b>@pen_assinatura_externa@</b>   </td>    </tr>  </table>');
+                $dto->setStrLogo($objTarjaAssinaturaDTOBanco->getStrLogo());            
+                $objTarjaAssinaturaBD->cadastrar($dto);
+        
+        
+                BancoSEI::getInstance()->executarSql("
+                        alter table md_pen_componente_digital add texto_tarja_validacao varchar(255);                    
+                        ");
+                BancoSEI::getInstance()->executarSql("
+                        alter table md_pen_componente_digital add texto_tarja varchar(255);                    
+                        ");
+                BancoSEI::getInstance()->executarSql("
+                        alter table md_pen_componente_digital add tarja_legada char(1);                   
+                        ");
+
+                        
+                        
     }  
 }
 

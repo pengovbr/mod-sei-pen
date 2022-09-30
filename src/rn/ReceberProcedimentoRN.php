@@ -177,7 +177,7 @@ class ReceberProcedimentoRN extends InfraRN
             if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
                 throw new InfraException("Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual);
             }
-
+            
             $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrHashComponenteBaixados, $objProtocolo);
 
             $this->atribuirObservacoesSobreDocumentoReferenciado($objProcedimentoDTO, $objProtocolo);
@@ -573,6 +573,14 @@ class ReceberProcedimentoRN extends InfraRN
                                 $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO);
                                 $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
                                 $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
+
+                                $param=[
+                                    "numIdDocumento"=>$numIdDocumento,
+                                    "objProtocolo"=>$objProtocolo,
+                                    "parNumIdentificacaoTramite"=>$parNumIdentificacaoTramite,
+                                    "parStrNumeroRegistro"=>$parStrNumeroRegistro,
+                                ];
+                                $this->assinarPen($param);
                                 $this->gravarLogDebug($strMensagemRecebimento, 3);
                             }
                         }
@@ -2465,4 +2473,96 @@ class ReceberProcedimentoRN extends InfraRN
             }
         }
     }
+
+    protected function assinarPenControlado($param){
+
+        $numIdDocumento=$param["numIdDocumento"];
+        $objProtocolo=$param["objProtocolo"];
+        $parNumIdentificacaoTramite=$param["parNumIdentificacaoTramite"];
+        $parStrNumeroRegistro=$param["parStrNumeroRegistro"];
+
+
+        //configura documento como autenticado
+        $objDocumentoDTO = new DocumentoDTO();
+        $objDocumentoDTO->setDblIdDocumento($numIdDocumento);
+        $objDocumentoDTO->setNumIdTipoConferencia(3);
+        $objDocumentoRN = new DocumentoRN();
+        $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+
+
+
+        $objDocumentoDTO = new DocumentoDTO();
+        $objDocumentoDTO->retStrStaDocumento();
+        $objDocumentoDTO->retNumIdTipoConferencia();
+        $objDocumentoDTO->retTodos();
+        $objDocumentoDTO->setDblIdDocumento($numIdDocumento);        
+        $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+
+        $arrObjDocumentoDTO=array();
+        $arrObjDocumentoDTO[]=$objDocumentoDTO;
+
+        $objUsuarioDTO = new UsuarioDTO();
+        $objUsuarioDTO->setStrSigla(SessaoSEI::$USUARIO_SEI);
+        $objUsuarioDTO->retNumIdUsuario();
+        $objUsuarioRN = new UsuarioRN();
+        $objUsuarioDTO=$objUsuarioRN->consultarRN0489($objUsuarioDTO); 
+        
+        
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->setArrObjDocumentoDTO($arrObjDocumentoDTO);
+        $objAssinaturaDTO->setStrStaFormaAutenticacao("M"); 
+        $objAssinaturaDTO->setStrModuloOrigem("PEN");      
+        $objAssinaturaDTO->setNumIdOrgaoUsuario(SessaoSEI::getInstance()->getNumIdOrgaoUsuario());    
+        // $objAssinaturaDTO->setNumIdUsuario($objUsuarioDTO->getNumIdUsuario());
+        //TODO usar o usuario do SEI, que atualmente não tem cargo associado
+        $objAssinaturaDTO->setNumIdUsuario("100000001");
+        $objAssinaturaDTO->setStrCargoFuncao("Agente Fiscalizador de Contrato");
+
+        // $objAssinaturaDTO->setStrSenhaUsuario("teste");      
+        //$objAssinaturaDTO->setStrCargoFuncao(PaginaSEI::getInstance()->recuperarCampo('selCargoFuncao'));      
+        // $objInfraDadoUsuario = new InfraDadoUsuario(SessaoSEI::getInstance());
+        // $strChaveDadoUsuarioAssinatura = 'ASSINATURA_CARGO_FUNCAO_'.SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        
+        $objDocumentoRN = new DocumentoRN();
+        $arrObjAssinaturaDTO = $objDocumentoRN->assinar($objAssinaturaDTO);
+
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($numIdDocumento);
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_AUTENTICACAO_DOCUMENTO);
+        // $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividadeDTO = $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+        $numIdAtividade = $objAtividadeDTO->getNumIdAtividade();
+
+        $objObjAssinaturaDTO=$arrObjAssinaturaDTO[0];
+        $objObjAssinaturaDTO->setNumIdAtividade($numIdAtividade);
+
+        $objAssinaturaRN = new AssinaturaRN();
+        $objAssinaturaRN->alterarRN1320($objObjAssinaturaDTO);
+
+        //TODO - validar essa tarja que nao funciona se existe mais de 1 documento
+        $textoTarjaAssinatura=$objProtocolo->documento->componenteDigital[0]->assinaturaDigital->razao;
+        $textoLinkValidacao=$objProtocolo->documento->componenteDigital[0]->assinaturaDigital->observacao;
+        
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+        $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
+        $objComponenteDigitalDTO->setDblIdDocumento($numIdDocumento);
+        $objComponenteDigitalDTO->setStrTextoTarja($textoTarjaAssinatura);
+        $objComponenteDigitalDTO->setStrTextoTarjaValidacao($textoLinkValidacao);
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
+
+
+
+
+    }
+
+    
+
+    
 }
