@@ -1,44 +1,35 @@
 <?php
 
-/**
- * Testes de trâmite de processos em lote
- *
- * Este mesmo documento deve ser recebido e assinalado como cancelado no destinatário e
- * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
- */
-class TramiteProcessoEmLoteTest extends CenarioBaseTestCase
+class TramiteProcessoEmLoteComCancelamentoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
     public static $processoTeste;
-    public static $documentoTeste1;
-    public static $documentoTeste2;
+    public static $documentoTeste;
     public static $protocoloTeste;
 
     /**
-     * Teste inicial de trâmite de um processo contendo um documento movido
+     * Teste de cancelamento de trâmite com processo (em lote) contendo documento gerado (interno)
      *
      * @group envio
+     * @large
+     * 
+     * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
      */
-    public function test_tramitar_processo_em_lote()
+    public function test_cancelamento_tramite_contendo_documento_interno()
     {
-
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+        self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste1);
+        $this->cadastrarDocumentoInterno(self::$documentoTeste);
         $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
-        $this->cadastrarDocumentoExterno(self::$documentoTeste2);
 
         // Seleciona todos os processos para tramitação em lote
         $this->selecionarProcessos(self::$protocoloTeste);
@@ -54,47 +45,59 @@ class TramiteProcessoEmLoteTest extends CenarioBaseTestCase
     }
 
     /**
+     * Teste de cancelamento de trâmite com processo contendo documento externo
+     *
+     * @group envio
+     * @large
+     * 
+     * @depends test_cancelamento_tramite_contendo_documento_interno
+     *
+     * @return void
+     */
+    public function test_cancelamento_tramite_contendo_documento_externo()
+    {
+        // Configuração do dados para teste do cenário
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso(self::$protocoloTeste);
+
+        $this->paginaProcesso->cancelarTramitacaoExterna();
+        $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+        $mensagemEsperada = utf8_encode("O trâmite externo do processo foi cancelado com sucesso!");
+        $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);
+        $this->assertFalse($this->paginaProcesso->processoBloqueado());
+        $this->assertTrue($this->paginaProcesso->processoAberto());
+
+    }
+
+    /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
      * @group verificacao_envio
      *
-     * @depends test_tramitar_processo_em_lote
+     * @depends test_cancelamento_tramite_contendo_documento_externo
      *
      * @return void
      */
-    public function test_verificar_envio_processo()
+    public function test_verificar_cancelamento_processo_lote()
     {
+
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->visualizarProcessoTramitadosEmLote($this);
-        $this->navegarProcessoEmLote(0);
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
             $testCase->refresh();
+            $this->navegarProcessoEmLote(7, self::$protocoloTeste);
             $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
+            $this->assertStringContainsString(self::$protocoloTeste, $paginaTramitarProcessoEmLote->informacaoLote());
             return true;
         }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
-        
-        sleep(5);
-    }
-
-    /**
-     * Teste de verificação do correto recebimento do processo no destino
-     *
-     * @group verificacao_recebimento
-     * @large
-     *
-     * @depends test_verificar_envio_processo
-     *
-     * @return void
-     */
-    public function test_verificar_recebimento_processo_destino()
-    {
-        $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+      
     }
 
 }

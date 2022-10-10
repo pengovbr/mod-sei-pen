@@ -4,7 +4,9 @@ use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 class PaginaTramitarProcessoEmLote extends PaginaTeste
 {
-    const STA_ANDAMENTO = "Em Processamento"; 
+    const STA_ANDAMENTO_PROCESSAMENTO = "Em Processamento";
+    const STA_ANDAMENTO_CANCELADO = "Cancelado";
+    const STA_ANDAMENTO_CONCLUIDO = "Concluído";
 
     public function __construct($test)
     {
@@ -12,18 +14,23 @@ class PaginaTramitarProcessoEmLote extends PaginaTeste
 
     }
 
-    public function selecionarProcessos()
+    public function selecionarProcessos($numProtocolo=null)
     {
 
-        try{
-            $chkGerados = $this->test->byXPath("//*[@id='imgGeradosCheck']");
-            $chkGerados->click();
-        } catch(Exception $e){}
+        if(is_null($numProtocolo)){
+            try{
+                $chkGerados = $this->test->byXPath("//*[@id='imgGeradosCheck']");
+                $chkGerados->click();
+            } catch(Exception $e){}
 
-        try{
-            $chkRecebidos = $this->test->byXPath("//*[@id='imgRecebidosCheck']");
-            $chkRecebidos->click();
-        } catch(Exception $e){}
+            try{
+                $chkRecebidos = $this->test->byXPath("//*[@id='imgRecebidosCheck']");
+                $chkRecebidos->click();
+            } catch(Exception $e){}
+        }else{
+           $chkProtocolo = $this->test->byXPath('//tr[contains(.,"'.$numProtocolo.'")]/td');
+           $chkProtocolo->click();
+        }
      
     }  
     
@@ -38,10 +45,20 @@ class PaginaTramitarProcessoEmLote extends PaginaTeste
         return $this->test->byId('divInfraAreaTelaD')->text();
     }     
 
-    public function selecionarSituacao()
+    public function navegarProcessoEmLote($selAndamento, $numProtocolo=null)
     {
-        //$this->test->frame(null);
-        $select = $this->test->select($this->test->byId('selAndamento'));
-        $select->selectOptionByLabel(self::STA_ANDAMENTO);        
+        if(!is_null($selAndamento)){
+            $select = $this->test->select($this->test->byId('selAndamento'));
+            $select->selectOptionByLabel($selAndamento); 
+        }
+
+        if(!is_null($numProtocolo)){
+            $this->protocoloInput=$this->test->byId('txtProcedimentoFormatado');
+            $this->protocoloInput->value($numProtocolo);
+        }
+
+        $this->presquisarProcessoButton = $this->test->byXPath("//*[@id='sbmPesquisar']");
+        $this->presquisarProcessoButton->click();
+       
     }
 }

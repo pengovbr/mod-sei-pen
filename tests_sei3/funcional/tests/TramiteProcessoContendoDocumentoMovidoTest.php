@@ -21,6 +21,9 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * Teste inicial de trâmite de um processo contendo um documento movido
      *
      * @group envio
+     * @large
+     * 
+     * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
      */
@@ -67,6 +70,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * Teste de verificação do correto envio do processo no sistema remetente
      *
      * @group verificacao_envio
+     * @large
      *
      * @depends test_tramitar_processo_contendo_documento_movido
      *
@@ -80,6 +84,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
+            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
             $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
@@ -99,6 +104,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * Teste de verificação do correto recebimento do processo com documento movido no destinatário
      *
      * @group verificacao_recebimento
+     * @large
      *
      * @depends test_verificar_origem_processo
      *
@@ -137,6 +143,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * mais dois documentos, sendo um deles movido
      *
      * @group envio
+     * @large
      *
      * @depends test_verificar_destino_processo_com_documento_movido
      *
@@ -150,7 +157,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
         // Criar processo secundário para o qual o novo documento será movido
         $processoSecundarioTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
-        self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+        self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
@@ -182,6 +189,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * Teste de verificação do correto envio do processo no sistema remetente
      *
      * @group verificacao_envio
+     * @large
      *
      * @depends test_devolucao_processo_para_origem_com_novo_documento_movido
      *
@@ -196,6 +204,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
+            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
             $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
@@ -215,6 +224,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
      * Teste de verificação da correta devolução do processo no destinatário
      *
      * @group verificacao_recebimento
+     * @large
      *
      * @depends test_verificar_devolucao_origem_processo
      *

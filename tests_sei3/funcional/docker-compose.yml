@@ -40,6 +40,7 @@ services:
 
   php-test-functional:
     image: processoeletronico/vagrant_sei4_httpd
+    container_name: php-test-functional
     depends_on: 
       - org1-database
       - org2-database
@@ -48,14 +49,22 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
+      - ./assets/config:/opt/sei/config/mod-pen      
       - .:/tests
       - /tmp:/tmp
     environment:
-      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9000 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug 
       - CONTEXTO_ORGAO_A_DB_SEI_DSN=${CONTEXTO_ORGAO_A_DB_SEI_DSN}
       - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+      - ORG1_CERTIFICADO=${ORG1_CERTIFICADO}
+      - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
+      - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
+      - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:   
@@ -92,7 +101,9 @@ services:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9000 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug 
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -128,7 +139,9 @@ services:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-      - XDEBUG_CONFIG=idekey=default remote_host=host.docker.internal remote_port=9003 remote_autostart=0  
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9000 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug 
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
