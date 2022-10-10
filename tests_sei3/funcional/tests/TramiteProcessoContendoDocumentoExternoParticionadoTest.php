@@ -8,11 +8,28 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
     public static $documentoTeste;
     public static $protocoloTeste;
 
+    public static function setUpBeforeClass() :void {
+
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
+
+    }      
+        
+    public static function tearDownAfterClass() :void {
+
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+
+    }
+
+
     /**
      * Teste de trâmite externo de processo contendo documento externo particionado acima de 60Mb
      *
      * @group envio
-     * @group large
+     * @large
+     * 
+     * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
      */
@@ -50,7 +67,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
      * Teste de verificação do correto envio do processo no sistema remetente
      *
      * @group verificacao_envio
-     * @group large
+     * @large
      *
      * @depends test_tramitar_processo_contendo_documento_externo_60mb
      *
@@ -68,6 +85,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
 
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
+            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
             $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
@@ -88,7 +106,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
      * @group verificacao_recebimento
-     * @group large
+     * @large
      *
      * @depends test_verificar_origem_processo_contendo_documento_externo_60mb
      *

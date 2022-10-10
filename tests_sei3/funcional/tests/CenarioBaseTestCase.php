@@ -6,8 +6,8 @@ use PHPUnit\Extensions\Selenium2TestCase;
 use function PHPSTORM_META\map;
 
 /**
-* Classe base contendo rotinas comuns utilizadas nos casos de teste do módulo
-*/
+ * Classe base contendo rotinas comuns utilizadas nos casos de teste do módulo
+ */
 class CenarioBaseTestCase extends Selenium2TestCase
 {
     const PASTA_ARQUIVOS_TESTE = "/tmp";
@@ -82,14 +82,15 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
         $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
-
-        // Inserção de mapeamentos de hipóteses legais pra o órgão A
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(1, 3, 3, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(2, 4, 4, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(3, 3, 3, 'R', 'S'));
 
+        $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+
         // Habilitação da extensão docx
         $bancoOrgaoA->execute("update arquivo_extensao set sin_ativo=? where extensao=?", array('S', 'docx'));
+
 
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2 *****************/
         $parametrosOrgaoB = new ParameterUtils(CONTEXTO_ORGAO_B);
@@ -108,16 +109,23 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
-
-        // Inserção de mapeamentos de hipóteses legais pra o órgão B
         $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
+
+        $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+
+        //para corrigir o erro do oracle que retorna stream sem acentuação das palavras no teste de URL
+
+        if ($bancoOrgaoA->getBdType() == "oci") {
+            $result = $bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V", "S"));
+            $strTarja = stream_get_contents($result[0]["TEXTO"]);
+            $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja, "V", "S"));
+        }
     }
 
     public static function tearDownAfterClass(): void
     {
-
     }
 
     public function setUp(): void
@@ -162,13 +170,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $objContexto = array(
             'URL' => constant($nomeContexto . '_URL'),
             'ORGAO' => constant($nomeContexto . '_SIGLA_ORGAO'),
-            'SIGLA_UNIDADE' =>constant($nomeContexto . '_SIGLA_UNIDADE'),
+            'SIGLA_UNIDADE' => constant($nomeContexto . '_SIGLA_UNIDADE'),
             'SIGLA_UNIDADE_HIERARQUIA' => constant($nomeContexto . '_SIGLA_UNIDADE_HIERARQUIA'),
             'NOME_UNIDADE' => constant($nomeContexto . '_NOME_UNIDADE'),
             'LOGIN' => constant($nomeContexto . '_USUARIO_LOGIN'),
             'SENHA' => constant($nomeContexto . '_USUARIO_SENHA'),
             'TIPO_PROCESSO' => constant($nomeContexto . '_TIPO_PROCESSO'),
-            'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
             'TIPO_DOCUMENTO' => constant($nomeContexto . '_TIPO_DOCUMENTO'),
             'TIPO_DOCUMENTO_NAO_MAPEADO' => constant($nomeContexto . '_TIPO_DOCUMENTO_NAO_MAPEADO'),
             'CARGO_ASSINATURA' => constant($nomeContexto . '_CARGO_ASSINATURA'),
@@ -180,12 +187,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_NAO_MAPEADO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_NAO_MAPEADO'),
             'REP_ESTRUTURAS' => constant($nomeContexto . '_REP_ESTRUTURAS'),
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
-            'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
-            'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
         );
-
         switch ($nomeContexto) {
             case CONTEXTO_ORGAO_A:
                 $objContexto['LOCALIZACAO_CERTIFICADO_DIGITAL'] = getenv('ORG1_CERTIFICADO');
@@ -206,12 +210,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         return $objContexto;
     }
 
-
     protected function acessarSistema($url, $siglaUnidade, $login, $senha)
     {
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+    }
+
+    protected function selecionarUnidadeInterna($unidadeDestino)
+    {
+        PaginaTeste::selecionarUnidadeContexto($this, $unidadeDestino);
     }
 
     protected function sairSistema()
@@ -238,7 +246,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->paginaBase->navegarParaControleProcesso();
         $protocolo = $this->paginaControleProcesso->localizarProcessoPelaDescricao($descricao);
-        if($protocolo){
+        if ($protocolo) {
             $this->paginaControleProcesso->abrirProcesso($protocolo);
         }
         return $protocolo;
@@ -251,7 +259,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(2);
     }
 
-    protected function cadastrarDocumentoExterno($dadosDocumentoExterno, $comAnexo=true)
+    protected function cadastrarDocumentoExterno($dadosDocumentoExterno, $comAnexo = true)
     {
         $this->paginaProcesso->selecionarProcesso();
         $this->paginaIncluirDocumento->gerarDocumentoExternoTeste($dadosDocumentoExterno, $comAnexo);
@@ -278,12 +286,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaAnexarProcesso->anexarProcesso($protocoloProcessoAnexado);
     }
 
-    protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente=false, $callbackEnvio=null, $timeout=PEN_WAIT_TIMEOUT)
+    protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
         // Acessar funcionalidade de trâmite externo
-        try{
+        try {
             $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
-        } catch(Exception $e){
+        } catch (Exception $e) {
             $this->paginaProcesso->navegarParaTramitarProcesso();
         }
 
@@ -292,24 +300,27 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
         $this->paginaTramitar->tramitar();
 
-        if($callbackEnvio == null){
+        if ($callbackEnvio == null) {
             $mensagemAlerta = null;
-            try{
+            try {
                 $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
-            } catch(Exception $e){}
-            if($mensagemAlerta){
+            } catch (Exception $e) {
+            }
+            if ($mensagemAlerta) {
                 throw new Exception($mensagemAlerta);
             }
         }
 
-        try{ $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true); }
-        catch(Exception $e){ }
+        try {
+            $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+        } catch (Exception $e) {
+        }
 
-        if(isset($mensagemAlerta)){
+        if (isset($mensagemAlerta)) {
             throw new Exception($mensagemAlerta);
         }
 
-        $callbackEnvio = $callbackEnvio ?: function($testCase) {
+        $callbackEnvio = $callbackEnvio ?: function ($testCase) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
                 $mensagemSucesso = utf8_encode('Trâmite externo do processo finalizado com sucesso!');
@@ -317,10 +328,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {
-                try{
+                try {
                     $this->frame(null);
                     $this->frame("ifrVisualizacao");
-                } catch(Exception $e){}   
+                } catch (Exception $e) {
+                }
             }
 
             return true;
@@ -329,10 +341,53 @@ class CenarioBaseTestCase extends Selenium2TestCase
         try {
             $this->waitUntil($callbackEnvio, $timeout);
         } finally {
-            try{
+            try {
                 $this->frame(null);
                 $this->frame("ifrVisualizacao");
-            } catch(Exception $e){}            
+            } catch (Exception $e) {
+            }
+        }
+
+        sleep(1);
+    }
+
+    protected function tramitarProcessoInternamente($unidadeDestino)
+    {
+        // Acessar funcionalidade de trâmite interno
+        $this->paginaProcesso->navegarParaTramitarProcessoInterno();
+
+        // Preencher parâmetros do trâmite
+        $this->paginaTramitar->unidadeInterna($unidadeDestino);
+        $this->paginaTramitar->tramitarInterno();
+
+        sleep(1);
+    }
+
+    protected function navegarParaCancelarDocumento($ordemDocumento)
+    {
+        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+        $this->paginaProcesso->selecionarDocumento($listaDocumentos[$ordemDocumento]);
+        $this->paginaDocumento->navegarParaCancelarDocumento();
+    }
+
+    protected function tramitarProcessoInternamenteParaCancelamento($unidadeOrigem, $unidadeDestino, $protocolo)
+    {
+        //Tramitar internamento para liberação da funcionalidade de cancelar
+        $this->tramitarProcessoInternamente($unidadeDestino);
+
+        //Selecionar unidade interna
+        $this->selecionarUnidadeInterna($unidadeDestino);
+        if ($protocolo) {
+            $this->paginaControleProcesso->abrirProcesso($protocolo['PROTOCOLO']);
+        }
+
+        //Tramitar internamento para liberação da funcionalidade de cancelar
+        $this->tramitarProcessoInternamente($unidadeOrigem);
+
+        //Selecionar unidade interna
+        $this->selecionarUnidadeInterna($unidadeOrigem);
+        if ($protocolo) {
+            $this->paginaControleProcesso->abrirProcesso($protocolo['PROTOCOLO']);
         }
 
         sleep(1);
@@ -341,42 +396,42 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarRecibosTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)
     {
         $mensagem = utf8_encode($mensagem);
-        $this->waitUntil(function($testCase) use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
+        $this->waitUntil(function ($testCase) use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
             sleep(5);
             $testCase->refresh();
             $testCase->paginaProcesso->navegarParaConsultarRecibos();
             $this->assertTrue($testCase->paginaReciboTramite->contemTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao));
             return true;
         }, PEN_WAIT_TIMEOUT);
-
-
     }
 
     protected function validarHistoricoTramite(
-        $unidadeDestino, $verificarProcessoEmTramitacao=true, $verificarProcessoRecebido=true, $verificarProcessoRejeitado=false, $motivoRecusa=null
-    )
-    {
+        $unidadeDestino,
+        $verificarProcessoEmTramitacao = true,
+        $verificarProcessoRecebido = true,
+        $verificarProcessoRejeitado = false,
+        $motivoRecusa = null
+    ) {
         $this->paginaProcesso->navegarParaConsultarAndamentos();
 
-        if($verificarProcessoEmTramitacao){
+        if ($verificarProcessoEmTramitacao) {
             $this->assertTrue($this->paginaConsultarAndamentos->contemTramiteProcessoEmTramitacao($unidadeDestino));
         }
 
-        if($verificarProcessoRecebido){
+        if ($verificarProcessoRecebido) {
             $this->assertTrue($this->paginaConsultarAndamentos->contemTramiteProcessoRecebido($unidadeDestino));
         }
 
-        if($verificarProcessoRejeitado){
+        if ($verificarProcessoRejeitado) {
 
             $motivoRecusa = utf8_encode($motivoRecusa);
-            $this->waitUntil(function($testCase) use ($unidadeDestino, $motivoRecusa) {
+            $this->waitUntil(function ($testCase) use ($unidadeDestino, $motivoRecusa) {
                 sleep(5);
                 $testCase->refresh();
                 $testCase->paginaProcesso->navegarParaConsultarAndamentos();
                 $this->assertTrue($testCase->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa));
                 return true;
             }, PEN_WAIT_TIMEOUT);
-
         }
     }
 
@@ -388,15 +443,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertEquals(utf8_encode($descricao), $this->paginaEditarProcesso->descricao());
         $this->assertEquals($restricao, $this->paginaEditarProcesso->restricao());
 
-        for ($i=0; $i < count($listaInteressados); $i++) {
+        $listaInteressados = is_array($listaInteressados) ? $listaInteressados : array($listaInteressados);
+        for ($i = 0; $i < count($listaInteressados); $i++) {
             $this->assertStringStartsWith(substr($listaInteressados[$i], 0, 100), $this->paginaEditarProcesso->listarInteressados()[$i]);
         }
 
-        if($observacoes){
+        if ($observacoes) {
             $this->assertStringContainsString($observacoes, $this->byCssSelector('body')->text());
         }
 
-        if($hipoteseLegal != null){
+        if ($hipoteseLegal != null) {
             $hipoteseLegalDocumento = $this->paginaEditarProcesso->recuperarHipoteseLegal();
             $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
         }
@@ -414,7 +470,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertTrue($this->paginaProcesso->ehDocumentoMovido($nomeDocArvore));
     }
 
-    protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria=false, $hipoteseLegal=null)
+    protected function validarDadosDocumento($nomeDocArvore, $dadosDocumento, $destinatario, $unidadeSecundaria = false, $hipoteseLegal = null)
     {
         sleep(2);
 
@@ -425,19 +481,19 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
         $this->paginaDocumento->navegarParaConsultarDocumento();
         $mesmoOrgao = $dadosDocumento['ORIGEM'] == $destinatario['URL'];
-        if($mesmoOrgao && $dadosDocumento['TIPO'] == 'G') {
+        if ($mesmoOrgao && $dadosDocumento['TIPO'] == 'G') {
             $this->assertEquals($dadosDocumento["DESCRICAO"], $this->paginaDocumento->descricao());
-            if(!$mesmoOrgao){
+            if (!$mesmoOrgao) {
                 $observacoes = ($unidadeSecundaria) ? $this->paginaDocumento->observacoesNaTabela() : $this->paginaDocumento->observacoes();
                 $this->assertEquals($dadosDocumento['OBSERVACOES'], $observacoes);
             }
         } else {
             $this->assertNotNull($this->paginaDocumento->nomeAnexo());
             $contemVariosComponentes = is_array($dadosDocumento['ARQUIVO']);
-            if(!$contemVariosComponentes) {
-                $nomeArquivo = $dadosDocumento['ARQUIVO'][0];
+            if (!$contemVariosComponentes) {
+                $nomeArquivo = $dadosDocumento['ARQUIVO'];
                 $this->assertStringContainsString(basename($nomeArquivo), $this->paginaDocumento->nomeAnexo());
-                if($hipoteseLegal != null){
+                if ($hipoteseLegal != null) {
                     $hipoteseLegalDocumento = $this->paginaDocumento->recuperarHipoteseLegal();
                     $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
                 }
@@ -488,11 +544,35 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt', $ordemDocumentoReferenciado=null)
+    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos = 'arquivo_pequeno.txt', $ordemDocumentoReferenciado = null)
     {
         // Tratamento para lista de arquivos em casos de documentos com mais de um componente digital
         $pasta = self::PASTA_ARQUIVOS_TESTE;
-        $arquivos = is_array($nomesArquivos) ? array_map(function($item) use ($pasta) { return "$pasta/$item";}, $nomesArquivos) : "$pasta/$nomesArquivos";
+        $arquivos = is_array($nomesArquivos) ? array_map(function ($item) use ($pasta) {
+            return "$pasta/$item";
+        }, $nomesArquivos) : "$pasta/$nomesArquivos";
+
+        return array(
+            'TIPO' => 'R', // Documento do tipo Recebido pelo sistema
+            "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
+            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
+            "DATA_ELABORACAO" => '01/01/2017',
+            "DESCRICAO" => str_repeat(util::random_string(9) . ' ', 10),
+            "OBSERVACOES" => util::random_string(500),
+            "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
+            "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
+            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "ARQUIVO" => $arquivos,
+            "ORIGEM" => $contextoProducao['URL'],
+        );
+    }
+
+    public function gerarDadosDocumentoExternoGrandeTeste($contextoProducao, $nomesArquivo = 'arquivo_grande_gerado.txt', $tamanhoMB = 100,  $ordemDocumentoReferenciado = null)
+    {
+        // Tratamento para lista de arquivos em casos de documentos com mais de um componente digital
+        $pasta = self::PASTA_ARQUIVOS_TESTE;
+        shell_exec('dd if=/dev/zero of=' . self::PASTA_ARQUIVOS_TESTE . '/' . $nomesArquivo . ' bs=1M count=' . $tamanhoMB);
+        $arquivos = "$pasta/$nomesArquivo";
 
         return array(
             'TIPO' => 'R', // Documento do tipo Recebido pelo sistema
@@ -517,11 +597,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
 
         // 2 - Cadastrar novo processo de teste
-        if (isset($processoTeste['PROTOCOLO'])){
+        if (isset($processoTeste['PROTOCOLO'])) {
             $strProtocoloTeste = $processoTeste['PROTOCOLO'];
             $this->abrirProcesso($strProtocoloTeste);
-        }
-        else {
+        } else {
             $strProtocoloTeste = $this->cadastrarProcesso($processoTeste);
             $processoTeste['PROTOCOLO'] = $strProtocoloTeste;
         }
@@ -529,11 +608,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // 3 - Incluir Documentos no Processo
         $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
         foreach ($documentosTeste as $doc) {
-            if($doc['TIPO'] == 'G') {
+            if ($doc['TIPO'] == 'G') {
                 $this->cadastrarDocumentoInterno($doc);
                 $this->assinarDocumento($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], $remetente['SENHA']);
-            }
-            else if($doc['TIPO'] == 'R') {
+            } else if ($doc['TIPO'] == 'R') {
                 $this->cadastrarDocumentoExterno($doc);
             }
         }
@@ -542,10 +620,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $paginaTramitar = $this->paginaTramitar;
         $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
-        if($validarTramite) {
+        if ($validarTramite) {
             // 6 - Verificar se situação atual do processo está como bloqueado
-            $this->waitUntil(function($testCase) use (&$orgaosDiferentes){
+            $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
                 sleep(5);
+                $this->atualizarTramitesPEN();
                 $testCase->refresh();
                 $paginaProcesso = new PaginaProcesso($testCase);
                 $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
@@ -571,7 +650,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
     public function realizarTramiteExternoSemvalidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
     {
         $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, false);
-
     }
 
     public function realizarTramiteExternoComValidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
@@ -587,7 +665,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // 11 - Abrir protocolo na tela de controle de processos
-        $this->waitUntil(function($testCase) use ($strProtocoloTeste){
+        $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
             sleep(5);
             $this->abrirProcesso($strProtocoloTeste);
             return true;
@@ -600,7 +678,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
         $strTipoProcesso .= $processoTeste['TIPO_PROCESSO'];
         $processoTeste['OBSERVACOES'] = (!$devolucao) ? $strTipoProcesso : $processoTeste['OBSERVACOES'];
-        $this->validarDadosProcesso($processoTeste['DESCRICAO'], $processoTeste['RESTRICAO'], $processoTeste['OBSERVACOES'], array($processoTeste['INTERESSADOS']));
+        $this->validarDadosProcesso($processoTeste['DESCRICAO'], $processoTeste['RESTRICAO'], $processoTeste['OBSERVACOES'], $processoTeste['INTERESSADOS']);
 
         // 13 - Verificar recibos de trâmite
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
@@ -609,12 +687,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
         $this->assertEquals(count($listaDocumentos), count($documentosTeste));
 
-        for ($i=0; $i < count($listaDocumentos); $i++) {
-            $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
+        for ($i = 0; $i < count($listaDocumentos); $i++) {
+            $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria, null);
         }
     }
 
-    public function realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentosTeste, $destinatario, $devolucao=false, $unidadeSecundaria=false)
+    public function realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false)
     {
         $strProtocoloTeste = null;
         $strDescricao = $documentosTeste['DESCRICAO'];
@@ -623,7 +701,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // Abrir protocolo na tela de controle de processos pelo texto da descrição
-        $this->waitUntil(function($testCase) use ($strDescricao, &$strProtocoloProcesso){
+        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloProcesso) {
             sleep(5);
             $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
             $this->assertNotFalse($strProtocoloTeste);
@@ -642,7 +720,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
         $this->assertEquals(count($listaDocumentos), count($documentosTeste));
 
-        for ($i=0; $i < count($listaDocumentos); $i++) {
+        for ($i = 0; $i < count($listaDocumentos); $i++) {
             $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
         }
     }
@@ -654,10 +732,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertFalse($this->paginaControleProcesso->contemProcesso($processoTeste['PROTOCOLO'], false, false));
     }
 
-    protected function selecionarProcessos()
+    protected function selecionarProcessos($numProtocolo=null)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramitarProcessoEmLote->selecionarProcessos();
+        $this->paginaTramitarProcessoEmLote->selecionarProcessos($numProtocolo);
         sleep(2);
     }
 
@@ -667,8 +745,28 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $test->byLinkText("Processos Tramitados em Lote")->click();
     }
 
-    protected function selecionarSituacao()
+    protected function navegarProcessoEmLote($selAndamento, $numProtocolo=null)
     {
-        $this->paginaTramitarProcessoEmLote->selecionarSituacao();
+        if($selAndamento == 0){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_PROCESSAMENTO;
+        }if($selAndamento == 2){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CONCLUIDO;
+        }if($selAndamento == 7){
+            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
+        }
+        $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
     }    
+
+    public function atualizarTramitesPEN($bolOrg1 = true, $bolOrg2 = true, $org2Primeiro = true, $quantidade = 1)
+    {
+        /*for($i=0;$i<$quantidade;$i++){
+            if($org2Primeiro){
+                if($bolOrg2)exec(PEN_SCRIPT_MONITORAMENTO_ORG2);
+                if($bolOrg1)exec(PEN_SCRIPT_MONITORAMENTO_ORG1);
+            }else{
+                if($bolOrg1)exec(PEN_SCRIPT_MONITORAMENTO_ORG1);
+                if($bolOrg2)exec(PEN_SCRIPT_MONITORAMENTO_ORG2);
+            }
+        }*/
+    }
 }

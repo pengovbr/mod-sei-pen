@@ -145,7 +145,7 @@ class PaginaIniciarProcesso extends PaginaTeste
         $test->byLinkText("Iniciar Processo")->click();
 
         $dadosProcesso = $dadosProcesso ?: array();
-        $dadosProcesso["TIPO_PROCESSO"] = @$dadosProcesso["TIPO_PROCESSO"] ?: "Licita√ß√£o: Preg√£o Eletr√¥nico";
+        $dadosProcesso["TIPO_PROCESSO"] = @$dadosProcesso["TIPO_PROCESSO"] ?: "LicitaÁ„o: Preg„o EletrÙnico";
         $dadosProcesso["DESCRICAO"] = @$dadosProcesso["DESCRICAO"] ?: util::random_string(20);
         $dadosProcesso["OBSERVACOES"] = @$dadosProcesso["OBSERVACOES"] ?: util::random_string(100);
         $dadosProcesso["INTERESSADOS"] = @$dadosProcesso["INTERESSADOS"] ?: util::random_string(40);
