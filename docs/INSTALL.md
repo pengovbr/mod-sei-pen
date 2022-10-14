@@ -707,7 +707,7 @@ Recursos:
     * pen_procedimento_expedir
 ~~~~
 
-### 4.6. Ajuste para órgãos que alterem a URL de acesso do SEI
+### 4.7. Ajuste para órgãos que alterem a URL de acesso do SEI
 
 Caso o órgão tenha alterado a URL de acesso, seja ajuste de protocolo http para https ou de hostname, será necessário adicionar o array abaixo no ConfiguracaoModPEN.php dentro da chave "PEN":
 
@@ -727,8 +727,23 @@ Caso o órgão tenha alterado a URL de acesso, seja ajuste de protocolo http par
     )
 ```
 
-    
----
+### 4.8. Ajuste para órgãos que alteram o atributo "Sigla do Órgão"
+
+Caso o órgão tenha alterado o atributo "Sigla do Órgão" será necessário adicionar o array abaixo no ConfiguracaoModPEN.php dentro da chave "PEN":
+
+```php
+'PEN' => array(
+    'WebService' => ...,
+    'WebServicePendencias' => ...,
+    'LocalizacaoCertificado' => ...,
+    'SenhaCertificado' => ...,
+    'NumeroTentativasErro' => ...,
+    'SiglaOrgaoLegado' => array(
+                                "atual"=>"ABCD",
+                                "antiga"=>"ABC"),
+    )
+```
+
 ---
 
 ## 5. SUPORTE
