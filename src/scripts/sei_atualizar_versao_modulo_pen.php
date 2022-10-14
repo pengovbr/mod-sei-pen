@@ -250,6 +250,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                     $this->instalarV30120();
                 case '3.1.20':
                     $this->instalarV30121();
+                case '3.1.21':
+                    $this->instalarV30122();
                     break;
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2457,6 +2459,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     protected function instalarV30121()
     {
         $this->atualizarNumeroVersao("3.1.21");
+    }  
+
+    protected function instalarV30122()
+    {
+        $objMetaBanco = $this->inicializarObjMetaBanco();
+        $objMetaBanco->renomearTabela("md_pen_rel_expedir_lote_procedimento", "md_pen_rel_expedir_lote");
+        $this->atualizarNumeroVersao("3.1.22");
     }  
 }
 
