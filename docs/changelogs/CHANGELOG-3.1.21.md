@@ -24,7 +24,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 Correção de erro na geração e publicação da versão 3.1.20
 
-
+Correção do erro prefixo [Str] não aplicável ao atributo SinValidarXSS.
 
 ### Atualização de Versão
 
