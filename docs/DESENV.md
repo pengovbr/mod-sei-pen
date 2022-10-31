@@ -71,11 +71,11 @@ Para iniciarlizar o ambiente de desenvolvimento local, certifique-se que o proje
 Nesta pasta execute os seguintes comandos MAKE:
 
 ``` 
-$ make test-environment-up             # Inicializa o ambiente do sistema utilizando docker
-$ make test-environment-provision      # Instala o módulo mod-sei-pen e atualiza o bando de dados
+$ make up             # Inicializa o ambiente do sistema utilizando docker
+$ make install        # Instala o módulo mod-sei-pen e atualiza o bando de dados
 ```
 
-> Atenção: Caso o docker instalado na máquina de desenvolvimento exija que seja executado como root através do comando SUDO, informe-o antes das instruções mencionadas acima (ex: ```sudo make test-environment-up```)
+> Atenção: Caso o docker instalado na máquina de desenvolvimento exija que seja executado como root através do comando SUDO, informe-o antes das instruções mencionadas acima (ex: ```sudo make up```)
 
 ## 8 - Verificar se todas as configurações do módulo estão corretas
 O **mod-sei-pen** possui um script de verificação da instalação, avaliando as parametrizações e simulando conexões com o Barramento do PEN para validar as permissões de autenticação. Para realizar esta verificação, execute o comando:
