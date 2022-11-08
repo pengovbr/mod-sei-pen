@@ -37,21 +37,11 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         sleep(1);
         if($objVerificadorInstalacaoRN->verificarArquivoConfiguracao()){
             $fnPrint("- Parâmetros técnicos obrigatórios de integração atribuídos em ConfiguracaoModPEN.php", 1);
-        }
-
-        sleep(1);
-        if($objVerificadorInstalacaoRN->verificarCompatibilidadeModulo()){
-            $fnPrint("- Verificada a compatibilidade do mod-sei-pen com a atual versão do SEI", 1);
-        }
+        }        
 
         sleep(1);
         if($objVerificadorInstalacaoRN->verificarCertificadoDigital()){
             $fnPrint("- Certificado digital localizado e corretamente configurado", 1);
-        }
-
-        sleep(1);
-        if($objVerificadorInstalacaoRN->verificarCompatibilidadeBanco()){
-            $fnPrint("- Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen", 1);
         }
 
         sleep(1);
@@ -67,6 +57,16 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         sleep(1);
         if($objVerificadorInstalacaoRN->verificarConfiguracaoGearman()){
             $fnPrint("- Conexão com o servidor de processamento de tarefas Gearman realizada com sucesso", 1);
+        }
+
+        sleep(1);
+        if($objVerificadorInstalacaoRN->verificarCompatibilidadeModulo()){
+            $fnPrint("- Verificada a compatibilidade do mod-sei-pen com a atual versão do SEI", 1);
+        }
+
+        sleep(1);
+        if($objVerificadorInstalacaoRN->verificarCompatibilidadeBanco()){
+            $fnPrint("- Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen", 1);
         }
 
         $fnPrint("", 0);
