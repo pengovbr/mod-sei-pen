@@ -51,7 +51,7 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento = "";
 
         $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
-        
+
         if ($bolAcaoGerarPendencia) {
             $objPaginaSEI = PaginaSEI::getInstance();
 
@@ -60,7 +60,7 @@ class PENIntegracao extends SeiIntegracao
             $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
             $objAtividadeDTO->setDthConclusao(null);
             $objAtividadeDTO->retNumIdUnidade();
-    
+
             $objAtividadeRN = new AtividadeRN();
             $numRegistros = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
@@ -78,7 +78,7 @@ class PENIntegracao extends SeiIntegracao
         }
 
         return array($strAcoesProcedimento);
-    }    
+    }
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
     {
@@ -179,7 +179,6 @@ class PENIntegracao extends SeiIntegracao
         if (!empty($arrObjProcedimentoDTO)) {
 
             foreach ($arrObjProcedimentoDTO as $objProcedimentoDTO) {
-
                 $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
                 $objPenProtocoloDTO = new PenProtocoloDTO();
                 $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -189,10 +188,13 @@ class PENIntegracao extends SeiIntegracao
                 $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
                 $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
-                if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-                    $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
+                if (!empty($objPenProtocoloDTO)) {
+                    if ($objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+                        $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
+                    } else {
+                        $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+                    }
                 }
-
             }
         }
 
@@ -233,14 +235,35 @@ class PENIntegracao extends SeiIntegracao
             $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
             $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
-            if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-                $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
+            if (!empty($objPenProtocoloDTO)) {
+                if($objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+                    $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
+                } else {
+                    $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+                }
             }
         } else {
             return array();
         }
 
         return $arrObjArvoreAcaoItemAPI;
+    }
+
+    private function getObjArvoreAcaoRecebido($dblIdProcedimento)
+    {
+        $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+        $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+        $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+        $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+        $objArvoreAcaoItemAPI->setTitle('Um trâmite para esse processo foi recebido');
+        $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/share-nodes-solid.svg');
+
+        $objArvoreAcaoItemAPI->setTarget(null);
+        $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi recebido\');');
+
+        $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+        return $objArvoreAcaoItemAPI;
     }
 
     public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO)
@@ -465,8 +488,8 @@ class PENIntegracao extends SeiIntegracao
 
             case 'pen_envio_processo_lote_cadastrar':
                 require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
-            break;      
-            
+            break;
+
             case 'pen_expedir_lote':
                 require_once dirname(__FILE__) . '/pen_expedir_lote.php';
             break;
@@ -621,9 +644,9 @@ class PENIntegracao extends SeiIntegracao
 
     /**
      * Verifica a compatibilidade e correta configuracao do módulo de Barramento, registrando mensagem de alerta no log do sistema
-     * 
+     *
      * Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
-     * caso de indisponibilidade momentânea do Barramento de Serviços.                        
+     * caso de indisponibilidade momentânea do Barramento de Serviços.
      */
     public static function verificarCompatibilidadeConfiguracoes(){
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
@@ -633,7 +656,7 @@ class PENIntegracao extends SeiIntegracao
         } catch (\Exception $e) {
             throw $e;
         }
-        
+
         try {
             $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo();
         } catch (\Exception $e) {
@@ -651,7 +674,7 @@ class PENIntegracao extends SeiIntegracao
 
     /**
      * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
-     * 
+     *
      * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
      * - Se resultado for IGUAL a 0, versões iguais
      * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
