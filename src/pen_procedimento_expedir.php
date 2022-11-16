@@ -386,7 +386,7 @@ function criarIFrameBarraProgresso() {
     iframe.id = nomeIFrameEnvioProcesso;
     iframe.name = nomeIFrameEnvioProcesso;
     iframe.setAttribute('frameBorder', '0');
-    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('scrolling', 'yes');
 
     return iframe;
 }
