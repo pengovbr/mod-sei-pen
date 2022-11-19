@@ -58,8 +58,14 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
         inner join sei.md_pen_tramite tra on pen.numero_registro=tra.numero_registro
         where protocolo_formatado=?",array(self::$protocoloTeste));
 
+        if (array_key_exists("id_tramite", $idtEnviado[0])) {
+            $idtEnviado=$idtEnviado[0]["id_tramite"];
+        }else{
+            $idtEnviado=$idtEnviado[0]["ID_TRAMITE"];
+        }
+
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v2/tramites/" . $idtEnviado[0]["id_tramite"]);
+        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v2/tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
@@ -110,7 +116,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
      //      return ($a->dataHoraOperacao < $b->dataHoraOperacao? -1: 1);
      //     });
 
-        $this->assertEquals(5, sizeof($saida->processo->itensHistorico) );
+        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
 
 
 

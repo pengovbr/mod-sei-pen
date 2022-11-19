@@ -56,8 +56,13 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         inner join sei.anexo an on an.id_protocolo=pp.id_protocolo_2
         where p.descricao=?",array($processo['DESCRICAO']));
 
+        if (array_key_exists("id_anexo", $idAnexo[0])) {
+            $id_Anexo=$idAnexo[0]["id_anexo"];
+        }else{
+            $id_Anexo=$idAnexo[0]["ID_ANEXO"];
+        }
 
-        $bancoOrgaoA->execute("delete from sei.anexo where id_anexo=?",array($idAnexo[0]['id_anexo']));
+        $bancoOrgaoA->execute("delete from sei.anexo where id_anexo=?",array($idAnexo));
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(

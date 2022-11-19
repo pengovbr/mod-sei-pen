@@ -47,9 +47,14 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $id_tramite = $bancoOrgaoA->query("select max(id_tramite) as id_tramite from sei.md_pen_componente_digital where protocolo = ?", array(self::$protocoloTeste));
+        $id_tramite = $bancoOrgaoA->query("select max(id_tramite) as id_tramite from md_pen_componente_digital where protocolo = ?", array(self::$protocoloTeste));
         //recusa o tramite contendo justificativa grande
-        $this->recusarTramite($this->servicoPEN, $id_tramite[0]["id_tramite"]);        
+        if (array_key_exists("id_tramite", $id_tramite[0])) {
+            $id_tramite=$id_tramite[0]["id_tramite"];
+        }else{
+            $id_tramite=$id_tramite[0]["ID_TRAMITE"];
+        }
+        $this->recusarTramite($this->servicoPEN, $id_tramite);        
     }
 
     /**

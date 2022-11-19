@@ -1327,6 +1327,30 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true, true);
             }
 
+
+            $arrComponenteDigital=$this->retornaComponentesImutaveis($objDocumentoDTO);
+
+            if(!empty($arrComponenteDigital)){
+
+
+                $objAnexoRN = new AnexoRN();
+                $objAnexoDTO = new AnexoDTO();
+                $objAnexoDTO->setNumIdAnexo($arrComponenteDigital[0]->getDblIdAnexoImutavel());
+                $objAnexoDTO->setStrSinAtivo("S");
+                $objAnexoDTO->retTodos();
+
+                $objAnexoDTO=$objAnexoRN->consultarRN0736($objAnexoDTO);
+                $strConteudoFS=file_get_contents($objAnexoRN->obterLocalizacao($objAnexoDTO));
+
+                $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoFS, true));
+                
+                if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital == $hashDoComponenteDigitalAnterior){
+                    $strConteudoAssinatura=$strConteudoFS;
+                }
+
+            }
+
+
             $objInformacaoArquivo['NOME'] = $strProtocoloDocumentoFormatado . ".html";
             $objInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
             $objInformacaoArquivo['TAMANHO'] = strlen($strConteudoAssinatura);
@@ -2035,6 +2059,15 @@ class ExpedirProcedimentoRN extends InfraRN {
                                 }
                             } else {
                                 $objDadosArquivo = $this->obterDadosArquivo($objDocumentoDTO, $strStaAssociacao);
+                                $dados=[
+                                    "objDocumentoDTO"=>$objDocumentoDTO,
+                                    "objDadosArquivo"=>$objDadosArquivo,
+                                    "dadosDoComponenteDigital"=>$dadosDoComponenteDigital,
+                                    "idProcedimentoPrincipal"=>$objComponenteDigitalDTO->getDblIdProcedimento()
+
+                                ];
+
+                                $this->salvarAnexoImutavel($dados);
                                 $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($objDadosArquivo['CONTEUDO'], XSD_BASE64BINARY);
     
                                 $parametros = new stdClass();
@@ -2065,6 +2098,99 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
         }
     }
+
+    
+    protected function retornaComponentesImutaveisControlado($objDocumentoDTO){
+
+        $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+        $objComponenteDigitalDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objComponenteDigitalDTO->setDblIdAnexoImutavel(null, InfraDTO::$OPER_DIFERENTE);
+        $objComponenteDigitalDTO->setStrTarjaLegada("N");
+        $objComponenteDigitalDTO->retTodos();
+
+        $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+        $arrComponenteDigital=$objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+        return $arrComponenteDigital;
+
+
+    }
+
+
+    protected function salvarAnexoImutavelControlado($dados){
+
+        try{
+
+        $objDocumentoDTO=$dados["objDocumentoDTO"];
+        $objDadosArquivo=$dados["objDadosArquivo"];
+        $dadosDoComponenteDigital=$dados["dadosDoComponenteDigital"];
+        $idProcedimentoPrincipal=$dados["idProcedimentoPrincipal"];
+
+
+        $arrComponenteDigital=$this->retornaComponentesImutaveis($objDocumentoDTO);
+
+        if(empty($arrComponenteDigital)){
+
+            $objAnexoRN = new AnexoRN();
+                    
+            $strConteudoAssinatura=$objDadosArquivo['CONTEUDO'];
+            $strNomeArquivoUploadHtml = $objAnexoRN->gerarNomeArquivoTemporario();
+
+            if (file_put_contents(DIR_SEI_TEMP.'/'.$strNomeArquivoUploadHtml, $strConteudoAssinatura) === false) {
+                throw new InfraException('Erro criando arquivo html temporário para envio do e-mail.');
+            }
+
+            
+            $objAnexoDTO = new AnexoDTO();
+            $objAnexoDTO->setNumIdAnexo($strNomeArquivoUploadHtml);
+            $objAnexoDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdDocumento());
+            $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+            $objAnexoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUploadHtml));
+            $objAnexoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+            $objAnexoDTO->setStrNome($objDocumentoDTO->getStrProtocoloDocumentoFormatado() . ".html");
+            $objAnexoDTO->setNumIdUnidade($objDocumentoDTO->getNumIdUnidadeResponsavel());
+            $objAnexoDTO->setStrSinAtivo("S");
+
+            
+            $objAnexoDTO=$objAnexoRN->cadastrarRN0172($objAnexoDTO);
+
+
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            // $objProcessoEletronicoDTO->setDblIdProcedimento($objDocumentoDTO->getDblIdProcedimento());
+            $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimentoPrincipal);
+
+            $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+            $objTramiteDTO=$objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+
+
+
+            $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+            $objComponenteDigitalDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+            $objComponenteDigitalDTO->setNumIdTramite($objTramiteDTO->getNumIdTramite());  
+            $objComponenteDigitalDTO->retTodos();
+            
+
+            $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+            $objComponenteDigitalDTO=$objComponenteDigitalBD->consultar($objComponenteDigitalDTO);
+            
+            $objComponenteDigitalDTO->setDblIdAnexoImutavel($objAnexoDTO->getNumIdAnexo());
+            $objComponenteDigitalDTO->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
+            $objComponenteDigitalDTO->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
+            $objComponenteDigitalDTO=$objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
+            
+
+
+
+        }
+
+
+        }catch(Exception $e){
+            throw new InfraException("Erro salvando anexo imutável", $e);
+        }
+
+        }
+
+
 
     private function corrigirNumeroOrdemComponentes($arrComponentesDigitaisDTO, $strProtocoloDocumento) {
         $arrOrdensComponentes = InfraArray::converterArrInfraDTO($arrComponentesDigitaisDTO, "Ordem");

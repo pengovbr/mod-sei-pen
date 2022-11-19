@@ -1013,6 +1013,7 @@ class ProcessoEletronicoRN extends InfraRN
                 $objComponenteDigitalDTOFiltro->setNumOrdemDocumento($objComponenteDigitalDTO->getNumOrdemDocumento());
 
                 if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) == 0){
+                    $objComponenteDigitalDTO->setStrTarjaLegada("N");
                     $objComponenteDigitalDTO = $objComponenteDigitalBD->cadastrar($objComponenteDigitalDTO);
                 }
                 else {

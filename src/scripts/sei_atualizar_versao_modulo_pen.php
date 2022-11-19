@@ -252,6 +252,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                     $this->instalarV30121();
                 case '3.1.21':
                     $this->instalarV30122();
+                case '3.1.22':
+                    $this->instalarV3020();
                     break;
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2466,6 +2468,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objMetaBanco = $this->inicializarObjMetaBanco();
         $objMetaBanco->renomearTabela("md_pen_rel_expedir_lote_procedimento", "md_pen_rel_expedir_lote");
         $this->atualizarNumeroVersao("3.1.22");
+    }  
+
+    protected function instalarV3020()
+    {
+       
+        $this->atualizarNumeroVersao("3.2.0");
+
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'id_anexo_imutavel', $objInfraMetaBD->tipoNumeroGrande(), 'null');
+        $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'tarja_legada', $objInfraMetaBD->tipoTextoFixo(1), 'null');
+
+        BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set tarja_legada='S'");
+ 
     }  
 }
 

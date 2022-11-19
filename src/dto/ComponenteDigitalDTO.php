@@ -31,6 +31,8 @@ class ComponenteDigitalDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoReferenciado', 'ordem_documento_referenciado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'OrdemDocumentoAnexado', 'ordem_documento_anexado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinEnviar', 'sin_enviar');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdAnexoImutavel', 'id_anexo_imutavel');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'TarjaLegada', 'tarja_legada');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaTipoTramite', 'sta_tipo_tramite', 'md_pen_tramite');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'TicketEnvioComponentes', 'ticket_envio_componentes', 'md_pen_tramite');
@@ -41,9 +43,9 @@ class ComponenteDigitalDTO extends InfraDTO {
 
 
     $this->configurarPK('NumeroRegistro', InfraDTO::$TIPO_PK_INFORMADO);
-    // $this->configurarPK('IdProcedimento', InfraDTO::$TIPO_PK_INFORMADO);
+    $this->configurarPK('IdProcedimento', InfraDTO::$TIPO_PK_INFORMADO);
     $this->configurarPK('IdDocumento', InfraDTO::$TIPO_PK_INFORMADO);
-    // $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
+    $this->configurarPK('IdTramite', InfraDTO::$TIPO_PK_INFORMADO);
 
     $this->configurarFK('NumeroRegistro', 'md_pen_tramite', 'numero_registro', InfraDTO::$TIPO_FK_OBRIGATORIA);
     $this->configurarFK('IdTramite', 'md_pen_tramite', 'id_tramite', InfraDTO::$TIPO_FK_OBRIGATORIA);

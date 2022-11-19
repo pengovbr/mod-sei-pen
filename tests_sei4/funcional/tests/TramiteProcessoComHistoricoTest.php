@@ -53,13 +53,19 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
 
         // Captura o IDT do processo
-        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM sei.protocolo p 
-        inner join sei.md_pen_processo_eletronico pen on p.id_protocolo=pen.id_procedimento
-        inner join sei.md_pen_tramite tra on pen.numero_registro=tra.numero_registro
+        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM protocolo p 
+        inner join md_pen_processo_eletronico pen on p.id_protocolo=pen.id_procedimento
+        inner join md_pen_tramite tra on pen.numero_registro=tra.numero_registro
         where protocolo_formatado=?",array(self::$protocoloTeste));
 
+        if (array_key_exists("id_tramite", $idtEnviado[0])) {
+            $idtEnviado=$idtEnviado[0]["id_tramite"];
+        }else{
+            $idtEnviado=$idtEnviado[0]["ID_TRAMITE"];
+        }
+
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado[0]["id_tramite"]);
+        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
