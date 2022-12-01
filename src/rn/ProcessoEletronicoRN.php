@@ -455,8 +455,8 @@ class ProcessoEletronicoRN extends InfraRN
             curl_setopt($curl, CURLOPT_HEADER, false);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -1013,7 +1013,6 @@ class ProcessoEletronicoRN extends InfraRN
                 $objComponenteDigitalDTOFiltro->setNumOrdemDocumento($objComponenteDigitalDTO->getNumOrdemDocumento());
 
                 if($objComponenteDigitalBD->contar($objComponenteDigitalDTOFiltro) == 0){
-                    $objComponenteDigitalDTO->setStrTarjaLegada("N");
                     $objComponenteDigitalDTO = $objComponenteDigitalBD->cadastrar($objComponenteDigitalDTO);
                 }
                 else {
