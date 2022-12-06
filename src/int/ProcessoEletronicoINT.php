@@ -43,12 +43,14 @@ class ProcessoEletronicoINT extends InfraINT {
         return $estruturas;
     }
 
-    public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa) {
+    public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false) {
+       
+       
         $objConecaoWebServerRN = new ProcessoEletronicoRN();
         $arrObjEstruturas = $objConecaoWebServerRN->listarEstruturas(
             $idRepositorioEstrutura,
             $strPalavrasPesquisa,
-            null, null, null, null, null, true, null
+            null, null, null, null, null, true, $bolPermiteEnvio
         );
 
         return static::gerarHierarquiaEstruturas($arrObjEstruturas);

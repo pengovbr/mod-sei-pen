@@ -489,7 +489,13 @@ class PENIntegracao extends SeiIntegracao
         switch ($_GET['acao_ajax']) {
 
             case 'pen_unidade_auto_completar_expedir_procedimento':
-                $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa']);
+
+                $bolPermiteEnvio = false;
+                if ($_GET['acao'] != 'pen_procedimento_expedir') {
+                    $bolPermiteEnvio = true;
+                }
+
+                $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
 
                 if (count($arrObjEstruturaDTO) > 0) {
                     $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');

@@ -264,6 +264,7 @@ class ProcessoEletronicoRN extends InfraRN
     public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw=false)
     {
         try {
+
             $parametros = new stdClass();
             $parametros->filtroDeEstruturas = new stdClass();
             $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
@@ -357,7 +358,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     public function listarEstruturas($idRepositorioEstrutura, $nome='', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
-        $nomeUnidade=null, $siglaUnidade=null, $offset=null, $registrosPorPagina=null, $parBolPermiteRecebimento=null, $parBolPermiteEnvio=null)
+    $nomeUnidade=null, $siglaUnidade=null, $offset=null, $registrosPorPagina=null, $parBolPermiteRecebimento=null, $parBolPermiteEnvio=null)
     {
         $arrObjEstruturaDTO = array();
 
