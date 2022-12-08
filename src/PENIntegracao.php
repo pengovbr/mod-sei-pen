@@ -191,7 +191,20 @@ class PENIntegracao extends SeiIntegracao
                 if (!empty($objPenProtocoloDTO)) {
                     if ($objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
                         $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
-                    } else {
+                    }
+                }
+                
+                $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
+                $objProcedimentoAndamentoDTO->retTodos();
+                $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
+                $objProcedimentoAndamentoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+                $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
+                $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
+                
+                if (!empty($objProcedimentoAndamentoDTO)) {
+                    $penTramiteProcessadoRN = new PenTramiteProcessadoRN();
+                    if ($penTramiteProcessadoRN->isTramiteRecebidoCancelado($objProcedimentoAndamentoDTO->getDblIdTramite())) {
                         $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
                     }
                 }
@@ -238,7 +251,20 @@ class PENIntegracao extends SeiIntegracao
             if (!empty($objPenProtocoloDTO)) {
                 if($objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
                     $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
-                } else {
+                }
+            }
+
+            $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
+            $objProcedimentoAndamentoDTO->retTodos();
+            $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
+            $objProcedimentoAndamentoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+            $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
+            $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
+            
+            if (!empty($objProcedimentoAndamentoDTO)) {
+                $penTramiteProcessadoRN = new PenTramiteProcessadoRN();
+                if ($penTramiteProcessadoRN->isTramiteRecebidoCancelado($objProcedimentoAndamentoDTO->getDblIdTramite())) {
                     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
                 }
             }
