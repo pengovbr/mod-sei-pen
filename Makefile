@@ -2,7 +2,7 @@
 
 
 # Parâmetros de execução do comando MAKE
-versao_sei=3
+versao_sei=4
 teste=
 
 MODULO_NOME = pen
