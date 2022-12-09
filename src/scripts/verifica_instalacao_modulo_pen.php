@@ -62,7 +62,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         if($objVerificadorInstalacaoRN->verificarConfiguracaoGearman()){
             $fnPrint("- Conexão com o servidor de processamento de tarefas Gearman realizada com sucesso", 1);
         } else {
-            throw new Exception($fnPrint("--- servidor".$configGearman["PEN"]["Gearman"]." identificados para o gearmand, tentando proceder com a conexão ----", 0));
+            $fnPrint("- ERROR: Servidor".$configGearman["PEN"]["Gearman"]." identificados para o gearmand, tentando proceder com a conexão", 1);
         }
 
         sleep(1);
