@@ -300,11 +300,11 @@ class VerificadorInstalacaoRN extends InfraRN
         try{
             $objGearmanClient = new GearmanClient();
             $objGearmanClient->addServer($strGearmanServidor, $strGearmanPorta);
+            $objGearmanClient->setTimeout(10000);
             $objGearmanClient->ping("health");
         } catch (\Exception $e) {
             $strMensagemErro = "Não foi possível conectar ao servidor Gearman (%s, %s). Erro: %s";
-            $strMensagem = "Não foi possível conectar ao servidor Gearman ($this->strGearmanServidor, $this->strGearmanPorta). Erro:" . $objGearmanClient->error();
-            $strMensagem = sprintf($strMensagemErro, $this->strGearmanServidor, $this->strGearmanPorta, $objGearmanClient->error());
+            $strMensagem = sprintf($strMensagemErro, $strGearmanServidor, $strGearmanPorta, $objGearmanClient->error());
             throw new InfraException($strMensagem);
         }
 
