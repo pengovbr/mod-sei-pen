@@ -404,7 +404,7 @@ Como exemplo de instalação das bibliotecas do Gearman considerando uma distrib
 ```bash
 # CentoOS/RHEL/Fedora
 yum install epel-release && yum update # Caso necessário
-yum install libgearman libgearman-devel php56*-pecl-gearman
+pecl install gearman
 
 # Debian/Ubuntu
 apt-get install libgearman libgearman-dev
