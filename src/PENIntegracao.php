@@ -168,6 +168,14 @@ class PENIntegracao extends SeiIntegracao
             $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
         }
 
+        $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
+        $arrStrIcone = $this->montarIconeRecebido($arrDblIdProcedimento, $arrStrIcone);
+
+        return $arrStrIcone;
+    }
+
+    private function montarIconeRecusa($arrDblIdProcedimento = array(), $arrStrIcone = array())
+    {
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
         $objProcedimentoDTO->retDblIdProcedimento();
@@ -188,25 +196,40 @@ class PENIntegracao extends SeiIntegracao
                 $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
                 $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
-                if (!empty($objPenProtocoloDTO)) {
-                    if ($objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+                if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+                    if (array_key_exists($dblIdProcedimento, $arrStrIcone)) {
+                        $arrStrIconeIcon = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
+                        $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrStrIconeIcon);
+                    } else {
                         $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
                     }
                 }
-                
-                $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
-                $objProcedimentoAndamentoDTO->retTodos();
-                $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
-                $objProcedimentoAndamentoDTO->setDblIdProcedimento($dblIdProcedimento);
+            }
+        }
 
-                $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
-                $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
-                
-                if (!empty($objProcedimentoAndamentoDTO)) {
-                    $penTramiteProcessadoRN = new PenTramiteProcessadoRN();
-                    if ($penTramiteProcessadoRN->isTramiteRecebidoCancelado($objProcedimentoAndamentoDTO->getDblIdTramite())) {
-                        $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
-                    }
+        return $arrStrIcone;
+    }
+
+    private function montarIconeRecebido($arrDblIdProcedimento = array(), $arrStrIcone = array())
+    {
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($arrDblIdProcedimento, InfraDTO::$OPER_IN);
+        $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->retNumIdAtividade();
+        $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+        $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
+        $arrObjAtividadeDTO = $objAtividadeBD->listar($objAtividadeDTO);
+        
+        
+        if (!empty($arrObjAtividadeDTO)) {
+            foreach ($arrObjAtividadeDTO as $ObjAtividadeDTO) {
+                $dblIdProcedimento = $ObjAtividadeDTO->getDblIdProcedimentoProtocolo();
+                if (array_key_exists($dblIdProcedimento, $arrStrIcone)) {
+                    $arrStrIconeIcon = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+                    $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrStrIconeIcon);
+                } else {
+                    $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
                 }
             }
         }
@@ -254,19 +277,17 @@ class PENIntegracao extends SeiIntegracao
                 }
             }
 
-            $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();
-            $objProcedimentoAndamentoDTO->retTodos();
-            $objProcedimentoAndamentoDTO->setNumMaxRegistrosRetorno(1);
-            $objProcedimentoAndamentoDTO->setDblIdProcedimento($dblIdProcedimento);
-
-            $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD(BancoSEI::getInstance());
-            $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
+            $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
             
-            if (!empty($objProcedimentoAndamentoDTO)) {
-                $penTramiteProcessadoRN = new PenTramiteProcessadoRN();
-                if ($penTramiteProcessadoRN->isTramiteRecebidoCancelado($objProcedimentoAndamentoDTO->getDblIdTramite())) {
-                    $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
-                }
+            if (!empty($objAtividadeDTO)) {
+                $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
             }
         } else {
             return array();

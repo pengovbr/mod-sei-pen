@@ -132,30 +132,4 @@ class PenTramiteProcessadoRN extends InfraRN {
         }
 
     }
-
-    /**
-     * Método que verifica se o trâmite em questão foi recebido
-     *
-     * @param integer $parNumIdTramite
-     * @return boolean
-     */
-    public function isTramiteRecebidoCancelado($parNumIdTramite){
-
-        //Instancia a classe processo eletrônico
-        $processoEletronicoRN = new ProcessoEletronicoRN();
-
-        //Busca os dados do trâmite
-        $arrObjTramite = $processoEletronicoRN->consultarTramites($parNumIdTramite);
-        $objTramite = $arrObjTramite[0];
-        //Verifica se o trâmite em questão. foi recusado o cancelado
-        if(
-            $objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO ||
-            $objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-        ){
-            return true;
-        }else{
-            return false;
-        }
-
-    }
 }
