@@ -2449,6 +2449,39 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
+    private function validarMudancaOrdemDocumentos(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao)
+    {
+        //Busca metadados do processo registrado em trâmite anterior
+        $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($objProcedimentoDTO->getDblIdProcedimento());
+
+        //Construção do cabeçalho para envio do processo
+        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+        $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+
+        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
+        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
+        if (!is_null(count($objTramitesAnteriores)) && count($objTramitesAnteriores)) {
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+            $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
+            $arrObjAtividadeDTO = $objAtividadeBD->listar($objAtividadeDTO);
+            
+            if (!is_null($arrObjAtividadeDTO) && count($arrObjAtividadeDTO)) {
+                // "Inconsist?ncia identificada no documento de ordem \'1\' do processo tramitado por este NRE, \'0000004460802022\', com protocolo \'99990.000001/2022-20\': hash de ao menos um componente digital n?o confere"
+                $mensagem = "Inconsistência identificada no documento de ordem do processo tramitado por este NRE, " . $objMetadadosProcessoTramiteAnterior->NRE
+                            . " com protocolo " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()
+                            . ": a ordem dos documentos foram modificadas na árvore do processo";
+                $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
+            }
+        }
+    }
+
     private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao) {
         $bolProcedimentoCompartilhado = false;
         $objProtocoloFederacaoDTO = new ProtocoloFederacaoDTO();
@@ -2504,7 +2537,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-
+        $this->validarMudancaOrdemDocumentos($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+        
         try{
             if(!$bolSinProcessamentoEmLote){
                 $this->validarPossibilidadeBloqueio($objProcedimentoDTO);
