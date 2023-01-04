@@ -148,10 +148,10 @@ class PENIntegracao extends SeiIntegracao
 
         //Apresenta o botão de cancelar trâmite
         $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
-        $numIdUnidadeGeradoraProtocolo = $objProcedimentoDTO->getNumIdUnidadeGeradoraProtocolo();
         if (
-            $numIdUnidadeAtual == $numIdUnidadeGeradoraProtocolo &&
-            $objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
+            $objAtividadeDTO &&
+            $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) &&
+            $objAtividadeDTO->getNumIdUnidade() == $numIdUnidadeAtual
         ) {
             $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
             $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';

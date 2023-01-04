@@ -3090,6 +3090,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             InfraDTO::$OPER_IN);
             $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
             $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdUnidade();
             $objAtividadeDTO->retNumIdAtividade();
             $objAtividadeDTO->retNumIdTarefa();
 
