@@ -237,8 +237,11 @@ class VerificadorInstalacaoRN extends InfraRN
             curl_setopt($curl, CURLOPT_HEADER, 0);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+
+            if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            }
             curl_setopt($curl, CURLOPT_SSLCERT, $strLocalizacaoCertificadoDigital);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $strSenhaCertificadoDigital);
 
