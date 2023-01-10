@@ -254,6 +254,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                     $this->instalarV30122();
                 case '3.1.22':
                     $this->instalarV3020();
+                case '3.2.0':
+                    $this->instalarV3021();
                     break;
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2482,7 +2484,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set tarja_legada='S'");
  
+    }
+
+    protected function instalarV3021()
+    {
+        $this->atualizarNumeroVersao("3.2.1");
     }  
+  
 }
 
 

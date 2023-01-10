@@ -32,8 +32,8 @@ class VerificadorInstalacaoRN extends InfraRN
     // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X
     const COMPATIBILIDADE_MODULO_SEI = array(
         '3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7', 
-        '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7',
-        '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5'
+        '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7', '4.0.8', '4.0.9',
+        '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.9.12'
     );
  
     public function __construct() {
