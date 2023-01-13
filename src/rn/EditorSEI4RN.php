@@ -1832,11 +1832,11 @@ class EditorSEI4RN extends InfraRN
 
   protected function consultarHtmlVersaoConectado($dados)
   {
-
     $parObjEditorDTO=$dados["parObjEditorDTO"];
     $montarTarja=$dados["montarTarja"];
     $controleURL=$dados["controleURL"];
     $bolTarjaLegada402=$dados["bolTarjaLegada402"];
+    $bolSiglaSistemaSUPER = $dados["bolSiglaSistemaSUPER"];
 
     $dblIdProcedimento=null;
     if ($parObjEditorDTO->getDblIdDocumento()!=null) {
@@ -1904,6 +1904,12 @@ class EditorSEI4RN extends InfraRN
       $arrCssContadores=array_combine($arrCssContadores[1],$arrCssContadores[2]);
     } else {
       $arrCssContadores=null;
+    }
+    
+    if($bolSiglaSistemaSUPER){
+      $pattern = '/<title>SUPER\/';
+      $replacement = "<title>SEI/";
+      $strTitulo = preg_replace($pattern, $replacement, $strTitulo);
     }
 
     $strHtml = '';

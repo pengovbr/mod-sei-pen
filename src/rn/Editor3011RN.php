@@ -1564,7 +1564,7 @@ class Editor3011RN extends InfraRN
     $montarTarja=$dados["montarTarja"];
     $controleURL=$dados["controleURL"];
     $bolTarjaLegada402=$dados["bolTarjaLegada402"];
-
+    $bolSiglaSistemaSUPER = $dados["bolSiglaSistemaSUPER"];
 
     if ($parObjEditorDTO->getDblIdDocumento()!=null) {
       $objDocumentoDTO = new DocumentoDTO();
@@ -1629,6 +1629,12 @@ class Editor3011RN extends InfraRN
       $arrCssContadores=array_combine($arrCssContadores[1],$arrCssContadores[2]);
     } else {
       $arrCssContadores=null;
+    }
+
+    if($bolSiglaSistemaSUPER){
+      $pattern = '/<title>SUPER\/';
+      $replacement = "<title>SEI/";
+      $strTitulo = preg_replace($pattern, $replacement, $strTitulo);
     }
 
     $strHtml = '';
