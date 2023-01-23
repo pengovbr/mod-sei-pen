@@ -96,7 +96,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
             $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
-            // Aplicação de scripts de atualização de forma incremental            
+            // Aplicação de scripts de atualização de forma incremental
             $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
             switch ($strVersaoModuloPen) {
                 case '':
@@ -1752,22 +1752,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         //Na versão 3.1.0 do SEI, houve uma mudança na rotina de atualização das sequences do banco de dados,
         //deixando de se utilizar a classe VersaoRN para utilizar a nova classe ScriptRN.
         //Devido a esta mudança, é necessário avaliar qual a atual versão do SEI executar a rotina correta
-
-        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.1.0 -> 030100)
-        $numVersaoAtualSEI = explode('.', SEI_VERSAO);
-        $numVersaoAtualSEI = array_map(function ($item) {
-            return str_pad($item, 2, '0', STR_PAD_LEFT);
-        }, $numVersaoAtualSEI);
-        $numVersaoAtualSEI = intval(join($numVersaoAtualSEI));
-
-        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.1.0 -> 030100)
-        $numVersaoMudancaAtualizarSequencias = explode('.', '3.1.0');
-        $numVersaoMudancaAtualizarSequencias = array_map(function ($item) {
-            return str_pad($item, 2, '0', STR_PAD_LEFT);
-        }, $numVersaoMudancaAtualizarSequencias);
-        $numVersaoMudancaAtualizarSequencias = intval(join($numVersaoMudancaAtualizarSequencias));
-
-        if ($numVersaoMudancaAtualizarSequencias <= $numVersaoAtualSEI) {
+        if (InfraUtil::compararVersoes('3.1.0', "<=", SEI_VERSAO)) {
             //Procedimento de atualização de sequências compatível com SEI 3.1.X
             $objScriptRN = new ScriptRN();
             $objScriptRN->atualizarSequencias();
@@ -2436,43 +2421,43 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
         $this->atualizarNumeroVersao("3.1.16");
     }
-    
+
 
     protected function instalarV30117()
     {
         $this->atualizarNumeroVersao("3.1.17");
-    }   
-    
+    }
+
     protected function instalarV30118()
     {
         $this->atualizarNumeroVersao("3.1.18");
-    }  
+    }
 
     protected function instalarV30119()
     {
         $this->atualizarNumeroVersao("3.1.19");
-    }  
+    }
 
     protected function instalarV30120()
     {
         $this->atualizarNumeroVersao("3.1.20");
-    }  
+    }
 
     protected function instalarV30121()
     {
         $this->atualizarNumeroVersao("3.1.21");
-    }  
+    }
 
     protected function instalarV30122()
     {
         $objMetaBanco = $this->inicializarObjMetaBanco();
         $objMetaBanco->renomearTabela("md_pen_rel_expedir_lote_procedimento", "md_pen_rel_expedir_lote");
         $this->atualizarNumeroVersao("3.1.22");
-    }  
+    }
 
     protected function instalarV3020()
     {
-       
+
         $this->atualizarNumeroVersao("3.2.0");
 
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -2481,14 +2466,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'tarja_legada', $objInfraMetaBD->tipoTextoFixo(1), 'null');
 
         BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set tarja_legada='S'");
- 
-    }  
+
+    }
 }
 
 
 /**
  * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
- * 
+ *
  * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
  * - Se resultado for IGUAL a 0, versões iguais
  * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
@@ -2513,16 +2498,15 @@ function compararVersoes($strVersao1, $strVersao2)
 
 try {
     session_start();
-
-    if (compararVersoes(SEI_VERSAO, "4.0.0") >= 0) {
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")) {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
         SessaoSEI::getInstance(false);
         BancoSEI::getInstance()->setBolScript(true);
-        
+
         $objVersaoSeiRN = new VersaoSei4RN();
         $strNomeParametro = $objVersaoSeiRN->verificarVersaoInstalada();
-        $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);        
+        $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
         $objVersaoSeiRN->setStrNome('Integração Processo Eletrônico Nacional - PEN');
         $objVersaoSeiRN->setStrVersaoAtual(PENIntegracao::VERSAO_MODULO);
         $objVersaoSeiRN->setStrParametroVersao($strNomeParametro);

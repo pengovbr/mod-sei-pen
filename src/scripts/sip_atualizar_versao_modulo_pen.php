@@ -257,7 +257,7 @@ class PenAtualizarSipRN extends InfraRN
                 case '3.1.14':
                     $this->instalarV30115();
                 case '3.1.15':
-                    $this->instalarV30116();            
+                    $this->instalarV30116();
                 case '3.1.16':
                     $this->instalarV30117();
                 case '3.1.17':
@@ -580,7 +580,7 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Obtém id do item de menu, baseado no sistema, rótulo e id do item superior
-     * 
+     *
      * A mesma função disponibilizada pelas classe ScriptSip, não existe a possibilidade de filtra a pesquisa
      * pelo id do item superior, o que pode gerar conflito entre diferentes módulos.
      */
@@ -1717,7 +1717,7 @@ class PenAtualizarSipRN extends InfraRN
         };
 
         // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
-        if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
+        if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
             $numIdSistema = $this->getNumIdSistema('SEI');
             $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
 
@@ -1741,66 +1741,41 @@ class PenAtualizarSipRN extends InfraRN
     protected function instalarV30116()
     {
         $this->atualizarNumeroVersao("3.1.16");
-    }    
+    }
 
     protected function instalarV30117()
     {
         $this->atualizarNumeroVersao("3.1.17");
-    }    
+    }
 
     protected function instalarV30118()
     {
         $this->atualizarNumeroVersao("3.1.18");
-    } 
+    }
 
     protected function instalarV30119()
     {
         $this->atualizarNumeroVersao("3.1.19");
-    } 
+    }
 
     protected function instalarV30120()
     {
         $this->atualizarNumeroVersao("3.1.20");
     }
-    
+
     protected function instalarV30121()
     {
         $this->atualizarNumeroVersao("3.1.21");
-    } 
+    }
 
     protected function instalarV30122()
     {
         $this->atualizarNumeroVersao("3.1.22");
-    } 
+    }
     protected function instalarV3020()
     {
         $this->atualizarNumeroVersao("3.2.0");
-    } 
-}
-
-/**
- * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
- * 
- * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
- * - Se resultado for IGUAL a 0, versões iguais
- * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
- * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
- */
-function compararVersoes($strVersao1, $strVersao2)
-{
-    $numVersao1 = explode('.', $strVersao1);
-    $numVersao1 = array_map(function ($item) {
-        return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao1);
-    $numVersao1 = intval(join($numVersao1));
-
-    $numVersao2 = explode('.', $strVersao2);
-    $numVersao2 = array_map(function ($item) {
-        return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao2);
-    $numVersao2 = intval(join($numVersao2));
-
-    return $numVersao1 - $numVersao2;
+    }
 }
 
 
@@ -1809,8 +1784,7 @@ try {
     SessaoSip::getInstance(false);
     $objVersaoSipRN = null;
 
-
-    if (compararVersoes(SIP_VERSAO, "3.0.0") >= 0) {
+    if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
         $objInfraParametro = new InfraParametro(BancoSip::getInstance());
 
         SessaoSip::getInstance(false);

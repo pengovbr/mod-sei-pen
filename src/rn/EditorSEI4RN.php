@@ -1,8 +1,8 @@
 <?
 /**
 Criado a partir da classe EditorRN da versao 4.0
-A modificacao nessa classe impediu gerar o documento exatamente da mesma forma que foi 
-gerado originalmente 
+A modificacao nessa classe impediu gerar o documento exatamente da mesma forma que foi
+gerado originalmente
  */
 
 class EditorSEI4RN extends InfraRN
@@ -2034,13 +2034,14 @@ class EditorSEI4RN extends InfraRN
               "objDocumentoDTO"=>$objDocumentoDTO,
               "controleURL"=>$controleURL
             ];
+
             //na versao 4.0.3 houve uma alteracao na escrita da tarja
-            if($numVersaoAtual==40003){
-              $strHtml .= $objAssinaturaRN->montarTarjasURL403($dados);
-            }elseif($numVersaoAtual>40003){
-              $strHtml .= $objAssinaturaRN->montarTarjasURL404($dados);
-            }else{
-              $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
+            if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.4")){
+                $strHtml .= $objAssinaturaRN->montarTarjasURL404($dados);
+            } elseif(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.3")){
+                $strHtml .= $objAssinaturaRN->montarTarjasURL403($dados);
+            } else {
+                $strHtml .= $objAssinaturaRN->montarTarjasURL($dados);
             }
           }
         }
@@ -3375,7 +3376,7 @@ class EditorSEI4RN extends InfraRN
     foreach ($atributos as $arr) {
       $data[$arr[1]]=$arr[3];
     }
-    
+
 
     if (!isset($data['i'], $data['p'], $data[$staTipoLinkFederacao])) {
       $bolErro=true;
@@ -3422,7 +3423,7 @@ class EditorSEI4RN extends InfraRN
       foreach ($atributos as $arr) {
         $data[$arr[1]]=$arr[3];
       }
-      
+
       if (!isset($data['i'], $data['p'], $data[$staTipoLinkFederacao])) {
         continue;
       }
@@ -3591,7 +3592,7 @@ class EditorSEI4RN extends InfraRN
     }
 
   }
-  
+
   private function montarTagsContato(ContatoDTO $objContatoDTO, $strTipo){
 
     if ($objContatoDTO->getStrStaGenero()==ContatoRN::$TG_MASCULINO){
@@ -3747,12 +3748,12 @@ class EditorSEI4RN extends InfraRN
     if (($strTag = $objContatoDTO->getStrTelefoneCelular())!=''){
       self::$arrTags['telefone_celular_'.$strTipo] = $strTag;
     }
-    
+
   }
-  
+
   public static function converterHTML($strConteudo){
-    return str_replace(array('°','º','ª','¹','²','³','£','¢','§','¬'), 
-                       array('&deg;','&ordm;','&ordf;','&sup1;','&sup2;','&sup3;','&pound;','&cent;','&sect;','&not;'), 
+    return str_replace(array('°','º','ª','¹','²','³','£','¢','§','¬'),
+                       array('&deg;','&ordm;','&ordf;','&sup1;','&sup2;','&sup3;','&pound;','&cent;','&sect;','&not;'),
                        InfraString::acentuarHTML($strConteudo));
   }
 

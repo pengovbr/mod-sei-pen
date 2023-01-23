@@ -84,8 +84,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     private $contadorDaBarraDeProgresso;
 
-    public function __construct()
-    {
+    public function __construct(){
         parent::__construct();
 
         //TODO: Remover criao de objetos de negcio no construtor da classe para evitar problemas de performance desnecessrios
@@ -219,7 +218,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
             $param->novoTramiteDeProcesso->processo = $objProcesso;
             $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
-            
+
             $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
             $this->lancarEventoEnvioMetadados($numIdTramite);
 
@@ -379,7 +378,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             foreach ($parObjProcesso->documento as $objDoc)
             {
                 $arrComponentesDigitais = is_array($objDoc->componenteDigital) ? $objDoc->componenteDigital : array($objDoc->componenteDigital);
-                foreach ($arrComponentesDigitais as $objComponenteDigital) {   
+                foreach ($arrComponentesDigitais as $objComponenteDigital) {
                     $strHashComponente = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
                     if(!in_array($strHashComponente, $arrHashIndexados)){
                         $arrHashIndexados[] = $strHashComponente;
@@ -533,7 +532,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objProcedimentoHistoricoDTO->setDblIdProcedimento($dblIdProcedimento);
         $objProcedimentoHistoricoDTO->setStrStaHistorico(ProcedimentoRN::$TH_TOTAL);
         $objProcedimentoHistoricoDTO->setStrSinGerarLinksHistorico('N');
-        
+
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoDTO = $objProcedimentoRN->consultarHistoricoRN1025($objProcedimentoHistoricoDTO);
         $arrObjAtividadeDTO = $objProcedimentoDTO->getArrObjAtividadeDTO();
@@ -549,7 +548,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objOperacao->dataHoraOperacao = $this->objProcessoEletronicoRN->converterDataWebService($objAtividadeDTO->getDthAbertura());
             $objOperacao->unidadeOperacao = $objAtividadeDTO->getStrDescricaoUnidade()?utf8_encode($objAtividadeDTO->getStrDescricaoUnidade()):"NA";
             $objOperacao->operacao = $objAtividadeDTO->getStrNomeTarefa()?$this->objProcessoEletronicoRN->reduzirCampoTexto(strip_tags(utf8_encode($objAtividadeDTO->getStrNomeTarefa())),1000):"NA";
-            $objOperacao->usuario = $objAtividadeDTO->getStrNomeUsuarioOrigem()?utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem()):"NA";          
+            $objOperacao->usuario = $objAtividadeDTO->getStrNomeUsuarioOrigem()?utf8_encode($objAtividadeDTO->getStrNomeUsuarioOrigem()):"NA";
             $arrObjOperacao[] = $objOperacao;
         }
 
@@ -924,11 +923,11 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objComponenteDigitalDTO->retTodos();
                 $objComponenteDigitalDTO->setDblIdDocumento($documentoDTO->getDblIdDocumento());
                 $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-    
+
                 if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0){
                     $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
                     $componenteDigital = $arrobjComponenteDigitalDTO[0];
-    
+
                     $documento->componenteDigital = new stdClass();
                     $documento->componenteDigital->ordem = 1;
                     $documento->componenteDigital->nome = utf8_encode($componenteDigital->getStrNome());
@@ -938,13 +937,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $documento->componenteDigital->tipoDeConteudo = $componenteDigital->getStrTipoConteudo();
                     $documento->componenteDigital->idAnexo = $componenteDigital->getNumIdAnexo();
                     $documento->componenteDigital = $this->atribuirDadosAssinaturaDigital($documentoDTO, $documento->componenteDigital, $componenteDigital->getStrHashConteudo());
-    
+
                     if($componenteDigital->getStrMimeType() == 'outro'){
                         $documento->componenteDigital->dadosComplementaresDoTipoDeArquivo = 'outro';
                     }
                 }else{
                     $this->atribuirComponentesDigitais($documento, $documentoDTO, $dblIdProcedimento);
-                }           
+                }
             }else{
                 $this->atribuirComponentesDigitais($documento, $documentoDTO, $dblIdProcedimento);
             }
@@ -995,7 +994,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->retNumCodigoEspecie();
         $objComponenteDigitalDTO->retStrNomeEspecieProdutor();
-        
+
         // Verifica se o documento é de um processo anexado ou não e busca no
         // campo correto
         if(isset($parMetaDocumento->idProcedimentoAnexadoSEI)){
@@ -1004,7 +1003,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         else{
             $objComponenteDigitalDTO->setDblIdProcedimento($dblIdProcedimento);
         }
-        
+
         $objComponenteDigitalDTO->setDblIdDocumento($dblIdDocumento);
         $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
         $objComponenteDigitalDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
@@ -1127,37 +1126,37 @@ class ExpedirProcedimentoRN extends InfraRN {
             if(!isset($objDadosArquivos) || count($objDadosArquivos) == 0){
                 throw new InfraException('Erro durante obtenção de informações sobre o componente digital do documento {$objDocumentoDTO->getStrProtocoloDocumentoFormatado()}.');
             }
-    
+
             $strAlgoritmoHash = self::ALGORITMO_HASH_DOCUMENTO;
             $hashDoComponenteDigital = $objDadosArquivos['HASH_CONTEUDO'];
             $strAlgoritmoHash = $objDadosArquivos['ALGORITMO_HASH_CONTEUDO'];
-    
+
             //TODO: Revisar tal implementação para atender a gerao de hash de arquivos grandes
             $objComponenteDigital = new stdClass();
             $objComponenteDigital->ordem = $numOrdemComponente;
             $objComponenteDigital->nome = utf8_encode($objDadosArquivos["NOME"]);
             $objComponenteDigital->hash = new SoapVar("<hash algoritmo='{$strAlgoritmoHash}'>{$hashDoComponenteDigital}</hash>", XSD_ANYXML);
             $objComponenteDigital->tamanhoEmBytes = $objDadosArquivos['TAMANHO'];
-    
+
             //TODO: Validar os tipos de mimetype de acordo com o WSDL do SEI
             //Caso no identifique o tipo correto, informar o valor [outro]
             $objComponenteDigital->mimeType = $objDadosArquivos['MIME_TYPE'];
             $objComponenteDigital->tipoDeConteudo = $this->obterTipoDeConteudo($objDadosArquivos['MIME_TYPE']);
             $objComponenteDigital = $this->atribuirDadosAssinaturaDigital($objDocumentoDTO, $objComponenteDigital, $hashDoComponenteDigital);
-    
+
             if($objDadosArquivos['MIME_TYPE'] == 'outro'){
                 $objComponenteDigital->dadosComplementaresDoTipoDeArquivo = $objDadosArquivos['dadosComplementaresDoTipoDeArquivo'];
             }
-    
+
             //TODO: Preencher dados complementares do tipo de arquivo
             //$objComponenteDigital->dadosComplementaresDoTipoDeArquivo = '';
-    
+
             //TODO: Carregar informações da assinatura digital
             //$this->atribuirAssinaturaEletronica($objComponenteDigital, $objDocumentoDTO);
-    
+
             $objComponenteDigital->idAnexo = $objDadosArquivos['ID_ANEXO'];
 
-            $objDocumento->componenteDigital[] = $objComponenteDigital; 
+            $objDocumento->componenteDigital[] = $objComponenteDigital;
         }
 
         return $objDocumento;
@@ -1293,10 +1292,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false,false,$dadosURL);
                     }
 
-                    $versaoSEIAtual=substr(SEI_VERSAO,0,1);
                     //verificar versao SEI4
                     $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-                    if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                    if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false,false,$dadosURL,true);
                     }
                 }
@@ -1309,9 +1307,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
 
             //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI4 e atualizado pra SEI4.0.3
-            $versaoSEIAtual=substr(SEI_VERSAO,0,1);
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-            if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+            if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,true,true);
             }
 
@@ -1357,7 +1354,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objInformacaoArquivo['MIME_TYPE'] = 'text/html';
             $objInformacaoArquivo['ID_ANEXO'] = null;
             $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $objInformacaoArquivo['CONTEUDO'], true);
-            $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);            
+            $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
 
         } else if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO) {
             $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
@@ -1369,13 +1366,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                     list($strCaminhoAnexoTemporario, $strNomeComponenteDigital) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                     $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                 } else {
-                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);  
+                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
                     $strNomeComponenteDigital = $objAnexoDTO->getStrNome();
                 }
 
                 $strConteudoAssinatura = null;
 
-                $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);                
+                $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
                 list($strDadosComplementares, $strMimeType) = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
 
                 $objInformacaoArquivo['NOME'] = $strNomeComponenteDigital;
@@ -1405,7 +1402,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objInformacaoArquivo['MIME_TYPE'] = 'text/html';
                 $objInformacaoArquivo['dadosComplementaresDoTipoDeArquivo'] = 'outro';
                 $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $objInformacaoArquivo['CONTEUDO'], true);
-                $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);                
+                $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
             } else {
                 throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
             }
@@ -1423,7 +1420,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objInformacaoArquivo['ID_ANEXO'] = null;
             $objInformacaoArquivo['CONTEUDO'] = $strResultado;
             $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $objInformacaoArquivo['CONTEUDO'], true);
-            $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);            
+            $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
         }
 
         return $objInformacaoArquivo;
@@ -1431,7 +1428,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     private function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
-        
+
         if(!is_readable($strCaminhoAnexoCompactado)) {
             throw new InfraException("Anexo de documento não pode ser localizado");
         }
@@ -1440,13 +1437,13 @@ class ExpedirProcedimentoRN extends InfraRN {
         $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
 
         $arrStrNomeArquivos = array();
-        $zipArchive = new ZipArchive(); 
+        $zipArchive = new ZipArchive();
         if($zipArchive->open($strCaminhoAnexoCompactado)){
             try {
-                for($i = 0; $i < $zipArchive->numFiles; $i++){ 
-                    $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i); 
+                for($i = 0; $i < $zipArchive->numFiles; $i++){
+                    $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
                 }
-        
+
                 $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
                 $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
                 copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
@@ -1456,7 +1453,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         } else {
             throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
         }
-        
+
         return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
     }
 
@@ -1479,7 +1476,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         return [$strDadosComplementaresDoTipoDeArquivo, $strMimeType];
     }
 
-    private function listarDadosArquivos($objDocumentoDTO, $strStaAssociacao){        
+    private function listarDadosArquivos($objDocumentoDTO, $strStaAssociacao){
         $numOrdemComponenteInicial = 1;
         $arrObjInformacaoArquivo = [];
         $arrObjComponentesDigitaisDTO = $this->listarComponentesDigitaisUltimoTramite($objDocumentoDTO);
@@ -1487,7 +1484,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(empty($arrObjComponentesDigitaisDTO)){
             $arrObjInformacaoArquivo[$numOrdemComponenteInicial] = $this->obterDadosArquivo($objDocumentoDTO, $strStaAssociacao);
         } else {
-            $bolMultiplosComponentes = count($arrObjComponentesDigitaisDTO) > 1; 
+            $bolMultiplosComponentes = count($arrObjComponentesDigitaisDTO) > 1;
             $this->corrigirNumeroOrdemComponentes($arrObjComponentesDigitaisDTO, $objDocumentoDTO->getStrProtocoloDocumentoFormatado());
             foreach ($arrObjComponentesDigitaisDTO as $objComponentesDigitaisDTO) {
                 $numOrdemComponenteDigital = $objComponentesDigitaisDTO->getNumOrdem();
@@ -1548,20 +1545,9 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objEditorDTO->setStrSinProcessarLinks('S');
         }
 
-        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
-        $numVersaoAtual = explode('.', SEI_VERSAO);
-        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
-        $numVersaoAtual = intval(join($numVersaoAtual));
-
-        //Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.7 -> 030007)
-        $numVersaoCarimboObrigatorio = explode('.', self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO);
-        $numVersaoCarimboObrigatorio = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoCarimboObrigatorio);
-        $numVersaoCarimboObrigatorio = intval(join($numVersaoCarimboObrigatorio));
-
-        if ($numVersaoAtual >= $numVersaoCarimboObrigatorio) {
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", self::VERSAO_CARIMBO_PUBLICACAO_OBRIGATORIO)) {
             $objEditorDTO->setStrSinCarimboPublicacao('N');
         }
-
 
         //para o caso de URLs antigos do órgão, ele testa o html com a tarja antiga
         $dados=[
@@ -1573,13 +1559,13 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objEditorRN = new EditorRN();
 
-        if($dadosURL!=null && $bolSeiVersao4==false){  
+        if($dadosURL!=null && $bolSeiVersao4==false){
             $objEditorRN = new Editor3011RN();
-        }elseif($dadosURL!=null && $bolSeiVersao4==true){  
+        }elseif($dadosURL!=null && $bolSeiVersao4==true){
             $objEditorRN = new EditorSEI4RN();
-        }elseif($bolSeiVersao4 && $bolTarjaLegada402){  
+        }elseif($bolSeiVersao4 && $bolTarjaLegada402){
             $objEditorRN = new EditorSEI4RN();
-        }elseif(!$bolSeiVersao4 && $bolTarjaLegada402){  
+        }elseif(!$bolSeiVersao4 && $bolTarjaLegada402){
             $objEditorRN = new Editor3011RN();
         }elseif($bolFormatoLegado3011){
             //fix-107. Gerar doc exatamente da forma como estava na v3.0.11
@@ -1587,7 +1573,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }else{
             $dados = $objEditorDTO;
         }
-        
+
         $strResultado = $objEditorRN->consultarHtmlVersao($dados);
 
         if(!empty($arrSiglaOrgaoLegado)){
@@ -1876,7 +1862,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
                 $bolIdDocumentoExiste = array_key_exists($dblIdDocumento, $arrObjDocumentoDTOIndexado) && isset($arrObjDocumentoDTOIndexado[$dblIdDocumento]);
                 $bolIdDocumentoFiltrado = is_null($paramDblIdDocumentoFiltro) || ($dblIdDocumento == $paramDblIdDocumentoFiltro);
-                
+
                 if ($bolIdDocumentoExiste && $bolIdDocumentoFiltrado){
                     $arrObjDocumentoDTO[] = array(
                         "Documento" => $arrObjDocumentoDTOIndexado[$dblIdDocumento],
@@ -1967,7 +1953,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->setStrNumeroRegistro($strNumeroRegistro);
         $objComponenteDigitalDTO->setNumIdTramite($numIdTramite);
-        $objComponenteDigitalDTO->setStrSinEnviar("S");        
+        $objComponenteDigitalDTO->setStrSinEnviar("S");
         $objComponenteDigitalDTO->retDblIdDocumento();
         $objComponenteDigitalDTO->retNumTicketEnvioComponentes();
         $objComponenteDigitalDTO->retStrProtocoloDocumentoFormatado();
@@ -1976,8 +1962,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigitalDTO->retNumOrdem();
         $objComponenteDigitalDTO->retStrNome();
         $objComponenteDigitalDTO->retDblIdProcedimento();
-        $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC); 
-        $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC); 
+        $objComponenteDigitalDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objComponenteDigitalDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
 
         $arrComponentesDigitaisDTOBanco = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
         if (!empty($arrComponentesDigitaisDTOBanco)) {
@@ -1995,27 +1981,27 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
                     }else{
                         $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 2);
-                    } 
-    
+                    }
+
                     $dadosDoComponenteDigital = new stdClass();
                     $dadosDoComponenteDigital->ticketParaEnvioDeComponentesDigitais = $objComponenteDigitalDTO->getNumTicketEnvioComponentes();
-    
+
                     //Processos apensados. Mesmo erro relatado com dois arquivos iguais em docs diferentes no mesmo processo
                     $dadosDoComponenteDigital->protocolo = $objComponenteDigitalDTO->getStrProtocolo();
                     $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
-    
+
                     //$objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
                     $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
                     $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
                     $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
                     $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
-                    
+
                     //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
                     $nrTamanhoArquivoMb = 0;
                     $nrTamanhoBytesArquivo = 0;
                     $nrTamanhoMegasMaximo = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                     $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
-    
+
                     try {
                         //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
                         if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
@@ -2025,7 +2011,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                                     $strProtocoloDocumento = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
                                     throw new InfraException("Anexo do documento $strProtocoloDocumento não pode ser localizado.");
                                 }
-    
+
                                 $strCaminhoAnexoTemporario = null;
                                 if($bolMultiplosComponentes){
                                     $numOrdemComponenteDigital = $objComponenteDigitalDTO->getNumOrdem();
@@ -2033,23 +2019,23 @@ class ExpedirProcedimentoRN extends InfraRN {
                                     list($strCaminhoAnexoTemporario, ) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                                     $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                                 } else {
-                                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);  
+                                    $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
                                 }
-    
+
                                 $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
                                 $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
-    
+
                                 //Método que irá particionar o arquivo em partes para realizar o envio
                                 $this->particionarComponenteDigitalParaEnvio(
-                                    $strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, 
+                                    $strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
                                     $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmLote
                                 );
-    
+
                                 //Finalizar o envio das partes do componente digital
                                 $parametros = new stdClass();
                                 $parametros->dadosDoTerminoDeEnvioDePartes = $dadosDoComponenteDigital;
                                 $this->objProcessoEletronicoRN->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
-    
+
                                 if(file_exists($strCaminhoAnexoTemporario)){
                                     try {
                                         unlink(DIR_SEI_TEMP . "/" . basename($strCaminhoAnexoTemporario));
@@ -2069,17 +2055,17 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                                 $this->salvarAnexoImutavel($dados);
                                 $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($objDadosArquivo['CONTEUDO'], XSD_BASE64BINARY);
-    
+
                                 $parametros = new stdClass();
                                 $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                                 $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
-    
+
                                 if(!$bolSinProcessamentoEmLote){
                                     $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                                     $this->contadorDaBarraDeProgresso++;
                                 }
                             }
-    
+
                             $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
 
                             //Bloquea documento para atualizao, já que ele foi visualizado
@@ -2094,7 +2080,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
                         throw new InfraException("Error Processing Request", $e);
                     }
-                }    
+                }
             }
         }
     }
@@ -2468,13 +2454,13 @@ class ExpedirProcedimentoRN extends InfraRN {
         if($bolProcedimentoCompartilhado) {
             $objInfraException->adicionarValidacao('Não é possível tramitar o processo pois ele foi compartilhado através do SEI Federação.', $strAtributoValidacao);
         }
-    }    
+    }
 
     /**
      * Valida se o processo pode ser bloqueado pelo sistema antes do seu envio
-     * 
+     *
      * Regra necessária para evitar que regras internas do SEI ou módulos possam impedir o bloqueio do processo após o seu envio externo,
-     * exceção esta que pode deixar o processo aberto tanto no remetente como no destinatário. 
+     * exceção esta que pode deixar o processo aberto tanto no remetente como no destinatário.
      */
     protected function validarPossibilidadeBloqueioControlado($objProcedimentoDTO){
         // Bloqueia temporariamente o processo para garantir que não exista restrições sobre ele
@@ -2513,7 +2499,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objInfraException->adicionarValidacao($e, $strAtributoValidacao);
         }
 
-        if (substr(SEI_VERSAO, 0, 1) > 3) {
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")) {
             $this->validarProcedimentoCompartilhadoSeiFederacao($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         }
     }
@@ -2719,7 +2705,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 }
                 $inicio = ($nrTamanhoBytesMaximo * $i);
             }
-    
+
             //Verifica se existem partes do componente digital que não foram enviadas para tentar realizar o envio novamente
             if(isset($arrPartesComponentesDigitaisNaoEnviadas)){
                 $nrTotalPartesNaoEnviadas = count($arrPartesComponentesDigitaisNaoEnviadas);
@@ -2948,10 +2934,10 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
             $objTramiteDTO->setNumMaxRegistrosRetorno(1);
             $objTramiteDTO->retNumIdTramite();
-    
+
             $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
             $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-    
+
             if(!isset($objTramiteDTO)){
                 throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
             }
@@ -3018,7 +3004,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
             $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
-        }        
+        }
 
         if(!$cancelarLote){
             $objDTOFiltro = new TramiteDTO();

@@ -67,7 +67,7 @@ class ProcessoEletronicoINT extends InfraINT {
         $nome = "";
 
         if(isset($ObjEstrutura->hierarquia)) {
-            
+
             $arrObjNivel = $ObjEstrutura->hierarquia->nivel;
 
             $siglasUnidades = array();
@@ -101,13 +101,11 @@ class ProcessoEletronicoINT extends InfraINT {
     }
 
 
-    public static function getCaminhoIcone($imagem,$relPath=null)
-    {
-        $versao=substr(SEI_VERSAO,0,1);
+    public static function getCaminhoIcone($imagem,$relPath=null) {
         $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
         $strModulo = $arrConfig['PENIntegracao'];
 
-        if ($versao>3){
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")){
 
             switch ($imagem) {
                 case 'imagens/consultar.gif':
@@ -141,37 +139,26 @@ class ProcessoEletronicoINT extends InfraINT {
                 case 'imagens/anexos.gif':
                     return '/infra_css/imagens/anexos.gif';
                     break;
-                
-                
+
                 default:
                     if($relPath==null){
                         return $imagem;
-                    }        
+                    }
                     return $relPath . $imagem;
                     break;
             }
-
-
         }
 
         if($relPath==null){
             return $imagem;
-        }        
+        }
+
         return $relPath . $imagem;
-
-
-
     }
 
     public static function getCssCompatibilidadeSEI4($arquivo)
     {
-
-        $versao = substr(SEI_VERSAO, 0, 1);
-        $numVersaoAtual = explode('.', SEI_VERSAO);
-        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
-        $numVersaoAtual = intval(join($numVersaoAtual));
-
-        if ($versao > 3 && $numVersaoAtual <= 40001 ) {
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && InfraUtil::compararVersoes(SEI_VERSAO, "<=", "4.0.1")) {
 
             switch ($arquivo) {
                 case 'pen_procedimento_expedir.css':
@@ -182,9 +169,7 @@ class ProcessoEletronicoINT extends InfraINT {
                     return $arquivo;
                     break;
             }
-        }
-
-        if ($numVersaoAtual > 40001) {
+        }elseif (InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1")) {
 
             switch ($arquivo) {
                 case 'pen_procedimento_expedir.css':
@@ -197,10 +182,6 @@ class ProcessoEletronicoINT extends InfraINT {
             }
         }
 
-
-
         return $arquivo;
     }
-
-    
 }

@@ -75,7 +75,34 @@ services:
       - selenium:selenium
     command: "true"  
     
+  php-test-unit:
+    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    container_name: php-test-unit
+    volumes:
+      - ${SEI_PATH}/sei:/opt/sei
+      - ${SEI_PATH}/sip:/opt/sip
+      - ${SEI_PATH}/infra:/opt/infra
+      - ./assets/config:/opt/sei/config/mod-pen
+      - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro      
+      - ../unitario:/tests
+      - ../../src:/opt/sei/web/modulos/pen
+    environment:
+      - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
+      - XDEBUG_SESSION=default
+      - XDEBUG_MODE=debug 
+      - CONTEXTO_ORGAO_A_DB_SEI_DSN=${CONTEXTO_ORGAO_A_DB_SEI_DSN}
+      - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
+      - SEI_DATABASE_USER=${SEI_DATABASE_USER}
+      - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+      - ORG1_CERTIFICADO=${ORG1_CERTIFICADO}
+      - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
+      - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
+      - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
 
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: "true"  
 
 ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 

@@ -17,7 +17,7 @@
         //////////////////////////////////////////////////////////////////////////////
 
         SessaoSEI::getInstance()->validarLink();
-        $bolVersaoSuperior4 = PENIntegracao::compararVersoes(SEI_VERSAO, '4.0.0') >= 0;
+        $bolVersaoSuperior4 = InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0");
         $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
         $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
         $arrComandos   = array();
@@ -59,14 +59,14 @@
 
     div.infraArvore input {
         margin: 4px 4px 4px 4px;
-    }    
+    }
 
     img.joinBottom {
         margin: 0px 0px -3px -11px
     }
 
-    .unidadeSelecionada{ 
-        background-color: #79e5e5 !important; 
+    .unidadeSelecionada{
+        background-color: #79e5e5 !important;
     }
 
     #btnPesquisar:disabled,
@@ -76,14 +76,14 @@
         opacity: 0.5;
         color: #495057;
     }
-    
+
 
 <?php
     PaginaSEI::getInstance()->fecharStyle();
     PaginaSEI::getInstance()->montarJavaScript();
 //    PaginaSEI::getInstance()->abrirJavaScript();
 ?>
-<script>    
+<script>
     var nivelEstrutura = 1;
     var mais  = '/infra_css/imagens/seta_abaixo.gif';
     var menos = '/infra_css/imagens/seta_acima.gif';
@@ -107,7 +107,7 @@
      * Realiza a consulta dos filhos da unidade externa selecionada
      * Josinaldo Júnior <josinaldo.junior@basis.com.br>
      **/
-    function recuperarEstruturaDeFilhosDeUnidadeExterna(idUnidadeExterna, nrDivPai, paramNivelEstrutura) {        
+    function recuperarEstruturaDeFilhosDeUnidadeExterna(idUnidadeExterna, nrDivPai, paramNivelEstrutura) {
 
         if($('#controlador_'+idUnidadeExterna).val() != 1){
             //Exibe o gif de loading somente do nivel de estrutura 2 acima
@@ -117,7 +117,7 @@
 
             var objData = {};
             objData['idRepositorioEstruturaOrganizacional'] = idRepositorioDeEstuturaSelecionado;
-            objData['numeroDeIdentificacaoDaEstrutura'] = idUnidadeExterna;            
+            objData['numeroDeIdentificacaoDaEstrutura'] = idUnidadeExterna;
 
             $.ajax({
                 url:strUrl,
@@ -127,7 +127,7 @@
                 cache: false,
                 success:function(result) {
                     $('#controlador_'+idUnidadeExterna).val(1);
-                    //verifica se o resultado é null                    
+                    //verifica se o resultado é null
                     if(result[0] != null) {
                         nivelEstrutura++;
                         adicionarEstruturaDeFilhos(nrDivPai, result, paramNivelEstrutura);
@@ -136,7 +136,7 @@
                     }
                 },
                 error: function (data) {
-                    alert("Não foi possível recuperar as unidades");                    
+                    alert("Não foi possível recuperar as unidades");
                 }
             }).done(function(){
                 $("#loading").hide();
@@ -217,7 +217,7 @@
 
         //habilita o botão de pesquisa textual
         $("#btnPesquisar").attr('disabled', false);
-        $("#btnPesquisar").attr('class', 'infraButton');                
+        $("#btnPesquisar").attr('class', 'infraButton');
     }
 
     /**
@@ -365,7 +365,7 @@
         return encodeURIComponent(string);
     }
 </script>
-<?    
+<?
     PaginaSEI::getInstance()->fecharHead();
 ?>
     <div id="divInfraAreaTela" class="infraAreaTela" style="padding: 0 5px;">
