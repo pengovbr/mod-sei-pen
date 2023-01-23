@@ -1300,7 +1300,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                     //verificar versao SEI4 e verificar se a sigla do sistema mudou para SUPER
                     $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-                    if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                    if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false,false,$dadosURL,true, false, true);
                     }
                 }
@@ -1328,7 +1328,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI4 e atualizado pra SEI4.0.3
             // e verificar se a sigla do sistema mudou para SUPER
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
-            if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+            if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,true,true, true, true);
             }
 
@@ -1373,7 +1373,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoFS=file_get_contents($objAnexoRN->obterLocalizacao($objAnexoDTO));
 
                 $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoFS, true));
-                
+
                 if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital == $hashDoComponenteDigitalAnterior){
                     $strConteudoAssinatura=$strConteudoFS;
                 }
@@ -2125,7 +2125,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
     }
 
-    
+
     protected function retornaComponentesImutaveisControlado($objDocumentoDTO){
 
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -2158,7 +2158,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(empty($arrComponenteDigital)){
 
             $objAnexoRN = new AnexoRN();
-                    
+
             $strConteudoAssinatura=$objDadosArquivo['CONTEUDO'];
             $strNomeArquivoUploadHtml = $objAnexoRN->gerarNomeArquivoTemporario();
 
@@ -2166,7 +2166,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 throw new InfraException('Erro criando arquivo html temporário para envio do e-mail.');
             }
 
-            
+
             $objAnexoDTO = new AnexoDTO();
             $objAnexoDTO->setNumIdAnexo($strNomeArquivoUploadHtml);
             $objAnexoDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdDocumento());
@@ -2177,7 +2177,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAnexoDTO->setNumIdUnidade($objDocumentoDTO->getNumIdUnidadeResponsavel());
             $objAnexoDTO->setStrSinAtivo("S");
 
-            
+
             $objAnexoDTO=$objAnexoRN->cadastrarRN0172($objAnexoDTO);
 
 
@@ -2192,18 +2192,18 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $objComponenteDigitalDTO = new ComponenteDigitalDTO();
             $objComponenteDigitalDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
-            $objComponenteDigitalDTO->setNumIdTramite($objTramiteDTO->getNumIdTramite());  
+            $objComponenteDigitalDTO->setNumIdTramite($objTramiteDTO->getNumIdTramite());
             $objComponenteDigitalDTO->retTodos();
-            
+
 
             $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
             $objComponenteDigitalDTO=$objComponenteDigitalBD->consultar($objComponenteDigitalDTO);
-            
+
             $objComponenteDigitalDTO->setDblIdAnexoImutavel($objAnexoDTO->getNumIdAnexo());
             $objComponenteDigitalDTO->setDblIdProcedimento($objComponenteDigitalDTO->getDblIdProcedimento());
             $objComponenteDigitalDTO->setStrNumeroRegistro($objComponenteDigitalDTO->getStrNumeroRegistro());
             $objComponenteDigitalDTO=$objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
-            
+
 
 
 
