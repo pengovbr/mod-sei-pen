@@ -1297,6 +1297,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                     if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                         $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false,false,$dadosURL,true);
                     }
+
+                    //verificar versao SEI4 e verificar se a sigla do sistema mudou para SUPER
+                    $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+                    if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
+                        $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false,false,$dadosURL,true, false, true);
+                    }
                 }
             }
 
@@ -1306,10 +1312,24 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,true);
             }
 
+            //Caso o hash ainda esteja inconsistente iremos usar a logica do  SEI 3.1.0
+            // e verificar se a sigla do sistema mudou para SUPER
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,true, null, false, false, true);
+            }
+
             //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI4 e atualizado pra SEI4.0.3
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,true,true);
+            }
+
+            //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI4 e atualizado pra SEI4.0.3
+            // e verificar se a sigla do sistema mudou para SUPER
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if($versaoSEIAtual>3 && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,true,true, true, true);
             }
 
             //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI3 e atualizado pra SEI4.0.3
@@ -1318,10 +1338,23 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,false,true);
             }
 
+            //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI3 e atualizado pra SEI4.0.3
+            // e verificar se a sigla do sistema mudou para SUPER
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,false,true, true);
+            }
+
             //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true, true);
+            }
+
+            //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
+            $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
+            if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
+                $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true, true, null, false, false, true);
             }
 
 
@@ -1528,7 +1561,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
     * @return String                     Conteúdo completo do documento para envio
     */
-    private function obterConteudoInternoAssinatura(DocumentoDTO $objDocumentoDTO, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false)
+    private function obterConteudoInternoAssinatura(DocumentoDTO $objDocumentoDTO, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false, $bolSiglaSistemaSUPER = false)
     {
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $arrSiglaOrgaoLegado = $objConfiguracaoModPEN->getValor("PEN", "SiglaOrgaoLegado", false);
@@ -1554,7 +1587,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             "parObjEditorDTO" => $objEditorDTO,
             "montarTarja" => $dadosURL==null?false:true,
             "controleURL" => $dadosURL,
-            "bolTarjaLegada402" => $bolTarjaLegada402
+            "bolTarjaLegada402" => $bolTarjaLegada402,
+            "bolSiglaSistemaSUPER" => $bolSiglaSistemaSUPER
         ];
 
         $objEditorRN = new EditorRN();
@@ -1593,7 +1627,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                     }
                 }
 
-                if($alterarTitle){
+                if($alterarTitle && $bolSiglaSistemaSUPER){
+                    $pattern = '/<title>SUPER\/'.$arrSiglaOrgaoLegado["atual"].'/';
+                    $replacement = "<title>SEI/".$arrSiglaOrgaoLegado["antiga"];
+                    $strResultado = preg_replace($pattern, $replacement, $strResultado);
+                }
+
+                if($alterarTitle && !$bolSiglaSistemaSUPER){
                     $pattern = '/<title>SEI\/'.$arrSiglaOrgaoLegado["atual"].'/';
                     $replacement = "<title>SEI/".$arrSiglaOrgaoLegado["antiga"];
                     $strResultado = preg_replace($pattern, $replacement, $strResultado);
