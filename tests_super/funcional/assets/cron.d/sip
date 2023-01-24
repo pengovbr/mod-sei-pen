@@ -1,0 +1,5 @@
+
+SHELL=/bin/bash
+
+* * * * * root . /root/crond_env.sh; /usr/bin/php -c /etc/php.ini /opt/sip/scripts/AgendamentoTarefaSip.php 2>&1 >> /var/log/sip/agendamento_sip.log
+00 01 * * * root rm -rf /opt/sip/temp/*

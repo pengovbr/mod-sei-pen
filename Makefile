@@ -2,7 +2,8 @@
 
 
 # Parâmetros de execução do comando MAKE
-versao_sei=4
+# Opções possíveis para testes: sei3, sei4, super
+versao_sei=super
 teste=
 
 MODULO_NOME = pen
@@ -14,8 +15,8 @@ SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests_sei$(versao_sei)/funcional
-PEN_TEST_UNIT = tests_sei$(versao_sei)/unitario
+PEN_TEST_FUNC = tests_$(versao_sei)/funcional
+PEN_TEST_UNIT = tests_$(versao_sei)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
