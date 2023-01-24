@@ -2470,6 +2470,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
         $this->atualizarNumeroVersao("3.2.1");
     }
+
+    protected function instalarV3022()
+    {
+        $this->atualizarNumeroVersao("3.2.2");
+    }
 }
 
 
