@@ -1812,7 +1812,7 @@ try {
         );
 
         $objVersaoSipRN->setStrVersaoAtual(VERSAO_MODULO_PEN);
-        $objVersaoSipRN->setStrVersaoInfra('1.595.1');
+        $objVersaoSipRN->setStrVersaoInfra("1.583.4");
         $objVersaoSipRN->setBolMySql(true);
         $objVersaoSipRN->setBolOracle(true);
         $objVersaoSipRN->setBolSqlServer(true);

@@ -2493,7 +2493,8 @@ try {
             PENIntegracao::VERSAO_MODULO => 'atualizarVersaoCompatibilidade',
         ));
 
-        $objVersaoSeiRN->setStrVersaoInfra('1.595.1');
+
+        $objVersaoSeiRN->setStrVersaoInfra("1.583.4");
         $objVersaoSeiRN->setBolMySql(true);
         $objVersaoSeiRN->setBolOracle(true);
         $objVersaoSeiRN->setBolSqlServer(true);
