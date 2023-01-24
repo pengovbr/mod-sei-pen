@@ -1,16 +1,16 @@
 <?
 
 class ConfiguracaoSip extends InfraConfiguracao  {
-	
+
 	private static $instance = null;
-	
+
 	public static function getInstance(){
 		if (ConfiguracaoSip::$instance == null) {
 			ConfiguracaoSip::$instance = new ConfiguracaoSip();
 		}
 		return ConfiguracaoSip::$instance;
 	}
-	
+
 	public function getArrConfiguracoes(){
 		return array(
             'Sip' => array(
@@ -36,19 +36,17 @@ class ConfiguracaoSip extends InfraConfiguracao  {
                 'ChaveAcesso' => getenv('SIP_CHAVE_ACESSO'), //ATENÇÃO: gerar uma nova chave para o SIP após a instalação (ver documento de instalação)
                 'https' => false,
 			),
-			
+
 			'BancoSip'  => array(
 				'Servidor' => getenv('DATABASE_HOST'),
 				'Porta' => getenv('DATABASE_PORT'),
 				'Banco' => getenv('SIP_DATABASE_NAME'),
 				'Usuario' => getenv('SIP_DATABASE_USER'),
 				'Senha' => getenv('SIP_DATABASE_PASSWORD'),
-				'UsuarioScript' => getenv('SIP_DATABASE_USER_SCRIPT'),
-				'SenhaScript' => getenv('SIP_DATABASE_PASSWORD_SCRIPT'),
 				'Tipo' => getenv('DATABASE_TYPE'), //MySql, SqlServer ou Oracle
-				'PesquisaCaseInsensitive' => false,				
-			), 	
-			
+				'PesquisaCaseInsensitive' => false,
+			),
+
 //			'BancoAuditoriaSip'  => array(
 //                'Servidor' => getenv('DATABASE_HOST'),
 //                'Porta' => getenv('DATABASE_PORT'),
@@ -60,14 +58,14 @@ class ConfiguracaoSip extends InfraConfiguracao  {
 //                'Tipo' => getenv('DATABASE_TYPE'), //MySql, SqlServer ou Oracle
 //                'PesquisaCaseInsensitive' => false,
 //            ),
-			
+
 			'CacheSip' => array(
-				'Servidor' => 'memcached',			
+				'Servidor' => 'memcached',
 				'Porta' => '11211',
 				'Timeout' => 2,
-				'Tempo' => 3600,				
+				'Tempo' => 3600,
 			),
-			
+
 //			'HostWebService' => array(
 //				'Replicacao' => array('*'),  //endereço ou IP da máquina que implementa o serviço de replicação de usuário
 //				'Pesquisa' => array('*'),    //endereços/IPs das máquinas do SEI

@@ -1905,11 +1905,12 @@ class EditorSEI4RN extends InfraRN
     } else {
       $arrCssContadores=null;
     }
-    
+
     if($bolSiglaSistemaSUPER){
-      $pattern = '/<title>SUPER\/';
-      $replacement = "<title>SEI/";
-      $strTitulo = preg_replace($pattern, $replacement, $strTitulo);
+        $strSiglaSistema = ConfiguracaoSEI::getInstance()->getValor("SessaoSEI","SiglaSistema");
+        $strPadrao = ($strSiglaSistema === "SEI") ? '/^SEI\//' : '/^SUPER\//';
+        $strSubstituicao = ($strSiglaSistema === "SEI") ? "SUPER/" : "SEI/";
+        $strTitulo = preg_replace($strPadrao, $strSubstituicao, $strTitulo);
     }
 
     $strHtml = '';

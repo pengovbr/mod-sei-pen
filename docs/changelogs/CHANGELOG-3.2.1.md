@@ -19,6 +19,11 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Correção de erro em envio externo provocado por mudança na sigla do sistema SEI para SUPER (#188)
+
+Correção de falha causada por mudança indevida em sigla do sistema SEI para SUPER nos arquivos e configuração do sistema, o que causada falha a geração de novas versões do documento para envio pelo Barramento, gerando erro em método consultarHtmlVersao.
+
+
 #### Correção de erro em envio externo de processos devido falha em operação consultarHtmlVersao
 
 Correção de falha que impedia o envio externo de processos já tramitados pelo barramento no SUPER.Gov.Br devido a falha de identificação da versão correta do sistema para aplicação das devidas regras de recuperação do conteúdo dos documentos internos, gerando erros na operação consultarHtmlVersao.
