@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.2.0");
+define("VERSAO_MODULO_PEN", "3.2.1");
 
 
 class PENIntegracao extends SeiIntegracao
@@ -51,7 +51,7 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento = "";
 
         $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
-        
+
         if ($bolAcaoGerarPendencia) {
             $objPaginaSEI = PaginaSEI::getInstance();
 
@@ -60,7 +60,7 @@ class PENIntegracao extends SeiIntegracao
             $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
             $objAtividadeDTO->setDthConclusao(null);
             $objAtividadeDTO->retNumIdUnidade();
-    
+
             $objAtividadeRN = new AtividadeRN();
             $numRegistros = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
@@ -78,7 +78,7 @@ class PENIntegracao extends SeiIntegracao
         }
 
         return array($strAcoesProcedimento);
-    }    
+    }
 
     public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
     {
@@ -465,8 +465,8 @@ class PENIntegracao extends SeiIntegracao
 
             case 'pen_envio_processo_lote_cadastrar':
                 require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
-            break;      
-            
+            break;
+
             case 'pen_expedir_lote':
                 require_once dirname(__FILE__) . '/pen_expedir_lote.php';
             break;
@@ -627,9 +627,9 @@ class PENIntegracao extends SeiIntegracao
 
     /**
      * Verifica a compatibilidade e correta configuracao do módulo de Barramento, registrando mensagem de alerta no log do sistema
-     * 
+     *
      * Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
-     * caso de indisponibilidade momentânea do Barramento de Serviços.                        
+     * caso de indisponibilidade momentânea do Barramento de Serviços.
      */
     public static function verificarCompatibilidadeConfiguracoes(){
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
@@ -639,7 +639,7 @@ class PENIntegracao extends SeiIntegracao
         } catch (\Exception $e) {
             throw $e;
         }
-        
+
         try {
             $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo();
         } catch (\Exception $e) {
@@ -657,7 +657,7 @@ class PENIntegracao extends SeiIntegracao
 
     /**
      * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
-     * 
+     *
      * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
      * - Se resultado for IGUAL a 0, versões iguais
      * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2

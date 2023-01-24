@@ -254,6 +254,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                     $this->instalarV30122();
                 case '3.1.22':
                     $this->instalarV3020();
+                case '3.2.0':
+                    $this->instalarV3021();
                     break;
                 default:
                     $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2457,44 +2459,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     protected function instalarV3020()
     {
-
         $this->atualizarNumeroVersao("3.2.0");
-
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-
         $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'id_anexo_imutavel', $objInfraMetaBD->tipoNumeroGrande(), 'null');
         $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'tarja_legada', $objInfraMetaBD->tipoTextoFixo(1), 'null');
-
         BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set tarja_legada='S'");
+    }
 
+    protected function instalarV3021()
+    {
+        $this->atualizarNumeroVersao("3.2.1");
     }
 }
 
-
-/**
- * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
- *
- * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
- * - Se resultado for IGUAL a 0, versões iguais
- * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
- * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
- */
-function compararVersoes($strVersao1, $strVersao2)
-{
-    $numVersao1 = explode('.', $strVersao1);
-    $numVersao1 = array_map(function ($item) {
-        return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao1);
-    $numVersao1 = intval(join($numVersao1));
-
-    $numVersao2 = explode('.', $strVersao2);
-    $numVersao2 = array_map(function ($item) {
-        return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao2);
-    $numVersao2 = intval(join($numVersao2));
-
-    return $numVersao1 - $numVersao2;
-}
 
 try {
     session_start();
