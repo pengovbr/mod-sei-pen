@@ -1,7 +1,7 @@
 <?
 /**
 Criado a partir da classe EditorRN da versao 3.0.11
-A modificacao nessa classe impediu gerar o documento exatamente da mesma forma que foi 
+A modificacao nessa classe impediu gerar o documento exatamente da mesma forma que foi
 gerado originalmente (v3.0.11 gerava de uma forma e na v3.1.0 esta gerando diferente)
 a diferenca esta no metodo consultarHtmlIdentificacaoVersao (uma gera sem link e na outra com link) que eh privado
 desta forma n ha como herdar a classe e alterar somente ele
@@ -1632,9 +1632,10 @@ class Editor3011RN extends InfraRN
     }
 
     if($bolSiglaSistemaSUPER){
-      $pattern = '/<title>SUPER\/';
-      $replacement = "<title>SEI/";
-      $strTitulo = preg_replace($pattern, $replacement, $strTitulo);
+      $strSiglaSistema = ConfiguracaoSEI::getInstance()->getValor("SessaoSEI","SiglaSistema");
+      $strPadrao = ($strSiglaSistema === "SEI") ? '/^SEI\//' : '/^SUPER\//';
+      $strSubstituicao = ($strSiglaSistema === "SEI") ? "SUPER/" : "SEI/";
+      $strTitulo = preg_replace($strPadrao, $strSubstituicao, $strTitulo);
     }
 
     $strHtml = '';
@@ -2002,7 +2003,7 @@ class Editor3011RN extends InfraRN
 
   private function resetContadoresCss($strConteudoHtml,$arrClasses)
   {
-    if(count($arrClasses)>1){
+    if(is_array($arrClasses) && count($arrClasses)>1){
       $arrContadoresUsados=array();
       $qtd=preg_match_all('/<p\w*\s*class="([^"]*)/',$strConteudoHtml,$arrMatches);
       if ($qtd>0){
@@ -2938,7 +2939,7 @@ class Editor3011RN extends InfraRN
     }
 
   }
-  
+
   private function montarTagsContato(ContatoDTO $objContatoDTO, $strTipo){
 
     if ($objContatoDTO->getStrStaGenero()==ContatoRN::$TG_MASCULINO){
@@ -2981,7 +2982,7 @@ class Editor3011RN extends InfraRN
     }
 
     $strTag = $objContatoDTO->getStrComplemento();
-    if ($strTag != '') {
+   if ($strTag != '') {
       self::$arrTags['complemento_endereco_'.$strTipo] = $strTag;
     }
 
@@ -3062,13 +3063,13 @@ class Editor3011RN extends InfraRN
     if (($strTag = $objContatoDTO->getStrTelefoneCelular())!=''){
       self::$arrTags['telefone_celular_'.$strTipo] = $strTag;
     }
-    
-  }
-  
-  public static function converterHTML($strConteudo){
-    return str_replace(array('°','º','ª','¹','²','³','£','¢','§','¬'), 
-                       array('&deg;','&ordm;','&ordf;','&sup1;','&sup2;','&sup3;','&pound;','&cent;','&sect;','&not;'), 
-                       InfraString::acentuarHTML($strConteudo));
+
+      }
+
+    public static function converterHTML($strConteudo){
+    return str_replace(array('°','º','ª','¹','²','³','£','¢','§','¬'),
+                        array('&deg;','&ordm;','&ordf;','&sup1;','&sup2;','&sup3;','&pound;','&cent;','&sect;','&not;'),
+                        InfraString::acentuarHTML($strConteudo));
   }
 
   private function montarCarimboPublicacao($strTextoPublicacao){
