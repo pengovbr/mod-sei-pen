@@ -1,4 +1,8 @@
 <?php
+/**
+ * @group rodarseparado
+ * @group rodarseparado3
+ */
 
 class TramiteProcessoEmLoteComCancelamentoTest extends CenarioBaseTestCase
 {

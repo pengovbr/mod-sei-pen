@@ -71,7 +71,7 @@ services:
       - "host.docker.internal:host-gateway"
     links:   
       - org1-database:${ORG1_DATABASE_HOST}
-      - org2-database:${ORG1_DATABASE_HOST}
+      - org2-database:${ORG2_DATABASE_HOST}
       - selenium:selenium
     command: "true"  
     
