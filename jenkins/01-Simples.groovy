@@ -75,7 +75,7 @@ pipeline {
             description: "Password do certificado de conexao ao tramita do orgao 2")
 		string(
             name: 'testParallel',
-            defaultValue:"4",
+            defaultValue:"5",
             description: "Quantos processos simultaneos")
 		string(
             name: 'testRetryCount',
