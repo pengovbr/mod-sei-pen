@@ -22,11 +22,11 @@ pipeline {
 	    string(
 	        name: 'branchGitSpe',
 	        defaultValue:"4.0.9",
-	        description: "Branch/Tag do git onde encontra-se o Spe")
+	        description: "Branch/Tag do git onde encontra-se o Sistema")
         choice(
-            name: 'spe',
+            name: 'sistema',
             choices: "sei4\nsei3\nsuper",
-            description: 'Qual o SPE' )
+            description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
     	
 
     }
@@ -47,7 +47,7 @@ pipeline {
                     }
 				    
 					branchGitSpe = params.branchGitSpe
-					SPE = params.spe
+					SISTEMA = params.sistema
 					
 				    withCredentials([file(credentialsId: "instanciamysql", variable: 'INSTANCIA_MYSQL'),
 					                 file(credentialsId: "instanciasqlserver", variable: 'INSTANCIA_SQLSERVER'),
@@ -117,7 +117,7 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
 								string(name: 'branchGitSpe', value: branchGitSpe),
-								string(name: 'spe', value: SPE),
+								string(name: 'sistema', value: SISTEMA),
                             ], wait: true
 					}}
 				
@@ -174,7 +174,7 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-								string(name: 'spe', value: SPE),
+								string(name: 'sistema', value: SISTEMA),
                             ], wait: true
 					}}
 				
@@ -230,7 +230,7 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-								string(name: 'spe', value: SPE),
+								string(name: 'sistema', value: SISTEMA),
                             ], wait: true
 					}}
 				

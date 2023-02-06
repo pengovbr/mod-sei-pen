@@ -1,37 +1,9 @@
 .PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
-
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, super
-SPE=super
-TESTE=
-
-MODULO_NOME = pen
-MODULO_PASTAS_CONFIG = mod-$(MODULO_NOME)
-VERSAO_MODULO := $(shell grep 'define."VERSAO_MODULO_PEN"' src/PENIntegracao.php | cut -d'"' -f4)
-SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
-SEI_CONFIG_DIR = dist/sei/config/mod-pen
-SEI_BIN_DIR = dist/sei/bin/mod-pen
-SEI_MODULO_DIR = dist/sei/web/modulos/pen
-SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
-PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests_$(SPE)/funcional
-PEN_TEST_UNIT = tests_$(SPE)/unitario
-PARALLEL_TEST_NODES = 5
-
--include $(PEN_TEST_FUNC)/.env
-
-CMD_INSTALACAO_SEI = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php atualizar_versao_sei.php
-CMD_INSTALACAO_SIP = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_versao_sip.php
-CMD_INSTALACAO_RECURSOS_SEI = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_recursos_sei.php
-CMD_INSTALACAO_SEI_MODULO = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php sei_atualizar_versao_modulo_pen.php
-CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php sip_atualizar_versao_modulo_pen.php
-
-CMD_COMPOSE_EXEC = docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -T
-CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
-CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
-FILE_VENDOR_FUNCIONAL = $(PEN_TEST_FUNC)/vendor/bin/phpunit
-FILE_VENDOR_UNITARIO = $(PEN_TEST_UNIT)/vendor/bin/phpunit
+sistema=super
+teste=
 
 ifeq (, $(shell groups |grep docker))
  CMD_DOCKER_SUDO=sudo
@@ -45,6 +17,36 @@ else
  CMD_DOCKER_COMPOSE=$(CMD_DOCKER_SUDO) docker-compose
 endif
 
+MODULO_NOME = pen
+MODULO_PASTAS_CONFIG = mod-$(MODULO_NOME)
+VERSAO_MODULO := $(shell grep 'define."VERSAO_MODULO_PEN"' src/PENIntegracao.php | cut -d'"' -f4)
+SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
+SEI_CONFIG_DIR = dist/sei/config/mod-pen
+SEI_BIN_DIR = dist/sei/bin/mod-pen
+SEI_MODULO_DIR = dist/sei/web/modulos/pen
+SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
+PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
+PEN_TEST_FUNC = tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests_$(sistema)/unitario
+PARALLEL_TEST_NODES = 5
+
+-include $(PEN_TEST_FUNC)/.env
+
+CMD_INSTALACAO_SEI = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php atualizar_versao_sei.php
+CMD_INSTALACAO_SIP = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_versao_sip.php
+CMD_INSTALACAO_RECURSOS_SEI = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_recursos_sei.php
+CMD_INSTALACAO_SEI_MODULO = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php sei_atualizar_versao_modulo_pen.php
+CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php sip_atualizar_versao_modulo_pen.php
+
+
+
+CMD_COMPOSE_UNIT = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_UNIT)/docker-compose.yml --env-file $(PEN_TEST_UNIT)/.env
+CMD_COMPOSE_FUNC = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env
+CMD_COMPOSE_FUNC_EXEC = $(CMD_COMPOSE_FUNC) exec -T
+CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
+CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
+FILE_VENDOR_FUNCIONAL = $(PEN_TEST_FUNC)/vendor/bin/phpunit
+FILE_VENDOR_UNITARIO = $(PEN_TEST_UNIT)/vendor/bin/phpunit
 
 all: help
 
@@ -124,53 +126,53 @@ clean:
 
 
 install: check-isalive
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sei
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sip
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+	$(CMD_COMPOSE_FUNC) up -d	
+	$(CMD_COMPOSE_FUNC) exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
+	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
+	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
+	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chown -R root:root /etc/cron.d/
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sei
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sip
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+	$(CMD_COMPOSE_FUNC) exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
+	$(CMD_COMPOSE_FUNC) exec org2-http chown -R root:root /etc/cron.d/
+	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sei
+	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
 	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
 
 
 up:	
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d
+	$(CMD_COMPOSE_FUNC) up -d
 
 
 update: ## Atualiza banco de dados através dos scripts de atualização do sistema
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sei/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SEI)"; true
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SIP)"; true
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sei/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SEI)"; true
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SIP)"; true
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sei/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SIP)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sei/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SIP)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
 
 
 destroy:
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env down --volumes
+	$(CMD_COMPOSE_FUNC) down --volumes
 
 
 down:	
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
+	$(CMD_COMPOSE_FUNC) stop
 
 
-# make TESTE=TramiteProcessoComDevolucaoTest test-functional
+# make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: $(FILE_VENDOR_FUNCIONAL)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml  /tests/tests/$(addsuffix .php,$(TESTE))
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml  /tests/tests/$(addsuffix .php,$(teste))
 
 
 test-functional-parallel: $(FILE_VENDOR_FUNCIONAL)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
 
 
 test-parallel-otimizado:
@@ -178,23 +180,23 @@ test-parallel-otimizado:
 	
 	
 test-unit: $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit'
 
 test: test-unit test-functional
 
 
 verify-config:
 	@echo "Verificando configurações do módulo para instância org1"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 	@echo "Verificando configurações do módulo para instância org2"
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 
 bash_org1:
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash
+	$(CMD_COMPOSE_FUNC) exec org1-http bash
 	
 
 bash_org2:
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
+	$(CMD_COMPOSE_FUNC) exec org2-http bash
 
 atualizaSequencia:
 	docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 

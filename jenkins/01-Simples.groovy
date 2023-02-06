@@ -46,9 +46,9 @@ pipeline {
 		    defaultValue:"/home/jenkins/spe",
 		    description: "Pasta onde vai clonar o SPE")
         choice(
-            name: 'spe',
+            name: 'sistema',
             choices: "sei4\nsei3\nsuper",
-            description: 'Qual o SPE (Sistema de Processo Eletrônico)' )
+            description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
 		string(
 		    name: 'folderModulo',
 		    defaultValue:"/home/jenkins/modulomodseipen",
@@ -146,7 +146,7 @@ pipeline {
 					GITBRANCH = params.branchGitSpe
 
 					FOLDERSPE = params.folderSpe
-					SPE = params.spe
+					SISTEMA = params.sistema
 					FOLDERMODULO = params.folderModulo
 					BOLFOLDERMODULODEL = params.bolFolderModuloDelete
 					ORG1_CERT = params.org1CertSecret
@@ -173,7 +173,7 @@ pipeline {
 					CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = params.CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA
 					CONTEXTO_ORGAO_B_NOME_UNIDADE = params.CONTEXTO_ORGAO_B_NOME_UNIDADE
 
-					FOLDER_FUNCIONAIS = "tests_${SPE}/funcional"
+					FOLDER_FUNCIONAIS = "tests_${SISTEMA}/funcional"
 
 					TESTES = ""
 					if(params.testes){
@@ -254,14 +254,14 @@ pipeline {
             }
         }
 
-        stage('Subir SPE - Instalar Modulo'){
+        stage('Subir Sistema - Instalar Modulo'){
 
             steps {
 				retry(3){
 				dir("${FOLDERMODULO}"){
 	                sh script: """
 					make destroy || true
-					sed -i "s|SPE=.*|SPE=${SPE}|g" Makefile
+					sed -i "s|sistema=.*|sistema=${SISTEMA}|g" Makefile
 					sed -i "s|PARALLEL_TEST_NODES =.*|PARALLEL_TEST_NODES = ${TESTE_PARALLEL}|g" Makefile
 					rm -rf ${FOLDER_FUNCIONAIS}/.env
 					\\cp ${FOLDER_FUNCIONAIS}/.env_${DATABASE} ${FOLDER_FUNCIONAIS}/.env

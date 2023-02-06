@@ -39,11 +39,11 @@ Ao implementar nova funcionalidade é altamente recomendável que se crie novo t
 
 ### 1. Escolha do sistema a ser testado
 
-Abra o Makefile e procure a variável:
+Abra o Makefile e procure a variável "sistema" para indicar qual sistema será testado (sei3, sei4 ou super):
 ```
-versao_sei=4
+sistema=super
 ```
-E ajuste para 4 como acima.
+
 
 ### 2. Cópia do certificado
 

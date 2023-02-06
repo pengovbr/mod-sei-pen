@@ -78,7 +78,7 @@ pipeline {
 	                                    parameters:
 	                                        [
 	                                            string(name: 'branchGitSpe', value: spe_branch),
-	                                            string(name: 'spe', value: spe_nome),
+	                                            string(name: 'sistema', value: spe_nome),
 	                                            string(name: 'versaoModulo', value: modulo_versao),
 	                                        ], wait: true
 	                            }
