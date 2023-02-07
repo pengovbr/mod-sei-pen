@@ -553,15 +553,49 @@ class ProcessoEletronicoRN extends InfraRN
         } catch (\SoapFault $e) {
             $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
             if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-                $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+                $strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }
 
             $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            if (strstr(strtolower($detalhes), "hash de ao menos um componente digital não confere")) {
+                $this->validarMudancaOrdemDocumentos($parametros->objProcedimentoDTO, $detalhes);
+            }
             throw new InfraException($strMensagem, $e, $strDetalhes);
         } catch (\Exception $e) {
             $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             throw new InfraException($mensagem, $e, $detalhes);
+        }
+    }
+
+    private function validarMudancaOrdemDocumentos($objProcedimentoDTO, $strMensagem)
+    {
+        //Busca metadados do processo registrado em trâmite anterior
+        $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($objProcedimentoDTO->getDblIdProcedimento());
+
+        //Construção do cabeçalho para envio do processo
+        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $objUltimoTramiteRecebidoDTO = $this->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+        $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+
+        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
+        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
+        if (!is_null(count($objTramitesAnteriores)) && count($objTramitesAnteriores)) {
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+            $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
+            $arrObjAtividadeDTO = $objAtividadeBD->listar($objAtividadeDTO);
+            
+            if (!is_null($arrObjAtividadeDTO) && count($arrObjAtividadeDTO)) {
+                $strMensagem = str_replace('hash de ao menos um componente digital não confere', 'a ordem dos documentos foram modificadas na árvore do processo', $strMensagem);
+                throw new InfraException($strMensagem);
+            }
         }
     }
 
