@@ -123,7 +123,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     {
         $numIdTramite = 0;
         try {
-            //Valida Permissão
+            //Valida Permiss?o
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir',__METHOD__, $objExpedirProcedimentoDTO);
             $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
@@ -149,7 +149,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
 
             $objInfraException = new InfraException();
-            //Carregamento dos dados de processo e documento para validação e envio externo
+            //Carregamento dos dados de processo e documento para valida??o e envio externo
             $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
             $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
             $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
@@ -160,7 +160,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             if($objInfraException->contemValidacoes()){
                 if(!$bolSinProcessamentoEmLote){
                     $this->barraProgresso->mover(0);
-                    $this->barraProgresso->setStrRotulo('Erro durante validação dos dados do processo.');
+                    $this->barraProgresso->setStrRotulo('Erro durante valida??o dos dados do processo.');
                     $objInfraException->lancarValidacoes();
                 }else{
 
@@ -173,16 +173,16 @@ class ExpedirProcedimentoRN extends InfraRN {
                         $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
                     }
 
-                    $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
+                    $this->gravarLogDebug(sprintf('Erro durante valida??o dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
                     PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
                     return false;
                 }
             }
 
-            //Busca metadados do processo registrado em trâmite anterior
+            //Busca metadados do processo registrado em tr?mite anterior
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
-            //Construção do cabeçalho para envio do processo
+            //Constru??o do cabe?alho para envio do processo
             $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
             $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
             $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
@@ -190,24 +190,24 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
-            //Construção do processo para envio
+            //Constru??o do processo para envio
             $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
-            //Obtém o tamanho total da barra de progreso
+            //Obt?m o tamanho total da barra de progreso
             $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
 
             if(!$bolSinProcessamentoEmLote){
-                //Atribui o tamanho máximo da barra de progresso
+                //Atribui o tamanho m?ximo da barra de progresso
                 $this->barraProgresso->setNumMax($nrTamanhoTotalBarraProgresso);
 
-                //Exibe a barra de progresso após definir o seu tamanho
+                //Exibe a barra de progresso ap?s definir o seu tamanho
                 $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
                 $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
             }else{
                 $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
             }
 
-            //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
+            //Cancela tr?mite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
             $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
             if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)){
                 $this->objProcessoEletronicoRN->cancelarTramite($objTramiteInconsistente->IDT);
@@ -217,7 +217,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $param->novoTramiteDeProcesso = new stdClass();
             $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
             $param->novoTramiteDeProcesso->processo = $objProcesso;
-            $param->objExpedirProcedimentoDTO = $objExpedirProcedimentoDTO;
             $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
 
             $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
@@ -262,7 +261,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                         //TODO: Erro no BARRAMENTO: Processo no pode ser enviado se possuir 2 documentos iguais(mesmo hash)
                         //TODO: Melhoria no barramento de servios. O mtodo solicitar metadados no deixa claro quais os componentes digitais que
-                        //precisam ser baixados. No cenrio de retorno de um processo existente, a nica forma  consultar o status do trâmite para
+                        //precisam ser baixados. No cenrio de retorno de um processo existente, a nica forma  consultar o status do tr?mite para
                         //saber quais precisam ser baixados. O processo poderia ser mais otimizado se o retorno nos metadados j informasse quais os
                         //componentes precisam ser baixados, semelhante ao que ocorre no enviarProcesso onde o barramento informa quais os componentes
                         //que precisam ser enviados
@@ -276,26 +275,26 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                         //TODO: Implementar o registro de auditoria, armazenando os metadados xml enviados para o PEN
 
-                        //TODO: Alterar atualizao para somente apresentar ao final de todo o trâmite
+                        //TODO: Alterar atualizao para somente apresentar ao final de todo o tr?mite
                         //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
 
                         if(!$bolSinProcessamentoEmLote){
                             $this->barraProgresso->mover($this->barraProgresso->getNumMax());
                             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
                         }else{
-                            $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
+                            $this->gravarLogDebug('Conclu?do envio dos componentes do processo', 2);
                             $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
                             $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
                         }
 
-                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Conclu?do envio dos componentes do processo', 'S'));
 
                         $this->receberReciboDeEnvio($objTramite->IDT);
 
-                        $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+                        $this->gravarLogDebug(sprintf('Tr?mite do processo %s foi conclu?do', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
 
                         $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
-                        $this->gravarLogDebug("Finalizado o envio de protocolo número " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
+                        $this->gravarLogDebug("Finalizado o envio de protocolo n?mero " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
                     }
                     catch (\Exception $e) {
                         //Realiza o desbloqueio do processo
@@ -310,7 +309,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                         $this->registrarAndamentoExpedicaoAbortada($objProcesso->idProcedimentoSEI);
 
-                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'N'));
+                        $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Conclu?do envio dos componentes do processo', 'N'));
                         throw $e;
                     }
                 }
@@ -321,12 +320,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                 }
 
                 $this->gravarLogDebug("Erro processando envio de processo [expedirProcedimento]: $e", 0, true);
-                throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
+                throw new InfraException('Falha de comunica??o com o servi?os de integra??o. Por favor, tente novamente mais tarde.', $e);
             }
         }
 
         /**
-        * Busca metadados do processo registrado no Barramento de Serviços do PEN em trâmites anteriores
+        * Busca metadados do processo registrado no Barramento de Servi?os do PEN em tr?mites anteriores
         * @return stdClass Metadados do Processo
         */
         private function consultarMetadadosPEN($parDblIdProcedimento)
@@ -353,18 +352,18 @@ class ExpedirProcedimentoRN extends InfraRN {
                 }
             }
             catch(Exception $e){
-                //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
-                //que os metadados do protocolo não pode ser obtida
-                LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
+                //Em caso de falha na comunica??o com o barramento neste ponto, o procedimento deve serguir em frente considerando
+                //que os metadados do protocolo n?o pode ser obtida
+                LogSEI::getInstance()->gravar("Falha na obten??o dos metadados de tr?mites anteriores do processo ($parDblIdProcedimento) durante tr?mite externo.", LogSEI::$AVISO);
             }
 
             return $objMetadadosProtocolo;
         }
 
         /**
-        * Método responsável por obter o tamanho total que terá a barra de progresso, considerando os diversos componentes digitais
-        * a quantidade de partes em que cada um será particionado
-        * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+        * M?todo respons?vel por obter o tamanho total que ter? a barra de progresso, considerando os diversos componentes digitais
+        * a quantidade de partes em que cada um ser? particionado
+        * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
         * @param $parObjProcesso
         * @return float|int $totalBarraProgresso
         */
@@ -478,7 +477,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento=null)
         {
             if(!isset($objExpedirProcedimentoDTO)){
-                throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
+                throw new InfraException('Par?metro $objExpedirProcedimentoDTO n?o informado.');
             }
 
             return $this->objProcessoEletronicoRN->construirCabecalho(
@@ -497,7 +496,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function construirProcesso($dblIdProcedimento, $arrIdProcessoApensado=null, $parObjMetadadosTramiteAnterior=null)
     {
         if(!isset($dblIdProcedimento)){
-            throw new InfraException('Parâmetro $dblIdProcedimento não informado.');
+            throw new InfraException('Par?metro $dblIdProcedimento n?o informado.');
         }
 
         $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
@@ -539,7 +538,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjAtividadeDTO = $objProcedimentoDTO->getArrObjAtividadeDTO();
 
         if($arrObjAtividadeDTO == null || count($arrObjAtividadeDTO) == 0) {
-            throw new InfraException("Não foi possível obter andamentos do processo {$objProcesso->protocolo}");
+            throw new InfraException("N?o foi poss?vel obter andamentos do processo {$objProcesso->protocolo}");
         }
 
         $arrObjOperacao = array();
@@ -573,7 +572,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     public static function mudarEstadoProcedimento($objProcesso, $strStaEstado)
     {
         if(!isset($objProcesso)) {
-            throw new InfraException('Parâmetro $objProcesso não informado.');
+            throw new InfraException('Par?metro $objProcesso n?o informado.');
         }
 
         try {
@@ -594,7 +593,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
             $objAtributoAndamentoDTO->setStrNome('MOTIVO');
             $objAtributoAndamentoDTO->setStrIdOrigem(null);
-            $objAtributoAndamentoDTO->setStrValor('Processo está em processamento devido ao seu trâmite externo para outra unidade.');
+            $objAtributoAndamentoDTO->setStrValor('Processo est? em processamento devido ao seu tr?mite externo para outra unidade.');
             $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array($objAtributoAndamentoDTO));
 
             $objAtividadeRN = new AtividadeRN();
@@ -698,7 +697,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function registrarAndamentoExpedicaoAbortada($dblIdProtocolo)
     {
-        //Seta todos os atributos do histórico de aborto da expedio
+        //Seta todos os atributos do hist?rico de aborto da expedio
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($dblIdProtocolo);
         $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -756,14 +755,14 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     private function atribuirDataHoraDeRegistro($objContexto, $dblIdProcedimento, $dblIdDocumento = null)
     {
-        //Validar parâmetro $objContexto
+        //Validar par?metro $objContexto
         if(!isset($objContexto)) {
-            throw new InfraException('Parâmetro $objContexto não informado.');
+            throw new InfraException('Par?metro $objContexto n?o informado.');
         }
 
-        //Validar parâmetro $dbIdProcedimento
+        //Validar par?metro $dbIdProcedimento
         if(!isset($dblIdProcedimento)) {
-            throw new InfraException('Parâmetro $dbIdProcedimento não informado.');
+            throw new InfraException('Par?metro $dbIdProcedimento n?o informado.');
         }
 
         $objProcedimentoHistoricoDTO = new ProcedimentoHistoricoDTO();
@@ -790,7 +789,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirProdutorProcesso($objProcesso, $dblIdProcedimento, $numIdUnidadeGeradora)
     {
         if(!isset($objProcesso)){
-            throw new InfraException('Parâmetro $objProcesso não informado.');
+            throw new InfraException('Par?metro $objProcesso n?o informado.');
         }
 
         $objProcesso->produtor = new stdClass();
@@ -798,7 +797,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(isset($objUsuarioProdutor)) {
             //Dados do produtor do processo
             $objProcesso->produtor->nome = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objUsuarioProdutor->getStrNome(), 150));
-            //TODO: Obter tipo de pessoa física dos contatos do SEI
+            //TODO: Obter tipo de pessoa f?sica dos contatos do SEI
             $objProcesso->produtor->numeroDeIdentificacao = $objUsuarioProdutor->getDblCpfContato();
             $objProcesso->produtor->tipo = self::STA_TIPO_PESSOA_FISICA;
             //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
@@ -816,7 +815,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirDadosInteressados($objProcesso, $dblIdProcedimento)
     {
         if(!isset($objProcesso)){
-            throw new InfraException('Parâmetro $objProcesso não informado.');
+            throw new InfraException('Par?metro $objProcesso n?o informado.');
         }
 
         $arrParticipantesDTO = $this->listarInteressados($dblIdProcedimento);
@@ -835,13 +834,13 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirDocumentos($objProcesso, $dblIdProcedimento, $parObjMetadadosTramiteAnterior)
     {
         if(!isset($objProcesso)) {
-            throw new InfraException('Parâmetro $objProcesso não informado.');
+            throw new InfraException('Par?metro $objProcesso n?o informado.');
         }
 
         $arrDocumentosRelacionados = $this->listarDocumentosRelacionados($dblIdProcedimento);
 
         if(!isset($arrDocumentosRelacionados)) {
-            throw new InfraException('Documentos não encontrados.');
+            throw new InfraException('Documentos n?o encontrados.');
         }
 
         $arrObjCompIndexadoPorIdDocumentoDTO = array();
@@ -863,7 +862,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento = new stdClass();
             $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
-            //Considera o número/nome do documento externo para descrição do documento
+            //Considera o n?mero/nome do documento externo para descri??o do documento
             $boolDocumentoRecebidoComNumero = $documentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO && $documentoDTO->getStrNumero() != null;
             $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
 
@@ -872,14 +871,14 @@ class ExpedirProcedimentoRN extends InfraRN {
             $documento->retirado = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
             $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
 
-            //Verifica se o documento faz parte de outro processo devido à sua anexação ou à sua movimentação
+            //Verifica se o documento faz parte de outro processo devido ? sua anexa??o ou ? sua movimenta??o
             if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
                 if($staAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
-                    // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
+                    // Caso o documento n?o tenha sido movido, seu protocolo ? diferente devido ? sua anexa??o ? outro processo
                     $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
                     $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
                 } else {
-                    // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
+                    // Em caso de documento movido, ele ser? tratado como cancelado para tr?mites externos
                     $documento->retirado = true;
                 }
             }
@@ -887,7 +886,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
                 $documento->hipoteseLegal = new stdClass();
                 $documento->hipoteseLegal->identificacao = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());
-                //TODO: Adicionar nome da hipótese legal atribuida ao documento
+                //TODO: Adicionar nome da hip?tese legal atribuida ao documento
             }
             $documento->dataHoraDeProducao = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
             $documento->produtor = new stdClass();
@@ -949,7 +948,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $this->atribuirComponentesDigitais($documento, $documentoDTO, $dblIdProcedimento);
             }
 
-            // TODO: Necessário tratar informações abaixo
+            // TODO: Necess?rio tratar informa??es abaixo
             //- protocoloDoDocumentoAnexado
             //- protocoloDoProcessoAnexado
             //- protocoloAnterior
@@ -964,26 +963,26 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Obtém a espécie documental relacionada ao documento do processo.
-    * A espécie documental, por padrão, é obtida do mapeamento de espécies realizado pelo administrador
-    * nas configurações do módulo.
-    * Caso o documento tenha sido produzido por outro órgão externamente, a espécie a ser considerada será
+    * Obt?m a esp?cie documental relacionada ao documento do processo.
+    * A esp?cie documental, por padr?o, ? obtida do mapeamento de esp?cies realizado pelo administrador
+    * nas configura??es do m?dulo.
+    * Caso o documento tenha sido produzido por outro ?rg?o externamente, a esp?cie a ser considerada ser?
     * aquela definida originalmente pelo seu produtor
     *
     * @param int $parDblIdProcedimento Identificador do processo
     * @param int $parDblIdDocumento Identificador do documento
-    * @return int Código da espécie documental
+    * @return int C?digo da esp?cie documental
     *
     */
     private function atribuirEspecieDocumental($parMetaDocumento, $parDocumentoDTO, $parObjMetadadosTramiteAnterior)
     {
-        //Validação dos parâmetros da função
+        //Valida??o dos par?metros da fun??o
         if(!isset($parDocumentoDTO)){
-            throw new InfraException('Parâmetro $parDocumentoDTO não informado.');
+            throw new InfraException('Par?metro $parDocumentoDTO n?o informado.');
         }
 
         if(!isset($parMetaDocumento)){
-            throw new InfraException('Parâmetro $parMetaDocumento não informado.');
+            throw new InfraException('Par?metro $parMetaDocumento n?o informado.');
         }
 
         $numCodigoEspecie = null;
@@ -991,12 +990,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         $dblIdProcedimento = $parDocumentoDTO->getDblIdProcedimento();
         $dblIdDocumento = $parDocumentoDTO->getDblIdDocumento();
 
-        //Inicialmente, busca espécie documental atribuida pelo produtor em trâmite realizado anteriormente
+        //Inicialmente, busca esp?cie documental atribuida pelo produtor em tr?mite realizado anteriormente
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->retNumCodigoEspecie();
         $objComponenteDigitalDTO->retStrNomeEspecieProdutor();
 
-        // Verifica se o documento é de um processo anexado ou não e busca no
+        // Verifica se o documento ? de um processo anexado ou n?o e busca no
         // campo correto
         if(isset($parMetaDocumento->idProcedimentoAnexadoSEI)){
             $objComponenteDigitalDTO->setDblIdProcedimentoAnexado($dblIdProcedimento);
@@ -1017,14 +1016,14 @@ class ExpedirProcedimentoRN extends InfraRN {
             $strNomeEspecieProdutor = utf8_encode($objComponenteDigitalDTO->getStrNomeEspecieProdutor());
         }
 
-        //Caso a informação sobre mapeamento esteja nulo, necessário buscar tal informação no Barramento
-        //A lista de documentos recuperada do trâmite anterior será indexada pela sua ordem no protocolo e
-        //a espécie documental e o nome do produtor serão obtidos para atribuição ao documento
+        //Caso a informa??o sobre mapeamento esteja nulo, necess?rio buscar tal informa??o no Barramento
+        //A lista de documentos recuperada do tr?mite anterior ser? indexada pela sua ordem no protocolo e
+        //a esp?cie documental e o nome do produtor ser?o obtidos para atribui??o ao documento
         if($objComponenteDigitalDTO != null && $numCodigoEspecie == null) {
             if(isset($parObjMetadadosTramiteAnterior)){
                 $arrObjMetaDocumentosTramiteAnterior = [];
 
-                //Obtenção de lista de documentos do processo
+                //Obten??o de lista de documentos do processo
                 $objProcesso = $parObjMetadadosTramiteAnterior->processo;
                 $objDocumento = $parObjMetadadosTramiteAnterior->documento;
                 $objProtocolo = isset($objProcesso) ? $objProcesso : $objDocumento;
@@ -1034,13 +1033,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $arrObjMetaDocumentosTramiteAnterior = array($arrObjMetaDocumentosTramiteAnterior);
                 }
 
-                //Indexação dos documentos pela sua ordem
+                //Indexa??o dos documentos pela sua ordem
                 $arrMetaDocumentosAnteriorIndexado = [];
                 foreach ($arrObjMetaDocumentosTramiteAnterior as $objMetaDoc) {
                     $arrMetaDocumentosAnteriorIndexado[$objMetaDoc->ordem] = $objMetaDoc;
                 }
 
-                //Atribui espécie documental definida pelo produtor do documento e registrado no PEN, caso exista
+                //Atribui esp?cie documental definida pelo produtor do documento e registrado no PEN, caso exista
                 if(count($arrMetaDocumentosAnteriorIndexado) > 0 && array_key_exists($parMetaDocumento->ordem, $arrMetaDocumentosAnteriorIndexado)){
                     $numCodigoEspecie = $arrMetaDocumentosAnteriorIndexado[$parMetaDocumento->ordem]->especie->codigo;
                     $strNomeEspecieProdutor = utf8_encode($arrMetaDocumentosAnteriorIndexado[$parMetaDocumento->ordem]->especie->nomeNoProdutor);
@@ -1048,7 +1047,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
         }
 
-        //Aplica o mapeamento de espécies definida pelo administrador para os novos documentos
+        //Aplica o mapeamento de esp?cies definida pelo administrador para os novos documentos
         if($numCodigoEspecie == null) {
             $numCodigoEspecie = $this->obterEspecieMapeada($parDocumentoDTO->getNumIdSerie());
             $strNomeEspecieProdutor = utf8_encode($parDocumentoDTO->getStrNomeSerie());
@@ -1064,7 +1063,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function obterEspecieMapeada($parNumIdSerie)
     {
         if(!isset($parNumIdSerie) || $parNumIdSerie == 0) {
-            throw new InfraException('Parâmetro $parNumIdSerie não informado.');
+            throw new InfraException('Par?metro $parNumIdSerie n?o informado.');
         }
 
         $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
@@ -1085,7 +1084,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
 
         if(!isset($numCodigoEspecieMapeada)) {
-            throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
+            throw new InfraException("C?digo de identifica??o da esp?cie documental n?o pode ser localizada para o tipo de documento {$parNumIdSerie}.");
         }
 
         return $numCodigoEspecieMapeada;
@@ -1095,10 +1094,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirAssinaturaEletronica($objComponenteDigital, AssinaturaDTO $objAssinaturaDTO)
     {
         if(!isset($objComponenteDigital)){
-            throw new InfraException('Parâmetro $objComponenteDigital não informado.');
+            throw new InfraException('Par?metro $objComponenteDigital n?o informado.');
         }
 
-        //TODO: Obter as informações corretas dos metadados da assinatura digital
+        //TODO: Obter as informa??es corretas dos metadados da assinatura digital
         if(isset($objAssinaturaDTO)) {
             $objComponenteDigital->assinaturaDigital = new stdClass();
             $objComponenteDigital->assinaturaDigital->dataHora = $this->objProcessoEletronicoRN->converterDataWebService($objComponenteDigital->getDthAberturaAtividade());
@@ -1110,11 +1109,11 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function atribuirComponentesDigitais($objDocumento, DocumentoDTO $objDocumentoDTO, $dblIdProcedimento=null)
     {
         if(!isset($objDocumento)){
-            throw new InfraException('Parâmetro $objDocumento não informado.');
+            throw new InfraException('Par?metro $objDocumento n?o informado.');
         }
 
         if(!isset($objDocumentoDTO)){
-            throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
+            throw new InfraException('Par?metro $objDocumentoDTO n?o informado.');
         }
 
         $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($dblIdProcedimento, $objDocumentoDTO->getDblIdDocumento());
@@ -1125,14 +1124,14 @@ class ExpedirProcedimentoRN extends InfraRN {
         foreach ($arrObjDadosArquivos as $numOrdemComponente => $objDadosArquivos) {
 
             if(!isset($objDadosArquivos) || count($objDadosArquivos) == 0){
-                throw new InfraException('Erro durante obtenção de informações sobre o componente digital do documento {$objDocumentoDTO->getStrProtocoloDocumentoFormatado()}.');
+                throw new InfraException('Erro durante obten??o de informa??es sobre o componente digital do documento {$objDocumentoDTO->getStrProtocoloDocumentoFormatado()}.');
             }
 
             $strAlgoritmoHash = self::ALGORITMO_HASH_DOCUMENTO;
             $hashDoComponenteDigital = $objDadosArquivos['HASH_CONTEUDO'];
             $strAlgoritmoHash = $objDadosArquivos['ALGORITMO_HASH_CONTEUDO'];
 
-            //TODO: Revisar tal implementação para atender a gerao de hash de arquivos grandes
+            //TODO: Revisar tal implementa??o para atender a gerao de hash de arquivos grandes
             $objComponenteDigital = new stdClass();
             $objComponenteDigital->ordem = $numOrdemComponente;
             $objComponenteDigital->nome = utf8_encode($objDadosArquivos["NOME"]);
@@ -1152,7 +1151,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             //TODO: Preencher dados complementares do tipo de arquivo
             //$objComponenteDigital->dadosComplementaresDoTipoDeArquivo = '';
 
-            //TODO: Carregar informações da assinatura digital
+            //TODO: Carregar informa??es da assinatura digital
             //$this->atribuirAssinaturaEletronica($objComponenteDigital, $objDocumentoDTO);
 
             $objComponenteDigital->idAnexo = $objDadosArquivos['ID_ANEXO'];
@@ -1165,7 +1164,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-     * Atribui a informação textual das tarjas de assinatura em metadados para envio, removendo os conteúdos de script e html
+     * Atribui a informa??o textual das tarjas de assinatura em metadados para envio, removendo os conte?dos de script e html
      *
      * @param DocumentoDTO $objDocumentoDTO
      * @param stdClass $objDocumento
@@ -1256,7 +1255,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO, $paramStrStaAssociacao, $bolMultiplosComponentes=false, $numOrdemComponenteDigital=1)
     {
         if(!isset($objDocumentoDTO)){
-            throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
+            throw new InfraException('Par?metro $objDocumentoDTO n?o informado.');
         }
 
         $objInformacaoArquivo = array();
@@ -1267,16 +1266,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO);
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
 
-            //Busca registro de tramitações anteriores para este componente digital para identificar se o Barramento do PEN já havia registrado o hash do documento gerado da
-            //forma antiga, ou seja, considerando o link do Número SEI. Este link foi removido para manter o padrão de conteúdo de documentos utilizado pelo SEI para assinatura
-            //Para não bloquear os documentos gerados anteriormente, aqueles já registrados pelo Barramento com o hash antigo deverão manter a geração de conteúdo anteriormente utilizada.
+            //Busca registro de tramita??es anteriores para este componente digital para identificar se o Barramento do PEN j? havia registrado o hash do documento gerado da
+            //forma antiga, ou seja, considerando o link do N?mero SEI. Este link foi removido para manter o padr?o de conte?do de documentos utilizado pelo SEI para assinatura
+            //Para n?o bloquear os documentos gerados anteriormente, aqueles j? registrados pelo Barramento com o hash antigo dever?o manter a gera??o de conte?do anteriormente utilizada.
             $objComponenteDigital = $this->consultarComponenteDigital($objDocumentoDTO->getDblIdDocumento());
             $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
             if(isset($hashDoComponenteDigitalAnterior) && ($hashDoComponenteDigitalAnterior <> $hashDoComponenteDigital)){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true);
             }
 
-            //Testa o hash com a tarja de validação contendo antigos URLs do órgão
+            //Testa o hash com a tarja de valida??o contendo antigos URLs do ?rg?o
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
             $arrControleURL = $objConfiguracaoModPEN->getValor("PEN", "ControleURL", false);
@@ -1346,13 +1345,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO,false,false,null,false,true, true);
             }
 
-            //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
+            //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as fun??es do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true, true);
             }
 
-            //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as funções do sei 3.0.11
+            //Caso o hash ainda esteja inconsistente teremos que forcar a geracao do arquivo usando as fun??es do sei 3.0.11
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
                 $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, true, true, null, false, false, true);
@@ -1427,8 +1426,8 @@ class ExpedirProcedimentoRN extends InfraRN {
                 }
 
             } elseif ($objDocumentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $paramStrStaAssociacao == RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
-                //Quando não é localizado um Anexo para um documento cancelado, os dados de componente digital precisam ser enviados
-                //pois o Barramento considera o componente digital do documento de forma obrigatória
+                //Quando n?o ? localizado um Anexo para um documento cancelado, os dados de componente digital precisam ser enviados
+                //pois o Barramento considera o componente digital do documento de forma obrigat?ria
                 $objInformacaoArquivo['NOME'] = 'cancelado.html';
                 $objInformacaoArquivo['CONTEUDO'] = "[documento cancelado]";
                 $objInformacaoArquivo['TAMANHO'] = 0;
@@ -1438,7 +1437,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $hashDoComponenteDigital = hash(self::ALGORITMO_HASH_DOCUMENTO, $objInformacaoArquivo['CONTEUDO'], true);
                 $objInformacaoArquivo['HASH_CONTEUDO'] = base64_encode($hashDoComponenteDigital);
             } else {
-                throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
+                throw new InfraException("Componente digital do documento {$strProtocoloDocumentoFormatado} n?o pode ser localizado.");
             }
         }
         else {
@@ -1464,7 +1463,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
 
         if(!is_readable($strCaminhoAnexoCompactado)) {
-            throw new InfraException("Anexo de documento não pode ser localizado");
+            throw new InfraException("Anexo de documento n?o pode ser localizado");
         }
 
         $objAnexoRN = new AnexoRN();
@@ -1501,7 +1500,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $strMimeType = 'outro';
             }
         } catch(Exception $e) {
-            throw new InfraException("Erro obtendo informações do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
+            throw new InfraException("Erro obtendo informa??es do anexo do documento {$strProtocoloDocumentoFormatado}", $e);
         }
         finally{
             finfo_close($finfo);
@@ -1549,18 +1548,18 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-    * Método de obtenção do conteúdo do documento interno para envio e cálculo de hash
+    * M?todo de obten??o do conte?do do documento interno para envio e c?lculo de hash
     *
-    * Anteriormente, os documentos enviados para o Barramento de Serviços do PEN continham o link para o número SEI do documento.
-    * Este link passou a não ser mais considerado pois é uma informação dinâmica e pertinente apenas quando o documento é visualizado
-    * dentro do sistema SEI. Quando o documento é tramitado externamente, este link não possui mais sentido.
+    * Anteriormente, os documentos enviados para o Barramento de Servi?os do PEN continham o link para o n?mero SEI do documento.
+    * Este link passou a n?o ser mais considerado pois ? uma informa??o din?mica e pertinente apenas quando o documento ? visualizado
+    * dentro do sistema SEI. Quando o documento ? tramitado externamente, este link n?o possui mais sentido.
     *
-    * Para tratar esta transição entre os formatos de documentos, existe o parâmetro $bolFormatoLegado para indicar qual formato deverá
+    * Para tratar esta transi??o entre os formatos de documentos, existe o par?metro $bolFormatoLegado para indicar qual formato dever?
     * ser utilizado na montagem dos metadados para envio.     *
     *
     * @param  Double  $parDblIdDocumento Identificador do documento
-    * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recuperação de conteúdo para envio deverá ser utilizada
-    * @return String                     Conteúdo completo do documento para envio
+    * @param  boolean $bolFormatoLegado  Flag indicando se a forma antiga de recupera??o de conte?do para envio dever? ser utilizada
+    * @return String                     Conte?do completo do documento para envio
     */
     private function obterConteudoInternoAssinatura(DocumentoDTO $objDocumentoDTO, $bolFormatoLegado=false, $bolFormatoLegado3011=false, $dadosURL=null, $bolSeiVersao4=false,$bolTarjaLegada402=false, $bolSiglaSistemaSUPER = false)
     {
@@ -1583,7 +1582,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objEditorDTO->setStrSinCarimboPublicacao('N');
         }
 
-        //para o caso de URLs antigos do órgão, ele testa o html com a tarja antiga
+        //para o caso de URLs antigos do ?rg?o, ele testa o html com a tarja antiga
         $dados=[
             "parObjEditorDTO" => $objEditorDTO,
             "montarTarja" => $dadosURL==null?false:true,
@@ -1614,10 +1613,10 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(!empty($arrSiglaOrgaoLegado)){
             $alterarTitle = true;
 
-            //Busca metadados do processo registrado em trâmite anterior
+            //Busca metadados do processo registrado em tr?mite anterior
             $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($objDocumentoDTO->getDblIdProcedimento());
 
-            //gerar o hash do conteúdo do documento
+            //gerar o hash do conte?do do documento
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strResultado, true));
 
             if(!empty($objMetadadosProcessoTramiteAnterior)){
@@ -1649,7 +1648,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function obterTipoDeConteudo($strMimeType)
     {
         if(!isset($strMimeType)){
-            throw new InfraException('Parâmetro $strMimeType não informado.');
+            throw new InfraException('Par?metro $strMimeType n?o informado.');
         }
 
         $resultado = self::TC_TIPO_CONTEUDO_OUTROS;
@@ -1672,7 +1671,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objSerieDTO = $this->consultarSerie($parObjDocumentoDTO->getNumIdSerie());
 
         if(!isset($objSerieDTO)){
-            throw new InfraException("Tipo de Documento não pode ser localizado. (Código: ".$parObjDocumentoDTO->getNumIdSerie().")");
+            throw new InfraException("Tipo de Documento n?o pode ser localizado. (C?digo: ".$parObjDocumentoDTO->getNumIdSerie().")");
         }
 
         $strStaNumeracao = $objSerieDTO->getStrStaNumeracao();
@@ -1717,7 +1716,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function consultarUnidade($numIdUnidade)
     {
         if(!isset($numIdUnidade)){
-            throw new InfraException('Parâmetro $numIdUnidade não informado.');
+            throw new InfraException('Par?metro $numIdUnidade n?o informado.');
         }
 
         $objUnidadeDTO = new UnidadeDTO();
@@ -1731,7 +1730,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function consultarSerie($numIdSerie)
     {
         if(!isset($numIdSerie)){
-            throw new InfraException('Parâmetro $numIdSerie não informado.');
+            throw new InfraException('Par?metro $numIdSerie n?o informado.');
         }
 
         $objSerieDTO = new SerieDTO();
@@ -1756,7 +1755,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     public function consultarProcedimento($numIdProcedimento)
     {
         if(!isset($numIdProcedimento)){
-            throw new InfraException('Parâmetro $numIdProcedimento não informado.');
+            throw new InfraException('Par?metro $numIdProcedimento n?o informado.');
         }
 
         $objProcedimentoDTO = new ProcedimentoDTO();
@@ -1780,7 +1779,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     public function listarInteressados($numIdProtocolo)
     {
         if(!isset($numIdProtocolo)){
-            throw new InfraException('Parâmetro $numIdProtocolo não informado.');
+            throw new InfraException('Par?metro $numIdProtocolo n?o informado.');
         }
 
         $objParticipanteDTO = new ParticipanteDTO();
@@ -1808,7 +1807,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function consultarAnexo($dblIdDocumento)
     {
         if(!isset($dblIdDocumento)){
-            throw new InfraException('Parâmetro $dblIdDocumento não informado.');
+            throw new InfraException('Par?metro $dblIdDocumento n?o informado.');
         }
 
         $objAnexoDTO = new AnexoDTO();
@@ -1826,7 +1825,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function consultarUsuario($numIdUsuario)
     {
         if(!isset($numIdUsuario)){
-            throw new InfraException('Parâmetro $numIdUsuario não informado.');
+            throw new InfraException('Par?metro $numIdUsuario n?o informado.');
         }
 
         $objUsuarioDTO = new UsuarioDTO();
@@ -1839,11 +1838,11 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-     * Recupera a lista de documentos do processo, mantendo sua ordem conforme definida pelo usuário após reordenações e
-     * movimentações de documentos
+     * Recupera a lista de documentos do processo, mantendo sua ordem conforme definida pelo usu?rio ap?s reordena??es e
+     * movimenta??es de documentos
      *
-     * Esta função basicamente aplica a desestruturação do retorno da função listarDocumentosRelacionados para obter somente
-     * as instãncias dos objetos DocumentoDTO
+     * Esta fun??o basicamente aplica a desestrutura??o do retorno da fun??o listarDocumentosRelacionados para obter somente
+     * as inst?ncias dos objetos DocumentoDTO
      *
      * @param num $idProcedimento
      * @return array
@@ -1862,7 +1861,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     public function listarDocumentosRelacionados($idProcedimento, $paramDblIdDocumentoFiltro=null)
     {
         if(!isset($idProcedimento)){
-            throw new InfraException('Parâmetro $idProcedimento não informado.');
+            throw new InfraException('Par?metro $idProcedimento n?o informado.');
         }
 
         $arrObjDocumentoDTO = array();
@@ -1897,7 +1896,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrObjDocumentoDTOBanco = $this->objDocumentoRN->listarRN0008($objDocumentoDTO);
             $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
 
-            //Mantem ordenação definida pelo usuário, indicando qual a sua associação com o processo
+            //Mantem ordena??o definida pelo usu?rio, indicando qual a sua associa??o com o processo
             $arrObjDocumentoDTO = array();
             foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
                 $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
@@ -1946,7 +1945,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function consultarDocumento($dblIdDocumento)
     {
         if(!isset($dblIdDocumento)){
-            throw new InfraException('Parâmetro $dblIdDocumento não informado.');
+            throw new InfraException('Par?metro $dblIdDocumento n?o informado.');
         }
 
         $documentoDTO = new DocumentoDTO();
@@ -1978,15 +1977,15 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmLote=false)
     {
         if (!isset($strNumeroRegistro)) {
-            throw new InfraException('Parâmetro $strNumeroRegistro não informado.');
+            throw new InfraException('Par?metro $strNumeroRegistro n?o informado.');
         }
 
         if (!isset($numIdTramite)) {
-            throw new InfraException('Parâmetro $numIdTramite não informado.');
+            throw new InfraException('Par?metro $numIdTramite n?o informado.');
         }
 
         if (!isset($strProtocolo)) {
-            throw new InfraException('Parâmetro $strProtocolo não informado.');
+            throw new InfraException('Par?metro $strProtocolo n?o informado.');
         }
 
         //Obter dados dos componetes digitais
@@ -2037,20 +2036,20 @@ class ExpedirProcedimentoRN extends InfraRN {
                     $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
                     $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
-                    //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
+                    //Verifica se existe o objeto anexoDTO para recuperar informa??es do arquivo
                     $nrTamanhoArquivoMb = 0;
                     $nrTamanhoBytesArquivo = 0;
                     $nrTamanhoMegasMaximo = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
                     $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
                     try {
-                        //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
+                        //Verifica se o arquivo ? maior que o tamanho m?ximo definido para envio, se for, realiza o particionamento do arquivo
                         if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
                             if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
                                 $objAnexoDTO = $this->consultarAnexo($objDocumentoDTO->getDblIdDocumento());
                                 if(!$objAnexoDTO){
                                     $strProtocoloDocumento = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
-                                    throw new InfraException("Anexo do documento $strProtocoloDocumento não pode ser localizado.");
+                                    throw new InfraException("Anexo do documento $strProtocoloDocumento n?o pode ser localizado.");
                                 }
 
                                 $strCaminhoAnexoTemporario = null;
@@ -2066,7 +2065,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                                 $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
                                 $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
 
-                                //Método que irá particionar o arquivo em partes para realizar o envio
+                                //M?todo que ir? particionar o arquivo em partes para realizar o envio
                                 $this->particionarComponenteDigitalParaEnvio(
                                     $strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
                                     $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmLote
@@ -2109,7 +2108,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
                             $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
 
-                            //Bloquea documento para atualizao, já que ele foi visualizado
+                            //Bloquea documento para atualizao, j? que ele foi visualizado
                             $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
                             $this->objProcedimentoAndamentoRN->cadastrar(
                                 ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
@@ -2164,7 +2163,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $strNomeArquivoUploadHtml = $objAnexoRN->gerarNomeArquivoTemporario();
 
             if (file_put_contents(DIR_SEI_TEMP.'/'.$strNomeArquivoUploadHtml, $strConteudoAssinatura) === false) {
-                throw new InfraException('Erro criando arquivo html temporário para envio do e-mail.');
+                throw new InfraException('Erro criando arquivo html tempor?rio para envio do e-mail.');
             }
 
 
@@ -2212,7 +2211,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
         }catch(Exception $e){
-            throw new InfraException("Erro salvando anexo imutável", $e);
+            throw new InfraException("Erro salvando anexo imut?vel", $e);
         }
 
         }
@@ -2230,13 +2229,13 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $arrOrdensAtualizadas = InfraArray::converterArrInfraDTO($arrComponentesDigitaisDTO, "Ordem");
         if(count($arrOrdensAtualizadas) != count(array_unique($arrOrdensAtualizadas))){
-            throw new InfraException("Falha identificada na definição da ordem dos componentes digitais do documento $strProtocoloDocumento");
+            throw new InfraException("Falha identificada na defini??o da ordem dos componentes digitais do documento $strProtocoloDocumento");
         }
     }
 
     /**
-    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+    * M?todo respons?vel por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
     * @param $strCaminhoAnexo
     * @param $dadosDoComponenteDigital
     * @param $nrTamanhoArquivoMb
@@ -2254,7 +2253,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         try{
             $inicio = 0;
-            //Lê o arquivo em partes para realizar o envio
+            //L? o arquivo em partes para realizar o envio
             for ($i = 1; $i <= $qtdPartes; $i++)
             {
                 $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO  , $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado())." (Componente digital: parte $i de $qtdPartes)");
@@ -2286,32 +2285,32 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
         if(!isset($objExpedirProcedimentoDTO)){
-            $objInfraException->adicionarValidacao('Parâmetro $objExpedirProcedimentoDTO não informado.');
+            $objInfraException->adicionarValidacao('Par?metro $objExpedirProcedimentoDTO n?o informado.');
         }
 
         //TODO: Validar se repositrio de origem foi informado
         if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdRepositorioOrigem())){
-            $objInfraException->adicionarValidacao('Identificação do repositório de estruturas da unidade atual não informado.');
+            $objInfraException->adicionarValidacao('Identifica??o do reposit?rio de estruturas da unidade atual n?o informado.');
         }
 
         //TODO: Validar se unidade de origem foi informado
         if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdUnidadeOrigem())){
-            $objInfraException->adicionarValidacao('Identificação da unidade atual no repositório de estruturas organizacionais não informado.');
+            $objInfraException->adicionarValidacao('Identifica??o da unidade atual no reposit?rio de estruturas organizacionais n?o informado.');
         }
 
         //TODO: Validar se repositrio foi devidamente informado
         if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdRepositorioDestino())){
-            $objInfraException->adicionarValidacao('Repositório de estruturas organizacionais não informado.');
+            $objInfraException->adicionarValidacao('Reposit?rio de estruturas organizacionais n?o informado.');
         }
 
         //TODO: Validar se unidade foi devidamente informada
         if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdUnidadeDestino())){
-            $objInfraException->adicionarValidacao('Unidade de destino não informado.');
+            $objInfraException->adicionarValidacao('Unidade de destino n?o informado.');
         }
 
         //TODO: Validar se motivo de urgncia foi devidamente informado, caso expedio urgente
         if ($objExpedirProcedimentoDTO->getBolSinUrgente() && InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdMotivoUrgencia())){
-            $objInfraException->adicionarValidacao('Motivo de urgência não informado.');
+            $objInfraException->adicionarValidacao('Motivo de urg?ncia n?o informado.');
         }
     }
 
@@ -2319,18 +2318,18 @@ class ExpedirProcedimentoRN extends InfraRN {
     {
         $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
         if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
-            $objInfraException->adicionarValidacao('Não é possível tramitar um processo sem documentos', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('N?o ? poss?vel tramitar um processo sem documentos', $strAtributoValidacao);
         }
     }
 
     private function validarDadosProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         if($objProcedimentoDTO->isSetStrDescricaoProtocolo() && InfraString::isBolVazia($objProcedimentoDTO->getStrDescricaoProtocolo())) {
-            $objInfraException->adicionarValidacao("Descrição do processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} não informado.", $strAtributoValidacao);
+            $objInfraException->adicionarValidacao("Descri??o do processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} n?o informado.", $strAtributoValidacao);
         }
 
         if(!$objProcedimentoDTO->isSetArrObjParticipanteDTO() || count($objProcedimentoDTO->getArrObjParticipanteDTO()) == 0) {
-            $objInfraException->adicionarValidacao("Interessados do processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} não informados.", $strAtributoValidacao);
+            $objInfraException->adicionarValidacao("Interessados do processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} n?o informados.", $strAtributoValidacao);
         }
     }
 
@@ -2349,7 +2348,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                 if($objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO){
                     if(empty($strMapeamentoEnvioPadrao) && $objGenericoBD->contar($objDocMapDTO) == 0) {
                         $strDescricao = sprintf(
-                            'Não existe mapeamento de envio para %s no documento %s',
+                            'N?o existe mapeamento de envio para %s no documento %s',
                             $objDocumentoDTO->getStrNomeSerie(),
                             $objDocumentoDTO->getStrProtocoloDocumentoFormatado()
                         );
@@ -2371,10 +2370,10 @@ class ExpedirProcedimentoRN extends InfraRN {
                         }
 
                         if (!empty($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objDocumentoDTO->getNumIdHipoteseLegalProtocolo()))) {
-                            $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não mapeada', $strAtributoValidacao);
+                            $objInfraException->adicionarValidacao('Hip?tese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' n?o mapeada', $strAtributoValidacao);
                         }else{
                             if($dados->getStrSinAtivo() == 'N'){
-                                $objInfraException->adicionarValidacao('Hipótese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' está inativa', $strAtributoValidacao);
+                                $objInfraException->adicionarValidacao('Hip?tese legal "'.$dados->getStrNome().'" do documento '.$objDocumentoDTO->getStrNomeSerie(). ' ' . $objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' est? inativa', $strAtributoValidacao);
                             }
                         }
                     }
@@ -2396,14 +2395,14 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         if(isset($arrObjAtividadeDTO) && count($arrObjAtividadeDTO) > 1) {
             $strSiglaUnidade = implode(', ', InfraArray::converterArrInfraDTO($arrObjAtividadeDTO, 'SiglaUnidade'));
-            $objInfraException->adicionarValidacao("Não é possível tramitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
+            $objInfraException->adicionarValidacao("N?o ? poss?vel tramitar um processo aberto em mais de uma unidade. ($strSiglaUnidade)", $strAtributoValidacao);
         }
     }
 
     private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {
-            $objInfraException->adicionarValidacao('Não é possível tramitar um processo com informações sigilosas.', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('N?o ? poss?vel tramitar um processo com informa??es sigilosas.', $strAtributoValidacao);
         }
     }
 
@@ -2417,7 +2416,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     {
         if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
             if (empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo())) {
-                $objInfraException->adicionarValidacao('Não é possível tramitar um processo de nível restrito sem a hipótese legal mapeada.', $strAtributoValidacao);
+                $objInfraException->adicionarValidacao('N?o ? poss?vel tramitar um processo de n?vel restrito sem a hip?tese legal mapeada.', $strAtributoValidacao);
             }
 
             $objHipoteseLegalDTO = new HipoteseLegalDTO();
@@ -2431,10 +2430,10 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
             if(!empty($dados)){
                 if (!empty($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()) && empty($objPenRelHipoteseLegalEnvioRN->getIdHipoteseLegalPEN($objProcedimentoDTO->getNumIdHipoteseLegalProtocolo()))) {
-                    $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' não mapeada', $strAtributoValidacao);
+                    $objInfraException->adicionarValidacao('Hip?tese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' n?o mapeada', $strAtributoValidacao);
                 }else{
                     if($dados->getStrSinAtivo() == 'N'){
-                        $objInfraException->adicionarValidacao('Hipótese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' está inativa', $strAtributoValidacao);
+                        $objInfraException->adicionarValidacao('Hip?tese legal "' . $dados->getStrNome() . '" do processo ' . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . ' est? inativa', $strAtributoValidacao);
                     }
                 }
             }
@@ -2464,7 +2463,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             foreach($arrObjDocumentoDTO as $objDocumentoDTO) {
                 $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
 
-                // Se o documento no tem assinatura e não foi cancelado então cai na regra de validao
+                // Se o documento no tem assinatura e n?o foi cancelado ent?o cai na regra de validao
                 if($this->objAssinaturaRN->contarRN1324($objAssinaturaDTO) == 0 && $objDocumentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO && ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_EDOC || $objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_INTERNO) ){
                     $bolAssinaturaCorretas = false;
                 }
@@ -2472,7 +2471,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         if($bolAssinaturaCorretas !== true) {
-            $objInfraException->adicionarValidacao('Não é possível tramitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('N?o ? poss?vel tramitar um processos com documentos gerados e n?o assinados', $strAtributoValidacao);
         }
     }
 
@@ -2493,22 +2492,22 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
         if($bolProcedimentoCompartilhado) {
-            $objInfraException->adicionarValidacao('Não é possível tramitar o processo pois ele foi compartilhado através do SEI Federação.', $strAtributoValidacao);
+            $objInfraException->adicionarValidacao('N?o ? poss?vel tramitar o processo pois ele foi compartilhado atrav?s do SEI Federa??o.', $strAtributoValidacao);
         }
     }
 
     /**
      * Valida se o processo pode ser bloqueado pelo sistema antes do seu envio
      *
-     * Regra necessária para evitar que regras internas do SEI ou módulos possam impedir o bloqueio do processo após o seu envio externo,
-     * exceção esta que pode deixar o processo aberto tanto no remetente como no destinatário.
+     * Regra necess?ria para evitar que regras internas do SEI ou m?dulos possam impedir o bloqueio do processo ap?s o seu envio externo,
+     * exce??o esta que pode deixar o processo aberto tanto no remetente como no destinat?rio.
      */
     protected function validarPossibilidadeBloqueioControlado($objProcedimentoDTO){
-        // Bloqueia temporariamente o processo para garantir que não exista restrições sobre ele
+        // Bloqueia temporariamente o processo para garantir que n?o exista restri??es sobre ele
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoRN->bloquear([$objProcedimentoDTO]);
 
-        // Desfaz a operação anterior para voltar ao estado original do processo
+        // Desfaz a opera??o anterior para voltar ao estado original do processo
         $objProtocoloDTOBanco = new ProcedimentoDTO();
         $objProtocoloDTOBanco->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
         $objProtocoloDTOBanco->retStrStaEstadoProtocolo();
@@ -2517,10 +2516,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Validação das pré-condições necessárias para que um processo e seus documentos possam ser expedidos para outra entidade
+    * Valida??o das pr?-condi??es necess?rias para que um processo e seus documentos possam ser expedidos para outra entidade
     * @param  InfraException  $objInfraException  Instncia da classe de exceo para registro dos erros
-    * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser expedido
-    * @param string $strAtributoValidacao índice para o InfraException separar os processos
+    * @param  ProcedimentoDTO $objProcedimentoDTO Informa??es sobre o procedimento a ser expedido
+    * @param string $strAtributoValidacao ?ndice para o InfraException separar os processos
     */
     public function validarPreCondicoesExpedirProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao = null, $bolSinProcessamentoEmLote = false)
     {
@@ -2531,7 +2530,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
         $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-        
+
         try{
             if(!$bolSinProcessamentoEmLote){
                 $this->validarPossibilidadeBloqueio($objProcedimentoDTO);
@@ -2572,7 +2571,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $idUnidadeAtual = filter_var($idUnidadeAtual, FILTER_SANITIZE_NUMBER_INT);
 
             if(!$idUnidadeAtual){
-                $objInfraException->adicionarValidacao('Processo inválido.');
+                $objInfraException->adicionarValidacao('Processo inv?lido.');
             }
 
             $objInfraException->lancarValidacoes();
@@ -2655,7 +2654,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $idUnidadeAtual = filter_var($idUnidadeAtual, FILTER_SANITIZE_NUMBER_INT);
 
             if(!$idUnidadeAtual){
-                $objInfraException->adicionarValidacao('Processo inválido.');
+                $objInfraException->adicionarValidacao('Processo inv?lido.');
             }
 
             $objInfraException->lancarValidacoes();
@@ -2708,8 +2707,8 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+    * M?todo respons?vel por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
     * @param $strCaminhoAnexo
     * @param $dadosDoComponenteDigital
     * @param $nrTamanhoArquivoMb
@@ -2721,14 +2720,14 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
     $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmLote=false)
     {
-        //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
+        //Faz o c?lculo para obter a quantidade de partes que o arquivo ser? particionado, sempre arrendondando para cima
         $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
         //Abre o arquivo para leitura
         $fp = fopen($strCaminhoAnexo, "rb");
 
         try {
             $inicio = 0;
-            //Lê o arquivo em partes para realizar o envio
+            //L? o arquivo em partes para realizar o envio
             for ($i = 1; $i <= $qtdPartes; $i++)
             {
                 $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
@@ -2741,13 +2740,13 @@ class ExpedirProcedimentoRN extends InfraRN {
                     }
                     $this->contadorDaBarraDeProgresso++;
                 }catch (Exception $e){
-                    //Armazena as partes que não foram enviadas para tentativa de reenvio posteriormente
+                    //Armazena as partes que n?o foram enviadas para tentativa de reenvio posteriormente
                     $arrPartesComponentesDigitaisNaoEnviadas[] = $inicio;
                 }
                 $inicio = ($nrTamanhoBytesMaximo * $i);
             }
 
-            //Verifica se existem partes do componente digital que não foram enviadas para tentar realizar o envio novamente
+            //Verifica se existem partes do componente digital que n?o foram enviadas para tentar realizar o envio novamente
             if(isset($arrPartesComponentesDigitaisNaoEnviadas)){
                 $nrTotalPartesNaoEnviadas = count($arrPartesComponentesDigitaisNaoEnviadas);
                 $i = 1;
@@ -2771,8 +2770,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-    * Método responsavel por realizar o envio de uma parte especifica de um componente digital
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+    * M?todo responsavel por realizar o envio de uma parte especifica de um componente digital
+    * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
     * @param $parInicio
     * @param $parFim
     * @param $parParteDoArquivo
@@ -2795,8 +2794,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-    * Método responsável por realizar o envio da parte de um componente digital
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+    * M?todo respons?vel por realizar o envio da parte de um componente digital
+    * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
     * @param $parametros
     * @return mixed
     * @throws InfraException
@@ -2814,8 +2813,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-    * Método responsável por sinalizar o término do envio das partes de um componente digital
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
+    * M?todo respons?vel por sinalizar o t?rmino do envio das partes de um componente digital
+    * @author Josinaldo J?nior <josinaldo.junior@basis.com.br>
     * @param $parametros
     * @return mixed
     * @throws InfraException
@@ -2825,7 +2824,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         try {
             return $this->getObjPenWs()->sinalizarTerminoDeEnvioDasPartesDoComponente($parametros);
         } catch (\Exception $e) {
-            $mensagem = "Falha em sinalizar o término de envio das partes do componente digital";
+            $mensagem = "Falha em sinalizar o t?rmino de envio das partes do componente digital";
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             throw new InfraException($mensagem, $e, $detalhes);
         }
@@ -2882,7 +2881,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             return true;
 
         } catch (\Exception $e) {
-            $strMensagem = "Falha na obtenção do recibo de envio de protocolo do trâmite $parNumIdTramite. $e";
+            $strMensagem = "Falha na obten??o do recibo de envio de protocolo do tr?mite $parNumIdTramite. $e";
             LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
         }
     }
@@ -2980,7 +2979,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
             if(!isset($objTramiteDTO)){
-                throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
+                throw new InfraException("Tr?mite n?o encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
             }
 
             $tramites = $this->objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, $objPenUnidadeDTO->getNumIdUnidadeRH(), null, null, $numIdRespositorio);
@@ -2989,16 +2988,16 @@ class ExpedirProcedimentoRN extends InfraRN {
             if (!$tramite) {
                 $numIdTramite = $objTramiteDTO->getNumIdTramite();
                 $numIdProtoloco = $objDtoProtocolo->getDblIdProtocolo();
-                throw new InfraException("Trâmite $numIdTramite não encontrado para o processo $numIdProtoloco.");
+                throw new InfraException("Tr?mite $numIdTramite n?o encontrado para o processo $numIdProtoloco.");
             }
 
-            //Verifica se o trâmite est com o status de iniciado
+            //Verifica se o tr?mite est com o status de iniciado
             if ($tramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO) {
                 $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
                 return true;
             }
 
-            //Busca o processo eletrônico
+            //Busca o processo eletr?nico
             $objDTOFiltro = new ProcessoEletronicoDTO();
             $objDTOFiltro->setDblIdProcedimento($dblIdProcedimento);
             $objDTOFiltro->retStrNumeroRegistro();
@@ -3008,7 +3007,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objProcessoEletronicoDTO = $objBD->consultar($objDTOFiltro);
 
             if (empty($objProcessoEletronicoDTO)) {
-                throw new InfraException('Não foi encontrado o processo pelo ID ' . $dblIdProcedimento);
+                throw new InfraException('N?o foi encontrado o processo pelo ID ' . $dblIdProcedimento);
             }
 
             //Armazena a situao atual
@@ -3017,17 +3016,17 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Valida os status
             switch ($numSituacaoAtual) {
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-                    throw new InfraException("O sistema destinatário já iniciou o recebimento desse processo, portanto não é possível realizar o cancelamento");
+                    throw new InfraException("O sistema destinat?rio j? iniciou o recebimento desse processo, portanto n?o ? poss?vel realizar o cancelamento");
                 break;
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-                    throw new InfraException("O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
+                    throw new InfraException("O sistema destinat?rio j? recebeu esse processo, portanto n?o ? possivel realizar o cancelamento");
                 break;
                 case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-                    throw new InfraException("O trâmite externo para esse processo encontra-se recusado.");
+                    throw new InfraException("O tr?mite externo para esse processo encontra-se recusado.");
                 break;
             }
 
-            //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
+            //Somente solicita cancelamento ao PEN se processo ainda n?o estiver cancelado
             if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
                 $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
             }
@@ -3207,9 +3206,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     /**
      * Recupera lista de tarjas de assinaturas aplicadas ao documento em seu formato HTML
      *
-     * Este método foi baseado na implementação presente em AssinaturaRN::montarTarjas.
-     * Devido a estrutura interna do SEI, não existe uma forma de reaproveitar as regras de montagem de tarjas
-     * de forma individual, restando como última alternativa a reprodução das regras até que esta seja encapsulado pelo core do SEI
+     * Este m?todo foi baseado na implementa??o presente em AssinaturaRN::montarTarjas.
+     * Devido a estrutura interna do SEI, n?o existe uma forma de reaproveitar as regras de montagem de tarjas
+     * de forma individual, restando como ?ltima alternativa a reprodu??o das regras at? que esta seja encapsulado pelo core do SEI
      *
      * @param DocumentoDTO $objDocumentoDTO
      * @return array
@@ -3246,7 +3245,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
               if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-                throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
+                throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" n?o encontrada.');
               }
 
               $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
