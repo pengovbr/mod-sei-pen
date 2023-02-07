@@ -456,8 +456,11 @@ class ProcessoEletronicoRN extends InfraRN
             curl_setopt($curl, CURLOPT_HEADER, false);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+
+            if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            }
             curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -505,8 +508,11 @@ class ProcessoEletronicoRN extends InfraRN
             curl_setopt($curl, CURLOPT_HEADER, 0);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, true);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
+
+            if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            }
             curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
             curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -642,11 +648,11 @@ class ProcessoEletronicoRN extends InfraRN
 
             $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
             $arrPropAdicionais=$objCabecalho->propriedadeAdicional;
-            $arrPropAdicionais[] = new SoapVar("<propriedadeAdicional 
+            $arrPropAdicionais[] = new SoapVar("<propriedadeAdicional
             chave='MODULO_PEN_VERSAO'>". $objInfraParametro->getValor('VERSAO_MODULO_PEN') . "</propriedadeAdicional>", XSD_ANYXML);
 
             $objCabecalho->propriedadeAdicional= $arrPropAdicionais;
-                    
+
         }catch(Exception $e){
 
             throw new InfraException($mensagem, $e);
@@ -655,11 +661,11 @@ class ProcessoEletronicoRN extends InfraRN
 
     }
 
-    
+
     private function atribuirInformacoesAssunto($objCabecalho,$dblIdProcedimento)
     {
 
-       
+
         try{
 
 
@@ -675,13 +681,13 @@ class ProcessoEletronicoRN extends InfraRN
 
         $objRelProtocoloAssuntoRN = new RelProtocoloAssuntoRN();
         $arrobjRelProtocoloAssuntoDTO = $objRelProtocoloAssuntoRN->listarRN0188($objRelProtocoloAssuntoDTO);
-        
+
         $arrDadosAssunto = array();
         $contagem=1;
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        
+
         foreach ($arrobjRelProtocoloAssuntoDTO as $objRelProtocoloAssuntoDTO) {
-            
+
             $idAssunto = $objRelProtocoloAssuntoDTO->getNumIdAssunto();
             $assuntoDTO = new AssuntoDTO();
             $assuntoDTO->setNumIdAssunto($idAssunto);
@@ -690,51 +696,51 @@ class ProcessoEletronicoRN extends InfraRN
             $assuntoDTO->retStrStaDestinacao();
             $assuntoDTO->retStrObservacao();
             $assuntoDTO->retStrCodigoEstruturado();
-            
+
             $objAssuntoRN = new AssuntoRN();
             $infoAssunto = $objAssuntoRN->consultarRN0256($assuntoDTO);
-            
+
             switch ($infoAssunto->getStrStaDestinacao()) {
                 case AssuntoRN::$TD_ELIMINACAO:
                     $destinacao = "Eliminação";
                     break;
-                
+
                 case AssuntoRN::$TD_GUARDA_PERMANENTE:
                     $destinacao = "Guarda Permanente";
                     break;
                 }
-                    
-            
+
+
             $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()), 10000)):"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
+
             $valorInput=$infoAssunto->getStrCodigoEstruturado()?utf8_encode($infoAssunto->getStrCodigoEstruturado()):"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_CodigoEstruturado_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
+
             $valorInput=$infoAssunto->getNumPrazoCorrente()? (int) $infoAssunto->getNumPrazoCorrente() :"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_PrazoCorrente_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
+
             $valorInput=$infoAssunto->getNumPrazoIntermediario()?(int) $infoAssunto->getNumPrazoIntermediario():"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_PrazoIntermediario_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
+
             $valorInput=$destinacao?utf8_encode($destinacao):"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
+
             $valorInput=$infoAssunto->getStrObservacao()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao()), 10000)):"NA";
-            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional 
+            $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
-            
-            
+
+
             $contagem++;
         }
 
         $objCabecalho->propriedadeAdicional= $arrDadosAssunto;
-                    
+
         }catch(Exception $e){
 
             throw new InfraException($mensagem, $e);

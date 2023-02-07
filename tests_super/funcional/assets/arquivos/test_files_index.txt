@@ -1,0 +1,10 @@
+https://archive.org/download/arquivo_pdf_testes/arquivo_pequeno.txt
+https://archive.org/download/arquivo_pdf_testes/arquivo_pequeno_A.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_pequeno_B.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_pequeno_C.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_001.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_003.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_020.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_060.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_corrompimento_besimplesoap.pdf
+https://archive.org/download/arquivo_pdf_testes/arquivo_extensao_nao_permitida.docx

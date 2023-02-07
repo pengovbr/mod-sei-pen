@@ -1,16 +1,16 @@
 <?
 
 class ConfiguracaoSEI extends InfraConfiguracao  {
-	
+
 	private static $instance = null;
-	
+
 	public static function getInstance(){
 		if (ConfiguracaoSEI::$instance == null) {
 			ConfiguracaoSEI::$instance = new ConfiguracaoSEI();
 		}
 		return ConfiguracaoSEI::$instance;
 	}
-	
+
 	public function getArrConfiguracoes(){
 		return array(
 			'SEI' => array(
@@ -36,7 +36,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
                     'PENIntegracao' => 'pen',
                 ),
 			),
-			
+
 			'SessaoSEI' => array(
 				'SiglaOrgaoSistema' => 'ABC',
 				'SiglaSistema' => 'SEI',
@@ -81,7 +81,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 				'Servidor' => 'memcached',
 				'Porta' => '11211',
 				'Timeout' => 1,
-				'Tempo' => 3600,					
+				'Tempo' => 3600,
 			),
 
             'Federacao' => array(
@@ -129,13 +129,13 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 				'CorePublicacoes' => 'sei-publicacoes',
 				'TempoCommitProtocolos' => 300,
 				'TempoCommitBasesConhecimento' => 60,
-				'TempoCommitPublicacoes' => 60,					
-			),				
-			
+				'TempoCommitPublicacoes' => 60,
+			),
+
 			'JODConverter' => array(
 				'Servidor' => 'http://jod/converter/service'
 			),
-			
+
 			'HostWebService' => array(
 				'Sip' => array('*'), //Refer?ncias (IP e nome na rede) de todas as m?quinas que executam o SIP.
 				'Publicacao' => array('*'), //Refer?ncias (IP e nome na rede) das m?quinas de ve?culos de publica??o externos cadastrados no SEI.
