@@ -558,8 +558,8 @@ class ProcessoEletronicoRN extends InfraRN
 
             $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-            if (strstr(strtolower($detalhes), "hash de ao menos um componente digital não confere")) {
-                $this->validarMudancaOrdemDocumentos($parametros->objProcedimentoDTO, $detalhes);
+            if (strpos(strtolower($strMensagem), "hash de ao menos um componente digital não confere")) {
+                $strMensagem = $this->validarMudancaOrdemDocumentos($parametros->dblIdProcedimento, $strMensagem);
             }
             throw new InfraException($strMensagem, $e, $strDetalhes);
         } catch (\Exception $e) {
@@ -569,22 +569,39 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
-    private function validarMudancaOrdemDocumentos($objProcedimentoDTO, $strMensagem)
+    private function validarMudancaOrdemDocumentos($dblIdProcedimento, $strMensagem)
     {
+        $objMetadadosProcessoTramiteAnterior = null;
         //Busca metadados do processo registrado em trâmite anterior
-        $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($objProcedimentoDTO->getDblIdProcedimento());
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
+        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+        $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+        $objTramiteDTO->retNumIdTramite();
+
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+        if(isset($objTramiteDTO)) {
+            $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
+            $objRetorno = $this->solicitarMetadados($parNumIdentificacaoTramite);
+
+            if(isset($objRetorno)){
+                $objMetadadosProcessoTramiteAnterior = $objRetorno->metadados;
+            }
+        }
 
         //Construção do cabeçalho para envio do processo
         $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
         $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
 
         //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
-        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
+        $objTramitesAnteriores = isset($strNumeroRegistro) ? $this->consultarTramites(null, $strNumeroRegistro) : null;
         if (!is_null(count($objTramitesAnteriores)) && count($objTramitesAnteriores)) {
             $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
             $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
             $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
             $objAtividadeDTO->retNumIdAtividade();
@@ -594,9 +611,10 @@ class ProcessoEletronicoRN extends InfraRN
             
             if (!is_null($arrObjAtividadeDTO) && count($arrObjAtividadeDTO)) {
                 $strMensagem = str_replace('hash de ao menos um componente digital não confere', 'a ordem dos documentos foram modificadas na árvore do processo', $strMensagem);
-                throw new InfraException($strMensagem);
             }
         }
+
+        return $strMensagem;
     }
 
     public function listarPendencias($bolTodasPendencias)
