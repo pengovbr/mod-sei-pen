@@ -1,22 +1,22 @@
     <?php
-try {
-    require_once DIR_SEI_WEB . '/SEI.php';
+    try {
+        require_once DIR_SEI_WEB . '/SEI.php';
 
-    session_start();
+        session_start();
 
-    $objSessaoSEI = SessaoSEI::getInstance();
-    $objPaginaSEI = PaginaSEI::getInstance();
+        $objSessaoSEI = SessaoSEI::getInstance();
+        $objPaginaSEI = PaginaSEI::getInstance();
 
-    $objSessaoSEI->validarLink();
-    $objSessaoSEI->validarPermissao($_GET['acao']);
+        $objSessaoSEI->validarLink();
+        $objSessaoSEI->validarPermissao($_GET['acao']);
 
-    $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
-    $staConcluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE;
-    $staEmProcessamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO;
+        $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
+        $staConcluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE;
+        $staEmProcessamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO;
 
-    $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado', 'txtNomeUsuario', 'txtUnidadeDestino', 'selAndamento'));
+        $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado', 'txtNomeUsuario', 'txtUnidadeDestino', 'selAndamento'));
 
-    switch ($_GET['acao']) {
+      switch ($_GET['acao']) {
 
         case 'pen_expedir_lote_listar':
             $strTitulo = 'Processos Tramitados em Lote';
@@ -24,115 +24,115 @@ try {
 
         default:
             throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }
+      }
 
-    $arrComandos = array();
-    $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+      $arrComandos = array();
+      $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
-    $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
+      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
 
-    $objPenLoteProcedimentoDTO->retNumIdLote();
-    $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
-    $objPenLoteProcedimentoDTO->retNumIdAndamento();
-    $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
-    $objPenLoteProcedimentoDTO->retStrNomeUsuario();
-    $objPenLoteProcedimentoDTO->retDthRegistro();
+      $objPenLoteProcedimentoDTO->retNumIdLote();
+      $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
+      $objPenLoteProcedimentoDTO->retNumIdAndamento();
+      $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+      $objPenLoteProcedimentoDTO->retStrNomeUsuario();
+      $objPenLoteProcedimentoDTO->retDthRegistro();
 
-    $strNomeUsuario = $objPaginaSEI->recuperarCampo('txtNomeUsuario');
-    if (trim($strNomeUsuario) != '') {
-        $objPenLoteProcedimentoDTO->setStrNomeUsuario('%' . trim($strNomeUsuario . '%'), InfraDTO::$OPER_LIKE);
-    }
+      $strNomeUsuario = $objPaginaSEI->recuperarCampo('txtNomeUsuario');
+      if (trim($strNomeUsuario) != '') {
+          $objPenLoteProcedimentoDTO->setStrNomeUsuario('%' . trim($strNomeUsuario . '%'), InfraDTO::$OPER_LIKE);
+      }
 
-    $strProcedimentoFormatado = $objPaginaSEI->recuperarCampo('txtProcedimentoFormatado');
-    if (trim($strProcedimentoFormatado) != '') {
-        $objPenLoteProcedimentoDTO->setStrProcedimentoFormatado(trim($strProcedimentoFormatado));
-    }
+      $strProcedimentoFormatado = $objPaginaSEI->recuperarCampo('txtProcedimentoFormatado');
+      if (trim($strProcedimentoFormatado) != '') {
+          $objPenLoteProcedimentoDTO->setStrProcedimentoFormatado(trim($strProcedimentoFormatado));
+      }
 
-    $strUnidadeDestino = $objPaginaSEI->recuperarCampo('txtUnidadeDestino');
-    if (trim($strUnidadeDestino) != '') {
-        $objPenLoteProcedimentoDTO->setStrUnidadeDestino(trim($strUnidadeDestino));
-    }
+      $strUnidadeDestino = $objPaginaSEI->recuperarCampo('txtUnidadeDestino');
+      if (trim($strUnidadeDestino) != '') {
+          $objPenLoteProcedimentoDTO->setStrUnidadeDestino(trim($strUnidadeDestino));
+      }
 
-    $numIdAndamento = $objPaginaSEI->recuperarCampo('selAndamento');
-    if ($numIdAndamento !== '') {
-        $objPenLoteProcedimentoDTO->setNumIdAndamento($numIdAndamento);
-    }
+      $numIdAndamento = $objPaginaSEI->recuperarCampo('selAndamento');
+      if ($numIdAndamento !== '') {
+          $objPenLoteProcedimentoDTO->setNumIdAndamento($numIdAndamento);
+      }
 
-    $objPaginaSEI->prepararOrdenacao($objPenLoteProcedimentoDTO, 'IdLote', InfraDTO::$TIPO_ORDENACAO_ASC);
-    $objPaginaSEI->prepararPaginacao($objPenLoteProcedimentoDTO);
+      $objPaginaSEI->prepararOrdenacao($objPenLoteProcedimentoDTO, 'IdLote', InfraDTO::$TIPO_ORDENACAO_ASC);
+      $objPaginaSEI->prepararPaginacao($objPenLoteProcedimentoDTO);
 
-    $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-    $arrObjPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarLoteProcedimento($objPenLoteProcedimentoDTO);
+      $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+      $arrObjPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarLoteProcedimento($objPenLoteProcedimentoDTO);
 
-    $objPaginaSEI->processarPaginacao($objPenLoteProcedimentoDTO);
-    $numRegistros = count($arrObjPenLoteProcedimentoRN);
+      $objPaginaSEI->processarPaginacao($objPenLoteProcedimentoDTO);
+      $numRegistros = count($arrObjPenLoteProcedimentoRN);
 
-    $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
 
-    if ($numRegistros > 0) {
-        $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+      if ($numRegistros > 0) {
+          $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
-        $strResultado = '';
-        $strSumarioTabela = 'Tabela de Processo em Lote.';
-        $strCaptionTabela = 'Processo em Lote';
+          $strResultado = '';
+          $strSumarioTabela = 'Tabela de Processo em Lote.';
+          $strCaptionTabela = 'Processo em Lote';
 
-        $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
-        $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
-        $strResultado .= '<tr>';
-        $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh" width="10%">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'ID Lote', 'IdLote', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Processo', 'ProcedimentoFormatado', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Usuário', 'IdUsuario', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Data do Envio', 'Registro', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Unidade Destino', 'UnidadeDestino', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Situação', 'IdAndamento', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
-        $strResultado .= '</tr>' . "\n";
-        $strCssTr = '';
+          $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
+          $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
+          $strResultado .= '<tr>';
+          $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh" width="10%">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'ID Lote', 'IdLote', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Processo', 'ProcedimentoFormatado', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Usuário', 'IdUsuario', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Data do Envio', 'Registro', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Unidade Destino', 'UnidadeDestino', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objPenLoteProcedimentoDTO, 'Situação', 'IdAndamento', $arrObjPenLoteProcedimentoRN) . '</th>' . "\n";
+          $strResultado .= '</tr>' . "\n";
+          $strCssTr = '';
         for ($i = 0; $i < $numRegistros; $i++) {
 
-            $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
-            $strResultado .= $strCssTr;
+          $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
+          $strResultado .= $strCssTr;
 
-            $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote(), $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote()) . '</td>';
-            $strResultado .= '<td align="center">' . $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote() . '</td>';
-            $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrProcedimentoFormatado()) . '</td>';
-            $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrNomeUsuario()) . '</td>';
-            $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getDthRegistro()) . '</td>';
-            $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrUnidadeDestino()) . '</td>';
-            $strResultado .= '<td align="center">';
+          $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote(), $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote()) . '</td>';
+          $strResultado .= '<td align="center">' . $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote() . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrProcedimentoFormatado()) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrNomeUsuario()) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getDthRegistro()) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrUnidadeDestino()) . '</td>';
+          $strResultado .= '<td align="center">';
 
-            switch ($arrObjPenLoteProcedimentoRN[$i]->getNumIdAndamento()) {
-                case $staConcluido:
-                    $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
-                    break;
-                case $staCancelado:
-                    $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
-                    break;
-                default:
-                    $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
-                    break;
-            }
+          switch ($arrObjPenLoteProcedimentoRN[$i]->getNumIdAndamento()) {
+            case $staConcluido:
+                $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
+                break;
+            case $staCancelado:
+                $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
+                break;
+            default:
+                $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
+                break;
+          }
             
-            $strResultado .= '</td></tr>' . "\n";
+          $strResultado .= '</td></tr>' . "\n";
             
         }
         $strResultado .= '</table>';
+      }
+
+      $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $objPaginaSEI->montarAncora($numIdGrupoSerie)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+
+    } catch (Exception $e) {
+        $objPaginaSEI->processarExcecao($e);
     }
 
-    $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $objPaginaSEI->montarAncora($numIdGrupoSerie)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-
-} catch (Exception $e) {
-    $objPaginaSEI->processarExcecao($e);
-}
-
-$objPaginaSEI->montarDocType();
-$objPaginaSEI->abrirHtml();
-$objPaginaSEI->abrirHead();
-$objPaginaSEI->montarMeta();
-$objPaginaSEI->montarTitle($objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo);
-$objPaginaSEI->montarStyle();
-$objPaginaSEI->abrirStyle();
-?>
+    $objPaginaSEI->montarDocType();
+    $objPaginaSEI->abrirHtml();
+    $objPaginaSEI->abrirHead();
+    $objPaginaSEI->montarMeta();
+    $objPaginaSEI->montarTitle($objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo);
+    $objPaginaSEI->montarStyle();
+    $objPaginaSEI->abrirStyle();
+    ?>
 
 #lblNomeUsuario {position:absolute;left:0%;top:0%;width:20%;}
 #txtNomeUsuario {position:absolute;left:0%;top:40%;width:20%;}

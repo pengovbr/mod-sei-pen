@@ -23,9 +23,9 @@ try {
     $objFiltroDTO->retStrProtocoloFormatado();
 
     // Verificar no DTO sobre funções de agragação para clausula DISTINCT
-    if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
-        $objFiltroDTO->retDthConclusaoAtividade();
-    }
+  if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
+      $objFiltroDTO->retDthConclusaoAtividade();
+  }
     $objPaginaSEI->prepararPaginacao($objFiltroDTO, 50);
 
     $objProcessoExpedidoRN = new ProcessoExpedidoRN();
@@ -33,53 +33,53 @@ try {
 
     $numRegistros = 0;
 
-    if(!empty($arrObjProcessoExpedidoDTO)) {
-        $arrObjProcessoExpedidoDTO = InfraArray::distinctArrInfraDTO($arrObjProcessoExpedidoDTO, 'IdProtocolo');
-        $numRegistros = count($arrObjProcessoExpedidoDTO);
-    }
+  if(!empty($arrObjProcessoExpedidoDTO)) {
+      $arrObjProcessoExpedidoDTO = InfraArray::distinctArrInfraDTO($arrObjProcessoExpedidoDTO, 'IdProtocolo');
+      $numRegistros = count($arrObjProcessoExpedidoDTO);
+  }
 
     $objPaginaSEI->processarPaginacao($objFiltroDTO);
 
-   if (!empty($arrObjProcessoExpedidoDTO)) {
+  if (!empty($arrObjProcessoExpedidoDTO)) {
 
-        $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+       $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
-        $strSumarioTabela = 'Tabela de Processos.';
-        $strCaptionTabela = 'Processos';
+       $strSumarioTabela = 'Tabela de Processos.';
+       $strCaptionTabela = 'Processos';
 
-        $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
-        $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
-        $strResultado .= '<tr>';
-        $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh">Processo</th>' . "\n";
-        $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
-        $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
-        $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
-        $strResultado .= '</tr>' . "\n";
-        $strCssTr = '';
+       $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
+       $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
+       $strResultado .= '<tr>';
+       $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
+       $strResultado .= '<th class="infraTh">Processo</th>' . "\n";
+       $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
+       $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
+       $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
+       $strResultado .= '</tr>' . "\n";
+       $strCssTr = '';
 
-        $numIndice = 1;
+       $numIndice = 1;
 
-        foreach($arrObjProcessoExpedidoDTO as $objProcessoExpedidoDTO) {
+    foreach($arrObjProcessoExpedidoDTO as $objProcessoExpedidoDTO) {
 
-            $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
-            $strResultado .= $strCssTr;
+      $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
+      $strResultado .= $strCssTr;
 
-            $strResultado .= '<td valign="top">'.$objPaginaSEI->getTrCheck($numIndice,$objProcessoExpedidoDTO->getDblIdProtocolo(),$objProcessoExpedidoDTO->getStrProtocoloFormatado()).'</td>'."\n";
-            $strResultado .= '<td width="17%" align="center"><a onclick="abrirProcesso(\'' .$objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objProcessoExpedidoDTO->getDblIdProtocolo())).'\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '" title="" class="protocoloNormal" style="font-size:1em !important;">'.$objProcessoExpedidoDTO->getStrProtocoloFormatado().'</a></td>' . "\n";
-            $strResultado .= '<td align="center"><a alt="Teste" title="Teste" class="ancoraSigla">' . $objProcessoExpedidoDTO->getStrNomeUsuario() . '</a></td>';
-            $strResultado .= '<td width="17%" align="center">' . $objProcessoExpedidoDTO->getDthExpedido() . '</td>';
-            $strResultado .= '<td align="left">' . $objProcessoExpedidoDTO->getStrDestino();
+      $strResultado .= '<td valign="top">'.$objPaginaSEI->getTrCheck($numIndice, $objProcessoExpedidoDTO->getDblIdProtocolo(), $objProcessoExpedidoDTO->getStrProtocoloFormatado()).'</td>'."\n";
+      $strResultado .= '<td width="17%" align="center"><a onclick="abrirProcesso(\'' .$objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objProcessoExpedidoDTO->getDblIdProtocolo())).'\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '" title="" class="protocoloNormal" style="font-size:1em !important;">'.$objProcessoExpedidoDTO->getStrProtocoloFormatado().'</a></td>' . "\n";
+      $strResultado .= '<td align="center"><a alt="Teste" title="Teste" class="ancoraSigla">' . $objProcessoExpedidoDTO->getStrNomeUsuario() . '</a></td>';
+      $strResultado .= '<td width="17%" align="center">' . $objProcessoExpedidoDTO->getDthExpedido() . '</td>';
+      $strResultado .= '<td align="left">' . $objProcessoExpedidoDTO->getStrDestino();
 
-            if ($bolAcaoRemoverSobrestamento) {
-                $strResultado .= '<a href="' . $objPaginaSEI->montarAncora($objProcessoExpedidoDTO->getDblIdProtocolo()) . '" onclick="acaoRemoverSobrestamento(\'' . $objProcessoExpedidoDTO->getDblIdProtocolo() . '\',\'' . $objProcessoExpedidoDTO->getStrProtocoloFormatado() . '\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '"><img src="imagens/sei_remover_sobrestamento_processo_pequeno.gif" title="Remover Sobrestamento" alt="Remover Sobrestamento" class="infraImg" /></a>&nbsp;';
-            }
+      if ($bolAcaoRemoverSobrestamento) {
+          $strResultado .= '<a href="' . $objPaginaSEI->montarAncora($objProcessoExpedidoDTO->getDblIdProtocolo()) . '" onclick="acaoRemoverSobrestamento(\'' . $objProcessoExpedidoDTO->getDblIdProtocolo() . '\',\'' . $objProcessoExpedidoDTO->getStrProtocoloFormatado() . '\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '"><img src="imagens/sei_remover_sobrestamento_processo_pequeno.gif" title="Remover Sobrestamento" alt="Remover Sobrestamento" class="infraImg" /></a>&nbsp;';
+      }
 
-            $strResultado .= '</td></tr>' . "\n";
-            $numIndice++;
-        }
-        $strResultado .= '</table>';
+      $strResultado .= '</td></tr>' . "\n";
+      $numIndice++;
     }
+       $strResultado .= '</table>';
+  }
 }
 catch (Exception $e) {
     $objPaginaSEI->processarExcecao($e);
