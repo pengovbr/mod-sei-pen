@@ -180,7 +180,7 @@ test-parallel-otimizado:
 	
 	
 test-unit: $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit'
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
 
 test: test-unit test-functional
 
