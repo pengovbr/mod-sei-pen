@@ -1034,17 +1034,18 @@ class ReceberProcedimentoRN extends InfraRN
         $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
 
         //Atribuição de dados do procedimento
+        $strProcessoNegocio = utf8_decode($parObjProtocolo->processoDeNegocio);
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setDblIdProcedimento(null);
         $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-        $objProcedimentoDTO->setStrNomeTipoProcedimento(utf8_decode($parObjProtocolo->processoDeNegocio));
+        $objProcedimentoDTO->setStrNomeTipoProcedimento($strProcessoNegocio);
         $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($parObjProtocolo->dataHoraDeProducao));
         $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($parObjProtocolo->protocolo));
         $objProcedimentoDTO->setStrSinGerarPendencia('S');
         $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
         $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
-        $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $parObjProtocolo->processoDeNegocio);
+        $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio);
 
         // Obtém código da unidade através de mapeamento entre SEI e Barramento
         $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
@@ -1314,8 +1315,9 @@ class ReceberProcedimentoRN extends InfraRN
         $objProtocoloDTO->setArrObjParticipanteDTO($arrObjParticipanteDTO);
     }
 
-    private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento)
-    {
+
+    private function obterTipoProcessoPadrao($numIdTipoProcedimento) {
+        
         if(!isset($numIdTipoProcedimento)){
             throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
         }
@@ -1328,7 +1330,40 @@ class ReceberProcedimentoRN extends InfraRN
         $objTipoProcedimentoRN = new TipoProcedimentoRN();
         $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
 
-        if ($objTipoProcedimentoDTO==null){
+        return $objTipoProcedimentoDTO;
+    }
+
+    private function obterTipoProcessoPorNome($strNomeTipoProcesso){
+
+        if(empty($strNomeTipoProcesso)){
+            throw new InfraException('Parâmetro $strNomeTipoProcesso não informado.');
+        }
+
+        $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
+        $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
+        $objTipoProcedimentoDTO->retStrNome();
+
+        // $strNomeTipoProcesso = mb_strtoupper($strNomeTipoProcesso, mb_internal_encoding());
+        $objTipoProcedimentoDTO->setStrNome($strNomeTipoProcesso);
+
+        $objTipoProcedimentoRN = new TipoProcedimentoRN();
+        $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
+
+        return $objTipoProcedimentoDTO;
+
+    }
+
+    private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
+    {
+        if(!empty(trim($strProcessoNegocio))){
+            $objTipoProcedimentoDTO = $this->obterTipoProcessoPorNome($strProcessoNegocio);
+        }
+
+        if(is_null($objTipoProcedimentoDTO)){
+            $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
+        }
+
+        if (is_null($objTipoProcedimentoDTO)){
             throw new InfraException('Tipo de processo não encontrado.');
         }
 

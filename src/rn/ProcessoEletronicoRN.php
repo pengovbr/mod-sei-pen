@@ -1490,7 +1490,6 @@ class ProcessoEletronicoRN extends InfraRN
         try {
             $parametros = new stdClass();
             $parametros->IDT = $parNumIdTramite;
-            //$resultado = $this->getObjPenWs()->receberReciboDeTramite($parametros);
             return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
                 return $objPenWs->receberReciboDeTramite($parametros);
             });
