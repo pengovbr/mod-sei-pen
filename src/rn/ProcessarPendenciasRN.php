@@ -8,10 +8,9 @@ class ProcessarPendenciasRN extends InfraRN
     private $objPenDebug = null;
     private $strGearmanServidor = null;
     private $strGearmanPorta = null;
-    private $objPenParametroRN = null;
 
-    const TIMEOUT_PROCESSAMENTO_JOB = 5400;
-    const TIMEOUT_PROCESSAMENTO_EVENTOS = 5000;
+    const TIMEOUT_PROCESSAMENTO_JOB = 5400; // valores em segundos, 5400 = 90 minutos
+    const TIMEOUT_PROCESSAMENTO_EVENTOS = 300000; // valores em milisegundos, 300000 = 5 minutos
 
     const NUMERO_WORKERS_GEARMAN = 4;
     const MAXIMO_WORKERS_GEARMAN = 10;
