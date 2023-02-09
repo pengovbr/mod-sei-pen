@@ -27,9 +27,10 @@ try {
     $objPenConsoleRN = new PenConsoleRN($objActionRN);
     $strRetorno = $objPenConsoleRN->run();
 
-    if(empty($_SERVER['argv']))
+  if(empty($_SERVER['argv'])) {
 
     print PenConsoleRN::format('Sucesso: ', 'blue', true);
+  }
     print $strRetorno.PHP_EOL;
 }
 catch(\InfraException $e) {

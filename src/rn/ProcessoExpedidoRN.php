@@ -4,24 +4,24 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class ProcessoExpedidoRN extends InfraRN {
 
-    public function __construct()
+  public function __construct()
     {
-        parent::__construct();
-    }
+      parent::__construct();
+  }
 
-    protected function inicializarObjInfraIBanco()
+  protected function inicializarObjInfraIBanco()
     {
-        return BancoSEI::getInstance();
-    }
+      return BancoSEI::getInstance();
+  }
 
-    public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO)
+  public function listarProcessoExpedido(ProtocoloDTO &$objProtocoloDTO)
     {
-        $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
-        $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
-        $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+      $numLimit = $objProtocoloDTO->getNumMaxRegistrosRetorno();
+      $numOffset = $objProtocoloDTO->getNumPaginaAtual() * $objProtocoloDTO->getNumMaxRegistrosRetorno();
+      $numIdUnidade = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
 
-        $sql = "SELECT
+      $sql = "SELECT
                         p.id_protocolo,
                         p.protocolo_formatado,
                         a.id_unidade id_unidade,
@@ -53,7 +53,7 @@ class ProcessoExpedidoRN extends InfraRN {
                 p.id_protocolo, p.protocolo_formatado, a.id_unidade , atd.valor , us.id_usuario, us.nome, a.dth_abertura ORDER BY a.dth_abertura DESC ";
 
 
-        $sqlCount = "SELECT count(*) total
+      $sqlCount = "SELECT count(*) total
                FROM protocolo p
                INNER JOIN atividade a ON a.id_protocolo = p.id_protocolo
                INNER JOIN atributo_andamento atd ON a.id_atividade = atd.id_atividade AND atd.nome = 'UNIDADE_DESTINO'
@@ -73,24 +73,24 @@ class ProcessoExpedidoRN extends InfraRN {
                 AND at2.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) ."
                 AND at2.dth_abertura > a.dth_abertura ) ";
 
-        $objPaginacao = $this->getObjInfraIBanco()->paginarSql($sql, $numOffset, $numLimit);
-        $total = $objPaginacao['totalRegistros'];
+      $objPaginacao = $this->getObjInfraIBanco()->paginarSql($sql, $numOffset, $numLimit);
+      $total = $objPaginacao['totalRegistros'];
 
-        $arrProcessosExpedidos = array();
-        $objProtocoloDTO->setNumTotalRegistros($total);
-        $objProtocoloDTO->setNumRegistrosPaginaAtual($total);
+      $arrProcessosExpedidos = array();
+      $objProtocoloDTO->setNumTotalRegistros($total);
+      $objProtocoloDTO->setNumRegistrosPaginaAtual($total);
 
-        foreach ($objPaginacao['registrosPagina'] as $res) {
-            $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);
-            $objProcessoExpedidoDTO = new ProcessoExpedidoDTO();
-            $objProcessoExpedidoDTO->setDblIdProtocolo($res['id_protocolo']);
-            $objProcessoExpedidoDTO->setStrProtocoloFormatado($res['protocolo_formatado']);
-            $objProcessoExpedidoDTO->setStrNomeUsuario($res['nome_usuario']);
-            $objProcessoExpedidoDTO->setDthExpedido($data);
-            $objProcessoExpedidoDTO->setStrDestino($res['unidade_destino']);
-            $arrProcessosExpedidos[] = $objProcessoExpedidoDTO;
-        }
-
-        return $arrProcessosExpedidos;
+    foreach ($objPaginacao['registrosPagina'] as $res) {
+        $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);
+        $objProcessoExpedidoDTO = new ProcessoExpedidoDTO();
+        $objProcessoExpedidoDTO->setDblIdProtocolo($res['id_protocolo']);
+        $objProcessoExpedidoDTO->setStrProtocoloFormatado($res['protocolo_formatado']);
+        $objProcessoExpedidoDTO->setStrNomeUsuario($res['nome_usuario']);
+        $objProcessoExpedidoDTO->setDthExpedido($data);
+        $objProcessoExpedidoDTO->setStrDestino($res['unidade_destino']);
+        $arrProcessosExpedidos[] = $objProcessoExpedidoDTO;
     }
+
+      return $arrProcessosExpedidos;
+  }
 }

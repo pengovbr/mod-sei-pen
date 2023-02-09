@@ -21,84 +21,84 @@ try {
     $arrComandos = array();
     $bolSomenteLeitura = false;
 
-    switch ($_GET['acao']) {
-        case PEN_RECURSO_BASE.'_cadastrar':
-            $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+  switch ($_GET['acao']) {
+    case PEN_RECURSO_BASE.'_cadastrar':
+        $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
+        $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
-            if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
-                $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
-            }
-            else {
-                $strTitulo =  sprintf('Novo %s', PEN_PAGINA_TITULO);
-            }
-            break;
+      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
+        $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
+      }
+      else {
+          $strTitulo =  sprintf('Novo %s', PEN_PAGINA_TITULO);
+      }
+        break;
 
-        case PEN_RECURSO_BASE.'_visualizar':
-            $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
-            $bolSomenteLeitura = true;
-           $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
-            break;
+    case PEN_RECURSO_BASE.'_visualizar':
+        $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
+        $bolSomenteLeitura = true;
+       $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
+        break;
 
 
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }
+    default:
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }
 
     $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
 
     //--------------------------------------------------------------------------
     // Ao por POST esta salvando o formulrio
-    if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
+  if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
-        if(!array_key_exists('id_hipotese_legal', $_POST) || empty($_POST['id_hipotese_legal'])) {
-            throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
-        }
-
-        if(!array_key_exists('id_barramento', $_POST) || empty($_POST['id_barramento'])) {
-            throw new InfraException('Nenhum "Tipo de Documento" foi selecionado');
-        }
-
-        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
-        $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
-        $objPenRelHipoteseLegalDTO->setStrTipo('R');// Recebido
-
-        $numIdMapeamento = 0;
-        if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
-            $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
-            $objPenRelHipoteseLegalRN->alterar($objPenRelHipoteseLegalDTO);
-            $numIdMapeamento = $_GET[PEN_PAGINA_GET_ID];
-        }
-        else {
-            $mapeamento = $objPenRelHipoteseLegalRN->cadastrar($objPenRelHipoteseLegalDTO);
-            $numIdMapeamento = $mapeamento->getDblIdMap();
-        }
-
-
-        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdMapeamento.PaginaSEI::getInstance()->montarAncora($numIdMapeamento)));
-        exit(0);
-    }
-    // Ao por GET + ID esta carregando o formulrio
-    else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
-
-        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-        $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
-        $objPenRelHipoteseLegalDTO->retTodos();
-
-        $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
-        $objPenRelHipoteseLegalDTO = $objPenRelHipoteseLegalRN->consultar($objPenRelHipoteseLegalDTO);
+    if(!array_key_exists('id_hipotese_legal', $_POST) || empty($_POST['id_hipotese_legal'])) {
+        throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
     }
 
-    if(empty($objPenRelHipoteseLegalDTO)){
-        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal(0);
-        $objPenRelHipoteseLegalDTO->setNumIdBarramento(0);
+    if(!array_key_exists('id_barramento', $_POST) || empty($_POST['id_barramento'])) {
+        throw new InfraException('Nenhum "Tipo de Documento" foi selecionado');
     }
 
+      $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
+      $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
+      $objPenRelHipoteseLegalDTO->setStrTipo('R');// Recebido
+
+      $numIdMapeamento = 0;
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
         $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
+        $objPenRelHipoteseLegalRN->alterar($objPenRelHipoteseLegalDTO);
+        $numIdMapeamento = $_GET[PEN_PAGINA_GET_ID];
     }
+    else {
+        $mapeamento = $objPenRelHipoteseLegalRN->cadastrar($objPenRelHipoteseLegalDTO);
+        $numIdMapeamento = $mapeamento->getDblIdMap();
+    }
+
+
+      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdMapeamento.PaginaSEI::getInstance()->montarAncora($numIdMapeamento)));
+      exit(0);
+  }
+    // Ao por GET + ID esta carregando o formulrio
+  else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
+
+      $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
+      $objPenRelHipoteseLegalDTO->retTodos();
+
+      $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
+      $objPenRelHipoteseLegalDTO = $objPenRelHipoteseLegalRN->consultar($objPenRelHipoteseLegalDTO);
+  }
+
+  if(empty($objPenRelHipoteseLegalDTO)){
+      $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal(0);
+      $objPenRelHipoteseLegalDTO->setNumIdBarramento(0);
+  }
+
+  if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+      $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
+  }
 
     //--------------------------------------------------------------------------
     // Auto-Complete
@@ -119,10 +119,10 @@ try {
     // Mapeamento da hipotese legal remota
     $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
-    if(!empty($arrNumIdHipoteseLegal)) {
-        // Remove os que j esto em uso
-        $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($arrNumIdHipoteseLegal, InfraDTO::$OPER_NOT_IN);
-    }
+  if(!empty($arrNumIdHipoteseLegal)) {
+      // Remove os que j esto em uso
+      $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($arrNumIdHipoteseLegal, InfraDTO::$OPER_NOT_IN);
+  }
     $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
     $objPenHipoteseLegalDTO->retStrNome();
 
@@ -187,7 +187,7 @@ function onSubmit() {
 </script>
 <?php
 $objPagina->fecharHead();
-$objPagina->abrirBody($strTitulo,'onload="inicializar();"');
+$objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
@@ -196,7 +196,7 @@ $objPagina->abrirBody($strTitulo,'onload="inicializar();"');
 
     <label for="id_barramento" class="infraLabelObrigatorio input-label-third">Hipótese Legal PEN:</label>
     <select name="id_barramento" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
-        <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdBarramento(),  $arrMapIdBarramento); ?>
+        <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
     </select>
 
     <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal SEI - <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>

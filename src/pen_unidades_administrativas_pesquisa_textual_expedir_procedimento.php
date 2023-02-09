@@ -38,9 +38,9 @@ try {
         $strResultado .= '</tr>'."\n";
         $strResultado .= '</table>';
 
-    }catch(Exception $e){
-        PaginaSEI::getInstance()->processarExcecao($e);
-    }
+}catch(Exception $e){
+    PaginaSEI::getInstance()->processarExcecao($e);
+}
 
     PaginaSEI::getInstance()->montarDocType();
     PaginaSEI::getInstance()->abrirHtml();
@@ -354,7 +354,7 @@ try {
                 <input type="text" id="txtNomeUnidade" name="txtNomeUnidade" class="infraText" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="" />
             <?php
                 PaginaSEI::getInstance()->fecharAreaDados();
-                PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
+                PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros);
                 PaginaSEI::getInstance()->montarAreaDebug();
                 #PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
             ?>
