@@ -1,6 +1,6 @@
 {
   "config": {
-    "vendor-dir": "./src/vendor",
+    "vendor-dir": "./vendor",
     "platform": {
       "php": "7.3.12"
     }
