@@ -57,8 +57,9 @@ class EnviarReciboTramiteRN extends InfraRN
         return $arrStrHashConteudo;
     }
 
-    protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array()){
-
+    protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array())
+    {
+      try {
         $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
 
         $objDTO = new ReciboTramiteRecebidoDTO();
@@ -82,6 +83,10 @@ class EnviarReciboTramiteRN extends InfraRN
             $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
             $objBD->cadastrar($objReciboTramiteHashDTO);
         }
+      } catch (Exception $e) {
+        $strMensagem = "Falha na obtenção do recibo de recebimento de protocolo do trâmite $parNumIdTramite. $e";
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+      } 
     }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash, $parDthRecebimento = null)
