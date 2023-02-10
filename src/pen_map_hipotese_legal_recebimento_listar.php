@@ -38,84 +38,82 @@ try {
         
     //--------------------------------------------------------------------------
     // Aes
-    if(array_key_exists('acao', $_GET)) {
+  if(array_key_exists('acao', $_GET)) {
         
-        $arrParam = array_merge($_GET, $_POST);
+      $arrParam = array_merge($_GET, $_POST);
         
-        switch($_GET['acao']) {
+    switch($_GET['acao']) {
             
-            case PEN_RECURSO_BASE.'_excluir':
-                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
+      case PEN_RECURSO_BASE.'_excluir':
+        if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
                     
-                    $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-                    $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
+            $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+            $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalRecebidoRN();
                     
-                    $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
+            $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
                     
-                    if(is_array($arrParam['hdnInfraItensSelecionados'])) {
+          if(is_array($arrParam['hdnInfraItensSelecionados'])) {
                         
-                        foreach($arrParam['hdnInfraItensSelecionados'] as $dblIdMap) {
+            foreach($arrParam['hdnInfraItensSelecionados'] as $dblIdMap) {
                             
-                            $objPenRelHipoteseLegalDTO->setDblIdMap($dblIdMap);
-                            $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
-                        }
-                    }
-                    else {
+                  $objPenRelHipoteseLegalDTO->setDblIdMap($dblIdMap);
+                  $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+            }
+          }
+          else {
                         
-                        $objPenRelHipoteseLegalDTO->setDblIdMap($arrParam['hdnInfraItensSelecionados']);
-                        $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
-                    }
+                $objPenRelHipoteseLegalDTO->setDblIdMap($arrParam['hdnInfraItensSelecionados']);
+                $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+          }
                     
-                    $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
+            $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
                     
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-                    
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-            
-            case PEN_RECURSO_BASE.'_desativar':
-                
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
-                    
-                    $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-                    
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-                
-            case PEN_RECURSO_BASE.'_ativar':
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-                    
-                    PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
-                    
-                    $objPagina->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-                    
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                break;
-                
-            case PEN_RECURSO_BASE.'_listar':
-                // Ação padrão desta tela
-                break;
-                
-            default:
-                throw new InfraException('Ação não permitida nesta tela');
-            
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
+            exit(0);
         }
+        else {
+                    
+            throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
+        }
+          break;
+            
+      case PEN_RECURSO_BASE.'_desativar':
+        if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
+                    
+          PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
+                    
+          $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
+                    
+          header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
+          exit(0);
+        }
+        else {
+                    
+            throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
+        }
+          break;
+                
+      case PEN_RECURSO_BASE.'_ativar':
+        if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
+                    
+            PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'S');
+                    
+            $objPagina->adicionarMensagem('Ativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
+                    
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
+            exit(0);
+        }
+          break;
+                
+      case PEN_RECURSO_BASE.'_listar':
+          // Ação padrão desta tela
+          break;
+                
+      default:
+          throw new InfraException('Ação não permitida nesta tela');
+            
     }
+  }
     //--------------------------------------------------------------------------
   
     $arrComandos = array();
@@ -132,23 +130,23 @@ try {
     $objPenRelHipoteseLegalDTO->retTodos();
     //--------------------------------------------------------------------------
     // Filtragem 
-    if(array_key_exists('id_barramento', $_POST) && (!empty($_POST['id_barramento']) && $_POST['id_barramento'] !== 'null')) {
-        $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
-    }
+  if(array_key_exists('id_barramento', $_POST) && (!empty($_POST['id_barramento']) && $_POST['id_barramento'] !== 'null')) {
+      $objPenRelHipoteseLegalDTO->setNumIdBarramento($_POST['id_barramento']);
+  }
     
-    if(array_key_exists('id_hipotese_legal', $_POST) && (!empty($_POST['id_hipotese_legal']) && $_POST['id_barramento'] !== 'null')) {
-        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
-    } 
+  if(array_key_exists('id_hipotese_legal', $_POST) && (!empty($_POST['id_hipotese_legal']) && $_POST['id_barramento'] !== 'null')) {
+      $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($_POST['id_hipotese_legal']);
+  } 
     
     $objFiltroDTO = clone $objPenRelHipoteseLegalDTO;
     
-    if(!$objFiltroDTO->isSetNumIdBarramento()) {
-        $objFiltroDTO->setNumIdBarramento('');   
-    }
+  if(!$objFiltroDTO->isSetNumIdBarramento()) {
+      $objFiltroDTO->setNumIdBarramento('');   
+  }
 
-    if(!$objFiltroDTO->isSetNumIdHipoteseLegal()) {
-        $objFiltroDTO->setNumIdHipoteseLegal('');
-    }
+  if(!$objFiltroDTO->isSetNumIdHipoteseLegal()) {
+      $objFiltroDTO->setNumIdHipoteseLegal('');
+  }
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);
     
@@ -181,48 +179,48 @@ try {
 
     $numRegistros = count($arrObjPenRelHipoteseLegalDTO);
 
-    if(!empty($arrObjPenRelHipoteseLegalDTO)){
+  if(!empty($arrObjPenRelHipoteseLegalDTO)){
         
-        $strResultado = '';
+      $strResultado = '';
 
-        $strResultado .= '<table width="99%" class="infraTable">'."\n";
-        $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
+      $strResultado .= '<table width="99%" class="infraTable">'."\n";
+      $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
 
-        $strResultado .= '<tr>';
-        $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal PEN</th>'."\n";        
-        $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal SEI - '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
+      $strResultado .= '<tr>';
+      $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal PEN</th>'."\n";        
+      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal SEI - '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
+      $strResultado .= '</tr>'."\n";
+      $strCssTr = '';
+
+      $index = 0;
+    foreach($arrObjPenRelHipoteseLegalDTO as $objPenRelHipoteseLegalDTO) {
+
+        $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+
+        $strResultado .= '<tr class="'.$strCssTr.'">';
+        $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenRelHipoteseLegalDTO->getDblIdMap(), '').'</td>';
+        $strResultado .= '<td>'.$arrMapIdBarramento[$objPenRelHipoteseLegalDTO->getNumIdBarramento()].'</td>';
+        $strResultado .= '<td>'.$arrMapIdHipoteseLegal[$objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal()].'</td>';
+        $strResultado .= '<td align="center">';
+            
+        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+      if($objSessao->verificarPermissao('pen_map_hipotese_legal_recebimento_alterar')) {
+        $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+      }
+            
+      if($objSessao->verificarPermissao('pen_map_hipotese_legal_recebimento_excluir')) {
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+      }
+            
+        $strResultado .= '</td>';
         $strResultado .= '</tr>'."\n";
-        $strCssTr = '';
 
-        $index = 0;
-        foreach($arrObjPenRelHipoteseLegalDTO as $objPenRelHipoteseLegalDTO) {
-
-            $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
-
-            $strResultado .= '<tr class="'.$strCssTr.'">';
-            $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenRelHipoteseLegalDTO->getDblIdMap(), '').'</td>';
-            $strResultado .= '<td>'.$arrMapIdBarramento[$objPenRelHipoteseLegalDTO->getNumIdBarramento()].'</td>';
-            $strResultado .= '<td>'.$arrMapIdHipoteseLegal[$objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal()].'</td>';
-            $strResultado .= '<td align="center">';
-            
-            //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
-            if($objSessao->verificarPermissao('pen_map_hipotese_legal_recebimento_alterar')) {
-                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
-            }
-            
-            if($objSessao->verificarPermissao('pen_map_hipotese_legal_recebimento_excluir')) {
-                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
-            }
-            
-            $strResultado .= '</td>';
-            $strResultado .= '</tr>'."\n";
-
-            $index++;
-        }
-        $strResultado .= '</table>';
+        $index++;
     }
+      $strResultado .= '</table>';
+  }
 }
 catch(InfraException $e){
     
@@ -352,7 +350,7 @@ function onClickBtnExcluir(){
 </script>
 <?php
 $objPagina->fecharHead();
-$objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
+$objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
 <form id="frmAcompanharEstadoProcesso" method="post" action="<?php // print $objSessao->assinarLink($strProprioLink); ?>">
     
@@ -362,7 +360,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
         
         <label for="id_barramento" class="infraLabelObrigatorio input-label-first">Hipótese Legal PEN:</label>
         <select name="id_barramento" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
-            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(),  $arrMapIdBarramento); ?>
+            <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
         </select> 
 
         <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-second">Hipótese Legal SEI - <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>

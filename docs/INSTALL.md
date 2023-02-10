@@ -483,7 +483,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
 ```
 
-### 3.2. Opcional: Instalação do Supervisor para monitoramento
+### 3.2. Instalação do Supervisor para monitoramento
 
 O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Barramento de Serviços do PEN. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
 

@@ -9,30 +9,30 @@ require_once DIR_SEI_WEB.'/SEI.php';
  */
 class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
 
-    protected function listarConectado(PenRelHipoteseLegalDTO $objDTO){
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_listar', __METHOD__, $objDTO);
-        return parent::listarInterno($objDTO);
-    }
+  protected function listarConectado(PenRelHipoteseLegalDTO $objDTO){
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_listar', __METHOD__, $objDTO);
+      return parent::listarInterno($objDTO);
+  }
 
-    protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO){
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
-        return parent::consultarInterno($objDTO);
-    }
+  protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO){
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
+      return parent::consultarInterno($objDTO);
+  }
 
-    protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO){
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
-        return parent::alterarInterno($objDTO);
-    }
+  protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO){
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
+      return parent::alterarInterno($objDTO);
+  }
 
-    protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO){
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
-        return parent::cadastrarInterno($objDTO);
-    }
+  protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO){
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
+      return parent::cadastrarInterno($objDTO);
+  }
 
-    protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO){
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
-        return parent::excluirInterno($objDTO);
-    }
+  protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO){
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
+      return parent::excluirInterno($objDTO);
+  }
 
 
     /**
@@ -40,22 +40,22 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
      * @param integer $numIdHipoteseSEI
      * @return integer
      */
-    protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
-        $objBanco = BancoSEI::getInstance();
-        $objGenericoBD = new GenericoBD($objBanco);
+  protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
+      $objBanco = BancoSEI::getInstance();
+      $objGenericoBD = new GenericoBD($objBanco);
 
-        // Mapeamento da hipotese legal remota
-        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
-        $objPenRelHipoteseLegalDTO->setStrTipo('E');
-        $objPenRelHipoteseLegalDTO->retNumIdentificacao();
-        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseSEI);
+      // Mapeamento da hipotese legal remota
+      $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenRelHipoteseLegalDTO->setStrTipo('E');
+      $objPenRelHipoteseLegalDTO->retNumIdentificacao();
+      $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseSEI);
 
-        $objPenRelHipoteseLegal = $objGenericoBD->consultar($objPenRelHipoteseLegalDTO);
+      $objPenRelHipoteseLegal = $objGenericoBD->consultar($objPenRelHipoteseLegalDTO);
 
-        if ($objPenRelHipoteseLegal) {
-            return $objPenRelHipoteseLegal->getNumIdentificacao();
-        } else {
-            return null;
-        }
+    if ($objPenRelHipoteseLegal) {
+        return $objPenRelHipoteseLegal->getNumIdentificacao();
+    } else {
+        return null;
     }
+  }
 }

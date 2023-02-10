@@ -1,6 +1,6 @@
 <?php
 
-class CancelamentoTramiteProcessoTest extends CenarioBaseTestCase
+class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;

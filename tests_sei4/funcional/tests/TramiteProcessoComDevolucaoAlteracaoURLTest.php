@@ -1,4 +1,8 @@
 <?php
+/**
+ * @group rodarseparado
+ * @group rodarseparado1
+ */
 
 class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
 {

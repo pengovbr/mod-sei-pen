@@ -3,31 +3,31 @@
 * 04/04/2019 - criado por Josinaldo Júnior
 */
 
-    try {
-        require_once DIR_SEI_WEB.'/SEI.php';
+try {
+    require_once DIR_SEI_WEB.'/SEI.php';
 
-        session_start();
-        $objSessaoSEI = SessaoSEI::getInstance();
-        $objPaginaSEI = PaginaSEI::getInstance();
+    session_start();
+    $objSessaoSEI = SessaoSEI::getInstance();
+    $objPaginaSEI = PaginaSEI::getInstance();
 
-        //////////////////////////////////////////////////////////////////////////////
-        // InfraDebug::getInstance()->setBolLigado(false);
-        // InfraDebug::getInstance()->setBolDebugInfra(true);
-        // InfraDebug::getInstance()->limpar();
-        //////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////
+    // InfraDebug::getInstance()->setBolLigado(false);
+    // InfraDebug::getInstance()->setBolDebugInfra(true);
+    // InfraDebug::getInstance()->limpar();
+    //////////////////////////////////////////////////////////////////////////////
 
-        SessaoSEI::getInstance()->validarLink();
-        $bolVersaoSuperior4 = InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0");
-        $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
-        $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
-        $arrComandos   = array();
-        $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisa Textual" onclick="abrirTelaDePesquisaTextual()" class="infraButton" disabled="disabled"><span class="infraTeclaAtalho">P</span>esquisa Textual</button>';
-        $arrComandos[] = '<button type="button" accesskey="T" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
-        $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    SessaoSEI::getInstance()->validarLink();
+    $bolVersaoSuperior4 = InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0");
+    $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
+    $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
+    $arrComandos   = array();
+    $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisa Textual" onclick="abrirTelaDePesquisaTextual()" class="infraButton" disabled="disabled"><span class="infraTeclaAtalho">P</span>esquisa Textual</button>';
+    $arrComandos[] = '<button type="button" accesskey="T" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
+    $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
 
-    }catch(Exception $e){
-        PaginaSEI::getInstance()->processarExcecao($e);
-    }
+}catch(Exception $e){
+    PaginaSEI::getInstance()->processarExcecao($e);
+}
 
     PaginaSEI::getInstance()->montarDocType();
     PaginaSEI::getInstance()->abrirHtml();
