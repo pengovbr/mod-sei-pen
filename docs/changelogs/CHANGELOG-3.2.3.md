@@ -31,6 +31,11 @@ entre os nomes do tipo na origem e no destino.
 Modificado os parâmetros de timeout das filas de processamento de tarefas gerenciadas pela ferramenta Gearman para que o mesmo 
 consigo receber um volume maior de processos de forma adequada e evitando reinicializações desnecessárias.
  
+#### Otimização de consultas de Metadados do processo no Tramita.gov.br
+
+Adicionado cache e otimizações no módulo para reduzir consultas desnecessárias à infraestrutura do Tramita.gov.br, reduzindo o tempo de envio de processos e documentos
+
+
 
 ### Atualização de Versão
 
