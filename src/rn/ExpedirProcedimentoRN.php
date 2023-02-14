@@ -52,6 +52,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $objProcedimentoAndamentoRN;
     private $fnEventoEnvioMetadados;
     private $objPenDebug;
+    private $objCacheMetadadosProtocolo=array();
 
     private $arrPenMimeTypes = array(
         "application/pdf",
@@ -324,40 +325,45 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
-        /**
-        * Busca metadados do processo registrado no Barramento de Serviços do PEN em trâmites anteriores
-        * @return stdClass Metadados do Processo
-        */
+    /**
+    * Busca metadados do processo registrado no Barramento de Serviços do PEN em trâmites anteriores
+    * @return stdClass Metadados do Processo
+    */
     private function consultarMetadadosPEN($parDblIdProcedimento)
-        {
+    {
         $objMetadadosProtocolo = null;
+        if(array_key_exists($parDblIdProcedimento, $this->objCacheMetadadosProtocolo)){
+            $objMetadadosProtocolo = $this->objCacheMetadadosProtocolo[$parDblIdProcedimento];
+        } else {
+            try{
+                $objTramiteDTO = new TramiteDTO();
+                $objTramiteDTO->setNumIdProcedimento($parDblIdProcedimento);
+                $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+                $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+                $objTramiteDTO->retNumIdTramite();
+    
+                $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+                $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-      try{
-            $objTramiteDTO = new TramiteDTO();
-            $objTramiteDTO->setNumIdProcedimento($parDblIdProcedimento);
-            $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
-            $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
-            $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-            $objTramiteDTO->retNumIdTramite();
-
-            $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-        if(isset($objTramiteDTO)) {
-          $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
-          $objRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
-
-          if(isset($objRetorno)){
-                $objMetadadosProtocolo = $objRetorno->metadados;
-          }
+                if(isset($objTramiteDTO)) {
+                    $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
+                    $objRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
+                    
+                    if(isset($objRetorno)){
+                        $objMetadadosProtocolo = $objRetorno->metadados;
+                    }
+                }
+            }
+            catch(Exception $e){
+                //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
+                //que os metadados do protocolo não pode ser obtida
+                LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
+            } 
         }
-      }
-      catch(Exception $e){
-              //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
-              //que os metadados do protocolo não pode ser obtida
-              LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
-      }
-
-              return $objMetadadosProtocolo;
+        
+        $this->objCacheMetadadosProtocolo[$parDblIdProcedimento] = $objMetadadosProtocolo;
+        return $objMetadadosProtocolo;
     }
 
         /**

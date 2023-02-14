@@ -37,6 +37,7 @@
       $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
       $objPenLoteProcedimentoDTO->retStrNomeUsuario();
       $objPenLoteProcedimentoDTO->retDthRegistro();
+      $objPenLoteProcedimentoDTO->setOrdNumIdLote(InfraDTO::$TIPO_ORDENACAO_DESC);
 
       $strNomeUsuario = $objPaginaSEI->recuperarCampo('txtNomeUsuario');
       if (trim($strNomeUsuario) != '') {
