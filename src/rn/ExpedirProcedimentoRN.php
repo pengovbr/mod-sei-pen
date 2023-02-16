@@ -1028,7 +1028,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         //a espécie documental e o nome do produtor serão obtidos para atribuição ao documento
       if($objComponenteDigitalDTO != null && $numCodigoEspecie == null) {
         if(isset($parObjMetadadosTramiteAnterior)){
-            $arrObjMetaDocumentosTramiteAnterior = [];
+            $arrObjMetaDocumentosTramiteAnterior = array();
 
             //Obtenção de lista de documentos do processo
             $objProcesso = $parObjMetadadosTramiteAnterior->processo;
@@ -1041,7 +1041,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           }
 
             //Indexação dos documentos pela sua ordem
-            $arrMetaDocumentosAnteriorIndexado = [];
+            $arrMetaDocumentosAnteriorIndexado = array();
           foreach ($arrObjMetaDocumentosTramiteAnterior as $objMetaDoc) {
               $arrMetaDocumentosAnteriorIndexado[$objMetaDoc->ordem] = $objMetaDoc;
           }
@@ -1518,7 +1518,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     private function listarDadosArquivos($objDocumentoDTO, $strStaAssociacao){
         $numOrdemComponenteInicial = 1;
-        $arrObjInformacaoArquivo = [];
+        $arrObjInformacaoArquivo = array();
         $arrObjComponentesDigitaisDTO = $this->listarComponentesDigitaisUltimoTramite($objDocumentoDTO);
 
       if(empty($arrObjComponentesDigitaisDTO)){
