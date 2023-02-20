@@ -571,46 +571,30 @@ class ProcessoEletronicoRN extends InfraRN
 
     private function validarMudancaOrdemDocumentos($dblIdProcedimento, $strMensagem)
     {
-        $objMetadadosProcessoTramiteAnterior = null;
-        //Busca metadados do processo registrado em trâmite anterior
-        $objTramiteDTO = new TramiteDTO();
-        $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
-        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
-        $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-        $objTramiteDTO->retNumIdTramite();
-
-        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-        if(isset($objTramiteDTO)) {
-            $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
-            $objRetorno = $this->solicitarMetadados($parNumIdentificacaoTramite);
-
-            if(isset($objRetorno)){
-                $objMetadadosProcessoTramiteAnterior = $objRetorno->metadados;
-            }
-        }
-
-        //Construção do cabeçalho para envio do processo
-        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
-        $objUltimoTramiteRecebidoDTO = $this->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
-        $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
-
-        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
-        $objTramitesAnteriores = isset($strNumeroRegistro) ? $this->consultarTramites(null, $strNumeroRegistro) : null;
-        if (!is_null(count($objTramitesAnteriores)) && count($objTramitesAnteriores)) {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+        
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+        $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+        
+        if (!is_null($numIdTramite) && $numIdTramite > 0) {
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
             $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
             $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
             $objAtividadeDTO->retNumIdAtividade();
             $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-            $objAtividadeBD = new AtividadeBD(BancoSEI::getInstance());
-            $arrObjAtividadeDTO = $objAtividadeBD->listar($objAtividadeDTO);
             
-            if (!is_null($arrObjAtividadeDTO) && count($arrObjAtividadeDTO)) {
-                $strMensagem = str_replace('hash de ao menos um componente digital não confere', 'a ordem dos documentos foram modificadas na árvore do processo', $strMensagem);
+            $objAtividadeRN = new AtividadeRN();
+            $arrObjAtividadeDTO = $objAtividadeRN->contarRN0035($objAtividadeDTO);
+            
+            if ($arrObjAtividadeDTO > 0) {
+                $strMensagem = str_replace(
+                    'hash de ao menos um componente digital não confere',
+                    ' Possivelmente a falha ocorreu devido a mundaça de ordem do documento na árvore do processo.',
+                    $strMensagem
+                );
             }
         }
 
