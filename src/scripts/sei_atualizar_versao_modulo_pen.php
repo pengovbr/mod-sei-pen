@@ -259,9 +259,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3022();
         case '3.2.2':
             $this->instalarV3023();
-    
-
-
+        case '3.3.0':
+            $this->instalarV3030();
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2485,6 +2484,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV3023()
     {
       $this->atualizarNumeroVersao("3.2.3");
+  }
+
+  protected function instalarV3030()
+    {
+      $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+      $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(255), 'null');
+      $this->atualizarNumeroVersao("3.3.0");
   }
 
 }
