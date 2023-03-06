@@ -247,10 +247,18 @@ class VerificadorInstalacaoRN extends InfraRN
           curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $strSenhaCertificadoDigital);
 
           $strOutput = curl_exec($curl);
+
+        if(empty($strOutput) || $strOutput === false ){
+            $strMsgError = "Falha na obtenção do WSDL em $strEnderecoWSDL. Comando CURL: $curl";
+            LogSEI::getInstance()->gravar($strMsgError, InfraLog::$ERRO);
+            throw new InfraException($strMsgError);
+        }
           $objXML = simplexml_load_string($strOutput);
 
-        if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new InfraException("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
+        if(empty($objXML) || $objXML === false){
+            $strMsgError = "Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL. Comando CURL $curl";
+            LogSEI::getInstance()->gravar($strMsgError, InfraLog::$ERRO);
+            throw new InfraException($strMsgError);
         }
 
       } finally{
