@@ -1,0 +1,27 @@
+################################################################################################################################################
+# Lista de testes pendentes de automação e com registro de erro no sistema                                                                     #
+################################################################################################################################################
+
+# TODO: Implementar testa para simular erro quando unidades não estão mapeadas em md_pen_unidade
+# TODO: Implementar teste para simular se botão tramitar continua aparecendo, mesmo com Barramento indisponível
+# TODO: Testar se processo está abrindo normalmente quando não existe comunicação com o barramento
+# TODO: Não está sendo tratado as permissões de acesso ao botão de visualizar recibos de trâmite
+# TODO: Implementar testes com envio de processo e problema no envio de recibo de conclusão pelo destinatário por questões de indisponibilidade do barramento
+# Todo: Implementar teste de desligamento do gearman com vários processos na lista
+# TODO: Implementar testes com unidades contendo mapeamentos errados, ou seja, não sendo representando pelo sistema.
+
+
+# TODO: Quando o usuário está sem as devidas permissões aos recursos do módulo, são disparado erros não tratados nas funcionalidades do sistema
+# TODO: Ícone de alerta de rejeição e mensagem de rejeição não aparecem na página do processo, somente em Controle de Processo
+# TODO: Agendamento de verificação do módulo não está lançando exceção, fazendo que com que o e-mail não seja enviado para o administrador
+# TODO: Pesquisa de unidades está registrando erro no log do SEI caso não encontre uma unidade
+# TODO: Adicionar botão de pesquisar
+# TODO: Pesquisa de unidades deve considerar a também a sigla de unidade ou sigla da hierarquia
+# TODO: Mudar popup de barra de progresso para impedir que navegador faça o bloqueio
+# TODO: Adicionar botão fechar ao popup de barra de progresso do trâmite externo
+# TODO: Adicionar opção de ocultar/extender registros da página de trâmite de processos
+# TODO: Implementar tratamento para unidades receptoras
+# TODO: Implementar o envio de dados da assinatura digital de documentos externos
+# TODO: Implementar trâmite de processos anexados e e-mail com anexos
+# TODO: Revisar mensagens de notificação para o usuário final
+

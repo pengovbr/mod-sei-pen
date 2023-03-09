@@ -29,60 +29,61 @@ class EnviarReciboTramiteRN extends InfraRN
      * @param int $numIdTramite
      * @return array
      */
-    protected function gerarReciboTramite($numIdTramite){
+  protected function gerarReciboTramite($numIdTramite){
 
-        $arrStrHashConteudo = array();
+      $arrStrHashConteudo = array();
 
-        $objMetaRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
+      $objMetaRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
 
-        $objMetaProcesso = $objMetaRetorno->metadados->processo;
+      $objMetaProcesso = $objMetaRetorno->metadados->processo;
 
-        $arrObjMetaDocumento = is_array($objMetaProcesso->documento) ? $objMetaProcesso->documento : array($objMetaProcesso->documento);
+      $arrObjMetaDocumento = is_array($objMetaProcesso->documento) ? $objMetaProcesso->documento : array($objMetaProcesso->documento);
 
-        $objDTO = new ComponenteDigitalDTO();
-        $objBD = new ComponenteDigitalBD($this->inicializarObjInfraIBanco());
+      $objDTO = new ComponenteDigitalDTO();
+      $objBD = new ComponenteDigitalBD($this->inicializarObjInfraIBanco());
 
-        foreach($arrObjMetaDocumento as $objMetaDocumento) {
+    foreach($arrObjMetaDocumento as $objMetaDocumento) {
 
-            $strHashConteudo = ProcessoEletronicoRN::getHashFromMetaDados($objMetaDocumento->componenteDigital->hash);
+        $strHashConteudo = ProcessoEletronicoRN::getHashFromMetaDados($objMetaDocumento->componenteDigital->hash);
 
-            $objDTO->setStrHashConteudo($strHashConteudo);
+        $objDTO->setStrHashConteudo($strHashConteudo);
 
-            if($objBD->contar($objDTO) > 0) {
+      if($objBD->contar($objDTO) > 0) {
 
-                $arrStrHashConteudo[] = $strHashConteudo;
-            }
-        }
-
-        return $arrStrHashConteudo;
+        $arrStrHashConteudo[] = $strHashConteudo;
+      }
     }
 
-    protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array()){
+      return $arrStrHashConteudo;
+  }
 
-        $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
+  protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array()){
 
-        $objDTO = new ReciboTramiteRecebidoDTO();
-        $objDTO->setStrNumeroRegistro($strNumeroRegistro);
-        $objDTO->setNumIdTramite($parNumIdTramite);
+      $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
 
-        if(!empty($strHashConteudo)) $objDTO->setStrHashAssinatura($strHashConteudo);
+      $objDTO = new ReciboTramiteRecebidoDTO();
+      $objDTO->setStrNumeroRegistro($strNumeroRegistro);
+      $objDTO->setNumIdTramite($parNumIdTramite);
 
-        if(intval($objBD->contar($objDTO)) == 0) {
-
-            $objDTO->setDthRecebimento(date('d/m/Y H:i:s'));
-            $objBD->cadastrar($objDTO);
-        }
-
-        foreach($parArrayHash as $strHashComponenteDigital){
-
-            $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-            $objReciboTramiteHashDTO->setStrNumeroRegistro($strNumeroRegistro);
-            $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
-            $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
-            $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
-            $objBD->cadastrar($objReciboTramiteHashDTO);
-        }
+    if(!empty($strHashConteudo)) { $objDTO->setStrHashAssinatura($strHashConteudo);
     }
+
+    if(intval($objBD->contar($objDTO)) == 0) {
+
+        $objDTO->setDthRecebimento(date('d/m/Y H:i:s'));
+        $objBD->cadastrar($objDTO);
+    }
+
+    foreach($parArrayHash as $strHashComponenteDigital){
+
+        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+        $objReciboTramiteHashDTO->setStrNumeroRegistro($strNumeroRegistro);
+        $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
+        $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+        $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
+        $objBD->cadastrar($objReciboTramiteHashDTO);
+    }
+  }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash, $parDthRecebimento = null)
   {
@@ -90,22 +91,22 @@ class EnviarReciboTramiteRN extends InfraRN
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
         date_default_timezone_set('America/Sao_Paulo');
 
-        if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
-          throw new InfraException('Parâmetro $parNumIdTramite não informado.');
-        }
+      if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
+        throw new InfraException('Parâmetro $parNumIdTramite não informado.');
+      }
 
         //Verifica se todos os componentes digitais já foram devidamente recebido
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
-        if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-          throw new InfraException("Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
-        }
+      if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
+        throw new InfraException("Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
+      }
 
         $objTramite = $arrObjTramite[0];
         $strNumeroRegistro = $objTramite->NRE;
 
-        if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-          throw new InfraException(sprintf('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite (%s).', $objTramite->situacaoAtual));
-        }
+      if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
+        throw new InfraException(sprintf('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite (%s).', $objTramite->situacaoAtual));
+      }
 
         $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);
         $dthRecebimentoComponentesDigitais = $dthRecebimentoComponentesDigitais ?: date();
@@ -117,11 +118,11 @@ class EnviarReciboTramiteRN extends InfraRN
         $strReciboTramite .= "<dataDeRecebimento>$dthRecebimento</dataDeRecebimento>";
         sort($parArrayHash);
 
-        foreach ($parArrayHash as $strHashConteudo) {
-          if(!empty($strHashConteudo)){
-                $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
-          }
+      foreach ($parArrayHash as $strHashConteudo) {
+        if(!empty($strHashConteudo)){
+              $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
         }
+      }
         $strReciboTramite  .= "</recibo>";
 
         //Envia o Recibo de salva no banco
@@ -132,9 +133,9 @@ class EnviarReciboTramiteRN extends InfraRN
         $detalhes = null;
         $mensagem = InfraException::inspecionar($e);
 
-        if(isset($strReciboTramite)){
-            $detalhes = "Falha na validação do recibo de conclusão do trâmite do processo. Recibo: \n" . $strReciboTramite;
-        }
+      if(isset($strReciboTramite)){
+          $detalhes = "Falha na validação do recibo de conclusão do trâmite do processo. Recibo: \n" . $strReciboTramite;
+      }
 
         throw new InfraException($mensagem, $e, $detalhes);
     }

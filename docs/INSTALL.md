@@ -296,7 +296,7 @@ Como o recebimento é realizado de forma automática, o sistema precisa atribuir
 
 A unidade a ser definida neste parâmetro será utilizada internamente pelo módulo e não deverá ter acesso de nenhum usuário do sistema. Por isto, não deve ser utilizada uma unidade pré-existente da própria instituição, sendo recomendado a criação de uma nova unidade administrativa "virtual" no SIP para esta configuração.
 
-Sugerimos que a criação uma nova unidade no SEI denominada "**EXTERNO - Unidade Externa**" para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
+Sugerimos que a criação uma nova unidade no SEI denominada: [sigla = **Tramita.GOV.BR**, nome: **Processo recebido via Tramita.GOV.BR**] para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
 
 #### Envia E-mail de Notificação de Recebimento
 *Indicação se o sistema irá enviar um e-mail de notificação alertando o recebimento de um novo processo para a unidade. Necessário que a unidade tenha um e-mail configurado em seu cadastro de contato.*
@@ -483,7 +483,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
 ```
 
-### 3.2. Opcional: Instalação do Supervisor para monitoramento
+### 3.2. Instalação do Supervisor para monitoramento
 
 O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Barramento de Serviços do PEN. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
 
