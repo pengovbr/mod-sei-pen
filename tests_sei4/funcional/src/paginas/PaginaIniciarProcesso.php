@@ -163,7 +163,7 @@ class PaginaIniciarProcesso extends PaginaTeste
 
         $test->frame(null);
         $test->frame("ifrArvore");
-        $protocoloProcesso = trim($test->byXPath("//span[@title='". $dadosProcesso["TIPO_PROCESSO"] ."']")->text());
+        $protocoloProcesso = trim($test->byXPath("//a[@title='". $dadosProcesso["TIPO_PROCESSO"] ."'] | //span[@title='". $dadosProcesso["TIPO_PROCESSO"] ."']")->text());
 
         return $protocoloProcesso;
     }

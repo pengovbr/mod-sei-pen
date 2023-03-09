@@ -1,9 +1,21 @@
-.PHONY: .env help clean dist all install destroy up down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
-
+.PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # Parâmetros de execução do comando MAKE
-versao_sei=3
+# Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, super
+sistema=super
 teste=
+
+ifeq (, $(shell groups |grep docker))
+ CMD_DOCKER_SUDO=sudo
+else
+ CMD_DOCKER_SUDO=
+endif
+
+ifeq (, $(shell which docker-compose))
+ CMD_DOCKER_COMPOSE=$(CMD_DOCKER_SUDO) docker compose
+else
+ CMD_DOCKER_COMPOSE=$(CMD_DOCKER_SUDO) docker-compose
+endif
 
 MODULO_NOME = pen
 MODULO_PASTAS_CONFIG = mod-$(MODULO_NOME)
@@ -14,8 +26,8 @@ SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests_sei$(versao_sei)/funcional
-PEN_TEST_UNIT = tests_sei$(versao_sei)/unitario
+PEN_TEST_FUNC = tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests_$(sistema)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
@@ -27,7 +39,52 @@ CMD_INSTALACAO_SEI_MODULO = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSW
 CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php sip_atualizar_versao_modulo_pen.php
 
 
+
+CMD_COMPOSE_UNIT = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_UNIT)/docker-compose.yml --env-file $(PEN_TEST_UNIT)/.env
+CMD_COMPOSE_FUNC = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env
+CMD_COMPOSE_FUNC_EXEC = $(CMD_COMPOSE_FUNC) exec -T
+CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
+CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
+FILE_VENDOR_FUNCIONAL = $(PEN_TEST_FUNC)/vendor/bin/phpunit
+FILE_VENDOR_UNITARIO = $(PEN_TEST_UNIT)/vendor/bin/phpunit
+
 all: help
+
+check-isalive: ## Target de apoio. Acessa os Sistemas e verifica se estao respondendo a tela de login
+	@echo ""
+	@echo "Testando se a pagina de login responde para o org1..."
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_LOGIN_ORG1); then \
+				echo 'Página de login encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_LOGIN_ORG1); then echo 'Pagina de login do org1 nao encontrada. Verifique...'; exit 1 ; fi;
+	@echo "Testando se a pagina de login responde para o org2..."
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_LOGIN_ORG2); then \
+				echo 'Página de login encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_LOGIN_ORG2); then echo 'Pagina de login do org2 nao encontrada. Verifique...'; exit 1 ; fi;
+
+
+install-phpunit-vendor: ## instala os pacotes composer referentes aos testes via phpunit
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-functional bash -c './composer.phar install'
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c './composer.phar install'
+
+
+$(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
+	make install-phpunit-vendor
+
+
+$(FILE_VENDOR_UNITARIO): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
+	make install-phpunit-vendor
 
 dist: 
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
@@ -68,74 +125,78 @@ clean:
 	@echo "Limpeza do diretório de distribuição do realizada com sucesso"
 
 
-install:	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d	
-	@echo "Sleeping for 20 seconds ..."; sleep 2;
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chown -R root:root /etc/cron.d/
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sei
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http chmod 0644 /etc/cron.d/sip
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+install: check-isalive
+	$(CMD_COMPOSE_FUNC) up -d	
+	$(CMD_COMPOSE_FUNC) exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
+	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
+	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
+	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chown -R root:root /etc/cron.d/
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sei
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http chmod 0644 /etc/cron.d/sip
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+	$(CMD_COMPOSE_FUNC) exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
+	$(CMD_COMPOSE_FUNC) exec org2-http chown -R root:root /etc/cron.d/
+	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sei
+	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
 	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
-	./composer.phar install -d $(PEN_TEST_FUNC)
-	./composer.phar install -d $(PEN_TEST_UNIT)
 
 
 up:	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env up -d
+	$(CMD_COMPOSE_FUNC) up -d
+
+
+update: ## Atualiza banco de dados através dos scripts de atualização do sistema
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sei/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SIP)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sei/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SEI)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SIP)"; true
+	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
 
 
 destroy:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env down --volumes
+	$(CMD_COMPOSE_FUNC) down --volumes
 
 
 down:	
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env stop
+	$(CMD_COMPOSE_FUNC) stop
 
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
-test-functional:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml  /tests/tests/$(addsuffix .php,$(teste))
-	# docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --stop-on-failure  /tests/tests/$(addsuffix .php,$(teste))
+test-functional: $(FILE_VENDOR_FUNCIONAL)
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml  /tests/tests/$(addsuffix .php,$(teste))
 
 
-test-functional-parallel:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite funcional -p 8
+test-functional-parallel: $(FILE_VENDOR_FUNCIONAL)
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
 
 
 test-parallel-otimizado:
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit:
-	php -c php.ini $(PEN_TEST_UNIT)/vendor/phpunit/phpunit/phpunit -c $(PEN_TEST_UNIT)/phpunit.xml $(PEN_TEST_UNIT)/rn/ProcessoEletronicoRNTest.php 
-
+test-unit: $(FILE_VENDOR_UNITARIO)
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
 
 test: test-unit test-functional
 
 
 verify-config:
 	@echo "Verificando configurações do módulo para instância org1"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 	@echo "Verificando configurações do módulo para instância org2"
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 
 bash_org1:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org1-http bash
+	$(CMD_COMPOSE_FUNC) exec org1-http bash
 	
 
 bash_org2:
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env exec org2-http bash
+	$(CMD_COMPOSE_FUNC) exec org2-http bash
 
 atualizaSequencia:
 	docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
@@ -157,6 +218,11 @@ tramitar-pendencias:
 		i=$$((i + 1));\
   	done
 
+tramitar-pendencias-simples:
+	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+	docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
+
 tramitar-pendencias-silent:
 	i=1; while [ "$$i" -le 300 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
@@ -164,15 +230,6 @@ tramitar-pendencias-silent:
 		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
 		i=$$((i + 1));\
   	done 
-
-update: ## Atualiza banco de dados através dos scripts de atualização do sistema
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sei/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SEI)"; true
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_SIP)"; true
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org1-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sei/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SEI)"; true
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
-	docker-compose -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_SIP)"; true
-
 
 #deve ser rodado em outro terminal
 stop-test-container:

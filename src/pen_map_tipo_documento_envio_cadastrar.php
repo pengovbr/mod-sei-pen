@@ -7,7 +7,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 try {
     session_start();
-	$objSessao = SessaoSEI::getInstance(); 
+    $objSessao = SessaoSEI::getInstance(); 
     $objPaginaSEI = PaginaSEI::getInstance();
 
     SessaoSEI::getInstance()->validarLink();
@@ -17,73 +17,73 @@ try {
 
     $bolSomenteLeitura = false;
     
-    switch ($_GET['acao']) {
-        case 'pen_map_tipo_documento_envio_cadastrar':
-            $arrComandos[] = '<button type="submit" name="sbmCadastrarSerie" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
+  switch ($_GET['acao']) {
+    case 'pen_map_tipo_documento_envio_cadastrar':
+        $arrComandos[] = '<button type="submit" name="sbmCadastrarSerie" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
+        $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
                         
-            if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
-                $strTitulo = 'Editar Mapeamento de Tipo de Documento para Envio';
-            }
-            else {
-                $strTitulo = 'Novo Mapeamento de Tipo de Documento para Envio';
-            }
-            break;
+      if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
+        $strTitulo = 'Editar Mapeamento de Tipo de Documento para Envio';
+      }
+      else {
+          $strTitulo = 'Novo Mapeamento de Tipo de Documento para Envio';
+      }
+        break;
         
-        case 'pen_map_tipo_documento_envio_visualizar':
-            $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
-            $bolSomenteLeitura = true;
-            $strTitulo = 'Consultar Mapeamento de Tipo de Documento para Envio';           
-            break;        
+    case 'pen_map_tipo_documento_envio_visualizar':
+        $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
+        $bolSomenteLeitura = true;
+        $strTitulo = 'Consultar Mapeamento de Tipo de Documento para Envio';           
+        break;        
         
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }  
+    default:
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }  
     
     //--------------------------------------------------------------------------
     // Ação por POST esta salvando o formulário
-    if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
+  if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
         
-        if(!array_key_exists('codigo_especie', $_POST) || empty($_POST['codigo_especie'])) {
-            throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
-        }
-        
-        if(!array_key_exists('id_serie', $_POST) || empty($_POST['id_serie'])) {
-            throw new InfraException('Nenhum "Tipo de Documento" foi selecionado');
-        }
-        
-        $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
-        $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($_POST['codigo_especie']);
-        $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($_POST['id_serie']);
-        
-        if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])) {
-            $objPenRelTipoDocMapEnviadoDTO->setDblIdMap($_GET['id_mapeamento']);
-        }
-
-        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
-        $objPenRelTipoDocMapEnviadoRN->cadastrar($objPenRelTipoDocMapEnviadoDTO);
-        
-        $objPaginaSEI->adicionarMensagem('Salvo com sucesso', InfraPagina::$TIPO_MSG_INFORMACAO);
-        
-        header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem='.$_GET['acao']));
-        exit(0);
+    if(!array_key_exists('codigo_especie', $_POST) || empty($_POST['codigo_especie'])) {
+        throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
     }
-    // Ação por GET + ID esta carregando o formulário
-    else if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])){
         
-        $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+    if(!array_key_exists('id_serie', $_POST) || empty($_POST['id_serie'])) {
+        throw new InfraException('Nenhum "Tipo de Documento" foi selecionado');
+    }
+        
+      $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($_POST['codigo_especie']);
+      $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($_POST['id_serie']);
+        
+    if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])) {
         $objPenRelTipoDocMapEnviadoDTO->setDblIdMap($_GET['id_mapeamento']);
-        $objPenRelTipoDocMapEnviadoDTO->retTodos();
+    }
+
+      $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+      $objPenRelTipoDocMapEnviadoRN->cadastrar($objPenRelTipoDocMapEnviadoDTO);
         
-        $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN(BancoSEI::getInstance());
-        $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->consultar($objPenRelTipoDocMapEnviadoDTO);
-    }
+      $objPaginaSEI->adicionarMensagem('Salvo com sucesso', InfraPagina::$TIPO_MSG_INFORMACAO);
+        
+      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_listar&acao_origem='.$_GET['acao']));
+      exit(0);
+  }
+    // Ação por GET + ID esta carregando o formulário
+  else if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])){
+        
+      $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objPenRelTipoDocMapEnviadoDTO->setDblIdMap($_GET['id_mapeamento']);
+      $objPenRelTipoDocMapEnviadoDTO->retTodos();
+        
+      $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN(BancoSEI::getInstance());
+      $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->consultar($objPenRelTipoDocMapEnviadoDTO);
+  }
     
-    if(empty($objPenRelTipoDocMapEnviadoDTO)){
-        $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
-        $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie(0);
-        $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie(0);
-    }
+  if(empty($objPenRelTipoDocMapEnviadoDTO)){
+      $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie(0);
+      $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie(0);
+  }
     
     $objTipoDocMapRN = new TipoDocMapRN();
     $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
@@ -95,14 +95,14 @@ try {
 } 
 catch (InfraException $e) {
     
-    if(preg_match('/Duplicate/', $e->getStrDescricao())){
+  if(preg_match('/Duplicate/', $e->getStrDescricao())){
 
-        $objPaginaSEI->adicionarMensagem('Nenhuma das duas chaves pode estar sendo utilizada em outra relação', InfraPagina::$TIPO_MSG_INFORMACAO);
-    }
-    else {
+      $objPaginaSEI->adicionarMensagem('Nenhuma das duas chaves pode estar sendo utilizada em outra relação', InfraPagina::$TIPO_MSG_INFORMACAO);
+  }
+  else {
         
-        $objPaginaSEI->processarExcecao($e);
-    }
+      $objPaginaSEI->processarExcecao($e);
+  }
 }
 ?>
 
@@ -162,7 +162,7 @@ function onSubmit() {
 </script>
 <?php
 $objPaginaSEI->fecharHead();
-$objPaginaSEI->abrirBody($strTitulo,'onload="inicializar();"');
+$objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="pen-map-tipo-doc-enviado" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>

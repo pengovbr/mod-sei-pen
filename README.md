@@ -1,6 +1,6 @@
-# Módulo de Integração do Processo Eletrônico Nacional - PEN
+# Módulo de Integração do SEI ao Tramita.GOV.BR
 
-O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simplificar e segura.
+O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI ao Tramita.GOV.BR. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simples e segura.
 
 
 ## O REPOSITÓRIO
@@ -46,8 +46,12 @@ Existem diversas formas de colaborar neste projeto:
 
 ## DESENVOLVIMENTO
 
-Para maior informações de como configurar o ambiente de desenvolvimento do mod-sei-pen para apoiar o desenvolvimento do projeto, acesse a página [Configuração do Ambiente de Desenvolvimento](docs/DESENV.md)
+Para maiores informações de como configurar o ambiente de desenvolvimento do mod-sei-pen para apoiar o desenvolvimento do projeto, acesse a página [Configuração do Ambiente de Desenvolvimento](docs/DESENV.md)
 
+## TESTES
+
+Os testes implementados no projeto estão em Phpunit e Selenium.
+Para maiores informações de como configurar o seu ambiente e rodar/visualizar os testes em tempo real acesse a página [Configuração dos Testes](docs/TESTE.md)
 
 ## SUPORTE
 
