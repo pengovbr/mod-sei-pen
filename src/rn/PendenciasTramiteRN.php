@@ -168,16 +168,14 @@ class PendenciasTramiteRN extends InfraRN
 
   private function configurarRequisicao()
     {
+      $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
       $curl = curl_init($this->strEnderecoServicoPendencias);
       curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias);
       curl_setopt($curl, CURLOPT_TIMEOUT, self::TIMEOUT_SERVICO_PENDENCIAS);
       curl_setopt($curl, CURLOPT_HEADER, 0);
-      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-    if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    }
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, $bolEmProducao);
+      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $bolEmProducao);
+
       curl_setopt($curl, CURLOPT_FAILONERROR, true);
       curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
       curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strSenhaCertificadoDigital);

@@ -452,15 +452,11 @@ class ProcessoEletronicoRN extends InfraRN
       $curl = curl_init($this->strComumXSD);
 
     try{
+        $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
         curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
         curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-
-      if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-      }
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, $bolEmProducao);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $bolEmProducao);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
