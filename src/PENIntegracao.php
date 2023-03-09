@@ -193,8 +193,6 @@ class PENIntegracao extends SeiIntegracao
         $objPenProtocoloDTO->retStrSinObteveRecusa();
         $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-        $objProtocoloRN = new ProtocoloRN();
-        $objProtocoloRN->consultarRN0186($objPenProtocoloDTO);
         $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
@@ -281,14 +279,35 @@ class PENIntegracao extends SeiIntegracao
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
       
-      if (!empty($objAtividadeDTO)) {
-        $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
-      }
+      $arrObjArvoreAcaoItemAPI = $this->getObjArvoreAcao(
+        $dblIdProcedimento,
+        $arrObjArvoreAcaoItemAPI,
+        ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO
+      );
     } else {
         return array();
     }
 
       return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcao($dblIdProcedimento, $arrObjArvoreAcaoItemAPI, $idTarefaAtividade)
+  {
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo($idTarefaAtividade));
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->retNumIdAtividade();
+
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    if (!empty($objAtividadeDTO)) {
+      $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+    }
+
+    return $arrObjArvoreAcaoItemAPI;
   }
 
   private function getObjArvoreAcaoRecebido($dblIdProcedimento)
