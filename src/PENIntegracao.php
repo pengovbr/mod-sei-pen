@@ -268,16 +268,6 @@ class PENIntegracao extends SeiIntegracao
       if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
         $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
       }
-
-      $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
-      $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
-      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-      $objAtividadeDTO->retNumIdAtividade();
-      
-      $objAtividadeRN = new AtividadeRN();
-      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
       
       $arrObjArvoreAcaoItemAPI = $this->getObjArvoreAcao(
         $dblIdProcedimento,
