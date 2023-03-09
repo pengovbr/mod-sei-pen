@@ -160,43 +160,77 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
-    {
+  {
       $arrStrIcone = array();
       $arrDblIdProcedimento = array();
 
-    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-        $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-    }
+      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+      }
 
-      $objProcedimentoDTO = new ProcedimentoDTO();
-      $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
-      $objProcedimentoDTO->retDblIdProcedimento();
-      $objProcedimentoDTO->retStrStaEstadoProtocolo();
+      $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
+      $arrStrIcone = $this->montarIconeRecebido($arrDblIdProcedimento, $arrStrIcone);
 
-      $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
-      $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
+      return $arrStrIcone;
+  }
+
+  private function montarIconeRecusa($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
+    $objProcedimentoDTO = new ProcedimentoDTO();
+    $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
+    $objProcedimentoDTO->retDblIdProcedimento();
+    $objProcedimentoDTO->retStrStaEstadoProtocolo();
+
+    $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
+    $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
 
     if (!empty($arrObjProcedimentoDTO)) {
 
       foreach ($arrObjProcedimentoDTO as $objProcedimentoDTO) {
+        $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+        $objPenProtocoloDTO = new PenProtocoloDTO();
+        $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenProtocoloDTO->retStrSinObteveRecusa();
+        $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-          $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-          $objPenProtocoloDTO = new PenProtocoloDTO();
-          $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
-          $objPenProtocoloDTO->retStrSinObteveRecusa();
-          $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
-
-          $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-          $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+        $objProtocoloRN = new ProtocoloRN();
+        $objProtocoloRN->consultarRN0186($objPenProtocoloDTO);
+        $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+        $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
         if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
           $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
         }
-
       }
     }
 
-      return $arrStrIcone;
+    return $arrStrIcone;
+  }
+
+  private function montarIconeRecebido($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($arrDblIdProcedimento, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+    $objAtividadeRN = new AtividadeRN();
+    $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+    
+    if (!empty($arrObjAtividadeDTO)) {
+      foreach ($arrObjAtividadeDTO as $ObjAtividadeDTO) {
+        $dblIdProcedimento = $ObjAtividadeDTO->getDblIdProcedimentoProtocolo();
+        if (array_key_exists($dblIdProcedimento, $arrStrIcone)) {
+          $arrStrIconeIcon = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+          $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrStrIconeIcon);
+        } else {
+          $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+        }
+      }
+    }
+
+    return $arrStrIcone;
   }
 
   public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP)
@@ -236,11 +270,42 @@ class PENIntegracao extends SeiIntegracao
       if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
         $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
       }
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->retNumIdAtividade();
+      
+      $objAtividadeRN = new AtividadeRN();
+      $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+      
+      if (!empty($objAtividadeDTO)) {
+        $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+      }
     } else {
         return array();
     }
 
       return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoRecebido($dblIdProcedimento)
+  {
+    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+    $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+    $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setTitle('Um trâmite para esse processo foi recebido');
+    $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/share-nodes-solid.svg');
+
+    $objArvoreAcaoItemAPI->setTarget(null);
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi recebido\');');
+
+    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+    return $objArvoreAcaoItemAPI;
   }
 
   public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO)
