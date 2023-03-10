@@ -2,7 +2,11 @@
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, super
+<<<<<<< HEAD
 sistema=super
+=======
+sistema=sei4
+>>>>>>> 73a3cd0 (feat: Adicionar mensagem de recusa para parametros externos sem assunto cadastrado)
 base=mysql
 teste=
 

@@ -35,24 +35,20 @@ try {
     $objNivelAcessoPermitidoRN = new NivelAcessoPermitidoRN();
     $arrObjNivelAcessoPermitido=InfraArray::converterArrInfraDTO($objNivelAcessoPermitidoRN->listar($objNivelAcessoPermitidoDTO),"IdTipoProcedimento");
 
-    $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
-    $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
-    $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
-    $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
-    $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO),"IdTipoProcedimento");
+    $objRelTipoProcedimentoDTO = new TipoProcedimentoDTO();
+    $objRelTipoProcedimentoDTO->retNumIdTipoProcedimento();
+    $objRelTipoProcedimentoDTO->retStrNome();
+    $objRelTipoProcedimentoDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-    $arrayFiltro=array_diff($arrObjTipoProcedimentoAssunto,$arrObjNivelAcessoPermitido);
+    $objRelTipoProcedimentoRN = new TipoProcedimentoRN();
+    $arrTipoProcedimento=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO),"IdTipoProcedimento");
+    $arrayFiltro = array_diff($arrTipoProcedimento,$arrObjNivelAcessoPermitido);
+    
+    $objRelTipoProcedimentoDTO->setNumIdTipoProcedimento($arrayFiltro, InfraDTO::$OPER_IN);
+    $arrObjTipoProcedimentoDTO = $objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO);
 
-    if($arrayFiltro!=null){
-        $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
-        $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
-        $objTipoProcedimentoDTO->setNumIdTipoProcedimento($arrayFiltro,InfraDTO::$OPER_IN);
-        $objTipoProcedimentoDTO->retStrNome();
-        $objTipoProcedimentoDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
-        $objTipoProcedimentoRN = new TipoProcedimentoRN();
-        $arrObjTipoProcedimentoDTO = $objTipoProcedimentoRN->listarRN0244($objTipoProcedimentoDTO);
-    }else{
-        $arrObjTipoProcedimentoDTO=null;
+    if ($arrayFiltro == null) {
+        $arrObjTipoProcedimentoDTO = null;
     }
 
     /* Busca os dados para montar dropdown ( UNIDADE GERADORA DOCUMENTO RECEBIDO ) */
@@ -70,10 +66,27 @@ try {
     switch ($_GET['acao']) {
         case 'pen_parametros_configuracao_salvar':
             try {
+
                 $objPenParametroRN = new PenParametroRN();
 
                 if (!empty(count($_POST['parametro']))) {
                     foreach ($_POST['parametro'] as $nome => $valor) {
+
+                        if ($nome == 'PEN_TIPO_PROCESSO_EXTERNO') {
+
+                            $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
+                            $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
+                            $objRelTipoProcedimentoAssuntoDTO->setNumIdTipoProcedimento($valor);
+                            $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
+
+                            $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
+                            $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO),"IdTipoProcedimento");
+
+                            if (empty($arrObjTipoProcedimentoAssunto)) {
+                                throw new InfraException("Tipo de processo externo selecionado não possui sugestão de assuntos atribuída.");
+                            }
+                        }
+
                         $objPenParametroDTO = new PenParametroDTO();
                         $objPenParametroDTO->setStrNome($nome);
                         $objPenParametroDTO->retStrNome();
@@ -84,6 +97,8 @@ try {
                         }
                     }
                 }
+
+
             } catch (Exception $e) {
                 $objPagina->processarExcecao($e);
             }
@@ -191,14 +206,14 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
     foreach ($retParametros as $parametro) {
 
         //echo '<div class="container">';
-        //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
+       //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
             ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?php
-            }
+        }
 
         //Constrói o campo de valor
-            switch ($parametro->getStrNome()) {
-              case 'PEN_ID_REPOSITORIO_ORIGEM':
+        switch ($parametro->getStrNome()) {
+            case 'PEN_ID_REPOSITORIO_ORIGEM':
                 try {
                     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
                     $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
@@ -217,48 +232,48 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso aos Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
                     echo '</div>';
                 }
-                  break;
+                break;
 
 
-              case 'PEN_TIPO_PROCESSO_EXTERNO':
-                  $textoAjuda="Selecionar o tipo de processo que será utilizado no envio. Nesta listagem não estão presentes os tipos que permitem a classificação como sigilosos ou não possuam assunto associado";
-                  echo '<div class="div_input">';
-                  echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraSelect input-field" >';
-                  echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome');
-                  echo '<select>';
-                  echo "<a class='pen_ajuda' id='ajuda_tipo_processo'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
-                  echo '</div>';
-                  break;
+            case 'PEN_TIPO_PROCESSO_EXTERNO':
+                $textoAjuda="Selecionar o tipo de processo que será utilizado no envio. Nesta listagem não estão presentes os tipos que permitem a classificação como sigilosos ou não possuam assunto associado";
+                echo '<div class="div_input">';
+                echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraSelect input-field" >';
+                echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome');
+                echo '<select>';
+                echo "<a class='pen_ajuda' id='ajuda_tipo_processo'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '</div>';
+                break;
 
-              case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
-                  $textoAjuda="Selecionar a unidade que representa os órgãos externos";
-                  echo '<div class="div_input">';
-                  echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraSelect input-field" >';
-                  echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjUnidade, 'IdUnidade', 'Sigla');
-                  echo '<select>';
-                  echo "<a class='pen_ajuda' id='ajuda_unidade'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
-                  echo '</div>';
-                  break;
+            case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
+                $textoAjuda="Selecionar a unidade que representa os órgãos externos";
+                echo '<div class="div_input">';
+                echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraSelect input-field" >';
+                echo InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjUnidade, 'IdUnidade', 'Sigla');
+                echo '<select>';
+                echo "<a class='pen_ajuda' id='ajuda_unidade'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '</div>';
+                break;
 
-              case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
-                  $textoAjuda="Selecionar caso queira receber notificações de recebimento";
-                  echo '<div class="div_input">';
-                  echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraSelect input-field" >';
-                  echo '    <option value="S" ' . ($parametro->getStrValor() == 'S' ? 'selected="selected"' : '') . '>Sim</option>';
-                  echo '    <option value="N" ' . ($parametro->getStrValor() == 'N' ? 'selected="selected"' : '') . '>Não</option>';
-                  echo '<select>';
-                  echo "<a class='pen_ajuda' id='ajuda_notificacao' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
-                  echo '</div>';
-                  break;
+            case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
+                $textoAjuda="Selecionar caso queira receber notificações de recebimento";
+                echo '<div class="div_input">';
+                echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraSelect input-field" >';
+                echo '    <option value="S" ' . ($parametro->getStrValor() == 'S' ? 'selected="selected"' : '') . '>Sim</option>';
+                echo '    <option value="N" ' . ($parametro->getStrValor() == 'N' ? 'selected="selected"' : '') . '>Não</option>';
+                echo '<select>';
+                echo "<a class='pen_ajuda' id='ajuda_notificacao' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                echo '</div>';
+                break;
 
-              default:
-                  echo '<div class="div_input">';
-                  echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
-                  echo '</div>';
-                  break;
-            }
-            }
-            ?>
+            default:
+                echo '<div class="div_input">';
+                echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                echo '</div>';
+                break;
+        }
+    }
+    ?>
 </form>
 
 <?
