@@ -20,7 +20,7 @@ Procedimentos destinados à Equipe Técnica responsáveis pela instalação do m
 2. **[Configuração](#configuração)**:
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
-3. **[Configurações Técnicas Adicionais](#configuracoes-técnicas-adicionais)**:
+3. **[Configurações Técnicas Adicionais](#3-configurações-adicionais)**:
 Esta seção apresenta algumas configurações adicionais do módulo do Barramento de Serviços do PEN que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
 
 4. **[Suporte](#suporte)**:
@@ -144,7 +144,7 @@ Senha do certificado digital necessário para a aplicação descriptografar e ac
 * **Gearman** _(opcional e altamente desejável)_  
 Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN.  
 As mensagens recebidas do Barramento são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para processamento coordenado. Caso este parâmetro não seja configurado ou o servidor do Gearman esteja indisponível, o processamento será feito diretamente pelo sistema na periodicidade definida no agendamento da tarefa _PENAgendamentoRN::processarTarefasPEN_.  
-Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-de-multiplos-processos-com-Gearman)) para maiores informações.
+Veja [Processamento paralelo de processos com Gearman]((#31-instalação-do-gearmand-para-processamento-assíncrono-de-tarefas)) para maiores informações.
 
     * **Servidor**  
     *IP ou Hostname do servidor Gearman instalado*
