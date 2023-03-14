@@ -173,8 +173,10 @@ class PendenciasTramiteRN extends InfraRN
       curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias);
       curl_setopt($curl, CURLOPT_TIMEOUT, self::TIMEOUT_SERVICO_PENDENCIAS);
       curl_setopt($curl, CURLOPT_HEADER, 0);
-      curl_setopt($curl, CURLOPT_RETURNTRANSFER, $bolEmProducao);
-      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, $bolEmProducao);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);      
 
       curl_setopt($curl, CURLOPT_FAILONERROR, true);
       curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
