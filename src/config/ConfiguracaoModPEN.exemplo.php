@@ -1,7 +1,7 @@
 <?
 
 /**
- * Arquivo de configuração do Módulo de Integração do SEI com o Processo Eletrônico Nacional
+ * Arquivo de configuração do Módulo de Integração do SEI com o Tramita.GOV.BR
  *
  * Seu desenvolvimento seguiu os mesmos padrões de configuração implementado pelo SEI e SIP e este
  * arquivo precisa ser adicionado à pasta de configurações do SEI para seu correto carregamento pelo módulo.
@@ -41,7 +41,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 "WebService" => "",
 
                 // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN.
-                // Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento
+                // Os certificados digitais são disponibilizados pela equipe do Tramita.GOV.BR mediante aprovação do credenciamento
                 // da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.
                 //
                 // Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:

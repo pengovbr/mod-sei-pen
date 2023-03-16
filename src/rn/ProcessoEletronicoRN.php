@@ -148,11 +148,11 @@ class ProcessoEletronicoRN extends InfraRN
     if($this->objPenWs == null) {
 
       if (InfraString::isBolVazia($this->strEnderecoWebService)) {
-        throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
+        throw new InfraException('Endereço do serviço de integração do Tramita.GOV.BR não informado.');
       }
 
       if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-          throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
+          throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
       }
 
         $this->validarDisponibilidade();
@@ -162,7 +162,7 @@ class ProcessoEletronicoRN extends InfraRN
           $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
       } catch (Exception $e) {
           $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-          $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;
+          $mensagem = "Falha de comunicação com o Tramita.GOV.BR: " . $detalhes;
           throw new \SoapFault("HTTP", $mensagem);
       }
     }
@@ -458,7 +458,7 @@ class ProcessoEletronicoRN extends InfraRN
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);        
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -1541,61 +1541,61 @@ class ProcessoEletronicoRN extends InfraRN
       $objOperacaoDTO->setStrNomePessoaOrigem(utf8_decode($strNomePessoa));
 
     switch ($objOperacaoPEN->codigo) {
-      case "01": 
+      case "01":
             $objOperacaoDTO->setStrNome("Registro");
           break;
-      case "02": 
+      case "02":
             $objOperacaoDTO->setStrNome("Envio de documento avulso/processo");
           break;
-      case "03": 
+      case "03":
             $objOperacaoDTO->setStrNome("Cancelamento/exclusão ou envio de documento");
           break;
-      case "04": 
+      case "04":
             $objOperacaoDTO->setStrNome("Recebimento de documento");
           break;
-      case "05": 
+      case "05":
             $objOperacaoDTO->setStrNome("Autuação");
           break;
-      case "06": 
+      case "06":
             $objOperacaoDTO->setStrNome("Juntada por anexação");
           break;
-      case "07": 
+      case "07":
             $objOperacaoDTO->setStrNome("Juntada por apensação");
           break;
-      case "08": 
+      case "08":
             $objOperacaoDTO->setStrNome("Desapensação");
           break;
-      case "09": 
+      case "09":
             $objOperacaoDTO->setStrNome("Arquivamento");
           break;
-      case "10": 
+      case "10":
             $objOperacaoDTO->setStrNome("Arquivamento no Arquivo Nacional");
           break;
-      case "11": 
+      case "11":
             $objOperacaoDTO->setStrNome("Eliminação");
           break;
-      case "12": 
+      case "12":
             $objOperacaoDTO->setStrNome("Sinistro");
           break;
-      case "13": 
+      case "13":
             $objOperacaoDTO->setStrNome("Reconstituição de processo");
           break;
-      case "14": 
+      case "14":
             $objOperacaoDTO->setStrNome("Desarquivamento");
           break;
-      case "15": 
+      case "15":
             $objOperacaoDTO->setStrNome("Desmembramento");
           break;
-      case "16": 
+      case "16":
             $objOperacaoDTO->setStrNome("Desentranhamento");
           break;
-      case "17": 
+      case "17":
             $objOperacaoDTO->setStrNome("Encerramento/abertura de volume no processo");
           break;
-      case "18": 
+      case "18":
             $objOperacaoDTO->setStrNome("Registro de extravio");
           break;
-      default:   
+      default:
             $objOperacaoDTO->setStrNome("Registro");
           break;
     }
@@ -2061,7 +2061,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
         $objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN();
     } catch (\Exception $e) {
-        throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
+        throw new InfraException("Falha de comunicação com o Tramita.GOV.BR. Por favor, tente novamente mais tarde.");
     }
   }
 

@@ -259,7 +259,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3022();
         case '3.2.2':
             $this->instalarV3023();
-    
+
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões

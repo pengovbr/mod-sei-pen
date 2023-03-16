@@ -22,7 +22,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function getNome() {
-      return 'Integração Processo Eletrônico Nacional - PEN';
+      return 'Integração Tramita.GOV.BR';
   }
 
 

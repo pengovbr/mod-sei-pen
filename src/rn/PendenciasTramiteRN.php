@@ -139,15 +139,15 @@ class PendenciasTramiteRN extends InfraRN
   private function validarCertificado()
     {
     if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException('Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informado.');
+        throw new InfraException('Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
     }
 
     if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
+        throw new InfraException("Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
     }
 
     if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
+        throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
     }
   }
 
@@ -176,7 +176,7 @@ class PendenciasTramiteRN extends InfraRN
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
       curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
-      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);      
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
 
       curl_setopt($curl, CURLOPT_FAILONERROR, true);
       curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
@@ -199,7 +199,7 @@ class PendenciasTramiteRN extends InfraRN
       $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
       shuffle($arrObjPendenciasDTO);
 
-      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(); 
+      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
       $objPenLoteProcedimentoDTO->retNumIdLote();
       $objPenLoteProcedimentoDTO->retDblIdProcedimento();
       $objPenLoteProcedimentoDTO->retNumIdAndamento();
@@ -222,14 +222,14 @@ class PendenciasTramiteRN extends InfraRN
       if (!is_array($arrObjPendenciasDTO)){
         $arrObjPendenciasDTO = array();
       }
-    }                 
+    }
 
     foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
         $objPendenciaDTO = new PendenciaDTO();
         $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProcedimento());
         $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
         $arrObjPendenciasDTO[] = $objPendenciaDTO;
-    }    
+    }
 
       $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 
