@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.2.3");
+define("VERSAO_MODULO_PEN", "3.2.4");
 
 
 class PENIntegracao extends SeiIntegracao
@@ -155,6 +155,13 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento .= '</a>';
     }
 
+
+    // Reenvio externo de processos
+    $bolAcaoReenviarProcesso = $objSessaoSEI->verificarPermissao('pen_reenviar_processo');
+    if ($bolAcaoReenviarProcesso && ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO))) {
+      $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+      $strAcoesProcedimento .= '<a id="validar_reenviar_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_reenviar_processo&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . ' alt="Reenvio Externo de Processo" title="Reenvio Externo de Processo" /></a>';
+    }
       return array($strAcoesProcedimento);
   }
 
@@ -474,6 +481,10 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_expedir_lote_listar':
           require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
           break;
+      
+      case 'pen_reenviar_processo':
+            require_once dirname(__FILE__) . '/pen_reenviar_processo.php';
+            break;
 
       default:
           return false;

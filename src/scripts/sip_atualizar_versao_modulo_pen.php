@@ -278,6 +278,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3022();
         case '3.2.2':
             $this->instalarV3023();
+        case '3.2.4':
+            $this->instalarV3024();
     
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -1797,6 +1799,15 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3023()
     {
       $this->atualizarNumeroVersao("3.2.3");
+  }
+
+  protected function instalarV3024()
+    {
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+      $this->criarRecurso('pen_reenviar_processo', 'Reenviar processo bloqueado por envio anterior', $numIdSistema);
+      ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_reenviar_processo');
+      $this->atualizarNumeroVersao("3.2.4");
   }
 
 }
