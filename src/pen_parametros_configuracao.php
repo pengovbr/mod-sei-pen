@@ -8,7 +8,7 @@ try {
     session_start();
 
     define('PEN_RECURSO_ATUAL', 'pen_parametros_configuracao');
-    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo de Tramitações PEN');
+    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo Tramita.GOV.BR');
 
     $objPagina = PaginaSEI::getInstance();
     $objBanco = BancoSEI::getInstance();
@@ -91,7 +91,7 @@ try {
             die;
 
         case 'pen_parametros_configuracao':
-            $strTitulo = 'Parâmetros de Configuração do Módulo de Tramitações PEN';
+            $strTitulo = 'Parâmetros de Configuração do Módulo Tramita.GOV.BR';
             break;
 
         default:
@@ -129,7 +129,7 @@ $objPagina->abrirStyle();
 }
 
 .div_input{
-    display:flex; 
+    display:flex;
     align-items:center;
     margin-bottom:10px;
 }
@@ -203,7 +203,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
                     $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
                     $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
-                    $textoAjuda="Selecionar o repositório, configurado no Portal do PEN, que seu órgão faz parte";
+                    $textoAjuda="Selecionar o repositório, configurado no Portal do Tramita.GOV.BR, que seu órgão faz parte";
                     echo '<div class="div_input">';
                     echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
                     echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
@@ -214,7 +214,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
                     echo '<div class="div_input">';
                     echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
-                    echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no PEN devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
+                    echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
                     echo '</div>';
                 }
                   break;
@@ -262,7 +262,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 </form>
 
 <?
-$objPagina->getInstance()->fecharAreaDados();  
+$objPagina->getInstance()->fecharAreaDados();
 $objPagina->fecharBody();
 $objPagina->fecharHtml();
 ?>

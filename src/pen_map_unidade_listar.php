@@ -150,7 +150,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - Tramita.GOV.BR</th>'."\n";
       $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
       $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
       $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";
