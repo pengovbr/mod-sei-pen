@@ -1818,7 +1818,6 @@ class PenAtualizarSipRN extends InfraRN
 
     $objItemMenuDTO = $objBD->consultar($objItemMenuDTO);
 
-    var_dump($objItemMenuDTO);
     if (!empty($objItemMenuDTO)) {
       $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
       $objBD->alterar($objItemMenuDTO);
