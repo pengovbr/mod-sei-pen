@@ -278,7 +278,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3022();
         case '3.2.2':
             $this->instalarV3023();
-    
+        case '3.2.3':
+            $this->instalarV3024();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1797,6 +1798,33 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3023()
     {
       $this->atualizarNumeroVersao("3.2.3");
+  }
+
+  protected function instalarV3024()
+  {
+
+    $objBD = new ItemMenuBD(BancoSip::getInstance());
+
+    // Achar o root
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retTodos();
+
+    $objItemMenuDTO = $objBD->consultar($objItemMenuDTO);
+
+    var_dump($objItemMenuDTO);
+    if (!empty($objItemMenuDTO)) {
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objBD->alterar($objItemMenuDTO);
+    }
+
+    $this->atualizarNumeroVersao('3.2.3');
   }
 
 }
