@@ -10,8 +10,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_unidade_listar');
-define('PEN_RECURSO_BASE', 'pen_map_unidade');
+define('PEN_RECURSO_ATUAL', 'tra_map_unidade_listar');
+define('PEN_RECURSO_BASE', 'tra_map_unidade');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Unidade');
 define('PEN_PAGINA_GET_ID', 'id_unidade');
 

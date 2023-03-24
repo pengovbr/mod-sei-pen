@@ -70,7 +70,7 @@ try {
 //    PaginaSEI::getInstance()->abrirJavaScript();
 ?>
 <script>
-    var strUrl = '<?php print $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_pesquisar_unidades_administrativas_estrutura_pai_textual'));?>';
+    var strUrl = '<?php print $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=tra_pesquisar_unidades_administrativas_estrutura_pai_textual'));?>';
     var idRepositorioDeEstuturaSelecionado = null;
     var idUnidadeRaizSelecionada = null;
     var siglaUnidade = null;

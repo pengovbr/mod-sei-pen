@@ -50,7 +50,7 @@ class PenUnidadeRN extends InfraRN {
   protected function listarConectado(UnidadeDTO $objPenUnidadeDTO) {
     try {
         //Valida Permissao
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_unidade_listar', __METHOD__, $objUnidadeDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_unidade_listar', __METHOD__, $objUnidadeDTO);
         $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
         return $objPenUnidadeBD->listar($objPenUnidadeDTO);            
     }catch(Exception $e){

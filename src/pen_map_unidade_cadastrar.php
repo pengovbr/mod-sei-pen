@@ -8,8 +8,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_unidade_cadastrar');
-define('PEN_RECURSO_BASE', 'pen_map_unidade');
+define('PEN_RECURSO_ATUAL', 'tra_map_unidade_cadastrar');
+define('PEN_RECURSO_BASE', 'tra_map_unidade');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Unidades');
 define('PEN_PAGINA_GET_ID', 'id_unidade');
 
@@ -27,7 +27,7 @@ try {
     //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
     $objPenParametroRN = new PenParametroRN();
     $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
-    $strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
+    $strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=tra_unidade_auto_completar_expedir_procedimento');
 
     $bolSomenteLeitura = false;
 

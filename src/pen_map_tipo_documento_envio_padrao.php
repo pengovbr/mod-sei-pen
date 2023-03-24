@@ -32,7 +32,7 @@ try {
 
   switch($_GET['acao']){
 
-    case 'pen_map_tipo_documento_envio_padrao_atribuir':
+    case 'tra_map_tipo_documento_envio_padrao_atribuir':
       $strTitulo = 'Atribuir Espécie Documental Padrão para Envio';
       $arrComandos[] = '<button type="submit" accesskey="S" name="sbmSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
       $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\''.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao_origem']).'\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
@@ -49,7 +49,7 @@ try {
       }
     break;
 
-    case 'pen_map_tipo_documento_envio_padrao_consultar':
+    case 'tra_map_tipo_documento_envio_padrao_consultar':
       $strTitulo = 'Consultar Espécie Documental Padrão para Envio';
       $arrComandos[] = '<button type="button" accesskey="F" name="btnFechar" value="Fechar" onclick="location.href=\''.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao']).'#ID-'.$_GET['id_cidade'].'\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
     break;
@@ -86,9 +86,9 @@ PaginaSEI::getInstance()->abrirJavaScript();
 ?>
 function inicializar(){
 
-  if ('<?=$_GET['acao']?>'=='pen_map_tipo_documento_envio_padrao_atribuir'){
+  if ('<?=$_GET['acao']?>'=='tra_map_tipo_documento_envio_padrao_atribuir'){
     document.getElementById('selEspeciePadraoEnvio').focus();
-  } else if ('<?=$_GET['acao']?>'=='pen_map_tipo_documento_envio_padrao_consultar'){
+  } else if ('<?=$_GET['acao']?>'=='tra_map_tipo_documento_envio_padrao_consultar'){
     infraDesabilitarCamposAreaDados();
   }
 

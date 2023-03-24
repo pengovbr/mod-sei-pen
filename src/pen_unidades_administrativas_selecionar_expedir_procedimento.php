@@ -113,7 +113,7 @@ try {
             //Exibe o gif de loading somente do nivel de estrutura 2 acima
             if(paramNivelEstrutura != 1){ carregaLoading(nrDivPai); }
 
-            var strUrl = '<?php print $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_pesquisar_unidades_administrativas_estrutura_pai'));?>';
+            var strUrl = '<?php print $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=tra_pesquisar_unidades_administrativas_estrutura_pai'));?>';
 
             var objData = {};
             objData['idRepositorioEstruturaOrganizacional'] = idRepositorioDeEstuturaSelecionado;
@@ -249,7 +249,7 @@ try {
      **/
     function abrirTelaDePesquisaTextual()
     {
-        var url = '<?php echo $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=2'); ?>';
+        var url = '<?php echo $objSessaoSEI->assinarLink('controlador.php?acao=tra_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=2'); ?>';
         objJanelaPesquisaTextual = abrirJanela(url, 'Pesquisa Textual', 700, 500);
     }
 

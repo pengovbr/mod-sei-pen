@@ -14,7 +14,7 @@ try {
     $objPaginaSEI = PaginaSEI::getInstance();
 
     SessaoSEI::getInstance()->validarLink();
-    SessaoSEI::getInstance()->validarPermissao('pen_map_tipo_documento_recebimento_cadastrar');
+    SessaoSEI::getInstance()->validarPermissao('tra_map_tipo_documento_recebimento_cadastrar');
 
     $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
 
@@ -23,9 +23,9 @@ try {
     $bolSomenteLeitura = false;
 
   switch ($_GET['acao']) {
-    case 'pen_map_tipo_documento_recebimento_cadastrar':
+    case 'tra_map_tipo_documento_recebimento_cadastrar':
         $arrComandos[] = '<button type="submit" name="sbmCadastrarSerie" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-        $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+        $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=tra_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
         $bolDesativarCampos = false;
 
       if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
@@ -36,8 +36,8 @@ try {
       }
         break;
 
-    case 'pen_map_tipo_documento_recebimento_visualizar':
-        $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
+    case 'tra_map_tipo_documento_recebimento_visualizar':
+        $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=tra_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
         $bolSomenteLeitura = true;
         $strTitulo = 'Consultar Mapeamento Tipo de Documento para Recebimento';
         break;
@@ -69,7 +69,7 @@ try {
       $objPenRelTipoDocMapRecebidoRN->cadastrar($objPenRelTipoDocMapRecebidoDTO);
       $objPaginaSEI->adicionarMensagem('Salvo com sucesso', InfraPagina::$TIPO_MSG_INFORMACAO);
 
-      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem='.$_GET['acao']));
+      header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=tra_map_tipo_documento_recebimento_listar&acao_origem='.$_GET['acao']));
       exit(0);
   }
     // Ação por GET + ID esta carregando o formulário

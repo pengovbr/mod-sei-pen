@@ -29,7 +29,7 @@ try {
 
     switch ($_GET['acao']) {
 
-        case 'pen_unidade_sel_expedir_procedimento':
+        case 'tra_unidade_sel_expedir_procedimento':
             $strTitulo = 'Selecionar Unidade';
             break;
 

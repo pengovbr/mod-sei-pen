@@ -4,8 +4,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_recebimento_cadastrar');
-define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_recebimento');
+define('PEN_RECURSO_ATUAL', 'tra_map_hipotese_legal_recebimento_cadastrar');
+define('PEN_RECURSO_BASE', 'tra_map_hipotese_legal_recebimento');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Hipótese Legal para Recebimento');
 define('PEN_PAGINA_GET_ID', 'id_mapeamento');
 

@@ -10,8 +10,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_envio_listar');
-define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_envio');
+define('PEN_RECURSO_ATUAL', 'tra_map_hipotese_legal_envio_listar');
+define('PEN_RECURSO_BASE', 'tra_map_hipotese_legal_envio');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Hipóteses Legais para Envio');
 define('PEN_PAGINA_GET_ID', 'id_mapeamento');
 
@@ -174,11 +174,11 @@ try {
         $strResultado .= '<td align="center">';
 
         //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
-      if($objSessao->verificarPermissao('pen_map_hipotese_legal_envio_alterar')) {
+      if($objSessao->verificarPermissao(PEN_RECURSO_BASE.'_alterar')) {
         $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
 
-      if($objSessao->verificarPermissao('pen_map_hipotese_legal_envio_excluir')) {
+      if($objSessao->verificarPermissao(PEN_RECURSO_BASE.'_excluir')) {
           $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
       }
 

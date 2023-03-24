@@ -22,7 +22,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
   protected function listarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
     {
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_listar', __METHOD__, $parObjPenRelTipoDocMapEnviadoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_tipo_documento_envio_listar', __METHOD__, $parObjPenRelTipoDocMapEnviadoDTO);
         $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
         return $objPenRelTipoDocMapEnviadoBD->listar($parObjPenRelTipoDocMapEnviadoDTO);
     }catch(Exception $e){
@@ -74,7 +74,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
     if($objParamDTO->isSetDblIdMap()) {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_alterar', __METHOD__, $objParamDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_tipo_documento_envio_alterar', __METHOD__, $objParamDTO);
         $objDTO = new PenRelTipoDocMapEnviadoDTO();
         $objDTO->setDblIdMap($objParamDTO->getDblIdMap());
         $objDTO->retTodos();
@@ -90,7 +90,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objBD->alterar($objDTO);
     }
     else {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_cadastrar', __METHOD__, $objParamDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_tipo_documento_envio_cadastrar', __METHOD__, $objParamDTO);
         $objDTO = new PenRelTipoDocMapEnviadoDTO();
         $objDTO->setNumCodigoEspecie($objParamDTO->getNumCodigoEspecie());
         $objDTO->setNumIdSerie($objParamDTO->getNumIdSerie());
@@ -107,7 +107,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
   protected function excluirControlado($parArrObjPenRelTipoDocMapEnviadoDTO)
     {
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_excluir', __METHOD__, $parArrObjPenRelTipoDocMapEnviadoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_tipo_documento_envio_excluir', __METHOD__, $parArrObjPenRelTipoDocMapEnviadoDTO);
         $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
 
       foreach ($parArrObjPenRelTipoDocMapEnviadoDTO as $IdMap) {
@@ -260,7 +260,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
   protected function atribuirEspeciePadraoControlado($parNumEspeciePadrao)
     {
     try{
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_padrao_atribuir', __METHOD__, $parNumEspeciePadrao);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_tipo_documento_envio_padrao_atribuir', __METHOD__, $parNumEspeciePadrao);
         $objPenParametroRN = new PenParametroRN();
         $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
     }catch(Exception $e){

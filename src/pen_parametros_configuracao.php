@@ -7,7 +7,7 @@ try {
 
     session_start();
 
-    define('PEN_RECURSO_ATUAL', 'pen_parametros_configuracao');
+    define('PEN_RECURSO_ATUAL', 'tra_parametros_configuracao');
     define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo Tramita.GOV.BR');
 
     $objPagina = PaginaSEI::getInstance();
@@ -17,7 +17,7 @@ try {
     $o = new PenRelHipoteseLegalEnvioRN();
     $os = new PenRelHipoteseLegalRecebidoRN();
 
-    $objSessao->validarPermissao('pen_parametros_configuracao');
+    $objSessao->validarPermissao('tra_parametros_configuracao');
 
     $objPenParametroDTO = new PenParametroDTO();
     $objPenParametroDTO->retTodos();
@@ -68,7 +68,7 @@ try {
     }
 
     switch ($_GET['acao']) {
-        case 'pen_parametros_configuracao_salvar':
+        case 'tra_parametros_configuracao_salvar':
             try {
                 $objPenParametroRN = new PenParametroRN();
 
@@ -90,7 +90,7 @@ try {
             header('Location: ' . $objSessao->assinarLink('controlador.php?acao=' . $_GET['acao_origem'] . '&acao_origem=' . $_GET['acao']));
             die;
 
-        case 'pen_parametros_configuracao':
+        case 'tra_parametros_configuracao':
             $strTitulo = 'Parâmetros de Configuração do Módulo Tramita.GOV.BR';
             break;
 
@@ -103,10 +103,10 @@ try {
 }
 
 //Monta os botões do topo
-if ($objSessao->verificarPermissao('pen_parametros_configuracao_alterar')) {
+if ($objSessao->verificarPermissao('tra_parametros_configuracao_alterar')) {
     $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
 }
-$arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+$arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=tra_parametros_configuracao&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
 $objPagina->montarDocType();
 $objPagina->abrirHtml();
@@ -145,7 +145,7 @@ $objPagina->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= $_GET['acao'] ?>'=='pen_parametros_configuracao_selecionar'){
+    if ('<?= $_GET['acao'] ?>'=='tra_parametros_configuracao_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{

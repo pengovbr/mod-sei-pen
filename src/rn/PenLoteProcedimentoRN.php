@@ -15,7 +15,7 @@ class PenLoteProcedimentoRN extends InfraRN {
   protected function cadastrarLoteProcedimentoControlado(PenLoteProcedimentoDTO $objPenLoteProcedimentoDTO){
 
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
         $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
         return $objPenLoteProcedimentoBD->cadastrar($objPenLoteProcedimentoDTO);
     }
@@ -28,7 +28,7 @@ class PenLoteProcedimentoRN extends InfraRN {
     {
     try {
         //Valida Permissão
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
             
         $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
         $objPenLoteProcedimentoBD->alterar($objPenLoteProcedimentoDTO);
@@ -44,7 +44,7 @@ class PenLoteProcedimentoRN extends InfraRN {
 
     try {
         //Valida Permissão
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
 
         $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
         $objPenLoteProcedimento = $objPenLoteProcedimentoBD->consultar($objPenLoteProcedimentoDTO);
@@ -62,7 +62,7 @@ class PenLoteProcedimentoRN extends InfraRN {
 
     try {
         //Valida Permissão
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
 
         $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
         $arrObjPenLoteProcedimento = $objPenLoteProcedimentoBD->listar($objPenLoteProcedimentoDTO);          
@@ -80,7 +80,7 @@ class PenLoteProcedimentoRN extends InfraRN {
     try {
 
         //Valida PermissãoTipo
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
 
         //Obter todos os processos pendentes antes de iniciar o monitoramento
         $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();

@@ -23,7 +23,7 @@ $strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['a
 
 try {
     $objSessaoSEI->validarLink();
-    $objSessaoSEI->validarPermissao('pen_map_tipo_documento_envio_listar');
+    $objSessaoSEI->validarPermissao('tra_map_tipo_documento_envio_listar');
 
     $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
 
@@ -32,7 +32,7 @@ try {
   if(array_key_exists('acao', $_GET)) {
       $arrParam = array_merge($_GET, $_POST);
     switch($_GET['acao']) {
-      case 'pen_map_tipo_documento_envio_excluir':
+      case 'tra_map_tipo_documento_envio_excluir':
         if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
             $objPenRelTipoDocMapEnviadoRN->excluir(explode(',', $arrParam['hdnInfraItensSelecionados']));
             $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
@@ -44,7 +44,7 @@ try {
         }
           break;
 
-      case 'pen_map_tipo_documento_envio_listar':
+      case 'tra_map_tipo_documento_envio_listar':
           // Ação padrão desta tela
           break;
 
@@ -58,15 +58,15 @@ try {
     $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Envio';
 
     $strBotaoEspeciePadrao = "";
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_consultar')){
-      $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do Tramita.GOV.BR" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
+  if(SessaoSEI::getInstance()->verificarPermissao('tra_map_tipo_documento_envio_padrao_consultar')){
+      $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do Tramita.GOV.BR" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
   }
 
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_atribuir')){
+  if(SessaoSEI::getInstance()->verificarPermissao('tra_map_tipo_documento_envio_padrao_atribuir')){
       $bolPadraoNaoAtribuido = empty((new PenParametroRN())->getParametro( "PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
       $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
       $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de espécie documental padrão para envio de processos" : "";
-      $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
+      $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
   }
 
     $arrComandos = array();
@@ -126,14 +126,14 @@ try {
         $strResultado .= '<td>'.$objPenRelTipoDocMapEnviadoDTO->getStrNomeEspecie().'</td>';
         $strResultado .= '<td align="center">';
 
-      if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_visualizar')) {
-        $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") . '  title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+      if($objSessaoSEI->verificarPermissao('tra_map_tipo_documento_envio_visualizar')) {
+        $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") . '  title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
       }
-      if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_alterar')) {
-          $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+      if($objSessaoSEI->verificarPermissao('tra_map_tipo_documento_envio_alterar')) {
+          $strResultado .= '<a href="'.$objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_mapeamento='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
-      if($objSessaoSEI->verificarPermissao('pen_map_tipo_documento_envio_excluir')) {
-          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+      if($objSessaoSEI->verificarPermissao('tra_map_tipo_documento_envio_excluir')) {
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenRelTipoDocMapEnviadoDTO->getDblIdMap()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
       }
 
         $strResultado .= '</td>';
@@ -217,7 +217,7 @@ function onCLickLinkDelete(url, link) {
 }
 
 function onClickBtnNovo(){
-    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
 }
 
 function onClickBtnExcluir(){
@@ -228,7 +228,7 @@ function onClickBtnExcluir(){
         if(len > 0){
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
                 var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
+                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=tra_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=tra_map_tipo_documento_envio_listar'); ?>');
                 form.submit();
             }
         }
