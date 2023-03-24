@@ -45,8 +45,8 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.
                 //
                 // Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
-                // Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
-                "LocalizacaoCertificado" => "/opt/sei/config/mod-pen/certificado.pem",
+                // Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/certificado.pem
+                "LocalizacaoCertificado" => "/opt/sei/config/mod-tramitagovbr/certificado.pem",
 
                 // Senha do certificado digital necessário para a aplicação descriptografar e acessar a sua chave privada
                 "SenhaCertificado" => "",

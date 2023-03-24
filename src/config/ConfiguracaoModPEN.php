@@ -50,8 +50,8 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN
                 // e assinar os recibos de envio/conclusão dos trâmites de processo
                 // Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
-                //  Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
-                "LocalizacaoCertificado" => "/opt/sei/config/mod-pen/certificado.pem",
+                //  Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/certificado.pem
+                "LocalizacaoCertificado" => "/opt/sei/config/mod-tramitagovbr/certificado.pem",
 
                 // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
                 "SenhaCertificado" => "1234",

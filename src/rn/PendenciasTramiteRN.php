@@ -14,7 +14,7 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
     const COMANDO_EXECUCAO_WORKER = '%s %s %s %s %s %s %s %s > %s 2>&1 &';
-    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php";
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
 

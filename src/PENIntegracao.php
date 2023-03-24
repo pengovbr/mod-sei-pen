@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.2.3");
+define("VERSAO_MODULO_PEN", "3.3.0");
 
 
 class PENIntegracao extends SeiIntegracao
@@ -42,7 +42,7 @@ class PENIntegracao extends SeiIntegracao
   public function inicializar($strVersaoSEI)
     {
       define('DIR_SEI_WEB', realpath(DIR_SEI_CONFIG.'/../web'));
-      require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+      require_once DIR_SEI_CONFIG . '/mod-tramitagovbr/ConfiguracaoModPEN.php';
   }
 
   public function montarBotaoControleProcessos() {
