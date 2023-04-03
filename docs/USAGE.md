@@ -6,12 +6,12 @@ A utilização deste módulo adicionará novas funcionalidades ao SEI, permitind
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o Barramento de Serviços e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
+Para maiores informações sobre o Tramita.GOV.BR e o PEN, acesse http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento.
 
 
 ## Manual de Utilização
 
-Esta seção tem por objetivo demonstrar as funcionalidades que são disponibilizadas pelo módulo de integração do SEI com o Barramento de Serviços do PEN e também as configurações que devem ser realizadas no próprio SEI para o correto funcionamento.
+Esta seção tem por objetivo demonstrar as funcionalidades que são disponibilizadas pelo módulo de integração do SEI com o Tramita.GOV.BR e também as configurações que devem ser realizadas no próprio SEI para o correto funcionamento.
 
 ### Informações Obrigatórias para Envio Externo de Processo
 
@@ -47,7 +47,7 @@ O cadastro da estrutura organizacional é feito previamente no Portal de Adminis
 Para maiores informações sobre o Comitê Gestor de Protocolo, consulte o [manual específico](http://processoeletronico.gov.br/images/documentacao/Manual_do_Barramento_PEN_GESTOR7rdz.pdf). 
 Todos os detalhes do procedimento de adeção também podem ser encontrados na seção "Como Aderir" no site do Processo Eletrônico Nacional. Link: http://processoeletronico.gov.br/index.php/assuntos/produtos/barramento/como-aderir-barramento
 
-O Barramento de Serviços do PEN permite a participação de órgãos e entidades de outros poderes e esferas administrativas, sendo no Poder Executivo Federal o uso obrigatório do SIORG, conforme parágrafo único do Art. 25, do [Decreto nº 6.944, de 21 de agosto de 2009](http://www.planalto.gov.br/ccivil_03/_Ato2007-2010/2009/Decreto/D6944.htm).   
+O Tramita.GOV.BR permite a participação de órgãos e entidades de outros poderes e esferas administrativas, sendo no Poder Executivo Federal o uso obrigatório do SIORG, conforme parágrafo único do Art. 25, do [Decreto nº 6.944, de 21 de agosto de 2009](http://www.planalto.gov.br/ccivil_03/_Ato2007-2010/2009/Decreto/D6944.htm).   
 
 Ao selecionar o repositório de estruturas desejado, é necessário digital o nome da unidade administrativa receptora do processo. Dinamicamente, sugere-se o nome da unidade, baseado na configuração feita no Portal de Administração do PEN. **As unidades disponíveis para envio externo dependem da configuração realizada por cada Comitê Gestor de Protocolo dos órgãos e entidades.**
 
@@ -68,7 +68,7 @@ Uma vez que o processo tenha sido recebido com sucesso pelo PEN, a seguinte mens
 
 ### Informações Registradas nos Andamentos do Processo (Histórico)
 
-O Barramento de Serviços do PEN atua como uma **terceiro confiável** no trâmite do processo administrativo. Em um primeiro momento, o módulo do SEI faz uma série de validações de informações constantes do processo a ser enviado. Uma vez validadas estas informações, a operação de envio é registrada no andamento do processo. **Mas isso ainda não reflete o sucesso no trâmite de fato**, pois a unidade receptora também faz uma série de validações como, por exemplo, os tamanhos de documentos que tem capacidade de receber, as espécies documentais, hipóteses legais, dentre outras. Uma vez validados, na origem, os requisitos para envio externo,** registra-se no andamento do processo a operação de envio** por meio do Barramento, conforme o seguinte exemplo:
+O Tramita.GOV.BR atua como uma **terceiro confiável** no trâmite do processo administrativo. Em um primeiro momento, o módulo do SEI faz uma série de validações de informações constantes do processo a ser enviado. Uma vez validadas estas informações, a operação de envio é registrada no andamento do processo. **Mas isso ainda não reflete o sucesso no trâmite de fato**, pois a unidade receptora também faz uma série de validações como, por exemplo, os tamanhos de documentos que tem capacidade de receber, as espécies documentais, hipóteses legais, dentre outras. Uma vez validados, na origem, os requisitos para envio externo,** registra-se no andamento do processo a operação de envio** por meio do Barramento, conforme o seguinte exemplo:
 
 ![Tela de Histórico do Processo - Processo em Envio Externo](imagens/historico_origem_envio_externo.png)
 
@@ -76,7 +76,7 @@ Enquanto a unidade receptora não confirma o recebimento, o SEI passa a indicar 
 
 ![Tela de Controle de Processos - Processo em Envio Externo](imagens/processo_em_tramitacao.png)
 
-O SEI, ao receber o aviso do Barramento de Serviços do PEN de que a unidade receptora validou as informações e recebeu o processo, faz o registro no andamento, indicando o sucesso no trâmite, e o **processo passa a indicar que não possui mais andamentos abertos**.
+O SEI, ao receber o aviso do Tramita.GOV.BR de que a unidade receptora validou as informações e recebeu o processo, faz o registro no andamento, indicando o sucesso no trâmite, e o **processo passa a indicar que não possui mais andamentos abertos**.
 
 ![Tela de Controle de Processos - Processo sem Andamentos Abertos](imagens/processo_bloqueado_envio_externo.png)
 
@@ -86,30 +86,30 @@ Abaixo, mensagem registrada no histórico, indicando a confirmação do envio ex
 
 Ainda é possível reabrir o processo na unidade, quando do envio externo ocorrido com sucesso, para que se consulte as informações do processo, caso assim deseje a unidade de origem. Mesmo nesse caso, **apenas a unidade que recebeu o processo** via PEN pode realizar a instrução processual, ou seja, efetuar modificações no processo administrativo.
 
-No caso de recebimento de processos por meio do Barramento de Serviços do PEN, o processo aparece na área de trabalho da mesma forma que fosse recebido de um trâmite interno (com fonte em vermelho). É importante frisar que, como regra, os processos serão direcionados às unidades receptoras. Caso não haja unidade receptora para determinada unidade visível no PEN, o processo é remetido diretamente à unidade destinatária visível para trâmite. A configuração das unidades visíveis para trâmite e das unidades receptoras ficarão a cargo do Comitê Gestor de cada órgão ou unidade.
+No caso de recebimento de processos por meio do Tramita.GOV.BR, o processo aparece na área de trabalho da mesma forma que fosse recebido de um trâmite interno (com fonte em vermelho). É importante frisar que, como regra, os processos serão direcionados às unidades receptoras. Caso não haja unidade receptora para determinada unidade visível no PEN, o processo é remetido diretamente à unidade destinatária visível para trâmite. A configuração das unidades visíveis para trâmite e das unidades receptoras ficarão a cargo do Comitê Gestor de cada órgão ou unidade.
 
 A operação de recebimento de processo por meio de envio externo também é registrada na unidade destinatária, conforme nota-se na imagem:
 
 ![Tela de Histórico do Processo - Informações na Unidade/Órgão Destinatários](imagens/recebimento_destinatario_historico.png)
 
-No exemplo acima, a unidade EXTERNO é a unidade cadastrada no passo 15 deste manual. Ou seja, a unidade EXTERNO recebeu o processo do Barramento de Serviços do PEN, realizou o download dos documentos a partir do Barramento e encaminhou o processo para a devida unidade, de forma automática.
+No exemplo acima, a unidade EXTERNO é a unidade cadastrada no passo 15 deste manual. Ou seja, a unidade EXTERNO recebeu o processo do Tramita.GOV.BR, realizou o download dos documentos a partir do Barramento e encaminhou o processo para a devida unidade, de forma automática.
 
 A unidade destinatária pode fazer a instrução processual normalmente, inclusive fazendo a devolução do processo para a unidade originária. Neste caso, o PEN consegue reconhecer os documentos que a unidade receptora já possui, realizando, assim, o **trâmite apenas daqueles documentos necessários para a unidade de origem**. 
  
 ### Consulta de Recibos
 
-O PEN disponibiliza recibos a respeito das operações realizadas. Os casos de disponibilização de recibos são o de envio para o Barramento de Serviços do PEN, disponibilizado ao remetente, e de conclusão de trâmite (disponibilizado para o remetente e o destinatário, para indicar que o destinatário recebeu com sucesso todos os documentos e processos).
+O PEN disponibiliza recibos a respeito das operações realizadas. Os casos de disponibilização de recibos são o de envio para o Tramita.GOV.BR, disponibilizado ao remetente, e de conclusão de trâmite (disponibilizado para o remetente e o destinatário, para indicar que o destinatário recebeu com sucesso todos os documentos e processos).
 
 Para consultar os recibos gerados, deve-se acessar o ícone correspondente, na barra de controle de processos, conforme imagem seguinte:
 
 ![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/icone_consulta_recibos.png)
 
 Para o remetente, disponibilizam-se os recibos de envio e de conclusão de trâmite, conforme imagens seguintes.
-O recibo de envio indica que o Barramento de Serviços do PEN recebeu com sucesso os documentos e processos de forma íntegra.
+O recibo de envio indica que o Tramita.GOV.BR recebeu com sucesso os documentos e processos de forma íntegra.
 
 ![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_envio.png)
 
-O recibo de trâmite indica que o Barramento de Serviços do PEN conseguiu entregar com sucesso os documentos e processos de forma íntegra ao destinatário.
+O recibo de trâmite indica que o Tramita.GOV.BR conseguiu entregar com sucesso os documentos e processos de forma íntegra ao destinatário.
 
 ![Tela de Controle do Processo - Ícone de Consulta de Recibos](imagens/recibo_confirmacao_tramite.png)
 

@@ -1,6 +1,6 @@
 # Manual de Atualização do Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-O objetivo deste documento é descrever os procedimento para ATUALIZAÇÃO do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-pen**) previamente instalado e configurado no Sistema Eletrônico de Informações (SEI).
+O objetivo deste documento é descrever os procedimento para ATUALIZAÇÃO do Módulo de Integração com o Tramita.GOV.BR (**mod-sei-pen**) previamente instalado e configurado no Sistema Eletrônico de Informações (SEI).
 
 **ATENÇÃO: Caso esta seja a primeira instalação do módulo no SEI, veja as instruções detalhadas de instalação no documento INSTALACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
 
@@ -143,7 +143,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN:
     - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen
-    - Conexão com o Barramento de Serviços do PEN realizada com sucesso
+    - Conexão com o Tramita.GOV.BR realizada com sucesso
     - Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso
 
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
@@ -201,7 +201,7 @@ rm <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/bin/verificar-servicos.sh
 
 ### 1.2.3. Desativar as configurações do SUPERVISOR e GEARMAN correspondente a versões anteriores
 
-A versão 2.0.0 do **mod-sei-pen** fez uma reestruturação completa dos mecanismos de processamento de tarefas provenientes do Barramento de Serviços do PEN, mudança esta que fez o uso do SUPERVISOR e GEARMAN se tornarem opcional. 
+A versão 2.0.0 do **mod-sei-pen** fez uma reestruturação completa dos mecanismos de processamento de tarefas provenientes do Tramita.GOV.BR, mudança esta que fez o uso do SUPERVISOR e GEARMAN se tornarem opcional. 
 
 Mesmo mantendo a utilização destes componentes, as mudanças aplicadas nesta versão modificaram os seus arquivos de configuração, sendo necessário desligar tais serviços e remover as configurações anteriores, conforme demonstrado abaixo:
 
@@ -280,14 +280,14 @@ cp ConfiguracaoModPEN.exemplo.php ConfiguracaoModPEN.php
 Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
 
 * **WebService**  
-Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
+Endereço do Web Service principal de integração com o Tramita.GOV.BR. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/ (novo - quem usa SEI já pode apontar pra cá. Quem usa rest é importante testar antes em homologação)
 
 
 * **LocalizacaoCertificado**  
-Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
+Localização completa do certificado digital utilizado para autenticação nos serviços do Tramita.GOV.BR. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
 Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
 ```
 Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
@@ -313,8 +313,8 @@ Quantidade de tentativas de requisição dos serviços do Barramento PEN antes q
 Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *Valor padrão: 3*
 
 * **WebServicePendencias** _(opcional)_  
-Endereço do Webservice de monitoramente de pendências de trâmite no Barramento de Serviços do PEN.
-Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Barramento de Serviços do PEN.  
+Endereço do Webservice de monitoramente de pendências de trâmite no Tramita.GOV.BR.
+Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Tramita.GOV.BR.  
 Para maiores informações sobre como utilizar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações.  
 Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
@@ -374,7 +374,7 @@ supervisorctl reload
 
 A partir da versão SEI 3.1.x, o agendamento de tarefas do sistema pode ser executado em uma periodicidade de minutos, o que não era possível em versões anteriores (SEI 3.0.X). 
 
-Com esta melhoria no SEI, o módulo mod-sei-pen 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Barramento de Serviços do PEN, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
+Com esta melhoria no SEI, o módulo mod-sei-pen 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Tramita.GOV.BR, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
 
 Para que o módulo possa funcionar corretamente com o agendamento de tarefas do SEI, é necessário revisar a configuração do serviço CRON do sistema para certificar que ele se encontra corretamente configurado para ser executado a cada minuto. Ou seja, seguindo o manual de instalação do SEI 3.1.X, a configuração do serviço CRON nos servidores responsáveis pela execução dos agendamentos do SEI deve estar semelhante ao mostrado abaixo:
 
@@ -422,7 +422,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN:
     - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen
-    - Conexão com o Barramento de Serviços do PEN realizada com sucesso
+    - Conexão com o Tramita.GOV.BR realizada com sucesso
     - Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso
 
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
@@ -433,7 +433,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN:
 
 ## 2. CONFIGURAÇÕES
 
-Esta seção descreve os passos de configuração adicionais presentes na nova versão do módulo de Integração do SEI com o Barramento de Serviços do PEN. Todos os itens descritos nesta seção são destinados aos administradores do sistema SEI da instituição, responsáveis pela alteração de configurações gerais do sistema através do menu de administração do SEI (**SEI >> Administração >> Processo Eletrônico Nacional**)
+Esta seção descreve os passos de configuração adicionais presentes na nova versão do módulo de Integração do SEI com o Tramita.GOV.BR. Todos os itens descritos nesta seção são destinados aos administradores do sistema SEI da instituição, responsáveis pela alteração de configurações gerais do sistema através do menu de administração do SEI (**SEI >> Administração >> Processo Eletrônico Nacional**)
 
 
 ### 2.1. Atribuição de Espécie Documental Padrão para Envio
@@ -461,7 +461,7 @@ As demais configurações do **mod-sei-pen** podem ser encontradas nas seções 
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
 * **Configurações Técnicas Adicionais**: 
-Esta seção apresenta algumas configurações adicionais do módulo do Barramento de Serviços do PEN que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
+Esta seção apresenta algumas configurações adicionais do módulo do Tramita.GOV.BR que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
 
 ---
 ---
