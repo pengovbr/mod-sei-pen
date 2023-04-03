@@ -2,15 +2,15 @@ version: '2'
 
 services:
 
-### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
+  ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
-      image: processoeletronico/vagrant_sei4_mailcatcher:${ENVIRONMENT_VERSION}
-      container_name: smtp
-      ports:
-        - "1080:1080"
+    image: processoeletronico/vagrant_super4_mailcatcher:${ENVIRONMENT_VERSION}
+    container_name: smtp
+    ports:
+      - "1080:1080"
 
   memcached:
-    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
     container_name: memcached
     ports:
       - "11211:11211"
@@ -41,9 +41,9 @@ services:
       - /tmp:/tmp
 
   php-test-functional:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: php-test-functional
-    depends_on: 
+    depends_on:
       - org1-database
       - org2-database
       - selenium
@@ -51,13 +51,13 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/config:/opt/sei/config/mod-pen      
+      - ./assets/config:/opt/sei/config/mod-pen
       - .:/tests
       - /tmp:/tmp
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
-      - XDEBUG_MODE=debug 
+      - XDEBUG_MODE=debug
       - CONTEXTO_ORGAO_A_DB_SEI_DSN=${CONTEXTO_ORGAO_A_DB_SEI_DSN}
       - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
@@ -69,14 +69,14 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    links:   
+    links:
       - org1-database:${ORG1_DATABASE_HOST}
       - org2-database:${ORG1_DATABASE_HOST}
       - selenium:selenium
-    command: "true"  
-    
+    command: "true"
+
   php-test-unit:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: php-test-unit
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
@@ -84,13 +84,13 @@ services:
       - ${SEI_PATH}/infra:/opt/infra
       - ./assets/config:/opt/sei/config/mod-pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
-      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro      
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - ../unitario:/tests
       - ../../src:/opt/sei/web/modulos/pen
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
-      - XDEBUG_MODE=debug 
+      - XDEBUG_MODE=debug
       - CONTEXTO_ORGAO_A_DB_SEI_DSN=${CONTEXTO_ORGAO_A_DB_SEI_DSN}
       - CONTEXTO_ORGAO_B_DB_SEI_DSN=${CONTEXTO_ORGAO_B_DB_SEI_DSN}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
@@ -102,9 +102,9 @@ services:
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    command: "true"  
+    command: "true"
 
-### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
+  ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
@@ -114,18 +114,18 @@ services:
       MYSQL_ROOT_PASSWORD: P@ssword
     ports:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
-      
+
   org1-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: org1-http
     restart: always
-    depends_on: 
+    depends_on:
       - org1-database
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/cron.d:/etc/cron.d
       - ./assets/config:/opt/sei/config/mod-pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
@@ -154,7 +154,7 @@ services:
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
       - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
       - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
-      
+
       - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
@@ -165,12 +165,11 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - memcached:memcached    
-      - smtp:smtp      
+      - memcached:memcached
+      - smtp:smtp
       - org1-database:${ORG1_DATABASE_HOST}
 
-
-### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
+  ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
@@ -180,18 +179,18 @@ services:
       MYSQL_ROOT_PASSWORD: P@ssword
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
-    
+
   org2-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: org2-http
     restart: always
-    depends_on: 
+    depends_on:
       - org2-database
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/cron.d:/etc/cron.d
       - ./assets/config:/opt/sei/config/mod-pen
       - ../../src/scripts:/opt/sei/scripts/mod-pen
       - ../../src/scripts:/opt/sip/scripts/mod-pen
@@ -220,7 +219,7 @@ services:
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
       - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
       - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
-      
+
       - SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
@@ -231,6 +230,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - memcached:memcached    
-      - smtp:smtp      
+      - memcached:memcached
+      - smtp:smtp
       - org2-database:${ORG2_DATABASE_HOST}
