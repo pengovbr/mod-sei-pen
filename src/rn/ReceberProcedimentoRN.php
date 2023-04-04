@@ -1333,30 +1333,68 @@ class ReceberProcedimentoRN extends InfraRN
       return $objTipoProcedimentoDTO;
   }
 
-  private function obterTipoProcessoPorNome($strNomeTipoProcesso){
+  /**
+   * Busca tipo de processo pelo nome, considerando as configurações de restrição de uso para a unidade atual
+   * 
+   * Esta informação é utilizada para se criar um processo do mesmo tipo daquele enviado pelo órgão de origem, utilizando
+   * o nome do processo de negócio para fazer a devida correspondência de tipos. 
+   * 
+   * Também é verificado se o tipo de processo localizado possui restrições de criação para a unidade atual. Caso exista, 
+   * o tipo de processo padrão configurado no módulo deverá ser utilizado.
+   *
+   * @param str $strNomeTipoProcesso
+   * @return TipoProcedimentoDTO
+   */
+  private function obterTipoProcessoPeloNomeOrgaoUnidade($strNomeTipoProcesso, $numIdOrgao, $numIdUnidade){
 
     if(empty($strNomeTipoProcesso)){
         throw new InfraException('Parâmetro $strNomeTipoProcesso não informado.');
     }
 
-      $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
-      $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
-      $objTipoProcedimentoDTO->retStrNome();
+    $objTipoProcedimentoDTOFiltro = new TipoProcedimentoDTO();
+    $objTipoProcedimentoDTOFiltro->retNumIdTipoProcedimento();
+    $objTipoProcedimentoDTOFiltro->retStrNome();
+    $objTipoProcedimentoDTOFiltro->setStrNome($strNomeTipoProcesso);
 
-      // $strNomeTipoProcesso = mb_strtoupper($strNomeTipoProcesso, mb_internal_encoding());
-      $objTipoProcedimentoDTO->setStrNome($strNomeTipoProcesso);
+    $objTipoProcedimentoRN = new TipoProcedimentoRN();
+    $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTOFiltro);
 
-      $objTipoProcedimentoRN = new TipoProcedimentoRN();
-      $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
+    // Verifica se tipo de procedimento possui restrições para utilização no órgão e unidade atual
+    if(!is_null($objTipoProcedimentoDTO)){
+      $strCache = 'SEI_TPR_'.$objTipoProcedimentoDTO->getNumIdTipoProcedimento();
+      $arrCache = CacheSEI::getInstance()->getAtributo($strCache);
+      if ($arrCache == null) {
+        $objTipoProcedRestricaoDTOFiltro = new TipoProcedRestricaoDTO();
+        $objTipoProcedRestricaoDTOFiltro->retNumIdOrgao();
+        $objTipoProcedRestricaoDTOFiltro->retNumIdUnidade();
+        $objTipoProcedRestricaoDTOFiltro->setNumIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
+  
+        $objTipoProcedRestricaoRN = new TipoProcedRestricaoRN();
+        $arrObjTipoProcedRestricaoDTO = $objTipoProcedRestricaoRN->listar($objTipoProcedRestricaoDTOFiltro);
+  
+        $arrCache = array();
+        foreach ($arrObjTipoProcedRestricaoDTO as $objTipoProcedRestricaoDTO) {
+          $arrCache[$objTipoProcedRestricaoDTO->getNumIdOrgao()][($objTipoProcedRestricaoDTO->getNumIdUnidade() == null ? '*' : $objTipoProcedRestricaoDTO->getNumIdUnidade())] = 0;
+        }
+        CacheSEI::getInstance()->setAtributo($strCache, $arrCache, CacheSEI::getInstance()->getNumTempo());
+      }
+        
+      if (InfraArray::contar($arrCache) && !isset($arrCache[$numIdUnidade]['*']) && !isset($arrCache[$numIdOrgao][$numIdUnidade])){
+        return null;
+      }  
+    }
 
-      return $objTipoProcedimentoDTO;
-
+    return $objTipoProcedimentoDTO;
   }
 
   private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
     {
     if(!empty(trim($strProcessoNegocio))){
-        $objTipoProcedimentoDTO = $this->obterTipoProcessoPorNome($strProcessoNegocio);
+        $objTipoProcedimentoDTO = $this->obterTipoProcessoPeloNomeOrgaoUnidade(
+          $strProcessoNegocio, 
+          SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(), 
+          SessaoSEI::getInstance()->getNumIdUnidadeAtual()
+        );
     }
 
     if(is_null($objTipoProcedimentoDTO)){
