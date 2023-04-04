@@ -36,10 +36,10 @@
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="125019" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Unidade de Desenvolvimento ORG1" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Unidade de Teste ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="125021" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Unidade de Desenvolvimento ORG1.1" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Unidade de Teste ORG1.1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
@@ -72,7 +72,7 @@
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="125020" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Unidade de Desenvolvimento ORG2" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Unidade de Teste ORG2" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />
