@@ -8,10 +8,15 @@ services:
     ports:
       - "1080:1080"
 
-  memcached:
-    image: guilhermeadc/sei3_memcached:7.2
+  org1-memcached:
+    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
     ports:
-      - "11211:11211"
+      - "11211"
+
+  org2-memcached:
+    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
+    ports:
+      - "11211"
 
   proxy:
     image: diouxx/apache-proxy
@@ -106,7 +111,7 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - memcached:memcached
+      - org1-memcached:memcached
       - smtp:smtp
       - org1-database:${ORG1_DATABASE_NAME}
 
@@ -143,6 +148,6 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - memcached:memcached
+      - org2-memcached:memcached
       - smtp:smtp
       - org2-database:${ORG2_DATABASE_NAME}

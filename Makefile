@@ -170,7 +170,7 @@ down:
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: $(FILE_VENDOR_FUNCIONAL)
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml  /tests/tests/$(addsuffix .php,$(teste))
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
 
 test-functional-parallel: $(FILE_VENDOR_FUNCIONAL)
