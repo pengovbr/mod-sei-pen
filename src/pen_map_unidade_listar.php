@@ -99,6 +99,8 @@ try {
     $objPenUnidadeDTOFiltro->retStrDescricao();
     $objPenUnidadeDTOFiltro->retNumIdUnidade();
     $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
+    $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
+    $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
 
     //--------------------------------------------------------------------------
     // Filtragem
@@ -144,16 +146,25 @@ try {
 
       $strResultado = '';
 
-      $strResultado .= '<table width="99%" class="infraTable">'."\n";
+      $strResultado .= '<table width="99%" class="infraTable" border="1">'."\n";
       $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
 
       $strResultado .= '<tr>';
-      $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";
+      $strResultado .= '<th class="infraTh"></th>';
+      $strResultado .= '<th class="infraTh" colspan="3">SEI</th>';
+      $strResultado .= '<th class="infraTh" colspan="3">Tramita.GOV.BR</th>';
+      $strResultado .= '<th class="infraTh"></th>';
+      $strResultado .= '</tr>';
+
+      $strResultado .= '<tr>';
+      $strResultado .= '<th class="infraTh" id="thCheck" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thIdUnidadeSei" width="2%">ID</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thSiglaUnidadeSei" width="3%">Sigla</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thDescricaoUnidadeSei" width="30%">Descrição</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thIdUnidadeTramitaGovBr" width="1%">ID</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thSiglaUnidadeTramitaGovBr" width="10%">Sigla</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thDescricaoUnidadeTramitaGovBr" width="30%">Descrição</th>'."\n";
+      $strResultado .= '<th class="infraTh" id="thAcoes" width="9%">Ações</th>'."\n";
       $strResultado .= '</tr>'."\n";
       $strCssTr = '';
 
@@ -165,9 +176,11 @@ try {
         $strResultado .= '<tr class="'.$strCssTr.'">';
         $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
-        $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
+        $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
+        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSiglaUnidadeRH().'</td>';
+        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrNomeUnidadeRH().'</td>';
         $strResultado .= '<td align="center">';
 
         //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
@@ -211,7 +224,14 @@ $objPagina->montarStyle();
 
 #lblDescricaoUnidade{position:absolute;left:30%;top:0%;width:25%; }
 #txtDescricaoUnidade{position:absolute;left:30%;top:50%;width:25%;}
-
+#thCheck{min-width:1%;max-width:1%;}
+#thIdUnidadeSei{min-width:2%;max-width:2%;}
+#thSiglaUnidadeSei{min-width:3%;max-width:3%;}
+#thDescricaoUnidadeSei{min-width:30%;max-width:30%;}
+#thIdUnidadeTramitaGovBr{min-width:1%;max-width:1%;}
+#thSiglaUnidadeTramitaGovBr{min-width:10%;max-width:10%;}
+#thDescricaoUnidadeTramitaGovBr{min-width:30%;max-width:30%;}
+#thAcoes{min-width:9%;max-width:9%;width:9%}
 </style>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">

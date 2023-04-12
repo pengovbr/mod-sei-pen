@@ -259,6 +259,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3022();
         case '3.2.2':
             $this->instalarV3023();
+        case '3.3.3':
+            $this->instalarV3033();
     
 
 
@@ -2485,6 +2487,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV3023()
     {
       $this->atualizarNumeroVersao("3.2.3");
+  }
+
+  protected function instalarV3033()
+    {
+      $this->atualizarNumeroVersao("3.3.3");
+      $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+      $objInfraMetaBD->adicionarColuna('md_pen_unidade', 'sigla_unidade_rh', $objInfraMetaBD->tipoTextoVariavel(20), 'null');
+      $objInfraMetaBD->adicionarColuna('md_pen_unidade', 'nome_unidade_rh', $objInfraMetaBD->tipoTextoVariavel(250), 'null');
   }
 
 }
