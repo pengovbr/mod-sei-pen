@@ -22,8 +22,10 @@ class PenUnidadeDTO extends UnidadeDTO {
     
   public function montar() {
         
-      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade'); 
-      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh'); 
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeUnidadeRH', 'nome_unidade_rh');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SiglaUnidadeRH', 'sigla_unidade_rh');
       $this->configurarPK('IdUnidade', InfraDTO::$TIPO_PK_INFORMADO);
         
       // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos

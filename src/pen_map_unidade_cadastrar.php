@@ -60,7 +60,6 @@ try {
     //--------------------------------------------------------------------------
     // Ao por POST esta salvando o formulrio
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
-
     if(!array_key_exists('id_unidade', $_POST) || empty($_POST['id_unidade'])) {
         throw new InfraException('Nenhuma "Unidade" foi selecionada');
     }
@@ -82,10 +81,19 @@ try {
         throw new InfraException('Já existe um registro com a "Unidade RH" para o código: ' .$_POST['id_unidade_rh'] );
     }
 
+      // CARREGAR NOME E SIGLA DA ESTRUTURA
+      $objProcessoEletronico     = new ProcessoEletronicoRN();
+      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
+      
+      $nomeUnidadeRH = $objProcessoEletronicoDTO[0]->getStrNome();
+      $siglaUnidadeRH = $objProcessoEletronicoDTO[0]->getStrSigla();
+
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($_POST['id_unidade']);
       $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
-
+      $objPenUnidadeDTO->setStrNomeUnidadeRH($nomeUnidadeRH);
+      $objPenUnidadeDTO->setStrSiglaUnidadeRH($siglaUnidadeRH);
+    
       $numIdUnidade = '';
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
         $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
