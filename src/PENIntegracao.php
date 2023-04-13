@@ -494,12 +494,12 @@ class PENIntegracao extends SeiIntegracao
             $bolPermiteEnvio = true;
         }
 
-        $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
+        $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
 
-        if (count($arrObjEstruturaDTO) > 0) {
-            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
+        if (count($arrObjEstruturaDTO['itens']) > 0) {
+            $xml = InfraAjax::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+            return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
 

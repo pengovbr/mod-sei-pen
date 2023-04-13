@@ -43,6 +43,41 @@ class ProcessoEletronicoINT extends InfraINT {
       return $estruturas;
   }
 
+  /**
+   * Concate as siglas das hierarquias no nome da unidade
+   *
+   * @param array(EstruturaDTO) $estruturas
+   * @return array
+   */
+  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = array())
+  {
+
+    if (empty($estruturas['itens'])) {
+      return $estruturas;
+    }
+
+    foreach ($estruturas['itens'] as &$estrutura) {
+      if ($estrutura->isSetArrHierarquia()) {
+        $nome  = $estrutura->getStrNome();
+        $nome .= ' - ';
+
+        $array = array($estrutura->getStrSigla());
+        foreach ($estrutura->getArrHierarquia() as $sigla) {
+          if (trim($sigla) !== '' && !in_array($sigla, array(
+            'PR', 'PE', 'UNIAO'
+          ))) {
+            $array[] = $sigla;
+          }
+        }
+
+        $nome .= implode(' / ', $array);
+        $estrutura->setStrNome($nome);
+      }
+    }
+
+    return $estruturas;
+  }
+
   public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false) {
        
        
@@ -54,6 +89,25 @@ class ProcessoEletronicoINT extends InfraINT {
       );
 
       return static::gerarHierarquiaEstruturas($arrObjEstruturas);
+  }
+
+  public static function autoCompletarEstruturasAutoCompletar($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false)
+  {
+
+    $objConecaoWebServerRN = new ProcessoEletronicoRN();
+    $arrObjEstruturas = $objConecaoWebServerRN->listarEstruturasAutoCompletar(
+      $idRepositorioEstrutura,
+      $strPalavrasPesquisa,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      $bolPermiteEnvio
+    );
+
+    return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
   }
 
   public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {
