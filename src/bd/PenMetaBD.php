@@ -136,6 +136,7 @@ class PenMetaBD extends InfraMetaBD {
 
         case 'InfraSqlServer':
           $strQuery = sprintf("sp_rename '%s', '%s'", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
 
         case 'InfraOracle':
           $strQuery = sprintf("RENAME TABLE %s TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
