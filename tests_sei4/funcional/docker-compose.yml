@@ -10,12 +10,12 @@ services:
       - "1080:1080"
 
   org1-memcached:
-    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
   org2-memcached:
-    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
@@ -156,15 +156,10 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
-      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
-      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
-
       - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
-      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -221,15 +216,10 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
-      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
-      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
-
       - SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
-      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
 
     extra_hosts:
       - "host.docker.internal:host-gateway"

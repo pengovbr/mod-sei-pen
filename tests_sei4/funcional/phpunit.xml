@@ -6,7 +6,6 @@
   colors="true"
   verbose="true"
   cacheResult="false"
-  executionOrder="no-depends"
 >
 
   <php>

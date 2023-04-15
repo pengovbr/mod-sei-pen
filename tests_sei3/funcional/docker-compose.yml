@@ -9,12 +9,12 @@ services:
       - "1080:1080"
 
   org1-memcached:
-    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
+    image: guilhermeadc/sei3_memcached:7.2
     ports:
       - "11211"
 
   org2-memcached:
-    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
+    image: guilhermeadc/sei3_memcached:7.2
     ports:
       - "11211"
 
@@ -73,8 +73,8 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - org1-database:${ORG1_DATABASE_HOST}
-      - org2-database:${ORG1_DATABASE_HOST}
+      - org1-database:${ORG1_DATABASE_NAME}
+      - org2-database:${ORG1_DATABASE_NAME}
       - selenium:selenium
     command: "true"
 
