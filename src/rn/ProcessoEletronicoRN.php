@@ -559,7 +559,7 @@ class ProcessoEletronicoRN extends InfraRN
             $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
             $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
             if (strpos(strtolower($strMensagem), "hash de ao menos um componente digital não confere")) {
-                $strMensagem = $this->validarMudancaOrdemDocumentos($parametros->dblIdProcedimento, $strMensagem);
+                $strMensagem = $this->validarMudancaOrdemDocumentos($parametros->dblIdProcedimento, $strMensagem, $strDetalhes);
             }
             throw new InfraException($strMensagem, $e, $strDetalhes);
         } catch (\Exception $e) {
@@ -569,15 +569,15 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
-    private function validarMudancaOrdemDocumentos($dblIdProcedimento, $strMensagem)
+    private function validarMudancaOrdemDocumentos($dblIdProcedimento, $strMensagem, $params = null)
     {
         $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
         $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
-        
+
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
         $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
-        
+
         if (!is_null($numIdTramite) && $numIdTramite > 0) {
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -585,14 +585,31 @@ class ProcessoEletronicoRN extends InfraRN
             $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
             $objAtividadeDTO->retNumIdAtividade();
             $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-            
+
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->contarRN0035($objAtividadeDTO);
-            
+
+            $objProtocoloDTO = new RelProtocoloProtocoloDTO();
+            $objProtocoloDTO->setDblIdProtocolo1($objAtividadeDTO->getDblIdProtocolo());
+            $objProtocoloDTO->setOrd('IdRelProtocoloProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
+            $objProtocoloDTO->retTodos();
+            $objProtocoloBD = new RelProtocoloProtocoloBD(BancoSEI::getInstance());
+            $arrProtocolos = $objProtocoloBD->listar($objProtocoloDTO);
+
+            $msg = "";
+            foreach ($arrProtocolos as $index => $protocolo) {
+                if ($index != $protocolo->getNumSequencia()){
+                    $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
+                    $pos = $index + 1;
+                    $sequencia = $protocolo->getNumSequencia() + 1;
+                    $msg .= "A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.";
+                }
+            }
+
             if ($arrObjAtividadeDTO > 0) {
                 $strMensagem = str_replace(
                     'hash de ao menos um componente digital não confere',
-                    ' Possivelmente a falha ocorreu devido a mundaça de ordem do documento na árvore do processo.',
+                    ' Possivelmente a falha ocorreu devido a mundaça de ordem do documento na árvore do processo.'. $msg,
                     $strMensagem
                 );
             }
