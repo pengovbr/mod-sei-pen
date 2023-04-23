@@ -241,10 +241,10 @@ class ReceberProcedimentoRN extends InfraRN
 
       // Lista todos os componentes digitais presente no protocolo
       // Esta verificação é necessária pois existem situações em que a lista de componentes
-      // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
+      // pendentes de recebimento informado pelo Tramita.gov.br não está de acordo com a lista atual de arquivos
       // mantida pela aplicação.
-      //$arrHashPendentesDownload = $objTramite->componenteDigitalPendenteDeRecebimento;
       $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProtocolo);
+      $arrHashPendentesRecebimento = $parObjTramite->componenteDigitalPendenteDeRecebimento;
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
@@ -255,21 +255,32 @@ class ReceberProcedimentoRN extends InfraRN
         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
         //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
-        $arrHashComponentesBaixados[] = $strHashComponentePendente;
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
         $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
-
+        
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
-
+        
         //Obter os dados do componente digital particionado
         $this->gravarLogDebug("Baixando componente digital $numOrdemComponente particionado", 3);
-
-        $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
+        
+        try{
+          $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
             $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
-        );
-        $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
+          );
+          $arrHashComponentesBaixados[] = $strHashComponentePendente;
+          $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
+        } catch(InfraException $e) {
+          // Caso o erro seja relacionado a falta do hash do documento no Tramita.gov.br e este não esteja
+          // pendente de recebimento, o download deve continuar para os demais documentos do processo 
+          if(!in_array($strHashComponentePendente, $arrHashPendentesRecebimento)){
+            continue;
+          }
+
+          throw $e;
+        }
+
         $this->criarDiretorioAnexo($objAnexoDTO);
 
         $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$strHashComponentePendente];
@@ -285,7 +296,6 @@ class ReceberProcedimentoRN extends InfraRN
         $numVelocidade = round($nrTamanhoArquivoKB / max([$numTempoTotalValidacao, 1]), 2);
         $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 4);
       }
-
     }
 
     if(count($arrAnexosComponentes) > 0){
