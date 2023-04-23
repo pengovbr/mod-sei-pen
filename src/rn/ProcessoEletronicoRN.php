@@ -631,8 +631,10 @@ class ProcessoEletronicoRN extends InfraRN
 
       $cabecalho->urgente = $urgente;
       $cabecalho->motivoDaUrgencia = $motivoUrgencia;
-      $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
-
+      //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
+      //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
+      $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
+      
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
       $this->atribuirInformacoesModulo($cabecalho);
 
