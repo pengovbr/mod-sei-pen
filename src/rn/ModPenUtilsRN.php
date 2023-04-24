@@ -6,34 +6,34 @@
  */
 class ModPenUtilsRN extends InfraRN
 {
-    protected function inicializarObjInfraIBanco()
+  protected function inicializarObjInfraIBanco()
     {
-      return BancoSEI::getInstance();
+    return BancoSEI::getInstance();
+  }
+
+  public static function obterUnidadeRecebimento()
+    {
+      $objPenParametroRN = new PenParametroRN();
+      $numUnidadeRecebimentoProcessos = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+
+    if(empty($numUnidadeRecebimentoProcessos)){
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $numUnidadeRecebimentoProcessos = $objInfraParametro->getValor('ID_UNIDADE_TESTE');
     }
 
-    public static function obterUnidadeRecebimento()
+      return $numUnidadeRecebimentoProcessos;
+  }
+
+  public static function simularLoginUnidadeRecebimento()
     {
-        $objPenParametroRN = new PenParametroRN();
-        $numUnidadeRecebimentoProcessos = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
+      $numUnidadeRecebimentoProcessos = self::obterUnidadeRecebimento();
 
-        if(empty($numUnidadeRecebimentoProcessos)){
-            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-            $numUnidadeRecebimentoProcessos = $objInfraParametro->getValor('ID_UNIDADE_TESTE');
-        }
-
-        return $numUnidadeRecebimentoProcessos;
+    if(empty($numUnidadeRecebimentoProcessos)) {
+        $strMensagem = "Configuração da unidade para representação de trâmites em órgãos externos não pode ser localizada.\n";
+        $strMensagem .= "Necessário atribuição de uma unidade válida nos parâmetros do Módulo de Integração PEN (mod-sei-pen)";
+        throw new InfraException($strMensagem);
     }
 
-    public static function simularLoginUnidadeRecebimento()
-    {
-        $numUnidadeRecebimentoProcessos = self::obterUnidadeRecebimento();
-
-        if(empty($numUnidadeRecebimentoProcessos)) {
-            $strMensagem = "Configuração da unidade para representação de trâmites em órgãos externos não pode ser localizada.\n";
-            $strMensagem .= "Necessário atribuição de uma unidade válida nos parâmetros do Módulo de Integração PEN (mod-sei-pen)";
-            throw new InfraException($strMensagem);
-        }
-
-        SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $numUnidadeRecebimentoProcessos);
-    }
+      SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $numUnidadeRecebimentoProcessos);
+  }
 }

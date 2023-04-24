@@ -33,6 +33,14 @@ Correção de falha que impedia o envio externo de processos já tramitados pelo
 
 Falha gerava erros no envio externo de processos com a indicação de falha na validação do hash dos documentos do processo já tramitados anteriormente.
 
+#### Manual de Configuração dos Testes
+
+Manual passo a passo de como configurar o ambiente localmente para rodar e visualizar os testes funcionais
+
+#### Jobs Jenkins
+
+Jobs Jenkins para automatizar os testes funcionais em versões antigas do SEI e SUPER. Atualmente disponível apenas para SEI4
+
 
 ### Atualização de Versão
 

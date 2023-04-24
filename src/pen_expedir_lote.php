@@ -18,112 +18,111 @@ try {
     $strDiretorioModulo = PENIntegracao::getDiretorio();
 
     $arrProtocolosOrigem = array();
-    $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'),$objPaginaSEI->getArrStrItensSelecionados('Recebidos'),$objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
+    $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
 
-    if (count($arrProtocolosOrigem)==0){
-        $arrProtocolosOrigem = explode(',',$_POST['hdnIdProcedimento']);
-    }
+  if (count($arrProtocolosOrigem)==0){
+      $arrProtocolosOrigem = explode(',', $_POST['hdnIdProcedimento']);
+  }
 
-    if (count($arrProtocolosOrigem)==0){
-        throw new InfraException('Processo não informado.');
-    }
+  if (count($arrProtocolosOrigem)==0){
+      throw new InfraException('Processo não informado.');
+  }
 
     $strItensSelProcedimentos = ProcedimentoINT::conjuntoCompletoFormatadoRI0903($arrProtocolosOrigem);
 
-    if (isset($_GET['arvore'])) {
-        $objPaginaSEI->setBolArvore($_GET['arvore']);
-        $strParametros .= '&arvore=' . $_GET['arvore'];
-    }
+  if (isset($_GET['arvore'])) {
+      $objPaginaSEI->setBolArvore($_GET['arvore']);
+      $strParametros .= '&arvore=' . $_GET['arvore'];
+  }
 
-    if (isset($_GET['executar'])) {
-        $executarExpedicao = filter_var($_GET['executar'], FILTER_VALIDATE_BOOLEAN);
-    }
+  if (isset($_GET['executar'])) {
+      $executarExpedicao = filter_var($_GET['executar'], FILTER_VALIDATE_BOOLEAN);
+  }
 
     $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
     $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
 
-    switch ($_GET['acao']) {
+  switch ($_GET['acao']) {
 
-        case 'pen_expedir_lote':
+    case 'pen_expedir_lote':
+        $strTitulo = 'Envio Externo de Processo em Lote';
+        $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
+        $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
-            $strTitulo = 'Envio Externo de Processo em Lote';
-            $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
-            $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+        //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
+        $objPenParametroRN = new PenParametroRN();
+        $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
-            //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
-            $objPenParametroRN = new PenParametroRN();
-            $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        //Preparação dos dados para montagem da tela de expedição de processos
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
 
-            //Preparação dos dados para montagem da tela de expedição de processos
-            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
-            $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+        $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
+        $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
-            $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
-            $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
+        $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
+        $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
 
-            $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
-            $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidadeRH();
+        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-            $objUnidadeDTO = new PenUnidadeDTO();
-            $objUnidadeDTO->retNumIdUnidadeRH();
-            $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objUnidadeRN = new UnidadeRN();
+        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
-            $objUnidadeRN = new UnidadeRN();
-            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+      if (!$objUnidadeDTO) {
+        throw new InfraException("A unidade atual não foi mapeada.");
+      }
 
-            if (!$objUnidadeDTO) {
-                throw new InfraException("A unidade atual não foi mapeada.");
-            }
+        $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
+        $numIdRepositorio = $_POST['selRepositorioEstruturas'];
+        $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+        $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
+        $strNomeUnidadeDestino = $_POST['txtUnidade'];
+        $numIdUsuario = $objSessaoSEI->getNumIdUsuario();
+        $dthRegistro = date('d/m/Y H:i:s');
 
-            $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
-            $numIdRepositorio = $_POST['selRepositorioEstruturas'];
-            $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
-            $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
-            $strNomeUnidadeDestino = $_POST['txtUnidade'];
-            $numIdUsuario = $objSessaoSEI->getNumIdUsuario();
-            $dthRegistro = date('d/m/Y H:i:s');
+      if(isset($_POST['sbmExpedir'])) {
+          $numVersao = $objPaginaSEI->getNumVersao();
+          echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+          echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
-            if(isset($_POST['sbmExpedir'])) {
-                $numVersao = $objPaginaSEI->getNumVersao();
-                echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
-                echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
+          $strTituloPagina = "Cadastro de processos em Lote";
+          $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
 
-                $strTituloPagina = "Cadastro de processos em Lote";
-                $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
+        try {
 
-                try {
+          $objPenExpedirLoteDTO = new PenExpedirLoteDTO();
+          $objPenExpedirLoteDTO->setNumIdLote(null);
+          $objPenExpedirLoteDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
+          $objPenExpedirLoteDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
+          $objPenExpedirLoteDTO->setNumIdRepositorioDestino($numIdRepositorio);
+          $objPenExpedirLoteDTO->setStrRepositorioDestino($strRepositorio);
+          $objPenExpedirLoteDTO->setNumIdUnidadeDestino($numIdUnidadeDestino);
+          $objPenExpedirLoteDTO->setStrUnidadeDestino($strNomeUnidadeDestino);
+          $objPenExpedirLoteDTO->setNumIdUsuario($numIdUsuario);
+          $objPenExpedirLoteDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+          $objPenExpedirLoteDTO->setDthRegistro($dthRegistro);
+          $objPenExpedirLoteDTO->setArrIdProcedimento($arrProtocolosOrigem);
 
-                    $objPenExpedirLoteDTO = new PenExpedirLoteDTO();
-                    $objPenExpedirLoteDTO->setNumIdLote(null);
-                    $objPenExpedirLoteDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
-                    $objPenExpedirLoteDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
-                    $objPenExpedirLoteDTO->setNumIdRepositorioDestino($numIdRepositorio);
-                    $objPenExpedirLoteDTO->setStrRepositorioDestino($strRepositorio);
-                    $objPenExpedirLoteDTO->setNumIdUnidadeDestino($numIdUnidadeDestino);
-                    $objPenExpedirLoteDTO->setStrUnidadeDestino($strNomeUnidadeDestino);
-                    $objPenExpedirLoteDTO->setNumIdUsuario($numIdUsuario);
-                    $objPenExpedirLoteDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-                    $objPenExpedirLoteDTO->setDthRegistro($dthRegistro);
-                    $objPenExpedirLoteDTO->setArrIdProcedimento($arrProtocolosOrigem);
+          $objPenExpedirLoteRN = new PenExpedirLoteRN();
+          $ret = $objPenExpedirLoteRN->cadastrarLote($objPenExpedirLoteDTO);
+          $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 
-                    $objPenExpedirLoteRN = new PenExpedirLoteRN();
-                    $ret = $objPenExpedirLoteRN->cadastrarLote($objPenExpedirLoteDTO);
-                    $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
+          // Muda situação da barra de progresso para Concluído
+          echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
+        } catch(\Exception $e) {
+            $objPaginaSEI->processarExcecao($e);
+            echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
+        }
 
-                    // Muda situação da barra de progresso para Concluído
-                    echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
-                } catch(\Exception $e) {
-                    $objPaginaSEI->processarExcecao($e);
-                    echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
-                }
+          $objPaginaSEI->finalizarBarraProgresso(null, false);
+      }
 
-                $objPaginaSEI->finalizarBarraProgresso(null, false);
-            }
-
-            break;
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }
+        break;
+    default:
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }
 
 } catch (Exception $e) {
     throw new InfraException("Erro processando requisição de envio externo de processo", $e);
@@ -378,14 +377,14 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         </select>
     </div>
 
-	<div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
-		<label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
+    <div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
+        <label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
         <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" >
         <?= $strItensSelRepositorioEstruturas ?>
         </select>
-	</div>
+    </div>
 
-	<div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
+    <div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
@@ -396,9 +395,9 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
             </div>
 
         <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" />
-	</div>
+    </div>
 
-	<input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?=implode(',',$arrProtocolosOrigem) ?>" />
+    <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?=implode(',', $arrProtocolosOrigem) ?>" />
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
 

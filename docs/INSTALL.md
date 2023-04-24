@@ -20,7 +20,7 @@ Procedimentos destinados à Equipe Técnica responsáveis pela instalação do m
 2. **[Configuração](#configuração)**:
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
-3. **[Configurações Técnicas Adicionais](#configuracoes-técnicas-adicionais)**:
+3. **[Configurações Técnicas Adicionais](#3-configurações-adicionais)**:
 Esta seção apresenta algumas configurações adicionais do módulo do Barramento de Serviços do PEN que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
 
 4. **[Suporte](#suporte)**:
@@ -144,7 +144,7 @@ Senha do certificado digital necessário para a aplicação descriptografar e ac
 * **Gearman** _(opcional e altamente desejável)_  
 Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN.  
 As mensagens recebidas do Barramento são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para processamento coordenado. Caso este parâmetro não seja configurado ou o servidor do Gearman esteja indisponível, o processamento será feito diretamente pelo sistema na periodicidade definida no agendamento da tarefa _PENAgendamentoRN::processarTarefasPEN_.  
-Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-de-multiplos-processos-com-Gearman)) para maiores informações.
+Veja [Processamento paralelo de processos com Gearman]((#31-instalação-do-gearmand-para-processamento-assíncrono-de-tarefas)) para maiores informações.
 
     * **Servidor**  
     *IP ou Hostname do servidor Gearman instalado*
@@ -296,7 +296,7 @@ Como o recebimento é realizado de forma automática, o sistema precisa atribuir
 
 A unidade a ser definida neste parâmetro será utilizada internamente pelo módulo e não deverá ter acesso de nenhum usuário do sistema. Por isto, não deve ser utilizada uma unidade pré-existente da própria instituição, sendo recomendado a criação de uma nova unidade administrativa "virtual" no SIP para esta configuração.
 
-Sugerimos que a criação uma nova unidade no SEI denominada "**EXTERNO - Unidade Externa**" para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
+Sugerimos que a criação uma nova unidade no SEI denominada: [sigla = **Tramita.GOV.BR**, nome: **Processo recebido via Tramita.GOV.BR**] para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
 
 #### Envia E-mail de Notificação de Recebimento
 *Indicação se o sistema irá enviar um e-mail de notificação alertando o recebimento de um novo processo para a unidade. Necessário que a unidade tenha um e-mail configurado em seu cadastro de contato.*
@@ -483,7 +483,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
 ```
 
-### 3.2. Opcional: Instalação do Supervisor para monitoramento
+### 3.2. Instalação do Supervisor para monitoramento
 
 O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Barramento de Serviços do PEN. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
 

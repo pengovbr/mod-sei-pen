@@ -22,29 +22,29 @@ class LogPenWs {
     /**
      * Construtor
      */
-    public function __construct($config = array(), $wsdl, $options)
+  public function __construct($config = array(), $wsdl, $options)
     {
-        $this->arrListaMetodos = is_array($config) ? $config : array();
-        $this->objSoapClient = new \BeSimple\SoapClient\SoapClient($wsdl, $options);
-    }
+      $this->arrListaMetodos = is_array($config) ? $config : array();
+      $this->objSoapClient = new \BeSimple\SoapClient\SoapClient($wsdl, $options);
+  }
 
 
     /**
      * Método mágico
      */
-    public function __call($method, $arguments)
+  public function __call($method, $arguments)
     {
-        $mixResultado = call_user_func_array(array($this->objSoapClient, $method), $arguments);
+      $mixResultado = call_user_func_array(array($this->objSoapClient, $method), $arguments);
 
-        if(in_array($method, $this->arrListaMetodos)) {
+    if(in_array($method, $this->arrListaMetodos)) {
 
-            $strMensagem  = '[ SOAP Request ]'.PHP_EOL;
-            $strMensagem .= 'Method: '.$method.PHP_EOL;
-            $strMensagem .= 'Requiest: '.$this->objSoapClient->__getLastRequest().PHP_EOL;
-            $strMensagem .= 'Response: '.$this->objSoapClient->__getLastResponse().PHP_EOL;
+        $strMensagem  = '[ SOAP Request ]'.PHP_EOL;
+        $strMensagem .= 'Method: '.$method.PHP_EOL;
+        $strMensagem .= 'Requiest: '.$this->objSoapClient->__getLastRequest().PHP_EOL;
+        $strMensagem .= 'Response: '.$this->objSoapClient->__getLastResponse().PHP_EOL;
 
-            LogSEI::getInstance()->gravar($strMensagem);
-        }
-        return $mixResultado;
+        LogSEI::getInstance()->gravar($strMensagem);
     }
+      return $mixResultado;
+  }
 }

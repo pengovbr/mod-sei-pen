@@ -158,7 +158,7 @@ class PaginaProcesso extends PaginaTeste
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
             if($bolDevePossuir){
-                    $idAnexo=$this->test->byXPath("//span[contains(@title,'" . $nomeDocumentoArvore . "')]")->attribute('id');
+                    $idAnexo=$this->test->byXPath("//span[contains(text(),'" . $nomeDocumentoArvore . "')]")->attribute('id');
                     $idAnexo=str_replace("span","",$idAnexo);
                     $this->test->byXPath("//img[contains(@id,'iconMD_PEN_DOC_REF" . $idAnexo . "')]");
             }

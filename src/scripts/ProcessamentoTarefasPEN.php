@@ -5,40 +5,40 @@ require_once $dirSeiWeb . '/SEI.php';
 
 class ProcessamentoTarefasPEN
 {
-    private static $instance = null;
+  private static $instance = null;
 
-    public static function getInstance() {
-        if (self::$instance == null) {
-            self::$instance = new ProcessamentoTarefasPEN();
-        }
-        return self::$instance;
+  public static function getInstance() {
+    if (self::$instance == null) {
+        self::$instance = new ProcessamentoTarefasPEN();
     }
+      return self::$instance;
+  }
 
-    function __construct()
+  function __construct()
     {
-        ini_set('max_execution_time','0');
-        ini_set('memory_limit','-1');
-    }
+      ini_set('max_execution_time', '0');
+      ini_set('memory_limit', '-1');
+  }
 
 
-    public function processarPendencias()
+  public function processarPendencias()
     {
+      InfraDebug::getInstance()->setBolLigado(false);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+      InfraDebug::getInstance()->limpar();
+
+    try {
+        SessaoSEI::getInstance(false);
+        $objProcessarPendenciasRN = new ProcessarPendenciasRN("PROCESSAMENTO");
+        $resultado = $objProcessarPendenciasRN->processarPendencias();
+        exit($resultado);
+    } finally {
         InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
-        InfraDebug::getInstance()->limpar();
-
-        try {
-            SessaoSEI::getInstance(false);
-            $objProcessarPendenciasRN = new ProcessarPendenciasRN("PROCESSAMENTO");
-            $resultado = $objProcessarPendenciasRN->processarPendencias();
-            exit($resultado);
-        } finally {
-            InfraDebug::getInstance()->setBolLigado(false);
-            InfraDebug::getInstance()->setBolDebugInfra(false);
-            InfraDebug::getInstance()->setBolEcho(false);
-        }
     }
+  }
 }
 
 
