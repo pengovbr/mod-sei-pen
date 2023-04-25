@@ -883,10 +883,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
             $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
             $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
-          } else {
-              // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
-              $documento->retirado = true;
           }
+        }
+
+        if($staAssociacao == RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
+          // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
+          $documento->retirado = true;
         }
 
         if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
@@ -2087,8 +2089,17 @@ class ExpedirProcedimentoRN extends InfraRN {
 
             //$objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
             $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
-            $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
-            $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
+            $objDocumentoDTO = null;
+            $strStaAssociacao = null;
+            $bolMultiplosComponentesCount = 0;
+            foreach ($arrObjDocumentoDTOAssociacao as  $objDocumentoDTOAssociacao) {
+              $strStaAssociacao = $objDocumentoDTOAssociacao['StaAssociacao'];
+              if($strStaAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
+                $objDocumentoDTO = $objDocumentoDTOAssociacao['Documento'];
+                $bolMultiplosComponentesCount++;
+              }
+            }
+            $bolMultiplosComponentes = $bolMultiplosComponentesCount > 1;
             $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
             //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
