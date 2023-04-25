@@ -13,7 +13,7 @@
 
 try {
 
-require_once DIR_SEI_WEB.'/SEI.php';
+  require_once DIR_SEI_WEB.'/SEI.php';
         
     $objPenConsoleRN = new PenConsoleRN();
     $arrArgs = $objPenConsoleRN->getTokens();
@@ -31,11 +31,11 @@ catch(Exception $e) {
     
     print InfraException::inspecionar($e);
     
-    try {
-        LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
-    } catch (Exception $e) {
+  try {
+      LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+  } catch (Exception $e) {
         
-    }
+  }
     
     exit(1);
 }

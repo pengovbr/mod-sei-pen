@@ -48,7 +48,7 @@ class PaginaTeste
     public function sairSistema()
     {
         $this->test->frame(null);
-        $this->test->byXPath("(//a[@id='lnkSairSistema'])")->click();
+        $this->test->byXPath("//a[@id='lnkInfraSairSistema'] | //a[@id='lnkSairSistema']")->click();
     }
 
     public static function selecionarUnidadeContexto($test, $unidadeContexto)

@@ -3,20 +3,20 @@
 class AssinaturaHashRN extends AssinaturaRN {
 
 
-public function __construct(){
-  parent::__construct();
-}
+  public function __construct(){
+    parent::__construct();
+  }
 
-protected function inicializarObjInfraIBanco(){
-  return BancoSEI::getInstance();
-}
+  protected function inicializarObjInfraIBanco(){
+    return BancoSEI::getInstance();
+  }
 
 
-protected function montarTarjasURLConectado($dados) {
+  protected function montarTarjasURLConectado($dados) {
     try {
 
-    $objDocumentoDTO=$dados["objDocumentoDTO"];
-    $controleURL=$dados["controleURL"];
+      $objDocumentoDTO=$dados["objDocumentoDTO"];
+      $controleURL=$dados["controleURL"];
 
       $strRet = '';
 
@@ -43,10 +43,10 @@ protected function montarTarjasURLConectado($dados) {
         $objTarjaAssinaturaDTO->retStrStaTarjaAssinatura();
         $objTarjaAssinaturaDTO->retStrTexto();
         $objTarjaAssinaturaDTO->retStrLogo();
-        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
+        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO, 'IdTarjaAssinatura')), InfraDTO::$OPER_IN);
 
         $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
-        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
+        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO), 'IdTarjaAssinatura');
 
         foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
 
@@ -78,7 +78,7 @@ protected function montarTarjasURLConectado($dados) {
         if ($objTarjaAssinaturaDTO != null){
 
           $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(),'@link_acesso_externo_processo@')!==false){
+          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false){
             $objEditorRN = new EditorRN();
             $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
@@ -89,7 +89,7 @@ protected function montarTarjasURLConectado($dados) {
           $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
           $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
           $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-          $strTarja = str_replace($controleURL["atual"],$controleURL["antigo"], $strTarja);
+          $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
           $strRet .= $strTarja;
 
         
@@ -99,7 +99,7 @@ protected function montarTarjasURLConectado($dados) {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.',$e);
+      throw new InfraException('Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -152,10 +152,10 @@ protected function montarTarjasURLConectado($dados) {
         $objTarjaAssinaturaDTO->retStrStaTarjaAssinatura();
         $objTarjaAssinaturaDTO->retStrTexto();
         $objTarjaAssinaturaDTO->retStrLogo();
-        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
+        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO, 'IdTarjaAssinatura')), InfraDTO::$OPER_IN);
 
         $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
-        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
+        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO), 'IdTarjaAssinatura');
 
         $numAssinaturas = 0;
 
@@ -205,7 +205,7 @@ protected function montarTarjasURLConectado($dados) {
             $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
             $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
             $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-            $strTarja = str_replace($controleURL["atual"],$controleURL["antigo"], $strTarja);
+            $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
             $strRet .= $strTarja;
           }
         }
@@ -215,7 +215,7 @@ protected function montarTarjasURLConectado($dados) {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.',$e);
+      throw new InfraException('Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -255,10 +255,10 @@ protected function montarTarjasURLConectado($dados) {
         $objTarjaAssinaturaDTO->retStrStaTarjaAssinatura();
         $objTarjaAssinaturaDTO->retStrTexto();
         $objTarjaAssinaturaDTO->retStrLogo();
-        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
+        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO, 'IdTarjaAssinatura')), InfraDTO::$OPER_IN);
 
         $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
-        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
+        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO), 'IdTarjaAssinatura');
 
         $numAssinaturas = 0;
 
@@ -308,7 +308,7 @@ protected function montarTarjasURLConectado($dados) {
             $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
             $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
             $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-            $strTarja = str_replace($controleURL["atual"],$controleURL["antigo"], $strTarja);
+            $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
             $strRet .= $strTarja;
           }
         }
@@ -318,7 +318,7 @@ protected function montarTarjasURLConectado($dados) {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.',$e);
+      throw new InfraException('Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -352,10 +352,10 @@ protected function montarTarjasURLConectado($dados) {
         $objTarjaAssinaturaDTO->retStrStaTarjaAssinatura();
         $objTarjaAssinaturaDTO->retStrTexto();
         $objTarjaAssinaturaDTO->retStrLogo();
-        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO,'IdTarjaAssinatura')),InfraDTO::$OPER_IN);
+        $objTarjaAssinaturaDTO->setNumIdTarjaAssinatura(array_unique(InfraArray::converterArrInfraDTO($arrObjAssinaturaDTO, 'IdTarjaAssinatura')), InfraDTO::$OPER_IN);
 
         $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
-        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO),'IdTarjaAssinatura');
+        $arrObjTarjaAssinaturaDTO = InfraArray::indexarArrInfraDTO($objTarjaAssinaturaRN->listar($objTarjaAssinaturaDTO), 'IdTarjaAssinatura');
 
         foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
 
@@ -387,7 +387,7 @@ protected function montarTarjasURLConectado($dados) {
         if ($objTarjaAssinaturaDTO != null){
 
           $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(),'@link_acesso_externo_processo@')!==false){
+          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false){
             $objEditorRN = new EditorRN();
             $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
@@ -407,7 +407,7 @@ protected function montarTarjasURLConectado($dados) {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.',$e);
+      throw new InfraException('Erro montando tarja de assinatura.', $e);
     }
   }
 

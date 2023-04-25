@@ -36,92 +36,92 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     protected $objInfraBanco ;
 
-    protected function inicializarObjInfraIBanco() {
+  protected function inicializarObjInfraIBanco() {
 
-        if (empty($this->objInfraBanco)) {
-            $this->objInfraBanco = BancoSEI::getInstance();
-            $this->objInfraBanco->abrirConexao();
-        }
-
-        return $this->objInfraBanco;
+    if (empty($this->objInfraBanco)) {
+        $this->objInfraBanco = BancoSEI::getInstance();
+        $this->objInfraBanco->abrirConexao();
     }
+
+      return $this->objInfraBanco;
+  }
 
     /**
      * Inicia a conexão com o banco de dados
      */
-    protected function inicializarObjMetaBanco() {
-        if (empty($this->objMeta)) {
-            $this->objMeta = new PenMetaBD($this->inicializarObjInfraIBanco());
-        }
-        return $this->objMeta;
+  protected function inicializarObjMetaBanco() {
+    if (empty($this->objMeta)) {
+        $this->objMeta = new PenMetaBD($this->inicializarObjInfraIBanco());
     }
+      return $this->objMeta;
+  }
 
     /**
      * Adiciona uma mensagem ao output para o usuário
      *
      * @return null
      */
-    protected function logar($strMsg) {
-        $this->objDebug->gravar($strMsg);
-    }
+  protected function logar($strMsg) {
+      $this->objDebug->gravar($strMsg);
+  }
 
     /**
      * Inicia o script criando um contator interno do tempo de execução
      *
      * @return null
      */
-    protected function inicializar($strTitulo) {
+  protected function inicializar($strTitulo) {
 
-        $this->numSeg = InfraUtil::verificarTempoProcessamento();
+      $this->numSeg = InfraUtil::verificarTempoProcessamento();
 
-        $this->logar($strTitulo);
-    }
+      $this->logar($strTitulo);
+  }
 
     /**
      * Finaliza o script informando o tempo de execução.
      *
      * @return null
      */
-    protected function finalizar($strMsg=null, $bolErro=false){
-        if (!$bolErro) {
-          $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
-          $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
-        }else{
-          $strMsg = 'ERRO: '.$strMsg;
-        }
-
-        if ($strMsg!=null){
-          $this->logar($strMsg);
-        }
-
-        InfraDebug::getInstance()->setBolLigado(false);
-        InfraDebug::getInstance()->setBolDebugInfra(false);
-        InfraDebug::getInstance()->setBolEcho(false);
-        $this->numSeg = 0;
+  protected function finalizar($strMsg = null, $bolErro = false){
+    if (!$bolErro) {
+      $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
+      $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
+    }else{
+      $strMsg = 'ERRO: '.$strMsg;
     }
+
+    if ($strMsg!=null){
+      $this->logar($strMsg);
+    }
+
+      InfraDebug::getInstance()->setBolLigado(false);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+      $this->numSeg = 0;
+  }
 
     /**
      * Construtor
      *
      * @param array $arrArgs Argumentos enviados pelo script
      */
-    public function __construct() {
+  public function __construct() {
 
-        parent::__construct();
-        ini_set('max_execution_time', '0');
-        ini_set('memory_limit', '-1');
-        // ini_set('zlib.output_compression', '0');
-        ini_set('implicit_flush', '1');
-        ob_implicit_flush();
+      parent::__construct();
+      ini_set('max_execution_time', '0');
+      ini_set('memory_limit', '-1');
+      // ini_set('zlib.output_compression', '0');
+      ini_set('implicit_flush', '1');
+      ob_implicit_flush();
 
-        $this->inicializarObjInfraIBanco();
-        $this->inicializarObjMetaBanco();
+      $this->inicializarObjInfraIBanco();
+      $this->inicializarObjMetaBanco();
 
-        $this->objDebug = InfraDebug::getInstance();
-        $this->objDebug->setBolLigado(true);
-        $this->objDebug->setBolDebugInfra(true);
-        $this->objDebug->setBolEcho(true);
-        $this->objDebug->limpar();
-    }
+      $this->objDebug = InfraDebug::getInstance();
+      $this->objDebug->setBolLigado(true);
+      $this->objDebug->setBolDebugInfra(true);
+      $this->objDebug->setBolEcho(true);
+      $this->objDebug->limpar();
+  }
 
 }

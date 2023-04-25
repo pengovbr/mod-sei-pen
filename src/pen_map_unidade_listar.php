@@ -34,55 +34,54 @@ try {
 
     //--------------------------------------------------------------------------
     // Ações
-    if(array_key_exists('acao', $_GET)) {
+  if(array_key_exists('acao', $_GET)) {
 
-        $arrParam = array_merge($_GET, $_POST);
+      $arrParam = array_merge($_GET, $_POST);
 
-        switch($_GET['acao']) {
+    switch($_GET['acao']) {
 
-            case PEN_RECURSO_BASE.'_excluir':
+      case PEN_RECURSO_BASE.'_excluir':
+        if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
 
-                if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
+            $objPenUnidadeDTO = new PenUnidadeDTO();
+            $objPenUnidadeRN = new PenUnidadeRN();
 
-                    $objPenUnidadeDTO = new PenUnidadeDTO();
-                    $objPenUnidadeRN = new PenUnidadeRN();
+            $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
 
-                    $arrParam['hdnInfraItensSelecionados'] = explode(',',$arrParam['hdnInfraItensSelecionados']);
+          if(is_array($arrParam['hdnInfraItensSelecionados'])) {
 
-                    if(is_array($arrParam['hdnInfraItensSelecionados'])) {
+            foreach($arrParam['hdnInfraItensSelecionados'] as $NumIdUnidade) {
 
-                        foreach($arrParam['hdnInfraItensSelecionados'] as $NumIdUnidade) {
+                  $objPenUnidadeDTO->setNumIdUnidade($NumIdUnidade);
+                  $objPenUnidadeRN->excluir($objPenUnidadeDTO);
+            }
+          }
+          else {
 
-                            $objPenUnidadeDTO->setNumIdUnidade($NumIdUnidade);
-                            $objPenUnidadeRN->excluir($objPenUnidadeDTO);
-                        }
-                    }
-                    else {
+                $objPenUnidadeDTO->setNumIdUnidade($arrParam['hdnInfraItensSelecionados']);
+                $objPenUnidadeRN->excluir($objPenUnidadeDTO);
+          }
 
-                        $objPenUnidadeDTO->setNumIdUnidade($arrParam['hdnInfraItensSelecionados']);
-                        $objPenUnidadeRN->excluir($objPenUnidadeDTO);
-                    }
+            $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
 
-                    $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
-
-                    header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
-                    exit(0);
-                }
-                else {
-
-                    throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
-                }
-                break;
-
-            case PEN_RECURSO_BASE.'_listar':
-                // Ação padrão desta tela
-                break;
-
-            default:
-                throw new InfraException('Ação não permitida nesta tela');
-
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
+            exit(0);
         }
+        else {
+
+            throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
+        }
+          break;
+
+      case PEN_RECURSO_BASE.'_listar':
+          // Ação padrão desta tela
+          break;
+
+      default:
+          throw new InfraException('Ação não permitida nesta tela');
+
     }
+  }
     //--------------------------------------------------------------------------
 
     $arrComandos = array();
@@ -103,23 +102,23 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-    if(array_key_exists('sigla', $_POST) && (!empty($_POST['sigla']) && $_POST['sigla'] !== 'null')) {
-        $objPenUnidadeDTOFiltro->setStrSigla('%'.$_POST['sigla'].'%', InfraDTO::$OPER_LIKE);
-    }
+  if(array_key_exists('sigla', $_POST) && (!empty($_POST['sigla']) && $_POST['sigla'] !== 'null')) {
+      $objPenUnidadeDTOFiltro->setStrSigla('%'.$_POST['sigla'].'%', InfraDTO::$OPER_LIKE);
+  }
 
-    if(array_key_exists('descricao', $_POST) && (!empty($_POST['descricao']) && $_POST['descricao'] !== 'null')) {
-        $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['descricao'].'%', InfraDTO::$OPER_LIKE);
-    }
+  if(array_key_exists('descricao', $_POST) && (!empty($_POST['descricao']) && $_POST['descricao'] !== 'null')) {
+      $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['descricao'].'%', InfraDTO::$OPER_LIKE);
+  }
 
     $objFiltroDTO = clone $objPenUnidadeDTOFiltro;
 
-    if(!$objFiltroDTO->isSetStrSigla()) {
-        $objFiltroDTO->setStrSigla('');
-    }
+  if(!$objFiltroDTO->isSetStrSigla()) {
+      $objFiltroDTO->setStrSigla('');
+  }
 
-    if(!$objFiltroDTO->isSetStrDescricao()) {
-        $objFiltroDTO->setStrDescricao('');
-    }
+  if(!$objFiltroDTO->isSetStrDescricao()) {
+      $objFiltroDTO->setStrDescricao('');
+  }
 
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);
@@ -141,52 +140,52 @@ try {
     $objPagina->processarPaginacao($objPenUnidadeDTOFiltro);
 
     $numRegistros = count($arrObjPenUnidadeDTO);
-    if(!empty($arrObjPenUnidadeDTO)){
+  if(!empty($arrObjPenUnidadeDTO)){
 
-        $strResultado = '';
+      $strResultado = '';
 
-        $strResultado .= '<table width="99%" class="infraTable">'."\n";
-        $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
+      $strResultado .= '<table width="99%" class="infraTable">'."\n";
+      $strResultado .= '<caption class="infraCaption">'.$objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros).'</caption>';
 
-        $strResultado .= '<tr>';
-        $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
-        $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";
+      $strResultado .= '<tr>';
+      $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";
+      $strResultado .= '</tr>'."\n";
+      $strCssTr = '';
+
+      $index = 0;
+
+    foreach($arrObjPenUnidadeDTO as $objPenUnidadeDTO) {
+        $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+
+        $strResultado .= '<tr class="'.$strCssTr.'">';
+        $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
+        $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
+        $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
+        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
+        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
+        $strResultado .= '<td align="center">';
+
+        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+      if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
+        $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+      }
+
+      if($objSessao->verificarPermissao('pen_map_unidade_excluir')) {
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+      }
+
+        $strResultado .= '</td>';
         $strResultado .= '</tr>'."\n";
-        $strCssTr = '';
 
-        $index = 0;
-
-        foreach($arrObjPenUnidadeDTO as $objPenUnidadeDTO) {
-            $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
-
-            $strResultado .= '<tr class="'.$strCssTr.'">';
-            $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
-            $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
-            $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
-            $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
-            $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
-            $strResultado .= '<td align="center">';
-
-            //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
-            if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
-                $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
-            }
-
-            if($objSessao->verificarPermissao('pen_map_unidade_excluir')) {
-                $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
-            }
-
-            $strResultado .= '</td>';
-            $strResultado .= '</tr>'."\n";
-
-            $index++;
-        }
-        $strResultado .= '</table>';
+        $index++;
     }
+      $strResultado .= '</table>';
+  }
 }
 catch(InfraException $e){
 
@@ -312,7 +311,7 @@ function onClickBtnExcluir(){
 </script>
 <?php
 $objPagina->fecharHead();
-$objPagina->abrirBody(PEN_PAGINA_TITULO,'onload="inicializar();"');
+$objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
 <form id="frmAcompanharEstadoProcesso" method="post" action="<?php // print $objSessao->assinarLink($strProprioLink); ?>">
 

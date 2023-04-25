@@ -16,35 +16,35 @@ require_once DIR_SEI_WEB.'/SEI.php';
  */
 class PenUnidadeDTO extends UnidadeDTO {
 
-    public function getStrNomeTabela() {
-        return 'md_pen_unidade';
-    }
+  public function getStrNomeTabela() {
+      return 'md_pen_unidade';
+  }
     
-    public function montar() {
+  public function montar() {
         
-        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade'); 
-        $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh'); 
-        $this->configurarPK('IdUnidade',InfraDTO::$TIPO_PK_INFORMADO);
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade'); 
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh'); 
+      $this->configurarPK('IdUnidade', InfraDTO::$TIPO_PK_INFORMADO);
         
-        // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
-        // esta na InfraDTO e ela confunde em função do extends, então tenho que 
-        // criar uma nova instância
-        $objUnidadeDTO = new UnidadeDTO();
-        $objUnidadeDTO->retTodos();
+      // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
+      // esta na InfraDTO e ela confunde em função do extends, então tenho que 
+      // criar uma nova instância
+      $objUnidadeDTO = new UnidadeDTO();
+      $objUnidadeDTO->retTodos();
         
-        foreach($objUnidadeDTO->getArrAtributos() as $arrAtrib) {
+    foreach($objUnidadeDTO->getArrAtributos() as $arrAtrib) {
             
-            if($arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO] != 'IdUnidade') {
+      if($arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO] != 'IdUnidade') {
             
-                $this->adicionarAtributoTabelaRelacionada(
-                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO], 
-                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_NOME], 
-                    $arrAtrib[InfraDTO::$POS_ATRIBUTO_CAMPO_SQL], 
-                    $objUnidadeDTO->getStrNomeTabela()
-                );
-            }
-        }     
+        $this->adicionarAtributoTabelaRelacionada(
+            $arrAtrib[InfraDTO::$POS_ATRIBUTO_PREFIXO], 
+            $arrAtrib[InfraDTO::$POS_ATRIBUTO_NOME], 
+            $arrAtrib[InfraDTO::$POS_ATRIBUTO_CAMPO_SQL], 
+            $objUnidadeDTO->getStrNomeTabela()
+        );
+      }
+    }     
 
-        $this->configurarFK('IdUnidade', 'unidade', 'id_unidade');  
-    }
+      $this->configurarFK('IdUnidade', 'unidade', 'id_unidade');  
+  }
 }

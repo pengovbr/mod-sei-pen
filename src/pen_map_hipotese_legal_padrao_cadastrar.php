@@ -29,66 +29,66 @@ try {
 
     $bolSomenteLeitura = false;
 
-    switch ($_GET['acao']) {
-        case PEN_RECURSO_BASE.'_cadastrar':
-            $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-            $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=principal&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
-            $strTitulo =  PEN_PAGINA_TITULO;
-            break;
+  switch ($_GET['acao']) {
+    case PEN_RECURSO_BASE.'_cadastrar':
+        $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
+        $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=principal&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+        $strTitulo =  PEN_PAGINA_TITULO;
+        break;
 
-        case PEN_RECURSO_BASE.'_visualizar':
-            $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=principal&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
-            $bolSomenteLeitura = true;
-           $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
-            break;
+    case PEN_RECURSO_BASE.'_visualizar':
+        $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=principal&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
+        $bolSomenteLeitura = true;
+       $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
+        break;
 
 
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }
+    default:
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }
 
     //--------------------------------------------------------------------------
     // Ao por POST esta salvando o formulário
 
     $objPenParametroRN = new PenParametroRN();
 
-    if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
+  if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
-        if(!array_key_exists('id_hipotese_legal', $_POST) || empty($_POST['id_hipotese_legal'])) {
-            throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
-        }
+    if(!array_key_exists('id_hipotese_legal', $_POST) || empty($_POST['id_hipotese_legal'])) {
+        throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
+    }
 
-        $objPenParametroDTO = new PenParametroDTO();
-        $objPenParametroDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
-        $objPenParametroDTO->retTodos();
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
+      $objPenParametroDTO->retTodos();
 
-        if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-            $objPenParametroDTO->setStrValor($_POST['id_hipotese_legal']);
-            $objPenParametroRN->alterar($objPenParametroDTO);
-        }
-        else {
-            $objPenParametroDTO->setStrValor($_POST['id_hipotese_legal']);
-            $objPenParametroRN->cadastrar($objPenParametroDTO);
-        }
-
-        $objPagina->adicionarMensagem('Hipótese de Restrição Padrão foi salva com sucesso', InfraPagina::$TIPO_MSG_AVISO);
-
-        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao']));
-        exit(0);
+    if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
+        $objPenParametroDTO->setStrValor($_POST['id_hipotese_legal']);
+        $objPenParametroRN->alterar($objPenParametroDTO);
     }
     else {
-
-        $objPenParametroDTO = new PenParametroDTO();
-        $objPenParametroDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
-        $objPenParametroDTO->retTodos();
-
-        if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-            $objPenParametroDTO = $objPenParametroRN->consultar($objPenParametroDTO);
-        }
-        else {
-            $objPenParametroDTO->setStrValor('0');
-        }
+        $objPenParametroDTO->setStrValor($_POST['id_hipotese_legal']);
+        $objPenParametroRN->cadastrar($objPenParametroDTO);
     }
+
+      $objPagina->adicionarMensagem('Hipótese de Restrição Padrão foi salva com sucesso', InfraPagina::$TIPO_MSG_AVISO);
+
+      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao']));
+      exit(0);
+  }
+  else {
+
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
+      $objPenParametroDTO->retTodos();
+
+    if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
+        $objPenParametroDTO = $objPenParametroRN->consultar($objPenParametroDTO);
+    }
+    else {
+        $objPenParametroDTO->setStrValor('0');
+    }
+  }
 
     //--------------------------------------------------------------------------
     // Auto-Complete
@@ -153,7 +153,7 @@ function onSubmit() {
 </script>
 <?php
 $objPagina->fecharHead();
-$objPagina->abrirBody($strTitulo,'onload="inicializar();"');
+$objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>

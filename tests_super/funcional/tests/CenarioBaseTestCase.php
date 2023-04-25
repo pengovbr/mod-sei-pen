@@ -507,7 +507,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->byLinkText("Menu")->click();
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
         $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }

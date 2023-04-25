@@ -49,7 +49,7 @@ try {
       }            
     break;
     
-    case 'pen_map_tipo_documento_envio_padrao_consultar':    	
+    case 'pen_map_tipo_documento_envio_padrao_consultar':       
       $strTitulo = 'Consultar Espécie Documental Padrão para Envio';
       $arrComandos[] = '<button type="button" accesskey="F" name="btnFechar" value="Fechar" onclick="location.href=\''.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao']).'#ID-'.$_GET['id_cidade'].'\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
     break;

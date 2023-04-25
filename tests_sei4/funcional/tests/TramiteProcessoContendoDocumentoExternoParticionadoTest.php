@@ -1,4 +1,8 @@
 <?php
+/**
+ * @group rodarseparado
+ * @group rodarseparado2
+ */
 
 class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBaseTestCase
 {
