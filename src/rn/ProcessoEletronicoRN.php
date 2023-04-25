@@ -152,7 +152,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
       if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-          throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
+          throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
       }
 
         $this->validarDisponibilidade();
@@ -631,8 +631,10 @@ class ProcessoEletronicoRN extends InfraRN
 
       $cabecalho->urgente = $urgente;
       $cabecalho->motivoDaUrgencia = $motivoUrgencia;
-      $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
-
+      //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
+      //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
+      $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
+      
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
       $this->atribuirInformacoesModulo($cabecalho);
 

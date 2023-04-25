@@ -214,7 +214,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
                     // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
                     echo '<div class="div_input">';
                     echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
-                    echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no PEN devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
+                    echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso aos Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
                     echo '</div>';
                 }
                   break;

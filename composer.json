@@ -4,15 +4,15 @@
     "platform": {
       "php": "7.3.12"
     }
-   },
+  },
   "require-dev": {
-      "php": "7.3.12",
-      "phpunit/phpunit": "*",
-      "squizlabs/php_codesniffer": "*",
-      "mockery/mockery": "^1.5",
-      "phpcompatibility/php-compatibility": "^9.3"
+    "php": "7.3.12",
+    "phpunit/phpunit": "*",
+    "squizlabs/php_codesniffer": "*",
+    "mockery/mockery": "^1.5",
+    "phpcompatibility/php-compatibility": "^9.3"
   },
   "require": {
-      "pheromone/phpcs-security-audit": "*"
+    "pheromone/phpcs-security-audit": "*"
   }
 }

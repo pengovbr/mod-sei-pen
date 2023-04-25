@@ -131,14 +131,14 @@ Abaixo um arquivo inteiro de um orgao que tramita em homologação, serve para e
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
     <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/?wsdl"/>
 
-    <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
+    <!-- Chaves de configurações gerais do teste do Tramita.GOV.BR -->
     <const name="PEN_WAIT_TIMEOUT" value="40000" /> 
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="120000" /> 
     <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="120000"/> 
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" "/> 
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" "/> 
 
-    <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de Serviços do PEN -->
+    <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Tramita.GOV.BR -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
     <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" /> 
     <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http:8000/sei"/>
