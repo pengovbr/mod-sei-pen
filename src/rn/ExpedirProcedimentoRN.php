@@ -883,10 +883,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
             $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
             $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
-          } else {
-              // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
-              $documento->retirado = true;
           }
+        }
+
+        if($staAssociacao == RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
+          // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
+          $documento->retirado = true;
         }
 
         if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
