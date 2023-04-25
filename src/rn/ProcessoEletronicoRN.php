@@ -1163,7 +1163,7 @@ class ProcessoEletronicoRN extends InfraRN
       $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo, true);
 
       $arrObjComponenteDigitalDTOAux = array();
-    foreach ($arrObjDocumento as $key => $objDocumento) {
+      foreach ($arrObjDocumento as $objDocumento) {
         $quantidadeDeComponentesDigitais = count($objDocumento->componenteDigital);
       if($quantidadeDeComponentesDigitais > 1){
         $arrObjComponenteDigitalDTOAux = self::montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados);
@@ -1174,7 +1174,7 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
           $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
           $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
-          $objComponenteDigitalDTO->setNumOrdem($key + 1);
+          $objComponenteDigitalDTO->setNumOrdem(1);
           $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
           $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
 
