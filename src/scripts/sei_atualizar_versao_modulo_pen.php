@@ -2488,12 +2488,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3024(){
       $this->atualizarNumeroVersao("3.2.4");
-  }  
+  }
 
   protected function instalarV3030() {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
       $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
-      
+      $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
+
       $this->atualizarNumeroVersao("3.3.0");
   }
 }

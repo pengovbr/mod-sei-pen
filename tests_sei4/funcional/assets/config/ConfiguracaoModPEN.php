@@ -59,7 +59,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
                 // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.
                 // Valor padrão: 3
-                "NumeroTentativasErro" => 20,
+                "NumeroTentativasErro" => 3,
 
                 // Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
                 // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para

@@ -183,7 +183,7 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->setBolDebugInfra(false);
       InfraDebug::getInstance()->setBolEcho(false);
       InfraDebug::getInstance()->limpar();
-                
+
     try {
         PENIntegracao::verificarCompatibilidadeConfiguracoes();
 

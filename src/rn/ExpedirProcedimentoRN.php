@@ -128,6 +128,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
           $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
+          $objLoteProcedimentoRN = new PenLoteProcedimentoRN();
           $bolSinProcessamentoEmLote = $objExpedirProcedimentoDTO->getBolSinProcessamentoEmLote();
           $numIdLote = $objExpedirProcedimentoDTO->getNumIdLote();
           $numIdAtividade = $objExpedirProcedimentoDTO->getNumIdAtividade();
@@ -141,12 +142,9 @@ class ExpedirProcedimentoRN extends InfraRN {
             $numTempoInicialRecebimento = microtime(true);
 
             $this->gravarLogDebug(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO, 2);
-            $objLoteProcedimentoRN = new PenLoteProcedimentoRN();
-
             $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
             $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
             $objPenLoteProcedimentoDTO->setNumIdLote($numIdLote);
-
         }
 
           $objInfraException = new InfraException();
@@ -175,7 +173,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
 
               $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
-              PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
+              $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento);
               return false;
           }
         }
@@ -299,7 +297,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           }
           catch (\Exception $e) {
           //Realiza o desbloqueio do processo
-            try{ $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI); } catch (InfraException $ex) { }
+            try{ $this->desbloquearProcessoExpedicao($objProcesso->idProcedimentoSEI); } catch (Exception $ex) { }
 
           //Realiza o cancelamento do tramite
             try{
@@ -316,12 +314,12 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
 
       } catch (\Exception $e) {
+        $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
         if($bolSinProcessamentoEmLote){
-                PenLoteProcedimentoRN::desbloquearProcessoLoteControlado($dblIdProcedimento);
+            $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento);
+        } else {
+            throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
         }
-
-          $this->gravarLogDebug("Erro processando envio de processo [expedirProcedimento]: $e", 0, true);
-          throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
       }
     }
 
@@ -342,14 +340,14 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
                 $objTramiteDTO->setNumMaxRegistrosRetorno(1);
                 $objTramiteDTO->retNumIdTramite();
-    
+
                 $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
                 $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
                 if(isset($objTramiteDTO)) {
                     $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
                     $objRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
-                    
+
                     if(isset($objRetorno)){
                         $objMetadadosProtocolo = $objRetorno->metadados;
                     }
@@ -359,9 +357,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
                 //que os metadados do protocolo não pode ser obtida
                 LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
-            } 
+            }
         }
-        
+
         $this->objCacheMetadadosProtocolo[$parDblIdProcedimento] = $objMetadadosProtocolo;
         return $objMetadadosProtocolo;
     }
@@ -1442,7 +1440,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $strConteudoFS = $this->recuperarConteudoComponenteImutavel($objDocumentoDTO);
           if(!empty($strConteudoFS)){
             $objComponenteDigital = $this->consultarComponenteDigital($objDocumentoDTO->getDblIdDocumento());
-            $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;            
+            $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
             $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoFS, true));
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital == $hashDoComponenteDigitalAnterior){
               $strConteudoAssinatura = $strConteudoFS;
@@ -1454,8 +1452,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
             $objDocumentoDTO2->setObjInfraSessao(SessaoSEI::getInstance());
             $objDocumentoRN = new DocumentoRN();
-            $strConteudoAssinatura = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO2); 
-            
+            $strConteudoAssinatura = $objDocumentoRN->consultarHtmlFormulario($objDocumentoDTO2);
+
             $objComponenteDigital = $this->consultarComponenteDigital($objDocumentoDTO->getDblIdDocumento());
             $hashDoComponenteDigitalAnterior = (isset($objComponenteDigital)) ? $objComponenteDigital->getStrHashConteudo() : null;
 
@@ -1463,8 +1461,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             if(isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
               // Caso 1: Verificar se a diferença de hash foi causada por mudança no fechamento das tags meta
               $strConteudoAssinatura = str_replace(
-                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />', 
-                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">', 
+                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />',
+                '<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">',
                 $strConteudoAssinatura
               );
             }
@@ -1488,8 +1486,8 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     /**
-     * Recupera o conteúdo de documento interno imutável armazenado no Filesystem durante o envio de processos para o 
-     * Tramita.gov.br, garantindo o envio da versão correta enviado originalmente e impedindo erros de hash por conta de 
+     * Recupera o conteúdo de documento interno imutável armazenado no Filesystem durante o envio de processos para o
+     * Tramita.gov.br, garantindo o envio da versão correta enviado originalmente e impedindo erros de hash por conta de
      * mudança na forma dinâmica de recuperação do conteúdo do documento
      *
      * @param DocumentoDTO $objDocumentoDTO
@@ -2170,9 +2168,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                       );
               }
             } catch (\Exception $e) {
-                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
-                $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'N'));
-                throw new InfraException("Error Processing Request", $e);
+                $strProtocoloDocumento = $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado();
+                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento, $strProtocoloDocumento), 'N'));
+                throw new InfraException("Erro processando envio do componentes digitais do documento $strProtocoloDocumento", $e);
             }
           }
         }
@@ -2967,15 +2965,15 @@ class ExpedirProcedimentoRN extends InfraRN {
     protected function cancelarTramiteControlado($dblIdProcedimento)
     {
         //Busca os dados do protocolo
-        $objDtoProtocolo = new ProtocoloDTO();
-        $objDtoProtocolo->retStrProtocoloFormatado();
-        $objDtoProtocolo->retDblIdProtocolo();
-        $objDtoProtocolo->setDblIdProtocolo($dblIdProcedimento);
+        $objProtocoloDTO = new ProtocoloDTO();
+        $objProtocoloDTO->retStrProtocoloFormatado();
+        $objProtocoloDTO->retDblIdProtocolo();
+        $objProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
 
         $objProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
-        $objDtoProtocolo = $objProtocoloBD->consultar($objDtoProtocolo);
+        $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-        $this->cancelarTramiteInterno($objDtoProtocolo);
+        $this->cancelarTramiteInterno($objProtocoloDTO);
 
     }
 
@@ -3003,7 +3001,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
         $cancelarLote=false;
 
-      if(is_object($objPenLoteProcedimentoDTO)){
+      if(!is_null($objPenLoteProcedimentoDTO)){
           $cancelarLote=true;
       }
 
