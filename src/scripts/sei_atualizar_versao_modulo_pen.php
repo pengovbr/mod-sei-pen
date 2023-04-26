@@ -2495,6 +2495,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
       $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
 
+      $objPenParametroRN = new PenParametroRN();
+      $objPenParametroRN->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
+
       $this->atualizarNumeroVersao("3.3.0");
   }
 }
