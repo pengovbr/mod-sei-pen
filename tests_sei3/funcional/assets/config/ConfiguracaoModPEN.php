@@ -76,6 +76,11 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                         "[servidor_php]",
                         "[servidor_php2]",
                     )
+                ),
+
+                // "EnviarApenasComponentesDigitaisPendentes" => true,
+                "EnviarApenasComponentesDigitaisPendentes" => array(
+                    5 => array(2000, 4000),
                 )
             )
         );
