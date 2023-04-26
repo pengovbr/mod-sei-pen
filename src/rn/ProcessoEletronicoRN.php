@@ -594,13 +594,13 @@ class ProcessoEletronicoRN extends InfraRN
             $objProtocoloBD = new RelProtocoloProtocoloBD(BancoSEI::getInstance());
             $arrProtocolos = $objProtocoloBD->listar($objProtocoloDTO);
 
-            $msg = "";
+            $msg = "<br/><br/>";
             foreach ($arrProtocolos as $index => $protocolo) {
                 if ($index != $protocolo->getNumSequencia()){
                     $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
                     $pos = $index + 1;
                     $sequencia = $protocolo->getNumSequencia() + 1;
-                    $msg .= "A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.";
+                    $msg .= "A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.<br/>";
                 }
             }
 
