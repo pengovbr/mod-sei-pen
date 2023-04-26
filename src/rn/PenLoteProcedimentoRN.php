@@ -104,14 +104,14 @@ class PenLoteProcedimentoRN extends InfraRN {
      * @param PenLoteProcedimentoDTO $objPenLoteProcedimentoDTO
      * @return void
      */
-    protected function registrarTentativaEnvioControlado(PenLoteProcedimentoDTO $objPenLoteProcedimentoDTO){
-        $numTentativas = $objPenLoteProcedimentoDTO->getNumTentativas() ?: 0;
-        $numTentativas += 1;
+  protected function registrarTentativaEnvioControlado(PenLoteProcedimentoDTO $objPenLoteProcedimentoDTO){
+      $numTentativas = $objPenLoteProcedimentoDTO->getNumTentativas() ?: 0;
+      $numTentativas += 1;
 
-        $objPenLoteProcedimentoDTO->setNumTentativas($numTentativas);
-        $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
-        $objPenLoteProcedimentoBD->alterar($objPenLoteProcedimentoDTO);
-    }
+      $objPenLoteProcedimentoDTO->setNumTentativas($numTentativas);
+      $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
+      $objPenLoteProcedimentoBD->alterar($objPenLoteProcedimentoDTO);
+  }
 
 
   protected function desbloquearProcessoLoteControlado($dblIdProcedimento)
@@ -128,15 +128,15 @@ class PenLoteProcedimentoRN extends InfraRN {
         $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
 
-        if(!is_null($objPenLoteProcedimentoDTO)){
-            $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
-            $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
-            $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
-            $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
+      if(!is_null($objPenLoteProcedimentoDTO)){
+          $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
+          $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
+          $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
+          $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
 
-            $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-            $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
-        }
+          $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+          $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+      }
 
         //Desbloqueia o processo
         $objProtocoloRN = new ProtocoloRN();

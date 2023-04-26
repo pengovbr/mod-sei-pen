@@ -268,43 +268,43 @@ class ProcessarPendenciasRN extends InfraRN
         $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
 
-        if(!is_null($objPenLoteProcedimentoDTO)){
-            //Registra tentativa de envio e cancela o trâmite caso ultrapasse os valores permitidos
-            $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
-            $numTentativasErroMaximo = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, ProcessoEletronicoRN::WS_TENTATIVAS_ERRO);
-            $numTentativasErroMaximo = (is_numeric($numTentativasErroMaximo)) ? intval($numTentativasErroMaximo) : ProcessoEletronicoRN::WS_TENTATIVAS_ERRO;
-            $numTentativasProcesso = $objPenLoteProcedimentoDTO->getNumTentativas() ?: 0;
+      if(!is_null($objPenLoteProcedimentoDTO)){
+          //Registra tentativa de envio e cancela o trâmite caso ultrapasse os valores permitidos
+          $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+          $numTentativasErroMaximo = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, ProcessoEletronicoRN::WS_TENTATIVAS_ERRO);
+          $numTentativasErroMaximo = (is_numeric($numTentativasErroMaximo)) ? intval($numTentativasErroMaximo) : ProcessoEletronicoRN::WS_TENTATIVAS_ERRO;
+          $numTentativasProcesso = $objPenLoteProcedimentoDTO->getNumTentativas() ?: 0;
 
-            if($numTentativasErroMaximo >= $numTentativasProcesso + 1){
-                $objPenLoteProcedimentoRN->registrarTentativaEnvio($objPenLoteProcedimentoDTO);
+        if($numTentativasErroMaximo >= $numTentativasProcesso + 1){
+            $objPenLoteProcedimentoRN->registrarTentativaEnvio($objPenLoteProcedimentoDTO);
 
-                $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
-                $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($objPenLoteProcedimentoDTO->getNumIdRepositorioOrigem());
-                $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($objPenLoteProcedimentoDTO->getNumIdUnidadeOrigem());
+            $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+            $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($objPenLoteProcedimentoDTO->getNumIdRepositorioOrigem());
+            $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($objPenLoteProcedimentoDTO->getNumIdUnidadeOrigem());
 
-                $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($objPenLoteProcedimentoDTO->getNumIdRepositorioDestino());
-                $objExpedirProcedimentoDTO->setStrRepositorioDestino($objPenLoteProcedimentoDTO->getStrRepositorioDestino());
-                $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($objPenLoteProcedimentoDTO->getNumIdUnidadeDestino());
-                $objExpedirProcedimentoDTO->setStrUnidadeDestino($objPenLoteProcedimentoDTO->getStrUnidadeDestino());
-                $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
-                $objExpedirProcedimentoDTO->setBolSinUrgente(false);
-                $objExpedirProcedimentoDTO->setDblIdProcedimento($objPenLoteProcedimentoDTO->getDblIdProcedimento());
-                $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
-                $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(true);
-                $objExpedirProcedimentoDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
-                $objExpedirProcedimentoDTO->setNumIdAtividade($objPenLoteProcedimentoDTO->getNumIdAtividade());
-                $objExpedirProcedimentoDTO->setNumIdUnidade($objPenLoteProcedimentoDTO->getNumIdUnidade());
+            $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($objPenLoteProcedimentoDTO->getNumIdRepositorioDestino());
+            $objExpedirProcedimentoDTO->setStrRepositorioDestino($objPenLoteProcedimentoDTO->getStrRepositorioDestino());
+            $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($objPenLoteProcedimentoDTO->getNumIdUnidadeDestino());
+            $objExpedirProcedimentoDTO->setStrUnidadeDestino($objPenLoteProcedimentoDTO->getStrUnidadeDestino());
+            $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+            $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+            $objExpedirProcedimentoDTO->setDblIdProcedimento($objPenLoteProcedimentoDTO->getDblIdProcedimento());
+            $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+            $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(true);
+            $objExpedirProcedimentoDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
+            $objExpedirProcedimentoDTO->setNumIdAtividade($objPenLoteProcedimentoDTO->getNumIdAtividade());
+            $objExpedirProcedimentoDTO->setNumIdUnidade($objPenLoteProcedimentoDTO->getNumIdUnidade());
 
-                $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
-                $objExpedirProcedimentoRN->expedirProcedimento($objExpedirProcedimentoDTO);
+            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+            $objExpedirProcedimentoRN->expedirProcedimento($objExpedirProcedimentoDTO);
 
-                $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
-                $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
+            $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
+            $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
 
-            } else {
-                $objPenLoteProcedimentoRN->desbloquearProcessoLote($objPenLoteProcedimentoDTO->getDblIdProcedimento());
-            }
+        } else {
+            $objPenLoteProcedimentoRN->desbloquearProcessoLote($objPenLoteProcedimentoDTO->getDblIdProcedimento());
         }
+      }
     } catch (\Exception $e) {
         throw new InfraException('Falha ao expedir processso em lote.', $e);
     }
