@@ -876,16 +876,16 @@ class ExpedirProcedimentoRN extends InfraRN {
           $documento->nivelDeSigilo = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
 
           //Verifica se o documento faz parte de outro processo devido à sua anexação ou à sua movimentação
-        if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
           if($staAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
-            // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
-            $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
-            $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
+            if($documentoDTO->getStrProtocoloProcedimentoFormatado() != $objProcesso->protocolo){
+                // Caso o documento não tenha sido movido, seu protocolo é diferente devido à sua anexação à outro processo
+                $documento->protocoloDoProcessoAnexado = $documentoDTO->getStrProtocoloProcedimentoFormatado();
+                $documento->idProcedimentoAnexadoSEI = $documentoDTO->getDblIdProcedimento();
+            }
           } else {
               // Em caso de documento movido, ele será tratado como cancelado para trâmites externos
               $documento->retirado = true;
           }
-        }
 
         if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
             $documento->hipoteseLegal = new stdClass();
@@ -1910,7 +1910,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
 
-    public function listarDocumentosRelacionados($idProcedimento, $paramDblIdDocumentoFiltro = null)
+    public function listarDocumentosRelacionados($idProcedimento, $idDblDocumentoFiltro = null)
     {
       if(!isset($idProcedimento)){
           throw new InfraException('Parâmetro $idProcedimento não informado.');
@@ -1954,7 +1954,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
             $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
             $bolIdDocumentoExiste = array_key_exists($dblIdDocumento, $arrObjDocumentoDTOIndexado) && isset($arrObjDocumentoDTOIndexado[$dblIdDocumento]);
-            $bolIdDocumentoFiltrado = is_null($paramDblIdDocumentoFiltro) || ($dblIdDocumento == $paramDblIdDocumentoFiltro);
+            $bolIdDocumentoFiltrado = is_null($idDblDocumentoFiltro) || ($dblIdDocumento == $idDblDocumentoFiltro);
 
           if ($bolIdDocumentoExiste && $bolIdDocumentoFiltrado){
             $arrObjDocumentoDTO[] = array(
@@ -2083,8 +2083,11 @@ class ExpedirProcedimentoRN extends InfraRN {
             $dadosDoComponenteDigital->protocolo = $objComponenteDigitalDTO->getStrProtocolo();
             $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
 
-            //$objDocumentoDTO = $this->consultarDocumento($objComponenteDigitalDTO->getDblIdDocumento());
             $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
+            $arrObjDocumentoDTOAssociacao = array_filter($arrObjDocumentoDTOAssociacao, function($item){
+                return $item["StaAssociacao"] == RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO;
+            });
+            $arrObjDocumentoDTOAssociacao = array_values($arrObjDocumentoDTOAssociacao);
             $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
             $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
             $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);

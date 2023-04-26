@@ -226,7 +226,7 @@ tramitar-pendencias-simples:
 	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
-	i=1; while [ "$$i" -le 300 ]; do \
+	i=1; while [ "$$i" -le 3000 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
 		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
 		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \

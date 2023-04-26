@@ -2498,6 +2498,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objPenParametroRN = new PenParametroRN();
       $objPenParametroRN->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
 
+      // Corrige chave primaria da tabela de componentes digitais
+      $this->excluirChavePrimariaComIndice('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+      $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem_documento', 'ordem'));
+
       $this->atualizarNumeroVersao("3.3.0");
   }
 }

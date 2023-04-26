@@ -855,6 +855,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
         $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmLote = false, $numIdUnidade = null)
     {
+
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
         throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
     }
