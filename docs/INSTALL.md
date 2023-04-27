@@ -1,6 +1,6 @@
 # Manual de Instalação do Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).
+O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Tramita.GOV.BR (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).
 
 **ATENÇÃO: Caso o módulo já se encontre instalado em uma versão anterior, siga as instruções detalhadas de atualização no documento ATUALIZACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
 
@@ -10,7 +10,7 @@ A utilização deste módulo adicionará novas funcionalidades ao SEI, permitind
  - Enviar e receber processos administrativos de outras instituições
  - Acompanhar a relação de processos em trâmite externo
  
-Para maiores informações sobre o Barramento de Serviços e o PEN, acesse https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen.
+Para maiores informações sobre o Tramita.GOV.BR e o PEN, acesse https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen.
 
 Este documento está estruturado nas seguintes seções:
 
@@ -20,8 +20,8 @@ Procedimentos destinados à Equipe Técnica responsáveis pela instalação do m
 2. **[Configuração](#configuração)**:
 Procedimentos destinados ao Administradores do SEI responsáveis pela configuração do módulo através da funcionalidades de administração do sistema.
 
-3. **[Configurações Técnicas Adicionais](#configuracoes-técnicas-adicionais)**:
-Esta seção apresenta algumas configurações adicionais do módulo do Barramento de Serviços do PEN que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
+3. **[Configurações Técnicas Adicionais](#3-configurações-adicionais)**:
+Esta seção apresenta algumas configurações adicionais do módulo do Tramita.GOV.BR que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo.
 
 4. **[Suporte](#suporte)**:
 Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módulo e os demais componentes do PEN.
@@ -42,10 +42,10 @@ Todos os itens descritos nesta seção são destinados à equipe de tecnologia d
  - Certificado Digital de autenticação de sistema no Barramento do PEN emitido pela equipe do Processo Eletrônico Nacional após aprovação do Comitê Gestor de Protocolo.
  - Importante ressaltar que para compatibilidade com o SEI versão 4, e suas futuras atualizações, o órgão deverá se atentar ao changelog de cada versão do módulo. Lembramos que apenas as versões do presente módulo superiores a 3.0.0 poderão ser utilizadas.
   
-Para iniciar os procedimentos de configuração, será necessário registrar no **Barramento de Serviços do PEN** às unidades administrativas que poderão realizar o envio e recebimento de processos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo**, previamente habilitado no portal do **Barramento de Serviços**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
+Para iniciar os procedimentos de configuração, será necessário registrar no **Tramita.GOV.BR** às unidades administrativas que poderão realizar o envio e recebimento de processos externo no SEI. Este procedimento precisa ser realizado pelo **Gestor de Protocolo**, previamente habilitado no portal do **Tramita.GOV.BR**. Lembrando que os testes devem ser feitos primeiro em ambiente de homologação para, posteriormente, a utilização em produção ser liberada. Para solicitação de acesso aos ambientes, acesse os seguintes endereços:
 
- - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
- - **Produção:** [https://gestaopen.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Barramento de Serviços do PEN - Cadastro de Comitê")
+ - **Homologação:** [https://homolog.gestaopen.processoeletronico.gov.br/](https://homolog.gestaopen.processoeletronico.gov.br/solicitarCadastroComite "HOMOLOGAÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
+ - **Produção:** [https://gestaopen.processoeletronico.gov.br/](https://gestaopen.processoeletronico.gov.br/solicitarCadastroComite "PRODUÇÃO: Portal de Administração Tramita.GOV.BR - Cadastro de Comitê")
 
 Para maiores informações, entre em contato pelo telefone 0800 978-9005 ou diretamente pela Central de Serviços do PEN, endereço https://portaldeservicos.economia.gov.br/citsmart/login/login.load.
 
@@ -125,14 +125,14 @@ mv ConfiguracaoModPEN.exemplo.php ConfiguracaoModPEN.php
 Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
 
 * **WebService**  
-Endereço do Web Service principal de integração com o Barramento de Serviços do PEN. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
+Endereço do Web Service principal de integração com o Tramita.GOV.BR. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
     * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/ 
 
 
 * **LocalizacaoCertificado**  
-Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
+Localização completa do certificado digital utilizado para autenticação nos serviços do Tramita.GOV.BR. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
 Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
 ```
 Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
@@ -144,7 +144,7 @@ Senha do certificado digital necessário para a aplicação descriptografar e ac
 * **Gearman** _(opcional e altamente desejável)_  
 Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN.  
 As mensagens recebidas do Barramento são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para processamento coordenado. Caso este parâmetro não seja configurado ou o servidor do Gearman esteja indisponível, o processamento será feito diretamente pelo sistema na periodicidade definida no agendamento da tarefa _PENAgendamentoRN::processarTarefasPEN_.  
-Veja [Processamento paralelo de processos com Gearman]((#processamento-paralelo-de-multiplos-processos-com-Gearman)) para maiores informações.
+Veja [Processamento paralelo de processos com Gearman]((#31-instalação-do-gearmand-para-processamento-assíncrono-de-tarefas)) para maiores informações.
 
     * **Servidor**  
     *IP ou Hostname do servidor Gearman instalado*
@@ -158,8 +158,8 @@ Quantidade de tentativas de requisição dos serviços do Barramento PEN antes q
 Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede. *Valor padrão: 3*
 
 * **WebServicePendencias** _(opcional)_  
-Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN.
-Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Barramento de Serviços do PEN.  
+Endereço do Web Service de monitoramente de pendências de trâmite no Tramita.GOV.BR.
+Configuração necessária somente quando o módulo é configurado para utilização conjunta com o Supervisor para monitorar ativamente todos os eventos de envio e recebimentos de processos enviados pelo Tramita.GOV.BR.  
 Para maiores informações sobre como utilzar este recurso. Veja a seção [Conexão persistente com uso do Supervisor](#Conexão-persistente-com-uso-do-Supervisor) para maiores informações.  
 Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
@@ -203,7 +203,7 @@ Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-l
 
 A partir da versão SEI 3.1.x, o agendamento de tarefas do sistema pode ser executado em uma periodicidade de minutos, o que não era possível em versões anteriores (SEI 3.0.X). 
 
-Com esta melhoria no SEI, o módulo mod-sei-pen 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Barramento de Serviços do PEN, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
+Com esta melhoria no SEI, o módulo mod-sei-pen 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Tramita.GOV.BR, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
 
 Para que o módulo possa funcionar corretamente com o agendamento de tarefas do SEI, é necessário revisar a configuração do serviço CRON do sistema para certificar que ele se encontra corretamente configurado para ser executado a cada minuto. Ou seja, seguindo o manual de instalação do SEI 3.1.X, a configuração do serviço CRON nos servidores responsáveis pela execução dos agendamentos do SEI deve estar semelhante ao mostrado abaixo:
 
@@ -252,7 +252,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
     - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do **mod-sei-pen**
-    - Conexão com o Barramento de Serviços do PEN realizada com sucesso
+    - Conexão com o Tramita.GOV.BR realizada com sucesso
     - Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso
 
 ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN** FINALIZADA COM SECESSO **
@@ -266,7 +266,7 @@ Outras configurações avançadas do módulo podem ser encontradas na seção [O
 
 ## 2. CONFIGURAÇÕES
 
-Esta seção descreve os passos de configuração do módulo de Integração do SEI com o Barramento de Serviços do PEN. Todos os itens descritos nesta seção são destinados aos Administradores do sistema SEI da instituição, responsáveis pela alteração de configurações gerais do sistema através do menu de administração do SEI (**SEI >> Administração >> Processo Eletrônico Nacional**)
+Esta seção descreve os passos de configuração do módulo de Integração do SEI com o Tramita.GOV.BR. Todos os itens descritos nesta seção são destinados aos Administradores do sistema SEI da instituição, responsáveis pela alteração de configurações gerais do sistema através do menu de administração do SEI (**SEI >> Administração >> Processo Eletrônico Nacional**)
 
 
 ### 2.1. Configurar os parâmetros do Módulo de Integração PEN
@@ -277,7 +277,7 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 Exemplo: Poder Executivo Federal - *Valor 1 (Código de identificação da estrutura organizacional do Poder Executivo Federal)*
 
 #### Tipo de Processo Externo:
-*Identificação do Tipo de Processo que será aplicado à todos os processos e documentos recebidos de outras instituições pelo Barramento de Serviços do PEN.*  
+*Identificação do Tipo de Processo que será aplicado à todos os processos e documentos recebidos de outras instituições pelo Tramita.GOV.BR.*  
 
 Como o recebimento é realizado de forma automática, o sistema precisa atribuir um Tipo de Processo padrão para o novo processo recebido. Com isto, sugerimos a criação de um tipo de processo específico para estes processos, permitindo a fácil identificação e reclassificação, caso necessário. Segue abaixo um exemplo de Tipo de Processo que pode ser criado para esta situação:
 
@@ -296,7 +296,7 @@ Como o recebimento é realizado de forma automática, o sistema precisa atribuir
 
 A unidade a ser definida neste parâmetro será utilizada internamente pelo módulo e não deverá ter acesso de nenhum usuário do sistema. Por isto, não deve ser utilizada uma unidade pré-existente da própria instituição, sendo recomendado a criação de uma nova unidade administrativa "virtual" no SIP para esta configuração.
 
-Sugerimos que a criação uma nova unidade no SEI denominada "**EXTERNO - Unidade Externa**" para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
+Sugerimos que a criação uma nova unidade no SEI denominada: [sigla = **Tramita.GOV.BR**, nome: **Processo recebido via Tramita.GOV.BR**] para atribuição à este parâmetro do sistema. Lembrando que novas unidades devem ser criadas inicialmente no SIP (SIP > Unidades) e depois atribuídas à hierarquia de unidades do SEI (SIP > Hierarquias > Montar).
 
 #### Envia E-mail de Notificação de Recebimento
 *Indicação se o sistema irá enviar um e-mail de notificação alertando o recebimento de um novo processo para a unidade. Necessário que a unidade tenha um e-mail configurado em seu cadastro de contato.*
@@ -308,7 +308,7 @@ Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional
 
 As unidades administrativas que estão habilitadas para envio e recebimento de processos são gerenciadas pela própria instituição no Portal do Processo Eletrônico Nacional. Veja seção [Pré-condições para utilização](#pré-condições)
 
-Primeiro selecione a unidade administrativa do SEI no campo de seleção e depois digite o nome da unidade habilitada no Barramento e aperte ENTER para que seja realizada uma consulta às do cadastro da unidade habilitada no Barramento de Serviços do PEN.
+Primeiro selecione a unidade administrativa do SEI no campo de seleção e depois digite o nome da unidade habilitada no Barramento e aperte ENTER para que seja realizada uma consulta às do cadastro da unidade habilitada no Tramita.GOV.BR.
 
 ---
 
@@ -345,11 +345,11 @@ PS: Somente Tipos de Documento com aplicabilidade 'Externa' ou 'Interna e Extern
 ---
 
 
-### 2.4. Mapeamento de hipóteses legais do SEI com o Barramento de Serviços do PEN
+### 2.4. Mapeamento de hipóteses legais do SEI com o Tramita.GOV.BR
 
-Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Hipóteses Legais]** para configurar as hipóteses legais do SEI com a relação de hipóteses pré-definidas pelo Barramento de Serviços do PEN.
+Acesse a funcionalidade **[SEI > Administração > Processo Eletrônico Nacional > Mapeamento de Hipóteses Legais]** para configurar as hipóteses legais do SEI com a relação de hipóteses pré-definidas pelo Tramita.GOV.BR.
 
-Esta vinculação é necessária para que o módulo de integração possa traduzir corretamente as hipóteses legais definidas no SEI para o subconjunto de hipóteses aceitas pelos Barramento de Serviços do PEN no momento do envio ou recebimento de processos.
+Esta vinculação é necessária para que o módulo de integração possa traduzir corretamente as hipóteses legais definidas no SEI para o subconjunto de hipóteses aceitas pelos Tramita.GOV.BR no momento do envio ou recebimento de processos.
 
 Este mapeamento precisa ser feito tanto para o envio de processos como para o recebimento, sendo necessário realizar a configuração através das duas funcionalidades apresentadas abaixo:
 
@@ -365,14 +365,14 @@ A configuração de Hipótese de Restrição Padrão define qual será o comport
 
 ## 3. CONFIGURAÇÕES ADICIONAIS
 
-Esta seção apresenta algumas configurações adicionais do módulo do Barramento de Serviços do PEN que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo. Portanto, todas essas parametrizações são de cunho técnico e devem ser executados pela equipe de Tecnologia da Informação de sua instituição.
+Esta seção apresenta algumas configurações adicionais do módulo do Tramita.GOV.BR que não são obrigatórias para o funcionamento da integração, mas adicionam maior segurança, confiabilidade e desempenho ao módulo. Portanto, todas essas parametrizações são de cunho técnico e devem ser executados pela equipe de Tecnologia da Informação de sua instituição.
 
 
 ### 3.1. Instalação do Gearmand para processamento assíncrono de tarefas
 
-O Gearman é um servidor utilizado para gerenciar o processamento paralelo de tarefas distribuidos em diferentes máquinas e processos, adicionando maior disponibilidade e rapidez no recebimentos de processos do Barramento de Serviços do PEN. Maiores informações do Gearman podem ser encontradas na página oficial do projeto em http://gearman.org/.
+O Gearman é um servidor utilizado para gerenciar o processamento paralelo de tarefas distribuidos em diferentes máquinas e processos, adicionando maior disponibilidade e rapidez no recebimentos de processos do Tramita.GOV.BR. Maiores informações do Gearman podem ser encontradas na página oficial do projeto em http://gearman.org/.
 
-A utilização deste componente na infraestrutura do módulo de Integração com o Barramento de Serviços permite que a carga de trabalho possa ser distribuída em vários nós de aplicação do SEI de forma organizada e gerenciada pelo Gearman.
+A utilização deste componente na infraestrutura do módulo de Integração com o Tramita.GOV.BR permite que a carga de trabalho possa ser distribuída em vários nós de aplicação do SEI de forma organizada e gerenciada pelo Gearman.
 
 Para fazer a sua utilização, os seguintes passos precisam ser realizados:
 
@@ -476,7 +476,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
     - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do **mod-sei-pen**
-    - Conexão com o Barramento de Serviços do PEN realizada com sucesso
+    - Conexão com o Tramita.GOV.BR realizada com sucesso
     - Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso
     - Conexão com o servidor de processamento de tarefas Gearman realizada com sucesso
 
@@ -485,7 +485,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 
 ### 3.2. Instalação do Supervisor para monitoramento
 
-O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Barramento de Serviços do PEN. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
+O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Tramita.GOV.BR. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
 
 A partir da versão **mod-sei-pen** 2.0.0, este componente passou a ser opcional pois o próprio agendamento de tarefas do SEI ficará encarregado de obter os processos pendentes do Barramento e processar seu recebimento. Tarefas executadas a cada 2 minutos, seguindo a configuração padrão do agendamento **PENAgendamentoRN::processarTarefasPEN**.
 
@@ -515,7 +515,7 @@ A inicialização automática do Supervisor não é configurada durante sua inst
 
 #### 3.2.3. Configuração dos serviços de recebimento de processos no **supervisor** 
 
-Neste passo será configurado o serviço de monitoramento de pendências de trâmite para escultar as mensagens do Barramento de Serviços do PEN e processar o recebimento de processos.
+Neste passo será configurado o serviço de monitoramento de pendências de trâmite para escultar as mensagens do Tramita.GOV.BR e processar o recebimento de processos.
 
 Para configurar este serviço, será necessário incluir as configurações do módulo ao arquivo de configuração do Supervisor, localizado em /etc/supervisor/supervisord.conf.
 

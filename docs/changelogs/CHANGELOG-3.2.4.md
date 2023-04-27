@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.2.3)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.2.4)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
@@ -7,7 +7,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
     * 3.1.0 até 3.1.7, 
-    * 4.0.0 até 4.0.9
+    * 4.0.0 até 4.0.10
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
@@ -19,21 +19,22 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
-#### Atribuição automática do tipo de processo no recebimento de acordo com o nome do tipo na origem
+#### Homologação de funcionamento do mod-sei-pen para SEI 4.0.8, 4.0.9 e 4.0.10
 
-Com o objetivo de simplificar o funcionamento do módulo e evitar retrabalho na atribuição dos tipos de processos no órgão 
-destinatário do processo, foi adicionado recurso para atribuir automaticamente o tipo de processo correto caso haja correspondência 
-entre os nomes do tipo na origem e no destino. 
+Homologado módulo mod-sei-pen para uso no SEI (4.0.8, 4.0.9 e 4.0.10) e SUPER (4.0.9.12 e 4.0.9.13), removendo as travas e mensagens de alertas emitidos durante uso instalação e uso nestas versôes.
 
 
-#### Correção de parâmetros de timeout de jobs de processamento de eventos no componente Gearman
+#### Correção de erro no recebimento de processo devido a restrição de criação de tipo de processo na unidade
 
-Modificado os parâmetros de timeout das filas de processamento de tarefas gerenciadas pela ferramenta Gearman para que o mesmo 
-consigo receber um volume maior de processos de forma adequada e evitando reinicializações desnecessárias.
- 
-#### Otimização de consultas de Metadados do processo no Tramita.gov.br
+Corrigido regras de atribuição automática do Tipo do Processo no recebimento baseando-se no nome do Tipo de Processo na origem. As versões anteriores geravam erro e recusa do processo caso o Tipo de Processo não estivesse habilitado para uso na unidade configurada para receber processos externos. A falha descrita anteriormente gerava recusa no recebimento do processo pelo seguinte motivo: Tipo de processo X não liberado para a unidade Y. 
 
-Adicionado cache e otimizações no módulo para reduzir consultas desnecessárias à infraestrutura do Tramita.gov.br, reduzindo o tempo de envio de processos e documentos
+
+#### Correção de erro na atualização do módulo para versâo 3.2.x em SQLServer (erro Rename) 
+
+Corrigido falha no script de atualização do módulo quando utilizado SQLServer devido a falha na execução de operação para modificação de nome de tabelas e colunas, operação RENAME.
+
+
+#### Correção de exibição de ícone de erro em página configurações do módulo
 
 
 

@@ -152,7 +152,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
       if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-          throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informados.');
+          throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
       }
 
         $this->validarDisponibilidade();
@@ -452,15 +452,13 @@ class ProcessoEletronicoRN extends InfraRN
       $curl = curl_init($this->strComumXSD);
 
     try{
+        $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
         curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
         curl_setopt($curl, CURLOPT_HEADER, false);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-
-      if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-      }
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);        
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -633,8 +631,10 @@ class ProcessoEletronicoRN extends InfraRN
 
       $cabecalho->urgente = $urgente;
       $cabecalho->motivoDaUrgencia = $motivoUrgencia;
-      $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
-
+      //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
+      //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
+      $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
+      
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
       $this->atribuirInformacoesModulo($cabecalho);
 
@@ -1127,7 +1127,7 @@ class ProcessoEletronicoRN extends InfraRN
       $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo, true);
 
       $arrObjComponenteDigitalDTOAux = array();
-    foreach ($arrObjDocumento as $objDocumento) {
+    foreach ($arrObjDocumento as $key => $objDocumento) {
         $quantidadeDeComponentesDigitais = count($objDocumento->componenteDigital);
       if($quantidadeDeComponentesDigitais > 1){
         $arrObjComponenteDigitalDTOAux = self::montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados);
@@ -1138,7 +1138,7 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigitalDTO->setDblIdProcedimento($parObjProtocolo->idProcedimentoSEI);
           $objComponenteDigitalDTO->setDblIdDocumento($objDocumento->idDocumentoSEI);
           $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumento->ordem);
-          $objComponenteDigitalDTO->setNumOrdem(1);
+          $objComponenteDigitalDTO->setNumOrdem($key + 1);
           $objComponenteDigitalDTO->setNumIdTramite($parNumIdentificacaoTramite);
           $objComponenteDigitalDTO->setStrProtocolo($parObjProtocolo->protocolo);
 
