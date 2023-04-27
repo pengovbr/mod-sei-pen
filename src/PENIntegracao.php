@@ -211,6 +211,7 @@ class PENIntegracao extends SeiIntegracao
     $objAtividadeDTO->setDblIdProtocolo($arrDblIdProcedimento, InfraDTO::$OPER_IN);
     $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
     $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
     $objAtividadeDTO->retNumIdAtividade();
     $objAtividadeDTO->retDblIdProcedimentoProtocolo();
     $objAtividadeRN = new AtividadeRN();
