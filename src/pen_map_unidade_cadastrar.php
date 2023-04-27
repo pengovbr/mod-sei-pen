@@ -152,6 +152,8 @@ try {
         $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
     }
   }
+
+  ProcessoEletronicoINT::montarRestricaoOrgaoUnidade(null, null, $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);
@@ -182,14 +184,44 @@ $classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcar
 #txtUnidadePen{position:absolute;left:0%;top:53%;width:60%;}
 #btnUnidadeRh2{position:absolute;left:61%;top:53%;}
 
-</style>
+<?=$strCssRestricao?>
 
+</style>
+<?php
+$objPagina->fecharHead();
+$objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
+?>
+<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
+    <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
+    <?php $objPagina->montarAreaValidacao(); ?>
+    <?php $objPagina->abrirAreaDados('15em'); ?>
+
+    <label id="lblUnidadeSei" for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
+    <select id="selUnidadeSei" name="id_unidade" class="infraSelect" >
+        <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
+    </select>
+
+    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do PEN (Estruturas Organizacionais):</label>
+    <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
+    <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
+    <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
+
+    <?php print $objPagina->fecharAreaDados(); ?>
+
+    <?php $objPagina->abrirAreaDados('15em'); ?>
+    <?=$strHtmlRestricao?>
+    <?php print $objPagina->fecharAreaDados(); ?>
+</form>
+<?php $objPagina->fecharBody(); ?>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
 
 var objAutoCompletarEstrutura = null;
 var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
 var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
+
+<?=$strJsGlobalRestricao?>
+
 function inicializar(){
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
@@ -214,7 +246,6 @@ function inicializar(){
     });
 }
 
-
 function onSubmit() {
 
     var form = jQuery('#<?php print PEN_RECURSO_BASE; ?>_form');
@@ -235,27 +266,7 @@ function onSubmit() {
     }
 }
 
+<?=$strJsInicializarRestricao?>
+
 </script>
-<?php
-$objPagina->fecharHead();
-$objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
-?>
-<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
-    <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
-    <?php $objPagina->montarAreaValidacao(); ?>
-    <?php $objPagina->abrirAreaDados('15em'); ?>
-
-    <label id="lblUnidadeSei" for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-    <select id="selUnidadeSei" name="id_unidade" class="infraSelect" >
-        <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
-    </select>
-
-    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do PEN (Estruturas Organizacionais):</label>
-    <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
-    <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
-    <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
-
-    <?php print $objPagina->fecharAreaDados(); ?>
-</form>
-<?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>

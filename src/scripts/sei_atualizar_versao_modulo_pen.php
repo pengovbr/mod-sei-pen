@@ -261,8 +261,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3023();   
         case '3.2.3':
             $this->instalarV3024();
+        case '3.2.4':
+            $this->instalarV3025();
   
-
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2488,6 +2489,44 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV3024(){
       $this->atualizarNumeroVersao("3.2.4");
   }  
+
+  protected function instalarV3025(): void
+  {
+    $this->atualizarNumeroVersao("3.2.5");
+    $objMetaBD = $this->objMeta;
+    // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+    $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_unidade_restricao',
+      'cols' => array(
+        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+        'unidade' => array('id_unidade', 'id_unidade')
+      )
+    ));
+
+    // Criando nova sequência 
+    $objInfraBanco = BancoSEI::getInstance();
+    $objInfraSequencia = new InfraSequencia($objInfraBanco);
+    if (!$objInfraSequencia->verificarSequencia('md_pen_unidade_restricao')) {
+      $objInfraSequencia->criarSequencia('md_pen_unidade_restricao', '1', '1', '9999999999');
+    }
+    //Sequência: md_pen_seq_unidade_restricao
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_unidade_restricao');
+    $numMaxId = $rs[0]['total'];
+    if ($numMaxId == null) {
+      $numMaxId = 0;
+    }
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unidade_restricao', $numMaxId + 1);
+  }
 
 }
 
