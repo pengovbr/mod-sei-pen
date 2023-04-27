@@ -594,22 +594,23 @@ class ProcessoEletronicoRN extends InfraRN
             $objProtocoloBD = new RelProtocoloProtocoloBD(BancoSEI::getInstance());
             $arrProtocolos = $objProtocoloBD->listar($objProtocoloDTO);
 
-            $msg = "<br/><br/>";
+            $msg = "";
             foreach ($arrProtocolos as $index => $protocolo) {
                 if ($index != $protocolo->getNumSequencia()){
                     $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
                     $pos = $index + 1;
                     $sequencia = $protocolo->getNumSequencia() + 1;
-                    $msg .= "A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.<br/>";
+                    $msg .= " <br />A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.";
                 }
             }
 
             if ($arrObjAtividadeDTO > 0) {
                 $strMensagem = str_replace(
                     'hash de ao menos um componente digital não confere',
-                    ' Possivelmente a falha ocorreu devido a mundaça de ordem do documento na árvore do processo.'. $msg,
+                    ' Possivelmente a falha ocorreu devido a mundaça de ordem do documento na árvore do processo.',
                     $strMensagem
                 );
+                $strMensagem.=$msg;
             }
         }
 
