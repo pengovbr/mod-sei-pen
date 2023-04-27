@@ -246,8 +246,16 @@ class VerificadorInstalacaoRN extends InfraRN
           curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
           curl_setopt($curl, CURLOPT_SSLCERT, $strLocalizacaoCertificadoDigital);
           curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $strSenhaCertificadoDigital);
+          curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
           $strOutput = curl_exec($curl);
+
+          if (curl_errno($curl)) {
+             $strErrorMsg = curl_error($curl);
+          }
+          if (isset($strErrorMsg)) {
+              throw new InfraException("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
+          }
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
