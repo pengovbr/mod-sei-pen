@@ -29,6 +29,7 @@ class PenUnidadeRestricaoDTO extends UnidadeDTO
 
   public function montar()
   {
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Id', 'id');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRestricao', 'id_unidade_restricao');

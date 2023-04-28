@@ -55,9 +55,32 @@ try {
         //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
         $objPenParametroRN = new PenParametroRN();
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidadeRH();
+        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
+        $objUnidadeRN = new UnidadeRN();
+        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+        
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null);
+        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+        
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrayIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
         //Preparação dos dados para montagem da tela de expedição de processos
-        $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        if ($arrayIdUnidadeRestricao != null) {
+            $repositorios = array();
+            foreach ($arrayIdUnidadeRestricao as $value) {
+                $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+            }
+        } else {
+            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        }
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 
         $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
@@ -71,13 +94,6 @@ try {
 
         $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
         $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
-
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->retNumIdUnidadeRH();
-        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
       if (!$objUnidadeDTO) {
         throw new InfraException("A unidade atual não foi mapeada.");

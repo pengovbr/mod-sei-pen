@@ -97,6 +97,40 @@ try {
         $numIdUnidade = $unidade->getNumIdUnidade();
     }
 
+    if(array_key_exists('hdnRepoEstruturas', $_POST) && !empty($_POST['hdnRepoEstruturas'])) {
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->prepararRepoEstruturas(
+            $_POST['id_unidade'],
+            $_POST['id_unidade_rh'],
+            $_POST['hdnRepoEstruturas']
+        );
+        
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null);
+        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+
+        $objPenUnidadeRestricaoRN->cadastrar($arrayObjPenUnidadeRestricaoDTO);
+    }
+
+    if(array_key_exists('hdnUnidades', $_POST) && !empty($_POST['hdnUnidades'])) {
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->prepararUnidades(
+            $_POST['id_unidade'],
+            $_POST['id_unidade_rh'],
+            $_POST['hdnUnidades']
+        );
+
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao(null);
+        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+
+        $objPenUnidadeRestricaoRN->cadastrar($arrayObjPenUnidadeRestricaoDTO);
+    }
+
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
       exit(0);
   }
@@ -154,7 +188,7 @@ try {
   }
 
   $strCssRestricao = ""; $strHtmlRestricao = ""; $strJsGlobalRestricao = ""; $strJsInicializarRestricao = "";
-   ProcessoEletronicoINT::montarRestricaoOrgaoUnidade($strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
+   ProcessoEletronicoINT::montarRestricaoOrgaoUnidade($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);

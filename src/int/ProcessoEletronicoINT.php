@@ -200,9 +200,39 @@ class ProcessoEletronicoINT extends InfraINT {
       return $arquivo;
   }
 
-  public static function montarRestricaoOrgaoUnidade(&$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
+  public static function montarRestricaoOrgaoUnidade($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
 	{
-		$strCss = ''
+    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+    $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
+    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null);
+    $objPenUnidadeRestricaoDTO->retTodos();
+    
+    $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+    $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+    $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrayObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+    $items = array();
+    foreach ($arrayObjPenUnidadeRestricaoDTO as $key => $item) {
+      //IdUnidadeRestricao NomeUnidadeRestricao
+      $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
+    }
+    $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
+
+    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+    $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
+    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao(null);
+    $objPenUnidadeRestricaoDTO->retTodos();
+    
+    $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+    $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+    $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrayObjPenUnidadeRestricaoDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+    $items = array();
+    foreach ($arrayObjPenUnidadeRestricaoDTO as $key => $item) {
+      //IdUnidadeRestricao NomeUnidadeRestricao
+      $items[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
+    }
+    $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($items);
+
+    $strCss = ''
 			. ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
 			. ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
 			. ' #selRepoEstruturas {position:absolute;left:0%;top:29%;width:20%;}'
@@ -270,14 +300,14 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
 			. ' };'
 			. ' '
-			. ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=unidade_auto_completar_todas') . '\');'
+			. ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento') . '\');'
 			. ' objAutoCompletarUnidade.limparCampo = true;'
 			. ' objAutoCompletarUnidade.prepararExecucao = function(){'
 			. ' 	if (document.getElementById(\'selRepoEstruturas\').selectedIndex==-1){'
 			. ' 	alert(\'Nenhum RepoEstruturas selecionado.\');'
 			. ' 	return false;'
 			. ' 	}'
-			. ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repo_estruturas=\'+document.getElementById(\'selRepoEstruturas\').value;'
+			. ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repositorio=\'+document.getElementById(\'selRepoEstruturas\').value;'
 			. ' };'
 			. ' '
 			. ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
@@ -293,7 +323,8 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' 	trocarRepoEstruturasRestricao();'
 			. ' };';
 
-    $strItensSelRepoEstruturasRestricao = "";
+    
+      
     $strHtmlRepoEstruturasUnidades = "";
 		$strHtml = ''
 			. ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
@@ -308,18 +339,19 @@ class ProcessoEletronicoINT extends InfraINT {
 			// . ' <br />'
 			// . ' <img id="imgExcluirOrgaos" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Órgãos Selecionados" title="Remover Órgãos Selecionados" class="infraImgNormal"  />'
 			. ' </div>'
-			. ' <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="" />' // ' . $_POST['hdnOrgaos'] . '
+			. ' <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="'.$arrRepoEstruturasSelecionados.'" />'
 			. ' <label id="lblUnidades" for="selUnidades" class="infraLabelOpcional">Restringir às Unidades:</label>'
 			. ' <input type="text" id="txtUnidade" name="txtUnidade" class="infraText" />'
 			. ' <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="" />'
 			. ' <select id="selUnidades" name="selUnidades" size="6" multiple="multiple" class="infraSelect" >'
+      . ' ' . $strItensSelUnidadesRestricao . ''
 			. ' </select>'
 			. ' <div id="divOpcoesUnidades">'
 			// . ' <img id="imgLupaUnidades" onclick="objLupaUnidades.selecionar(700,500);" src="' . PaginaSEI::getInstance()->getIconePesquisar() . '" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg"  />'
 			// . ' <br />'
 			// . ' <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />'
 			// . ' </div>'
-			. ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="" />' // ' . $_POST['hdnUnidades'] . '
+			. ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />'
 			. ' ' . $strHtmlRepoEstruturasUnidades . ''
 			. ' </div>';
 	}

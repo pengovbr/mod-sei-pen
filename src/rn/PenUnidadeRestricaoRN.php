@@ -20,90 +20,126 @@ class PenUnidadeRestricaoRN extends InfraRN
   }
 
   /**
-   * Método para buscar apenas as unidades que já estão em uso
-   * @param PenUnidadeDTO $objFiltroDTO
-   * @return arrayDTO
-   */
-  protected function getIdUnidadeEmUsoConectado(PenUnidadeDTO $objFiltroDTO)
-  {
-    $objDTO = new PenUnidadeDTO();
-    $objDTO->setDistinct(true);
-    $objDTO->retNumIdUnidade();
-
-    if ($objFiltroDTO->isSetNumIdUnidade()) {
-      $objDTO->setNumIdUnidade($objFiltroDTO->getNumIdUnidade(), InfraDTO::$OPER_DIFERENTE);
-    }
-
-    $arrObjDTO = $this->listar($objDTO);
-
-    $arrIdUnidade = array();
-
-    if (!empty($arrObjDTO)) {
-      $arrIdUnidade = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdUnidade');
-    }
-    return $arrIdUnidade;
-  }
-
-  /**
    * Método utilizado para listagem de dados.
-   * @param UnidadeDTO $objUnidadeDTO
+   * @param PenUnidadeRestricaoDTO $objPenUnidadeRestricaoDTO
    * @return array
    * @throws InfraException
    */
-  protected function listarConectado(UnidadeDTO $objPenUnidadeDTO)
+  protected function listarConectado(PenUnidadeRestricaoDTO $objPenUnidadeRestricaoDTO)
   {
     try {
-      //Valida Permissao
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_unidade_listar', __METHOD__, $objUnidadeDTO);
-      $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
-      return $objPenUnidadeBD->listar($objPenUnidadeDTO);
+      $objPenUnidadeRestricaoBD = new PenUnidadeRestricaoBD($this->getObjInfraIBanco());
+      return $objPenUnidadeRestricaoBD->listar($objPenUnidadeRestricaoDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro listando Unidades.', $e);
     }
   }
 
   /**
-   * Método utilizado para alteração de dados.
-   * @param UnidadeDTO $objDTO
+   * Método utilizado para preparar cadastro de dados.
+   * @param string $hdnRepoEstruturas
+   * @param string $IdUnidade
+   * @param string $IdUnidadeRH
    * @return array
    * @throws InfraException
    */
-  protected function alterarControlado(UnidadeDTO $objPenUnidadeDTO)
+  public function prepararRepoEstruturas($IdUnidade, $IdUnidadeRH, $hdnRepoEstruturas)
   {
-    try {
-      $objPenUnidadeBD = new PenUnidadeBD(BancoSEI::getInstance());
-      return $objPenUnidadeBD->alterar($objPenUnidadeDTO);
-    } catch (Exception $e) {
-      throw new InfraException('Erro alterando mapeamento de unidades.', $e);
+    $contador = 0;
+    $arrayObjPenUnidadeRestricaoDTO = array();
+    $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnRepoEstruturas);
+    foreach ($arrOpcoes as $opcoes) {
+      $contador++;
+      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+      $objPenUnidadeRestricaoDTO->setNumId($contador);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
+      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
+      $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
     }
+    return $arrayObjPenUnidadeRestricaoDTO;
   }
 
   /**
-   * Método utilizado para cadastro de dados.
-   * @param UnidadeDTO $objDTO
+   * Método utilizado para preparar cadastro de dados.
+   * @param string $hdnRepoEstruturas
+   * @param string $IdUnidade
+   * @param string $IdUnidadeRH
    * @return array
    * @throws InfraException
    */
-  protected function cadastrarConectado(UnidadeDTO $objDTO)
+  public function prepararUnidades($IdUnidade, $IdUnidadeRH, $hdnUnidades)
+  {
+    $contador = 2;
+    $arrayObjPenUnidadeRestricaoDTO = array();
+    $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnUnidades);
+    foreach ($arrOpcoes as $opcoes) {
+      $contador++;
+      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+      $objPenUnidadeRestricaoDTO->setNumId($contador);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($opcoes[0]);
+      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($opcoes[1]);
+      $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
+    }
+    return $arrayObjPenUnidadeRestricaoDTO;
+  }
+
+  /**
+   * Método utilizado para cadastro de lista de dados.
+   * @param array $arrayObjDTO
+   * @return array
+   * @throws InfraException
+   */
+  protected function cadastrarConectado($arrayObjDTO)
   {
     try {
-      $objBD = new PenUnidadeBD(BancoSEI::getInstance());
-      return $objBD->cadastrar($objDTO);
+      $retArrayObjDTO = array();
+      $objBD = new PenUnidadeRestricaoBD(BancoSEI::getInstance());
+      foreach ($arrayObjDTO as $objDTO) {
+        $retArrayObjDTO[] = $objBD->cadastrar($objDTO);
+      }
+      return $retArrayObjDTO;
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
+      throw new InfraException('Erro cadastrando restrição de tramite no mapeamento de unidades.', $e);
     }
   }
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param UnidadeDTO $objDTO
+   * @param PenUnidadeRestricaoDTO $objDTO
    * @return array
    * @throws InfraException
    */
-  protected function excluirControlado(UnidadeDTO $objDTO)
+  protected function prepararExcluirControlado(PenUnidadeRestricaoDTO $objDTO)
   {
     try {
-      $objBD = new PenUnidadeBD(BancoSEI::getInstance());
+      $arrayObjPenUnidadeRestricaoDTO = array();
+      $objDTO->retTodos();
+      $objPenUnidadeRestricaoDTO = $this->listar($objDTO);
+      if ($objPenUnidadeRestricaoDTO != null) {
+        foreach ($objPenUnidadeRestricaoDTO as $value) {
+          $arrayObjPenUnidadeRestricaoDTO[] = $this->excluir($value);
+        }
+      }
+      return $arrayObjPenUnidadeRestricaoDTO;
+    } catch (Exception $e) {
+      throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+    }
+  }
+
+  /**
+   * Método utilizado para exclusão de dados.
+   * @param PenUnidadeRestricaoDTO $objDTO
+   * @return array
+   * @throws InfraException
+   */
+  protected function excluirControlado(PenUnidadeRestricaoDTO $objDTO)
+  {
+    try {
+      $objBD = new PenUnidadeRestricaoBD(BancoSEI::getInstance());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
