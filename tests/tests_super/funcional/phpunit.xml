@@ -18,7 +18,7 @@
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
-    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800000" />
+    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="1080000" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
 
@@ -32,11 +32,11 @@
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="152006" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="00000000" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Unidade de Teste ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="125021" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="11111111" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Unidade de Teste ORG1.1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
@@ -64,11 +64,11 @@
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
-    <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />
+    <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="152007" />
+    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="33333333" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Unidade de Teste ORG2" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />

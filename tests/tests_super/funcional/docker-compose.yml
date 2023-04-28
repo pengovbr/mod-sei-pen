@@ -4,18 +4,18 @@ services:
 
   ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
-    image: processoeletronico/vagrant_sei4_mailcatcher:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_mailcatcher:${ENVIRONMENT_VERSION}
     container_name: smtp
     ports:
       - "1080:1080"
 
   org1-memcached:
-    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
   org2-memcached:
-    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
@@ -45,7 +45,7 @@ services:
       - /tmp:/tmp
 
   php-test-functional:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: php-test-functional
     depends_on:
       - org1-database
@@ -70,7 +70,6 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -80,7 +79,7 @@ services:
     command: "true"
 
   php-test-unit:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: php-test-unit
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
@@ -90,7 +89,7 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - ../unitario:/tests
-      - ../../src:/opt/sei/web/modulos/pen
+      - ../../../src:/opt/sei/web/modulos/pen
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -103,13 +102,11 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: "true"
 
   ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
-
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
     container_name: org1-${ORG1_DATABASE_HOST}
@@ -120,7 +117,7 @@ services:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
 
   org1-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: org1-http
     restart: always
     depends_on:
@@ -133,10 +130,10 @@ services:
       - ./assets/config:/opt/sei/config/mod-pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - ../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen
+      - ../../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../../src/bin:/opt/sei/bin/mod-pen
+      - ../../../src:/opt/sei/web/modulos/pen
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -156,11 +153,11 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+
       - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -169,7 +166,6 @@ services:
       - org1-database:${ORG1_DATABASE_HOST}
 
   ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
-
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
     container_name: org2-${ORG2_DATABASE_HOST}
@@ -180,7 +176,7 @@ services:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
   org2-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     container_name: org2-http
     restart: always
     depends_on:
@@ -191,12 +187,12 @@ services:
       - ${SEI_PATH}/infra:/opt/infra
       - ./assets/cron.d:/etc/cron.d
       - ./assets/config:/opt/sei/config/mod-pen
-      - ../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
+      - ../../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../../src/bin:/opt/sei/bin/mod-pen
+      - ../../../src:/opt/sei/web/modulos/pen
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
@@ -216,11 +212,11 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
+
       - SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
