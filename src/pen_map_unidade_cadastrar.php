@@ -153,7 +153,8 @@ try {
     }
   }
 
-  ProcessoEletronicoINT::montarRestricaoOrgaoUnidade(null, null, $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
+  $strCssRestricao = ""; $strHtmlRestricao = ""; $strJsGlobalRestricao = ""; $strJsInicializarRestricao = "";
+   ProcessoEletronicoINT::montarRestricaoOrgaoUnidade($strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);
@@ -216,11 +217,10 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
 
+<?=$strJsGlobalRestricao?>
 var objAutoCompletarEstrutura = null;
 var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
 var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
-
-<?=$strJsGlobalRestricao?>
 
 function inicializar(){
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
