@@ -2320,7 +2320,7 @@ class ReceberProcedimentoRN extends InfraRN
     foreach ($arrObjDocumentos as $objDocumento){
         $arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
       foreach ($arrObjComponentesDigitais as $objComponentesDigital){
-        if($objComponentesDigital->hash->_ == $parComponentePendente){
+        if(ProcessoEletronicoRN::getHashFromMetaDados($objComponentesDigital->hash) == $parComponentePendente){
             $tamanhoComponentePendende = $objComponentesDigital->tamanhoEmBytes;
           break;
         }
@@ -2399,7 +2399,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumento->componenteDigital = array($objDocumento->componenteDigital);
       }
       foreach($objDocumento->componenteDigital as $objComponente){
-          $resultado[$objComponente->hash->_] = $objComponente;
+          $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente->hash);
+          $resultado[$strHash] = $objComponente;
       }
     }
       return $resultado;

@@ -1042,21 +1042,25 @@ class ProcessoEletronicoRN extends InfraRN
     * @param object $objMeta tem que ser o componenteDigital->hash
     * @return string
     */
-  public static function getHashFromMetaDados($objMeta)
+    public static function getHashFromMetaDados($objMeta)
     {
-      $strHashConteudo = '';
+        $strHashConteudo = '';
 
-    if (isset($objMeta)) {
-        $matches = array();
-        $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
+        if (isset($objMeta)) {
+            if(is_string($objMeta)){
+                $strHashConteudo = $objMeta;
+            } else {
+                $matches = array();
+                $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
 
-      if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
-        $strHashConteudo = $matches[1][0];
-      }
-    }
+                if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
+                    $strHashConteudo = $matches[1][0];
+                }
+            }
+        }
 
       return $strHashConteudo;
-  }
+    }
 
   private function montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados)
     {
