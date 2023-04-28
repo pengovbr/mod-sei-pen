@@ -43,7 +43,7 @@ try {
     $objRelTipoProcedimentoRN = new TipoProcedimentoRN();
     $arrTipoProcedimento=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO), "IdTipoProcedimento");
     $arrayFiltro = array_diff($arrTipoProcedimento, $arrObjNivelAcessoPermitido);
-    
+
     $objRelTipoProcedimentoDTO->setNumIdTipoProcedimento($arrayFiltro, InfraDTO::$OPER_IN);
     $arrObjTipoProcedimentoDTO = $objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO);
 
@@ -73,18 +73,17 @@ try {
           foreach ($_POST['parametro'] as $nome => $valor) {
 
             if ($nome == 'PEN_TIPO_PROCESSO_EXTERNO') {
+                $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
+                $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
+                $objRelTipoProcedimentoAssuntoDTO->setNumIdTipoProcedimento($valor);
+                $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
 
-                  $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
-                  $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
-                  $objRelTipoProcedimentoAssuntoDTO->setNumIdTipoProcedimento($valor);
-                  $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
+                $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
+                $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
 
-                  $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
-                  $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
-
-              if (empty($arrObjTipoProcedimentoAssunto)) {
-                throw new InfraException("Tipo de processo externo selecionado não possui sugestão de assuntos atribuída.");
-              }
+                if (empty($arrObjTipoProcedimentoAssunto)) {
+                    throw new InfraException("Tipo de processo externo selecionado não possui sugestão de assuntos atribuída.");
+                }
             }
 
             $objPenParametroDTO = new PenParametroDTO();
@@ -92,8 +91,8 @@ try {
             $objPenParametroDTO->retStrNome();
 
             if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-                    $objPenParametroDTO->setStrValor(trim($valor));
-                    $objPenParametroRN->alterar($objPenParametroDTO);
+                $objPenParametroDTO->setStrValor(trim($valor));
+                $objPenParametroRN->alterar($objPenParametroDTO);
             }
           }
         }
@@ -144,7 +143,7 @@ $objPagina->abrirStyle();
 }
 
 .div_input{
-    display:flex; 
+    display:flex;
     align-items:center;
     margin-bottom:10px;
 }
@@ -277,7 +276,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 </form>
 
 <?
-$objPagina->getInstance()->fecharAreaDados();  
+$objPagina->getInstance()->fecharAreaDados();
 $objPagina->fecharBody();
 $objPagina->fecharHtml();
 ?>
