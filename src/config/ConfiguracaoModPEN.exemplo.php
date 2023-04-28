@@ -79,6 +79,12 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
               //     * Produção: https://pendencias.conectagov.processoeletronico.gov.br/
               "WebServicePendencias" => "",
 
+              //Opcional
+              // Tamanho do bloco de dados, em megabytes, a ser utilizado no particionamento dos arquivos para
+              // envio e recebimento de processos. Permitido valores entre 1 e 200 megabytes
+              // Valor padrão: 50
+              //"TamanhoBlocoArquivoTransferencia" => 50,
+
               // Opcional
               // Configuração para indicar ao módulo para enviar apenas os documentos pendentes de recebimento no órgão
               // destinatário do processo. Deve ser configurado o ID do Repositório de Estruturas e a lista correspondente

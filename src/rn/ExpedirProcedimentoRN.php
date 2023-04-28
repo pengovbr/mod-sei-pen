@@ -371,10 +371,10 @@ class ExpedirProcedimentoRN extends InfraRN {
         * @param $parObjProcesso
         * @return float|int $totalBarraProgresso
         */
-    private function obterTamanhoTotalDaBarraDeProgresso($parObjProcesso)
-        {
-        $nrTamanhoMegasMaximo  = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
-        $nrTamanhoBytesMaximo  = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
+    private function obterTamanhoTotalDaBarraDeProgresso($parObjProcesso) {
+
+        $nrTamanhoMegasMaximo = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
+        $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
         $totalBarraProgresso = 2;
         $this->contadorDaBarraDeProgresso = 2;
@@ -2117,7 +2117,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
             $nrTamanhoArquivoMb = 0;
             $nrTamanhoBytesArquivo = 0;
-            $nrTamanhoMegasMaximo = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+            $nrTamanhoMegasMaximo = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
             $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
             try {
@@ -2298,7 +2298,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (TamanhoBlocoArquivoTransferencia)
     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $strCaminhoAnexo
     * @param $dadosDoComponenteDigital
@@ -2771,7 +2771,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (TamanhoBlocoArquivoTransferencia)
     * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
     * @param $strCaminhoAnexo
     * @param $dadosDoComponenteDigital

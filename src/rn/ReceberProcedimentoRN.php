@@ -237,7 +237,7 @@ class ReceberProcedimentoRN extends InfraRN
       $arrHashComponentesBaixados = array();
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
-      $numParamTamMaxDocumentoMb = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+      $numParamTamMaxDocumentoMb = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
 
       // Lista todos os componentes digitais presente no protocolo
       // Esta verificação é necessária pois existem situações em que a lista de componentes
@@ -2331,7 +2331,7 @@ class ReceberProcedimentoRN extends InfraRN
 
 
     /**
-    * Método responsável por realizar o recebimento do componente digital particionado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * Método responsável por realizar o recebimento do componente digital particionado, de acordo com o parametro (TamanhoBlocoArquivoTransferencia)
     * @param $componentePendente
     * @param $nrTamanhoBytesMaximo
     * @param $nrTamanhoBytesArquivo

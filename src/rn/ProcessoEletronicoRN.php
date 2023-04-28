@@ -55,6 +55,7 @@ class ProcessoEletronicoRN extends InfraRN
     const WS_TIMEOUT_CONEXAO = 300;
     const WS_ESPERA_RECONEXAO = 5;
     const WS_TENTATIVAS_ERRO = 3;
+    const WS_TAMANHO_BLOCO_TRANSFERENCIA = 50;
 
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
@@ -2040,6 +2041,30 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $bolExisteProcessoAnexado;
   }
+
+
+  public static function obterTamanhoBlocoTransferencia(){
+    $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+
+    try{
+        $numTamanhoBlocoMB = ConfiguracaoModPEN::getInstance()->getValor(
+            "PEN",
+            "TamanhoBlocoArquivoTransferencia",
+            false,
+            ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA
+        );
+
+        // Limita valores possíveis entre 1MB e 200MB
+        $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+        $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
+    } catch(Exception $e){
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+
+    return $numTamanhoBlocoMB;
+  }
+
 
     /**
      * Identifica se um determinado documento recebido pelo PEN originou-se de uma anexação de processos

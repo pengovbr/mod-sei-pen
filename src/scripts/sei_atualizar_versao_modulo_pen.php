@@ -2496,7 +2496,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
 
       $objPenParametroRN = new PenParametroRN();
-      $objPenParametroRN->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome("PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO");
+      $objPenParametroDTO->retStrNome();
+      $objPenParametroRN->excluir($objPenParametroDTO);
 
       // Corrige chave primaria da tabela de componentes digitais
       $this->excluirChavePrimariaComIndice('md_pen_componente_digital', 'pk_md_pen_componente_digital');
