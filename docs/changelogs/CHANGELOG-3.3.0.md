@@ -42,6 +42,11 @@ Modificado o valor padrão dos blocos de dados de transmissão de dados para o T
 Corrigido falha nas rotinas de processamento de envio de processos em lote que gerava inúmeras tentativas de transmissão de processos com falha em seus dados, gerando processamento desnecessário e gerando inúmeros registros no histórico de trâmites no Painel de Controle da instituição no Tramita.gov.br 
 
 
+#### Correção de erro processando operação consultarHtmlVersao no envio em lote (#272)
+
+Corrigido "Erro processando operação consultarHtmlVersao." quando realizado um trâmite de processo utilizando a funcionalidade de envio em lote. O erro ocorre quando o sistema está configurado para utilização de protocolo HTTPS e o processo contém documentos internos e e-mails. 
+
+
 #### Adicionado mensagem de validação para evitar a configuração de Tipo de Processo padrão sem Assunto vinculado (#67)
     
 Melhoria foi inserida na página de configuração do módulo para evitar a configuração de tipos de processos sem assunto vinculado, provocando erro no recebimento e recusa do processo por falta desta configuração.

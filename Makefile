@@ -29,7 +29,7 @@ SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
 PEN_TEST_FUNC = tests_$(sistema)/funcional
 PEN_TEST_UNIT = tests_$(sistema)/unitario
-PARALLEL_TEST_NODES = 8
+PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
 
