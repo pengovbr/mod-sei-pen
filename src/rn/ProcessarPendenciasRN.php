@@ -269,6 +269,14 @@ class ProcessarPendenciasRN extends InfraRN
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
 
       if(!is_null($objPenLoteProcedimentoDTO)){
+
+          // Ajuste na variável global $_SERVER['HTTPS'] para considerar a mesma configuração definida para o SEI
+          // e evitar erros na rotina validaHttps quando em execução por linha de comando
+          if (!isset($_SERVER['HTTP_USER_AGENT'])) {
+              $bolHttps = ConfiguracaoSEI::getInstance()->getValor('SessaoSEI','https');
+              $_SERVER['HTTPS'] = $bolHttps ? "on" : null;
+          }
+
           //Registra tentativa de envio e cancela o trâmite caso ultrapasse os valores permitidos
           $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
           $numTentativasErroMaximo = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, ProcessoEletronicoRN::WS_TENTATIVAS_ERRO);

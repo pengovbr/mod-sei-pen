@@ -60,7 +60,7 @@
           $objPenLoteProcedimentoDTO->setNumIdAndamento($numIdAndamento);
       }
 
-      $objPaginaSEI->prepararOrdenacao($objPenLoteProcedimentoDTO, 'IdLote', InfraDTO::$TIPO_ORDENACAO_ASC);
+      $objPaginaSEI->prepararOrdenacao($objPenLoteProcedimentoDTO, 'IdLote', InfraDTO::$TIPO_ORDENACAO_DESC);
       $objPaginaSEI->prepararPaginacao($objPenLoteProcedimentoDTO);
 
       $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
