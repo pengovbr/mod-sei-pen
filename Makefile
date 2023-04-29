@@ -27,8 +27,8 @@ SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests/tests_$(sistema)/funcional
-PEN_TEST_UNIT = tests/tests_$(sistema)/unitario
+PEN_TEST_FUNC = tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests_$(sistema)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
@@ -173,7 +173,7 @@ test-functional: .env $(FILE_VENDOR_FUNCIONAL)
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
 
-test-functional-parallel: $(FILE_VENDOR_FUNCIONAL)
+test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL)
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
 
 
@@ -181,7 +181,7 @@ test-parallel-otimizado:
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit: .env $(FILE_VENDOR_UNITARIO)
+test-unit: $(FILE_VENDOR_UNITARIO)
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
 
 test: test-unit test-functional

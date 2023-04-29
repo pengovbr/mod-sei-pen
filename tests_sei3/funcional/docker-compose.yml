@@ -20,7 +20,6 @@ services:
 
   proxy:
     image: diouxx/apache-proxy
-    container_name: proxy
     ports:
       - "80:80"
     volumes:
@@ -31,7 +30,6 @@ services:
 
   selenium:
     image: selenium/standalone-chrome-debug
-    container_name: selenium
     links:
       - proxy:org1-http
       - proxy:org2-http
@@ -45,7 +43,6 @@ services:
 
   php-test-functional:
     image: processoeletronico/vagrant_sei4_httpd
-    container_name: php-test-functional
     depends_on:
       - org1-database
       - org2-database
@@ -82,13 +79,11 @@ services:
 
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:7.2
-    container_name: org1-${ORG1_DATABASE_NAME}
     ports:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
 
   org1-http:
     image: guilhermeadc/sei3_httpd-2.4:7.2
-    container_name: org1-http
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -119,13 +114,11 @@ services:
 
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:7.2
-    container_name: org2-${ORG2_DATABASE_NAME}
     ports:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
   org2-http:
     image: guilhermeadc/sei3_httpd-2.4:7.2
-    container_name: org2-http
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip

@@ -66,6 +66,7 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -84,7 +85,7 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - ../unitario:/tests
-      - ../../../src:/opt/sei/web/modulos/pen
+      - ../../src:/opt/sei/web/modulos/pen
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -97,11 +98,13 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: "true"
 
   ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
+
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
     restart: always
@@ -123,10 +126,10 @@ services:
       - ./assets/config:/opt/sei/config/mod-pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - ../../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../../src/bin:/opt/sei/bin/mod-pen
-      - ../../../src:/opt/sei/web/modulos/pen
+      - ../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../src/bin:/opt/sei/bin/mod-pen
+      - ../../src:/opt/sei/web/modulos/pen
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -179,12 +182,12 @@ services:
       - ${SEI_PATH}/infra:/opt/infra
       - ./assets/cron.d:/etc/cron.d
       - ./assets/config:/opt/sei/config/mod-pen
+      - ../../src/scripts:/opt/sei/scripts/mod-pen
+      - ../../src/scripts:/opt/sip/scripts/mod-pen
+      - ../../src/bin:/opt/sei/bin/mod-pen
+      - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - ../../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../../src/bin:/opt/sei/bin/mod-pen
-      - ../../../src:/opt/sei/web/modulos/pen
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
@@ -208,6 +211,7 @@ services:
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
+
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
