@@ -63,13 +63,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         //TODO: Migrar todo o código abaixo para uma classe utilitária de configuração dos testes
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 1 *****************/
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $parametrosOrgaoA = new ParameterUtils(CONTEXTO_ORGAO_A);
         $parametrosOrgaoA->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS);
         $parametrosOrgaoA->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
         $parametrosOrgaoA->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
         $parametrosOrgaoA->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
-        $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('N', 'TESTE_1_2'));
+
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         // Configuração do mapeamento de unidades
         $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000001', CONTEXTO_ORGAO_A_ID_ESTRUTURA));
@@ -93,13 +94,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update arquivo_extensao set sin_ativo=? where extensao=?", array('S', 'docx'));
 
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2 *****************/
-        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $parametrosOrgaoB = new ParameterUtils(CONTEXTO_ORGAO_B);
         $parametrosOrgaoB->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS);
         $parametrosOrgaoB->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
         $parametrosOrgaoB->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
         $parametrosOrgaoB->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
-        $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('N', 'TESTE_1_2'));
+
+        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+        $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
