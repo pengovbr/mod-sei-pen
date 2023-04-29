@@ -32,12 +32,12 @@
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="00000000" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="XXXXXXXXXXX" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Unidade de Teste ORG1" />
-    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="11111111" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Unidade de Teste ORG1.1" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="XXXXXXXXXXX" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
