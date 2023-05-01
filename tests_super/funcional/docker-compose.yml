@@ -97,7 +97,6 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: "true"

@@ -224,7 +224,7 @@ tramitar-pendencias-simples:
 
 tramitar-pendencias-silent:
 	@echo 'Executando monitoramento de pendências do Org1 e Org2'
-	@i=1; while [ "$$i" -le 3000 ]; do \
+	@i=1; while [ "$$i" -le 300 ]; do \
 		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 & \
 		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 ; \
 		i=$$((i + 1));\

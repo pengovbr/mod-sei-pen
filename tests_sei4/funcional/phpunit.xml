@@ -7,7 +7,6 @@
   verbose="true"
   cacheResult="false"
 >
-
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
     <const name="PHPUNIT_PORT" value="4444" />
@@ -33,12 +32,16 @@
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXX" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.11]" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1.1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
@@ -69,9 +72,11 @@
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="XXXXXXXXXXX" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />

@@ -1265,6 +1265,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
     }
 
+        if (InfraUtil::compararVersoes(SEI_VERSAO, '<=', '4.0.0')) {
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $objInfraParametro->setValor('PEN_VERSAO_MODULO_SEI', '0.0.0');
+        }
+
       $this->atualizarNumeroVersao("1.0.0");
 
       $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
