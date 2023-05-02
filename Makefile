@@ -123,6 +123,10 @@ clean:
 	@rm -f dist/$(PEN_MODULO_COMPACTADO)
 	@echo "Limpeza do diretório de distribuição do realizada com sucesso"
 
+config:  ## Configura o ambiente para outro banco de dados (mysql|sqlserver|oracle|postgresql). Ex: make config base=oracle 
+	@cp -f $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env;
+	@echo "$(SUCCESS)Ambiente configurado para utilizar a base de dados $(base).$(NC)"
+
 
 install: check-isalive
 	$(CMD_COMPOSE_FUNC) up -d	
@@ -224,7 +228,7 @@ tramitar-pendencias-simples:
 
 tramitar-pendencias-silent:
 	@echo 'Executando monitoramento de pendências do Org1 e Org2'
-	@i=1; while [ "$$i" -le 300 ]; do \
+	@i=1; while [ "$$i" -le 3000 ]; do \
 		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 & \
 		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 ; \
 		i=$$((i + 1));\
