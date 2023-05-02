@@ -483,10 +483,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
       }
 
-        $bolObrigarEnvioDeTodosOsComponentesDigitais = !$this->enviarApenasComponentesDigitaisPendentes(
-            $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
-            $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
-        );
+        // Atenção: Comportamento desativado até que seja tratado o recebimento de um processo recebendo um novo documento
+        // com mesmo arquivo/hash de outro documento já existente no processo
+        // $bolObrigarEnvioDeTodosOsComponentesDigitais = !$this->enviarApenasComponentesDigitaisPendentes(
+        //     $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+        //     $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
+        // );
+        $bolObrigarEnvioDeTodosOsComponentesDigitais = true;
 
         return $this->objProcessoEletronicoRN->construirCabecalho(
             $strNumeroRegistro,

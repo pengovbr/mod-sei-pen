@@ -1510,10 +1510,9 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->setOrdNumOrdemDocumentoAnexado(InfraDTO::$TIPO_ORDENACAO_ASC);
     }
 
-      $strCampoOrdenacao = "OrdemDocumento";
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
       $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-      $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, $strCampoOrdenacao);
+      $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, "OrdemDocumento");
 
       $arrObjDocumentoDTO = array();
       $arrIdDocumentosRetirados = array();
