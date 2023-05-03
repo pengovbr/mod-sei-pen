@@ -2514,20 +2514,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     ));
 
     // Criando nova sequência 
-    $objInfraBanco = BancoSEI::getInstance();
-    $objInfraSequencia = new InfraSequencia($objInfraBanco);
-    if (!$objInfraSequencia->verificarSequencia('md_pen_unidade_restricao')) {
-      $objInfraSequencia->criarSequencia('md_pen_unidade_restricao', '1', '1', '9999999999');
-    }
-    //Sequência: md_pen_seq_unidade_restricao
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_hipotese_legal
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_unidade_restricao');
     $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
       $numMaxId = 0;
     }
     BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unidade_restricao', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_unidade_restricao');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
   }
-
 }
 
 

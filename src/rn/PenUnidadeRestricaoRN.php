@@ -45,44 +45,30 @@ class PenUnidadeRestricaoRN extends InfraRN
    */
   public function prepararRepoEstruturas($IdUnidade, $IdUnidadeRH, $hdnRepoEstruturas)
   {
-    $contador = 0;
     $arrayObjPenUnidadeRestricaoDTO = array();
     $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnRepoEstruturas);
     foreach ($arrOpcoes as $opcoes) {
-      $contador++;
-      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-      $objPenUnidadeRestricaoDTO->setNumId($contador);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
-      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
-      $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
-    }
-    return $arrayObjPenUnidadeRestricaoDTO;
-  }
-
-  /**
-   * Método utilizado para preparar cadastro de dados.
-   * @param string $hdnRepoEstruturas
-   * @param string $IdUnidade
-   * @param string $IdUnidadeRH
-   * @return array
-   * @throws InfraException
-   */
-  public function prepararUnidades($IdUnidade, $IdUnidadeRH, $hdnUnidades)
-  {
-    $contador = 2;
-    $arrayObjPenUnidadeRestricaoDTO = array();
-    $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnUnidades);
-    foreach ($arrOpcoes as $opcoes) {
-      $contador++;
-      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-      $objPenUnidadeRestricaoDTO->setNumId($contador);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
-      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($opcoes[0]);
-      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($opcoes[1]);
-      $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
+      $hdnRepoEstruturasUnidades = 'hdnRepoEstruturas' . $opcoes[0];
+      if(array_key_exists($hdnRepoEstruturasUnidades, $_POST) && !empty($_POST[$hdnRepoEstruturasUnidades])) {
+        $arrOpcoesUnidades = PaginaSEI::getInstance()->getArrOptionsSelect($_POST[$hdnRepoEstruturasUnidades]);
+        foreach ($arrOpcoesUnidades as $opcoesUnidades) {
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
+          $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($opcoesUnidades[0]);
+          $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($opcoesUnidades[1]);
+          $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
+        }
+      } else {
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
+        $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
+        $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
+      }
     }
     return $arrayObjPenUnidadeRestricaoDTO;
   }

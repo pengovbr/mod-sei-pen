@@ -36,7 +36,7 @@ class PenUnidadeRestricaoDTO extends UnidadeDTO
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeUnidadeRestricao', 'nome_unidade_restricao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRHRestricao', 'id_unidade_rh_restricao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeUnidadeRHRestricao', 'nome_unidade_rh_restricao');
-    $this->configurarPK('Id', InfraDTO::$TIPO_PK_INFORMADO);
+    $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
 
     $this->configurarFK('IdUnidade', 'unidade', 'id_unidade');
   }

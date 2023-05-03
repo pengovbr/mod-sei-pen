@@ -204,34 +204,40 @@ class ProcessoEletronicoINT extends InfraINT {
 	{
     $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
     $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
-    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null);
     $objPenUnidadeRestricaoDTO->retTodos();
     
     $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-    $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-    $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrayObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+    $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
     $items = array();
-    foreach ($arrayObjPenUnidadeRestricaoDTO as $key => $item) {
-      //IdUnidadeRestricao NomeUnidadeRestricao
-      $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
+    $arrayKeys = array();
+    $arrObjPenUnidadeDTO = array();
+    $itemsUnidades = array();
+    $hdnRepoEstruturas = array();
+    $strHtmlRepoEstruturasUnidades = "";
+    foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
+      if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
+        //IdUnidadeRestricao NomeUnidadeRestricao
+        $arrayKeys[] = $item->getNumIdUnidadeRestricao();
+        $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
+        //$strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" name="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" value="" />' . "\n";
+        $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+      }
+      if ($item->getNumIdUnidadeRHRestricao() != null) {
+        $arrObjPenUnidadeDTO[] = $item;
+        $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
+        $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
+      }
+    }
+    foreach ($hdnRepoEstruturas as $key => $unidades) {
+      $value = implode('¥', $unidades);
+      $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key 
+        . '" name="hdnRepoEstruturas' . $key . '" value="' . $value . '" />' . "\n";
     }
     $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
-
-    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-    $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
-    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao(null);
-    $objPenUnidadeRestricaoDTO->retTodos();
+    $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
+    $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+    $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
     
-    $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-    $arrayObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-    $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrayObjPenUnidadeRestricaoDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
-    $items = array();
-    foreach ($arrayObjPenUnidadeRestricaoDTO as $key => $item) {
-      //IdUnidadeRestricao NomeUnidadeRestricao
-      $items[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
-    }
-    $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($items);
-
     $strCss = ''
 			. ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
 			. ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
@@ -310,13 +316,15 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repositorio=\'+document.getElementById(\'selRepoEstruturas\').value;'
 			. ' };'
 			. ' '
-			. ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
-			. ' 	if (id!=\'\'){'
-			. ' 	objLupaUnidades.adicionar(id,descricao,document.getElementById(\'txtUnidade\'));'
-			. ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
-			. ' 	}'
-			. ' };'
-			. ' '
+      . ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
+      . ' 	if (id!=\'\'){ '
+      . ' 	objLupaUnidades.adicionar(id,descricao,document.getElementById(\'txtUnidade\'));'
+      . '   repo = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+      . '   repo += (repo != \'\' ? "¥" : "") + id + "±" + descricao;'
+      . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = repo;'
+      . ' 	}'
+      . ' };'
+      . ' '
 			. ' if (document.getElementById(\'selRepoEstruturas\').options.length){'
 			. ' 	document.getElementById(\'selRepoEstruturas\').disabled = false;'
 			. ' 	document.getElementById(\'selRepoEstruturas\').options[0].selected = true;'
@@ -324,8 +332,6 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' };';
 
     
-      
-    $strHtmlRepoEstruturasUnidades = "";
 		$strHtml = ''
 			. ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
 			. ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>'
@@ -334,10 +340,10 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' <select id="selRepoEstruturas" name="selRepoEstruturas" size="6" multiple="multiple" class="infraSelect" onchange="trocarRepoEstruturasRestricao()" >'
 			. ' ' . $strItensSelRepoEstruturasRestricao . ''
 			. ' </select>'
-			// . ' <div id="divOpcoesOrgaos">'
+			. ' <div id="divOpcoesRepoEstruturas">'
 			// . ' <img id="imgLupaOrgaos" onclick="objLupaRepositoriosEstruturas.selecionar(700,500);" src="' . PaginaSEI::getInstance()->getIconePesquisar() . '" alt="Selecionar Órgãos" title="Selecionar Órgãos" class="infraImgNormal"  />'
 			// . ' <br />'
-			// . ' <img id="imgExcluirOrgaos" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Órgãos Selecionados" title="Remover Órgãos Selecionados" class="infraImgNormal"  />'
+			. ' <img id="imgExcluirRepoEstruturas" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Estruturas Selecionados" title="Remover Estrutuas Selecionados" class="infraImgNormal"  />'
 			. ' </div>'
 			. ' <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="'.$arrRepoEstruturasSelecionados.'" />'
 			. ' <label id="lblUnidades" for="selUnidades" class="infraLabelOpcional">Restringir às Unidades:</label>'
@@ -349,8 +355,8 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' <div id="divOpcoesUnidades">'
 			// . ' <img id="imgLupaUnidades" onclick="objLupaUnidades.selecionar(700,500);" src="' . PaginaSEI::getInstance()->getIconePesquisar() . '" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg"  />'
 			// . ' <br />'
-			// . ' <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />'
-			// . ' </div>'
+			. ' <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />'
+			. ' </div>'
 			. ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />'
 			. ' ' . $strHtmlRepoEstruturasUnidades . ''
 			. ' </div>';

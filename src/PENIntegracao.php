@@ -493,7 +493,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
         } else {
-            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+            return '<itens><item id="0" descricao="Repositório de estruturas não Encontrado."></item></itens>';
         }
           break;
       case 'pen_unidade_auto_completar_expedir_procedimento':
@@ -502,12 +502,40 @@ class PENIntegracao extends SeiIntegracao
             $bolPermiteEnvio = true;
         }
 
-        $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
+        if ($bolPermiteEnvio == false) {
+          $objUnidadeDTO = new PenUnidadeDTO();
+          $objUnidadeDTO->retNumIdUnidadeRH();
+          $objUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
-        if (count($arrObjEstruturaDTO) > 0) {
+          $objUnidadeRN = new UnidadeRN();
+          $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
+          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
+          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
+          
+          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+          $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+          $arrObjEstruturaDTO = array();
+          foreach ($arrEstruturas as $key => $unidade) {
+            if ($unidade->getNumIdUnidadeRHRestricao() != null) {
+              $arrObjEstruturaDTO[] = $unidade;
+            }
+          }
+          if (count($arrObjEstruturaDTO) > 0) {
+            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+          }
+        }
+        if (count($arrObjEstruturaDTO) == 0) {
+          $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
+          if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
-        } else {
-            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+          } else {
+              return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+          }
         }
           break;
 

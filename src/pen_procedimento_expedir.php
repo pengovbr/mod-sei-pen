@@ -66,16 +66,15 @@ try {
         $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
         $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
         $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null);
         $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
         $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
         
         $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-        $arrayIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
         //Preparação dos dados para montagem da tela de expedição de processos
-        if ($arrayIdUnidadeRestricao != null) {
+        if ($arrIdUnidadeRestricao != null) {
             $repositorios = array();
-            foreach ($arrayIdUnidadeRestricao as $value) {
+            foreach ($arrIdUnidadeRestricao as $value) {
                 $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
             }
         } else {
