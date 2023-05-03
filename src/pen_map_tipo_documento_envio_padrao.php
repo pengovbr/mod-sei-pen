@@ -47,15 +47,15 @@ try {
           PaginaSEI::getInstance()->processarExcecao($e);
         }
       }            
-    break;
+        break;
     
     case 'pen_map_tipo_documento_envio_padrao_consultar':       
       $strTitulo = 'Consultar Espécie Documental Padrão para Envio';
       $arrComandos[] = '<button type="button" accesskey="F" name="btnFechar" value="Fechar" onclick="location.href=\''.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao']).'#ID-'.$_GET['id_cidade'].'\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-    break;
+        break;
     
     default:
-    throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
+        throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
   }
   
   $objTipoDocMapRN = new TipoDocMapRN();
@@ -112,7 +112,7 @@ function validarCadastro() {
 <?
 PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
-PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
+PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="frmEspeciePadraoAtribuir" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].$strParametros)?>">
 <?

@@ -258,9 +258,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         case '3.2.1':
             $this->instalarV3022();
         case '3.2.2':
-            $this->instalarV3023();   
+            $this->instalarV3023();
         case '3.2.3':
             $this->instalarV3024();
+        case '3.2.4':
+            $this->instalarV3030();
+
+
         case '3.2.4':
             $this->instalarV3025();
   
@@ -268,7 +272,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
-              break;
       }
 
         $this->finalizar('FIM');
@@ -2488,8 +2491,25 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3024(){
       $this->atualizarNumeroVersao("3.2.4");
-  }  
+  }
 
+  protected function instalarV3030() {
+      $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+      $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+      $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
+
+      $objPenParametroRN = new PenParametroRN();
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome("PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO");
+      $objPenParametroDTO->retStrNome();
+      $objPenParametroRN->excluir($objPenParametroDTO);
+
+      // Corrige chave primaria da tabela de componentes digitais
+      $this->excluirChavePrimariaComIndice('md_pen_componente_digital', 'pk_md_pen_componente_digital');
+      $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem_documento', 'ordem'));
+
+      $this->atualizarNumeroVersao("3.3.0");
+  }
   protected function instalarV3025(): void
   {
     $this->atualizarNumeroVersao("3.2.5");

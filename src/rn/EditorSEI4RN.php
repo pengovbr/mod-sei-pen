@@ -62,7 +62,8 @@ class EditorSEI4RN extends InfraRN
     }
 
     $ie = PaginaSEI::getInstance()->isBolNavegadorIE();
-    if ($ie) $ie = PaginaSEI::getInstance()->getNumVersaoInternetExplorer();
+    if ($ie) { $ie = PaginaSEI::getInstance()->getNumVersaoInternetExplorer();
+    }
     if (InfraArray::contar($arrImagemPermitida) > 0 && !PaginaSEI::getInstance()->isBolNavegadorSafariIpad() && (!$ie || $ie > 7)) {
       $includePlugins[] = 'base64image';
     } else {
@@ -131,7 +132,8 @@ class EditorSEI4RN extends InfraRN
 
 
     $temp = array('Cut', 'Copy', 'PasteFromWord', 'PasteText', '-', 'Undo', 'Redo');
-    if ($scayt != '') $temp[] = 'SpellChecker';
+    if ($scayt != '') { $temp[] = 'SpellChecker';
+    }
     $temp[] = 'Scayt';
     $arrBotoes[] = $temp;
 
@@ -190,7 +192,8 @@ class EditorSEI4RN extends InfraRN
     $arrImagemPermitida = EditorINT::getArrImagensPermitidas();
 
     $includePlugins = array('simpleLink', 'notification', 'extenso', 'maiuscula', 'stylesheetparser', 'tableresize', 'tableclean', 'symbol');
-    if ($bolAutotexto) $includePlugins[] = 'autotexto';
+    if ($bolAutotexto) { $includePlugins[] = 'autotexto';
+    }
     $removePlugins = array('resize', 'maximize', 'link', 'wsc', 'assinatura', 'save', 'autogrow');
 
     if ($bolLinkSei) {
@@ -213,7 +216,8 @@ class EditorSEI4RN extends InfraRN
     }
 
     $ie = PaginaSEI::getInstance()->isBolNavegadorIE();
-    if ($ie) $ie = PaginaSEI::getInstance()->getNumVersaoInternetExplorer();
+    if ($ie) { $ie = PaginaSEI::getInstance()->getNumVersaoInternetExplorer();
+    }
     if ($bolImagens && InfraArray::contar($arrImagemPermitida) > 0 && !PaginaSEI::getInstance()->isBolNavegadorSafariIpad() && (!$ie || $ie > 7)) {
       $includePlugins[] = 'base64image';
     } else {
@@ -310,8 +314,10 @@ class EditorSEI4RN extends InfraRN
 
 
     $temp = array('Cut', 'Copy', 'CopyFormatting', 'PasteFromWord', 'PasteText', '-', 'Undo', 'Redo', 'ShowBlocks', 'Symbol');
-    if ($bolBtnWSC) $temp[] = 'SpellChecker';
-    if ($bolBtnScayt) $temp[] = 'Scayt';
+    if ($bolBtnWSC) { $temp[] = 'SpellChecker';
+    }
+    if ($bolBtnScayt) { $temp[] = 'Scayt';
+    }
     $arrRetorno[] = $temp;
 
     $arrRetorno[] = array('NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', 'base64image');
@@ -535,7 +541,7 @@ class EditorSEI4RN extends InfraRN
       $arrTags=$this->obterListaTags();
       ksort($arrTags);
       unset($arrTags['link_acesso_externo_processo']);
-      foreach ($arrTags as $chave=>$tag) {
+      foreach ($arrTags as $chave => $tag) {
         $jsonTags.=$strConcat."{'name':'$tag','id':'$chave'}";
         $strConcat=',';
       }
@@ -658,7 +664,7 @@ class EditorSEI4RN extends InfraRN
           $strFormatos = rtrim($strFormatos, '|');
 
           $strConteudo = PaginaSEI::tratarHTML($this->filtrarTags($objSecaoModeloDTO->getStrConteudo()));
-          $strConteudo = $this->substituirTagsInterno($parObjEditorDTO, $strConteudo,true);
+          $strConteudo = $this->substituirTagsInterno($parObjEditorDTO, $strConteudo, true);
 
           if ($objSecaoModeloDTO->getStrSinHtml() == 'N') {
             $arrConteudo = explode("\n", $strConteudo);
@@ -717,7 +723,7 @@ class EditorSEI4RN extends InfraRN
 
       $ret->setNumVersao(0);
       $ret->setStrSinAlterouVersao('N');
-      $ret->setStrToolbar($this->jsEncode($this->montarBarraFerramentas(true, false,false)));
+      $ret->setStrToolbar($this->jsEncode($this->montarBarraFerramentas(true, false, false)));
       $ret->setStrTextareas($strTextareas);
       $ret->setStrCss($strConteudoCss);
       $ret->setStrInicializacao($strInicializacao);
@@ -1315,7 +1321,7 @@ class EditorSEI4RN extends InfraRN
 
           if (count($arrObjRelBlocoProtocoloDTO)){
             $objBlocoRN = new BlocoRN();
-            $objBlocoRN->removerRevisao(InfraArray::gerarArrInfraDTO('BlocoDTO','IdBloco',InfraArray::converterArrInfraDTO($arrObjRelBlocoProtocoloDTO,'IdBloco')));
+            $objBlocoRN->removerRevisao(InfraArray::gerarArrInfraDTO('BlocoDTO', 'IdBloco', InfraArray::converterArrInfraDTO($arrObjRelBlocoProtocoloDTO, 'IdBloco')));
           }
 
           if ($objDocumentoDTO->getStrSinAssinado() == 'S') {
@@ -1599,8 +1605,9 @@ class EditorSEI4RN extends InfraRN
             //compara as diferenças, que devem ser 0
             if (InfraArray::contar(array_diff_assoc($value, $arrEstilos2))===0 &&
                 InfraArray::contar(array_diff_assoc($arrEstilos2, $value))===0
-            )
+            ) {
               return $key;
+            }
           }
         } else {
           foreach ($value as $value2) {
@@ -1632,7 +1639,8 @@ class EditorSEI4RN extends InfraRN
         $objConjuntoEstilosDTO->setStrSinUltimo('S');
         $objConjuntoEstilosDTO->retNumIdConjuntoEstilos();
         $objConjuntoEstilosDTO = $objConjuntoEstilosRN->consultar($objConjuntoEstilosDTO);
-        if ($objConjuntoEstilosDTO==null) throw new InfraException('Erro consultando conjunto de estilos.');
+        if ($objConjuntoEstilosDTO==null) { throw new InfraException('Erro consultando conjunto de estilos.');
+        }
         $arrEstilos = $this->getArrayCss($objConjuntoEstilosDTO->getNumIdConjuntoEstilos());
         $parObjEditorDTO->setNumIdConjuntoEstilos($objConjuntoEstilosDTO->getNumIdConjuntoEstilos());
       }
@@ -1700,7 +1708,7 @@ class EditorSEI4RN extends InfraRN
 
   }
 
-  private function montarConteudoSecao($objSecaoDocumentoDTO, $arrEstilosFormatados, $numVersao,$parObjEditorDTO)
+  private function montarConteudoSecao($objSecaoDocumentoDTO, $arrEstilosFormatados, $numVersao, $parObjEditorDTO)
   {
 
     self::$arrTags['versao']=$numVersao;
@@ -1714,12 +1722,12 @@ class EditorSEI4RN extends InfraRN
 
       $strConteudo = $objSecaoDocumentoDTO->getStrConteudoOriginal();
 
-      $strConteudo=$this->substituirTagsInterno($parObjEditorDTO,$strConteudo);
+      $strConteudo=$this->substituirTagsInterno($parObjEditorDTO, $strConteudo);
 
       //if ($objSecaoDocumentoDTO->getStrSinSomenteLeitura()=='S') {
-        if (trim($strConteudo)!='' && $objSecaoDocumentoDTO->getStrSinHtml()=='N') {
-          $strConteudo = '<p ' . $strEstiloPadrao . '>'.$strConteudo . '</p>' . "\r\n";
-        }
+      if (trim($strConteudo)!='' && $objSecaoDocumentoDTO->getStrSinHtml()=='N') {
+        $strConteudo = '<p ' . $strEstiloPadrao . '>'.$strConteudo . '</p>' . "\r\n";
+      }
       //}
 
     } else {
@@ -1899,15 +1907,15 @@ class EditorSEI4RN extends InfraRN
     }
 
     //regex reset de contadores
-    $qtd=preg_match_all('/p\.(\S*) \{[^}]*counter-increment:([^;]*);/',$strConteudoCss,$arrCssContadores);
+    $qtd=preg_match_all('/p\.(\S*) \{[^}]*counter-increment:([^;]*);/', $strConteudoCss, $arrCssContadores);
     if ($qtd>0){
-      $arrCssContadores=array_combine($arrCssContadores[1],$arrCssContadores[2]);
+      $arrCssContadores=array_combine($arrCssContadores[1], $arrCssContadores[2]);
     } else {
       $arrCssContadores=null;
     }
 
     if($bolSiglaSistemaSUPER){
-        $strSiglaSistema = ConfiguracaoSEI::getInstance()->getValor("SessaoSEI","SiglaSistema");
+        $strSiglaSistema = ConfiguracaoSEI::getInstance()->getValor("SessaoSEI", "SiglaSistema");
         $strPadrao = ($strSiglaSistema === "SEI") ? '/^SEI\//' : '/^SUPER\//';
         $strSubstituicao = ($strSiglaSistema === "SEI") ? "SUPER/" : "SEI/";
         $strTitulo = preg_replace($strPadrao, $strSubstituicao, $strTitulo);
@@ -1995,7 +2003,7 @@ class EditorSEI4RN extends InfraRN
           $objVersaoSecaoDocumentoDTO->setNumMaxRegistrosRetorno(1);
 
           $arrObjVersaoSecaoDocumentoDTO = $objVersaoSecaoDocumentoRN->listar($objVersaoSecaoDocumentoDTO);
-          $strHtml .= $this->resetContadoresCss($arrObjVersaoSecaoDocumentoDTO[0]->getStrConteudo(),$arrCssContadores);
+          $strHtml .= $this->resetContadoresCss($arrObjVersaoSecaoDocumentoDTO[0]->getStrConteudo(), $arrCssContadores);
         }
 
       } else {
@@ -2022,7 +2030,8 @@ class EditorSEI4RN extends InfraRN
         }
 
         $numVersaoAtual = explode('.', SEI_VERSAO);
-        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT); }, $numVersaoAtual);
+        $numVersaoAtual = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT);
+        }, $numVersaoAtual);
         $numVersaoAtual = intval(join($numVersaoAtual));
 
         if ($objDocumentoDTO!=null) {
@@ -2032,8 +2041,8 @@ class EditorSEI4RN extends InfraRN
               $strHtml .= $objAssinaturaRN->montarTarjasLegado($objDocumentoDTO);
 
             }else{
-            $objAssinaturaRN = new AssinaturaRN();
-            $strHtml .= $objAssinaturaRN->montarTarjas($objDocumentoDTO);
+              $objAssinaturaRN = new AssinaturaRN();
+              $strHtml .= $objAssinaturaRN->montarTarjas($objDocumentoDTO);
             }
           }else{
             $objAssinaturaRN = new AssinaturaHashRN();
@@ -2058,7 +2067,7 @@ class EditorSEI4RN extends InfraRN
 
     if ($parObjEditorDTO->getStrSinIdentificacaoVersao()=='S') {
       if(!$montarTarja){
-      $strHtml .= $this->consultarHtmlIdentificacaoVersao($parObjEditorDTO);
+        $strHtml .= $this->consultarHtmlIdentificacaoVersao($parObjEditorDTO);
       }else{
         $strHtml .= $this->consultarHtmlIdentificacaoVersao3015($parObjEditorDTO);
       }
@@ -2080,7 +2089,7 @@ class EditorSEI4RN extends InfraRN
       $strHtml=$this->assinarLinkFederacao($strHtml);
 
     } else {
-      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO,'$4',$strHtml);
+      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO, '$4', $strHtml);
     }
 
     if ($parObjEditorDTO->isSetStrSinValidarXss() && $parObjEditorDTO->getStrSinValidarXss()=='S') {
@@ -2165,9 +2174,9 @@ class EditorSEI4RN extends InfraRN
     }
 
     //regex reset de contadores
-    $qtd=preg_match_all('/p\.(\S*) \{[^}]*counter-increment:([^;]*);/',$strConteudoCss,$arrCssContadores);
+    $qtd=preg_match_all('/p\.(\S*) \{[^}]*counter-increment:([^;]*);/', $strConteudoCss, $arrCssContadores);
     if ($qtd>0){
-      $arrCssContadores=array_combine($arrCssContadores[1],$arrCssContadores[2]);
+      $arrCssContadores=array_combine($arrCssContadores[1], $arrCssContadores[2]);
     } else {
       $arrCssContadores=null;
     }
@@ -2245,7 +2254,7 @@ class EditorSEI4RN extends InfraRN
         } else {
           $str1=$objVersaoSecaoDocumentoDTO1->getStrConteudo();
           $str2=$objVersaoSecaoDocumentoDTO2->getStrConteudo();
-          $strConteudo = InfraHTML::comparar($str1,$str2);
+          $strConteudo = InfraHTML::comparar($str1, $str2);
         }
 
         $strHtml .= $this->resetContadoresCss($strConteudo, $arrCssContadores);
@@ -2266,17 +2275,17 @@ class EditorSEI4RN extends InfraRN
       $strHtml=$this->assinarLinkFederacao($strHtml);
 
     } else {
-      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO,'$4',$strHtml);
+      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO, '$4', $strHtml);
     }
 
     return $strHtml;
   }
 
-  private function resetContadoresCss($strConteudoHtml,$arrClasses)
+  private function resetContadoresCss($strConteudoHtml, $arrClasses)
   {
     if(is_array($arrClasses) && count($arrClasses)>1){
       $arrContadoresUsados=array();
-      $qtd=preg_match_all('/<p\w*\s*class="([^"]*)/',$strConteudoHtml,$arrMatches);
+      $qtd=preg_match_all('/<p\w*\s*class="([^"]*)/', $strConteudoHtml, $arrMatches);
       if ($qtd>0){
         $arrClassesUsadas=array_unique($arrMatches[1]);
         foreach ($arrClassesUsadas as $strClasse) {
@@ -2298,7 +2307,7 @@ class EditorSEI4RN extends InfraRN
     return $strConteudoHtml;
   }
 
-  private function substituirTagsInterno(EditorDTO $parObjEditorDTO,$strConteudo,$bolTesteModelo=false){
+  private function substituirTagsInterno(EditorDTO $parObjEditorDTO, $strConteudo, $bolTesteModelo = false){
     if($bolTesteModelo){
       self::$arrTags['#numIdUnidadeResponsavel']=SessaoSEI::getInstance()->getNumIdUnidadeAtual();
       self::$arrTags['#numIdUsuarioGerador']=SessaoSEI::getInstance()->getNumIdUsuario();
@@ -2310,14 +2319,15 @@ class EditorSEI4RN extends InfraRN
       self::$arrTags['mes_extenso']=strtolower(InfraData::descreverMes(substr($dtaGeracao, 3, 2)));
     }
 
-    $strConteudo=preg_replace_callback('/@([a-zA-Z0-9_-]+)@/',function($match) use ($parObjEditorDTO,$bolTesteModelo) {
-      if (isset(self::$arrTags[$match[1]])) return self::$arrTags[$match[1]];
-      $this->obterParametros($parObjEditorDTO, $match[1],$bolTesteModelo);
+    $strConteudo=preg_replace_callback('/@([a-zA-Z0-9_-]+)@/', function($match) use ($parObjEditorDTO, $bolTesteModelo) {
+      if (isset(self::$arrTags[$match[1]])) { return self::$arrTags[$match[1]];
+      }
+      $this->obterParametros($parObjEditorDTO, $match[1], $bolTesteModelo);
       if (isset(self::$arrTags[$match[1]])) {
         return self::$arrTags[$match[1]];
       }
       return $match[0];
-    },$strConteudo);
+    }, $strConteudo);
     return $strConteudo;
   }
 
@@ -2330,7 +2340,7 @@ class EditorSEI4RN extends InfraRN
   public function processarTag(EditorDTO $parObjEditorDTO){
 
     $tag=$parObjEditorDTO->getStrNomeTag();
-    $this->obterParametros($parObjEditorDTO,$tag);
+    $this->obterParametros($parObjEditorDTO, $tag);
 
     if (isset(self::$arrTags[$tag])) {
       return self::$arrTags[$tag];
@@ -2471,18 +2481,18 @@ class EditorSEI4RN extends InfraRN
       'categoria_interessado',
       'link_acesso_externo_processo');
 
-    $arr=array_fill_keys($arr,'');
+    $arr=array_fill_keys($arr, '');
 
     foreach($SEI_MODULOS as $seiModulo){
       if (($arrVariaveisModulo = $seiModulo->executar('obterRelacaoVariaveisEditor'))!=null){
-        foreach ($arrVariaveisModulo as $chave=>$valor) {
+        foreach ($arrVariaveisModulo as $chave => $valor) {
           $arr[$chave]=$valor;
         }
       }
     }
     return $arr;
   }
-  private function obterParametros(EditorDTO $parObjEditorDTO,$parStrTag,$bolTesteModelo=false){
+  private function obterParametros(EditorDTO $parObjEditorDTO, $parStrTag, $bolTesteModelo = false){
 
     global $SEI_MODULOS;
 
@@ -2515,19 +2525,19 @@ class EditorSEI4RN extends InfraRN
       case 'observacao_documento':
       case 'observacao_processo':
         $bolDocumento=true;
-        break;
+          break;
 
       case 'nome_autor':
         $bolUsuario=!isset(self::$arrTags['nome_autor']);
-        break;
+          break;
 
       case 'nome_usuario':
         $bolUsuario=!isset(self::$arrTags['nome_usuario']);
-        break;
+          break;
 
       case 'cargo_usuario':
         $bolUsuario=!isset(self::$arrTags['cargo_usuario']);
-        break;
+          break;
 
       case 'sigla_orgao_origem':
       case 'descricao_orgao_origem':
@@ -2549,7 +2559,7 @@ class EditorSEI4RN extends InfraRN
       case 'descricao_unidade_maiusculas':
       case 'observacao_unidade':
         $bolUnidade=!isset(self::$arrTags['sigla_orgao_origem']);
-        break;
+          break;
 
       case 'hierarquia_unidade':
       case 'hierarquia_unidade_invertida':
@@ -2561,7 +2571,7 @@ class EditorSEI4RN extends InfraRN
       case 'hierarquia_unidade_superior_descricao':
         $bolUnidade=!isset(self::$arrTags['sigla_orgao_origem']);
         $bolHierarquia=!isset(self::$arrTags['hierarquia_unidade']);
-        break;
+          break;
 
       case 'destinatarios':
       case 'destinatarios_virgula_espaco':
@@ -2648,22 +2658,21 @@ class EditorSEI4RN extends InfraRN
       case 'categoria_destinatario':
       case 'categoria_interessado':
         $bolParticipante=!(isset(self::$arrTags['interessados_virgula_espaco'])||isset(self::$arrTags['destinatarios_virgula_espaco']));
-        break;
+          break;
       case 'link_acesso_externo_processo':
-
         if($bolTesteModelo){
           break;
         }
         $objDocumentoDTO = new DocumentoDTO();
         $objDocumentoDTO->setDblIdDocumento($parObjEditorDTO->getDblIdDocumento());
         self::$arrTags[$parStrTag] = $this->recuperarLinkAcessoExterno($objDocumentoDTO);
-        break;
+          break;
       default:
-        if(preg_match(EditorRN::$REGEXP_VARIAVEL_EDITOR,$parStrTag)===1){
+        if(preg_match(EditorRN::$REGEXP_VARIAVEL_EDITOR, $parStrTag)===1){
           $bolModulo=true;
           break;
         }
-        return;
+          return;
     }
     try {
 
@@ -2844,7 +2853,7 @@ class EditorSEI4RN extends InfraRN
         self::$arrTags['endereco_unidade'] = $objContatoDTO->getStrEndereco();
 
         if (InfraString::isBolVazia(self::$arrTags['endereco_unidade'])) {
-          throw new InfraException('Unidade ' . $objUnidadeDTO->getStrSigla() . ' não possui endereço cadastrado.',null,null,true,InfraLog::$AVISO);
+          throw new InfraException('Unidade ' . $objUnidadeDTO->getStrSigla() . ' não possui endereço cadastrado.', null, null, true, InfraLog::$AVISO);
         }
 
         self::$arrTags['cep_unidade'] = 'CEP ' . $objContatoDTO->getStrCep();
@@ -2933,15 +2942,15 @@ class EditorSEI4RN extends InfraRN
 
         foreach($SEI_MODULOS as $seiModulo){
           if (($arrVariaveisModulo = $seiModulo->executar('obterRelacaoVariaveisEditor'))!=null && isset($arrVariaveisModulo[$parStrTag])){
-            if (($arrModulo = $seiModulo->executar('processarVariaveisEditor',$objDocumentoAPI))!=null){
-              foreach ($arrModulo as $strVariavel=>$strValor) {
+            if (($arrModulo = $seiModulo->executar('processarVariaveisEditor', $objDocumentoAPI))!=null){
+              foreach ($arrModulo as $strVariavel => $strValor) {
                 if(isset(self::$arrTags[$strVariavel])) {
                   throw new InfraException('Tentativa de sobrescrever variavel [' . $strVariavel . '] no módulo ' . $seiModulo->getNome());
                 }
                 if(!isset($arrVariaveisModulo[$strVariavel])){
                   throw new InfraException('Variável [' . $strVariavel . '] não relacionada no módulo ' . $seiModulo->getNome());
                 }
-                if(preg_match(EditorRN::$REGEXP_VARIAVEL_EDITOR,$strVariavel)!==1){
+                if(preg_match(EditorRN::$REGEXP_VARIAVEL_EDITOR, $strVariavel)!==1){
                   throw new InfraException('Tentativa de definir variavel inválida [' . $strVariavel . '] no módulo ' . $seiModulo->getNome());
                 }
                 self::$arrTags[$strVariavel]=$strValor;
@@ -3132,7 +3141,7 @@ class EditorSEI4RN extends InfraRN
         }
       }
 
-      if (array_key_exists($parStrTag,self::$arrTags) && self::$arrTags[$parStrTag]==null){
+      if (array_key_exists($parStrTag, self::$arrTags) && self::$arrTags[$parStrTag]==null){
         self::$arrTags[$parStrTag]='';
       }
 
@@ -3148,7 +3157,8 @@ class EditorSEI4RN extends InfraRN
     $ext = pathinfo(DIR_SEI_TEMP . '/' . $nomeArquivo);
 
     $ret = print_r($ext, true);
-    if (!in_array($ext['extension'], $arrImagemPermitida)) return 'Tipo de Arquivo não permitido.';
+    if (!in_array($ext['extension'], $arrImagemPermitida)) { return 'Tipo de Arquivo não permitido.';
+    }
 
     return 'data:image/' . $ext['extension'] . ';base64,' . base64_encode(file_get_contents(DIR_SEI_TEMP . '/' . $nomeArquivo));
   }
@@ -3228,10 +3238,9 @@ class EditorSEI4RN extends InfraRN
         switch ($tag) {
           case 'script':
             $objInfraException->lancarValidacao('Documento possui código de script oculto no conteúdo.');
-            break;
+              break;
 
           case 'img':
-
             if (InfraArray::contar($arrImagemPermitida)==0) {
               $objInfraException->lancarValidacao('Documento possui imagem no conteúdo.');
             }
@@ -3251,28 +3260,28 @@ class EditorSEI4RN extends InfraRN
                 $objInfraException->lancarValidacao('Documento possui imagem não permitida no conteúdo.');
               }
             }
-            break;
+              break;
 
           case 'button':
           case 'input':
           case 'select':
             $objInfraException->lancarValidacao('Documento possui componente HTML não permitido no conteúdo.');
-            break;
+              break;
           case 'iframe':
             $objInfraException->lancarValidacao('Documento possui formulário oculto no conteúdo.');
-            break;
+              break;
 
           case 'frame':
             $objInfraException->lancarValidacao('Documento possui formulário no conteúdo.');
-            break;
+              break;
           case 'embed':
           case 'object':
           case 'param':
             $objInfraException->lancarValidacao('Documento possui um objeto não autorizado no conteúdo.');
-            break;
+              break;
           case 'video':
             $objInfraException->lancarValidacao('Documento possui vídeo no conteúdo.');
-            break;
+              break;
           case 'audio':
             $objInfraException->lancarValidacao('Documento possui áudio no conteúdo.');
         }
@@ -3283,19 +3292,20 @@ class EditorSEI4RN extends InfraRN
 
   public function processarLinksSei($str)
   {
-    if ($str==null) return null;
+    if ($str==null) { return null;
+    }
     //remover sujeira scayt
-    $ret=preg_replace(self::$REGEX_SPAN_SCAYT,'$4', $str);
+    $ret=preg_replace(self::$REGEX_SPAN_SCAYT, '$4', $str);
     if($ret!==null){
       $str=$ret;
     } else {
-      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_SCAYT: '.preg_last_error(),InfraLog::$DEBUG);
+      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_SCAYT: '.preg_last_error(), InfraLog::$DEBUG);
     }
     $ret = preg_replace_callback(self::$REGEXP_LINK_ASSINADO, "self::validarLink", $str);
     if($ret!==null){
       $str=$ret;
     } else {
-      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_LINK_ASSINADO: '.preg_last_error(),InfraLog::$DEBUG);
+      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_LINK_ASSINADO: '.preg_last_error(), InfraLog::$DEBUG);
     }
 
     if (preg_match_all(self::$REGEXP_SPAN_LINKSEI, $str, $matches)>0){
@@ -3314,19 +3324,19 @@ class EditorSEI4RN extends InfraRN
       }
 
     } else if(preg_last_error()!=0) {
-      LogSEI::getInstance()->gravar('[processarLinksSei] Match_all REGEXP_SPAN_LINKSEI: '.preg_last_error(),InfraLog::$DEBUG);
+      LogSEI::getInstance()->gravar('[processarLinksSei] Match_all REGEXP_SPAN_LINKSEI: '.preg_last_error(), InfraLog::$DEBUG);
     }
-    $ret= preg_replace_callback(self::$REGEXP_SPAN_LINKSEI,'self::processarLinkProtocolo',$str);
+    $ret= preg_replace_callback(self::$REGEXP_SPAN_LINKSEI, 'self::processarLinkProtocolo', $str);
     if($ret!==null){
       $str=$ret;
     } else {
-      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_LINKSEI: '.preg_last_error(),InfraLog::$DEBUG);
+      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_LINKSEI: '.preg_last_error(), InfraLog::$DEBUG);
     }
-    $ret= preg_replace_callback(self::$REGEXP_SPAN_LINKSEI_FEDERACAO,'self::processarLinkFederacao',$str);
+    $ret= preg_replace_callback(self::$REGEXP_SPAN_LINKSEI_FEDERACAO, 'self::processarLinkFederacao', $str);
     if($ret!==null){
       $str=$ret;
     } else {
-      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_LINKSEI_FEDERACAO: '.preg_last_error(),InfraLog::$DEBUG);
+      LogSEI::getInstance()->gravar('[processarLinksSei] REGEXP_SPAN_LINKSEI_FEDERACAO: '.preg_last_error(), InfraLog::$DEBUG);
     }
     return $str;
   }
@@ -3373,12 +3383,12 @@ class EditorSEI4RN extends InfraRN
     //verificar se tem ft (tipo),fi (instalacao),fp (processo), fa (processo_anexado) ou fd (documento)
     //filtrar outros dados
     //caso não tenha, deixar somente texto
-    if(preg_match('/data-ft\s?=\s?(\'|")([pda])\1/',$strAtributosLink,$match)!==1){
+    if(preg_match('/data-ft\s?=\s?(\'|")([pda])\1/', $strAtributosLink, $match)!==1){
       return $strTextoLink;
     }
     $staTipoLinkFederacao=$match[2];
 
-    preg_match_all('/data-f([ipda])\s?=\s?(\'|")([0-9A-HJKLMNPQRSTVWXYZ]{26})\2/', $strAtributosLink, $atributos,PREG_SET_ORDER);
+    preg_match_all('/data-f([ipda])\s?=\s?(\'|")([0-9A-HJKLMNPQRSTVWXYZ]{26})\2/', $strAtributosLink, $atributos, PREG_SET_ORDER);
     //valida parametros t,i,p (para documentos)
     foreach ($atributos as $arr) {
       $data[$arr[1]]=$arr[3];
@@ -3396,10 +3406,10 @@ class EditorSEI4RN extends InfraRN
     switch($staTipoLinkFederacao){
       case 'd':
         $ret.=' data-fd="'.$data['d'].'">';
-        break;
+          break;
       case 'a':
         $ret.=' data-fa="'.$data['a'].'">';
-        break;
+          break;
       case 'p':
         $ret.='>';
     }
@@ -3418,14 +3428,14 @@ class EditorSEI4RN extends InfraRN
     while (($posLinkSeiIni = strpos($strHtml, $strChaveBusca, $posLinkSeiIni))!==false) {
 
       $posLinkSeiIni += strlen($strChaveBusca);
-      $posLinkSeiFim=strpos($strHtml,'>',$posLinkSeiIni-1);
-      $strAtributosLink=substr($strHtml,$posLinkSeiIni,$posLinkSeiFim-$posLinkSeiIni);
-      if(preg_match('/data-ft\s?=\s?(\'|")([pda])\1/',$strAtributosLink,$match)!==1){
+      $posLinkSeiFim=strpos($strHtml, '>', $posLinkSeiIni-1);
+      $strAtributosLink=substr($strHtml, $posLinkSeiIni, $posLinkSeiFim-$posLinkSeiIni);
+      if(preg_match('/data-ft\s?=\s?(\'|")([pda])\1/', $strAtributosLink, $match)!==1){
         continue;
       }
       $staTipoLinkFederacao=$match[2];
 
-      preg_match_all('/data-f([ipda])\s?=\s?(\'|")([0-9A-HJKLMNPQRSTVWXYZ]{26})\2/', $strAtributosLink, $atributos,PREG_SET_ORDER);
+      preg_match_all('/data-f([ipda])\s?=\s?(\'|")([0-9A-HJKLMNPQRSTVWXYZ]{26})\2/', $strAtributosLink, $atributos, PREG_SET_ORDER);
       //valida parametros t,i,p (para documentos)
       foreach ($atributos as $arr) {
         $data[$arr[1]]=$arr[3];
@@ -3442,14 +3452,14 @@ class EditorSEI4RN extends InfraRN
         case 'a':
           $strLink.='processo_consulta_federacao';
           $strParametros.='&id_procedimento_federacao_anexado='.$data['a'];
-          break;
+            break;
         case 'd':
           $strLink.='documento_consulta_federacao';
           $strParametros.='&id_documento_federacao='.$data['d'];
-          break;
+            break;
         case 'p':
           $strLink.='processo_consulta_federacao';
-          break;
+            break;
       }
       $strLink = SessaoSEI::getInstance()->assinarLink($strLink.$strParametros);
 

@@ -27,8 +27,8 @@ SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests_$(sistema)/funcional
-PEN_TEST_UNIT = tests_$(sistema)/unitario
+PEN_TEST_FUNC = tests/tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests/tests_$(sistema)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
@@ -160,16 +160,16 @@ update: ## Atualiza banco de dados através dos scripts de atualização do sist
 	$(CMD_COMPOSE_FUNC) run --rm -w /opt/sip/scripts/ org2-http bash -c "$(CMD_INSTALACAO_RECURSOS_SEI)"; true
 
 
-destroy:
+destroy: .env
 	$(CMD_COMPOSE_FUNC) down --volumes
 
 
-down:	
+down: .env
 	$(CMD_COMPOSE_FUNC) stop
 
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
-test-functional: $(FILE_VENDOR_FUNCIONAL)
+test-functional: .env $(FILE_VENDOR_FUNCIONAL)
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
 
 
@@ -181,7 +181,7 @@ test-parallel-otimizado:
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit: $(FILE_VENDOR_UNITARIO)
+test-unit: .env $(FILE_VENDOR_UNITARIO)
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
 
 test: test-unit test-functional
@@ -226,7 +226,7 @@ tramitar-pendencias-simples:
 	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
-	i=1; while [ "$$i" -le 300 ]; do \
+	i=1; while [ "$$i" -le 3000 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
 		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
 		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \

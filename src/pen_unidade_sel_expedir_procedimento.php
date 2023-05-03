@@ -27,15 +27,15 @@ try {
 // $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
 // $resultDadosHierarquia  = $objExpedirProcedimentosRN->consultarUnidadesHierarquia();
 
-    switch ($_GET['acao']) {
+  switch ($_GET['acao']) {
 
-        case 'pen_unidade_sel_expedir_procedimento':
-            $strTitulo = 'Selecionar Unidade';
-            break;
+    case 'pen_unidade_sel_expedir_procedimento':
+        $strTitulo = 'Selecionar Unidade';
+        break;
 
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-    }
+    default:
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }
 
     $arrComandos = array();
 
