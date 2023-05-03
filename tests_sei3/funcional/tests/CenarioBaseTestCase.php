@@ -105,6 +105,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
+        $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000002', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA));
+
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
         $bancoOrgaoB->execute("update unidade set sin_protocolo=? where sigla=?", array('S', CONTEXTO_ORGAO_B_SIGLA_UNIDADE));
         $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasPEN'", null);
