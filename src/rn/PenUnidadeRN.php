@@ -58,6 +58,22 @@ class PenUnidadeRN extends InfraRN {
     }
   }
     
+  /**
+   * Método utilizado para consultar dados.
+   * @param PenUnidadeDTO $objDTO
+   * @return array
+   * @throws InfraException
+   */
+  protected function consultarControlado(PenUnidadeDTO $objPenUnidadeDTO){
+    try {
+        $objPenUnidadeBD = new PenUnidadeBD(BancoSEI::getInstance());
+        return $objPenUnidadeBD->consultar($objPenUnidadeDTO);
+    } 
+    catch (Exception $e) {
+        throw new InfraException('Erro alterando mapeamento de unidades.', $e);
+    }
+  }
+
     /**
      * Método utilizado para alteração de dados.
      * @param UnidadeDTO $objDTO
