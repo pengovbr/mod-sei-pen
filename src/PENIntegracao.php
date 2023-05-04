@@ -223,11 +223,37 @@ class PENIntegracao extends SeiIntegracao
     if (!empty($arrObjAtividadeDTO)) {
       foreach ($arrObjAtividadeDTO as $ObjAtividadeDTO) {
         $dblIdProcedimento = $ObjAtividadeDTO->getDblIdProcedimentoProtocolo();
-        if (array_key_exists($dblIdProcedimento, $arrStrIcone)) {
-          $arrStrIconeIcon = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
-          $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrStrIconeIcon);
-        } else {
-          $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+        
+        $objPenUnidadeDTO = new PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objPenUnidadeDTO->retNumIdUnidadeRH();
+        //Monta o select das unidades
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $arrNumIdUnidadeUsados = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
+        $numIdUnidadeRH = $arrNumIdUnidadeUsados != null ? $arrNumIdUnidadeUsados->getNumIdUnidadeRH() : false;
+
+        $objTramiteDTO = new TramiteDTO();
+        $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
+        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+        $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+        $objTramiteDTO->retNumIdTramite();
+        $objTramiteDTO->retNumIdEstruturaDestino();
+
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+        $numIdEstruturaDestino = $objTramiteDTO != null ? $objTramiteDTO->getNumIdEstruturaDestino() : false;
+
+        if (
+          $numIdEstruturaDestino !== false && $numIdUnidadeRH !== false &&
+          ($numIdEstruturaDestino == $numIdUnidadeRH)
+        ) {
+          if (array_key_exists($dblIdProcedimento, $arrStrIcone)) {
+            $arrStrIconeIcon = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+            $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrStrIconeIcon);
+          } else {
+            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/share-nodes-solid.svg" title="Um trâmite para esse processo foi recebido" />');
+          }
         }
       }
     }
