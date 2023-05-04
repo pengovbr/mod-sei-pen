@@ -57,32 +57,37 @@ class EnviarReciboTramiteRN extends InfraRN
       return $arrStrHashConteudo;
   }
 
-  protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array()){
-
+  protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array())
+    {
+    try {
       $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
 
       $objDTO = new ReciboTramiteRecebidoDTO();
       $objDTO->setStrNumeroRegistro($strNumeroRegistro);
       $objDTO->setNumIdTramite($parNumIdTramite);
 
-    if(!empty($strHashConteudo)) { $objDTO->setStrHashAssinatura($strHashConteudo);
-    }
+      if(!empty($strHashConteudo)) { $objDTO->setStrHashAssinatura($strHashConteudo);
+      }
 
-    if(intval($objBD->contar($objDTO)) == 0) {
+      if(intval($objBD->contar($objDTO)) == 0) {
 
-        $objDTO->setDthRecebimento(date('d/m/Y H:i:s'));
-        $objBD->cadastrar($objDTO);
-    }
+          $objDTO->setDthRecebimento(date('d/m/Y H:i:s'));
+          $objBD->cadastrar($objDTO);
+      }
 
-    foreach($parArrayHash as $strHashComponenteDigital){
+      foreach($parArrayHash as $strHashComponenteDigital){
 
-        $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-        $objReciboTramiteHashDTO->setStrNumeroRegistro($strNumeroRegistro);
-        $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
-        $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
-        $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
-        $objBD->cadastrar($objReciboTramiteHashDTO);
-    }
+          $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+          $objReciboTramiteHashDTO->setStrNumeroRegistro($strNumeroRegistro);
+          $objReciboTramiteHashDTO->setNumIdTramite($parNumIdTramite);
+          $objReciboTramiteHashDTO->setStrHashComponenteDigital($strHashComponenteDigital);
+          $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
+          $objBD->cadastrar($objReciboTramiteHashDTO);
+      }
+    } catch (Exception $e) {
+      $strMensagem = "Falha na obtenção do recibo de recebimento de protocolo do trâmite $parNumIdTramite. $e";
+      LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    } 
   }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash, $parDthRecebimento = null)
