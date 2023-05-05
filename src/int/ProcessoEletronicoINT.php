@@ -200,7 +200,7 @@ class ProcessoEletronicoINT extends InfraINT {
       return $arquivo;
   }
 
-  public static function montarRestricaoOrgaoUnidade($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
+  public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
 	{
     $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
     $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
@@ -281,10 +281,19 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' };'
 			. ' '
 			. ' objAutoCompletarRepoEstruturas.processarResultado = function(id,descricao,complemento){'
-			. ' 	if (id!=\'\'){'
-			. ' 	objLupaRepositoriosEstruturas.adicionar(id,descricao,document.getElementById(\'txtRepoEstruturas\'));'
-			. ' 	objLupaUnidades.limpar();'
-			. ' 	}'
+			. ' 	if (id!=\'\'){ '
+			. ' 	  objLupaRepositoriosEstruturas.adicionar(id,descricao,document.getElementById(\'txtRepoEstruturas\'));'      
+			. ' 	  objLupaUnidades.limpar();'
+      . '     hdnRepoEst = document.getElementById("hdnRepoEstruturas" + id); '
+      . '     if (hdnRepoEst == null) { '
+      . '       html = document.createElement(\'input\'); '
+      . '       html.type = \'hidden\'; '
+      . '       html.id=\'hdnRepoEstruturas\' + id;'
+      . '       html.name= \'hdnRepoEstruturas\'+ id;'
+      . '       divRestricao = document.getElementById(\'divRestricao\');'
+      . '       divRestricao.appendChild(html);'
+      . '     };'
+			. ' 	};'
 			. ' };'
 			. ' '
 			. ' objLupaUnidades = new infraLupaSelect(\'selUnidades\',\'hdnUnidades\',\'\');'

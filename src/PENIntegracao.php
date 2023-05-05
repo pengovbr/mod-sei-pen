@@ -532,7 +532,7 @@ class PENIntegracao extends SeiIntegracao
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
           }
         }
-        if (count($arrObjEstruturaDTO) == 0) {
+        if (is_null($arrObjEstruturaDTO) || count($arrObjEstruturaDTO) == 0) {
           $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
           if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
