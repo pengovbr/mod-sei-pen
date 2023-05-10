@@ -1,7 +1,7 @@
 <?
 
 /**
- * Arquivo de configuração do Módulo de Integração do SEI com o Processo Eletrônico Nacional
+ * Arquivo de configuração do Módulo de Integração do SEI com o Tramita.GOV.BR
  *
  * Seu desenvolvimento seguiu os mesmos padrões de configuração implementado pelo SEI e SIP e este
  * arquivo precisa ser adicionado à pasta de configurações do SEI para seu correto carregamento pelo módulo.

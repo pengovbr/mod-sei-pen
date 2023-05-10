@@ -29,9 +29,9 @@ try {
 
   switch ($_GET['acao']) {
 
-    case 'pen_unidade_sel_expedir_procedimento':
-        $strTitulo = 'Selecionar Unidade';
-        break;
+        case 'tra_unidade_sel_expedir_procedimento':
+            $strTitulo = 'Selecionar Unidade';
+            break;
 
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");

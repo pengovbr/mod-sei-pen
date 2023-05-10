@@ -7,8 +7,8 @@ try {
 
     session_start();
 
-    define('PEN_RECURSO_ATUAL', 'pen_parametros_configuracao');
-    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo de Tramitações PEN');
+    define('PEN_RECURSO_ATUAL', 'tra_parametros_configuracao');
+    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo Tramita.GOV.BR');
 
     $objPagina = PaginaSEI::getInstance();
     $objBanco = BancoSEI::getInstance();
@@ -17,7 +17,7 @@ try {
     $o = new PenRelHipoteseLegalEnvioRN();
     $os = new PenRelHipoteseLegalRecebidoRN();
 
-    $objSessao->validarPermissao('pen_parametros_configuracao');
+    $objSessao->validarPermissao('tra_parametros_configuracao');
 
     $objPenParametroDTO = new PenParametroDTO();
     $objPenParametroDTO->retTodos();
@@ -43,7 +43,7 @@ try {
     $objRelTipoProcedimentoRN = new TipoProcedimentoRN();
     $arrTipoProcedimento=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO), "IdTipoProcedimento");
     $arrayFiltro = array_diff($arrTipoProcedimento, $arrObjNivelAcessoPermitido);
-    
+
     $objRelTipoProcedimentoDTO->setNumIdTipoProcedimento($arrayFiltro, InfraDTO::$OPER_IN);
     $arrObjTipoProcedimentoDTO = $objRelTipoProcedimentoRN->listarRN0244($objRelTipoProcedimentoDTO);
 
@@ -63,11 +63,10 @@ try {
       throw new InfraException("Registros não encontrados.");
   }
 
-  switch ($_GET['acao']) {
-    case 'pen_parametros_configuracao_salvar':
-      try {
-
-        $objPenParametroRN = new PenParametroRN();
+    switch ($_GET['acao']) {
+        case 'tra_parametros_configuracao_salvar':
+            try {
+                $objPenParametroRN = new PenParametroRN();
 
         if (!empty(count($_POST['parametro']))) {
           foreach ($_POST['parametro'] as $nome => $valor) {
@@ -105,9 +104,9 @@ try {
         header('Location: ' . $objSessao->assinarLink('controlador.php?acao=' . $_GET['acao_origem'] . '&acao_origem=' . $_GET['acao']));
         die;
 
-    case 'pen_parametros_configuracao':
-        $strTitulo = 'Parâmetros de Configuração do Módulo de Tramitações PEN';
-        break;
+        case 'tra_parametros_configuracao':
+            $strTitulo = 'Parâmetros de Configuração do Módulo Tramita.GOV.BR';
+            break;
 
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
@@ -118,10 +117,10 @@ try {
 }
 
 //Monta os botões do topo
-if ($objSessao->verificarPermissao('pen_parametros_configuracao_alterar')) {
+if ($objSessao->verificarPermissao('tra_parametros_configuracao_alterar')) {
     $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
 }
-$arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+$arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=tra_parametros_configuracao&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
 $objPagina->montarDocType();
 $objPagina->abrirHtml();
@@ -144,7 +143,7 @@ $objPagina->abrirStyle();
 }
 
 .div_input{
-    display:flex; 
+    display:flex;
     align-items:center;
     margin-bottom:10px;
 }
@@ -160,7 +159,7 @@ $objPagina->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= $_GET['acao'] ?>'=='pen_parametros_configuracao_selecionar'){
+    if ('<?= $_GET['acao'] ?>'=='tra_parametros_configuracao_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{
@@ -212,27 +211,27 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
       }
 
         //Constrói o campo de valor
-      switch ($parametro->getStrNome()) {
-        case 'PEN_ID_REPOSITORIO_ORIGEM':
-          try {
-            $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-            $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
-            $textoAjuda="Selecionar o repositório, configurado no Portal do PEN, que seu órgão faz parte";
-            echo '<div class="div_input">';
-            echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
-            echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
-            echo '</select>';
-            echo "<a class='pen_ajuda' id='ajuda_repositorio' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
-            echo '</div>';
-          } catch (Exception $e) {
-              // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
-              echo '<div class="div_input">';
-              echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
-              echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso aos Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
-              echo '</div>';
-          }
-            break;
+            switch ($parametro->getStrNome()) {
+              case 'PEN_ID_REPOSITORIO_ORIGEM':
+                try {
+                    $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+                    $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+                    $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
+                    $textoAjuda="Selecionar o repositório, configurado no Portal do Tramita.GOV.BR, que seu órgão faz parte";
+                    echo '<div class="div_input">';
+                    echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
+                    echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
+                    echo '</select>';
+                    echo "<a class='pen_ajuda' id='ajuda_repositorio' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+                    echo '</div>';
+                } catch (Exception $e) {
+                    // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
+                    echo '<div class="div_input">';
+                    echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
+                    echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso ao Barramento de Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
+                    echo '</div>';
+                }
+                  break;
 
 
         case 'PEN_TIPO_PROCESSO_EXTERNO':
@@ -277,7 +276,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 </form>
 
 <?
-$objPagina->getInstance()->fecharAreaDados();  
+$objPagina->getInstance()->fecharAreaDados();
 $objPagina->fecharBody();
 $objPagina->fecharHtml();
 ?>

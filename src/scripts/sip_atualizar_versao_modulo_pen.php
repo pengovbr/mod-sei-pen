@@ -280,7 +280,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3023();
         case '3.2.3':
             $this->instalarV3024();
-      
+        case '3.2.4':
+            $this->instalarV3030();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1800,11 +1801,32 @@ class PenAtualizarSipRN extends InfraRN
     {
       $this->atualizarNumeroVersao("3.2.3");
   }
-  
+
   protected function instalarV3024()
     {
       $this->atualizarNumeroVersao("3.2.4");
   }
+
+  protected function instalarV3030()
+  {
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $recursosBD = new RecursoBD(BancoSip::getInstance());
+    $recursoDto = new RecursoDTO();
+    $recursoDto->retTodos();
+    $recursos = $recursosBD->listar($recursoDto);
+    foreach($recursos as $recurso) {
+        if (strpos($recurso->get('Nome'), 'pen_') !== false) {
+            $recurso->retTodos();
+            $recurso = $recursosBD->consultar($recurso);
+            $nomeRecurso = $recurso->get('Nome');
+            $novoNomeRecurso = str_replace('pen_', 'tra_', $recurso->get('Nome'));
+            $this->renomearRecurso($numIdSistema, $nomeRecurso, $novoNomeRecurso);
+            var_dump($novoNomeRecurso);
+        }
+    }
+    $this->atualizarNumeroVersao('3.3.0');
+  }
+
 }
 
 

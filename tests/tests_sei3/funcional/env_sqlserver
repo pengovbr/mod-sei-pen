@@ -8,7 +8,7 @@ SEI_DATABASE_PASSWORD=sei_user
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############
 ORG1_HOSTNAME=org1-http
 ORG1_SIGLA_ORGAO=ABC
-ORG1_CERTIFICADO=/opt/sei/config/mod-pen/certificado_org1.pem
+ORG1_CERTIFICADO=/opt/sei/config/mod-tramitagovbr/certificado_org1.pem
 ORG1_CERTIFICADO_SENHA=XXXXXXX
 
 ##### BANCO DE DADOS DO ÓRGÃO 1 #####

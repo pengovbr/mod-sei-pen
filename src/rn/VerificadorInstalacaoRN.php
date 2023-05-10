@@ -55,13 +55,13 @@ class VerificadorInstalacaoRN extends InfraRN
      */
     public function verificarPosicionamentoScripts()
     {
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/sei_atualizar_versao_modulo_pen.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/verifica_instalacao_modulo_pen.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/MonitoramentoTarefasPEN.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/ProcessamentoTarefasPEN.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../config/mod-pen/ConfiguracaoModPEN.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-reboot-fila.sh');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-pendencias-represadas.py');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-tramitagovbr/sei_atualizar_versao_modulo_pen.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-tramitagovbr/verifica_instalacao_modulo_pen.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-tramitagovbr/ProcessamentoTarefasPEN.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../config/mod-tramitagovbr/ConfiguracaoModPEN.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-tramitagovbr/verificar-reboot-fila.sh');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-tramitagovbr/verificar-pendencias-represadas.py');
         return true;
     }
 
@@ -104,9 +104,9 @@ class VerificadorInstalacaoRN extends InfraRN
     public function verificarArquivoConfiguracao()
     {
         // Valida se arquivo de configuração está presente na instalação do sistema
-        $strArquivoConfiguracao = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+        $strArquivoConfiguracao = DIR_SEI_CONFIG . '/mod-tramitagovbr/ConfiguracaoModPEN.php';
       if (file_exists($strArquivoConfiguracao) && is_readable($strArquivoConfiguracao)) {
-          require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
+          require_once DIR_SEI_CONFIG . '/mod-tramitagovbr/ConfiguracaoModPEN.php';
       } else {
           $strMensagem = "Arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizado";
           $strDetalhes = "As configurações do módulo mod-sei-pen não foram encontradas em $strArquivoConfiguracao \n";

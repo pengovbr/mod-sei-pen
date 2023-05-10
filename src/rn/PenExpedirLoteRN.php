@@ -75,7 +75,7 @@ class PenExpedirLoteRN extends InfraRN
     {
     try {
         //Valida Permissão
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenExpedirLoteDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_expedir_lote', __METHOD__, $objPenExpedirLoteDTO);
 
         $this->barraProgresso->exibir();
         $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO);          

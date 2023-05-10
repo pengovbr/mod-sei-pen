@@ -37,7 +37,7 @@ class PenParametroRN extends InfraRN {
   protected function listarConectado(PenParametroDTO $objDTO){
 
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao', __METHOD__, $objDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_parametros_configuracao', __METHOD__, $objDTO);
         $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
         return $objBD->listar($objDTO);
     }
@@ -60,7 +60,7 @@ class PenParametroRN extends InfraRN {
   protected function alterarControlado(PenParametroDTO $objDTO){
 
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao_alterar', __METHOD__, $objDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('tra_parametros_configuracao_alterar', __METHOD__, $objDTO);
         $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
         return $objBD->alterar($objDTO);
     }

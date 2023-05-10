@@ -54,7 +54,7 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/config:/opt/sei/config/mod-pen
+      - ./assets/config:/opt/sei/config/mod-tramitagovbr
       - .:/tests
       - /tmp:/tmp
     environment:
@@ -93,12 +93,12 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/cron.d:/etc/cron.d
-      - ./assets/config:/opt/sei/config/mod-pen
-      - ../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen
+      - ./assets/cron.d:/etc/cron.d      
+      - ./assets/config:/opt/sei/config/mod-tramitagovbr
+      - ../../src/scripts:/opt/sei/scripts/mod-tramitagovbr
+      - ../../src/scripts:/opt/sip/scripts/mod-tramitagovbr
+      - ../../src/bin:/opt/sei/bin/mod-tramitagovbr
+      - ../../src:/opt/sei/web/modulos/tramitagovbr
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
     environment:
@@ -130,11 +130,11 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ../../src/scripts:/opt/sei/scripts/mod-pen
-      - ../../src/scripts:/opt/sip/scripts/mod-pen
-      - ../../src/bin:/opt/sei/bin/mod-pen
-      - ../../src:/opt/sei/web/modulos/pen
-      - ./assets/config:/opt/sei/config/mod-pen
+      - ../../src/scripts:/opt/sei/scripts/mod-tramitagovbr
+      - ../../src/scripts:/opt/sip/scripts/mod-tramitagovbr
+      - ../../src/bin:/opt/sei/bin/mod-tramitagovbr
+      - ../../src:/opt/sei/web/modulos/tramitagovbr
+      - ./assets/config:/opt/sei/config/mod-tramitagovbr
       - ./assets/cron.d:/etc/cron.d
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro

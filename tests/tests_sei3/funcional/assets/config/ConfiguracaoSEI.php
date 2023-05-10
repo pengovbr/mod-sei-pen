@@ -19,7 +19,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 				'Producao' => false,
 				'RepositorioArquivos' => '/var/sei/arquivos',
 				'Modulos' => array(
-					"PENIntegracao" => "pen",
+					"PENIntegracao" => "tramitagovbr",
 					)
 			),
 

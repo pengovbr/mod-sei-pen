@@ -18,17 +18,17 @@ else
  CMD_DOCKER_COMPOSE=$(CMD_DOCKER_SUDO) docker-compose
 endif
 
-MODULO_NOME = pen
+MODULO_NOME = tramitagovbr
 MODULO_PASTAS_CONFIG = mod-$(MODULO_NOME)
 VERSAO_MODULO := $(shell grep 'define."VERSAO_MODULO_PEN"' src/PENIntegracao.php | cut -d'"' -f4)
-SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
-SEI_CONFIG_DIR = dist/sei/config/mod-pen
-SEI_BIN_DIR = dist/sei/bin/mod-pen
-SEI_MODULO_DIR = dist/sei/web/modulos/pen
-SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
-PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests/tests_$(sistema)/funcional
-PEN_TEST_UNIT = tests/tests_$(sistema)/unitario
+SEI_SCRIPTS_DIR = dist/sei/scripts/mod-tramitagovbr
+SEI_CONFIG_DIR = dist/sei/config/mod-tramitagovbr
+SEI_BIN_DIR = dist/sei/bin/mod-tramitagovbr
+SEI_MODULO_DIR = dist/sei/web/modulos/tramitagovbr
+SIP_SCRIPTS_DIR = dist/sip/scripts/mod-tramitagovbr
+PEN_MODULO_COMPACTADO = mod-sei-tramitagovbr-$(VERSAO_MODULO).zip
+PEN_TEST_FUNC = tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests_$(sistema)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
@@ -85,7 +85,7 @@ $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi 
 $(FILE_VENDOR_UNITARIO): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
 	make install-phpunit-vendor
 
-dist: 
+dist:
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
 	@mkdir -p $(SEI_SCRIPTS_DIR)
 	@mkdir -p $(SEI_CONFIG_DIR)
@@ -125,20 +125,20 @@ clean:
 
 
 install: check-isalive
-	$(CMD_COMPOSE_FUNC) up -d	
+	$(CMD_COMPOSE_FUNC) up -d
 	$(CMD_COMPOSE_FUNC) exec org1-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)"
 
 	$(CMD_COMPOSE_FUNC) exec org2-http bash -c "printenv | sed 's/^\(.*\)$$/export \1/g' > /root/crond_env.sh"
 	$(CMD_COMPOSE_FUNC) exec org2-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sei
 	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sip
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)"
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
 	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
@@ -189,9 +189,9 @@ test: test-unit test-functional
 
 verify-config:
 	@echo "Verificando configurações do módulo para instância org1"
-	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-tramitagovbr/verifica_instalacao_modulo_pen.php
 	@echo "Verificando configurações do módulo para instância org2"
-	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-tramitagovbr/verifica_instalacao_modulo_pen.php
 
 bash_org1:
 	$(CMD_COMPOSE_FUNC) exec org1-http bash
@@ -210,26 +210,26 @@ deletarHttpProxy:
 tramitar-pendencias:
 	i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T1 $$i"; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		docker exec org1-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php & \
+		docker exec org2-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done & i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T2 $$i"; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		docker exec org1-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php & \
+		docker exec org2-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done
 
 tramitar-pendencias-simples:
-	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
+	docker exec org1-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php; \
+	docker exec org2-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php; \
+	docker exec org1-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
 	i=1; while [ "$$i" -le 3000 ]; do \
     	echo "Executando $$i" >/dev/null 2>&1; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
+		docker exec org1-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
+		docker exec org2-http php /opt/sei/scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
 		i=$$((i + 1));\
   	done 
 

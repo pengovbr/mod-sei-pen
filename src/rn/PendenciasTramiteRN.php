@@ -14,7 +14,7 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
     const COMANDO_EXECUCAO_WORKER = '%s %s %s %s %s %s %s %s > %s 2>&1 &';
-    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-tramitagovbr/MonitoramentoTarefasPEN.php";
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
 
@@ -176,7 +176,7 @@ class PendenciasTramiteRN extends InfraRN
       curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
       curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
       curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
-      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);      
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
 
       curl_setopt($curl, CURLOPT_FAILONERROR, true);
       curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalizacaoCertificadoDigital);
@@ -199,7 +199,7 @@ class PendenciasTramiteRN extends InfraRN
       $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
       shuffle($arrObjPendenciasDTO);
 
-      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(); 
+      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
       $objPenLoteProcedimentoDTO->retNumIdLote();
       $objPenLoteProcedimentoDTO->retDblIdProcedimento();
       $objPenLoteProcedimentoDTO->retNumIdAndamento();
@@ -222,14 +222,14 @@ class PendenciasTramiteRN extends InfraRN
       if (!is_array($arrObjPendenciasDTO)){
         $arrObjPendenciasDTO = array();
       }
-    }                 
+    }
 
     foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
         $objPendenciaDTO = new PendenciaDTO();
         $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProcedimento());
         $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
         $arrObjPendenciasDTO[] = $objPendenciaDTO;
-    }    
+    }
 
       $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 

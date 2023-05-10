@@ -1,8 +1,8 @@
 # Manual de Instalação do Módulo de Integração do Processo Eletrônico Nacional - PEN
 
-O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Tramita.GOV.BR (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).
+O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Barramento de Serviços do PEN (**mod-sei-tramitagovbr**) no Sistema Eletrônico de Informações (SEI).
 
-**ATENÇÃO: Caso o módulo já se encontre instalado em uma versão anterior, siga as instruções detalhadas de atualização no documento ATUALIZACAO.md presente no arquivo de distribuição do módulo (mod-sei-pen-VERSAO.zip)**
+**ATENÇÃO: Caso o módulo já se encontre instalado em uma versão anterior, siga as instruções detalhadas de atualização no documento ATUALIZACAO.md presente no arquivo de distribuição do módulo (mod-sei-tramitagovbr-VERSAO.zip)**
 
 O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI à plataforma de interoperabilidade do Processo Eletrônico Nacional - PEN. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simplificada e segura.
 
@@ -33,7 +33,7 @@ Canais de comunicação para resolver problemas ou tirar dúvidas sobre o módul
 
 ## 1. INSTALAÇÃO
 
-Esta seção descreve os passos obrigatórios para **INSTALAÇÃO** do **```**mod-sei-pen**```**.  
+Esta seção descreve os passos obrigatórios para **INSTALAÇÃO** do **```**mod-sei-tramitagovbr**```**.  
 Todos os itens descritos nesta seção são destinados à equipe de tecnologia da informação, responsáveis pela execução dos procedimentos técnicos de instalação e manutenção da infraestrutura do SEI.
 
 ### Pré-requisitos
@@ -57,9 +57,9 @@ Todos os procedimentos de manutenção do sistema devem ser precedidos de backup
 
 ---
 
-### 1.2. Baixar o arquivo de distribuição do **mod-sei-pen**
+### 1.2. Baixar o arquivo de distribuição do **mod-sei-tramitagovbr**
 
-Necessário realizar o _download_ do pacote de distribuição do módulo **mod-sei-pen** para instalação ou atualização do sistema SEI. O pacote de distribuição consiste em um arquivo zip com a denominação **mod-sei-pen-VERSAO**.zip e sua última versão pode ser encontrada em https://github.com/spbgovbr/mod-sei-pen/releases
+Necessário realizar o _download_ do pacote de distribuição do módulo **mod-sei-tramitagovbr** para instalação ou atualização do sistema SEI. O pacote de distribuição consiste em um arquivo zip com a denominação **mod-sei-tramitagovbr-VERSAO**.zip e sua última versão pode ser encontrada em https://github.com/spbgovbr/mod-sei-pen/releases
 
 ---
 
@@ -68,28 +68,28 @@ Necessário realizar o _download_ do pacote de distribuição do módulo **mod-s
 Após realizar a descompactação do arquivo zip de instalação, será criada uma pasta contendo a seguinte estrutura:
 
 ```
-/**mod-sei-pen**-VERSAO 
+/**mod-sei-tramitagovbr**-VERSAO 
     /sei              # Arquivos do módulo posicionados corretamente dentro da estrutura do SEI
     /sip              # Arquivos do módulo posicionados corretamente dentro da estrutura do SIP
-    INSTALACAO.md     # Instruções de instalação do **mod-sei-pen**
-    ATUALIZACAO.md    # Instruções de atualização do **mod-sei-pen**    
+    INSTALACAO.md     # Instruções de instalação do **mod-sei-tramitagovbr**
+    ATUALIZACAO.md    # Instruções de atualização do **mod-sei-tramitagovbr**    
     NOTAS_VERSAO.MD   # Registros de novidades, melhorias e correções desta versão
 ```
 
-Importante enfatizar que os arquivos contidos dentro dos diretórios ```sei``` e ```sip``` não substituem nenhum código-fonte original do sistema. Eles apenas posicionam os arquivos do módulos nas pastas corretas de scripts, configurações e pasta de módulos, todos posicionados dentro de um diretório específico denominado mod-pen para deixar claro quais scripts fazem parte do módulo.
+Importante enfatizar que os arquivos contidos dentro dos diretórios ```sei``` e ```sip``` não substituem nenhum código-fonte original do sistema. Eles apenas posicionam os arquivos do módulos nas pastas corretas de scripts, configurações e pasta de módulos, todos posicionados dentro de um diretório específico denominado mod-tramitagovbr para deixar claro quais scripts fazem parte do módulo.
 
 Os diretórios ```sei``` e ```sip``` descompactados acima devem ser mesclados com os diretórios originais através de uma cópia simples dos arquivos.
 
 Observação: O termo curinga VERSAO deve ser substituído nas instruções abaixo pelo número de versão do módulo que está sendo instalado
 
 ```
-$ cp /tmp/**mod-sei-pen**-VERSAO.zip <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>
+$ cp /tmp/**mod-sei-tramitagovbr**-VERSAO.zip <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>
 $ cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>
-$ unzip **mod-sei-pen**-VERSAO.zip
+$ unzip **mod-sei-tramitagovbr**-VERSAO.zip
 ```
 ---
 
-### 1.4.  Habilitar módulo **mod-sei-pen** no arquivo de configuração do SEI
+### 1.4.  Habilitar módulo **mod-sei-tramitagovbr** no arquivo de configuração do SEI
 
 Esta etapa é padrão para a instalação de qualquer módulo no SEI para que ele possa ser carregado junto com o sistema. Edite o arquivo **sei/config/ConfiguracaoSEI.php** para adicionar a referência ao módulo PEN na chave **[Modulos]** abaixo da chave **[SEI]**:    
 
@@ -98,31 +98,31 @@ Esta etapa é padrão para a instalação de qualquer módulo no SEI para que el
     'URL' => ...,
     'Producao' => ...,
     'RepositorioArquivos' => ...,
-    'Modulos' => array('PENIntegracao' => 'pen'),
+    'Modulos' => array('PENIntegracao' => 'tramitagovbr'),
     ),
 ```
 
 Adicionar a referência ao módulo PEN na array da chave 'Modulos' indicada acima:
 
 ```php
-'Modulos' => array('PENIntegracao' => 'pen')
+'Modulos' => array('PENIntegracao' => 'tramitagovbr')
 ```
 ---
 
 ### 1.5. Configurar os parâmetros do Módulo de Integração PEN
 
-A instalação da nova versão do **mod-sei-pen** cria um arquivo de configuração específico para o módulo dentro da pasta de configuração do SEI (**<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/**). 
+A instalação da nova versão do **mod-sei-tramitagovbr** cria um arquivo de configuração específico para o módulo dentro da pasta de configuração do SEI (**<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/**). 
 
 O arquivo de configuração padrão criado **ConfiguracaoModPEN.exemplo.php** vem com o sufixo **exemplo** justamente para não substituir o arquivo principal contendo as configurações vigentes do módulo.
 
-Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php**, renomeie o arquivo de exemplo para iniciar a parametrização da integração.
+Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/ConfiguracaoModPEN.php**, renomeie o arquivo de exemplo para iniciar a parametrização da integração.
 
 ```
-cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/
+cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/
 mv ConfiguracaoModPEN.exemplo.php ConfiguracaoModPEN.php
 ```
 
-Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
+Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/ConfiguracaoModPEN.php** e defina as configurações do módulo, conforme apresentado abaixo:
 
 * **WebService**  
 Endereço do Web Service principal de integração com o Tramita.GOV.BR. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
@@ -135,7 +135,7 @@ Endereço do Web Service principal de integração com o Tramita.GOV.BR. Os ende
 Localização completa do certificado digital utilizado para autenticação nos serviços do Tramita.GOV.BR. Os certificados digitais são disponibilizados pela equipe do Processo Eletrônico Nacional mediante aprovação do credenciamento da instituição. Verifique a seção [pré-requisitos](#pré-requisitos) para maiores informações.  
 Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
 ```
-Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
+Exemplo: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/certificado.pem
 ```
 
 * **SenhaCertificado**  
@@ -167,26 +167,26 @@ Os endereços disponíveis são os seguintes (verifique se houve atualizações 
 
 ---
 
-### 1.6. Atualizar a base de dados do SIP com as tabelas do **mod-sei-pen**
+### 1.6. Atualizar a base de dados do SIP com as tabelas do **mod-sei-tramitagovbr**
 
-A atualização realizada no SIP não cria nenhuma tabela específica para o módulo, apenas é aplicada a criarção os recursos, permissões e menus de sistema utilizados pelo **mod-sei-pen**. Todos os novos recursos criados possuem o prefixo **pen_** para fácil localização pelas funcionalidades de gerenciamento de recursos do SIP.
+A atualização realizada no SIP não cria nenhuma tabela específica para o módulo, apenas é aplicada a criarção os recursos, permissões e menus de sistema utilizados pelo **mod-sei-tramitagovbr**. Todos os novos recursos criados possuem o prefixo **pen_** para fácil localização pelas funcionalidades de gerenciamento de recursos do SIP.
 
-O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php```
+O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-tramitagovbr/sip_atualizar_versao_modulo_pen.php```
 
 ```bash
-$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sip/scripts/mod-tramitagovbr/sip_atualizar_versao_modulo_pen.php
 ```
 
 ---
 
-### 1.7. Atualizar a base de dados do SEI com as tabelas do **mod-sei-pen**
+### 1.7. Atualizar a base de dados do SEI com as tabelas do **mod-sei-tramitagovbr**
 
-Nesta etapa é instalado/atualizado as tabelas de banco de dados vinculadas do **mod-sei-pen**. Todas estas tabelas possuem o prefixo **md_pen_** para organização e fácil localização no banco de dados.
+Nesta etapa é instalado/atualizado as tabelas de banco de dados vinculadas do **mod-sei-tramitagovbr**. Todas estas tabelas possuem o prefixo **md_pen_** para organização e fácil localização no banco de dados.
 
-O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php```
+O script de atualização da base de dados do SIP fica localizado em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-tramitagovbr/sei_atualizar_versao_modulo_pen.php```
 
 ```bash
-$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
+$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-tramitagovbr/sei_atualizar_versao_modulo_pen.php
 ```
 
 ---
@@ -203,7 +203,7 @@ Este link pode ajudar a configurar conforme o SO utilizado: http://ntp.br/guia-l
 
 A partir da versão SEI 3.1.x, o agendamento de tarefas do sistema pode ser executado em uma periodicidade de minutos, o que não era possível em versões anteriores (SEI 3.0.X). 
 
-Com esta melhoria no SEI, o módulo mod-sei-pen 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Tramita.GOV.BR, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
+Com esta melhoria no SEI, o módulo mod-sei-tramitagovbr 2.0.0 passou a utilizar o próprio agendamento de tarefas do sistema para realizar a consulta de novos processos no Barramento de Serviços do PEN, simplificando consideravelmente os procedimentos de instalação e configuração do módulo. 
 
 Para que o módulo possa funcionar corretamente com o agendamento de tarefas do SEI, é necessário revisar a configuração do serviço CRON do sistema para certificar que ele se encontra corretamente configurado para ser executado a cada minuto. Ou seja, seguindo o manual de instalação do SEI 3.1.X, a configuração do serviço CRON nos servidores responsáveis pela execução dos agendamentos do SEI deve estar semelhante ao mostrado abaixo:
 
@@ -234,9 +234,9 @@ Portanto, a periodicidade do serviço CRON deve estar configurado como:
 
 ### 1.10. Verificação e testes da instalação do módulo
 
-A versão 2.0.0 do **mod-sei-pen** adiciona um novo script utilitário ao SEI para que seja realizada uma verificação de todos os passos da instalação, assim como as configurações aplicadas. Estas verificações funcionam como um diagnóstico do correto funcionamento do sistema.
+A versão 2.0.0 do **mod-sei-tramitagovbr** adiciona um novo script utilitário ao SEI para que seja realizada uma verificação de todos os passos da instalação, assim como as configurações aplicadas. Estas verificações funcionam como um diagnóstico do correto funcionamento do sistema.
 
-Para executar a verificação, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretório de scripts do SEI ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/```.
+Para executar a verificação, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretório de scripts do SEI ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-tramitagovbr/```.
 
 ```bash
 $ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
@@ -249,7 +249,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
     - Arquivos do módulo posicionados corretamente
     - Módulo corretamente ativado no arquivo de configuracao do sistema
     - Parâmetros técnicos obrigatórios de integração atribuídos em ConfiguracaoModPEN.php
-    - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
+    - Verificada a compatibilidade do **mod-sei-tramitagovbr** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do **mod-sei-pen**
     - Conexão com o Tramita.GOV.BR realizada com sucesso
@@ -314,7 +314,7 @@ Primeiro selecione a unidade administrativa do SEI no campo de seleção e depoi
 
 ### 2.3. Mapeamento de Tipos de Documentos do SEI com as Espécies Documentais do PEN
 
-A partir da versão **mod-sei-pen** 2.0.0, os mapeamentos dos Tipos de Documentos do SEI são realizados de forma automática durante a instalação do módulo ou automaticamente através do agendamento de tarefas **PENAgendamentoRN::atualizarInformacoesPEN**. 
+A partir da versão **mod-sei-tramitagovbr** 2.0.0, os mapeamentos dos Tipos de Documentos do SEI são realizados de forma automática durante a instalação do módulo ou automaticamente através do agendamento de tarefas **PENAgendamentoRN::atualizarInformacoesPEN**. 
 
 Caso seja necessário modificar o mapeamento pré-definido pelo sistema, a alteração pode ser realizada através da funcionalidade **Mapeamento de Tipos de Documentos** localizado em [SEI >> Administração >> Processo Eletrônico Nacional >> Mapeamento de Tipos de Documentos]
 
@@ -430,7 +430,7 @@ extension="gearman.so"
 
 #### 3.1.3. Configurar o módulo para acesso ao Gearman
 
-Altere os parâmetros da seção ```Gearman``` no arquivo de configuração específico do módulo em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/ConfiguracaoModPEN.php```, conforme apresentado abaixo:
+Altere os parâmetros da seção ```Gearman``` no arquivo de configuração específico do módulo em ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/ConfiguracaoModPEN.php```, conforme apresentado abaixo:
 
 ```php
 "Gearman" => array(
@@ -458,12 +458,12 @@ $ service gearmand start
 
 #### 3.1.5. Verificação da instalação e configuração do Gearman
 
-O script de verificação da instalação do **mod-sei-pen** 2.0.0 também pode ser utilizado para validar se os passos da instalação foram realizadas com sucesso e se o módulo está conextando corretamente ao servidor do Gearmand.
+O script de verificação da instalação do **mod-sei-tramitagovbr** 2.0.0 também pode ser utilizado para validar se os passos da instalação foram realizadas com sucesso e se o módulo está conextando corretamente ao servidor do Gearmand.
 
-Para executar a verificação, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretório de scripts do SEI ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/```.
+Para executar a verificação, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretório de scripts do SEI ```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-tramitagovbr/```.
 
 ```bash
-$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+$ php -c /etc/php.ini <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/scripts/mod-tramitagovbr/verifica_instalacao_modulo_pen.php
 ``` 
 
 O resultado esperado para uma correta instalação e configuração do módulo é este apresentado abaixo:
@@ -473,7 +473,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
     - Arquivos do módulo posicionados corretamente
     - Módulo corretamente ativado no arquivo de configuracao do sistema
     - Parâmetros técnicos obrigatórios de integração atribuídos em ConfiguracaoModPEN.php
-    - Verificada a compatibilidade do **mod-sei-pen** com a atual versão do SEI
+    - Verificada a compatibilidade do **mod-sei-tramitagovbr** com a atual versão do SEI
     - Certificado digital localizado e corretamente configurado
     - Base de dados do SEI corretamente atualizada com a versão atual do **mod-sei-pen**
     - Conexão com o Tramita.GOV.BR realizada com sucesso
@@ -487,7 +487,7 @@ INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO **MOD-SEI-PEN**:
 
 O supervisor é o componente responsável pelo gerenciamento dos processos de monitoramento e processamentos dos eventos gerados pelo Tramita.GOV.BR. Sua principal função é garantir que nenhum dos processos PHP envolvidos com o envio e recebimento de processos ficaram indisponíveis em caso de falha ou indisponibilidade do sistema, o que poderia acarretar atrasos no recebimento de documentos.
 
-A partir da versão **mod-sei-pen** 2.0.0, este componente passou a ser opcional pois o próprio agendamento de tarefas do SEI ficará encarregado de obter os processos pendentes do Barramento e processar seu recebimento. Tarefas executadas a cada 2 minutos, seguindo a configuração padrão do agendamento **PENAgendamentoRN::processarTarefasPEN**.
+A partir da versão **mod-sei-tramitagovbr** 2.0.0, este componente passou a ser opcional pois o próprio agendamento de tarefas do SEI ficará encarregado de obter os processos pendentes do Barramento e processar seu recebimento. Tarefas executadas a cada 2 minutos, seguindo a configuração padrão do agendamento **PENAgendamentoRN::processarTarefasPEN**.
 
 Caso seja necessário maior agilidade no recebimento dos processos e aumentar a garantia de disponibilidade dos serviços de conexão ao Barramento do PEN, o Supervisor pode ser utilizado.
 
@@ -521,14 +521,14 @@ Para configurar este serviço, será necessário incluir as configurações do m
 
 O arquivo de configuração do supervisor para utilização no SEI **supervisor.exemplo.ini** vem com o sufixo **exemplo** justamente para não substituir o arquivo principal contendo as configurações vigentes do módulo.
 
-Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini**, renomeie o arquivo de exemplo.
+Caso não exista o arquivo principal de configurações do módulo criado em **<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/supervisor.ini**, renomeie o arquivo de exemplo.
 
 ```
-cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/
+cd <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/
 mv supervisor.exemplo.ini supervisor.ini
 ```
 
-Na chave de configuração *files* da seção *[include]*, informe o caminho completo para o arquivo **supervisor.ini**, configurações do supervisor preparadas exclusivamente para o módulo. Este arquivo fica localizado na pasta de configurações do SEI (```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini```)
+Na chave de configuração *files* da seção *[include]*, informe o caminho completo para o arquivo **supervisor.ini**, configurações do supervisor preparadas exclusivamente para o módulo. Este arquivo fica localizado na pasta de configurações do SEI (```<DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/supervisor.ini```)
 
 Exemplo: 
 
@@ -536,7 +536,7 @@ Exemplo:
 
 ```ini
 [include]
-files = <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-pen/supervisor.ini
+files = <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI E SIP>/sei/config/mod-tramitagovbr/supervisor.ini
 ```
 
 As configurações contidas no arquivo **supervisor.ini** devem ser revisadas para certificar se não existem divergências em relação ao ambiente em que o módulo está sendo instalado, principalmente em relação as chaves de configurações *[user]* e *[directory]*, que deverão ser configurados respectivamente com o usuário do serviço web/http (verifique no seu servidor qual é o usuario. Ex.: apache) e com o diretório em que o sei está instalado.
@@ -593,7 +593,7 @@ Uma forma de agendar essa rotina no crontab pode ser feita assim:
 - essa mesma pasta deve ter possibilidade de leitura e escrita pelo usuário que executa o agendamento, bem como o usuário deverá ter a permissão de dar kill nos processos
 - feito isso basta agendar no crontab, por exemplo: 
 ```
-* * * * * /opt/sei/bin/mod-pen/verificar-reboot-fila-sem-supervisor.sh >> /var/log/sei-fila-rebootter.log 2>&1
+* * * * * /opt/sei/bin/mod-tramitagovbr/verificar-reboot-fila-sem-supervisor.sh >> /var/log/sei-fila-rebootter.log 2>&1
 ```
 
 O arquivo /var/log/sei-fila-rebootter.log vai logar a atividade da rotina. E caso haja algum processo na memória travado há muito tempo ele vai limpar e o agendador do SEI subirá um novo destravado para processar a fila.
@@ -609,7 +609,7 @@ Uma forma de agendar essa rotina no crontab pode ser feita assim:
 - essa mesma pasta deve ter possibilidade de leitura e escrita pelo usuário que executa o agendamento, bem como o usuário deverá ter a permissão de dar kill nos processos
 - feito isso basta agendar no crontab, por exemplo: 
 ```
-* * * * * /opt/sei/bin/mod-pen/verificar-reboot-fila.sh >> /var/log/sei-fila-rebootter.log 2>&1
+* * * * * /opt/sei/bin/mod-tramitagovbr/verificar-reboot-fila.sh >> /var/log/sei-fila-rebootter.log 2>&1
 ```
 
 ---

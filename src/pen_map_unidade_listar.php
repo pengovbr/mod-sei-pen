@@ -10,8 +10,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-define('PEN_RECURSO_ATUAL', 'pen_map_unidade_listar');
-define('PEN_RECURSO_BASE', 'pen_map_unidade');
+define('PEN_RECURSO_ATUAL', 'tra_map_unidade_listar');
+define('PEN_RECURSO_BASE', 'tra_map_unidade');
 define('PEN_PAGINA_TITULO', 'Mapeamento de Unidade');
 define('PEN_PAGINA_GET_ID', 'id_unidade');
 
@@ -150,7 +150,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="12%">ID da Unidade</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - PEN</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="12%">ID da Unidade - Tramita.GOV.BR</th>'."\n";
       $strResultado .= '<th class="infraTh" width="25%">Sigla</th>'."\n";
       $strResultado .= '<th class="infraTh" width="35%">Descrição</th>'."\n";
       $strResultado .= '<th class="infraTh" width="15%">Ações</th>'."\n";

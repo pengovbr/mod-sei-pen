@@ -17,7 +17,7 @@ try {
     $objSessaoSEI = SessaoSEI::getInstance();
 
     //$objSessaoSEI->validarLink();
-    $objSessaoSEI->validarPermissao('pen_procedimento_expedir');
+    $objSessaoSEI->validarPermissao('tra_procedimento_expedir');
     $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
 
   if(array_key_exists('metodo', $_GET)) {

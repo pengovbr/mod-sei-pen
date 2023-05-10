@@ -147,7 +147,7 @@ class ProcessoEletronicoRN extends InfraRN
     if($this->objPenWs == null) {
 
       if (InfraString::isBolVazia($this->strEnderecoWebService)) {
-        throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
+        throw new InfraException('Endereço do serviço de integração do Tramita.GOV.BR não informado.');
       }
 
       if (InfraString::isBolVazia($this->strLocalCertPassword)) {
@@ -161,7 +161,7 @@ class ProcessoEletronicoRN extends InfraRN
           $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
       } catch (Exception $e) {
           $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-          $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;
+          $mensagem = "Falha de comunicação com o Tramita.GOV.BR: " . $detalhes;
           throw new \SoapFault("HTTP", $mensagem);
       }
     }
@@ -1061,7 +1061,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
       return $strHashConteudo;
-    }
+  }
 
   private function montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados)
     {
@@ -2091,7 +2091,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
         $objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN();
     } catch (\Exception $e) {
-        throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.", $e);
+        throw new InfraException("Falha de comunicação com o Tramita.GOV.BR. Por favor, tente novamente mais tarde.");
     }
   }
 

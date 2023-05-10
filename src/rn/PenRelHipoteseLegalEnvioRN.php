@@ -15,22 +15,22 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
   }
 
   protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO){
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
       return parent::consultarInterno($objDTO);
   }
 
   protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO){
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
       return parent::alterarInterno($objDTO);
   }
 
   protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO){
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
       return parent::cadastrarInterno($objDTO);
   }
 
   protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO){
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('tra_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
       return parent::excluirInterno($objDTO);
   }
 

@@ -33,7 +33,7 @@ try {
   switch($_GET['acao']){
    
    
-    case 'pen_procedimento_processo_anexado':
+    case 'tra_procedimento_processo_anexado':
       $strTitulo = 'Processo Anexado';
         break;
 
