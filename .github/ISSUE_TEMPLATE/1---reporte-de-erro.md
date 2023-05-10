@@ -2,7 +2,7 @@
 name: 1 - Reporte de erro
 about: Crie um registro para nos ajudar a melhorar
 title: ''
-labels: bug
+labels: erro
 assignees: ''
 
 ---

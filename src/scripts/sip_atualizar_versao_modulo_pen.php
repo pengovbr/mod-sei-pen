@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.2.3");
+define("VERSAO_MODULO_PEN", "3.2.4");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -1803,29 +1803,8 @@ class PenAtualizarSipRN extends InfraRN
   }
 
   protected function instalarV3024()
-  {
-
-    $objBD = new ItemMenuBD(BancoSip::getInstance());
-
-    // Achar o root
-    $numIdSistema = $this->getNumIdSistema('SEI');
-    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
-
-    $objItemMenuDTO = new ItemMenuDTO();
-    $objItemMenuDTO->setNumIdSistema($numIdSistema);
-    $objItemMenuDTO->setNumIdMenu($numIdMenu);
-    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
-    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
-    $objItemMenuDTO->retTodos();
-
-    $objItemMenuDTO = $objBD->consultar($objItemMenuDTO);
-
-    if (!empty($objItemMenuDTO)) {
-      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
-      $objBD->alterar($objItemMenuDTO);
-    }
-
-    $this->atualizarNumeroVersao('3.2.4');
+    {
+      $this->atualizarNumeroVersao("3.2.4");
   }
 
   protected function instalarV3030()

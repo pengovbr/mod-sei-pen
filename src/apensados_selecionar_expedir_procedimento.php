@@ -10,7 +10,7 @@
 */
 
 try {
-require_once DIR_SEI_WEB.'/SEI.php';
+  require_once DIR_SEI_WEB.'/SEI.php';
   require_once DIR_SEI_WEB.'/SEI.php';
 
   session_start();
@@ -28,7 +28,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
   
   PaginaSEI::getInstance()->salvarCamposPost(array('txtNumeroProcesso','txtDescricaoProcesso'));
 
-  $strTitulo = PaginaSEI::getInstance()->getTituloSelecao('Selecionar Processos Apensados','Selecionar Processos Apensados');
+  $strTitulo = PaginaSEI::getInstance()->getTituloSelecao('Selecionar Processos Apensados', 'Selecionar Processos Apensados');
 
   $arrComandos = array();
   
@@ -62,7 +62,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
     $strCaptionTabela = 'Processos Apensados';
 
     $strResultado .= '<table width="99%" class="infraTable" summary="'.$strSumarioTabela.'">'."\n";
-    $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela,$numRegistros).'</caption>';
+    $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros).'</caption>';
     $strResultado .= '<tr>';
     $strResultado .= '<th class="infraTh" width="1%">'.PaginaSEI::getInstance()->getThCheck().'</th>'."\n";
     $strResultado .= '<th align="left" class="infraTh">Processo</th>'."\n";
@@ -70,16 +70,16 @@ require_once DIR_SEI_WEB.'/SEI.php';
     $strResultado .= '</tr>'."\n";
     $strCssTr='';
     
-    for($i = 0;$i < $numRegistros; $i++){
+    for($i = 0; $i < $numRegistros; $i++){
 
       $strCssTr = ($strCssTr=='<tr class="infraTrClara">')?'<tr class="infraTrEscura">':'<tr class="infraTrClara">';
       $strResultado .= $strCssTr;
 
       //Se o processo não se encontra aberto em mais de uma unidade
       if(isset($processosAbertos[$arrProcessos[$i]->getDblIdProtocolo()]) && count($processosAbertos[$arrProcessos[$i]->getDblIdProtocolo()]) == 1 ){
-            $strResultado .= '<td valign="top">'.PaginaSEI::getInstance()->getTrCheck($i,$arrProcessos[$i]->getDblIdProtocolo(), $arrProcessos[$i]->getStrProtocoloFormatadoProtocolo()).'</td>';
+            $strResultado .= '<td valign="top">'.PaginaSEI::getInstance()->getTrCheck($i, $arrProcessos[$i]->getDblIdProtocolo(), $arrProcessos[$i]->getStrProtocoloFormatadoProtocolo()).'</td>';
       }else{
-            $strResultado .= '<td valign="top">'.PaginaSEI::getInstance()->getTrCheck($i,$arrProcessos[$i]->getDblIdProtocolo(), $arrProcessos[$i]->getStrProtocoloFormatadoProtocolo(), 'N', 'Infra', 'class="abertoUnidades"').'</td>';
+            $strResultado .= '<td valign="top">'.PaginaSEI::getInstance()->getTrCheck($i, $arrProcessos[$i]->getDblIdProtocolo(), $arrProcessos[$i]->getStrProtocoloFormatadoProtocolo(), 'N', 'Infra', 'class="abertoUnidades"').'</td>';
       }
       
       $strResultado .= '<td width="85%" class="numeroProcesso">'.$arrProcessos[$i]->getStrProtocoloFormatadoProtocolo().'</td>';
@@ -87,7 +87,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
       
       //Se o processo não se encontra aberto em mais de uma unidade
       if(isset($processosAbertos[$arrProcessos[$i]->getDblIdProtocolo()]) && count($processosAbertos[$arrProcessos[$i]->getDblIdProtocolo()]) == 1 ){
-        $strResultado .= PaginaSEI::getInstance()->getAcaoTransportarItem($i,$arrProcessos[$i]->getDblIdProtocolo(), 'Infra', 'class="teste"');
+        $strResultado .= PaginaSEI::getInstance()->getAcaoTransportarItem($i, $arrProcessos[$i]->getDblIdProtocolo(), 'Infra', 'class="teste"');
       }else{
          $strResultado .= '<a id="" href="#" onclick="alertaImpossibilidade();" ><img src="/infra_css/imagens/transportar.gif" title="Transportar este item e Fechar" alt="Transportar este item e Fechar" class="infraImg"></a>';
       }
@@ -132,7 +132,7 @@ function inicializar(){
 <?
 PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
-PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
+PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="frmApensadosLista" method="post" action="<?=PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_procedimento='.$_GET['id_procedimento']))?>">
   <?
@@ -148,7 +148,7 @@ PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
   
   <?
   PaginaSEI::getInstance()->fecharAreaDados();  
-  PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
+  PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros);
   PaginaSEI::getInstance()->montarAreaDebug();
   PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
   ?>

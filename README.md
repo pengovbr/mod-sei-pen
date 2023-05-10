@@ -26,13 +26,13 @@ As instruções de instalação e atualização do módulo, assim com o manual d
 
 ## PROJETOS RELACIONADOS
 
-O mod-sei-pen trata-se de um módulo adicional ao Sistema Eletrônico de Informações (SEI) para adição de novas funcionalidades relacionadas ao trâmite de processos e documentos entre instituições integradas ao Processo Eletrônico Nacional (PEN). Para a sua utilização, é necessário que a instituição possua o sistema SEI e tenha aderido ao Barramendo de Serviços do PEN.
+O mod-sei-pen trata-se de um módulo adicional ao Sistema Eletrônico de Informações (SEI) para adição de novas funcionalidades relacionadas ao trâmite de processos e documentos entre instituições integradas ao Processo Eletrônico Nacional (PEN). Para a sua utilização, é necessário que a instituição possua o sistema SEI e tenha aderido ao Tramita.GOV.BR.
 
 Para informações sobre como aderir ao SEI, acesse: 
 https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/conteudo/sistema-eletronico-de-informacoes-sei
 
 
-Para informações sobre como aderir ao Barramento de Serviços do PEN, acesse:
+Para informações sobre como aderir ao Tramita.GOV.BR, acesse:
 https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen
 
 

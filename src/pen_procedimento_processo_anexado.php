@@ -35,10 +35,10 @@ try {
    
     case 'tra_procedimento_processo_anexado':
       $strTitulo = 'Processo Anexado';
-      break;
+        break;
 
     default:
-      throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
+        throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
   }
 
   $arrComandos = array();

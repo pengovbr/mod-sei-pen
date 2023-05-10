@@ -55,7 +55,7 @@ try {
     break;
 
     default:
-    throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
+        throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
   }
 
   $objTipoDocMapRN = new TipoDocMapRN();
@@ -112,7 +112,7 @@ function validarCadastro() {
 <?
 PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
-PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
+PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="frmEspeciePadraoAtribuir" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].$strParametros)?>">
 <?

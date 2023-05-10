@@ -237,14 +237,14 @@ class ReceberProcedimentoRN extends InfraRN
       $arrHashComponentesBaixados = array();
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
-      $numParamTamMaxDocumentoMb = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
+      $numParamTamMaxDocumentoMb = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
 
       // Lista todos os componentes digitais presente no protocolo
       // Esta verificação é necessária pois existem situações em que a lista de componentes
-      // pendentes de recebimento informado pelo PEN não está de acordo com a lista atual de arquivos
+      // pendentes de recebimento informado pelo Tramita.gov.br não está de acordo com a lista atual de arquivos
       // mantida pela aplicação.
-      //$arrHashPendentesDownload = $objTramite->componenteDigitalPendenteDeRecebimento;
       $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProtocolo);
+      $arrHashPendentesRecebimento = $parObjTramite->componenteDigitalPendenteDeRecebimento;
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
@@ -255,7 +255,6 @@ class ReceberProcedimentoRN extends InfraRN
         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
         //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
-        $arrHashComponentesBaixados[] = $strHashComponentePendente;
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
         $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
@@ -265,11 +264,24 @@ class ReceberProcedimentoRN extends InfraRN
         //Obter os dados do componente digital particionado
         $this->gravarLogDebug("Baixando componente digital $numOrdemComponente particionado", 3);
 
-        $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
+        try{
+          $objAnexoDTO = $this->receberComponenenteDigitalParticionado(
             $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
-        );
-        $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
+          );
+          $arrHashComponentesBaixados[] = $strHashComponentePendente;
+          $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
+        } catch(InfraException $e) {
+          // Caso o erro seja relacionado a falta do hash do documento no Tramita.gov.br e este não esteja
+          // pendente de recebimento, o download deve continuar para os demais documentos do processo
+          if(!in_array($strHashComponentePendente, $arrHashPendentesRecebimento)){
+            $this->gravarLogDebug("Componente digital já presente no processo", 4);
+            continue;
+          }
+
+          throw $e;
+        }
+
         $this->criarDiretorioAnexo($objAnexoDTO);
 
         $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$strHashComponentePendente];
@@ -285,7 +297,6 @@ class ReceberProcedimentoRN extends InfraRN
         $numVelocidade = round($nrTamanhoArquivoKB / max([$numTempoTotalValidacao, 1]), 2);
         $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 4);
       }
-
     }
 
     if(count($arrAnexosComponentes) > 0){
@@ -1238,7 +1249,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objAtributoAndamentoDTO->setStrValor($nome);
           $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
           $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
-        
+
 
       $objAtividadeDTO = new AtividadeDTO();
       $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
@@ -1317,7 +1328,7 @@ class ReceberProcedimentoRN extends InfraRN
 
 
   private function obterTipoProcessoPadrao($numIdTipoProcedimento) {
-        
+
     if(!isset($numIdTipoProcedimento)){
         throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
     }
@@ -1333,30 +1344,68 @@ class ReceberProcedimentoRN extends InfraRN
       return $objTipoProcedimentoDTO;
   }
 
-  private function obterTipoProcessoPorNome($strNomeTipoProcesso){
+  /**
+   * Busca tipo de processo pelo nome, considerando as configurações de restrição de uso para a unidade atual
+   *
+   * Esta informação é utilizada para se criar um processo do mesmo tipo daquele enviado pelo órgão de origem, utilizando
+   * o nome do processo de negócio para fazer a devida correspondência de tipos.
+   *
+   * Também é verificado se o tipo de processo localizado possui restrições de criação para a unidade atual. Caso exista,
+   * o tipo de processo padrão configurado no módulo deverá ser utilizado.
+   *
+   * @param str $strNomeTipoProcesso
+   * @return TipoProcedimentoDTO
+   */
+  private function obterTipoProcessoPeloNomeOrgaoUnidade($strNomeTipoProcesso, $numIdOrgao, $numIdUnidade){
 
     if(empty($strNomeTipoProcesso)){
         throw new InfraException('Parâmetro $strNomeTipoProcesso não informado.');
     }
 
-      $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
-      $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
-      $objTipoProcedimentoDTO->retStrNome();
+    $objTipoProcedimentoDTOFiltro = new TipoProcedimentoDTO();
+    $objTipoProcedimentoDTOFiltro->retNumIdTipoProcedimento();
+    $objTipoProcedimentoDTOFiltro->retStrNome();
+    $objTipoProcedimentoDTOFiltro->setStrNome($strNomeTipoProcesso);
 
-      // $strNomeTipoProcesso = mb_strtoupper($strNomeTipoProcesso, mb_internal_encoding());
-      $objTipoProcedimentoDTO->setStrNome($strNomeTipoProcesso);
+    $objTipoProcedimentoRN = new TipoProcedimentoRN();
+    $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTOFiltro);
 
-      $objTipoProcedimentoRN = new TipoProcedimentoRN();
-      $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
+    // Verifica se tipo de procedimento possui restrições para utilização no órgão e unidade atual
+    if(!is_null($objTipoProcedimentoDTO)){
+      $strCache = 'SEI_TPR_'.$objTipoProcedimentoDTO->getNumIdTipoProcedimento();
+      $arrCache = CacheSEI::getInstance()->getAtributo($strCache);
+      if ($arrCache == null) {
+        $objTipoProcedRestricaoDTOFiltro = new TipoProcedRestricaoDTO();
+        $objTipoProcedRestricaoDTOFiltro->retNumIdOrgao();
+        $objTipoProcedRestricaoDTOFiltro->retNumIdUnidade();
+        $objTipoProcedRestricaoDTOFiltro->setNumIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
 
-      return $objTipoProcedimentoDTO;
+        $objTipoProcedRestricaoRN = new TipoProcedRestricaoRN();
+        $arrObjTipoProcedRestricaoDTO = $objTipoProcedRestricaoRN->listar($objTipoProcedRestricaoDTOFiltro);
 
+        $arrCache = array();
+        foreach ($arrObjTipoProcedRestricaoDTO as $objTipoProcedRestricaoDTO) {
+          $arrCache[$objTipoProcedRestricaoDTO->getNumIdOrgao()][($objTipoProcedRestricaoDTO->getNumIdUnidade() == null ? '*' : $objTipoProcedRestricaoDTO->getNumIdUnidade())] = 0;
+        }
+        CacheSEI::getInstance()->setAtributo($strCache, $arrCache, CacheSEI::getInstance()->getNumTempo());
+      }
+
+      if (InfraArray::contar($arrCache) && !isset($arrCache[$numIdUnidade]['*']) && !isset($arrCache[$numIdOrgao][$numIdUnidade])){
+        return null;
+      }
+    }
+
+    return $objTipoProcedimentoDTO;
   }
 
   private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
     {
     if(!empty(trim($strProcessoNegocio))){
-        $objTipoProcedimentoDTO = $this->obterTipoProcessoPorNome($strProcessoNegocio);
+        $objTipoProcedimentoDTO = $this->obterTipoProcessoPeloNomeOrgaoUnidade(
+          $strProcessoNegocio,
+          SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(),
+          SessaoSEI::getInstance()->getNumIdUnidadeAtual()
+        );
     }
 
     if(is_null($objTipoProcedimentoDTO)){
@@ -2249,7 +2298,7 @@ class ReceberProcedimentoRN extends InfraRN
           $bolDocumentoPendente = false;
         }
       }
-    }        
+    }
 
       return $bolDocumentoPendente;
   }
@@ -2271,7 +2320,7 @@ class ReceberProcedimentoRN extends InfraRN
     foreach ($arrObjDocumentos as $objDocumento){
         $arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
       foreach ($arrObjComponentesDigitais as $objComponentesDigital){
-        if($objComponentesDigital->hash->_ == $parComponentePendente){
+        if(ProcessoEletronicoRN::getHashFromMetaDados($objComponentesDigital->hash) == $parComponentePendente){
             $tamanhoComponentePendende = $objComponentesDigital->tamanhoEmBytes;
           break;
         }
@@ -2282,7 +2331,7 @@ class ReceberProcedimentoRN extends InfraRN
 
 
     /**
-    * Método responsável por realizar o recebimento do componente digital particionado, de acordo com o parametro (PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO)
+    * Método responsável por realizar o recebimento do componente digital particionado, de acordo com o parametro (TamanhoBlocoArquivoTransferencia)
     * @param $componentePendente
     * @param $nrTamanhoBytesMaximo
     * @param $nrTamanhoBytesArquivo
@@ -2350,7 +2399,8 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumento->componenteDigital = array($objDocumento->componenteDigital);
       }
       foreach($objDocumento->componenteDigital as $objComponente){
-          $resultado[$objComponente->hash->_] = $objComponente;
+          $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente->hash);
+          $resultado[$strHash] = $objComponente;
       }
     }
       return $resultado;

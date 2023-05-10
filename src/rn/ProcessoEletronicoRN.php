@@ -54,7 +54,8 @@ class ProcessoEletronicoRN extends InfraRN
     // 5 minutos de timeout para requisições via webservice
     const WS_TIMEOUT_CONEXAO = 300;
     const WS_ESPERA_RECONEXAO = 5;
-    const WS_TENTATIVAS_RECONEXAO = 3;
+    const WS_TENTATIVAS_ERRO = 3;
+    const WS_TAMANHO_BLOCO_TRANSFERENCIA = 50;
 
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
@@ -105,10 +106,8 @@ class ProcessoEletronicoRN extends InfraRN
       $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
       $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
       $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro");
-      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_RECONEXAO;
-
-
+      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
+      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
 
       $this->strEnderecoWebService = $strEnderecoWebService;
       $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
@@ -631,7 +630,9 @@ class ProcessoEletronicoRN extends InfraRN
 
       $cabecalho->urgente = $urgente;
       $cabecalho->motivoDaUrgencia = $motivoUrgencia;
-      $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
+      //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
+      //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
+      $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
 
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
       $this->atribuirInformacoesModulo($cabecalho);
@@ -855,6 +856,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
         $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmLote = false, $numIdUnidade = null)
     {
+
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
         throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
     }
@@ -1041,18 +1043,22 @@ class ProcessoEletronicoRN extends InfraRN
     * @param object $objMeta tem que ser o componenteDigital->hash
     * @return string
     */
-  public static function getHashFromMetaDados($objMeta)
+    public static function getHashFromMetaDados($objMeta)
     {
-      $strHashConteudo = '';
+        $strHashConteudo = '';
 
-    if (isset($objMeta)) {
-        $matches = array();
-        $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
+        if (isset($objMeta)) {
+            if(is_string($objMeta)){
+                $strHashConteudo = $objMeta;
+            } else {
+                $matches = array();
+                $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
 
-      if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
-        $strHashConteudo = $matches[1][0];
-      }
-    }
+                if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
+                    $strHashConteudo = $matches[1][0];
+                }
+            }
+        }
 
       return $strHashConteudo;
   }
@@ -2035,6 +2041,30 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $bolExisteProcessoAnexado;
   }
+
+
+  public static function obterTamanhoBlocoTransferencia(){
+    $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+
+    try{
+        $numTamanhoBlocoMB = ConfiguracaoModPEN::getInstance()->getValor(
+            "PEN",
+            "TamanhoBlocoArquivoTransferencia",
+            false,
+            ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA
+        );
+
+        // Limita valores possíveis entre 1MB e 200MB
+        $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+        $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
+    } catch(Exception $e){
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+
+    return $numTamanhoBlocoMB;
+  }
+
 
     /**
      * Identifica se um determinado documento recebido pelo PEN originou-se de uma anexação de processos

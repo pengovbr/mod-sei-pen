@@ -3,7 +3,7 @@
 Este documento descreve os passos necessários para configurar um ambiente de desenvolvimento do projeto **mod-sei-pen** para permitir colaborações no projeto.
 
 ## 1 - Configurar comitês de protocolo
-Para colaborar com o desenvolvimento e testes do módulo ```mod-sei-pen```, será necessário configurar dois comitês de protocolo no ambiente de homologação Barramento de Serviços do PEN. Este passo é necessário para que possa ser emulado duas diferentes entidades durante os  trâmite de processos.
+Para colaborar com o desenvolvimento e testes do módulo ```mod-sei-pen```, será necessário configurar dois comitês de protocolo no ambiente de homologação Tramita.GOV.BR. Este passo é necessário para que possa ser emulado duas diferentes entidades durante os  trâmite de processos.
 
 Em casos específicos, apenas um comitê de protocolo de homologação poderá ser utilizado de forma  limitada. Neste caso, o ambiente de homologação público, disponíbilizado pelo Ministério da Economia, poderá ser utilizado para simular o trâmite de processo entre dois sistemas. Esse ambiente encontra-se disponível em https://sei-pen-mp.hom.nuvem.gov.br.
 
@@ -41,7 +41,7 @@ Para isto, acesse a funcionalidade **[Protocolo > Comitês de Protocolo]**, loca
 Na página que irá se abrir, seleciona as unidades ao qual tal sistema será responsável por enviar e receber processos.
 	
 ## 5 - Gerar novos certificados digitais de autentição dos sistemas.
-Para que os novos sistemas cadastrados possam interagir com o Barramento de Serviços do PEN, é necessário a geração de certificados digitais de autenticação para ambos. Estes deverão ser armazenados de forma segura pelo desenvolvedor e posteriormente configurados no ambiente de desenvolvimento.
+Para que os novos sistemas cadastrados possam interagir com o Tramita.GOV.BR, é necessário a geração de certificados digitais de autenticação para ambos. Estes deverão ser armazenados de forma segura pelo desenvolvedor e posteriormente configurados no ambiente de desenvolvimento.
 
 Para gerar os novos certificados, acesse **[Administração > Sistemas de Processo Eletrônico]**, encontre o respectivo sistema e clique em **[Gerar Certificado]**. Será apresentado uma página informando qual a senha de acesso e o botão para baixar o certificado gerado. Guarde estas duas informações para configuração posterior no ambiente de desenvolvimento. 
 
@@ -94,7 +94,7 @@ O resultado esperado é o seguinte
 00005 -         - Verificada a compatibilidade do mod-sei-pen com a atual versão do SEI
 00006 -         - Certificado digital localizado e corretamente configurado
 00007 -         - Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen
-00008 -         - Conexão com o Barramento de Serviços do PEN realizada com sucesso
+00008 -         - Conexão com o Tramita.GOV.BR realizada com sucesso
 00009 -         - Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso
 00010 -     
 00011 -     ** VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN FINALIZADA COM SUCESSO **
@@ -125,7 +125,7 @@ Acesse **[SEI > Administração > Processo Eletrônico Nacional > Configuração
 * **Repositório de Estruturas**: Repositório de estrutura ao qual seu comitê de protocolo foi criado
 Exemplo: Poder Executivo Federal
 
-* **Tipo de Processo Externo**: Identificação do Tipo de Processo que será aplicado à todos os processos e documentos recebidos de outras instituições pelo Barramento de Serviços do PEN.  
+* **Tipo de Processo Externo**: Identificação do Tipo de Processo que será aplicado à todos os processos e documentos recebidos de outras instituições pelo Tramita.GOV.BR.  
 
 
 * **Unidade SEI para Representação de Órgãos Externos**

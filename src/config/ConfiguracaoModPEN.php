@@ -1,36 +1,36 @@
 <?
 
 /**
- * Arquivo de configuração do Módulo de Integração do SEI com o Tramita.GOV.BR
- *
- * Seu desenvolvimento seguiu os mesmos padrões de configuração implementado pelo SEI e SIP e este
+ * Arquivo de configuração do Módulo de Integração do SEI com o Processo Eletrônico Nacional
+ * 
+ * Seu desenvolvimento seguiu os mesmos padrões de configuração implementado pelo SEI e SIP e este 
  * arquivo precisa ser adicionado à pasta de configurações do SEI para seu correto carregamento pelo módulo.
  */
 
 class ConfiguracaoModPEN extends InfraConfiguracao  {
 
-	private static $instance = null;
-
+  private static $instance = null;
+    
     /**
      * Obtém instância única (singleton) dos dados de configuração do módulo de integração com Barramento PEN
-     *
+     * 
      *
      * @return ConfiguracaoModPEN
      */
-    public static function getInstance()
+  public static function getInstance()
     {
-		if (ConfiguracaoModPEN::$instance == null) {
-			ConfiguracaoModPEN::$instance = new ConfiguracaoModPEN();
-		}
-		return ConfiguracaoModPEN::$instance;
-	}
+    if (ConfiguracaoModPEN::$instance == null) {
+        ConfiguracaoModPEN::$instance = new ConfiguracaoModPEN();
+    }
+      return ConfiguracaoModPEN::$instance;
+  }
 
     /**
      * Definição dos parâmetros de configuração do módulo
      *
      * @return array
      */
-    public function getArrConfiguracoes()
+  public function getArrConfiguracoes()
     {
         return array(
             "PEN" => array(
@@ -53,23 +53,23 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 //  Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-tramitagovbr/certificado.pem
                 "LocalizacaoCertificado" => "/opt/sei/config/mod-tramitagovbr/certificado.pem",
 
-                // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
-                "SenhaCertificado" => "1234",
+              // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
+              "SenhaCertificado" => "1234",
 
-                // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
-                // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.
-                // Valor padrão: 3
-                "NumeroTentativasErro" => 3,
+              // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
+              // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.
+              // Valor padrão: 3
+              "NumeroTentativasErro" => 3,
 
-                // Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
-                // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para
-                // processamento paralelo. Caso este parâmetro não seja configurado ou o servidor este indisponível, o processamento será
-                // feito diretamente pelo sistema na periodicidade definida pelo agendamento da tarefa PENAgendamento::receberProcessos
-                "Gearman" => array(
-                    "Servidor" => "",
-                    "Porta" => "", //Padrão: 4730
-                )
-            )
-        );
-    }
+              // Localização do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
+              // As mensagem recebidas são organizadas em filas de tarefas e distribuídas entre os nós da aplicação para
+              // processamento paralelo. Caso este parâmetro não seja configurado ou o servidor este indisponível, o processamento será
+              // feito diretamente pelo sistema na periodicidade definida pelo agendamento da tarefa PENAgendamento::receberProcessos
+              "Gearman" => array(
+                  "Servidor" => "",
+                  "Porta" => "", //Padrão: 4730
+              )
+          )
+      );
+  }
 }
