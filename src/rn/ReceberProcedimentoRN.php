@@ -1568,12 +1568,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objProcedimentoDTO2->retStrProtocoloProcedimentoFormatado();
           $objProcedimentoDTO2->retNumIdTipoProcedimento();
           $objProcedimentoDTO2->retStrNomeTipoProcedimento();
-          $objProcedimentoDTO2->adicionarCriterio(
-              array('IdProcedimento','ProtocoloProcedimentoFormatado','ProtocoloProcedimentoFormatadoPesquisa'),
-              array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL),
-              array($objDocumentoDTO->getDblIdProcedimento(), $objDocumentoDTO->getDblIdProcedimento(), $objDocumentoDTO->getDblIdProcedimento()),
-              array(InfraDTO::$OPER_LOGICO_OR,InfraDTO::$OPER_LOGICO_OR)
-          );
+          $objProcedimentoDTO2->setDblIdProcedimento($objDocumentoDTO->getDblIdProcedimento());
 
           $objProcedimentoRN = new ProcedimentoRN();
           $objProcedimentoDTO2 = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO2);
@@ -1582,7 +1577,6 @@ class ReceberProcedimentoRN extends InfraRN
           throw new InfraException('Processo ['.$objDocumentoDTO->getDblIdProcedimento().'] não encontrado.');
         }
 
-          $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO2->getDblIdProcedimento());
           $objDocumentoDTO->setNumIdSerie($objSerieDTO->getNumIdSerie());
           $objDocumentoDTO->setStrNomeSerie($objSerieDTO->getStrNome());
 
