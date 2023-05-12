@@ -603,7 +603,7 @@ class ProcessoEletronicoRN extends InfraRN
             $protocolos = $objProtocoloBD->listar($objProtocoloDTO)[0];
 
 
-            $msg = "Não foi possível enviar o processo por meio '".$protocolos->getStrProtocoloFormatado()."' do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
+            $msg = "Não foi possível enviar o processo '".$protocolos->getStrProtocoloFormatado()."' por meio do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
             foreach ($arrProtocolos as $index => $protocolo) {
                 if ($index != $protocolo->getNumSequencia()){
                     $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
