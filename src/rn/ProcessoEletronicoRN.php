@@ -612,7 +612,7 @@ class ProcessoEletronicoRN extends InfraRN
                     $msg .= " A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.";
                 }
             }
-            $msg .= "Sugere-se desfazer as alterações acima listadas antes de realizar nova tentativa de trâmite. Mantenha sempre a ordem original dos documentos de processos recebidos pelo Tramita.GOV.BR, uma vez que sua instrução foi realizada por outro órgão. Tenha em mente que qualquer alteração nessa ordem pode impedir um novo trâmite do processo.";
+            $msg .= " Sugere-se desfazer as alterações acima listadas antes de realizar nova tentativa de trâmite. Mantenha sempre a ordem original dos documentos de processos recebidos pelo Tramita.GOV.BR, uma vez que sua instrução foi realizada por outro órgão. Tenha em mente que qualquer alteração nessa ordem pode impedir um novo trâmite do processo.";
 
             if ($arrObjAtividadeDTO > 0) {
                 $strMensagem = str_replace(
