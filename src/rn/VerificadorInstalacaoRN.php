@@ -216,10 +216,43 @@ class VerificadorInstalacaoRN extends InfraRN
           throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital");
       }
 
+        $this->verificarCertificadoSSL();
+
         return true;
     }
 
+    /**
+     * Verifica certificado SSL
+     * 
+     * @return void
+     */
+    public function verificarCertificadoSSL()
+    {
+        try {
+            $url = $_SERVER['HOST_URL'];            
+            $orignal_parse = parse_url($url, PHP_URL_HOST);
+            $get = stream_context_create(array("ssl" => array("capture_peer_cert" => TRUE)));
+            $read = stream_socket_client("ssl://".$orignal_parse.":443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $get);
+            $cert = stream_context_get_params($read);
+            $certinfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
 
+            $validFrom = DateTime::createFromFormat('ymdHisP', $certinfo['validFrom']);
+            $validTo = DateTime::createFromFormat('ymdHisP', $certinfo['validTo']);
+            $now = date_create('now');
+            if ($validFrom < $now && $validTo > $now) {
+                DebugPen::getInstance()->gravar(
+                    "- Certificado SSL válido de " . $validFrom->format('d/m/Y H:i:s') . " à " . $validTo->format('d/m/Y H:i:s'),
+                    1,
+                    false,
+                    false
+                );
+            } else {
+                DebugPen::getInstance()->gravar("- Certificado SSL não é válido", 1, false, false);
+            }
+        } catch (\Throwable $th) {
+            DebugPen::getInstance()->gravar("- Certificado SSL não é válido", 1, false, false);
+        }
+    }
 
     /**
     * Verifica a conexão com o Barramento de Serviços do PEN, utilizando o endereço e certificados informados
