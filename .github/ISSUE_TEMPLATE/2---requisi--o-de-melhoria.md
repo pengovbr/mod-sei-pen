@@ -2,7 +2,7 @@
 name: 2 - Requisição de melhoria
 about: Sugira uma ideia para este projeto
 title: ''
-labels: enhancement
+labels: melhoria
 assignees: ''
 
 ---
