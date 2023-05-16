@@ -62,7 +62,7 @@ As versões anteriores do módulo permitiam, erroneamente, a qualquer unidade do
 Adicionado restrição na página de configuração do módulo para permitir apenas a escolha de "Unidade de Representação de Órgãos Externo" que não estejam disponíveis para envio de processos. Isto é necessário para evitar a escolha de uma unidade que esteja em pleno uso pela instituição e com usuários vinculados, indo contra as orientações descritas no manual e possibilitando que processos sejam recebidos automaticamente no estado fechado ou com possibilidade de realização de alterações indevidas no processo.
 
 
-#### Adicionado melhorias no log de verificação da disponibilidade do Tramita.gov.br
+#### Adicionado melhorias no log de verificação da disponibilidade do Tramita.gov.br (#270)
 
 A melhoria adicionada no log permitirá que a equipe de operações possa identificar, com precisão, qual a falha de conectividade está ocorrendo, principalmente por falhas relacionadas a falta de confiabilidade do servidor do SEI com os certificados digitais Let's Encrypt utilizados pela API do Tramita.gov.br
 
