@@ -1140,18 +1140,23 @@ class ReceberProcedimentoRN extends InfraRN
       if($this->obterNivelSigiloSEI($parObjMetadadoProcedimento->hipoteseLegal->identificacao) == ProtocoloRN::$NA_RESTRITO){
         $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
         $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
-
+        $strMensagemLogHipoteseLegal = "Número do ID da hipótese legal padrão: ".$numIdHipoteseLegalPadrao. "\n";
         if (!isset($parObjProtocolo->hipoteseLegal) || (isset($parObjProtocolo->hipoteseLegal) && empty($parObjProtocolo->hipoteseLegal->identificacao))) {
+            $strMensagemLogHipoteseLegal .= "Protocolo: ".$parNumIdProcedimento." não possui hipótese legal. Vamos usar hipótese padrão.\n";
             $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
         } else {
-
+            $strMensagemLogHipoteseLegal .= "Protocolo: ".$parNumIdProcedimento." possui hipótese legal. Vamos pesquisar hipótese ".$parObjProtocolo->hipoteseLegal->identificacao." enviada.\n";
             $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parObjProtocolo->hipoteseLegal->identificacao);
           if (empty($numIdHipoteseLegal)) {
+                $strMensagemLogHipoteseLegal .= "Hipótese enviada: ".$parObjProtocolo->hipoteseLegal->identificacao." não encontrada no banco. Vamos usar a hipótese padrão.";
                 $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
           } else {
-                  $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+                $strMensagemLogHipoteseLegal .= "Hipótese legal ".$parObjProtocolo->hipoteseLegal->identificacao." encontrada. Vamos usar o valor encontrado no banco: ".$numIdHipoteseLegal;
+                $objProtocoloDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
           }
+
         }
+        LogSEI::getInstance()->gravar($strMensagemLogHipoteseLegal);
       }
     }
 
@@ -2010,12 +2015,16 @@ class ReceberProcedimentoRN extends InfraRN
       //Atribuí a hipótese legal
       $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
       $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
-
+      $strMensagemLogHipoteseLegal = "Número do ID da hipótese legal padrão: ".$numIdHipoteseLegalPadrao. "\n";
       $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parNumIdHipoteseLegalPEN);
 
     if (empty($numIdHipoteseLegal)) {
+        $strMensagemLogHipoteseLegal .= "Hipótese legal ".$parNumIdHipoteseLegalPEN." não encontrada. Usando hipótese padrão.";
+        LogSEI::getInstance()->gravar($strMensagemLogHipoteseLegal);
         return $numIdHipoteseLegalPadrao;
     } else {
+        $strMensagemLogHipoteseLegal .= "Hipótese legal ".$parNumIdHipoteseLegalPEN." encontrada. Usando hipótese: ".$numIdHipoteseLegal;
+        LogSEI::getInstance()->gravar($strMensagemLogHipoteseLegal);
         return $numIdHipoteseLegal;
     }
   }
