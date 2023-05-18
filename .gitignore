@@ -4,9 +4,11 @@ vendor/
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
 **/.tmp/
-*.pem
+
 .vscode
+
 .env
+*.pem
 *.cache
 *.lock
 *.log

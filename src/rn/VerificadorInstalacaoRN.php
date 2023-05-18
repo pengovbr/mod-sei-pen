@@ -171,7 +171,7 @@ class VerificadorInstalacaoRN extends InfraRN
     public function verificarCompatibilidadeBanco()
     {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
 
         $objPENIntegracao = new PENIntegracao();
         $strVersaoModulo = $objPENIntegracao->getVersao();
@@ -287,12 +287,12 @@ class VerificadorInstalacaoRN extends InfraRN
              $strErrorMsg = curl_error($curl);
           }
           if (isset($strErrorMsg)) {
-              throw new InfraException("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
+              throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
           }
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new InfraException("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
+            throw new Exception("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
         }
 
       } finally{

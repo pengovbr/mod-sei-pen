@@ -1265,6 +1265,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
     }
 
+        if (InfraUtil::compararVersoes(SEI_VERSAO, '<=', '4.0.0')) {
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $objInfraParametro->setValor('PEN_VERSAO_MODULO_SEI', '0.0.0');
+        }
+
       $this->atualizarNumeroVersao("1.0.0");
 
       $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
@@ -2492,7 +2497,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3030() {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-      $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+
+      // Modificação de tipo de dados para a coluna ticket_envio_componentes na tabela md_pen_tramite
+      $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'ticket_envio_componentes_temp', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+      BancoSEI::getInstance()->executarSql("update md_pen_tramite set ticket_envio_componentes_temp=ticket_envio_componentes");
+      $objInfraMetaBD->excluirColuna('md_pen_tramite', 'ticket_envio_componentes');
+      $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+      BancoSEI::getInstance()->executarSql("update md_pen_tramite set ticket_envio_componentes=ticket_envio_componentes_temp");
+      $objInfraMetaBD->excluirColuna('md_pen_tramite', 'ticket_envio_componentes_temp');
+
       $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
 
       $objPenParametroRN = new PenParametroRN();
