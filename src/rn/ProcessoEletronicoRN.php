@@ -9,47 +9,47 @@ class ProcessoEletronicoRN extends InfraRN
 {
     /* TAREFAS DE EXPEDIÇÃO DE PROCESSOS */
     //Está definindo o comportamento para a tarefa $TI_PROCESSO_EM_PROCESSAMENTO
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 'PEN_PROCESSO_EXPEDIDO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 'PEN_PROCESSO_RECEBIDO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 'PEN_PROCESSO_CANCELADO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 'PEN_PROCESSO_RECUSADO';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
-  public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
-  public static $TI_DOCUMENTO_AVULSO_RECEBIDO = 'PEN_DOCUMENTO_AVULSO_RECEBIDO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO = 'PEN_PROCESSO_EXPEDIDO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO = 'PEN_PROCESSO_RECEBIDO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO = 'PEN_PROCESSO_CANCELADO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO = 'PEN_PROCESSO_RECUSADO';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
+    public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
+    public static $TI_DOCUMENTO_AVULSO_RECEBIDO = 'PEN_DOCUMENTO_AVULSO_RECEBIDO';
 
     /* TIPO DE PROTOCOLO RECEBIDO PELO BARRAMENTO - SE PROCESSO OU DOCUMENTO AVULSO */
-  public static $STA_TIPO_PROTOCOLO_PROCESSO = 'P';
-  public static $STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO = 'D';
+    public static $STA_TIPO_PROTOCOLO_PROCESSO = 'P';
+    public static $STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO = 'D';
 
     /* NÍVEL DE SIGILO DE PROCESSOS E DOCUMENTOS */
-  public static $STA_SIGILO_PUBLICO = '1';
-  public static $STA_SIGILO_RESTRITO = '2';
-  public static $STA_SIGILO_SIGILOSO = '3';
+    public static $STA_SIGILO_PUBLICO = '1';
+    public static $STA_SIGILO_RESTRITO = '2';
+    public static $STA_SIGILO_SIGILOSO = '3';
 
     /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
-  public static $STA_SITUACAO_TRAMITE_NAO_INICIADO = 0;                       // Não Iniciado - Aguardando envio de Metadados pela solução
-  public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
-  public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
-  public static $STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO = 3;    // Metadados recebidos pelo destinatário
-  public static $STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO = 4; // Componentes digitais recebidos pelo destinatário
-  public static $STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO = 5;        // Recibo de conclusão do trâmite enviado pelo destinatário do processo
-  public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
-  public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)
-  public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
-  public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
-  public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
+    public static $STA_SITUACAO_TRAMITE_NAO_INICIADO = 0;                       // Não Iniciado - Aguardando envio de Metadados pela solução
+    public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
+    public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
+    public static $STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO = 3;    // Metadados recebidos pelo destinatário
+    public static $STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO = 4; // Componentes digitais recebidos pelo destinatário
+    public static $STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO = 5;        // Recibo de conclusão do trâmite enviado pelo destinatário do processo
+    public static $STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE = 6;          // Recibo de conclusão do trâmite recebido pelo remetente do processo
+    public static $STA_SITUACAO_TRAMITE_CANCELADO = 7;                          // Trâmite do processo ou documento cancelado pelo usuário (Qualquer situação diferente de 5 e 6)
+    public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
+    public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
+    public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
 
     /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
-  public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
-  public static $STA_TIPO_TRAMITE_RECEBIMENTO = 'R'; // Trâmite de RECEBIMENTO de processo externo
+    public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo
+    public static $STA_TIPO_TRAMITE_RECEBIMENTO = 'R'; // Trâmite de RECEBIMENTO de processo externo
 
-  public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
-  public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
-  public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
+    public static $STA_TIPO_RECIBO_ENVIO = '1'; // Recibo de envio
+    public static $STA_TIPO_RECIBO_CONCLUSAO_ENVIADO = '2'; // Recibo de recebimento enviado
+    public static $STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO = '3'; // Recibo de recebimento recebido
 
     /* OPERAÇÕES DO HISTÓRICO DO PROCESSO */
     // 02 a 18 estão registrados na tabela rel_tarefa_operacao
-  public static $OP_OPERACAO_REGISTRO = "01";
+    public static $OP_OPERACAO_REGISTRO = "01";
 
     // 5 minutos de timeout para requisições via webservice
     const WS_TIMEOUT_CONEXAO = 300;
@@ -60,32 +60,32 @@ class ProcessoEletronicoRN extends InfraRN
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
     /**
-    * Motivo para recusar de tramite de componente digital pelo formato
-    */
+     * Motivo para recusar de tramite de componente digital pelo formato
+     */
     const MTV_RCSR_TRAM_CD_FORMATO = '01';
 
     /**
-    * Motivo para recusar de tramite de componente digital que está corrompido
-    */
+     * Motivo para recusar de tramite de componente digital que está corrompido
+     */
     const MTV_RCSR_TRAM_CD_CORROMPIDO = '02';
 
     /**
-    * Motivo para recusar de tramite de componente digital que não foi enviado
-    */
+     * Motivo para recusar de tramite de componente digital que não foi enviado
+     */
     const MTV_RCSR_TRAM_CD_FALTA = '03';
 
     /**
-    * Espécie documentoal não mapeada
-    */
+     * Espécie documentoal não mapeada
+     */
     const MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA = '04';
 
     /**
-    * Motivo para recusar de tramite de componente digital
-    */
+     * Motivo para recusar de tramite de componente digital
+     */
     const MTV_RCSR_TRAM_CD_OUTROU = '99';
 
-  public static $MOTIVOS_RECUSA = array(
-        "01"  => "Formato de componente digital não suportado",
+    public static $MOTIVOS_RECUSA = array(
+        "01" => "Formato de componente digital não suportado",
         "02" => "Componente digital corrompido",
         "03" => "Falta de componentes digitais",
         "04" => "Espécie documental não mapeada no destinatário",
@@ -100,41 +100,41 @@ class ProcessoEletronicoRN extends InfraRN
     private $strLocalCert;
     private $strLocalCertPassword;
 
-  public function __construct()
+    public function __construct()
     {
-      $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
-      $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
-      $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
-      $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
-      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
+        $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+        $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
+        $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+        $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
+        $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
+        $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
 
-      $this->strEnderecoWebService = $strEnderecoWebService;
-      $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
-      $this->strLocalCert = $strLocalizacaoCertificadoDigital;
-      $this->strLocalCertPassword = $strSenhaCertificadoDigital;
-      $this->numTentativasErro = $numTentativasErro;
+        $this->strEnderecoWebService = $strEnderecoWebService;
+        $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
+        $this->strLocalCert = $strLocalizacaoCertificadoDigital;
+        $this->strLocalCertPassword = $strSenhaCertificadoDigital;
+        $this->numTentativasErro = $numTentativasErro;
 
-      $this->options = array(
-          'soap_version' => SOAP_1_1
-          , 'local_cert' => $this->strLocalCert
-          , 'passphrase' => $this->strLocalCertPassword
-          , 'resolve_wsdl_remote_includes' => true
-          , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
-          , 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
-          , 'encoding' => 'UTF-8'
-          , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
-          , 'ssl' => array(
-              'allow_self_signed' => true,
-          )
-      );
-  }
+        $this->options = array(
+            'soap_version' => SOAP_1_1
+        , 'local_cert' => $this->strLocalCert
+        , 'passphrase' => $this->strLocalCertPassword
+        , 'resolve_wsdl_remote_includes' => true
+        , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
+        , 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
+        , 'encoding' => 'UTF-8'
+        , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
+        , 'ssl' => array(
+                'allow_self_signed' => true,
+            )
+        );
+    }
 
 
-  protected function inicializarObjInfraIBanco()
+    protected function inicializarObjInfraIBanco()
     {
-      return BancoSEI::getInstance();
-  }
+        return BancoSEI::getInstance();
+    }
 
 
     /**
@@ -142,32 +142,32 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return void
      */
-  private function getObjPenWs()
+    private function getObjPenWs()
     {
-    if($this->objPenWs == null) {
+        if ($this->objPenWs == null) {
 
-      if (InfraString::isBolVazia($this->strEnderecoWebService)) {
-        throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
-      }
+            if (InfraString::isBolVazia($this->strEnderecoWebService)) {
+                throw new InfraException('Endereço do serviço de integração do Processo Eletrônico Nacional (PEN) não informado.');
+            }
 
-      if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-          throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
-      }
+            if (InfraString::isBolVazia($this->strLocalCertPassword)) {
+                throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+            }
 
-        $this->validarDisponibilidade();
+            $this->validarDisponibilidade();
 
-      try {
-          $strWSDL = $this->strEnderecoWebService . '?wsdl';
-          $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
-      } catch (Exception $e) {
-          $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-          $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;
-          throw new \SoapFault("HTTP", $mensagem);
-      }
+            try {
+                $strWSDL = $this->strEnderecoWebService . '?wsdl';
+                $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
+            } catch (Exception $e) {
+                $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+                $mensagem = "Falha de comunicação com o Processo Eletrônico Nacional: " . $detalhes;
+                throw new \SoapFault("HTTP", $mensagem);
+            }
+        }
+
+        return $this->objPenWs;
     }
-
-      return $this->objPenWs;
-  }
 
 
     /**
@@ -176,317 +176,314 @@ class ProcessoEletronicoRN extends InfraRN
      * @param int $numIdentificacaoDoRepositorioDeEstruturas Código de identificação do repositório de estruturas do PEN
      * @return void
      */
-  public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
+    public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
     {
-      $objRepositorioDTO = null;
-    try{
-        $parametros = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = false;
+        $objRepositorioDTO = null;
+        try {
+            $parametros = new stdClass();
+            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
+            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = false;
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
-        });
+            $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
+            });
 
-      if(isset($result->repositoriosEncontrados->repositorio)){
+            if (isset($result->repositoriosEncontrados->repositorio)) {
 
-        if(!is_array($result->repositoriosEncontrados->repositorio)) {
-            $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
+                if (!is_array($result->repositoriosEncontrados->repositorio)) {
+                    $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
+                }
+
+                foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
+                    if ($repositorio->id == $numIdentificacaoDoRepositorioDeEstruturas) {
+                        $objRepositorioDTO = new RepositorioDTO();
+                        $objRepositorioDTO->setNumId($repositorio->id);
+                        $objRepositorioDTO->setStrNome(utf8_decode($repositorio->nome));
+                        $objRepositorioDTO->setBolAtivo($repositorio->ativo);
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
 
-        foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
-          if($repositorio->id == $numIdentificacaoDoRepositorioDeEstruturas){
-                $objRepositorioDTO = new RepositorioDTO();
-                $objRepositorioDTO->setNumId($repositorio->id);
-                $objRepositorioDTO->setStrNome(utf8_decode($repositorio->nome));
-                $objRepositorioDTO->setBolAtivo($repositorio->ativo);
-          }
-        }
-      }
-    } catch(Exception $e){
-        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
+        return $objRepositorioDTO;
     }
-
-      return $objRepositorioDTO;
-  }
 
     /**
      * Lista todo os repositórios de estruturas disponíveis no Barramento de Serviços do PEN
      *
      * @return void
      */
-  public function listarRepositoriosDeEstruturas()
+    public function listarRepositoriosDeEstruturas()
     {
-      $arrObjRepositorioDTO = array();
+        $arrObjRepositorioDTO = array();
 
-    try{
-        $parametros = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;
+        try {
+            $parametros = new stdClass();
+            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
+            $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
-        });
+            $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
+            });
 
-      if(isset($result->repositoriosEncontrados->repositorio)){
-        if(!is_array($result->repositoriosEncontrados->repositorio)) {
-            $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
+            if (isset($result->repositoriosEncontrados->repositorio)) {
+                if (!is_array($result->repositoriosEncontrados->repositorio)) {
+                    $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
+                }
+
+                foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
+                    $item = new RepositorioDTO();
+                    $item->setNumId($repositorio->id);
+                    $item->setStrNome(utf8_decode($repositorio->nome));
+                    $item->setBolAtivo($repositorio->ativo);
+                    $arrObjRepositorioDTO[] = $item;
+                }
+            }
+        } catch (Exception $e) {
+            $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
 
-        foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
-                $item = new RepositorioDTO();
-                $item->setNumId($repositorio->id);
-                $item->setStrNome(utf8_decode($repositorio->nome));
-                $item->setBolAtivo($repositorio->ativo);
-                $arrObjRepositorioDTO[] = $item;
-        }
-      }
-    } catch(Exception $e){
-        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
+        return $arrObjRepositorioDTO;
     }
 
-      return $arrObjRepositorioDTO;
-  }
-
     /**
-    * Método responsável por consultar as estruturas das unidades externas no barramento
-    * @param $idRepositorioEstrutura
-    * @param $numeroDeIdentificacaoDaEstrutura
-    * @param bool $bolRetornoRaw
-    * @return EstruturaDTO|mixed
-    * @throws InfraException
-    */
-  public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw = false)
+     * Método responsável por consultar as estruturas das unidades externas no barramento
+     * @param $idRepositorioEstrutura
+     * @param $numeroDeIdentificacaoDaEstrutura
+     * @param bool $bolRetornoRaw
+     * @return EstruturaDTO|mixed
+     * @throws InfraException
+     */
+    public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw = false)
     {
-    try {
+        try {
 
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturas = new stdClass();
-        $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
-        $parametros->filtroDeEstruturas->apenasAtivas = false;
+            $parametros = new stdClass();
+            $parametros->filtroDeEstruturas = new stdClass();
+            $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+            $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
+            $parametros->filtroDeEstruturas->apenasAtivas = false;
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturas($parametros);
-        });
+            $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->consultarEstruturas($parametros);
+            });
 
-      if ($result->estruturasEncontradas->totalDeRegistros == 1) {
-        $arrObjEstrutura = is_array($result->estruturasEncontradas->estrutura) ? $result->estruturasEncontradas->estrutura : array($result->estruturasEncontradas->estrutura);
-        $objEstrutura = current($arrObjEstrutura);
+            if ($result->estruturasEncontradas->totalDeRegistros == 1) {
+                $arrObjEstrutura = is_array($result->estruturasEncontradas->estrutura) ? $result->estruturasEncontradas->estrutura : array($result->estruturasEncontradas->estrutura);
+                $objEstrutura = current($arrObjEstrutura);
 
-        $objEstrutura->nome = utf8_decode($objEstrutura->nome);
-        $objEstrutura->sigla = utf8_decode($objEstrutura->sigla);
+                $objEstrutura->nome = utf8_decode($objEstrutura->nome);
+                $objEstrutura->sigla = utf8_decode($objEstrutura->sigla);
 
-        if ($bolRetornoRaw !== false) {
-          if (isset($objEstrutura->hierarquia) && isset($objEstrutura->hierarquia->nivel)) {
-            if (!is_array($objEstrutura->hierarquia->nivel)) {
-                    $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
-            }
+                if ($bolRetornoRaw !== false) {
+                    if (isset($objEstrutura->hierarquia) && isset($objEstrutura->hierarquia->nivel)) {
+                        if (!is_array($objEstrutura->hierarquia->nivel)) {
+                            $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
+                        }
 
-            foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
+                        foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
                             $objNivel->nome = utf8_decode($objNivel->nome);
+                        }
+                    }
+                    return $objEstrutura;
+                } else {
+                    $objEstruturaDTO = new EstruturaDTO();
+                    $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($objEstrutura->numeroDeIdentificacaoDaEstrutura);
+                    $objEstruturaDTO->setStrNome($objEstrutura->nome);
+                    $objEstruturaDTO->setStrSigla($objEstrutura->sigla);
+                    $objEstruturaDTO->setBolAtivo($objEstrutura->ativo);
+                    $objEstruturaDTO->setBolAptoParaReceberTramites($objEstrutura->aptoParaReceberTramites);
+                    $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($objEstrutura->codigoNoOrgaoEntidade);
+                    return $objEstruturaDTO;
+                }
             }
-          }
-            return $objEstrutura;
+        } catch (Exception $e) {
+            $mensagem = "Falha na obtenção de unidades externas";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
-        else {
-                $objEstruturaDTO = new EstruturaDTO();
-                $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($objEstrutura->numeroDeIdentificacaoDaEstrutura);
-                $objEstruturaDTO->setStrNome($objEstrutura->nome);
-                $objEstruturaDTO->setStrSigla($objEstrutura->sigla);
-                $objEstruturaDTO->setBolAtivo($objEstrutura->ativo);
-                $objEstruturaDTO->setBolAptoParaReceberTramites($objEstrutura->aptoParaReceberTramites);
-                $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($objEstrutura->codigoNoOrgaoEntidade);
-                return $objEstruturaDTO;
-        }
-      }
     }
-    catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
 
     /**
-    * Método responsável por recuperar pela estutura pai a estrutura de filhos de uma unidade
-    * @param $idRepositorioEstrutura
-    * @param null $numeroDeIdentificacaoDaEstrutura
-    * @param bool $bolRetornoRaw
-    * @return array
-    * @throws InfraException
-    */
-  public function consultarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null, $bolRetornoRaw = false)
+     * Método responsável por recuperar pela estutura pai a estrutura de filhos de uma unidade
+     * @param $idRepositorioEstrutura
+     * @param null $numeroDeIdentificacaoDaEstrutura
+     * @param bool $bolRetornoRaw
+     * @return array
+     * @throws InfraException
+     */
+    public function consultarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null, $bolRetornoRaw = false)
     {
-    try {
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturasPorEstruturaPai = new stdClass();
-        $parametros->filtroDeEstruturasPorEstruturaPai->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+        try {
+            $parametros = new stdClass();
+            $parametros->filtroDeEstruturasPorEstruturaPai = new stdClass();
+            $parametros->filtroDeEstruturasPorEstruturaPai->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
 
-      if(!is_null($numeroDeIdentificacaoDaEstrutura)){
-        $parametros->filtroDeEstruturasPorEstruturaPai->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
-      }
-
-        $parametros->filtroDeEstruturasPorEstruturaPai->apenasAtivas = true;
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturasPorEstruturaPai($parametros);
-        });
-
-        $estruturasUnidades = is_array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura) ? $result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura : array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura);
-
-        //Cria um array com os nomes da unidades para realizar a ordenação das mesmas
-        $nomesUnidades = [];
-      foreach ($estruturasUnidades as $estrutura) {
-        $nomesUnidades[] = $estrutura->nome;
-      }
-
-        //Ordena as unidades pelo nome
-        array_multisort($nomesUnidades, SORT_ASC, $estruturasUnidades);
-
-        return $estruturasUnidades;
-    }
-    catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
-
-  public function listarEstruturas($idRepositorioEstrutura, $nome = '', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
-    $nomeUnidade = null, $siglaUnidade = null, $offset = null, $registrosPorPagina = null, $parBolPermiteRecebimento = null, $parBolPermiteEnvio = null)
-    {
-      $arrObjEstruturaDTO = array();
-
-    try{
-        $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
-      if(!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
-      }
-
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturas = new stdClass();
-        $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-        $parametros->filtroDeEstruturas->apenasAtivas = true;
-
-      if(!is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta)){
-          $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstruturaRaizDaConsulta = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta;
-      }else{
-          $nome = trim($nome);
-        if(is_numeric($nome)) {
-            $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
-        } else {
-            $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
-        }
-      }
-
-      if(!is_null($siglaUnidade)){
-          $parametros->filtroDeEstruturas->sigla = $siglaUnidade;
-      }
-
-      if(!is_null($nomeUnidade)){
-          $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
-      }
-
-      if(!is_null($registrosPorPagina) && !is_null($offset)){
-          $parametros->filtroDeEstruturas->paginacao = new stdClass();
-          $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
-          $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
-      }
-
-      if(!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true){
-          $parametros->filtroDeEstruturas->permiteRecebimento = true;
-      }
-
-      if(!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true){
-          $parametros->filtroDeEstruturas->permiteEnvio = true;
-      }
-
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturas($parametros);
-        });
-
-      if($result->estruturasEncontradas->totalDeRegistros > 0) {
-
-        if(!is_array($result->estruturasEncontradas->estrutura)) {
-            $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
-        }
-
-        foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
-                $item = new EstruturaDTO();
-                $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-                $item->setStrNome(utf8_decode($estrutura->nome));
-                $item->setStrSigla(utf8_decode($estrutura->sigla));
-                $item->setBolAtivo($estrutura->ativo);
-                $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
-                $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
-                $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
-
-          if(!empty($estrutura->hierarquia->nivel)) {
-                $array = array();
-            foreach($estrutura->hierarquia->nivel as $nivel) {
-                $array[] = utf8_decode($nivel->sigla);
+            if (!is_null($numeroDeIdentificacaoDaEstrutura)) {
+                $parametros->filtroDeEstruturasPorEstruturaPai->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
             }
-                $item->setArrHierarquia($array);
-          }
 
-                $arrObjEstruturaDTO[] = $item;
+            $parametros->filtroDeEstruturasPorEstruturaPai->apenasAtivas = true;
+            $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->consultarEstruturasPorEstruturaPai($parametros);
+            });
+
+            $estruturasUnidades = is_array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura) ? $result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura : array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura);
+
+            //Cria um array com os nomes da unidades para realizar a ordenação das mesmas
+            $nomesUnidades = [];
+            foreach ($estruturasUnidades as $estrutura) {
+                $nomesUnidades[] = $estrutura->nome;
+            }
+
+            //Ordena as unidades pelo nome
+            array_multisort($nomesUnidades, SORT_ASC, $estruturasUnidades);
+
+            return $estruturasUnidades;
+        } catch (Exception $e) {
+            $mensagem = "Falha na obtenção de unidades externas";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
-      }
-
-    } catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
     }
 
-      return $arrObjEstruturaDTO;
-  }
-
-  public function consultarMotivosUrgencia()
+    public function listarEstruturas($idRepositorioEstrutura, $nome = '', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
+                                     $nomeUnidade = null, $siglaUnidade = null, $offset = null, $registrosPorPagina = null, $parBolPermiteRecebimento = null, $parBolPermiteEnvio = null)
     {
-      $curl = curl_init($this->strComumXSD);
+        $arrObjEstruturaDTO = array();
 
-    try{
-        $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
-        curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
-        curl_setopt($curl, CURLOPT_HEADER, false);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
-        curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
-        curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+        try {
+            $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
+            if (!$idRepositorioEstrutura) {
+                throw new InfraException("Repositório de Estruturas inválido");
+            }
 
-        $output = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($curl) {
-            return curl_exec($curl);
-        });
+            $parametros = new stdClass();
+            $parametros->filtroDeEstruturas = new stdClass();
+            $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+            $parametros->filtroDeEstruturas->apenasAtivas = true;
 
-        $dom = new DOMDocument();
-        $dom->loadXML($output);
+            if (!is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta)) {
+                $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstruturaRaizDaConsulta = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta;
+            } else {
+                $nome = trim($nome);
+                if (is_numeric($nome)) {
+                    $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
+                } else {
+                    $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+                }
+            }
 
-        $xpath = new DOMXPath($dom);
+            if (!is_null($siglaUnidade)) {
+                $parametros->filtroDeEstruturas->sigla = $siglaUnidade;
+            }
 
-        $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
-        $xpath->registerNamespace('x', $rootNamespace);
-        $entries = $xpath->query('/x:schema/x:simpleType[@name="motivoDaUrgencia"]/x:restriction/x:enumeration');
+            if (!is_null($nomeUnidade)) {
+                $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
+            }
 
-        $resultado = array();
-      foreach ($entries as $entry) {
-        $valor = $entry->getAttribute('value');
-        $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
-        $descricao = $documentationNode->item(0)->nodeValue;
-        $resultado[$valor] = utf8_decode($descricao);
-      }
-    } finally{
-        curl_close($curl);
+            if (!is_null($registrosPorPagina) && !is_null($offset)) {
+                $parametros->filtroDeEstruturas->paginacao = new stdClass();
+                $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
+                $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
+            }
+
+            if (!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true) {
+                $parametros->filtroDeEstruturas->permiteRecebimento = true;
+            }
+
+            if (!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true) {
+                $parametros->filtroDeEstruturas->permiteEnvio = true;
+            }
+
+            $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->consultarEstruturas($parametros);
+            });
+
+            if ($result->estruturasEncontradas->totalDeRegistros > 0) {
+
+                if (!is_array($result->estruturasEncontradas->estrutura)) {
+                    $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
+                }
+
+                foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
+                    $item = new EstruturaDTO();
+                    $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+                    $item->setStrNome(utf8_decode($estrutura->nome));
+                    $item->setStrSigla(utf8_decode($estrutura->sigla));
+                    $item->setBolAtivo($estrutura->ativo);
+                    $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+                    $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+                    $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
+
+                    if (!empty($estrutura->hierarquia->nivel)) {
+                        $array = array();
+                        foreach ($estrutura->hierarquia->nivel as $nivel) {
+                            $array[] = utf8_decode($nivel->sigla);
+                        }
+                        $item->setArrHierarquia($array);
+                    }
+
+                    $arrObjEstruturaDTO[] = $item;
+                }
+            }
+
+        } catch (Exception $e) {
+            $mensagem = "Falha na obtenção de unidades externas";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
+
+        return $arrObjEstruturaDTO;
     }
 
-      return $resultado;
-  }
+    public function consultarMotivosUrgencia()
+    {
+        $curl = curl_init($this->strComumXSD);
+
+        try {
+            $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
+            curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
+            curl_setopt($curl, CURLOPT_HEADER, false);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+
+            $output = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($curl) {
+                return curl_exec($curl);
+            });
+
+            $dom = new DOMDocument();
+            $dom->loadXML($output);
+
+            $xpath = new DOMXPath($dom);
+
+            $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
+            $xpath->registerNamespace('x', $rootNamespace);
+            $entries = $xpath->query('/x:schema/x:simpleType[@name="motivoDaUrgencia"]/x:restriction/x:enumeration');
+
+            $resultado = array();
+            foreach ($entries as $entry) {
+                $valor = $entry->getAttribute('value');
+                $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
+                $descricao = $documentationNode->item(0)->nodeValue;
+                $resultado[$valor] = utf8_decode($descricao);
+            }
+        } finally {
+            curl_close($curl);
+        }
+
+        return $resultado;
+    }
 
 
     /**
@@ -496,71 +493,106 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return array
      */
-  public function consultarEspeciesDocumentais()
+    public function consultarEspeciesDocumentais()
     {
-      $curl = curl_init($this->strComumXSD);
+        $curl = curl_init($this->strComumXSD);
 
-    try{
-        curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        try {
+            curl_setopt($curl, CURLOPT_URL, $this->strComumXSD);
+            curl_setopt($curl, CURLOPT_HEADER, 0);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
 
-      if(!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')){
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-      }
-        curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
-        curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
+            if (!ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao')) {
+                curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
+                curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            }
+            curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
+            curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
-        $output = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($curl) {
-            return curl_exec($curl);
-        });
+            $output = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($curl) {
+                return curl_exec($curl);
+            });
 
-        $dom = new DOMDocument();
-        $dom->loadXML($output);
+            $dom = new DOMDocument();
+            $dom->loadXML($output);
 
-        $xpath = new DOMXPath($dom);
-        $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
-        $xpath->registerNamespace('x', $rootNamespace);
-        $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
+            $xpath = new DOMXPath($dom);
+            $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
+            $xpath->registerNamespace('x', $rootNamespace);
+            $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
 
-        $resultado = array();
-      foreach ($entries as $entry) {
-        $valor = $entry->getAttribute('value');
-        $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
-        $descricao = $documentationNode->item(0)->nodeValue;
-        $resultado[$valor] = utf8_decode($descricao);
-      }
-    } finally{
-        curl_close($curl);
+            $resultado = array();
+            foreach ($entries as $entry) {
+                $valor = $entry->getAttribute('value');
+                $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
+                $descricao = $documentationNode->item(0)->nodeValue;
+                $resultado[$valor] = utf8_decode($descricao);
+            }
+        } finally {
+            curl_close($curl);
+        }
+
+        return $resultado;
     }
 
-      return $resultado;
-  }
 
-
-  public function enviarProcesso($parametros)
+    public function enviarProcesso($parametros)
     {
-    try {
-        return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->enviarProcesso($parametros);
-        });
+        try {
+            return $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+                return $objPenWs->enviarProcesso($parametros);
+            });
 
-    } catch (\SoapFault $e) {
-        $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
-      if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-          $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
-      }
+        } catch (\SoapFault $e) {
+            $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
+            if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
+                $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+            }
 
-        $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
-        throw new InfraException($strMensagem, $e, $strDetalhes);
-    } catch (\Exception $e) {
-        $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
+            if (strpos($strMensagem, 'já possui trâmite em andamento')) {
+                $strMensagem = $this->validarTramitaEmAndamento($parametros->dblIdProcedimento, $strMensagem);
+                $e->faultstring = $strMensagem;
+            }
+            $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+            throw new InfraException($strMensagem, $e, $strDetalhes);
+        } catch (\Exception $e) {
+            $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
+        }
     }
-  }
+
+    private function validarTramitaEmAndamento($dblIdProcedimento, $strMensagem)
+    {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+        $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+
+        if (!is_null($numIdTramite) && $numIdTramite > 0) {
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+
+            # PROTOCOLO
+            $objProtocoloDTO = new ProtocoloDTO();
+            $objProtocoloDTO->setDblIdProtocolo($objAtividadeDTO->getDblIdProtocolo());
+            $objProtocoloDTO->setOrd('IdProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
+            $objProtocoloDTO->retTodos();
+            $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+            $protocolo = $objProtocoloBD->listar($objProtocoloDTO)[0];
+
+            $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: ".$objUltimoTramiteDTO->getStrNumeroRegistro().". Processo: ".$protocolo->getStrProtocoloFormatado().".";
+        }
+        return $strMensagem;
+
+    }
 
   public function listarPendencias($bolTodasPendencias)
     {
