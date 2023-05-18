@@ -12,7 +12,7 @@ class RelTarefaOperacaoDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'CodigoOperacao', 'codigo_operacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTarefa', 'id_tarefa');
         
-    $this->configurarPK('IdTarefa',InfraDTO::$TIPO_PK_INFORMADO);    
+    $this->configurarPK('IdTarefa', InfraDTO::$TIPO_PK_INFORMADO);    
     $this->configurarFK('IdTarefa', 'tarefa', 'id_tarefa');
   }
 }

@@ -141,9 +141,9 @@ $objPaginaSEI->abrirStyle();
 
 #lblProtocoloExibir {position:absolute;left:0%;top:0%;}
 #txtProtocoloExibir {position:absolute;left:0%;top:38%;width:50%;}
-#selProcedimentos {position:absolute;left:0%;top:21%;width:81%;}
+#selProcedimentos {position:absolute;left:0%;top:21%;width:81%;height:75%}
 
-#lblRepositorioEstruturas {position:absolute;left:0%;top:10%;width:50%;}
+#lblRepositorioEstruturas {position:absolute;left:0%;top:0%;width:50%;}
 #selRepositorioEstruturas {position:absolute;left:0%;top:48%;width:51%;}
 
 #lblUnidades {position:absolute;left:0%;top:10%;}
@@ -154,8 +154,10 @@ $objPaginaSEI->abrirStyle();
 #imgPesquisaAvancada {
     vertical-align: middle;
     margin-left: 10px;
+    width: 20px;
+    height: 20px;
 }
-
+div.infraAreaDados {margin-bottom: 10px;}
 <?php
 $objPaginaSEI->fecharStyle();
 $objPaginaSEI->montarJavaScript();
@@ -390,7 +392,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
                 <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
                     value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
-                <button id="btnIdUnidade" type="button" class="infraText">Consultar</button>
+                <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
                 <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
             </div>
 

@@ -5,7 +5,6 @@ services:
   ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
     image: processoeletronico/vagrant_super4_mailcatcher:${ENVIRONMENT_VERSION}
-    container_name: smtp
     ports:
       - "1080:1080"
 
@@ -21,7 +20,6 @@ services:
 
   proxy:
     image: diouxx/apache-proxy
-    container_name: proxy
     ports:
       - "8000:8000"
     volumes:
@@ -32,7 +30,6 @@ services:
 
   selenium:
     image: selenium/standalone-chrome-debug
-    container_name: selenium
     links:
       - proxy:org1-http
       - proxy:org2-http
@@ -46,7 +43,6 @@ services:
 
   php-test-functional:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
-    container_name: php-test-functional
     depends_on:
       - org1-database
       - org2-database
@@ -70,7 +66,6 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -81,7 +76,6 @@ services:
 
   php-test-unit:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
-    container_name: php-test-unit
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -103,7 +97,6 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: "true"
@@ -112,7 +105,6 @@ services:
 
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
-    container_name: org1-${ORG1_DATABASE_HOST}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: P@ssword
@@ -121,7 +113,6 @@ services:
 
   org1-http:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
-    container_name: org1-http
     restart: always
     depends_on:
       - org1-database
@@ -156,16 +147,11 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
-      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
-      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
 
       - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
-      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
@@ -177,7 +163,6 @@ services:
 
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
-    container_name: org2-${ORG2_DATABASE_HOST}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: P@ssword
@@ -186,7 +171,6 @@ services:
 
   org2-http:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
-    container_name: org2-http
     restart: always
     depends_on:
       - org2-database
@@ -221,16 +205,11 @@ services:
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
       - SEI_DATABASE_USER=${SEI_DATABASE_USER}
       - SEI_DATABASE_PASSWORD=${SEI_DATABASE_PASSWORD}
-      - SEI_DATABASE_USER_SCRIPT=${SEI_DATABASE_USER_SCRIPT}
-      - SEI_DATABASE_PASSWORD_SCRIPT=${SEI_DATABASE_PASSWORD_SCRIPT}
 
       - SIP_CHAVE_ACESSO=${ORG2_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
-      - SIP_DATABASE_USER_SCRIPT=${SIP_DATABASE_USER_SCRIPT}
-      - SIP_DATABASE_PASSWORD_SCRIPT=${SIP_DATABASE_PASSWORD_SCRIPT}
-
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:

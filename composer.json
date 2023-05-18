@@ -10,9 +10,7 @@
     "phpunit/phpunit": "*",
     "squizlabs/php_codesniffer": "*",
     "mockery/mockery": "^1.5",
-    "phpcompatibility/php-compatibility": "^9.3"
-  },
-  "require": {
+    "phpcompatibility/php-compatibility": "^9.3",
     "pheromone/phpcs-security-audit": "*"
   }
 }

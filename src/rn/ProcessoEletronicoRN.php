@@ -54,7 +54,8 @@ class ProcessoEletronicoRN extends InfraRN
     // 5 minutos de timeout para requisições via webservice
     const WS_TIMEOUT_CONEXAO = 300;
     const WS_ESPERA_RECONEXAO = 5;
-    const WS_TENTATIVAS_RECONEXAO = 3;
+    const WS_TENTATIVAS_ERRO = 3;
+    const WS_TAMANHO_BLOCO_TRANSFERENCIA = 50;
 
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
 
@@ -105,10 +106,8 @@ class ProcessoEletronicoRN extends InfraRN
       $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
       $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
       $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro");
-      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_RECONEXAO;
-
-
+      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
+      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
 
       $this->strEnderecoWebService = $strEnderecoWebService;
       $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
@@ -458,7 +457,7 @@ class ProcessoEletronicoRN extends InfraRN
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $bolEmProducao);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);        
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
         curl_setopt($curl, CURLOPT_SSLCERT, $this->strLocalCert);
         curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $this->strLocalCertPassword);
 
@@ -634,7 +633,7 @@ class ProcessoEletronicoRN extends InfraRN
       //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
       //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
       $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
-      
+
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
       $this->atribuirInformacoesModulo($cabecalho);
 
@@ -857,6 +856,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
         $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmLote = false, $numIdUnidade = null)
     {
+
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
         throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
     }
@@ -1043,21 +1043,25 @@ class ProcessoEletronicoRN extends InfraRN
     * @param object $objMeta tem que ser o componenteDigital->hash
     * @return string
     */
-  public static function getHashFromMetaDados($objMeta)
+    public static function getHashFromMetaDados($objMeta)
     {
-      $strHashConteudo = '';
+        $strHashConteudo = '';
 
-    if (isset($objMeta)) {
-        $matches = array();
-        $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
+        if (isset($objMeta)) {
+            if(is_string($objMeta)){
+                $strHashConteudo = $objMeta;
+            } else {
+                $matches = array();
+                $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
 
-      if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
-        $strHashConteudo = $matches[1][0];
-      }
-    }
+                if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
+                    $strHashConteudo = $matches[1][0];
+                }
+            }
+        }
 
       return $strHashConteudo;
-  }
+    }
 
   private function montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados)
     {
@@ -1543,61 +1547,61 @@ class ProcessoEletronicoRN extends InfraRN
       $objOperacaoDTO->setStrNomePessoaOrigem(utf8_decode($strNomePessoa));
 
     switch ($objOperacaoPEN->codigo) {
-      case "01": 
+      case "01":
             $objOperacaoDTO->setStrNome("Registro");
           break;
-      case "02": 
+      case "02":
             $objOperacaoDTO->setStrNome("Envio de documento avulso/processo");
           break;
-      case "03": 
+      case "03":
             $objOperacaoDTO->setStrNome("Cancelamento/exclusão ou envio de documento");
           break;
-      case "04": 
+      case "04":
             $objOperacaoDTO->setStrNome("Recebimento de documento");
           break;
-      case "05": 
+      case "05":
             $objOperacaoDTO->setStrNome("Autuação");
           break;
-      case "06": 
+      case "06":
             $objOperacaoDTO->setStrNome("Juntada por anexação");
           break;
-      case "07": 
+      case "07":
             $objOperacaoDTO->setStrNome("Juntada por apensação");
           break;
-      case "08": 
+      case "08":
             $objOperacaoDTO->setStrNome("Desapensação");
           break;
-      case "09": 
+      case "09":
             $objOperacaoDTO->setStrNome("Arquivamento");
           break;
-      case "10": 
+      case "10":
             $objOperacaoDTO->setStrNome("Arquivamento no Arquivo Nacional");
           break;
-      case "11": 
+      case "11":
             $objOperacaoDTO->setStrNome("Eliminação");
           break;
-      case "12": 
+      case "12":
             $objOperacaoDTO->setStrNome("Sinistro");
           break;
-      case "13": 
+      case "13":
             $objOperacaoDTO->setStrNome("Reconstituição de processo");
           break;
-      case "14": 
+      case "14":
             $objOperacaoDTO->setStrNome("Desarquivamento");
           break;
-      case "15": 
+      case "15":
             $objOperacaoDTO->setStrNome("Desmembramento");
           break;
-      case "16": 
+      case "16":
             $objOperacaoDTO->setStrNome("Desentranhamento");
           break;
-      case "17": 
+      case "17":
             $objOperacaoDTO->setStrNome("Encerramento/abertura de volume no processo");
           break;
-      case "18": 
+      case "18":
             $objOperacaoDTO->setStrNome("Registro de extravio");
           break;
-      default:   
+      default:
             $objOperacaoDTO->setStrNome("Registro");
           break;
     }
@@ -2038,6 +2042,30 @@ class ProcessoEletronicoRN extends InfraRN
       return $bolExisteProcessoAnexado;
   }
 
+
+  public static function obterTamanhoBlocoTransferencia(){
+    $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+
+    try{
+        $numTamanhoBlocoMB = ConfiguracaoModPEN::getInstance()->getValor(
+            "PEN",
+            "TamanhoBlocoArquivoTransferencia",
+            false,
+            ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA
+        );
+
+        // Limita valores possíveis entre 1MB e 200MB
+        $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+        $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
+    } catch(Exception $e){
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+
+    return $numTamanhoBlocoMB;
+  }
+
+
     /**
      * Identifica se um determinado documento recebido pelo PEN originou-se de uma anexação de processos
      *
@@ -2063,7 +2091,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
         $objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN();
     } catch (\Exception $e) {
-        throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.");
+        throw new InfraException("Falha de comunicação com o Processo Eletrônico Nacional. Por favor, tente novamente mais tarde.", $e);
     }
   }
 
@@ -2142,6 +2170,37 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $strTexto;
   }
+
+    public static function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
+
+        if(!is_readable($strCaminhoAnexoCompactado)) {
+            throw new InfraException("Anexo de documento não pode ser localizado");
+        }
+
+        $objAnexoRN = new AnexoRN();
+        $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
+
+        $arrStrNomeArquivos = array();
+        $zipArchive = new ZipArchive();
+        if($zipArchive->open($strCaminhoAnexoCompactado)){
+            try {
+                for($i = 0; $i < $zipArchive->numFiles; $i++){
+                    $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
+                }
+
+                $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
+                $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
+                copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
+            } finally {
+                $zipArchive->close();
+            }
+        } else {
+            throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
+        }
+
+        return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
+    }
+
 
     /**
      * Recupera a lista de todos os documentos do processo, principal ou anexados, mantendo a ordem correta entre eles e indicando qual
