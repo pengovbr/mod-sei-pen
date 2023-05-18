@@ -79,6 +79,61 @@ class PENIntegracao extends SeiIntegracao
       return array($strAcoesProcedimento);
   }
 
+  public function validarExcluirDesativarTipoDocumento($arrObjSerieAPI)
+  {
+    foreach ($arrObjSerieAPI as $objSerieAPI) {
+      $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
+      $objPenRelTipoDocMapEnviadoDTO->retTodos();
+
+      $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+      $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->consultar($objPenRelTipoDocMapEnviadoDTO);
+      if (!is_null($objPenRelTipoDocMapEnviadoDTO)) {
+        throw new InfraException('Não e permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"', null, null);
+      }
+
+      $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+      $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
+      $objPenRelTipoDocMapRecebidoDTO->retTodos();
+
+      $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+      $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->consultar($objPenRelTipoDocMapRecebidoDTO);
+      if (!is_null($objPenRelTipoDocMapEnviadoDTO)) {
+        throw new InfraException('Não e permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"', null, null);
+      }
+    }
+  }
+
+  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI)
+  {
+    foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
+      $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
+      $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+      $objPenHipoteseLegalDTO->retTodos();
+
+      $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
+      $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
+      if (!is_null($objPenHipoteseLegalDTO)) {
+        throw new InfraException('Não e permitido excluir ou desativar a hipotese legal "' . $objHipoteseLegalAPI->getNome() . '"', null, null);
+      }
+    }
+  }
+
+  public function validarExcluirDesativarUnidade($arrObjUnidadeAPI)
+  {
+    foreach ($arrObjUnidadeAPI as $objUnidadeAPI) {
+      $objPenUnidadeDTO = new PenUnidadeDTO();
+      $objPenUnidadeDTO->setNumIdUnidade($objUnidadeAPI->getIdUnidade());
+      $objPenUnidadeDTO->retTodos();
+
+      $objPenHipoteseLegalRN = new PenUnidadeRN();
+      $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->contar($objPenUnidadeDTO);
+      if ($objPenHipoteseLegalDTO >= 1) {
+        throw new InfraException('Não e permitido excluir ou desativar a unidade "' . $objUnidadeAPI->getSigla() . '"', null, null);
+      }
+    }
+  }
+
   public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
     {
       $objProcedimentoDTO = new ProcedimentoDTO();
