@@ -71,29 +71,13 @@ try {
 
         if (!empty(count($_POST['parametro']))) {
           foreach ($_POST['parametro'] as $nome => $valor) {
-
-            if ($nome == 'PEN_TIPO_PROCESSO_EXTERNO') {
-
-                  $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
-                  $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
-                  $objRelTipoProcedimentoAssuntoDTO->setNumIdTipoProcedimento($valor);
-                  $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
-
-                  $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
-                  $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
-
-              if (empty($arrObjTipoProcedimentoAssunto)) {
-                throw new InfraException("Tipo de processo externo selecionado não possui sugestão de assuntos atribuída.");
-              }
-            }
-
             $objPenParametroDTO = new PenParametroDTO();
             $objPenParametroDTO->setStrNome($nome);
             $objPenParametroDTO->retStrNome();
 
             if($objPenParametroRN->contar($objPenParametroDTO) > 0) {
-                    $objPenParametroDTO->setStrValor(trim($valor));
-                    $objPenParametroRN->alterar($objPenParametroDTO);
+                $objPenParametroDTO->setStrValor(trim($valor));
+                $objPenParametroRN->alterar($objPenParametroDTO);
             }
           }
         }

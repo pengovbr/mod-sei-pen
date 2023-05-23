@@ -84,13 +84,13 @@ class ReceberComponenteDigitalRN extends InfraRN
       // Caso possua, será necessário compactar todos os arquivos em ZIP para vinculação ao documento no SEI que
       // permite apenas um arquivo por documento
       $objAnexoDTODocumento = null;
-    if(count($arrObjAnexoDTOParaCompactacao) == 1){
-        $objAnexoDTODocumento = $arrObjAnexoDTOParaCompactacao[0];
-    }elseif (count($arrObjAnexoDTOParaCompactacao) > 1){
-        $objAnexoDTODocumento = self::compactarAnexosDoDocumento($parNumIdDocumento, $arrObjAnexoDTOParaCompactacao);
-    }else{
-        throw new InfraException("Anexo do documento $parNumIdDocumento não pode ser localizado.");
-    }
+      if(count($arrObjAnexoDTOParaCompactacao) == 1){
+          $objAnexoDTODocumento = $arrObjAnexoDTOParaCompactacao[0];
+      }elseif (count($arrObjAnexoDTOParaCompactacao) > 1){
+          $objAnexoDTODocumento = self::compactarAnexosDoDocumento($parNumIdDocumento, $arrObjAnexoDTOParaCompactacao);
+      }else{
+          throw new InfraException("Anexo do documento $parNumIdDocumento não pode ser localizado.");
+      }
 
       //Transferir documentos validados para o repositório final de arquivos
       $objAnexoDTODocumento->setDblIdProtocolo($parNumIdDocumento);
@@ -253,7 +253,6 @@ class ReceberComponenteDigitalRN extends InfraRN
      * @param $objComponenteDigital
      * @return AnexoDTO
      *
-     * Pelo que entendi, aqui os arquivos são gerados na pasta temporária.
      */
   public function copiarComponenteDigitalPastaTemporaria($parObjComponenteDigital, $parObjConteudo)
     {
@@ -375,6 +374,5 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);
-
   }
 }
