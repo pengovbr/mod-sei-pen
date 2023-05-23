@@ -32,6 +32,7 @@
       $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
 
       $objPenLoteProcedimentoDTO->retNumIdLote();
+      $objPenLoteProcedimentoDTO->retDblIdProcedimento();
       $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
       $objPenLoteProcedimentoDTO->retNumIdAndamento();
       $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
@@ -96,7 +97,7 @@
 
           $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote(), $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote()) . '</td>';
           $strResultado .= '<td align="center">' . $arrObjPenLoteProcedimentoRN[$i]->getNumIdLote() . '</td>';
-          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrProcedimentoFormatado()) . '</td>';
+          $strResultado .= '<td align="center"><a onclick="abrirProcesso(\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $arrObjPenLoteProcedimentoRN[$i]->getDblIdProcedimento())).'\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '" title="" class="protocoloNormal" >' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrProcedimentoFormatado()) . '</a></td>' . "\n";
           $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrNomeUsuario()) . '</td>';
           $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getDthRegistro()) . '</td>';
           $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($arrObjPenLoteProcedimentoRN[$i]->getStrUnidadeDestino()) . '</td>';
@@ -113,9 +114,9 @@
                 $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
                 break;
           }
-            
+
           $strResultado .= '</td></tr>' . "\n";
-            
+
         }
         $strResultado .= '</table>';
       }
@@ -164,6 +165,14 @@ function inicializar(){
     infraEfeitoTabelas();
 }
 
+
+function abrirProcesso(link){
+    document.getElementById('divInfraBarraComandosSuperior').style.visibility = 'hidden';
+    document.getElementById('divInfraAreaTabela').style.visibility = 'hidden';
+    infraOcultarMenuSistemaEsquema();
+    document.getElementById('frmLoteListar').action = link;
+    document.getElementById('frmLoteListar').submit();
+}
 <?
 $objPaginaSEI->fecharJavaScript();
 $objPaginaSEI->fecharHead();

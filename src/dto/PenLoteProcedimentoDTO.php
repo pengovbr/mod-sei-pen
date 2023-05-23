@@ -21,6 +21,7 @@ class PenLoteProcedimentoDTO extends InfraDTO
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimento', 'id_procedimento');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdAndamento', 'id_andamento');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdAtividade', 'id_atividade_expedicao');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Tentativas', 'tentativas');
 
       $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdLote', 'id_lote', 'md_pen_expedir_lote');
       $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioDestino', 'id_repositorio_destino', 'md_pen_expedir_lote');
