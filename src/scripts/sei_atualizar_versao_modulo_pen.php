@@ -263,6 +263,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.4.0':
+            $this->instalarV3040();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2520,6 +2522,42 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $this->atualizarNumeroVersao("3.3.0");
   }
+
+  // novo tramite em bloco
+  protected function instalarV3040() {
+    $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+    
+    $objMetaBD = $this->objMeta;
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_tramita_em_bloco',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+          'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+          'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+          'idx_bloco' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+          'sta_tipo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+          'sta_estado' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'uk' => array(),
+      'fks' => array(
+        'unidade' => array('nome' => 'fk_tramite_bloco_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+        'usuario' => array('nome' => 'fk_tramite_bloco_usuario', 'cols' => array('id_usuario', 'id_usuario')),
+      )
+  ));
+
+  # Criar sequencia para tramite em bloco
+
+  $objInfraBanco = BancoSEI::getInstance();
+  $objInfraSequencia = new InfraSequencia($objInfraBanco);
+
+  if (!$objInfraSequencia->verificarSequencia('md_pen_tramita_em_bloco')) {
+      $objInfraSequencia->criarSequencia('md_pen_tramita_em_bloco', '1', '1', '9999999999');
+  }
+
+  $this->atualizarNumeroVersao("3.4.0");
+}
 }
 
 
