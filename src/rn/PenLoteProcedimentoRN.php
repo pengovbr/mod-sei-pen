@@ -180,4 +180,20 @@ class PenLoteProcedimentoRN extends InfraRN {
     }
   }
 
+  protected function cancelarTramiteLoteControlado($dblIdLote)
+  {
+      $loteDTO = new PenLoteProcedimentoDTO();
+      $loteDTO->setNumIdLote($dblIdLote);
+      $loteDTO->retTodos();
+      $loteRN = new PenLoteProcedimentoRN();
+      $lotes = $loteRN->listarLoteProcedimento($loteDTO);
+      foreach ($lotes as $lote) {
+          if ($lote->getNumIdAndamento() == 7) {
+              continue;
+          }
+          $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+          $objExpedirProcedimentoRN->cancelarTramite($lote->getDblIdProcedimento());
+      }
+  }
+
 }

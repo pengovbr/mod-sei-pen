@@ -475,6 +475,7 @@ class PENIntegracao extends SeiIntegracao
           break;
 
       case 'pen_expedir_lote_listar':
+      case 'pen_cancelar_lote':
           require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
           break;
 

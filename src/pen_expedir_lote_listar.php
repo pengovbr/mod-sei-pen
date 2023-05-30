@@ -8,6 +8,7 @@
         $objPaginaSEI = PaginaSEI::getInstance();
 
         $objSessaoSEI->validarLink();
+        if ($_GET['acao'] != 'pen_cancelar_lote')
         $objSessaoSEI->validarPermissao($_GET['acao']);
 
         $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
@@ -21,13 +22,24 @@
         case 'pen_expedir_lote_listar':
             $strTitulo = 'Processos Tramitados em Lote';
             break;
+        case 'pen_cancelar_lote': {
+            $strTitulo = 'Processos Tramitados em Lote';
+            $lotes = array_values(array_unique(explode(',',$_POST['hdnInfraItensSelecionados'])));
+            foreach ($lotes as $lote) {
+                $loteRN = new PenLoteProcedimentoRN();
+                $lotes = $loteRN->cancelarTramiteLote($lote);
+            }
+        }
 
+            break;
         default:
             throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
       }
 
       $arrComandos = array();
       $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+
+      $arrComandos[] = '<a href="#" onclick="cancelarProcessosSelecionados()"><button type="button" class="infraButton">Cancelar Selecionados</button></a>';
 
       $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
 
@@ -165,6 +177,11 @@ function inicializar(){
     infraEfeitoTabelas();
 }
 
+function cancelarProcessosSelecionados() {
+    console.log(document.getElementById('hdnInfraItensSelecionados').value)
+    document.getElementById('frmLoteListar').action = "<?= $objSessaoSEI->assinarLink('controlador.php?acao=pen_cancelar_lote&acao_origem=' . $_GET['acao']) ?>"
+    document.getElementById('frmLoteListar').submit();
+}
 
 function abrirProcesso(link){
     document.getElementById('divInfraBarraComandosSuperior').style.visibility = 'hidden';
