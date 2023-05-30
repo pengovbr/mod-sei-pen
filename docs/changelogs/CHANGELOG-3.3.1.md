@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.3.0)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.3.1)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
