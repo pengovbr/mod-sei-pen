@@ -7,7 +7,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
  *
  * Tramitar em bloco
  */
-class TramiteEmBloco extends InfraRN {
+class TramiteEmBlocoRN extends InfraRN {
     
     /**
      * Inicializa o obj do banco da Infra

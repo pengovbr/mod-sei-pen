@@ -1658,9 +1658,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       //Sequência: md_pen_seq_tramite_pendente
       $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramite_pendente');
       $numMaxId = $rs[0]['total'];
-    if ($numMaxId == null) {
-        $numMaxId = 0;
-    }
+      if ($numMaxId == null) {
+          $numMaxId = 0;
+      }
       BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramite_pendente', $numMaxId + 1);
       $objInfraSequenciaDTO->setStrNome('md_pen_tramite_pendente');
       $objInfraSequenciaDTO->retStrNome();
@@ -2526,7 +2526,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   // novo tramite em bloco
   protected function instalarV3040() {
     $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-    
+
     $objMetaBD = $this->objMeta;
     $objMetaBD->criarTabela(array(
       'tabela' => 'md_pen_tramita_em_bloco',
@@ -2545,21 +2545,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         'unidade' => array('nome' => 'fk_tramite_bloco_unidade', 'cols' => array('id_unidade', 'id_unidade')),
         'usuario' => array('nome' => 'fk_tramite_bloco_usuario', 'cols' => array('id_usuario', 'id_usuario')),
       )
-  ));
+    ));
 
-  # Criar sequencia para tramite em bloco
+     # Criar sequencia para tramite em bloco
 
-  $objInfraBanco = BancoSEI::getInstance();
-  $objInfraSequencia = new InfraSequencia($objInfraBanco);
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
-  if (!$objInfraSequencia->verificarSequencia('md_pen_tramita_em_bloco')) {
-      $objInfraSequencia->criarSequencia('md_pen_tramita_em_bloco', '1', '1', '9999999999');
+    //Sequência: md_pen_seq_tramita_em_bloco
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.4.0");
   }
-
-  $this->atualizarNumeroVersao("3.4.0");
 }
-}
-
 
 try {
     session_start();

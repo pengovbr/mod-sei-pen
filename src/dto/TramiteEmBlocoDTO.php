@@ -11,7 +11,7 @@
 
 require_once dirname(__FILE__).'/../SEI.php';
 
-class BlocoDTO extends InfraDTO {
+class TramiteEmBlocoDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
   	 return 'md_pen_tramita_em_bloco';
