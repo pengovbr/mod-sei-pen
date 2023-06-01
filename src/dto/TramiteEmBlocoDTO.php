@@ -9,13 +9,17 @@
 * Versão no CVS: $Id$
 */
 
-require_once dirname(__FILE__).'/../SEI.php';
+require_once DIR_SEI_WEB.'/SEI.php';
 
 class TramiteEmBlocoDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
   	 return 'md_pen_tramita_em_bloco';
   }
+
+  public function getStrNomeSequenciaNativa() {
+    return 'md_pen_seq_tramita_em_bloco';
+}  
 
   public function montar() {
 
@@ -112,7 +116,7 @@ class TramiteEmBlocoDTO extends InfraDTO {
                                               'nome',
                                               'usuario');
 
-	// 	$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'TipoDescricao');
+		$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'TipoDescricao');
 	// 	$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'StaEstadoDescricao');
 	// 	//$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinVazio');
     // $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'PalavrasPesquisa');
