@@ -182,18 +182,23 @@ class PenLoteProcedimentoRN extends InfraRN {
 
   protected function cancelarTramiteLoteControlado($dblIdLote)
   {
-      $loteDTO = new PenLoteProcedimentoDTO();
-      $loteDTO->setNumIdLote($dblIdLote);
-      $loteDTO->retTodos();
-      $loteRN = new PenLoteProcedimentoRN();
-      $lotes = $loteRN->listarLoteProcedimento($loteDTO);
-      foreach ($lotes as $lote) {
-          if (in_array($lote->getNumIdAndamento(), [0,1,2])) {
-              continue;
+      try {
+          $loteDTO = new PenLoteProcedimentoDTO();
+          $loteDTO->setNumIdLote($dblIdLote);
+          $loteDTO->retTodos();
+          $loteRN = new PenLoteProcedimentoRN();
+          $lotes = $loteRN->listarLoteProcedimento($loteDTO);
+          foreach ($lotes as $lote) {
+              if (in_array($lote->getNumIdAndamento(), [0,1,2])) {
+                  continue;
+              }
+              $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+              $objExpedirProcedimentoRN->cancelarTramite($lote->getDblIdProcedimento());
           }
-          $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
-          $objExpedirProcedimentoRN->cancelarTramite($lote->getDblIdProcedimento());
+      } catch (\Exception $e) {
+          throw new InfraException('Falha ao cancelar lote '.$dblIdLote.'.', $e);
       }
+
   }
 
 }
