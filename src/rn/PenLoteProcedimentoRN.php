@@ -188,7 +188,7 @@ class PenLoteProcedimentoRN extends InfraRN {
       $loteRN = new PenLoteProcedimentoRN();
       $lotes = $loteRN->listarLoteProcedimento($loteDTO);
       foreach ($lotes as $lote) {
-          if ($lote->getNumIdAndamento() == 7) {
+          if (in_array($lote->getNumIdAndamento(), [0,1,2])) {
               continue;
           }
           $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
