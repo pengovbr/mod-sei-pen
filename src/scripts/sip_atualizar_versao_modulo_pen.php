@@ -1265,10 +1265,9 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO->retNumIdItemMenu();
 
       $objDTO = $objBD->consultar($objDTO);
-
-      if (empty($objDTO)) {
-        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
-      }
+    if (empty($objDTO)) {
+      throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
+    }
 
       $numIdItemMenuPai = $objDTO->getNumIdItemMenu();
 
