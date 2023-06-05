@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.0");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -282,6 +282,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.4.0':
+          $this->instalarV3040();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1811,6 +1813,79 @@ class PenAtualizarSipRN extends InfraRN
     {
         $this->atualizarNumeroVersao("3.3.0");
     }
+
+    protected function instalarV3040()
+    {
+      /* Corrige nome de menu de trâmite de documentos */
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      //Corrige nome do recurso
+      $objRecursoDTO = new RecursoDTO();
+      $objRecursoDTO->setNumIdSistema($numIdSistema);
+      $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
+      $objRecursoDTO->retNumIdRecurso();
+      $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+      $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+    if (isset($objRecursoDTO)) {
+        $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
+        $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objRecursoBD->alterar($objRecursoDTO);
+    }
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenuPai(null);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+        $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+    // adicionar submenu
+    //   if (!empty($objItemMenuDTO)) {
+
+    //     $numIdItemMenuMapeamento = $objItemMenuDTO->getNumIdItemMenu();
+
+    //     $objDTO = new ItemMenuDTO();
+    //     $objDTO->setNumIdSistema($numIdSistema);
+    //     $objDTO->setNumIdMenu($numIdMenu);
+    //     $objDTO->setNumIdItemMenuPai($numIdItemMenuMapeamento);
+    //     $objDTO->retTodos();
+
+    //     $arrObjDTO = $objItemMenuDTO->listar($objDTO);
+
+    //   if (!empty($arrObjDTO)) {
+    //       $numIdItemMenuPai = $this->criarMenu('Listagem', 0, $numIdItemMenuMapeamento, $numIdMenu, null, $numIdSistema);
+    //       $numIdItemMenuPai = $this->criarMenu('Mapeamento de Tipos de Documento', 10, $numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
+
+    //     foreach ($arrObjDTO as $objDTO) {
+    //       $objDTO->setNumIdItemMenuPai($numIdItemMenuPai);
+    //       $objItemMenuDTO->alterar($objDTO);
+    //     }
+
+    //       $objItemMenuDTO->excluir($objItemMenuDTO);
+    //   }
+    // }
+
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // adicionar permissão
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'md_pen_tramita_em_bloco');
+
+    $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Listar Processos Tramitados em Bloco', $numIdSistema);
+    ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Trâmitados Em Bloco", 55);
+
+    $this->atualizarNumeroVersao("3.4.0");
+  }
 }
 
 
