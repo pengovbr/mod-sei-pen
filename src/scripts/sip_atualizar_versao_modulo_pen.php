@@ -1955,8 +1955,8 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'md_pen_tramita_em_bloco');
 
-    $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Listar Processos Tramitados em Bloco', $numIdSistema);
-    ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Trâmitados Em Bloco", 55);
+    //$numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Listar Processos Tramitados em Bloco', $numIdSistema);
+    //ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Trâmitados Em Bloco", 55);
 
     $this->atualizarNumeroVersao("3.4.0");
   }
