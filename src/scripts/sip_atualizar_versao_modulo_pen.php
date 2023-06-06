@@ -1235,6 +1235,7 @@ class PenAtualizarSipRN extends InfraRN
      */
   private function instalarV1110()
     {
+
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
 
       $numIdSistema = $this->getNumIdSistema('SEI');
