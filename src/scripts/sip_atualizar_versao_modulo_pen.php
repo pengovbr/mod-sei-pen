@@ -283,7 +283,7 @@ class PenAtualizarSipRN extends InfraRN
         case '3.2.4':
             $this->instalarV3030();
         case '3.4.0':
-          $this->instalarV3040();
+            $this->instalarV3040();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1208,7 +1208,7 @@ class PenAtualizarSipRN extends InfraRN
       $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
       if (isset($objRecursoDTO)) {
         $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
-        $objRecursoDTO->setStrDescricao('Tramita.GOV.BR');
+        $objRecursoDTO->setStrDescricao('Processos Tramitados Externamente');
         $objRecursoBD->alterar($objRecursoDTO);
       }
 
@@ -1216,14 +1216,14 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->setNumIdItemMenuPai(null);
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
       $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
-      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->setStrRotulo('Processos Trâmitados Externamente');
       $objItemMenuDTO->retNumIdMenu();
       $objItemMenuDTO->retNumIdItemMenu();
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
       if (isset($objItemMenuDTO)) {
-        $objItemMenuDTO->setStrDescricao('Tramita.GOV.BR');
-        $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+        $objItemMenuDTO->setStrDescricao('Processos Tramitados Externamente');
+        $objItemMenuDTO->setStrRotulo('Processos Tramitados Externamente');
         $objItemMenuBD->alterar($objItemMenuDTO);
       }
 
@@ -1954,9 +1954,6 @@ class PenAtualizarSipRN extends InfraRN
     $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
     $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'md_pen_tramita_em_bloco');
-
-    //$numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Listar Processos Tramitados em Bloco', $numIdSistema);
-    //ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Trâmitados Em Bloco", 55);
 
     $this->atualizarNumeroVersao("3.4.0");
   }
