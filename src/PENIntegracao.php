@@ -492,6 +492,14 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
         break;
 
+      case 'pen_tramite_em_bloco_cadastrar':
+        require_once dirname(__FILE__) . '/pen_tramite_em_bloco_cadastrar.php';
+        break;
+
+      case 'pen_tramite_em_bloco_alterar':
+        require_once dirname(__FILE__) . '/pen_tramite_em_bloco_cadastrar.php';
+        break;
+
       case 'pen_tramita_em_bloco_protocolo_listar':
           require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
           break;

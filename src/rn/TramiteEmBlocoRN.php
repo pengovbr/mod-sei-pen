@@ -8,11 +8,11 @@ require_once DIR_SEI_WEB . '/SEI.php';
  * Tramitar em bloco
  */
 class TramiteEmBlocoRN extends InfraRN {
-    
+
     public static $TB_ASSINATURA = 'A';
     public static $TB_REUNIAO = 'R';
     public static $TB_INTERNO = 'I';
-    
+
     public static $TE_ABERTO = 'A';
     public static $TE_DISPONIBILIZADO = 'D';
     public static $TE_RETORNADO = 'R';
@@ -21,7 +21,7 @@ class TramiteEmBlocoRN extends InfraRN {
 
     public static $TA_TODAS = 'T';
     public static $TA_MINHAS = 'M';
-    
+
     /**
      * Inicializa o obj do banco da Infra
      * @return obj
@@ -52,11 +52,11 @@ class TramiteEmBlocoRN extends InfraRN {
 
     private function validarStrDescricao(TramiteEmBlocoDTO $objTramiteEmBlocoDTO, InfraException $objInfraException){
         if (InfraString::isBolVazia($objTramiteEmBlocoDTO->getStrDescricao())) {
-            
+
             $objTramiteEmBlocoDTO->setStrDescricao(null);
 
         } else {
-            
+
             $objTramiteEmBlocoDTO->setStrDescricao(trim($objTramiteEmBlocoDTO->getStrDescricao()));
             $objTramiteEmBlocoDTO->setStrDescricao(InfraUtil::filtrarISO88591($objTramiteEmBlocoDTO->getStrDescricao()));
 
@@ -69,11 +69,11 @@ class TramiteEmBlocoRN extends InfraRN {
 
     private function validarStrIdxBloco(TramiteEmBlocoDTO $objTramiteEmBlocoDTO, InfraException $objInfraException){
         if (InfraString::isBolVazia($objTramiteEmBlocoDTO->getStrIdxBloco())){
-            
+
             $objTramiteEmBlocoDTO->setStrIdxBloco(null);
 
         }else{
-            
+
             $objTramiteEmBlocoDTO->setStrIdxBloco(trim($objTramiteEmBlocoDTO->getStrIdxBloco()));
 
             if (strlen($objTramiteEmBlocoDTO->getStrIdxBloco()) > 500){
@@ -99,17 +99,17 @@ class TramiteEmBlocoRN extends InfraRN {
 
     public function listarValoresTipo(){
         try {
-    
+
             $arrObjTipoDTO = array();
-            
+
             $objTipoDTO = new TipoDTO();
             $objTipoDTO->setStrStaTipo(self::$TB_INTERNO);
             $objTipoDTO->setStrDescricao('Interno');
             $arrObjTipoDTO[] = $objTipoDTO;
 
-            
+
             return $arrObjTipoDTO;
-    
+
         }catch(Exception $e){
             throw new InfraException('Erro listando valores de Tipo.', $e);
         }
@@ -134,9 +134,8 @@ class TramiteEmBlocoRN extends InfraRN {
 
     protected function listarConectado(TramiteEmBlocoDTO $objTramiteEmBlocoDTO) {
         try {
-
             //Valida Permissao
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_listar',__METHOD__,$objTramiteEmBlocoDTO);
+            SessaoSEI::getInstance()->validarAuditarPermissao('md_pen_tramita_em_bloco',__METHOD__,$objTramiteEmBlocoDTO);
 
 
             if ($objTramiteEmBlocoDTO->isRetStrTipoDescricao()) {
@@ -204,7 +203,7 @@ class TramiteEmBlocoRN extends InfraRN {
 
     protected function cadastrarControlado(TramiteEmBlocoDTO $objTramiteEmBlocoDTO) {
         try {
-    
+
             //Valida Permissao
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar',__METHOD__,$objTramiteEmBlocoDTO);
 

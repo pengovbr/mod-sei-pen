@@ -1,6 +1,6 @@
 <?
 /**
-* 
+*
 *
 */
 try {
@@ -41,7 +41,7 @@ try {
 
   switch($_GET['acao']) {
     case 'pen_tramite_em_bloco_cadastrar':
-  
+
       $strTitulo = 'Novo Trâmite em Bloco';
       $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarTramiteEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
       $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $strParametros) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
@@ -52,14 +52,14 @@ try {
       $objTramiteEmBlocoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
       $objTramiteEmBlocoDTO->setStrDescricao($_POST['txtDescricao']);
       $objTramiteEmBlocoDTO->setStrIdxBloco(null);
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);        
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
       if (isset($_POST['sbmCadastrarTramiteEmBloco'])) {
         try{
           //
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
           PaginaSEI::getInstance()->setStrMensagem('Trâmite em Bloco "' . $objTramiteEmBlocoDTO->getNumId() . '" cadastrado com sucesso.');
-          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&id_bloco=' . $objTramiteEmBlocoDTO->getNumId() . $strParametros . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoDTO->getNumId())));
+          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco&acao_origem=' . $_GET['acao'] . '&id_bloco=' . $objTramiteEmBlocoDTO->getNumId() . $strParametros . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoDTO->getNumId())));
           die;
         }catch(Exception $e){
           PaginaSEI::getInstance()->processarExcecao($e);
@@ -69,7 +69,7 @@ try {
 
     case 'pen_tramite_em_bloco_alterar':
 
-      $strTitulo = 'Alterar Trâmite em Bloco';  
+      $strTitulo = 'Alterar Trâmite em Bloco';
       $arrComandos[] = '<button type="submit" accesskey="S" name="sbmAlterarBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
       $strDesabilitar = 'disabled="disabled"';
 
