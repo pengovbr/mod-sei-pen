@@ -488,8 +488,13 @@ class PENIntegracao extends SeiIntegracao
 
       // novo
       case 'md_pen_tramita_em_bloco':
+      case 'md_pen_tramita_em_bloco_excluir':
         require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
         break;
+
+      case 'pen_tramita_em_bloco_protocolo_listar':
+          require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
+          break;
 
       default:
           return false;

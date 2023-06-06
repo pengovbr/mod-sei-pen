@@ -1,6 +1,6 @@
 <?php
 
-require_once DIR_SEI_WEB.'/SEI.php';
+require_once DIR_SEI_WEB . '/SEI.php';
 
 /**
  * Description of TramiteEmBloco
@@ -8,9 +8,20 @@ require_once DIR_SEI_WEB.'/SEI.php';
  * Tramitar em bloco
  */
 class TramiteEmBlocoRN extends InfraRN {
+    
+    public static $TB_ASSINATURA = 'A';
+    public static $TB_REUNIAO = 'R';
     public static $TB_INTERNO = 'I';
-
+    
     public static $TE_ABERTO = 'A';
+    public static $TE_DISPONIBILIZADO = 'D';
+    public static $TE_RETORNADO = 'R';
+    public static $TE_CONCLUIDO = 'C';
+    public static $TE_RECEBIDO = 'B';
+
+    public static $TA_TODAS = 'T';
+    public static $TA_MINHAS = 'M';
+    
     /**
      * Inicializa o obj do banco da Infra
      * @return obj
@@ -302,6 +313,26 @@ class TramiteEmBlocoRN extends InfraRN {
 
         } catch (Exception $e){
             throw new InfraException('Erro alterando Bloco.',$e);
+        }
+    }
+
+    /**
+     * Método utilizado para exclusão de dados.
+     * @param array $arrayObjDTO
+     * @return array
+     * @throws InfraException
+     */
+    protected function excluirControlado(array $arrayObjDTO)
+    {
+        try {
+            $arrayExcluido = array();
+            foreach ($arrayObjDTO as $objDTO) {
+                $objBD = new TramiteEmBlocoBD(BancoSEI::getInstance());
+                $arrayExcluido[] = $objBD->excluir($objDTO);
+            }
+            return $arrayExcluido;
+        } catch (Exception $e) {
+            throw new InfraException('Erro excluindo Bloco.', $e);
         }
     }
 }
