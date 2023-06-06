@@ -2576,7 +2576,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
       'fks' => array(
         'protocolo' => array('nome' => 'fk_tramita_em_bloco_protocolo_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
-        //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
+        'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
       )
     ));
 

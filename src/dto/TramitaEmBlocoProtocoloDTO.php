@@ -59,27 +59,17 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM,
                                    'IdUnidadeBloco',
                                    'id_unidade',
-                                   'bloco');
+                                   'md_pen_tramita_em_bloco tb1');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
                                    'StaTipoBloco',
                                    'sta_tipo',
-                                   'bloco');
+                                   'md_pen_tramita_em_bloco tb1');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
                                    'StaEstadoBloco',
                                    'sta_estado',
-                                   'bloco');
-    
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_DBL,
-                                   'IdProcedimentoDocumento',
-                                   'id_procedimento',
-                                   'documento');
-
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
-                                  'ProtocoloProcedimentoFormatado',
-                                  'p2.protocolo_formatado',
-                                  'protocolo p2');
+                                   'md_pen_tramita_em_bloco tb1');
 
     /* $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinAberto'); */
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'ProtocoloDTO');
@@ -93,9 +83,7 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->configurarPK('IdTramitaEmBloco',InfraDTO::$TIPO_PK_INFORMADO);
     
     $this->configurarFK('IdProtocolo', 'protocolo p1', 'p1.id_protocolo');
-		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco', 'id');
-		$this->configurarFK('IdProtocoloProtocolo', 'documento', 'id_documento', InfraDTO::$TIPO_FK_OPCIONAL);
-    $this->configurarFK('IdProcedimentoDocumento', 'protocolo p2', 'p2.id_protocolo');
+		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco tb1', 'id');
   }
 }
 ?>
