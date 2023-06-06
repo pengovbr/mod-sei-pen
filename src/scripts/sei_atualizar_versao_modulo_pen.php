@@ -2547,7 +2547,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       )
     ));
 
-     # Criar sequencia para tramite em bloco
+    # Criar sequencia para tramite em bloco
 
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
@@ -2558,6 +2558,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco', $numMaxId + 1);
     $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_tramita_em_bloco_protocolo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+          'id_tramita_em_bloco' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'anotacao' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+          'sequencia' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+          'idx_rel_bloco_protocolo' => array($objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
+      'fks' => array(
+        'protocolo' => array('nome' => 'fk_tramita_em_bloco_protocolo_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
+        //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
+      )
+    ));
+
+    //Sequência: md_pen_tramita_em_bloco_protocolo
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco_protocolo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco_protocolo', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco_protocolo');
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);

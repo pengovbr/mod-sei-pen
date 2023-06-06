@@ -478,6 +478,10 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
           break;
 
+      case 'pen_tramita_em_bloco_protocolo_listar':
+          require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
+          break;
+
       default:
           return false;
 
