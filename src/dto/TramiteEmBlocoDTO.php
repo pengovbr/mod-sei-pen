@@ -19,7 +19,7 @@ class TramiteEmBlocoDTO extends InfraDTO {
 
   public function getStrNomeSequenciaNativa() {
     return 'md_pen_seq_tramita_em_bloco';
-}  
+}
 
   public function montar() {
 
@@ -46,11 +46,11 @@ class TramiteEmBlocoDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR,
                                    'StaTipo',
                                    'sta_tipo');
-                                   
+
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR,
                                    'StaEstado',
                                    'sta_estado');
-                                   
+
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
 					                                   'SiglaUnidade',
 					                                   'uc.sigla',
@@ -105,7 +105,7 @@ class TramiteEmBlocoDTO extends InfraDTO {
 					                                   'DescricaoUnidadeRelBlocoUnidade',
 					                                   'ud.descricao',
 					                                   'unidade ud');
-					                                   
+
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
                                               'SiglaUsuario',
                                               'sigla',
@@ -119,7 +119,7 @@ class TramiteEmBlocoDTO extends InfraDTO {
 		$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'TipoDescricao');
 	// 	$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'StaEstadoDescricao');
 	// 	//$this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinVazio');
-    // $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'PalavrasPesquisa');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'PalavrasPesquisa');
     // $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM,'Documentos');
     // $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM,'Assinados');
 
@@ -129,7 +129,7 @@ class TramiteEmBlocoDTO extends InfraDTO {
     // $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'StaTipoAtribuicao');
 
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA );
-    
+
     // $this->configurarFK('Id', 'rel_bloco_unidade', 'id');
     $this->configurarFK('IdUsuario', 'usuario', 'id_usuario');
     $this->configurarFK('IdUnidade', 'unidade uc', 'uc.id_unidade');
