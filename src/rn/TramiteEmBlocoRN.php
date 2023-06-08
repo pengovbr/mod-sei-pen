@@ -125,6 +125,16 @@ class TramiteEmBlocoRN extends InfraRN {
             $objEstadoBlocoDTO->setStrDescricao('Gerado');
             $objArrEstadoBlocoDTO[] = $objEstadoBlocoDTO;
 
+            $objEstadoBlocoDTO = new EstadoBlocoDTO();
+            $objEstadoBlocoDTO->setStrStaEstado(self::$TE_DISPONIBILIZADO);
+            $objEstadoBlocoDTO->setStrDescricao('Em Processamento');
+            $objArrEstadoBlocoDTO[] = $objEstadoBlocoDTO;
+
+            $objEstadoBlocoDTO = new EstadoBlocoDTO();
+            $objEstadoBlocoDTO->setStrStaEstado(self::$TE_CONCLUIDO);
+            $objEstadoBlocoDTO->setStrDescricao('Concluído');
+            $objArrEstadoBlocoDTO[] = $objEstadoBlocoDTO;
+
             return $objArrEstadoBlocoDTO;
 
         } catch(Exception $e) {
