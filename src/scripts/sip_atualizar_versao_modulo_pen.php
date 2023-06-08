@@ -1939,17 +1939,26 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_tramite_em_bloco_alterar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_tramite_em_bloco_consultar');
 
-    //Corrige nome do recurso
     $objRecursoDTO = new RecursoDTO();
     $objRecursoDTO->setNumIdSistema($numIdSistema);
     $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco_excluir');
     $objRecursoDTO->retNumIdRecurso();
     $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
     $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-    // adicionar permissão
-    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
-    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Blocos de Trâmite Externo', $numIdSistema);
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'md_pen_tramita_em_bloco_excluir');
+
+    $objRecursoDTO = new RecursoDTO();
+    $objRecursoDTO->setNumIdSistema($numIdSistema);
+    $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_listar');
+    $objRecursoDTO->retNumIdRecurso();
+    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+
+    $objRecursoDTO = new RecursoDTO();
+    $objRecursoDTO->setNumIdSistema($numIdSistema);
+    $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_excluir');
+    $objRecursoDTO->retNumIdRecurso();
+    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
 
     $this->atualizarNumeroVersao("3.4.0");
   }
