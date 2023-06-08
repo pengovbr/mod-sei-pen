@@ -1981,17 +1981,17 @@ class PenAtualizarSipRN extends InfraRN
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
       //Corrige nome do recurso
-      $objRecursoDTO = new RecursoDTO();
-      $objRecursoDTO->setNumIdSistema($numIdSistema);
-      $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
-      $objRecursoDTO->retNumIdRecurso();
-      $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
-      $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-    if (isset($objRecursoDTO)) {
-        $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
-        $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
-        $objRecursoBD->alterar($objRecursoDTO);
-    }
+    //   $objRecursoDTO = new RecursoDTO();
+    //   $objRecursoDTO->setNumIdSistema($numIdSistema);
+    //   $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
+    //   $objRecursoDTO->retNumIdRecurso();
+    //   $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+    //   $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+    // if (isset($objRecursoDTO)) {
+    //     $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
+    //     $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
+    //     $objRecursoBD->alterar($objRecursoDTO);
+    // }
 
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdItemMenuPai(null);
@@ -2032,20 +2032,9 @@ class PenAtualizarSipRN extends InfraRN
     $objRecursoDTO = new RecursoDTO();
     $objRecursoDTO->setNumIdSistema($numIdSistema);
     $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco_excluir');
-    $objRecursoDTO->retNumIdRecurso();
-    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
-    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-
-    $objRecursoDTO = new RecursoDTO();
-    $objRecursoDTO->setNumIdSistema($numIdSistema);
     $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_listar');
-    $objRecursoDTO->retNumIdRecurso();
-    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
-    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-
-    $objRecursoDTO = new RecursoDTO();
-    $objRecursoDTO->setNumIdSistema($numIdSistema);
     $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_excluir');
+    $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
     $objRecursoDTO->retNumIdRecurso();
     $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
     $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
