@@ -13,7 +13,7 @@ try {
 
   $objSessaoSEI->validarLink();
   SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
-  // $objSessaoSEI->validarPermissao($_GET['acao']);
+  $objSessaoSEI->validarPermissao($_GET['acao']);
 
 
   $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_documento=222'.$_GET['id_documento']);
@@ -27,9 +27,15 @@ try {
       try {
         $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
         $arrObjTramiteEmBlocoDTO = array();
-        for ($i = 0; $i < count($arrStrIds); $i++) {
+        if (count($arrStrIds) > 0) {
+          for ($i = 0; $i < count($arrStrIds); $i++) {
+            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+            $objTramiteEmBlocoDTO->setNumId($arrStrIds[$i]);
+            $arrObjTramiteEmBlocoDTO[] = $objTramiteEmBlocoDTO;
+          }
+        } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-          $objTramiteEmBlocoDTO->setNumId($arrStrIds[$i]);
+          $objTramiteEmBlocoDTO->setNumId(intval($_GET['hdnInfraItensSelecionados']));
           $arrObjTramiteEmBlocoDTO[] = $objTramiteEmBlocoDTO;
         }
         $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
@@ -38,7 +44,7 @@ try {
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
-      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_origem'] . '&acao_origem=' . $_GET['acao']));
+      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
       die;
       // case 'md_pen_tramita_em_bloco_excluir':
 
@@ -156,7 +162,9 @@ try {
         $strResultado .= '<a onclick="acaoConcluir(\'' . $idBlocoTramite . '\');" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . Icone::BLOCO_CONCLUIR . '" title="Concluir Bloco" alt="Concluir Bloco" class="infraImg" /></a>&nbsp;';
 
         // Excluir
-        $strResultado .= '<a onclick="onClickBtnExcluir(\''.$idBlocoTramite.'\');" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+        //$strResultado .= '<a onclick="" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+      
+        $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
         $strResultado .= "</td>";
       }
     }
