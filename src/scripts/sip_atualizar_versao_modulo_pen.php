@@ -1,7 +1,6 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-// Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
 define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
@@ -52,7 +51,6 @@ class VersaoSip4RN extends InfraScriptVersao
 class PenAtualizarSipRN extends InfraRN
 {
     const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
-    const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -71,7 +69,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Inicia o script criando um contator interno do tempo de execução
      * Inicia o script criando um contator interno do tempo de execução
      *
      * @return null
@@ -104,7 +101,6 @@ class PenAtualizarSipRN extends InfraRN
       }
 
         //testando permissoes de criações de tabelas
-        //testando permissoes de criações de tabelas
         $objInfraMetaBD = new InfraMetaBD(BancoSip::getInstance());
 
       if (count($objInfraMetaBD->obterTabelas('pen_sip_teste')) == 0) {
@@ -116,12 +112,9 @@ class PenAtualizarSipRN extends InfraRN
 
         // Aplicação de scripts de atualização de forma incremental
         // Ausência de [break;] proposital para realizar a atualização incremental de versões
-        // Aplicação de scripts de atualização de forma incremental
-        // Ausência de [break;] proposital para realizar a atualização incremental de versões
         $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
 
       switch ($strVersaoModuloPen) {
-              //case '' - Nenhuma versão instalada
               //case '' - Nenhuma versão instalada
         case '':
         case '0.0.0':
@@ -136,13 +129,6 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV104();
         case '1.0.4':
             $this->instalarV111();
-        case '1.1.1': //Não houve atualização no banco de dados
-        case '1.1.2': //Não houve atualização no banco de dados
-        case '1.1.3': //Não houve atualização no banco de dados
-        case '1.1.4': //Não houve atualização no banco de dados
-        case '1.1.5': //Não houve atualização no banco de dados
-        case '1.1.6': //Não houve atualização no banco de dados
-        case '1.1.7': //Não houve atualização no banco de dados
         case '1.1.1': //Não houve atualização no banco de dados
         case '1.1.2': //Não houve atualização no banco de dados
         case '1.1.3': //Não houve atualização no banco de dados
@@ -200,10 +186,6 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV1502();
         case '1.5.2':
             $this->instalarV1503();
-        case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.6'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
@@ -307,6 +289,7 @@ class PenAtualizarSipRN extends InfraRN
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
+            break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -327,7 +310,6 @@ class PenAtualizarSipRN extends InfraRN
 
 
     /**
-     * Finaliza o script informando o tempo de execução.
      * Finaliza o script informando o tempo de execução.
      *
      * @return null
@@ -352,7 +334,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Adiciona uma mensagem ao output para o usuário
      * Adiciona uma mensagem ao output para o usuário
      *
      * @return null
@@ -384,7 +365,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      *
      * @return int Código do Menu
-     * @return int Código do Menu
      */
   protected function getNumIdMenu($strMenu = 'Principal', $numIdSistema = 0)
     {
@@ -400,7 +380,6 @@ class PenAtualizarSipRN extends InfraRN
 
     if (empty($objDTO)) {
         throw new InfraException('Menu ' . $strMenu . ' não encontrado.');
-        throw new InfraException('Menu ' . $strMenu . ' não encontrado.');
     }
 
       return $objDTO->getNumIdMenu();
@@ -408,7 +387,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Cria novo recurso no SIP
-     * @return int Código do Recurso gerado
      * @return int Código do Recurso gerado
      */
   protected function criarRecurso($strNome, $strDescricao, $numIdSistema)
@@ -474,7 +452,6 @@ class PenAtualizarSipRN extends InfraRN
 
     if ($objRecursoDTO == null) {
         throw new InfraException("Recurso com nome {$strNomeRecurso} não pode ser localizado.");
-        throw new InfraException("Recurso com nome {$strNomeRecurso} não pode ser localizado.");
     }
 
       return $objRecursoDTO->getNumIdRecurso();
@@ -495,6 +472,7 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
 
     if ($objItemMenuDTO == null){
+      throw new InfraException("Item de menu não pode ser localizado.");
       throw new InfraException("Item de menu não pode ser localizado.");
     }
 
@@ -545,7 +523,6 @@ class PenAtualizarSipRN extends InfraRN
 
 
     //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
-    //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
   public function addRecursosToPerfil($numIdPerfil, $numIdSistema)
     {
 
@@ -567,7 +544,6 @@ class PenAtualizarSipRN extends InfraRN
     }
   }
 
-    //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
     //TODO: Necessário refatorar método abaixo devido a baixa qualidade da codificação
   public function addMenusToPerfil($numIdPerfil, $numIdSistema)
     {
@@ -601,7 +577,6 @@ class PenAtualizarSipRN extends InfraRN
       $objRN = $this;
 
       // Vincula a um perfil os recursos e menus adicionados nos métodos criarMenu e criarReturso
-      // Vincula a um perfil os recursos e menus adicionados nos métodos criarMenu e criarReturso
       $fnCadastrar = function ($strNome, $numIdSistema) use ($objDTO, $objBD, $objRN) {
 
           $objDTO->unSetTodos();
@@ -623,8 +598,7 @@ class PenAtualizarSipRN extends InfraRN
 
 
     /**
-     * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
-     * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
+     * Atualiza o nÃºmero de versão do módulo nas tabelas de parâmetro do sistema
      *
      * @param string $parStrNumeroVersao
      * @return void
@@ -644,10 +618,7 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Obtém id do item de menu, baseado no sistema, rótulo e id do item superior
-     * Obtém id do item de menu, baseado no sistema, rótulo e id do item superior
      *
-     * A mesma função disponibilizada pelas classe ScriptSip, não existe a possibilidade de filtra a pesquisa
-     * pelo id do item superior, o que pode gerar conflito entre diferentes módulos.
      * A mesma função disponibilizada pelas classe ScriptSip, não existe a possibilidade de filtra a pesquisa
      * pelo id do item superior, o que pode gerar conflito entre diferentes módulos.
      */
@@ -665,7 +636,6 @@ class PenAtualizarSipRN extends InfraRN
         $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
       if ($objItemMenuDTO == null) {
         throw new InfraException('Item de menu ' . $strRotulo . ' não encontrado.');
-        throw new InfraException('Item de menu ' . $strRotulo . ' não encontrado.');
       }
 
         return $objItemMenuDTO->getNumIdItemMenu();
@@ -675,7 +645,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.0
      * Instala/Atualiza os módulo PEN para versão 1.0
      */
   private function instalarV100()
@@ -704,7 +673,6 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarMenu('Tramita.GOV.BR', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
 
       //Atribui as permissões aos recursos e menus
-      //Atribui as permissões aos recursos e menus
       $this->atribuirPerfil($numIdSistema);
 
 
@@ -715,13 +683,10 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarRecurso('apensados_selecionar_expedir_procedimento', 'Processos Apensados', $numIdSistema);
       //$numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
       //$this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
-      //$numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
-      //$this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
 
       //----------------------------------------------------------------------
       // Mapeamento de documentos enviados
       //----------------------------------------------------------------------
-      $this->criarRecurso('pen_map_tipo_documento_envio_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
       $this->criarRecurso('pen_map_tipo_documento_envio_visualizar', 'Visualização de mapeamento de documentos enviados', $numIdSistema);
 
       // Acha o menu existente de Tipos de Documento
@@ -736,7 +701,6 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-        throw new InfraException('Menu "Tipo de Documentos" não foi localizado');
         throw new InfraException('Menu "Tipo de Documentos" não foi localizado');
     }
 
@@ -768,10 +732,8 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarMenu('Listar', 20, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
       //Atribui as permissões aos recursos e menus
-      //Atribui as permissões aos recursos e menus
       $this->atribuirPerfil($numIdSistema);
 
-      // ---------- antigo método (instalarV003R003S003IW001) ---------- //
       // ---------- antigo método (instalarV003R003S003IW001) ---------- //
       $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -783,14 +745,12 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO->setNumIdSistema($numIdSistema);
       $objDTO->setNumIdMenu($numIdMenu);
       $objDTO->setStrRotulo('Administração');
-      $objDTO->setStrRotulo('Administração');
       $objDTO->setNumMaxRegistrosRetorno(1);
       $objDTO->retNumIdItemMenu();
 
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Administração" não foi localizado');
         throw new InfraException('Menu "Administração" não foi localizado');
     }
 
@@ -821,7 +781,6 @@ class PenAtualizarSipRN extends InfraRN
 
       if (!empty($arrObjDTO)) {
           $numIdItemMenuPai = $this->criarMenu('Processo Eletrônico Nacional', 0, $numIdItemMenuRoot, $numIdMenu, null, $numIdSistema);
-          $numIdItemMenuPai = $this->criarMenu('Processo Eletrônico Nacional', 0, $numIdItemMenuRoot, $numIdMenu, null, $numIdSistema);
           $numIdItemMenuPai = $this->criarMenu('Mapeamento de Tipos de Documento', 10, $numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
 
         foreach ($arrObjDTO as $objDTO) {
@@ -838,11 +797,9 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.0.1
-     * Instala/Atualiza os módulo PEN para versão 1.0.1
      */
   private function instalarV101()
     {
-      // ---------- antigo método (instalarV006R004S001US039) ---------- //
       // ---------- antigo método (instalarV006R004S001US039) ---------- //
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -853,7 +810,6 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
       $objItemMenuDTO->setNumIdMenu($numIdMenu);
       $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
-      $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
       $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
       $objItemMenuDTO->retNumIdItemMenu();
 
@@ -861,29 +817,19 @@ class PenAtualizarSipRN extends InfraRN
 
     if (empty($objItemMenuDTO)) {
         throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio
       $numIdItemMenu = $this->criarMenu('Mapeamento de Hipóteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
-      // Administrao > Mapeamento de Hipóteses Legais de Envio
-      $numIdItemMenu = $this->criarMenu('Mapeamento de Hipóteses Legais', 20, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
       $numIdItemMenu = $this->criarMenu('Envio', 10, $numIdItemMenu, $numIdMenu, null, $numIdSistema);
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_alterar', 'Alterar de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
       $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipóteses Legais de Envio', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_excluir', 'Excluir mapeamento de Hipóteses Legais de Envio', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_enviado_listar', 'Listagem de mapeamento de Hipóteses Legais de Envio', $numIdSistema);
@@ -893,7 +839,6 @@ class PenAtualizarSipRN extends InfraRN
       $this->atribuirPerfil($numIdSistema);
 
 
-      // ---------- antigo método (instalarV006R004S001US040) ---------- //
       // ---------- antigo método (instalarV006R004S001US040) ---------- //
       $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -907,7 +852,6 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO->setNumIdSistema($numIdSistema);
       $objDTO->setNumIdMenu($numIdMenu);
       $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');
-      $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');
       $objDTO->setNumMaxRegistrosRetorno(1);
       $objDTO->retNumIdItemMenu();
 
@@ -915,16 +859,11 @@ class PenAtualizarSipRN extends InfraRN
 
     if (empty($objDTO)) {
         throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
       $numIdItemMenu = $this->criarMenu('Recebimento', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
-      $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alteração de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
       $this->criarRecurso('pen_map_hipotese_legal_recebido_alterar', 'Alteração de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_cadastrar', 'Cadastro de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
@@ -933,15 +872,11 @@ class PenAtualizarSipRN extends InfraRN
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
       $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Exclusão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
-      $this->criarRecurso('pen_map_hipotese_legal_recebido_excluir', 'Exclusão de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_recebido_listar', 'Listagem de mapeamento de Hipóteses Legais de Recebimento', $numIdSistema);
       $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
       //Atribui as permisses aos recursos e menus
       $this->atribuirPerfil($numIdSistema);
 
-      // ---------- antigo método (instalarV006R004S001US043) ---------- //
       // ---------- antigo método (instalarV006R004S001US043) ---------- //
       $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -952,7 +887,6 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO->setNumIdSistema($numIdSistema);
       $objDTO->setNumIdMenu($numIdMenu);
       $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');
-      $objDTO->setStrRotulo('Mapeamento de Hipóteses Legais');
       $objDTO->setNumMaxRegistrosRetorno(1);
       $objDTO->retNumIdItemMenu();
 
@@ -960,14 +894,10 @@ class PenAtualizarSipRN extends InfraRN
 
     if (empty($objDTO)) {
         throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
 
-      $this->criarMenu('Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
-      $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
       $this->criarMenu('Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
       $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
       $this->atribuirPerfil($numIdSistema);
@@ -976,7 +906,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.0.2
      * Instala/Atualiza os módulo PEN para versão 1.0.2
      */
   private function instalarV102()
@@ -993,7 +922,6 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO->setNumIdSistema($numIdSistema);
       $objDTO->setNumIdMenu($numIdMenu);
       $objDTO->setStrRotulo('Processo Eletrônico Nacional');
-      $objDTO->setStrRotulo('Processo Eletrônico Nacional');
       $objDTO->setNumMaxRegistrosRetorno(1);
       $objDTO->retNumIdItemMenu();
 
@@ -1001,29 +929,20 @@ class PenAtualizarSipRN extends InfraRN
 
     if (empty($objDTO)) {
         throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
       $numIdItemMenu = $this->criarMenu('Mapeamento de Unidades', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
       // Cadastro do menu de administração parâmetros
       $numIdRecurso = $this->criarRecurso('pen_parametros_configuracao', 'Parametros de Configuração', $numIdSistema);
       $this->criarMenu('Parâmetros de Configuração', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
-      // Cadastro do menu de administração parâmetros
-      $numIdRecurso = $this->criarRecurso('pen_parametros_configuracao', 'Parametros de Configuração', $numIdSistema);
-      $this->criarMenu('Parâmetros de Configuração', 20, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
-      $this->criarRecurso('pen_map_unidade_alterar', 'Alteração de mapeamento de Unidades', $numIdSistema);
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Cadastrar
       $this->criarRecurso('pen_map_unidade_alterar', 'Alteração de mapeamento de Unidades', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_unidade_cadastrar', 'Cadastro de mapeamento de Unidades', $numIdSistema);
       $this->criarMenu('Cadastrar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
 
-      // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
-      $this->criarRecurso('pen_map_unidade_excluir', 'Exclusão de mapeamento de Unidades', $numIdSistema);
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio > Listar
       $this->criarRecurso('pen_map_unidade_excluir', 'Exclusão de mapeamento de Unidades', $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_unidade_listar', 'Listagem de mapeamento de Unidades', $numIdSistema);
@@ -1037,7 +956,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.0.3
      * Instala/Atualiza os módulo PEN para versão 1.0.3
      */
   private function instalarV103()
@@ -1053,7 +971,6 @@ class PenAtualizarSipRN extends InfraRN
       $objBD = new ItemMenuBD($this->getObjInfraIBanco());
       $objDTO = $objBD->consultar($objDTO);
     if ($objDTO) {
-        $objDTO->setStrRotulo('Hipótese de Restrição Padrão');
         $objDTO->setStrRotulo('Hipótese de Restrição Padrão');
         $objBD->alterar($objDTO);
     }
@@ -1164,14 +1081,11 @@ class PenAtualizarSipRN extends InfraRN
 
       //Cadastrar recurso de alteração dos parâmetros
       $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
-      //Cadastrar recurso de alteração dos parâmetros
-      $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
 
       $this->atualizarNumeroVersao('1.0.3');
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.0.4
      * Instala/Atualiza os módulo PEN para versão 1.0.4
      */
   private function instalarV104()
@@ -1181,13 +1095,8 @@ class PenAtualizarSipRN extends InfraRN
       //Cadastrar recurso Mapeamento dos Tipo de documentos enviados
       $this->criarRecurso('pen_map_tipo_documento_envio_alterar', 'Alteração de mapeamento de documentos enviados', $numIdSistema);
       $this->criarRecurso('pen_map_tipo_documento_envio_excluir', 'Exclusão de mapeamento de documentos enviados', $numIdSistema);
-      $this->criarRecurso('pen_map_tipo_documento_envio_alterar', 'Alteração de mapeamento de documentos enviados', $numIdSistema);
-      $this->criarRecurso('pen_map_tipo_documento_envio_excluir', 'Exclusão de mapeamento de documentos enviados', $numIdSistema);
 
       //Cadastrar recurso Mapeamento dos Tipo de documentos recebido
-      $this->criarRecurso('pen_map_tipo_documento_recebimento_alterar', 'Alteração de mapeamento de documentos recebimento', $numIdSistema);
-      $this->criarRecurso('pen_map_tipo_documento_recebimento_excluir', 'Exclusão de mapeamento de documentos recebimento', $numIdSistema);
-      $this->criarRecurso('pen_map_tipo_documento_recebimento_visualizar', 'Visualização de mapeamento de documentos recebimento', $numIdSistema);
       $this->criarRecurso('pen_map_tipo_documento_recebimento_alterar', 'Alteração de mapeamento de documentos recebimento', $numIdSistema);
       $this->criarRecurso('pen_map_tipo_documento_recebimento_excluir', 'Exclusão de mapeamento de documentos recebimento', $numIdSistema);
       $this->criarRecurso('pen_map_tipo_documento_recebimento_visualizar', 'Visualização de mapeamento de documentos recebimento', $numIdSistema);
@@ -1257,21 +1166,17 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.1
-     * Instala/Atualiza os módulo PEN para versão 1.1.1
      */
   private function instalarV111()
     {
       $numIdSistema = $this->getNumIdSistema('SEI');
 
       //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
-      //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
       BancoSIP::getInstance()->executarSql("update infra_parametro set nome = '" . self::PARAMETRO_VERSAO_MODULO . "' where nome = '" . self::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
       //Adequação em nome de recursos do módulo
-      //Adequação em nome de recursos do módulo
       $this->renomearRecurso($numIdSistema, 'apensados_selecionar_expedir_procedimento', 'pen_apensados_selecionar_expedir_procedimento');
 
-      //Atualização com recursos não adicionados automaticamente em versões anteriores
       //Atualização com recursos não adicionados automaticamente em versões anteriores
       $this->arrRecurso = array_merge($this->arrRecurso, array(
           $this->consultarRecurso($numIdSistema, "pen_map_tipo_documento_envio_alterar"),
@@ -1291,7 +1196,6 @@ class PenAtualizarSipRN extends InfraRN
       $objPerfilDTO->setStrNome('Administrador');
       $objPerfilDTO = $objPerfilRN->consultar($objPerfilDTO);
     if ($objPerfilDTO == null) {
-        throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
         throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
     }
 
@@ -1315,11 +1219,9 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.9
-     * Instala/Atualiza os módulo PEN para versão 1.1.9
      */
   private function instalarV119()
     {
-      /* Corrige nome de menu de trâmite de documentos */
       /* Corrige nome de menu de trâmite de documentos */
       $numIdSistema = $this->getNumIdSistema('SEI');
       $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
@@ -1342,7 +1244,6 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
       $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
       $objItemMenuDTO->setStrRotulo('Processos Trâmitados Externamente');
-      $objItemMenuDTO->setStrRotulo('Processos Trâmitados Externamente');
       $objItemMenuDTO->retNumIdMenu();
       $objItemMenuDTO->retNumIdItemMenu();
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
@@ -1357,7 +1258,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.1.10
      * Instala/Atualiza os módulo PEN para versão 1.1.10
      */
   private function instalarV1110()
@@ -1380,10 +1280,8 @@ class PenAtualizarSipRN extends InfraRN
 
       if (empty($objItemMenuDTO)) {
         throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
-        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
       }
 
-      // ---------- antigo método (instalarV006R004S001US043) ---------- //
       // ---------- antigo método (instalarV006R004S001US043) ---------- //
       $objBD = new ItemMenuBD(BancoSip::getInstance());
 
@@ -1400,11 +1298,12 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
       if (empty($objDTO)) {
         throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
-        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
       }
 
       $numIdItemMenuPai = $objDTO->getNumIdItemMenu();
 
+      $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+      $this->criarMenu('Blocos de Trâmite Externo', 57, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
       $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
       $this->criarMenu('Blocos de Trâmite Externo', 57, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
 
@@ -1421,7 +1320,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.11
-     * Instala/Atualiza os módulo PEN para versão 1.1.11
      */
   private function instalarV1111()
     {
@@ -1429,7 +1327,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.1.12
      * Instala/Atualiza os módulo PEN para versão 1.1.12
      */
   private function instalarV1112()
@@ -1439,7 +1336,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.13
-     * Instala/Atualiza os módulo PEN para versão 1.1.13
      */
   private function instalarV1113()
     {
@@ -1447,7 +1343,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.1.14
      * Instala/Atualiza os módulo PEN para versão 1.1.14
      */
   private function instalarV1114()
@@ -1457,7 +1352,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.15
-     * Instala/Atualiza os módulo PEN para versão 1.1.15
      */
   private function instalarV1115()
     {
@@ -1465,7 +1359,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.1.16
      * Instala/Atualiza os módulo PEN para versão 1.1.16
      */
   private function instalarV1116()
@@ -1475,7 +1368,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.1.17
-     * Instala/Atualiza os módulo PEN para versão 1.1.17
      */
   private function instalarV1117()
     {
@@ -1483,7 +1375,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.2.0
      * Instala/Atualiza os módulo PEN para versão 1.2.0
      */
   private function instalarV1200()
@@ -1493,7 +1384,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.1
-     * Instala/Atualiza os módulo PEN para versão 1.2.1
      */
   private function instalarV1201()
     {
@@ -1501,7 +1391,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.2.2
      * Instala/Atualiza os módulo PEN para versão 1.2.2
      */
   private function instalarV1202()
@@ -1511,7 +1400,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.3
-     * Instala/Atualiza os módulo PEN para versão 1.2.3
      */
   private function instalarV1203()
     {
@@ -1519,7 +1407,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.2.4
      * Instala/Atualiza os módulo PEN para versão 1.2.4
      */
   private function instalarV1204()
@@ -1529,7 +1416,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.2.5
-     * Instala/Atualiza os módulo PEN para versão 1.2.5
      */
   private function instalarV1205()
     {
@@ -1537,7 +1423,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.2.6
      * Instala/Atualiza os módulo PEN para versão 1.2.6
      */
   private function instalarV1206()
@@ -1547,7 +1432,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.3.0
-     * Instala/Atualiza os módulo PEN para versão 1.3.0
      */
   private function instalarV1300()
     {
@@ -1555,7 +1439,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.4.0
      * Instala/Atualiza os módulo PEN para versão 1.4.0
      */
   private function instalarV1400()
@@ -1565,7 +1448,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.1
-     * Instala/Atualiza os módulo PEN para versão 1.4.1
      */
   private function instalarV1401()
     {
@@ -1573,7 +1455,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.4.2
      * Instala/Atualiza os módulo PEN para versão 1.4.2
      */
   private function instalarV1402()
@@ -1583,7 +1464,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.4.3
-     * Instala/Atualiza os módulo PEN para versão 1.4.3
      */
   private function instalarV1403()
     {
@@ -1591,7 +1471,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.5.0
      * Instala/Atualiza os módulo PEN para versão 1.5.0
      */
   private function instalarV1500()
@@ -1601,7 +1480,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.5.1
-     * Instala/Atualiza os módulo PEN para versão 1.5.1
      */
   private function instalarV1501()
     {
@@ -1609,7 +1487,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 1.5.2
      * Instala/Atualiza os módulo PEN para versão 1.5.2
      */
   private function instalarV1502()
@@ -1619,7 +1496,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 1.5.3
-     * Instala/Atualiza os módulo PEN para versão 1.5.3
      */
   private function instalarV1503()
     {
@@ -1628,20 +1504,13 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0
-     * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
   private function instalarV2000_beta1()
     {
       // Criar novos recursos de configuração de espécie documental padrão para envio de processos
-      $this->logar('ATRIBUIÇÃO DE PERMISSÃO DE ATRIBUÍÇÃO DE ESPÉCIES/TIPO DE DOCUMENTO PADRÃO AO PERFIL ADMINISTRADOR');
-      // Criar novos recursos de configuração de espécie documental padrão para envio de processos
-      $this->logar('ATRIBUIÇÃO DE PERMISSÃO DE ATRIBUÍÇÃO DE ESPÉCIES/TIPO DE DOCUMENTO PADRÃO AO PERFIL ADMINISTRADOR');
+      $this->logar('ATRIBUIÃ‡ÃƒO DE PERMISSÃƒO DE ATRIBUÃÃ‡ÃƒO DE ESPÃ‰CIES/TIPO DE DOCUMENTO PADRÃƒO AO PERFIL ADMINISTRADOR');
       $numIdSistemaSei = $this->getNumIdSistema('SEI');
       $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
-      $this->criarRecurso('pen_map_tipo_documento_envio_padrao_atribuir', 'Atribuir espécie documental padrão para envio de processos', $numIdSistemaSei);
-      $this->criarRecurso('pen_map_tipo_documento_envio_padrao_consultar', 'Consultar espécie documental padrão para envio de processos', $numIdSistemaSei);
-      $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_atribuir', 'Atribuir tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
-      $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_consultar', 'Consultar tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
       $this->criarRecurso('pen_map_tipo_documento_envio_padrao_atribuir', 'Atribuir espécie documental padrão para envio de processos', $numIdSistemaSei);
       $this->criarRecurso('pen_map_tipo_documento_envio_padrao_consultar', 'Consultar espécie documental padrão para envio de processos', $numIdSistemaSei);
       $this->criarRecurso('pen_map_tipo_doc_recebimento_padrao_atribuir', 'Atribuir tipo de documento padrão para recebimento de processos', $numIdSistemaSei);
@@ -1662,11 +1531,9 @@ class PenAtualizarSipRN extends InfraRN
         ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuMapTipDoc);
     } catch (\Exception $e) {
         $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
-        $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
 
       // Recriar item de menu agrupador de mapeamento de tipos de documento
-      $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
       $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
       $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu(
           $numIdSistemaSei,
@@ -1690,12 +1557,7 @@ class PenAtualizarSipRN extends InfraRN
       ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenuSEI, $numIdItemMenuMapeamento, $numIdRecursoMapRecebimentoListar, "Recebimento", 20);
 
       // Redefinir ordem de apresentação dos menus de administração do módulo
-      // Redefinir ordem de apresentação dos menus de administração do módulo
       $arrOrdemMenusAdministracaoPEN = array(
-          array("rotulo" => "Parâmetros de Configuração",        "sequencia" => 10, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Unidades",            "sequencia" => 30, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Hipóteses Legais",    "sequencia" => 40, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
           array("rotulo" => "Parâmetros de Configuração",        "sequencia" => 10, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
           array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
           array("rotulo" => "Mapeamento de Unidades",            "sequencia" => 30, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
@@ -1706,7 +1568,6 @@ class PenAtualizarSipRN extends InfraRN
           $objItemMenuRN = new ItemMenuRN();
           $numIdItemMenuPai = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $item["rotuloMenuSuperior"]);
 
-          // Obtém id do item de menu, baseado no sistema, rótulo e, principalmente, ID DO ITEM SUPERIOR
           // Obtém id do item de menu, baseado no sistema, rótulo e, principalmente, ID DO ITEM SUPERIOR
           $numIdItemMenu = $this->obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, $numIdItemMenuPai, $item["rotulo"]);
         if (isset($numIdItemMenu)) {
@@ -1721,14 +1582,11 @@ class PenAtualizarSipRN extends InfraRN
 
 
       $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
-      $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
       $strNomeMenuProcessosTramitados = "Tramita.GOV.BR";
       $numIdSistemaSei = ScriptSip::obterIdSistema('SEI');
       $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
-      $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
       $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
-      // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
       // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
      /* ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
       $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');
@@ -1742,7 +1600,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
-     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
      */
   protected function instalarV2000_beta2()
     {
@@ -1752,7 +1609,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
-     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
      */
   protected function instalarV2000_beta3()
     {
@@ -1760,7 +1616,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
      */
   protected function instalarV2000_beta4()
@@ -1770,7 +1625,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta5
-     * Instala/Atualiza os módulo PEN para versão 2.0.0-beta5
      */
   protected function instalarV2000_beta5()
     {
@@ -1778,7 +1632,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.0.0
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
   protected function instalarV2000()
@@ -1788,7 +1641,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.1
-     * Instala/Atualiza os módulo PEN para versão 2.0.1
      */
   protected function instalarV2001()
     {
@@ -1796,7 +1648,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.1.0
      * Instala/Atualiza os módulo PEN para versão 2.1.0
      */
   protected function instalarV2100()
@@ -1806,25 +1657,20 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.2
-     * Instala/Atualiza os módulo PEN para versão 2.0.2
      */
   protected function instalarV2101()
     {
-      // Adição de recursos relacionados à consulta de mapeamento de hipóteses legais de envio e recebimento
-      // Adição de recursos relacionados à consulta de mapeamento de hipóteses legais de envio e recebimento
+      // Adição de recursos relacionados Ã  consulta de mapeamento de hipóteses legais de envio e recebimento
       $numIdSistemaSei = $this->getNumIdSistema('SEI');
       $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
       $this->criarRecurso('pen_map_hipotese_legal_recebimento_consultar', 'Consulta de mapeamento de Hipóteses Legais de Recebimento', $numIdSistemaSei);
-      $this->criarRecurso('pen_map_hipotese_legal_recebimento_consultar', 'Consulta de mapeamento de Hipóteses Legais de Recebimento', $numIdSistemaSei);
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_hipotese_legal_recebimento_consultar');
-      $this->criarRecurso('pen_map_hipotese_legal_envio_consultar', 'Consulta de mapeamento de Hipóteses Legais de Envio', $numIdSistemaSei);
       $this->criarRecurso('pen_map_hipotese_legal_envio_consultar', 'Consulta de mapeamento de Hipóteses Legais de Envio', $numIdSistemaSei);
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_hipotese_legal_envio_consultar');
       $this->atualizarNumeroVersao("2.1.1");
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.1.2
      * Instala/Atualiza os módulo PEN para versão 2.1.2
      */
   protected function instalarV2102()
@@ -1834,7 +1680,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.1.3
-     * Instala/Atualiza os módulo PEN para versão 2.1.3
      */
   protected function instalarV2103()
     {
@@ -1842,7 +1687,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.1.4
      * Instala/Atualiza os módulo PEN para versão 2.1.4
      */
   protected function instalarV2104()
@@ -1852,7 +1696,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.1.5
-     * Instala/Atualiza os módulo PEN para versão 2.1.5
      */
   protected function instalarV2105()
     {
@@ -1861,7 +1704,6 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Instala/Atualiza os módulo PEN para versão 2.1.6
-     * Instala/Atualiza os módulo PEN para versão 2.1.6
      */
   protected function instalarV2106()
     {
@@ -1869,7 +1711,6 @@ class PenAtualizarSipRN extends InfraRN
   }
 
     /**
-     * Instala/Atualiza os módulo PEN para versão 2.1.6
      * Instala/Atualiza os módulo PEN para versão 2.1.6
      */
   protected function instalarV2107()
@@ -1887,7 +1728,6 @@ class PenAtualizarSipRN extends InfraRN
   }
   protected function instalarV3010()
     {
-      $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
       $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
       $numIdSistema = $this->getNumIdSistema('SEI');
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
@@ -1992,8 +1832,7 @@ class PenAtualizarSipRN extends InfraRN
         }
       };
 
-      // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
-      // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
+      // A partir da versão 3.0.0 é que o SIP passa a dar suporte Ã  Ã­cones
     if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
@@ -2098,6 +1937,7 @@ class PenAtualizarSipRN extends InfraRN
       }
 
       //Cria função genérica de cadastro de perfil
+      //Cria função genérica de cadastro de perfil
       $fnCadastrarPerfil = function ($numIdSistema, $nome, $descricao, $coordenado, $ativo) {
         $objPerfilDTO = new PerfilDTO();
         $objPerfilDTO->setNumIdSistema($numIdSistema);
@@ -2113,7 +1953,7 @@ class PenAtualizarSipRN extends InfraRN
       };
 
       //Cadastrar o perfil
-      $id_perfil_tramitador = $fnCadastrarPerfil($numIdSistema, 'Tramitador de Processos em Bloco', 'Acesso aos recursos específicos ao perfil Tramitador de Processos em Bloco', 'N', 'S');
+      $id_perfil_tramitador = $fnCadastrarPerfil($numIdSistema, 'Tramitador de Processos em Bloco', 'Acesso aos recursos especí­ficos ao perfil Tramitador de Processos em Bloco', 'N', 'S');
 
       $this->arrRecurso = [];
       $this->arrRecurso = array_merge($this->arrRecurso, array(
@@ -2128,6 +1968,7 @@ class PenAtualizarSipRN extends InfraRN
       ));
 
       //Atribui as permissões aos recursos e menus
+      //Atribui as permissões aos recursos e menus
       $this->atribuirPerfil($numIdSistema, $id_perfil_tramitador);
 
       $this->atualizarNumeroVersao("3.2.5");
@@ -2135,7 +1976,6 @@ class PenAtualizarSipRN extends InfraRN
 
     protected function instalarV3040()
     {
-      /* Corrige nome de menu de trâmite de documentos */
       /* Corrige nome de menu de trâmite de documentos */
       $numIdSistema = $this->getNumIdSistema('SEI');
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
@@ -2150,7 +1990,6 @@ class PenAtualizarSipRN extends InfraRN
     if (isset($objRecursoDTO)) {
         $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
         $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
-        $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
         $objRecursoBD->alterar($objRecursoDTO);
     }
 
@@ -2158,7 +1997,6 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->setNumIdItemMenuPai(null);
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
       $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
-      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
       $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
       $objItemMenuDTO->retNumIdMenu();
       $objItemMenuDTO->retNumIdItemMenu();
@@ -2168,18 +2006,21 @@ class PenAtualizarSipRN extends InfraRN
       if (isset($objItemMenuDTO)) {
         $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
         $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
-        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
-        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
         $objItemMenuBD->alterar($objItemMenuDTO);
       }
     // adicionar submenu
 
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
+    // adicionar permissão
     // adicionar permissão
     $numIdPerfilSeiTramitador = ScriptSip::obterIdPerfil($numIdSistema, "Tramitador de Processos em Bloco");
     $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
 
@@ -2194,8 +2035,24 @@ class PenAtualizarSipRN extends InfraRN
     $objRecursoDTO->retNumIdRecurso();
     $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
     $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+
+    $objRecursoDTO = new RecursoDTO();
+    $objRecursoDTO->setNumIdSistema($numIdSistema);
+    $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_listar');
+    $objRecursoDTO->retNumIdRecurso();
+    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+
+    $objRecursoDTO = new RecursoDTO();
+    $objRecursoDTO->setNumIdSistema($numIdSistema);
+    $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_excluir');
+    $objRecursoDTO->retNumIdRecurso();
+    $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+    $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+
     // adicionar permissão
     $numIdPerfilSeiTramitador = ScriptSip::obterIdPerfil($numIdSistema, "Tramitador de Processos em Bloco");
+    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Blocos de Trâmite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Blocos de Trâmite Externo', $numIdSistema);
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'md_pen_tramita_em_bloco_excluir');
 
@@ -2244,21 +2101,17 @@ try {
 
     if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'UsuarioScript')) {
         throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
-        throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'UsuarioScript'))) {
-        throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
         throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
     }
 
     if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'SenhaScript')) {
         throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
-        throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'SenhaScript'))) {
-        throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
         throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
     }
 
