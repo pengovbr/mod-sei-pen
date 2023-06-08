@@ -47,8 +47,6 @@ try {
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
       die;
-      // case 'md_pen_tramita_em_bloco_excluir':
-
     case 'md_pen_tramita_em_bloco':
       $arrEstadosSelecionados = [];
       $checkboxesEstados = [
