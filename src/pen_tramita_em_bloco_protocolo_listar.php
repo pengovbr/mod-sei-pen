@@ -45,6 +45,7 @@
       }
 
   $arrComandos = array();
+  $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
   $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
@@ -204,64 +205,6 @@ function inicializar(){
     infraEfeitoTabelas();
 }
 
-<?php $objPaginaSEI->fecharStyle(); ?>
-<?php $objPaginaSEI->montarJavaScript(); ?>
-<script type="text/javascript">
-  function inicializar() {
-    infraEfeitoTabelas();
-  }
-
-  function inicializar() {
-    infraEfeitoTabelas();
-    var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
-    if (strMensagens) {
-      alert(strMensagens);
-    }
-  }
-
-  function onClickBtnPesquisar() {
-    var form = jQuery('#frmProcessosListar');
-    form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
-    form.submit();
-  }
-
-  function tratarEnter(ev) {
-    var key = infraGetCodigoTecla(ev);
-    if (key == 13) {
-      onClickBtnPesquisar();
-    }
-    return true;
-  }
-
-  function onCLickLinkDelete(url, link) {
-    var row = jQuery(link).parents('tr:first');
-    var strEspecieDocumental = row.find('td:eq(1)').text();
-    var strTipoDocumento = row.find('td:eq(2)').text();
-
-    if (confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
-      window.location = url;
-    }
-  }
-
-  function onClickBtnExcluir() {
-
-    try {
-      var len = jQuery('input[name*=chkInfraItem]:checked').length;
-
-      if (len > 0) {
-        if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
-          var form = jQuery('#frmProcessosListar');
-          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
-          form.submit();
-        }
-      } else {
-        alert('Selecione pelo menos um mapeamento para Excluir');
-      }
-    } catch (e) {
-      alert('Erro : ' + e.message);
-    }
-  }
-</script>
 <?
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');

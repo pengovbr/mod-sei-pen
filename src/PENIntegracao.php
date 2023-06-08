@@ -158,8 +158,6 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento .= '</a>';
     }
 
-    $strAcoesProcedimento .= '<a>TESTE AQUII</a>';
-
       return array($strAcoesProcedimento);
   }
 
