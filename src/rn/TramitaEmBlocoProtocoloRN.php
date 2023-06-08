@@ -16,6 +16,46 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         return BancoSEI::getInstance();
     }
 
+    protected function listarProtocolosBlocoConectado(TramitaEmBlocoProtocoloDTO $parObjTramitaEmBlocoProtocoloDTO)
+    {
+        try {
+
+            $ret = array();
+
+            //Valida Permissao
+            // SessaoSEI::getInstance()->validarAuditarPermissao('rel_bloco_protocolo_listar', __METHOD__, $parObjRelBlocoProtocoloDTO);
+
+            $parObjRelBlocoProtocoloDTO = InfraString::prepararPesquisaDTO($parObjTramitaEmBlocoProtocoloDTO, "PalavrasPesquisa", "IdxRelBlocoProtocolo");
+            $parObjRelBlocoProtocoloDTO->setStrStaNivelAcessoGlobalProtocolo(ProtocoloRN::$NA_SIGILOSO, InfraDTO::$OPER_DIFERENTE);
+            $arrObjRelProtocoloBlocoDTO = $this->listar($parObjRelBlocoProtocoloDTO);
+
+            foreach ($arrObjRelProtocoloBlocoDTO as $dto) {
+
+                $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+                $objPenLoteProcedimentoDTO->retNumIdLote();
+                $objPenLoteProcedimentoDTO->retDblIdProcedimento();
+                $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
+                $objPenLoteProcedimentoDTO->retNumIdAndamento();
+                $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+                $objPenLoteProcedimentoDTO->retStrNomeUsuario();
+                $objPenLoteProcedimentoDTO->retDthRegistro();
+                $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
+                $objPenLoteProcedimentoDTO->setOrdNumIdLote(InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objPenLoteProcedimentoDTO->setDblIdProcedimento($dto->getDblIdProtocolo());
+
+                $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+                $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+
+                $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoDTO);
+                $ret[] = $dto;
+            }
+
+            return $ret;
+        } catch (Exception $e) {
+            throw new InfraException('Erro listando protocolos do bloco.', $e);
+        }
+    }
+
     /**
      * Método utilizado para exclusão de dados.
      * @param TramitaEmBlocoProtocoloDTO $objDTO
@@ -39,17 +79,21 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
     /**
      * Método utilizado para exclusão de dados.
-     * @param TramitaEmBlocoProtocoloDTO $objDTO
+     * @param array $arrayObjDTO
      * @return array
      * @throws InfraException
      */
-    protected function excluirControlado(TramitaEmBlocoProtocoloDTO $objDTO)
+    protected function excluirControlado(array $arrayObjDTO)
     {
         try {
-            $objBD = new TramitaEmBlocoProtocoloBD(BancoSEI::getInstance());
-            return $objBD->excluir($objDTO);
+            $arrayExcluido = array();
+            foreach ($arrayObjDTO as $objDTO) {
+                $objBD = new TramitaEmBlocoProtocoloBD(BancoSEI::getInstance());
+                $arrayExcluido[] = $objBD->excluir($objDTO);
+            }
+            return $arrayExcluido;
         } catch (Exception $e) {
-            throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+            throw new InfraException('Erro excluindo Bloco.', $e);
         }
     }
 }

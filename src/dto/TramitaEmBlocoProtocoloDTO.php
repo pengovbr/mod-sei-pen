@@ -83,19 +83,20 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
 
     /* $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinAberto'); */
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'ProtocoloDTO');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'PenLoteProcedimentoDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR,'ObjAssinaturaDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'PalavrasPesquisa');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinAberto');
 
 
-    $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA );
+    $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
     $this->configurarPK('IdProtocolo',InfraDTO::$TIPO_PK_INFORMADO);
     $this->configurarPK('IdTramitaEmBloco',InfraDTO::$TIPO_PK_INFORMADO);
     
     $this->configurarFK('IdProtocolo', 'protocolo p1', 'p1.id_protocolo');
-		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco', 'id');
-		$this->configurarFK('IdProtocoloProtocolo', 'documento', 'id_documento', InfraDTO::$TIPO_FK_OPCIONAL);
-    $this->configurarFK('IdProcedimentoDocumento', 'protocolo p2', 'p2.id_protocolo');
+		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco tb1', 'id');
+		$this->configurarFK('IdTramitaEmBloco', 'md_pen_rel_expedir_lote tbrel', 'id');
+		$this->configurarFK('dProtocolo', 'md_pen_tramita_em_bloco tb1', 'id_procedimento');
   }
 }
 ?>
