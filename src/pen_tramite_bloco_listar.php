@@ -158,6 +158,9 @@ try {
 
         // Excluir
         $strResultado .= '<a onclick="onClickBtnExcluir(\''.$idBlocoTramite.'\');" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+
+        // Tramitar bloco
+        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
         $strResultado .= "</td>";
       }
     }
@@ -248,6 +251,9 @@ $objPaginaSEI->montarStyle();
   select.infraSelect,
   input.infraText {
     width: 100%;
+  }
+  .iconTramita {
+    max-width: 1.5rem;
   }
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
