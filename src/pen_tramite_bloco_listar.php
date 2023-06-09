@@ -47,6 +47,9 @@ try {
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
       die;
     case 'md_pen_tramita_em_bloco':
+        var_dump($_GET);
+        var_dump($_POST);
+        //return false;
       $arrEstadosSelecionados = [];
       $checkboxesEstados = [
           'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
@@ -64,9 +67,8 @@ try {
 
       break;
     case 'pen_tramite_em_bloco_cancelar':
-        var_dump($_GET);
       $arrEstadosSelecionados = [];
-      $arrStrIds = explode(',',$_GET['hdnInfraItensSelecionados']);
+      $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
       if (count($arrStrIds) > 0) {
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoRN->cancelar($arrStrIds);
