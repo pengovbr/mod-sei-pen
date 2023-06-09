@@ -350,6 +350,9 @@ class TramiteEmBlocoRN extends InfraRN {
     protected function excluirControlado(array $arrayObjDTO)
     {
         try {
+            //Valida Permissao
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_excluir',__METHOD__,$arrayObjDTO);
+
             $arrayExcluido = array();
             foreach ($arrayObjDTO as $objDTO) {
                 $objBD = new TramiteEmBlocoBD(BancoSEI::getInstance());
