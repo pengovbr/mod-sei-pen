@@ -72,7 +72,7 @@ try {
           $objTramiteEmBlocoRN->cancelar($arrStrIds);
       }
       PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
-      // header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
 
       break;
     default:
