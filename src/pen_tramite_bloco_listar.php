@@ -47,9 +47,6 @@ try {
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
       die;
     case 'md_pen_tramita_em_bloco':
-        var_dump($_GET);
-        var_dump($_POST);
-        //return false;
       $arrEstadosSelecionados = [];
       $checkboxesEstados = [
           'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
@@ -68,7 +65,7 @@ try {
       break;
     case 'pen_tramite_em_bloco_cancelar':
       $arrEstadosSelecionados = [];
-      $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
+      $arrStrIds = isset($_GET['id_tramita_em_bloco']) ? [$_GET['id_tramita_em_bloco']] : PaginaSEI::getInstance()->getArrStrItensSelecionados();
       if (count($arrStrIds) > 0) {
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoRN->cancelar($arrStrIds);
@@ -182,7 +179,7 @@ try {
         // Tramitar bloco
         $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
 
-        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
+        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
 
         $strResultado .= "</td>";
       }
