@@ -340,4 +340,29 @@ class TramiteEmBlocoRN extends InfraRN {
             throw new InfraException('Erro alterando Bloco.',$e);
         }
     }
+
+    /**
+     * Método utilizado para exclusão de dados.
+     * @param array $arrayObjDTO
+     * @return array
+     * @throws InfraException
+     */
+    protected function excluirControlado(array $arrayObjDTO)
+    {
+        try {
+            $arrayExcluido = array();
+            foreach ($arrayObjDTO as $objDTO) {
+                $objBD = new TramiteEmBlocoBD(BancoSEI::getInstance());
+                $arrayExcluido[] = $objBD->excluir($objDTO);
+            }
+            return $arrayExcluido;
+        } catch (Exception $e) {
+            throw new InfraException('Erro excluindo Bloco.', $e);
+        }
+    }
+
+    protected function cancelarControlado(array $blocoIds)
+    {
+        var_dump($blocoIds);
+    }
 }
