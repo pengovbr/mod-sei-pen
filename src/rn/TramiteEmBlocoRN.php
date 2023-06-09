@@ -347,6 +347,17 @@ class TramiteEmBlocoRN extends InfraRN {
 
     protected function cancelarControlado(array $blocoIds)
     {
-        var_dump($blocoIds);
+        $objBloco = new TramitaEmBlocoProtocoloDTO();
+        foreach ($blocoIds as $blocoId) {
+            $objBloco->setNumIdTramitaEmBloco($blocoId);
+            $objBloco->retDblIdProtocolo();
+            $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
+            $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
+            $protocoloRn = new ProcessoExpedidoRN();
+            foreach ($protocoloIds as $protocoloId) {
+
+            }
+        }
+
     }
 }
