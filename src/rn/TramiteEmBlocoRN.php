@@ -344,4 +344,23 @@ class TramiteEmBlocoRN extends InfraRN {
             throw new InfraException('Erro excluindo Bloco.', $e);
         }
     }
+
+    protected function cancelarControlado(array $blocoIds)
+    {
+        try {
+            $objBloco = new TramitaEmBlocoProtocoloDTO();
+            foreach ($blocoIds as $blocoId) {
+                $objBloco->setNumIdTramitaEmBloco($blocoId);
+                $objBloco->retDblIdProtocolo();
+                $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
+                $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
+                $protocoloRn = new ExpedirProcedimentoRN();
+                foreach ($protocoloIds as $protocoloId) {
+                    $protocoloRn->cancelarTramite($protocoloId->getDblIdProtocolo());
+                }
+            }
+        } catch (Exception $e) {
+            throw new InfraException('Erro cancelando Bloco.', $e);
+        }
+    }
 }

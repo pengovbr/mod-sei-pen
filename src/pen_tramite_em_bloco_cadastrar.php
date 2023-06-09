@@ -16,7 +16,7 @@ try {
 
   SessaoSEI::getInstance()->validarLink();
 
-  SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
+  // SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
 
   $strParametros = '';
   if(isset($_GET['arvore'])) {
