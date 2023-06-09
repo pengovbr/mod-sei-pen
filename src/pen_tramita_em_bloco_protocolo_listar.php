@@ -8,7 +8,7 @@ try {
   $objPaginaSEI = PaginaSEI::getInstance();
 
   $objSessaoSEI->validarLink();
-  //$objSessaoSEI->validarPermissao($_GET['acao']);
+  $objSessaoSEI->validarPermissao($_GET['acao']);
 
   $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
   $staConcluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE;
@@ -59,7 +59,13 @@ try {
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
   $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-  $objTramitaEmBlocoProtocoloDTO->retTodos();
+  $objTramitaEmBlocoProtocoloDTO->retNumId();
+  $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retNumSequencia();
+  $objTramitaEmBlocoProtocoloDTO->retStrAnotacao();
+  $objTramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdUsuario();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdUnidadeBloco();
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
   $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtProcedimentoFormatado');
   if ($strPalavrasPesquisa!=''){
@@ -117,7 +123,7 @@ try {
       $strResultado .= '</td>';
 
       $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
-
+      
       if ($objPenLoteProcedimentoDTO) {
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimentoDTO->getStrNomeUsuario()) . '</td>';
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimentoDTO->getDthRegistro()) . '</td>';
@@ -158,14 +164,12 @@ try {
       }
 
       $strResultado .= '<td align="center">' . "\n";
-      // if (
-      //     $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
-      //     $objRelBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()
-      // ) {
-      $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
-      $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
-      $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
-      // }
+      // $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
+      if ($objDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
+        $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
+        $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
+        $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+      }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";
     }
