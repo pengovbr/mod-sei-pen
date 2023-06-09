@@ -2010,17 +2010,20 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_cancelar', 'Cancelar bloco de Tramite Externo', $numIdSistema);
 
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'md_pen_tramita_em_bloco');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'pen_tramite_em_bloco_cadastrar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'pen_tramite_em_bloco_alterar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'pen_tramite_em_bloco_consultar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'pen_tramite_em_bloco_cancelar');
 
     $objRecursoDTO = new RecursoDTO();
     $objRecursoDTO->setNumIdSistema($numIdSistema);
     $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco_excluir');
     $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_listar');
     $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_excluir');
+    $objRecursoDTO->setStrNome('pen_tramita_em_bloco_protocolo_cancelar');
     $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
     $objRecursoDTO->retNumIdRecurso();
     $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());

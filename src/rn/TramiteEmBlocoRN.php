@@ -344,4 +344,9 @@ class TramiteEmBlocoRN extends InfraRN {
             throw new InfraException('Erro excluindo Bloco.', $e);
         }
     }
+
+    protected function cancelarControlado(array $blocoIds)
+    {
+        var_dump($blocoIds);
+    }
 }
