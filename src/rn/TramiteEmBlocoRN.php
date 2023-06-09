@@ -347,17 +347,20 @@ class TramiteEmBlocoRN extends InfraRN {
 
     protected function cancelarControlado(array $blocoIds)
     {
-        $objBloco = new TramitaEmBlocoProtocoloDTO();
-        foreach ($blocoIds as $blocoId) {
-            $objBloco->setNumIdTramitaEmBloco($blocoId);
-            $objBloco->retDblIdProtocolo();
-            $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
-            $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
-            $protocoloRn = new ProcessoExpedidoRN();
-            foreach ($protocoloIds as $protocoloId) {
-
+        try {
+            $objBloco = new TramitaEmBlocoProtocoloDTO();
+            foreach ($blocoIds as $blocoId) {
+                $objBloco->setNumIdTramitaEmBloco($blocoId);
+                $objBloco->retDblIdProtocolo();
+                $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
+                $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
+                $protocoloRn = new ProcessoExpedidoRN();
+                foreach ($protocoloIds as $protocoloId) {
+                    $protocoloRn->cancelarTramite($protocoloId);
+                }
             }
+        } catch (Exception $e) {
+            throw new InfraException('Erro cancelando Bloco.', $e);
         }
-
     }
 }
