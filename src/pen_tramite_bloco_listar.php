@@ -332,7 +332,7 @@ $objPaginaSEI->montarStyle();
                   form.submit();
               }
           } else {
-              alert('Selecione pelo menos um mapeamento para Excluir');
+              alert('Selecione pelo menos um mapeamento para Cancelar');
           }
       } catch (e) {
           alert('Erro : ' + e.message);
