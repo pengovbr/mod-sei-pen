@@ -58,8 +58,13 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM,
                                    'IdUnidadeBloco',
-                                   'id_unidade',
-                                   'bloco');
+                                   'tb1.id_unidade',
+                                   'md_pen_tramita_em_bloco tb1');
+
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM,
+                                   'IdUsuario',
+                                   'tb1.id_usuario',
+                                   'md_pen_tramita_em_bloco tb1');
 
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
                                    'StaTipoBloco',
@@ -69,19 +74,10 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
                                    'StaEstadoBloco',
                                    'sta_estado',
-                                   'bloco');
-    
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_DBL,
-                                   'IdProcedimentoDocumento',
-                                   'id_procedimento',
-                                   'documento');
+                                   'md_pen_tramita_em_bloco tb1');
+                              
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaNomeUsuario', 'nome', 'usuario us');
 
-    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR,
-                                  'ProtocoloProcedimentoFormatado',
-                                  'p2.protocolo_formatado',
-                                  'protocolo p2');
-
-    /* $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinAberto'); */
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'ProtocoloDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'PenLoteProcedimentoDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR,'ObjAssinaturaDTO');
@@ -94,9 +90,8 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->configurarPK('IdTramitaEmBloco',InfraDTO::$TIPO_PK_INFORMADO);
     
     $this->configurarFK('IdProtocolo', 'protocolo p1', 'p1.id_protocolo');
-		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco tb1', 'id');
-		$this->configurarFK('IdTramitaEmBloco', 'md_pen_rel_expedir_lote tbrel', 'id');
-		$this->configurarFK('dProtocolo', 'md_pen_tramita_em_bloco tb1', 'id_procedimento');
+		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco tb1', 'tb1.id');
+    $this->configurarFK('IdUsuario', 'usuario us', 'us.id_usuario');
   }
 }
 ?>

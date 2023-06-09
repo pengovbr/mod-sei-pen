@@ -2021,7 +2021,8 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('pen_tramite_em_bloco_cancelar', 'Cancelar bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
 
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'md_pen_tramita_em_bloco');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'pen_tramite_em_bloco_cadastrar');

@@ -8,7 +8,7 @@
         $objPaginaSEI = PaginaSEI::getInstance();
 
   $objSessaoSEI->validarLink();
-  //$objSessaoSEI->validarPermissao($_GET['acao']);
+  $objSessaoSEI->validarPermissao($_GET['acao']);
 
   $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
   $staConcluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE;
@@ -138,13 +138,34 @@
       $strResultado .= '</td>';
       // }
 
-          switch ($arrObjPenLoteProcedimentoRN[$i]->getNumIdAndamento()) {
-            case $staConcluido:
-                $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
-                break;
-            case $staCancelado:
-                $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
-                break;
+      $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
+
+      if ($objPenLoteProcedimentoDTO) {
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimentoDTO->getStrNomeUsuario()) . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimentoDTO->getDthRegistro()) . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimentoDTO->getStrUnidadeDestino()) . '</td>';
+
+        $strResultado .= '<td align="center">' . "\n";
+
+        $objPenProtocoloDTO = new PenProtocoloDTO();
+        $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+        $objPenProtocoloDTO->retStrSinObteveRecusa();
+        $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
+        $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+        $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+
+        if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" alt="Um trâmite para esse processo foi recusado" />';
+        } else {
+          switch ($objPenLoteProcedimentoDTO->getNumIdAndamento()) {
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
+              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
+              break;
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
+              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
+              break;
+            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
             default:
                 $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
                 break;
@@ -163,7 +184,7 @@
       // ) {
       $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
       $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
-      $strResultado .= '<a href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoExcluir(\'' . $strId . '\',\'' . $strDescricao . '\',\'' . $objDTO->getDblIdProtocolo() . '\');" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . PaginaSEI::getInstance()->getIconeExcluir() . '" title="Retirar Processo/Documento do Bloco" alt="Retirar Processo/Documento do Bloco" class="infraImg" /></a>&nbsp;';
+      $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
       // }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";
