@@ -23,7 +23,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
             $ret = array();
 
             //Valida Permissao
-            // SessaoSEI::getInstance()->validarAuditarPermissao('rel_bloco_protocolo_listar', __METHOD__, $parObjRelBlocoProtocoloDTO);
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $parObjTramitaEmBlocoProtocoloDTO);
 
             $parObjRelBlocoProtocoloDTO = InfraString::prepararPesquisaDTO($parObjTramitaEmBlocoProtocoloDTO, "PalavrasPesquisa", "IdxRelBlocoProtocolo");
             $parObjRelBlocoProtocoloDTO->setStrStaNivelAcessoGlobalProtocolo(ProtocoloRN::$NA_SIGILOSO, InfraDTO::$OPER_DIFERENTE);
@@ -31,22 +31,53 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
             foreach ($arrObjRelProtocoloBlocoDTO as $dto) {
 
-                $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-                $objPenLoteProcedimentoDTO->retNumIdLote();
-                $objPenLoteProcedimentoDTO->retDblIdProcedimento();
-                $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
-                $objPenLoteProcedimentoDTO->retNumIdAndamento();
-                $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
-                $objPenLoteProcedimentoDTO->retStrNomeUsuario();
-                $objPenLoteProcedimentoDTO->retDthRegistro();
-                $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
-                $objPenLoteProcedimentoDTO->setOrdNumIdLote(InfraDTO::$TIPO_ORDENACAO_DESC);
-                $objPenLoteProcedimentoDTO->setDblIdProcedimento($dto->getDblIdProtocolo());
+                $objPenProtocoloDTO = new PenProtocoloDTO();
+                $objPenProtocoloDTO->setDblIdProtocolo($dto->getDblIdProtocolo());
+                $objPenProtocoloDTO->retStrSinObteveRecusa();
+                $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-                $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-                $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+                $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+                $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
-                $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoDTO);
+                if (!empty($objPenProtocoloDTO)) {
+                    $dto->setStrSinObteveRecusa($objPenProtocoloDTO->getStrSinObteveRecusa());
+                } else {
+                    $dto->setStrSinObteveRecusa('N');
+                }
+
+                $objTramiteDTO = new TramiteDTO();
+                $objTramiteDTO->setNumIdProcedimento($dto->getDblIdProtocolo());
+                $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+                $objTramiteDTO->retNumIdTramite();
+                $objTramiteDTO->retDthRegistro();
+                $objTramiteDTO->retStrNomeUsuario();
+    
+                $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+                $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+
+                $dto->setObjTramiteDTO($objTramiteDTO);
+
+                $objAtividadeDTO = new AtividadeDTO();
+                $objAtividadeDTO->setDblIdProtocolo($dto->getDblIdProtocolo());
+                $objAtividadeDTO->setNumIdTarefa([
+                    ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+                    ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO)
+                ], InfraDTO::$OPER_IN);
+                $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+                $objAtividadeDTO->retNumIdAtividade();
+                $objAtividadeDTO->retNumIdTarefa();
+                $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+                $objAtividadeRN = new AtividadeRN();
+                $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+                
+                if (!empty($arrObjAtividadeDTO) && $arrObjAtividadeDTO[0]->getNumIdTarefa() != null) {
+                    $dto->setNumStaIdTarefa($arrObjAtividadeDTO[0]->getNumIdTarefa());
+                } else {
+                    $dto->setNumStaIdTarefa(0);
+                }
+                
                 $ret[] = $dto;
             }
 
@@ -66,7 +97,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     {
         try {
             //Valida Permissão
-            //SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objDTO);
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $objDTO);
 
             $objTramitaEmBlocoProtocoloBD = new TramitaEmBlocoProtocoloBD($this->getObjInfraIBanco());
             $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloBD->listar($objDTO);
@@ -86,6 +117,9 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     protected function excluirControlado(array $arrayObjDTO)
     {
         try {
+            //Valida Permissão
+            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_excluir', __METHOD__, $arrayObjDTO);
+
             $arrayExcluido = array();
             foreach ($arrayObjDTO as $objDTO) {
                 $objBD = new TramitaEmBlocoProtocoloBD(BancoSEI::getInstance());
