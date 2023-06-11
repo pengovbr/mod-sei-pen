@@ -505,6 +505,7 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_tramita_em_bloco_protocolo_excluir':
       case 'pen_tramita_em_bloco_protocolo_listar':
+      case 'pen_tramita_em_bloco_protocolo_cancelar':
           require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
           break;
 

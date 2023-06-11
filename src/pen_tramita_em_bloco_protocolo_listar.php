@@ -38,11 +38,12 @@
       die;
     case 'pen_tramita_em_bloco_protocolo_listar':
       $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
+      $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
       break;
 
-        default:
-            throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
-      }
+    default:
+      throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+  }
 
   $arrComandos = array();
   $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
@@ -60,8 +61,12 @@
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
 
   $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-  $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
-  // echo "<pre>"; var_dump($_GET['id_bloco']); echo "</pre>"; die(1);
+  $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->listarProtocolosBloco($objTramitaEmBlocoProtocoloDTO);
+
+  $arrComandos = array();
+  
+  $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+  $arrComandos[] = '<button type="submit" accesskey="P" onclick="onClickBtnPesquisar()" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
   $objPaginaSEI->prepararPaginacao($objTramitaEmBlocoProtocoloDTO);
   $objPaginaSEI->processarPaginacao($objTramitaEmBlocoProtocoloDTO);
@@ -70,7 +75,7 @@
   $numRegistros = count($arrTramitaEmBlocoProtocoloDTO);
   if ($numRegistros > 0) {
     $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
 
           $strResultado = '';
           $strSumarioTabela = 'Tabela de Processo em Lote.';
@@ -172,14 +177,12 @@
       $strResultado .= '</td>' . "\n";
 
       $strResultado .= '<td align="center">' . "\n";
-      // if (
-      //     $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
-      //     $objRelBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()
-      // ) {
-      $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
-      $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
-      $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
-      // }
+      // $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
+      if ($objDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
+        $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
+        $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
+        $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+      }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";
     }
@@ -202,6 +205,8 @@
 
 #lblProcedimentoFormatado {position:absolute;left:0%;top:0%;width:20%;}
 #txtProcedimentoFormatado {position:absolute;left:0%;top:40%;width:20%;}
+input.infraText {width: 100%;}
+.iconTramita {max-width: 1.5rem;}
 
 <?
 $objPaginaSEI->fecharStyle();
@@ -220,6 +225,79 @@ function inicializar(){
     infraEfeitoTabelas();
 }
 
+<?php $objPaginaSEI->fecharStyle(); ?>
+<?php $objPaginaSEI->montarJavaScript(); ?>
+<script type="text/javascript">
+  function inicializar() {
+    infraEfeitoTabelas();
+  }
+
+  function inicializar() {
+    infraEfeitoTabelas();
+    var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
+    if (strMensagens) {
+      alert(strMensagens);
+    }
+  }
+
+  function onClickBtnPesquisar() {
+    var form = jQuery('#frmProcessosListar');
+    form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+    form.submit();
+  }
+
+  function tratarEnter(ev) {
+    var key = infraGetCodigoTecla(ev);
+    if (key == 13) {
+      onClickBtnPesquisar();
+    }
+    return true;
+  }
+
+  function onCLickLinkDelete(url, link) {
+    var row = jQuery(link).parents('tr:first');
+    var strEspecieDocumental = row.find('td:eq(1)').text();
+    var strTipoDocumento = row.find('td:eq(2)').text();
+
+    if (confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
+      window.location = url;
+    }
+  }
+
+  function onClickBtnExcluir() {
+
+    try {
+      var len = jQuery('input[name*=chkInfraItem]:checked').length;
+
+      if (len > 0) {
+        if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
+          var form = jQuery('#frmProcessosListar');
+          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+          form.submit();
+        }
+      } else {
+        alert('Selecione pelo menos um mapeamento para Excluir');
+      }
+    } catch (e) {
+      alert('Erro : ' + e.message);
+    }
+  }
+
+  function onClickBtnTramitarProcessos() {
+    try {
+      var len = jQuery('input[name*=chkInfraItem]:checked').length;
+      if (len > 0) {
+        var form = jQuery('#frmLoteListar');
+        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=pen_tramita_em_bloco_protocolo_listar&acao_retorno=pen_tramita_em_bloco_protocolo_listar&tramite_em_bloco=1'); ?>');
+        form.submit();
+      } else {
+        alert('Selecione pelo menos um processo');
+      }
+    } catch (e) {
+      alert('Erro : ' + e.message);
+    }
+  }
+</script>
 <?
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
