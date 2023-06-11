@@ -47,9 +47,32 @@ try {
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']));
       die;
     case 'pen_tramita_em_bloco_protocolo_listar':
-      $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];      
+      $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
       break;
-
+    case 'pen_tramita_em_bloco_protocolo_cancelar': {
+      try{
+        $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
+        $arrObjTramiteBlocoProtocoloDTO = array();
+        var_dump($arrStrIds);
+        if (count($arrStrIds) > 0) {
+          foreach ($arrStrIds as $arrStrId) {
+              $arrStrIdComposto = explode('-', $arrStrId);
+              $expedirProcedimentoRN = new ExpedirProcedimentoRN();
+              $expedirProcedimentoRN->cancelarTramite($arrStrIdComposto[1]);
+          }
+        } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
+            $arrStrIdComposto = explode('-', $_GET['hdnInfraItensSelecionados']);
+            $expedirProcedimentoRN = new ExpedirProcedimentoRN();
+            $expedirProcedimentoRN->cancelarTramite($arrStrIdComposto[1]);
+        }
+        PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
+      } catch (Exception $e) {
+        PaginaSEI::getInstance()->processarExcecao($e);
+      }
+      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']));
+      //die;
+    }
+    break;
     default:
       throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
@@ -76,7 +99,7 @@ try {
   $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->listarProtocolosBloco($objTramitaEmBlocoProtocoloDTO);
 
   $arrComandos = array();
-  
+
   $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
   $arrComandos[] = '<button type="submit" accesskey="P" onclick="onClickBtnPesquisar()" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
@@ -87,6 +110,7 @@ try {
   $numRegistros = count($arrTramitaEmBlocoProtocoloDTO);
   if ($numRegistros > 0) {
     $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+    $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelarTramites()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
 
     $strResultado = '';
@@ -120,7 +144,7 @@ try {
       $strResultado .= '</td>';
 
       $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
-      
+
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
       if ($objTramiteDTO) {
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
@@ -159,8 +183,10 @@ try {
       // $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
       if ($objDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
         $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
+        $strProtocoloId = $objDTO->getDblIdProtocolo();
         $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
         $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+        $strResultado .= $objDTO->getNumStaIdTarefa() == $PROCESSO_EXPEDIDO_ID ? '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite" alt="Cancelar Tramite" class="infraImg iconTramita" /></a>&nbsp;' : '';
       }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";
@@ -184,6 +210,8 @@ $objPaginaSEI->abrirStyle();
 
 #lblProcedimentoFormatado {position:absolute;left:0%;top:0%;width:20%;}
 #txtProcedimentoFormatado {position:absolute;left:0%;top:40%;width:20%;}
+input.infraText {width: 100%;}
+.iconTramita {max-width: 1.5rem;}
 
 <?
 $objPaginaSEI->fecharStyle();
@@ -257,6 +285,33 @@ infraEfeitoTabelas();
       }
     } catch (e) {
       alert('Erro : ' + e.message);
+    }
+  }
+
+  function onClickBtnCancelarTramites()
+  {
+    try {
+      var len = jQuery('input[name*=chkInfraItem]:checked').length;
+        if (len > 0) {
+          if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
+            var form = jQuery('#frmProcessosListar');
+              form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+              form.submit();
+          }
+        } else {
+          alert('Selecione pelo menos um mapeamento para Excluir');
+        }
+      } catch (e) {
+        alert('Erro : ' + e.message);
+      }
+  }
+
+  function onClickBtnCancelarTramite(url, link) {
+    var row = jQuery(link).parents('tr:first');
+    var strTipoDocumento = row.find('td:eq(2)').text();
+      console.log(link)
+    if (confirm('Confirma a cancelamento do trâmite "' + strTipoDocumento + '"?')) {
+        window.location = url;
     }
   }
 
