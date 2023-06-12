@@ -49,7 +49,14 @@
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
   $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-  $objTramitaEmBlocoProtocoloDTO->retTodos();
+  $objTramitaEmBlocoProtocoloDTO->retNumId();
+  $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retNumSequencia();
+  $objTramitaEmBlocoProtocoloDTO->retStrAnotacao();
+  $objTramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdUsuario();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdUnidadeBloco();
+  $objTramitaEmBlocoProtocoloDTO->retStrStaEstadoProtocolo();
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
 
   $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
@@ -92,8 +99,6 @@
 
       $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $objDTO->getNumId(), $objDTO->getNumId()) . '</td>';
       $strResultado .= '<td align="center">' . $objDTO->getNumSequencia() . '</td>';
-
-      $objPenLoteProcedimentoDTO = $objDTO->getObjPenLoteProcedimentoDTO();
 
       $strResultado .= '<td align="center">';
       //' . PaginaSEI::tratarHTML($objProtocoloDTO->getStrNomeTipoProcedimentoProcedimento()) . '
@@ -147,6 +152,8 @@
 
       if ($objDTO->getStrSinObteveRecusa() == 'S') {
         $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" alt="Um trâmite para esse processo foi recusado" />';
+      } else if ($objDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
       } else {
         $PROCESSO_EXPEDIDO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
         $PROCESSO_TRAMITE_CANCELADO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO);
@@ -159,7 +166,6 @@
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
             break;
           default:
-            // $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
             break;
         }
       }

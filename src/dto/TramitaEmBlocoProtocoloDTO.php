@@ -30,6 +30,7 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdProcedimento', 'pe.id_procedimento', 'md_pen_processo_eletronico pe');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'pe.numero_registro', 'md_pen_processo_eletronico pe');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'pt.id_tramite', 'md_pen_tramite pt');
+    $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaEstadoProtocolo', 'p1.sta_estado', 'protocolo p1');
     
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'TramiteDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'AtividadeDTO');
