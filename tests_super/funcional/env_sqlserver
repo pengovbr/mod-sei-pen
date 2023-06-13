@@ -1,22 +1,16 @@
 ##### Diretório em que está localizada a instalação do SEI #####
 SEI_PATH=../../../../../../
-ENVIRONMENT_VERSION=9.8
+ENVIRONMENT_VERSION=10.0
 
 SEI_CONFIG=./assets/config/ConfiguracaoSEI.php
 SEI_DATABASE_NAME=sei
 SEI_DATABASE_USER=sei_user
 SEI_DATABASE_PASSWORD=sei_user
-SEI_DATABASE_USER_SCRIPT=sei_user
-SEI_DATABASE_PASSWORD_SCRIPT=sei_user
 
 SIP_CONFIG=./assets/config/ConfiguracaoSip.php
 SIP_DATABASE_NAME=sip
 SIP_DATABASE_USER=sip_user
 SIP_DATABASE_PASSWORD=sip_user
-SIP_DATABASE_USER_SCRIPT=sip_user
-SIP_DATABASE_PASSWORD_SCRIPT=sip_user
-
-
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############
 ORG1_HOSTNAME=org1-http
@@ -35,7 +29,7 @@ ORG1_DATABASE_TYPE=SqlServer
 ORG1_DATABASE_GUEST_PORT=1433
 ORG1_DATABASE_HOST_PORT=14331
 ORG1_DATABASE_DATA_DIR=/var/opt/mssql 
-CONTEXTO_ORGAO_A_DB_SEI_DSN =sqlsrv:server=org1-database,1433; Database=sei
+CONTEXTO_ORGAO_A_DB_SEI_DSN=sqlsrv:server=org1-database,1433; Database=sei
 
 
 
@@ -58,7 +52,7 @@ ORG2_DATABASE_TYPE=SqlServer
 ORG2_DATABASE_GUEST_PORT=1433
 ORG2_DATABASE_HOST_PORT=14332
 ORG2_DATABASE_DATA_DIR=/var/opt/mssql 
-CONTEXTO_ORGAO_B_DB_SEI_DSN =sqlsrv:server=org2-database,1433; Database=sei
+CONTEXTO_ORGAO_B_DB_SEI_DSN=sqlsrv:server=org2-database,1433; Database=sei
 
 
 

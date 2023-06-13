@@ -1,20 +1,16 @@
 ##### Diretório em que está localizada a instalação do SEI #####
 SEI_PATH=../../../../../../
-ENVIRONMENT_VERSION=9.8
+ENVIRONMENT_VERSION=10.0
 
 SEI_CONFIG=./assets/config/ConfiguracaoSEI.php
 SEI_DATABASE_NAME=sei
 SEI_DATABASE_USER=sei_user
 SEI_DATABASE_PASSWORD=sei_user
-SEI_DATABASE_USER_SCRIPT=sei_user
-SEI_DATABASE_PASSWORD_SCRIPT=sei_user
 
 SIP_CONFIG=./assets/config/ConfiguracaoSip.php
 SIP_DATABASE_NAME=sip
 SIP_DATABASE_USER=sip_user
 SIP_DATABASE_PASSWORD=sip_user
-SIP_DATABASE_USER_SCRIPT=sip_user
-SIP_DATABASE_PASSWORD_SCRIPT=sip_user
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############
@@ -29,13 +25,13 @@ ORG1_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 ##### BANCO DE DADOS DO ÓRGÃO 1 #####
 # Configurações do banco de dados MYSQL do ÓRGÃO 1
-ORG1_DATABASE_IMAGE=processoeletronico/vagrant_sei4_mysql
+ORG1_DATABASE_IMAGE=processoeletronico/vagrant_super4_mysql
 ORG1_DATABASE_HOST=mysql
 ORG1_DATABASE_TYPE=MySql
 ORG1_DATABASE_GUEST_PORT=3306
 ORG1_DATABASE_HOST_PORT=33061
 ORG1_DATABASE_DATA_DIR=/var/lib/mysql
-CONTEXTO_ORGAO_A_DB_SEI_DSN =mysql:host=org1-database;port=3306;dbname=sei
+CONTEXTO_ORGAO_A_DB_SEI_DSN=mysql:host=org1-database;port=3306;dbname=sei
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############
@@ -49,12 +45,12 @@ ORG2_CERTIFICADO=/opt/sei/config/mod-pen/certificado_org2.pem
 ORG2_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 # Configurações do banco de dados MYSQL do ÓRGÃO 2
-ORG2_DATABASE_IMAGE=processoeletronico/vagrant_sei4_mysql
+ORG2_DATABASE_IMAGE=processoeletronico/vagrant_super4_mysql
 ORG2_DATABASE_HOST=mysql
 ORG2_DATABASE_TYPE=MySql
 ORG2_DATABASE_GUEST_PORT=3306
 ORG2_DATABASE_HOST_PORT=33062
 ORG2_DATABASE_DATA_DIR=/var/lib/mysql
-CONTEXTO_ORGAO_B_DB_SEI_DSN =mysql:host=org2-database;port=3306;dbname=sei
+CONTEXTO_ORGAO_B_DB_SEI_DSN=mysql:host=org2-database;port=3306;dbname=sei
 
 

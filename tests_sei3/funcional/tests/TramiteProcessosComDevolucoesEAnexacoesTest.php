@@ -344,7 +344,7 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
         $this->assertEquals(4, count($listaDocumentosProcessoAnexado));
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste1, self::$destinatario);
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste2, self::$destinatario);
-        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste3, self::$destinatario);
-        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste3, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[3], self::$documentoTeste4, self::$destinatario);
     }
 }

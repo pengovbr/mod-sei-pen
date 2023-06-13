@@ -31,11 +31,11 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
 
         // Definição de dados de teste do processo principal
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        
+
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
-        
+
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
@@ -48,10 +48,10 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         $this->paginaCancelarDocumento->cancelar("Motivo de teste");
 
         $processo=self::$processoTeste;
-        
+
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        
-        $idAnexo=$bancoOrgaoA->query("SELECT an.id_anexo FROM sei.rel_protocolo_protocolo pp
+
+        $idAnexo = $bancoOrgaoA->query("SELECT an.id_anexo FROM sei.rel_protocolo_protocolo pp
         inner join sei.protocolo p on pp.id_protocolo_1=p.id_protocolo
         inner join sei.anexo an on an.id_protocolo=pp.id_protocolo_2
         where p.descricao=?",array($processo['DESCRICAO']));
@@ -62,7 +62,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
             $id_Anexo=$idAnexo[0]["ID_ANEXO"];
         }
 
-        $bancoOrgaoA->execute("delete from sei.anexo where id_anexo=?",array($idAnexo));
+        $bancoOrgaoA->execute("delete from sei.anexo where id_anexo=?",array($id_Anexo));
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(

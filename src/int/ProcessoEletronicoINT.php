@@ -194,7 +194,7 @@ class ProcessoEletronicoINT extends InfraINT {
             return '/infra_css/imagens/anexos.gif';
             break;
         case 'imagens/sei_erro.png':
-          return 'modulos/' . $strModulo . '/imagens/sei_erro.png';
+            return 'modulos/' . $strModulo . '/imagens/sei_erro.png';
           break;
         default:
           if($relPath==null){

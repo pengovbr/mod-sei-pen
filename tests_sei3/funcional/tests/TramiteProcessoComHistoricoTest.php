@@ -18,7 +18,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
      */
     public function test_tramitar_processo_da_origem()
     {
- 
+
 
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -53,7 +53,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
 
         // Captura o IDT do processo
-        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM sei.protocolo p 
+        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM sei.protocolo p
         inner join sei.md_pen_processo_eletronico pen on p.id_protocolo=pen.id_procedimento
         inner join sei.md_pen_tramite tra on pen.numero_registro=tra.numero_registro
         where protocolo_formatado=?",array(self::$protocoloTeste));
@@ -65,7 +65,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v2/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
@@ -77,41 +77,41 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
 
 
         foreach($saida->propriedadesAdicionais as $propriedades){
-        
+
             switch($propriedades->chave){
- 
+
                 case "CLASSIFICACAO_PrazoIntermediario_1":
                      $this->assertEquals('15', $propriedades->valor );
                      break;
-                   
+
                 case "CLASSIFICACAO_PrazoCorrente_1":
                      $this->assertEquals('5', $propriedades->valor );
                      break;
- 
+
                 case "MODULO_PEN_VERSAO":
                      $this->assertTrue(isset($propriedades->valor));
                      break;
- 
+
                 case "CLASSIFICACAO_CodigoEstruturado_1":
                     $this->assertEquals('052.21', $propriedades->valor );
                      break;
- 
+
                 case "CLASSIFICACAO_Destinacao_1":
                      $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
                      break;
- 
+
                 case "CLASSIFICACAO_Observacao_1":
                     $this->assertEquals('Condicional', substr($propriedades->valor,0,11) );
                      break;
- 
+
                 case "CLASSIFICACAO_Descricao_1":
                      $this->assertEquals('RECEITA (inclusive', substr($propriedades->valor,0,18));
                      break;
-                     
-                     
+
+
             }
         }
- 
+
      //    usort($saida->processo->itensHistorico,function($a,$b){
      //      return ($a->dataHoraOperacao < $b->dataHoraOperacao? -1: 1);
      //     });

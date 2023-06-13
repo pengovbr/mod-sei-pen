@@ -31,10 +31,13 @@ class VerificadorInstalacaoRN extends InfraRN
 {
     // A partir da versão 2.0.0, o módulo de integração do SEI com o PEN não será mais compatível com o SEI 3.0.X
     const COMPATIBILIDADE_MODULO_SEI = array(
+        // Versões SEI
         '3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7',
         '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7',
+        '4.0.8', '4.0.9', '4.0.10',
+        // Versões SUPER
         '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.4.6', '4.0.5.7',
-        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12'
+        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13'
     );
 
     public function __construct() {
@@ -168,7 +171,7 @@ class VerificadorInstalacaoRN extends InfraRN
     public function verificarCompatibilidadeBanco()
     {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
 
         $objPENIntegracao = new PENIntegracao();
         $strVersaoModulo = $objPENIntegracao->getVersao();
@@ -213,10 +216,43 @@ class VerificadorInstalacaoRN extends InfraRN
           throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital");
       }
 
+        $this->verificarCertificadoSSL();
+
         return true;
     }
 
+    /**
+     * Verifica certificado SSL
+     * 
+     * @return void
+     */
+    public function verificarCertificadoSSL()
+    {
+        try {
+            $url = $_SERVER['HOST_URL'];            
+            $orignal_parse = parse_url($url, PHP_URL_HOST);
+            $get = stream_context_create(array("ssl" => array("capture_peer_cert" => TRUE)));
+            $read = stream_socket_client("ssl://".$orignal_parse.":443", $errno, $errstr, 30, STREAM_CLIENT_CONNECT, $get);
+            $cert = stream_context_get_params($read);
+            $certinfo = openssl_x509_parse($cert['options']['ssl']['peer_certificate']);
 
+            $validFrom = DateTime::createFromFormat('ymdHisP', $certinfo['validFrom']);
+            $validTo = DateTime::createFromFormat('ymdHisP', $certinfo['validTo']);
+            $now = date_create('now');
+            if ($validFrom < $now && $validTo > $now) {
+                DebugPen::getInstance()->gravar(
+                    "- Certificado SSL válido de " . $validFrom->format('d/m/Y H:i:s') . " à " . $validTo->format('d/m/Y H:i:s'),
+                    1,
+                    false,
+                    false
+                );
+            } else {
+                DebugPen::getInstance()->gravar("- Certificado SSL não é válido", 1, false, false);
+            }
+        } catch (\Throwable $th) {
+            DebugPen::getInstance()->gravar("- Certificado SSL não é válido", 1, false, false);
+        }
+    }
 
     /**
     * Verifica a conexão com o Barramento de Serviços do PEN, utilizando o endereço e certificados informados
@@ -243,12 +279,20 @@ class VerificadorInstalacaoRN extends InfraRN
           curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $bolEmProducao);
           curl_setopt($curl, CURLOPT_SSLCERT, $strLocalizacaoCertificadoDigital);
           curl_setopt($curl, CURLOPT_SSLCERTPASSWD, $strSenhaCertificadoDigital);
+          curl_setopt($curl, CURLOPT_FAILONERROR, true);
 
           $strOutput = curl_exec($curl);
+
+          if (curl_errno($curl)) {
+             $strErrorMsg = curl_error($curl);
+          }
+          if (isset($strErrorMsg)) {
+              throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
+          }
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new InfraException("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
+            throw new Exception("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
         }
 
       } finally{

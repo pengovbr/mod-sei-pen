@@ -139,15 +139,15 @@ class PendenciasTramiteRN extends InfraRN
   private function validarCertificado()
     {
     if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException('Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não informado.');
+        throw new InfraException('Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
     }
 
     if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Certificado digital de autenticação do serviço de integração do Processo Eletrônico Nacional(PEN) não encontrado.");
+        throw new InfraException("Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
     }
 
     if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Dados de autenticação do serviço de integração do Processo Eletrónico Nacional(PEN) não informados.');
+        throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
     }
   }
 

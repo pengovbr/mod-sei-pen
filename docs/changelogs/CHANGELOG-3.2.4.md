@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.1.22)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.2.4)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
@@ -7,7 +7,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
     * 3.1.0 até 3.1.7, 
-    * 4.0.0 até 4.0.7
+    * 4.0.0 até 4.0.10
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
@@ -19,26 +19,23 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Homologação de funcionamento do mod-sei-pen para SEI 4.0.8, 4.0.9 e 4.0.10
 
-#### Ajustes nos testes (#179)
-
-Ajustes nos testes do módulo para o correto funcionamento da versão do SEI 3.1.4 e 3.1.7.
-
-
-#### Corrige erro ao tentar tramitar processo (#181)
-
-Ao tentar tramitar processo que já foi tramitado via barramento e a base foi restaurada quando ocorreu desconcentração administrativa os processo não consegue tramitar via barramento por apresentar erro de geração de novo NRE.
-
-#### Corrige erro de hash nos documentos (#183)
-
-Ao mudar a sigla do órgão o título dos documentos estão sendo alterados. Nesse cenário o módulo entende que houve alteração no documento e apresenta mensagem de erro informando que o hash foi alterado.
+Homologado módulo mod-sei-pen para uso no SEI (4.0.8, 4.0.9 e 4.0.10) e SUPER (4.0.9.12 e 4.0.9.13), removendo as travas e mensagens de alertas emitidos durante uso instalação e uso nestas versôes.
 
 
-#### Corrige erro invalid object name 'md_pen_rel_expedir_lote' (#185)
+#### Correção de erro no recebimento de processo devido a restrição de criação de tipo de processo na unidade
 
-Ao tentar fazer uso da funcionalidade tramitação em lote o sistema está apresentando o erro abaixo: 
+Corrigido regras de atribuição automática do Tipo do Processo no recebimento baseando-se no nome do Tipo de Processo na origem. As versões anteriores geravam erro e recusa do processo caso o Tipo de Processo não estivesse habilitado para uso na unidade configurada para receber processos externos. A falha descrita anteriormente gerava recusa no recebimento do processo pelo seguinte motivo: Tipo de processo X não liberado para a unidade Y. 
 
-exception 'Exception' with message ''Warning: /opt/infra/infra_php/InfraSqlServer.php linha:407. mssql_query(): message: Invalid object name 'md_pen_rel_expedir_lote'. (severity 16)
+
+#### Correção de erro na atualização do módulo para versâo 3.2.x em SQLServer (erro Rename) 
+
+Corrigido falha no script de atualização do módulo quando utilizado SQLServer devido a falha na execução de operação para modificação de nome de tabelas e colunas, operação RENAME.
+
+
+#### Correção de exibição de ícone de erro em página configurações do módulo
+
 
 
 ### Atualização de Versão

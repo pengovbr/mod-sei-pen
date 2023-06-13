@@ -5,7 +5,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 class RepositorioDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
-  	 return null;
+     return null;
   }
 
   public function montar() {
