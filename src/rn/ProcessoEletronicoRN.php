@@ -604,7 +604,7 @@ class ProcessoEletronicoRN extends InfraRN
 
             $msg = "Não foi possível enviar o processo '".$protocolos->getStrProtocoloFormatado()."' por meio do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
             if (count($arrProtocolos) > 0) {
-                $msg .= " Ex.: A ordem do documento ".$arrProtocolos[0]->getDblIdProtocolo2()." foi modificada na árvore do processo, mudando da posição 1 para a posição ".($arrProtocolos[0]->getDblIdProtocolo2() + 1).".";
+                $msg .= " Ex.: A ordem do documento ".str_pad($arrProtocolos[0]->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT)." foi modificada na árvore do processo, mudando da posição 1 para a posição ".($arrProtocolos[0]->getNumSequencia() + 1).".";
             }
             $msg .= " Sugere-se desfazer as alterações acima listadas antes de realizar nova tentativa de trâmite. Mantenha sempre a ordem original dos documentos de processos recebidos pelo Tramita.GOV.BR, uma vez que sua instrução foi realizada por outro órgão. Tenha em mente que qualquer alteração nessa ordem pode impedir um novo trâmite do processo.";
 
