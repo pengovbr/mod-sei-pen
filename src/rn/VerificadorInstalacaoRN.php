@@ -208,12 +208,12 @@ class VerificadorInstalacaoRN extends InfraRN
         $strLocalizacaoAjustada = 'file://' . $strLocalizacaoCertificadoDigital;
         $strPublicKey = openssl_pkey_get_public($strLocalizacaoAjustada);
       if(empty($strPublicKey)){
-          throw new InfraException("Chave pública do certificado digital de autenticação no Barramento do PEN não pode ser localizada em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave pública do certificado digital de autenticação no Barramento do PEN não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
