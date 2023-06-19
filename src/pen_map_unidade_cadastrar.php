@@ -103,13 +103,15 @@ try {
         $_POST['id_unidade_rh'],
         $_POST['hdnRepoEstruturas'] ?? ""
     );
-    
-    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-    $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
-    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
-    $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
 
-    $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
+    if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+    
+        $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
+    }
 
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
       exit(0);
@@ -168,7 +170,7 @@ try {
   }
 
   $strCssRestricao = ""; $strHtmlRestricao = ""; $strJsGlobalRestricao = ""; $strJsInicializarRestricao = "";
-   ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
+    ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);

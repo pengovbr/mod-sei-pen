@@ -512,22 +512,27 @@ class PENIntegracao extends SeiIntegracao
 
           $objUnidadeRN = new UnidadeRN();
           $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
-          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-          $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
-          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
-          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
           
-          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-          $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
           $arrObjEstruturaDTO = array();
-          foreach ($arrEstruturas as $key => $unidade) {
-            if ($unidade->getNumIdUnidadeRHRestricao() != null) {
-              $arrObjEstruturaDTO[] = $unidade;
+          try {
+            $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+            $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
+            $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
+            $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
+            
+            $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+            
+            foreach ($arrEstruturas as $key => $unidade) {
+              if ($unidade->getNumIdUnidadeRHRestricao() != null) {
+                $arrObjEstruturaDTO[] = $unidade;
+              }
             }
+          } catch (Exception $e) {
           }
+          
           if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
           }

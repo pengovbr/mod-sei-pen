@@ -56,28 +56,32 @@ try {
         $objPenParametroRN = new PenParametroRN();
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
         
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->retNumIdUnidadeRH();
-        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        try {
+            $objUnidadeDTO = new PenUnidadeDTO();
+            $objUnidadeDTO->retNumIdUnidadeRH();
+            $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-        
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
-        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
-        
-        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-        //Preparação dos dados para montagem da tela de expedição de processos
-        if ($arrIdUnidadeRestricao != null) {
-            $repositorios = array();
-            foreach ($arrIdUnidadeRestricao as $value) {
-                $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+            $objUnidadeRN = new UnidadeRN();
+            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+            
+            $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+            $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+            $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+            $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+            
+            $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+            $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+            //Preparação dos dados para montagem da tela de expedição de processos
+            if ($arrIdUnidadeRestricao != null) {
+                $repositorios = array();
+                foreach ($arrIdUnidadeRestricao as $value) {
+                    $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+                }
+            } else {
+                $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
             }
-        } else {
+        } catch (Exception $e) {
             $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
         }
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();

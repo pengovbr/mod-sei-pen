@@ -202,146 +202,147 @@ class ProcessoEletronicoINT extends InfraINT {
 
   public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
 	{
-    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-    $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
-    $objPenUnidadeRestricaoDTO->retTodos();
-    
-    $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-    $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-    $items = array();
-    $arrayKeys = array();
-    $arrObjPenUnidadeDTO = array();
-    $itemsUnidades = array();
-    $hdnRepoEstruturas = array();
-    $strHtmlRepoEstruturasUnidades = "";
-    foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
-      if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
-        //IdUnidadeRestricao NomeUnidadeRestricao
-        $arrayKeys[] = $item->getNumIdUnidadeRestricao();
-        $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
-        //$strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" name="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" value="" />' . "\n";
-        $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+    try {
+      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+      $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
+      $objPenUnidadeRestricaoDTO->retTodos();
+      
+      $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+      $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+      $items = array();
+      $arrayKeys = array();
+      $arrObjPenUnidadeDTO = array();
+      $itemsUnidades = array();
+      $hdnRepoEstruturas = array();
+      $strHtmlRepoEstruturasUnidades = "";
+      foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
+        if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
+          //IdUnidadeRestricao NomeUnidadeRestricao
+          $arrayKeys[] = $item->getNumIdUnidadeRestricao();
+          $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
+          //$strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" name="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" value="" />' . "\n";
+          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+        }
+        if ($item->getNumIdUnidadeRHRestricao() != null) {
+          $arrObjPenUnidadeDTO[] = $item;
+          $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
+          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
+        }
       }
-      if ($item->getNumIdUnidadeRHRestricao() != null) {
-        $arrObjPenUnidadeDTO[] = $item;
-        $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
-        $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
+      foreach ($hdnRepoEstruturas as $key => $unidades) {
+        $value = implode('¥', $unidades);
+        $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key 
+          . '" name="hdnRepoEstruturas' . $key . '" value="' . $value . '" />' . "\n";
       }
-    }
-    foreach ($hdnRepoEstruturas as $key => $unidades) {
-      $value = implode('¥', $unidades);
-      $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key 
-        . '" name="hdnRepoEstruturas' . $key . '" value="' . $value . '" />' . "\n";
-    }
-    $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
-    $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
-    $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
-    $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
-    
-    $strCss = ''
-			. ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
-			. ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
-			. ' #selRepoEstruturas {position:absolute;left:0%;top:29%;width:20%;}'
-			. ' #divOpcoesRepoEstruturas {position:absolute;left:21%;top:29%;}'
-			. ' '
-			. ' #lblUnidades {position:absolute;left:25%;top:0%;}'
-			. ' #txtUnidade {position:absolute;left:25%;top:13%;width:54.5%;}'
-			. ' #selUnidades {position:absolute;left:25%;top:29%;width:55%;}'
-			. ' #divOpcoesUnidades {position:absolute;left:81%;top:29%;}';
+      $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
+      $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
+      $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+      $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+      
+      $strCss = ''
+        . ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
+        . ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
+        . ' #selRepoEstruturas {position:absolute;left:0%;top:29%;width:20%;}'
+        . ' #divOpcoesRepoEstruturas {position:absolute;left:21%;top:29%;}'
+        . ' '
+        . ' #lblUnidades {position:absolute;left:25%;top:0%;}'
+        . ' #txtUnidade {position:absolute;left:25%;top:13%;width:54.5%;}'
+        . ' #selUnidades {position:absolute;left:25%;top:29%;width:55%;}'
+        . ' #divOpcoesUnidades {position:absolute;left:81%;top:29%;}';
 
-		$strJsGlobal = ''
-			. ' var objLupaRepositoriosEstruturas = null;'
-			. ' var objAutoCompletarOrgao = null;'
-			. ' var objLupaUnidades = null;'
-			. ' var objAutoCompletarUnidade = null;'
-			. ' '
-			. ' function trocarOrgaoRestricao(){'
-			. ' document.getElementById(\'hdnUnidades\').value = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
-			. ' objLupaUnidades.montar();'
-			. ' };';
+      $strJsGlobal = ''
+        . ' var objLupaRepositoriosEstruturas = null;'
+        . ' var objAutoCompletarOrgao = null;'
+        . ' var objLupaUnidades = null;'
+        . ' var objAutoCompletarUnidade = null;'
+        . ' '
+        . ' function trocarOrgaoRestricao(){'
+        . ' document.getElementById(\'hdnUnidades\').value = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . ' objLupaUnidades.montar();'
+        . ' };';
 
-		$strJsInicializar = ''
-			. ' objLupaRepositoriosEstruturas	= new infraLupaSelect(\'selRepoEstruturas\',\'hdnRepoEstruturas\',\'' . /*SessaoSEI::getInstance()->assinarLink('controlador.php?acao=orgao_selecionar&tipo_selecao=2&id_object=objLupaRepositoriosEstruturas') .*/ '\');'
-			. ' objLupaRepositoriosEstruturas.processarRemocao = function(itens){'
-			. ' 	objLupaUnidades.limpar();'
-			. ' 	for(var i=0;i < itens.length;i++){'
-			. ' 	document.getElementById(\'hdnRepoEstruturas\' + itens[i].value).value = \'\';'
-			. ' 	}'
-			. ' 	return true;'
-			. ' };'
-			. ' '
-			. ' objLupaRepositoriosEstruturas.finalizarSelecao = function(){'
-			. ' 	objLupaUnidades.limpar();'
-			. ' };'
-			. ' '
-			. ' objAutoCompletarRepoEstruturas = new infraAjaxAutoCompletar(\'hdnIdRepoEstruturas\',\'txtRepoEstruturas\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_listar_repositorios_estruturas_auto_completar') . '\');'
-			. ' objAutoCompletarRepoEstruturas.limparCampo = true;'
-			. ' objAutoCompletarRepoEstruturas.prepararExecucao = function(){'
-			. ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtRepoEstruturas\').value;'
-			. ' };'
-			. ' '
-			. ' objAutoCompletarRepoEstruturas.processarResultado = function(id,descricao,complemento){'
-			. ' 	if (id!=\'\'){ '
-			. ' 	  objLupaRepositoriosEstruturas.adicionar(id,descricao,document.getElementById(\'txtRepoEstruturas\'));'      
-			. ' 	  objLupaUnidades.limpar();'
-      . '     hdnRepoEst = document.getElementById("hdnRepoEstruturas" + id); '
-      . '     if (hdnRepoEst == null) { '
-      . '       html = document.createElement(\'input\'); '
-      . '       html.type = \'hidden\'; '
-      . '       html.id=\'hdnRepoEstruturas\' + id;'
-      . '       html.name= \'hdnRepoEstruturas\'+ id;'
-      . '       divRestricao = document.getElementById(\'divRestricao\');'
-      . '       divRestricao.appendChild(html);'
-      . '     };'
-			. ' 	};'
-			. ' };'
-			. ' '
-			. ' objLupaUnidades = new infraLupaSelect(\'selUnidades\',\'hdnUnidades\',\'\');'
-			. ' objLupaUnidades.validarSelecionar = function(){'
-			. ' 	if (document.getElementById(\'selOrgaos\').selectedIndex==-1){'
-			. ' 	alert(\'Nenhum RepoEstruturas selecionado.\');'
-			. ' 	return false;'
-			. ' 	}'
-			. ' 	objLupaUnidades.url = document.getElementById(\'lnkRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
-			. ' 	return true;'
-			. ' };'
-			. ' '
-			. ' objLupaUnidades.finalizarRemocao = function(){'
-			. ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
-			. ' 	return true;'
-			. ' };'
-			. ' '
-			. ' objLupaUnidades.finalizarSelecao = function(){'
-			. ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
-			. ' };'
-			. ' '
-			. ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento') . '\');'
-			. ' objAutoCompletarUnidade.limparCampo = true;'
-			. ' objAutoCompletarUnidade.prepararExecucao = function(){'
-			. ' 	if (document.getElementById(\'selRepoEstruturas\').selectedIndex==-1){'
-			. ' 	alert(\'Nenhum RepoEstruturas selecionado.\');'
-			. ' 	return false;'
-			. ' 	}'
-			. ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repositorio=\'+document.getElementById(\'selRepoEstruturas\').value;'
-			. ' };'
-			. ' '
-      . ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
-      . ' 	if (id!=\'\'){ '
-      . ' 	objLupaUnidades.adicionar(id,descricao,document.getElementById(\'txtUnidade\'));'
-      . '   repo = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
-      . '   repo += (repo != \'\' ? "¥" : "") + id + "±" + descricao;'
-      . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = repo;'
-      . ' 	}'
-      . ' };'
-      . ' '
-			. ' if (document.getElementById(\'selRepoEstruturas\').options.length){'
-			. ' 	document.getElementById(\'selRepoEstruturas\').disabled = false;'
-			. ' 	document.getElementById(\'selRepoEstruturas\').options[0].selected = true;'
-			. ' 	trocarRepoEstruturasRestricao();'
-			. ' };';
+      $strJsInicializar = ''
+        . ' objLupaRepositoriosEstruturas	= new infraLupaSelect(\'selRepoEstruturas\',\'hdnRepoEstruturas\',\'' . /*SessaoSEI::getInstance()->assinarLink('controlador.php?acao=orgao_selecionar&tipo_selecao=2&id_object=objLupaRepositoriosEstruturas') .*/ '\');'
+        . ' objLupaRepositoriosEstruturas.processarRemocao = function(itens){'
+        . ' 	objLupaUnidades.limpar();'
+        . ' 	for(var i=0;i < itens.length;i++){'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + itens[i].value).value = \'\';'
+        . ' 	}'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaRepositoriosEstruturas.finalizarSelecao = function(){'
+        . ' 	objLupaUnidades.limpar();'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarRepoEstruturas = new infraAjaxAutoCompletar(\'hdnIdRepoEstruturas\',\'txtRepoEstruturas\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_listar_repositorios_estruturas_auto_completar') . '\');'
+        . ' objAutoCompletarRepoEstruturas.limparCampo = true;'
+        . ' objAutoCompletarRepoEstruturas.prepararExecucao = function(){'
+        . ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtRepoEstruturas\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarRepoEstruturas.processarResultado = function(id,descricao,complemento){'
+        . ' 	if (id!=\'\'){ '
+        . ' 	  objLupaRepositoriosEstruturas.adicionar(id,descricao,document.getElementById(\'txtRepoEstruturas\'));'      
+        . ' 	  objLupaUnidades.limpar();'
+        . '     hdnRepoEst = document.getElementById("hdnRepoEstruturas" + id); '
+        . '     if (hdnRepoEst == null) { '
+        . '       html = document.createElement(\'input\'); '
+        . '       html.type = \'hidden\'; '
+        . '       html.id=\'hdnRepoEstruturas\' + id;'
+        . '       html.name= \'hdnRepoEstruturas\'+ id;'
+        . '       divRestricao = document.getElementById(\'divRestricao\');'
+        . '       divRestricao.appendChild(html);'
+        . '     };'
+        . ' 	};'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades = new infraLupaSelect(\'selUnidades\',\'hdnUnidades\',\'\');'
+        . ' objLupaUnidades.validarSelecionar = function(){'
+        . ' 	if (document.getElementById(\'selOrgaos\').selectedIndex==-1){'
+        . ' 	alert(\'Nenhum RepoEstruturas selecionado.\');'
+        . ' 	return false;'
+        . ' 	}'
+        . ' 	objLupaUnidades.url = document.getElementById(\'lnkRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades.finalizarRemocao = function(){'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades.finalizarSelecao = function(){'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento') . '\');'
+        . ' objAutoCompletarUnidade.limparCampo = true;'
+        . ' objAutoCompletarUnidade.prepararExecucao = function(){'
+        . ' 	if (document.getElementById(\'selRepoEstruturas\').selectedIndex==-1){'
+        . ' 	alert(\'Nenhum RepoEstruturas selecionado.\');'
+        . ' 	return false;'
+        . ' 	}'
+        . ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repositorio=\'+document.getElementById(\'selRepoEstruturas\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
+        . ' 	if (id!=\'\'){ '
+        . ' 	objLupaUnidades.adicionar(id,descricao,document.getElementById(\'txtUnidade\'));'
+        . '   repo = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . '   repo += (repo != \'\' ? "¥" : "") + id + "±" + descricao;'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = repo;'
+        . ' 	}'
+        . ' };'
+        . ' '
+        . ' if (document.getElementById(\'selRepoEstruturas\').options.length){'
+        . ' 	document.getElementById(\'selRepoEstruturas\').disabled = false;'
+        . ' 	document.getElementById(\'selRepoEstruturas\').options[0].selected = true;'
+        . ' 	trocarRepoEstruturasRestricao();'
+        . ' };';
 
-    
-		$strHtml = ''
+      
+      $strHtml = ''
 			. ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
 			. ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>'
 			. ' <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />'
@@ -369,5 +370,9 @@ class ProcessoEletronicoINT extends InfraINT {
 			. ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />'
 			. ' ' . $strHtmlRepoEstruturasUnidades . ''
 			. ' </div>';
-	}
+	
+    } catch (Exception $e) {
+      // não grava nada e não retorna objeto restrição mapeamento de unidades
+    }
+  }
 }
