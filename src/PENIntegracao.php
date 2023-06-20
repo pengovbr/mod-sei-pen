@@ -161,7 +161,7 @@ class PENIntegracao extends SeiIntegracao
 
     // Reenvio externo de processos
     $bolAcaoReenviarProcesso = $objSessaoSEI->verificarPermissao('pen_reenviar_processo');
-    if ($bolAcaoReenviarProcesso && ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO))) {
+    if ($bolAcaoReenviarProcesso && ($objAtividadeDTO && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO)) && $objProcedimentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
       $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
       $strAcoesProcedimento .= '<a id="validar_reenviar_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_reenviar_processo&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . ' alt="Reenvio Externo de Processo" title="Reenvio Externo de Processo" /></a>';
     }

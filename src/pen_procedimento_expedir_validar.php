@@ -39,6 +39,12 @@ try {
       $objInfraException->adicionarValidacao('Informe Unidade de destino', $strProtocoloFormatado);
   }
 
+  if (isset($_POST['penReenviarProcesso'])) {
+    $objProcedimentoDTO->setBolPenReenviarProcesso($_POST['penReenviarProcesso']);
+  } else {
+    $objProcedimentoDTO->setBolPenReenviarProcesso(false);
+  }
+
   if(!$objInfraException->contemValidacoes()) {
       $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
