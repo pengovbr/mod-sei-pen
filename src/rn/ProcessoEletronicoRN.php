@@ -589,7 +589,8 @@ class ProcessoEletronicoRN extends InfraRN
             $objProtocoloDTO = new RelProtocoloProtocoloDTO();
             $objProtocoloDTO->setDblIdProtocolo1($objAtividadeDTO->getDblIdProtocolo());
             $objProtocoloDTO->setOrd('IdRelProtocoloProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retTodos();
+            $objProtocoloDTO->retNumSequencia();
+            $objProtocoloDTO->retDblIdProtocolo2();
             $objProtocoloBD = new RelProtocoloProtocoloBD(BancoSEI::getInstance());
             $arrProtocolos = $objProtocoloBD->listar($objProtocoloDTO);
 
@@ -597,12 +598,13 @@ class ProcessoEletronicoRN extends InfraRN
             $objProtocoloDTO = new ProtocoloDTO();
             $objProtocoloDTO->setDblIdProtocolo($objAtividadeDTO->getDblIdProtocolo());
             $objProtocoloDTO->setOrd('IdProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retTodos();
+            $objProtocoloDTO->retDblIdProtocolo();
+            $objProtocoloDTO->retStrProtocoloFormatado();
             $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-            $protocolos = $objProtocoloBD->listar($objProtocoloDTO)[0];
+            $protocolo = $objProtocoloBD->consultar($objProtocoloDTO);
 
 
-            $msg = "Não foi possível enviar o processo '".$protocolos->getStrProtocoloFormatado()."' por meio do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
+            $msg = "Não foi possível enviar o processo '".$protocolo->getStrProtocoloFormatado()."' por meio do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
             foreach ($arrProtocolos as $index => $protocolo) {
                 if ($index != $protocolo->getNumSequencia() && $index == 0){
                     $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
