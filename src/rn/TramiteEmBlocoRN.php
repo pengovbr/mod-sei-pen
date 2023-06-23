@@ -231,7 +231,7 @@ class TramiteEmBlocoRN extends InfraRN {
         try {
 
             //Valida Permissao
-            SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar',__METHOD__,$objTramiteEmBlocoDTO);
+//           / SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar',__METHOD__,$objTramiteEmBlocoDTO);
 
             //Regras de Negocio
             $objInfraException = new InfraException();

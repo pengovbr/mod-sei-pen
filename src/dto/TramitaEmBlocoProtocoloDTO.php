@@ -10,6 +10,10 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
   	 return 'md_pen_tramita_em_bloco_protocolo';
   }
 
+  public function getStrNomeSequenciaNativa() {
+    return 'md_pen_seq_tramita_em_bloco_protocolo';
+  }
+
   public function montar() {
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Id', 'id');
@@ -31,7 +35,7 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'pe.numero_registro', 'md_pen_processo_eletronico pe');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'pt.id_tramite', 'md_pen_tramite pt');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'StaEstadoProtocolo', 'p1.sta_estado', 'protocolo p1');
-    
+
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'TramiteDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'AtividadeDTO');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ,'ProtocoloDTO');
@@ -40,11 +44,11 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinAberto');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM,'StaIdTarefa');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_STR,'SinObteveRecusa');
-    
+
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
     $this->configurarPK('IdProtocolo',InfraDTO::$TIPO_PK_INFORMADO);
     $this->configurarPK('IdTramitaEmBloco',InfraDTO::$TIPO_PK_INFORMADO);
-        
+
     $this->configurarFK('IdProtocolo', 'protocolo p1', 'p1.id_protocolo');
 		$this->configurarFK('IdTramitaEmBloco', 'md_pen_tramita_em_bloco tb1', 'tb1.id');
     $this->configurarFK('IdProtocolo', 'md_pen_processo_eletronico pe', 'pe.id_procedimento', InfraDTO::$TIPO_FK_OPCIONAL);
