@@ -2,7 +2,7 @@
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
-As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizada em versões anteriores.
+As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizadas em versões anteriores.
 
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:

@@ -2,7 +2,7 @@
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
-As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizada em versões anteriores.
+As melhorias entregues em cada uma das versões são cumulativas, ou seja, contêm todas as implementações realizadas em versões anteriores.
 
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
@@ -20,61 +20,68 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
 
-#### Disponibilizado novo parâmetro para permitir o envio de apenas os documentos pendentes no destinatário
+#### Disponibilizado novo parâmetro para permitir o envio de apenas os documentos pendentes no destinatário, evitando erros relacionados à hash inválido 
 
-Adicionado novo parâmetro de configuração EnviarApenasComponentesDigitaisPendentes em ConfiguracaoModPEN.php para possibilitar a troca de processos enviando apenas o conjunto de documentos pendentes na instituição destinatária, e não todos os documentos do processo. Esta funcionalidade é útil nos cenários de envio e devolução de processos grandes, diminuindo consideravelmente a velocidade da transmissão e evitando erros relacionados a problemas de validação de Hash. 
-
-A configuração deste parâmetro exige a indicação explícita do Repositório e Unidade de destino, já que é necessário que o sistema destinatário também esteja utilizando esta versão do módulo ou outra superior para não gerar erros durante o recebimento dos processos.
+O tratamento de erros de trâmites relacionado a validação de hash por meio de um parâmetro de configuração  EnviarApenasComponentesDigitaisPendentes em ConfiguracaoModPEN.php (Ler seção de parâmetros no README para maiores detalhes);
 
 
 #### Correção de erro de envio de documentos movimentados para outros processos (#228)
 
-Corrigido falha ao realizar o trâmite de processos que possuam documentos que foram movidos para outros processos e depois retornados ao mesmo processo, mas em posição diferente. Neste cenário, o envio de processo falhava com indicação de erro ao salvar as informações nas tabelas de componentes digitais por duplicidade de chave primária. 
+O erro que impossibilita o envio de processo com documento externo movimentado para outro processo e depois retornado ao original( documento duplicado, sendo um deles apenas uma referência a movimentação) foi corrigido.
 
 
 #### Melhoria de desempenho dos trâmites com o aumento do tamanho do bloco de particionamento de arquivos (#268)
 
-Modificado o valor padrão dos blocos de dados de transmissão de dados para o Tramita.gov.br de 5Mbs para 50Mbs, aumentando a velocidade do envio e recebimento de processos e diminuindo o processamento de validação da integridade dos documentos.  
+O tamanho do bloco de dados foi aumentado de 5 para 50Mbs, seja para o envio ou recebimento de processos por meio do Tramita.GOV.BR. Dessa forma, contribuindo para celeridade no trâmite de processos.
 
 
 #### Correção de erro de múltiplos envios de processo por meio do Envio em Lote (#267)
 
-Corrigido falha nas rotinas de processamento de envio de processos em lote que gerava inúmeras tentativas de transmissão de processos com falha em seus dados, gerando processamento desnecessário e gerando inúmeros registros no histórico de trâmites no Painel de Controle da instituição no Tramita.gov.br 
+A correção do erro da funcionalidade Envio Lote que possibilitava o envio n-plicados do mesmo processo para o Tramita.GOV.BR.
 
 
 #### Correção de erro processando operação consultarHtmlVersao no envio em lote (#272)
 
-Corrigido "Erro processando operação consultarHtmlVersao." quando realizado um trâmite de processo utilizando a funcionalidade de envio em lote. O erro ocorre quando o sistema está configurado para utilização de protocolo HTTPS e o processo contém documentos internos e e-mails. 
+Corrigido "Erro processando operação consultarHtmlVersao." quando realizado um trâmite de processo utilizando a funcionalidade de envio em lote. O erro ocorre quando o sistema está configurado para utilização de protocolo HTTPS e o processo contém documentos internos e e-mails.
 
 
 #### Adicionado mensagem de validação para evitar a configuração de Tipo de Processo padrão sem Assunto vinculado (#67)
     
-Melhoria foi inserida na página de configuração do módulo para evitar a configuração de tipos de processos sem assunto vinculado, provocando erro no recebimento e recusa do processo por falta desta configuração.
+"Na funcionalidade Processo Eletrônico Nacional --> Parâmetros de Configuração do Módulo de Tramitação PEN não é possível escolher um Tipo de Processo Externo sem assunto vinculado. Uma validação foi incluída ao salvar a alteração.
+
+A ausência de assunto desse tipo de processo causava a recusa do trâmite. Portanto, com essa correção o processo não será recusado pelo seguinte motivo:  Nenhum assunto foi informado."
 
 
-#### Restringido exibição de botão 'Cancelar Tramitação Externa' somente para a unidade que envio processo (#126)
+#### Exibição do botão 'Cancelar Tramitação Externa' somente para a unidade que enviou o processo (#126)
 
-As versões anteriores do módulo permitiam, erroneamente, a qualquer unidade do sistema a possibilidade de cancelar o trâmite de um processo. A melhoria aplicada nesta versão permite que apenas a unidade que enviou o processo possa cancelar o trâmite externo.
-
-
-#### Restrição de parâmetro "Unidade de Representação de Órgãos Externo" para não receber processos
-
-Adicionado restrição na página de configuração do módulo para permitir apenas a escolha de "Unidade de Representação de Órgãos Externo" que não estejam disponíveis para envio de processos. Isto é necessário para evitar a escolha de uma unidade que esteja em pleno uso pela instituição e com usuários vinculados, indo contra as orientações descritas no manual e possibilitando que processos sejam recebidos automaticamente no estado fechado ou com possibilidade de realização de alterações indevidas no processo.
+Apenas a unidade responsável pelo envio do processo para o Tramita.GO.BR poderá cancelar o seu trâmite.
 
 
-#### Adicionado melhorias no log de verificação da disponibilidade do Tramita.gov.br (#270)
+#### Restrição do parâmetro "Unidade SEI para Representação de Órgãos Externos" para exibir somente unidades habilitadas para receber processos
 
-A melhoria adicionada no log permitirá que a equipe de operações possa identificar, com precisão, qual a falha de conectividade está ocorrendo, principalmente por falhas relacionadas a falta de confiabilidade do servidor do SEI com os certificados digitais Let's Encrypt utilizados pela API do Tramita.gov.br
+Adicionada validação na página de configuração do módulo para permitir apenas a escolha de unidades disponíveis para o envio de processos. As unidades com o campo 'Disponível para Envio de Processos' desativado não podem mais ser selecionadas no campo 'Unidade SEI para Representação de Órgãos Externos'.
+
+
+#### Detalhamento no log de verificação da disponibilidade do Tramita.gov.br (#270)
+
+O log foi melhorado para contemplar mais detalhes e facilitar o entendimento do problema antes da abertura de chamado para a Central de Atendimento.
 
 
 #### Tratamento para não recusar trâmite em caso de falha no registro do recibo (#215)
 
+O trâmite não será mais recusado em caso de falha no registro do recibo.
+
 
 #### Correção de erro de validação de hash em processos contendo documento do tipo e-mail
+
+A correção do erro de validação de hash para processos com e-mails, no qual o envio externo ficava em situação "Validação em Informações do Processo" e não chegava ao status 1. 
+
+OBS: Soluciona os casos em que o processo foi enviado na versão 3.X.X e posteriormente na 4.X.X ocorreu o erro acima. 
 
 
 #### Correção de erros de formatação nos campos da página envio de processos em lote (#200)
 
+Melhoria de Usabilidade da Tela Envio Externo de Processo em Lote, a qual é acessada por meio do Controle de Processos.
 
 
 ### Atualização de Versão

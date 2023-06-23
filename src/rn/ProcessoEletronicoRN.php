@@ -2159,8 +2159,13 @@ class ProcessoEletronicoRN extends InfraRN
         $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
         $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
     } catch(Exception $e){
-        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]. Detalhes: " . $e->getMessage();
         LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+    finally{
+      if (empty($numTamanhoBlocoMB)){
+        $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+      }
     }
 
     return $numTamanhoBlocoMB;
