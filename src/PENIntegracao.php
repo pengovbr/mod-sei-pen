@@ -118,7 +118,6 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function desativarHipoteseLegal($arrObjHipoteseLegalDTO) {
-      var_dump($arrObjHipoteseLegalDTO[0]);
     $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO);
   }
 
