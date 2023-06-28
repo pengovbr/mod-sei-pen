@@ -584,7 +584,7 @@ class ProcessoEletronicoRN extends InfraRN
             $objProtocoloDTO = new ProtocoloDTO();
             $objProtocoloDTO->setDblIdProtocolo($objAtividadeDTO->getDblIdProtocolo());
             $objProtocoloDTO->setOrd('IdProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retTodos();
+            $objProtocoloDTO->retStrProtocoloFormatado();
             $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
             $protocolo = $objProtocoloBD->listar($objProtocoloDTO)[0];
 
