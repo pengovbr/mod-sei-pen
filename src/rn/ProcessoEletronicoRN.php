@@ -1499,7 +1499,7 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite. ". $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -1523,7 +1523,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $resultado->conteudoDoReciboDeEnvio;
     }
     catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite de envio. " . $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
