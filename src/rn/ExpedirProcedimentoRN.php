@@ -1101,19 +1101,16 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
         $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
-        
-        //Mapeamento achado
-        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
-        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
-      //O padrão de recebimento está nulo e não achou mapeamento
-      if($numCodigoEspecieMapeada == null) {
+
+      if($objPenRelTipoDocMapEnviadoDTO == null) {
           $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
           $objPenRelTipoDocMapEnviadoDTO->retNumCodigoEspecie();
           $objPenRelTipoDocMapEnviadoDTO->setNumMaxRegistrosRetorno(1);
           $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
-          $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
       }
-      
+
+        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
+        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
 
       if(!isset($numCodigoEspecieMapeada)) {
           throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
