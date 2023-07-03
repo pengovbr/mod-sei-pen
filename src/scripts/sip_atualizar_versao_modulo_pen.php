@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.0");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -282,6 +282,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.4.0':
+            $this->instalarV3040();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1811,6 +1813,51 @@ class PenAtualizarSipRN extends InfraRN
     {
         $this->atualizarNumeroVersao("3.3.0");
     }
+  
+  protected function instalarV3040()
+  {
+    /* Corrige nome de menu de trâmite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+    if (empty($objItemMenuDTO)) {
+      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+    }
+  
+    // Adicionar submenu
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos
+    $numIdItemMenu = $this->criarMenu('Órgãos Externos', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir mapeamento de Orgãos Externos', $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de mapeamento de Orgãos Externos', $numIdSistema);
+    $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+    
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Novo
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar mapeamento de Orgão Externo', $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de mapeamento de Orgãos Externos', $numIdSistema);
+    $this->criarMenu('Novo', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Reativar
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar mapeamento de Orgãos Externos', $numIdSistema);
+    $this->criarMenu('Reativar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+    
+    // Nova versão
+    $this->atualizarNumeroVersao("3.4.0");
+  }
 }
 
 

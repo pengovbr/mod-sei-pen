@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.0");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -445,6 +445,11 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_map_unidade_visualizar':
           require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
           break;
+
+      case 'pen_map_orgaos_externos_salvar':
+      case 'pen_map_orgaos_externos_cadastrar':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
+        break;
 
       case 'pen_map_unidade_listar';
       case 'pen_map_unidade_excluir':
