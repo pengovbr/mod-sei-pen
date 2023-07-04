@@ -263,6 +263,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.4.0':
+            $this->instalarV3040();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2519,6 +2521,48 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem_documento', 'ordem'));
 
       $this->atualizarNumeroVersao("3.3.0");
+  }
+
+  protected function instalarV3040() 
+  {
+    $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+    $objMetaBD = $this->objMeta;
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_orgao_externo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_orgao' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_unidade_rh' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_unidade_rh' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'sin_extender_sub_unidades' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO, 'N'),
+          'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+        ),
+        'pk' => array('cols' => array('id')),
+        'fks' => array(
+          'unidade' => array('nome' => 'fk_md_pen_orgao_externo_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+        )
+    ));
+
+    # Criar sequencia para tramite em bloco
+
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_tramita_em_bloco
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_orgao_externo', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_orgao_externo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.4.0");
   }
 }
 
