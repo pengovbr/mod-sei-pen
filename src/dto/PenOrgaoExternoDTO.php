@@ -20,13 +20,11 @@ class PenOrgaoExternoDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'Id');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdOrgao', 'id_orgao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Orgao', 'str_orgao');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'UnidadeRH', 'str_unidade_rh'); 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'ExtenderSubUnidades', 'sin_extender_sub_unidades');
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');
 
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
     

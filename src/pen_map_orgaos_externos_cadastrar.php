@@ -43,7 +43,6 @@ try {
         throw new InfraException("A unidade atual não foi mapeada.");
     }
 
-    $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
     $strNomeUnidadeDestino = $_POST['txtUnidade'];
     $numIdRepositorio = $_POST['selRepositorioEstruturas'];
     $txtRepositorioEstruturas = $_POST['txtRepositorioEstruturas'];
@@ -54,13 +53,10 @@ try {
         case 'pen_map_orgaos_externos_salvar':
             if (is_null($numIdRepositorio)) {
                 $objPaginaSEI->adicionarMensagem('selecione um repositório de destino.');
-            } elseif (is_null($numIdUnidadeDestino)) {
-                $objPaginaSEI->adicionarMensagem('A unidade do orgão não foi selecionada.');
             } else {
                 $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                 $objPenOrgaoExternoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
                 $objPenOrgaoExternoDTO->setNumIdOrgao($numIdRepositorio);
-                $objPenOrgaoExternoDTO->setNumIdUnidadeRH($numIdUnidadeDestino);
                 $objPenOrgaoExternoDTO->setNumMaxRegistrosRetorno(1);
 
                 $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
@@ -71,14 +67,13 @@ try {
                     exit(0);
                 }
 
+                $boolSinExtenderSubUnidades = !empty($boolSinExtenderSubUnidades) && $boolSinExtenderSubUnidades ? 'S' : 'N';
                 $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                 $objPenOrgaoExternoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
                 $objPenOrgaoExternoDTO->setNumIdOrgao($numIdRepositorio);
                 $objPenOrgaoExternoDTO->setStrOrgao($txtRepositorioEstruturas);
                 $objPenOrgaoExternoDTO->setDthRegistro(date('d/m/Y H:i:s'));
                 $objPenOrgaoExternoDTO->setStrExtenderSubUnidades($boolSinExtenderSubUnidades);
-                $objPenOrgaoExternoDTO->setNumIdUnidadeRH($numIdUnidadeDestino);
-                $objPenOrgaoExternoDTO->setStrUnidadeRH($strNomeUnidadeDestino);
 
                 $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
                 $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->contar($objPenOrgaoExternoDTO);
@@ -146,13 +141,8 @@ margin-bottom: 10px;
 #lblRepositorioEstruturas {position:absolute;left:0%;top:0%;width:50%;}
 #selRepositorioEstruturas {position:absolute;left:0%;top:38%;width:51%;}
 
-#lblUnidades {position:absolute;left:0%;top:0%;}
-#txtUnidade {left:0%;top:38%;width:50%;border:.1em solid #666;}
-#imgLupaUnidades {position:absolute;left:52%;top:48%;}
-
 .alinhamentoBotaoImput{position:absolute;left:0%;top:48%;width:85%;};
 
-#btnIdUnidade {float: right;}
 #imgPesquisaAvancada {
 vertical-align: middle;
 margin-left: 10px;
@@ -176,11 +166,6 @@ $objPaginaSEI->montarJavaScript();
     var objAutoCompletarEstrutura = null;
     var objAutoCompletarProcedimentosApensados = null;
 
-    var objLupaUnidades = null;
-    var objLupaUnidadesAdministrativas = null;
-    var objLupaProcedimentosApensados = null;
-    var objJanelaExpedir = null;
-    var evnJanelaExpedir = null;
 
     function inicializar() {
         infraEfeitoTabelas();
@@ -188,29 +173,6 @@ $objPaginaSEI->montarJavaScript();
         if(strMensagens) {
             alert(strMensagens);
         }
-        objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas', 'hdnUnidadesAdministrativas', '<?= $strLinkUnidadesAdministrativasSelecao ?>');
-
-        objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade', 'txtUnidade', '<?= $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada");
-        objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
-        objAutoCompletarEstrutura.mostrarAviso = true;
-        objAutoCompletarEstrutura.limparCampo = false;
-        objAutoCompletarEstrutura.tempoAviso = 10000000;
-
-        objAutoCompletarEstrutura.prepararExecucao = function() {
-            var selRepositorioEstruturas = document.getElementById('selRepositorioEstruturas');
-            var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidade').value;
-            parametros += '&id_repositorio=' + selRepositorioEstruturas.options[selRepositorioEstruturas.selectedIndex].value
-            return parametros;
-        };
-
-        objAutoCompletarEstrutura.processarResultado = function(id, descricao, complemento) {
-            window.infraAvisoCancelar();
-        };
-
-        $('#btnIdUnidade').click(function() {
-            objAutoCompletarEstrutura.executar();
-            objAutoCompletarEstrutura.procurar();
-        });
 
         //Botão de pesquisa avançada
         $('#imgPesquisaAvancada').click(function() {
@@ -226,154 +188,9 @@ $objPaginaSEI->montarJavaScript();
         document.getElementById('selRepositorioEstruturas').focus();
     }
 
-    function validarCadastroAbrirRI0825() {
-        if (!infraSelectSelecionado('selUnidades')) {
-            alert('Informe as Unidades de Destino.');
-            document.getElementById('selUnidades').focus();
-            return false;
-        }
-
-        return true;
-    }
-
-    function selecionarUrgencia() {
-        var chkSinUrgenteEnabled = $('#chkSinUrgente').is(':checked');
-        $('#selMotivosUrgencia').prop('disabled', !chkSinUrgenteEnabled);
-
-        if (!chkSinUrgenteEnabled) {
-            infraSelectSelecionarItem('selMotivosUrgencia', '0');
-            $('#selMotivosUrgencia').addClass('infraReadOnly');
-            $('#divMotivosUrgencia').css('display', 'none');
-        } else {
-            $('#selMotivosUrgencia').removeClass('infraReadOnly');
-            $('#divMotivosUrgencia').css('display', 'block');
-        }
-    }
-
-    //Caso não tenha unidade encontrada
-    $(document).ready(function() {
-        $(document).on('click', '#txtUnidade', function() {
-            if ($(this).val() == "Unidade não Encontrada.") {
-                $(this).val('');
-            }
-        });
-    });
 
     function selecionarRepositorio() {
-        var txtUnidade = $('#txtUnidade');
-        var selRepositorioEstruturas = $('#selRepositorioEstruturas');
-
-        var txtUnidadeEnabled = selRepositorioEstruturas.val() > 0;
-        txtUnidade.prop('disabled', !txtUnidadeEnabled);
-        $('#hdnIdUnidade').val('');
-        txtUnidade.val('');
-
-        if (!txtUnidadeEnabled) {
-            txtUnidade.addClass('infraReadOnly');
-        } else {
-            txtUnidade.removeClass('infraReadOnly');
-            $('#txtRepositorioEstruturas').val($("#selRepositorioEstruturas option:selected").text());
-        }
-    }
-
-    function avaliarPreCondicoes() {
-        var houveErros = document.getElementById('hdnErrosValidacao').value;
-        if (houveErros) {
-            infraDesabilitarCamposDiv(document.getElementById('divProtocoloExibir'));
-            infraDesabilitarCamposDiv(document.getElementById('divRepositorioEstruturas'));
-            infraDesabilitarCamposDiv(document.getElementById('divUnidades'));
-            infraDesabilitarCamposDiv(document.getElementById('divProcedimentosApensados'));
-            infraDesabilitarCamposDiv(document.getElementById('divSinUrgente'));
-            infraDesabilitarCamposDiv(document.getElementById('divMotivosUrgencia'));
-
-            var smbExpedir = document.getElementById('sbmExpedir');
-            smbExpedir.disabled = true;
-            smbExpedir.className += ' infraReadOnly';
-        }
-    }
-
-
-    function criarIFrameBarraProgresso() {
-
-        nomeIFrameEnvioProcesso = 'ifrEnvioProcesso';
-        var iframe = document.getElementById(nomeIFrameEnvioProcesso);
-        if (iframe != null) {
-            iframe.parentElement.removeChild(iframe);
-        }
-
-        var iframe = document.createElement('iframe');
-        iframe.id = nomeIFrameEnvioProcesso;
-        iframe.name = nomeIFrameEnvioProcesso;
-        iframe.setAttribute('frameBorder', '0');
-        iframe.setAttribute('scrolling', 'yes');
-
-        return iframe;
-    }
-
-    function exibirBarraProgresso(elemBarraProgresso) {
-        // Exibe camada de fundo da barra de progresso
-        var divFundo = document.createElement('div');
-        divFundo.id = 'divFundoBarraProgresso';
-        divFundo.className = 'infraFundoTransparente';
-        divFundo.style.visibility = 'visible';
-
-        var divAviso = document.createElement('div');
-        divAviso.id = 'divBarraProgresso';
-        divAviso.appendChild(elemBarraProgresso);
-        divFundo.appendChild(divAviso);
-
-        document.body.appendChild(divFundo);
-
-        redimencionarBarraProgresso();
-        infraAdicionarEvento(window, 'resize', redimencionarBarraProgresso);
-    }
-
-
-    function abrirBarraProgresso(form, action, largura, altura) {
-
-        if (typeof(form.onsubmit) == 'function' && !form.onsubmit()) {
-            return null;
-        }
-
-        iframe = criarIFrameBarraProgresso();
-        exibirBarraProgresso(iframe);
-
-        form.target = iframe.id;
-        form.action = action;
-        form.submit();
-    }
-
-
-    function redimencionarBarraProgresso() {
-        var divFundo = document.getElementById('divFundoBarraProgresso');
-        if (divFundo != null) {
-            divFundo.style.width = infraClientWidth() + 'px';
-            divFundo.style.height = infraClientHeight() + 'px';
-        }
-    }
-
-    function enviarForm(event) {
-        var button = jQuery(event.target);
-        var labelPadrao = button.html();
-
-        button.attr('disabled', 'disabled').html('Validando...');
-
-        var urlValidacao = '<?php print $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_validar' . $strParametros)); ?>';
-        var objData = {};
-
-        jQuery.each(['txtProtocoloExibir', 'selRepositorioEstruturas', 'hdnIdUnidade'], function(index, name) {
-            var objInput = jQuery('#' + name);
-            objData[name] = objInput.val();
-        });
-
-        jQuery.ajax({
-            url: urlValidacao,
-            method: 'POST',
-            dataType: 'json',
-            data: objData
-        }).done(function() {
-            button.removeAttr('disabled').html(labelPadrao);
-        });
+        $('#txtRepositorioEstruturas').val($("#selRepositorioEstruturas option:selected").text());
     }
 </script>
 <?php
@@ -392,17 +209,6 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
         </select>
         
         <input type="hidden" id="txtRepositorioEstruturas" name="txtRepositorioEstruturas" class="infraText" value="<?= $txtRepositorioEstruturas; ?>" />
-    </div>
-
-    <div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
-        <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
-        <div class="alinhamentoBotaoImput">
-            <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= $strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
-            <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
-            <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
-        </div>
-
-        <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?= $numIdUnidadeDestino; ?>" />
     </div>
 
     <div id="divSinExtenderSubUnidades" class="infraAreaDados" style="height: 4.5em;">
