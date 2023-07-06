@@ -83,7 +83,8 @@ try {
 
           $objTramiteEmBlocoProtocoloDTO = $objTramiteEmBlocoProtocoloRN->cadastrar($objTramiteEmBlocoProtocoloDTO);
           PaginaSEI::getInstance()->setStrMensagem('Incluir Processo em Bloco "' . $objTramiteEmBlocoProtocoloDTO->getNumId() . '" cadastrado com sucesso.');
-          header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=' . $_GET['acao'] . '&id_bloco=' . $objTramiteEmBlocoProtocoloDTO->getNumId() . $strParametros . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoProtocoloDTO->getNumId())));
+          // header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));        
+          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
 
         }catch(Exception $e){
           PaginaSEI::getInstance()->processarExcecao($e);
