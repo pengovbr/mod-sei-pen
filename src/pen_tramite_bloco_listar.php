@@ -103,7 +103,6 @@ try {
     // Cabeçalho da tabela
     $colunas = array(
       'id' => 'Número',
-      'sinalizacao' => 'Sinalizações',
       'estado' => 'Estados',
       'descricao' => 'Descrições',
       'acao' => 'Ações'
@@ -114,8 +113,7 @@ try {
     foreach ($arrObjBlocosListar as $objFiltro) {
      // print_r($objFiltro->getNumId()); die('aki2');
       $arr['id'] = $objFiltro->getNumId();
-      $arr['sinalizacao'] = 'R';
-      $arr['estado'] = $objFiltro->getStrStaEstado();
+      $arr['estado'] = $obgTramiteEmBloco->retornarEstadoDescricao($objFiltro->getStrStaEstado());
       $arr['descricao'] = $objFiltro->getStrDescricao();
       $arr['acao'] = '';
 
@@ -162,24 +160,18 @@ try {
         // visualizar
         $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_bloco=' . $idBlocoTramite) . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . Icone::BLOCO_CONSULTAR_PROTOCOLOS . '" title="Visualizar Processos" alt="Visualizar Processos" class="infraImg" /></a>&nbsp;';
 
-        // atribuir
-        $strResultado .= '<a onclick="acaoAtribuir(\'' . $idBlocoTramite . '\');" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . Icone::BLOCO_USUARIO . '" title="Atribuir Bloco" alt="Atribuir Bloco" class="infraImg" /></a>&nbsp;';
-
         // alterar
         $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramite_em_bloco_alterar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$idBlocoTramite).'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeAlterar().'" title="Alterar Bloco" alt="Alterar Bloco" class="infraImg" /></a>&nbsp;';
-
-        // concluir
-        $strResultado .= '<a onclick="acaoConcluir(\'' . $idBlocoTramite . '\');" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . Icone::BLOCO_CONCLUIR . '" title="Concluir Bloco" alt="Concluir Bloco" class="infraImg" /></a>&nbsp;';
-
-        // Excluir
-        //$strResultado .= '<a onclick="" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
 
         $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
 
         // Tramitar bloco
         $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
 
-        $strResultado .= '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite.'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite do Bloco" alt="Cancelar Tramite do Bloco" class="infraImg iconTramita" /></a>&nbsp;';
+        // Cancelar tramite
+        if ($objFiltro->getStrStaEstado() != TramiteEmBlocoRN::$TE_ABERTO) {
+          $strResultado .= '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite.'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite do Bloco" alt="Cancelar Tramite do Bloco" class="infraImg iconTramita" /></a>&nbsp;';
+        }
 
         $strResultado .= "</td>";
       }
@@ -395,19 +387,17 @@ $objPaginaSEI->abrirBody( $strTitulo, 'onload="inicializar();"');
     <label id="lblPalavrasPesquisaBloco" for="txtPalavrasPesquisaBloco" accesskey="" class="infraLabelOpcional">Palavras-chave para pesquisa:</label>
     <input type="text" id="txtPalavrasPesquisaBloco" name="txtPalavrasPesquisaBloco" class="infraText" value="<?=PaginaSEI::tratarHTML($strPalavrasPesquisa)?>" onkeypress="return tratarDigitacao(event);" tabindex="<?=$objPaginaSEI->getProxTabDados()?>" />
 
-    <div id="divLinkVisualizacao">
-    <?  if ($strTipoAtribuicao == BlocoRN::$TA_MINHAS) { ?>
-      <a id="ancVisualizacao" href="javascript:void(0);" onclick="verBlocos('<?=BlocoRN::$TA_TODAS?>');" class="ancoraPadraoPreta" tabindex="<?=$objPaginaSEI->getProxTabDados()?>">Ver todos os blocos</a>
-    <? } else { ?>
-      <a id="ancVisualizacao" href="javascript:void(0);" onclick="verBlocos('<?=BlocoRN::$TA_MINHAS?>');" class="ancoraPadraoPreta" tabindex="<?=$objPaginaSEI->getProxTabDados()?>">Ver blocos atribuídos a mim</a>
-    <? } ?>
-    </div>
+      <div id="divLinkVisualizacao">
+        <?php if ($strTipoAtribuicao == BlocoRN::$TA_MINHAS) : ?>
+          <a id="ancVisualizacao" href="javascript:void(0);" onclick="verBlocos('<?= BlocoRN::$TA_TODAS ?>');" class="ancoraPadraoPreta" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">Ver todos os blocos</a>
+        <?php endif; ?>
+      </div>
 
-  </div>
-  <div class="col-md-6 col-12 ">
-    <div class="d-flex flex-row flex-md-row ">
-        <fieldset id="fldSinalizacao" class=" mr-2 flex-grow-1 mr-md-2 flex-md-grow-0 infraFieldset">
-        <legend class="infraLegend"> Sinalizações </legend>
+    </div>
+    <div class="col-md-6 col-12 ">
+      <div class="d-flex flex-row flex-md-row ">
+        <!-- <fieldset id="fldSinalizacao" class=" mr-2 flex-grow-1 mr-md-2 flex-md-grow-0 infraFieldset">
+          <legend class="infraLegend"> Sinalizações </legend>
 
           <div id="divSinPrioridade" class="infraDivCheckbox">
             <input type="checkbox" id="chkSinPrioridade" name="chkSinPrioridade" class="infraCheckbox" <?= $objPaginaSEI->setCheckbox($strSinPrioridade) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
@@ -422,12 +412,12 @@ $objPaginaSEI->abrirBody( $strTitulo, 'onload="inicializar();"');
             <input type="checkbox"  id="chkSinComentario" name="chkSinComentario" class="infraCheckbox" <?= $objPaginaSEI->setCheckbox($strSinComentario) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
             <label id="lblSinComentario" for="chkSinComentario" accesskey="" class="infraLabelCheckbox">Comentados</label>
           </div>
-        </fieldset>
+        </fieldset> -->
         <fieldset id="fldEstado" class="ml-md-4 infraFieldset">
           <legend class="infraLegend">Estado</legend>
 
           <div id="divSinEstadoGerado" class="infraDivCheckbox">
-            <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_ABERTO, $arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoGerado" name="chkSinEstadoGerado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoGerado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+            <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_ABERTO, $arrEstadosSelecionados) ||  empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoGerado" name="chkSinEstadoGerado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoGerado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
             <label id="lblSinEstadoGerado" for="chkSinEstadoGerado" accesskey="" class="infraLabelCheckbox">Aberto</label>
           </div>
 

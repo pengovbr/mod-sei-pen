@@ -158,6 +158,21 @@ class TramiteEmBlocoRN extends InfraRN {
         }
     }
 
+    public function retornarEstadoDescricao($estado){
+        try {
+            $arg = [
+               self::$TE_ABERTO => 'Gerado',
+               self::$TE_DISPONIBILIZADO = 'Em Processamento',
+               self::$TE_RETORNADO = 'Retornado',
+            ];
+
+            return $arg[$estado];
+
+        } catch(Exception $e) {
+            throw new InfraException('Estado nâo encontrado.',$e);
+        }
+    }
+
     protected function listarConectado(TramiteEmBlocoDTO $objTramiteEmBlocoDTO) {
         try {
             //Valida Permissao
