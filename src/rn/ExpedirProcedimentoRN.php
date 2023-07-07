@@ -194,6 +194,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           //Construção do processo para envio
           $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
+          //Verifica se Protocolo é um Ducumento tipo Avulso "D" se já foi tramitado para não atribuir o NRE do trâmite anterior
+          if($objProcesso->staTipoProtocolo == "D" && (isset($strNumeroRegistro))){
+            $strNumeroRegistro = null;
+          }else{
+            $strNumeroRegistro = $objMetadadosProcessoTramiteAnterior->NRE;
+          }
+
           //Obtém o tamanho total da barra de progreso
           $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
 
@@ -342,14 +349,14 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
                 $objTramiteDTO->setNumMaxRegistrosRetorno(1);
                 $objTramiteDTO->retNumIdTramite();
-    
+
                 $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
                 $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
                 if(isset($objTramiteDTO)) {
                     $parNumIdentificacaoTramite = $objTramiteDTO->getNumIdTramite();
                     $objRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
-                    
+
                     if(isset($objRetorno)){
                         $objMetadadosProtocolo = $objRetorno->metadados;
                     }
@@ -359,9 +366,9 @@ class ExpedirProcedimentoRN extends InfraRN {
                 //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
                 //que os metadados do protocolo não pode ser obtida
                 LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
-            } 
+            }
         }
-        
+
         $this->objCacheMetadadosProtocolo[$parDblIdProcedimento] = $objMetadadosProtocolo;
         return $objMetadadosProtocolo;
     }
