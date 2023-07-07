@@ -194,7 +194,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           //Construção do processo para envio
           $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
-          //Verifica se Protocolo é um Ducumento Avulso "D" se já foi tramitado para não atribuir o NRE do trâmite anterior
+          //Verifica se Protocolo é um Ducumento tipo Avulso "D" se já foi tramitado para não atribuir o NRE do trâmite anterior
           if($objProcesso->staTipoProtocolo == "D" && (isset($strNumeroRegistro))){
             $strNumeroRegistro = null;
           }else{
