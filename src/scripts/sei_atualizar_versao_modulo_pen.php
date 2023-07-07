@@ -2534,14 +2534,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
           'id_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
           'str_orgao' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
-          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_estrutura' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_estrutura' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
           'sin_extender_sub_unidades' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO, 'N'),
           'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
           'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
         ),
         'pk' => array('cols' => array('id')),
         'fks' => array(
-          'unidade' => array('nome' => 'fk_md_pen_orgao_externo_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+          'unidade' => array('nome' => 'fk_md_pen_mapeamento_orgao_externo', 'cols' => array('id_unidade', 'id_unidade')),
         )
     ));
 
