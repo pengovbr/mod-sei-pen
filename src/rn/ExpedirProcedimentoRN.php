@@ -192,6 +192,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           //Construção do processo para envio
           $objProcesso = $this->construirProcesso($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
 
+          //Verifica se Protocolo é um Ducumento tipo Avulso "D" se já foi tramitado para não atribuir o NRE do trâmite anterior
+          if($objProcesso->staTipoProtocolo == "D" && (isset($strNumeroRegistro))){
+            $strNumeroRegistro = null;
+          }else{
+            $strNumeroRegistro = $objMetadadosProcessoTramiteAnterior->NRE;
+          }
+
           //Obtém o tamanho total da barra de progreso
           $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgresso($objProcesso);
 
@@ -1101,7 +1108,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
         $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
-        
+
         //Mapeamento achado
         $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
         $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
@@ -1113,7 +1120,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
           $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
       }
-      
+
 
       if(!isset($numCodigoEspecieMapeada)) {
           throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
