@@ -18,11 +18,17 @@ class PenOrgaoExternoDTO extends InfraDTO {
   public function montar() {
       
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'Id');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdOrgao', 'id_orgao');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Orgao', 'str_orgao');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'UnidadeRH', 'str_unidade_rh'); 
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstrutaOrganizacional', 'id_estrutura');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'EstrutaOrganizacional', 'str_estrutura');
+
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdOrgaoOrigem', 'id_orgao_origem');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'OrgaoOrigem', 'str_orgao_origem');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstrutaOrganizacionalOrigem', 'id_estrutura_origem');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'EstrutaOrganizacionalOrigem', 'str_estrutura_origem');
+
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdOrgaoDestino', 'id_orgao_destino');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'OrgaoDestino', 'str_orgao_destino');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstrutaOrganizacionalDestino', 'id_estrutura_destino');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'EstrutaOrganizacionalDestino', 'str_estrutura_destino');
+
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'ExtenderSubUnidades', 'sin_extender_sub_unidades');
