@@ -451,6 +451,11 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
         break;
 
+      case 'pen_map_orgaos_externos_listar':
+      case 'pen_map_orgaos_externos_excluir':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_listar.php';
+        break;
+
       case 'pen_map_unidade_listar';
       case 'pen_map_unidade_excluir':
           require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
