@@ -1850,10 +1850,6 @@ class PenAtualizarSipRN extends InfraRN
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar mapeamento de Orgão Externo', $numIdSistema);
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de mapeamento de Orgãos Externos', $numIdSistema);
     $this->criarMenu('Novo', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
-
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Reativar
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar mapeamento de Orgãos Externos', $numIdSistema);
-    $this->criarMenu('Reativar', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
     
     // Nova versão
     $this->atualizarNumeroVersao("3.4.0");
