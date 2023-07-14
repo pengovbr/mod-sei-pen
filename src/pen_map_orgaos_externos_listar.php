@@ -72,6 +72,32 @@ try {
                 // Ação padrão desta tela
                 break;
 
+            case 'pen_map_orgaos_externos_reativar':
+                if(isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) {
+                    $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
+                    foreach ($arrHdnInInfraItensSelecionados as $id) {
+                        $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+                        $objPenOrgaoExternoDTO->setDblId($id);
+                        $objPenOrgaoExternoDTO->setStrAtivo('S');
+    
+                        $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+                        $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
+                    }
+                    $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
+                }
+    
+                if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
+                    $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+                    $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
+                    $objPenOrgaoExternoDTO->setStrAtivo('S');
+    
+                    $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+                    $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
+                    $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
+                }
+                break;
+
+
             default:
                 throw new InfraException('Ação não permitida nesta tela');
         }
@@ -80,11 +106,6 @@ try {
 
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
     //--------------------------------------------------------------------------
     // DTO de paginao
@@ -140,6 +161,7 @@ try {
         $strCssTr = '';
 
         $index = 0;
+        $botaoReativarAdicionado = 'N';
         foreach ($respObjPenOrgaoExternoDTO as $objPenOrgaoExternoDTO) {
             $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
@@ -150,6 +172,16 @@ try {
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoDestino() . '</td>';
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
             $strResultado .= '<td align="center">';
+
+            if($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
+                $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
+                $strId = $objPenOrgaoExternoDTO->getDblId();
+                if ($botaoReativarAdicionado == 'N') {
+                    $arrComandos[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton">Reativar</button>';
+                    $botaoReativarAdicionado = 'S';
+                } 
+                $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Mapeamento" alt="Reativar Mapeamento" class="infraImg"></a>';
+            }
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
@@ -173,6 +205,10 @@ try {
         }
         $strResultado .= '</table>';
     }
+    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 } catch (InfraException $e) {
     $objPagina->processarExcecao($e);
 }
@@ -227,6 +263,12 @@ $objPagina->montarStyle();
         top: 50%;
         width: 25%;
     }
+    #txtEstadoSelect {
+        position: absolute;
+        left: 52%;
+        top: 50%;
+        width: 25%;
+    }
 </style>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
@@ -268,20 +310,6 @@ $objPagina->montarStyle();
         window.location = '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_cadastrar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao_origem']); ?>';
     }
 
-    function onClickBtnAtivar() {
-
-        try {
-
-            var form = jQuery('#frmAcompanharEstadoProcesso');
-            form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_ativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
-            form.submit();
-        } catch (e) {
-
-            alert('Erro : ' + e.message);
-        }
-
-    }
-
     function onClickBtnDesativar() {
 
         try {
@@ -317,6 +345,33 @@ $objPagina->montarStyle();
             alert('Erro : ' + e.message);
         }
     }
+
+    function acaoReativar(id){
+
+        if (confirm("Confirma a reativação do mapeamento?")) {
+            document.getElementById('hdnInfraItemId').value=id;
+            document.getElementById('frmAcompanharEstadoProcesso').action='<?=$strLinkReativar?>';
+            document.getElementById('frmAcompanharEstadoProcesso').submit();
+        }
+    }
+
+    function onClickBtnReativar(){
+        try {
+            var len = jQuery('input[name*=chkInfraItem]:checked').length;
+            if (len > 0) {
+                if (confirm('Confirma a reativação de ' + len + ' mapeamento(s) ?')) {
+                    var form = jQuery('#frmAcompanharEstadoProcesso');
+                    form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+                    form.submit();
+                }
+            } else {
+                alert('Selecione pelo menos um mapeamento para reativar');
+            }
+        } catch(e) {
+            alert('Erro : ' + e.message);
+        }
+    }
+
 </script>
 <?php
 $objPagina->fecharHead();
@@ -335,7 +390,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 
     <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>
     <input type="text" id="txtEstado" name="txtEstado" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) ? $_POST['txtEstado'] : ''); ?>">
-    <select id="txtEstado" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
+    <select id="txtEstadoSelect" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
         <option value=""></option>
         <option value="S" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] == "S" ? 'selected="selected"' : ''); ?>>Ativo</option>
         <option value="N" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] == "N" ? 'selected="selected"' : ''); ?>>Inativo</option>

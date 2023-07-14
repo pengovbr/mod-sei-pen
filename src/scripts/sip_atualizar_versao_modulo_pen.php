@@ -1843,6 +1843,7 @@ class PenAtualizarSipRN extends InfraRN
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir mapeamento de Orgãos Externos', $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar mapeamento de Orgãos Externos', $numIdSistema);
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de mapeamento de Orgãos Externos', $numIdSistema);
     $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
     
