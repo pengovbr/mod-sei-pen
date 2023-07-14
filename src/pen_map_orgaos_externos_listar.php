@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_orgaos_externos_listar');
 define('PEN_RECURSO_BASE', 'pen_map_orgaos_externos');
-define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos Externos para Mapeamento de Tipo de Processo');
+define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos');
 define('PEN_PAGINA_GET_ID', 'id');
 
 
