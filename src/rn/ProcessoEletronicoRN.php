@@ -586,35 +586,9 @@ class ProcessoEletronicoRN extends InfraRN
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
-            $objProtocoloDTO = new RelProtocoloProtocoloDTO();
-            $objProtocoloDTO->setDblIdProtocolo1($objAtividadeDTO->getDblIdProtocolo());
-            $objProtocoloDTO->setOrd('IdRelProtocoloProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retNumSequencia();
-            $objProtocoloDTO->retDblIdProtocolo2();
-            $objProtocoloBD = new RelProtocoloProtocoloBD(BancoSEI::getInstance());
-            $arrProtocolos = $objProtocoloBD->listar($objProtocoloDTO);
-
-            # PROTOCOLO
-            $objProtocoloDTO = new ProtocoloDTO();
-            $objProtocoloDTO->setDblIdProtocolo($objAtividadeDTO->getDblIdProtocolo());
-            $objProtocoloDTO->setOrd('IdProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retDblIdProtocolo();
-            $objProtocoloDTO->retStrProtocoloFormatado();
-            $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-            $protocolo = $objProtocoloBD->consultar($objProtocoloDTO);
-
-
-            $msg = "Não foi possível enviar o processo '".$protocolo->getStrProtocoloFormatado()."' por meio do Tramita.GOV.BR, em decorrência de alteração da ordem de um ou mais documentos na árvore do processo. A seguir, a lista dos documentos com ordem alterada:";
-            foreach ($arrProtocolos as $index => $protocolo) {
-                if ($index != $protocolo->getNumSequencia()){
-                    $documento = str_pad($protocolo->getDblIdProtocolo2(), 6, '0', STR_PAD_LEFT);
-                    $pos = $index + 1;
-                    $sequencia = $protocolo->getNumSequencia() + 1;
-                    $msg .= " A ordem do documento $documento foi modificada na árvore do processo, mudando da posição $pos para a posição $sequencia.";
-                    break;
-                }
-            }
-            $msg .= " Sugere-se desfazer as alterações acima listadas antes de realizar nova tentativa de trâmite. Mantenha sempre a ordem original dos documentos de processos recebidos pelo Tramita.GOV.BR, uma vez que sua instrução foi realizada por outro órgão. Tenha em mente que qualquer alteração nessa ordem pode impedir um novo trâmite do processo.";
+            $msg = "Houve uma alteração na ordem dos documentos no processo, o que impede o reenvio de um processo que já foi tramitado pela plataforma. ".
+            "Portanto, é recomendado reordenar os documentos de acordo com a ordem original. ".
+            "Caso você seja um usuário sem permissão para reordenar o processo, é necessário entrar em contato internamente para identificar quem possui essa permissão.";
 
             if ($arrObjAtividadeDTO > 0) {
                 $strMensagem = str_replace(
