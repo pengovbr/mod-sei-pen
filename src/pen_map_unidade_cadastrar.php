@@ -62,11 +62,17 @@ try {
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
     if(!array_key_exists('id_unidade', $_POST) || empty($_POST['id_unidade'])) {
-        throw new InfraException('Nenhuma "Unidade" foi selecionada');
+        $params = http_build_query($_POST);
+        $objPagina->adicionarMensagem('Nenhuma "Unidade" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+        exit(0);
     }
 
     if(!array_key_exists('id_unidade_rh', $_POST) || $_POST['id_unidade_rh'] === '' || $_POST['id_unidade_rh'] === null) {
-        throw new InfraException('Nenhuma "Unidade RH" foi selecionada');
+        $params = http_build_query($_POST);
+        $objPagina->adicionarMensagem('Nenhuma "Unidade RH" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+        exit(0);
     }
 
       $objGenericoBD = new GenericoBD($objBanco);
@@ -79,7 +85,10 @@ try {
       $objResultado = $objGenericoBD->listar($objPenUnidadeRHDTO);
 
     if (count($objResultado) > 0) {
-        throw new InfraException('Já existe um registro com a "Unidade RH" para o código: ' .$_POST['id_unidade_rh'] );
+        $params = http_build_query($_POST);
+        $objPagina->adicionarMensagem(sprintf('Já existe um registro com a "Unidade RH" para o código: %s', $_POST['id_unidade_rh']), InfraPagina::$TIPO_MSG_ERRO);
+        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+        exit(0);
     }
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
@@ -111,6 +120,10 @@ try {
         $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
     
         $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
+    } else {
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
     }
 
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
@@ -167,6 +180,9 @@ try {
     }else{
         $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
     }
+  } else if (!empty($_GET['id_unidade_rh']) && !empty($_GET['txtUnidadePen'])){
+    $strNomeUnidadeSelecionada = $_GET['txtUnidadePen'];
+    $objPenUnidadeDTO->setNumIdUnidadeRH($_GET['id_unidade_rh']);
   }
 
   $strCssRestricao = ""; $strHtmlRestricao = ""; $strJsGlobalRestricao = ""; $strJsInicializarRestricao = "";
@@ -210,7 +226,6 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
-    <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('15em'); ?>
 
     <label id="lblUnidadeSei" for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>

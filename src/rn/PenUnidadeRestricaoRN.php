@@ -138,11 +138,11 @@ class PenUnidadeRestricaoRN extends InfraRN
    * @return array
    * @throws InfraException
    */
-  protected function contarConectado(PenUnidadeDTO $objPenUnidadeDTO)
+  protected function contarConectado(PenUnidadeRestricaoDTO $objPenUnidadeDTO)
   {
     try {
       //Valida Permissao
-      $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
+      $objPenUnidadeBD = new PenUnidadeRestricaoBD($this->getObjInfraIBanco());
       return $objPenUnidadeBD->contar($objPenUnidadeDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro contando mapeamento de unidades.', $e);

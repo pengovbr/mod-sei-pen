@@ -505,6 +505,7 @@ class PENIntegracao extends SeiIntegracao
             $bolPermiteEnvio = true;
         }
 
+        $restricaoCadastrada = false;
         if ($bolPermiteEnvio == false) {
           $objUnidadeDTO = new PenUnidadeDTO();
           $objUnidadeDTO->retNumIdUnidadeRH();
@@ -523,11 +524,17 @@ class PENIntegracao extends SeiIntegracao
             $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
             
             $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-            
-            foreach ($arrEstruturas as $key => $unidade) {
-              if ($unidade->getNumIdUnidadeRHRestricao() != null) {
-                $arrObjEstruturaDTO[] = $unidade;
+            $restricaoCadastrada = $objPenUnidadeRestricaoRN->contar($objPenUnidadeRestricaoDTO);
+            $restricaoCadastrada = $restricaoCadastrada > 0;
+
+            if ($restricaoCadastrada) {
+              $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+              $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+              
+              foreach ($arrEstruturas as $key => $unidade) {
+                if ($unidade->getNumIdUnidadeRHRestricao() != null) {
+                  $arrObjEstruturaDTO[] = $unidade;
+                }
               }
             }
           } catch (Exception $e) {
@@ -535,9 +542,11 @@ class PENIntegracao extends SeiIntegracao
           
           if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+          } else if ($restricaoCadastrada) {
+              return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
           }
         }
-        if (is_null($arrObjEstruturaDTO) || count($arrObjEstruturaDTO) == 0) {
+        if (!$restricaoCadastrada && (is_null($arrObjEstruturaDTO) || count($arrObjEstruturaDTO) == 0)) {
           $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturas($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
           if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
