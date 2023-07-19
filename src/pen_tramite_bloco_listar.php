@@ -112,7 +112,6 @@ try {
     // Corpo Tabela
     $tabelaLinhas = [];
     foreach ($arrObjBlocosListar as $objFiltro) {
-     // print_r($objFiltro->getNumId()); die('aki2');
       $arr['id'] = $objFiltro->getNumId();
       $arr['estado'] = $obgTramiteEmBloco->retornarEstadoDescricao($objFiltro->getStrStaEstado());
       $arr['descricao'] = $objFiltro->getStrDescricao();
@@ -173,7 +172,7 @@ try {
         $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
 
         // Tramitar bloco
-        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
+        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
 
         // Cancelar tramite
         if ($objFiltro->getStrStaEstado() != TramiteEmBlocoRN::$TE_ABERTO) {

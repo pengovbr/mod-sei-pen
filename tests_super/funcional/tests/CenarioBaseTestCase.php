@@ -39,9 +39,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
 
+    protected $paginaTramitarProcessoEmBloco = null;
+
     public function setUpPage(): void
     {
         $this->paginaBase = new PaginaTeste($this);
+
+        $this->paginaTramitarProcessoEmBloco = new PaginaTramitarProcessoEmBloco($this);
+
         $this->paginaDocumento = new PaginaDocumento($this);
         $this->paginaAssinaturaDocumento = new PaginaAssinaturaDocumento($this);
         $this->paginaProcesso = new PaginaProcesso($this);
@@ -56,6 +61,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+
+        
         $this->currentWindow()->maximize();
     }
 
@@ -221,6 +228,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
+    }
+
+    protected function navegarPara($acao) 
+    {
+        $this->frame(null);
+        $acao = "acao={$acao}";
+        $xpath = "//a[contains(@href, '$acao')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)
@@ -761,6 +780,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
         }
         $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
+    }
+
+    protected function selecionarBlocoDeTramite()
+    {
+        $this->paginaTramitarProcessoEmBloco->adicionarProcessoAoBloco();
+        sleep(2);
     }
 
     public function atualizarTramitesPEN($bolOrg1 = true, $bolOrg2 = true, $org2Primeiro = true, $quantidade = 1)

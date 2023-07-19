@@ -93,7 +93,6 @@ try {
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
 
   $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
-  print_r($strPalavrasPesquisa); die('aki');
   if ($strPalavrasPesquisa!=''){
     $objTramitaEmBlocoProtocoloDTO->setStrPalavrasPesquisa($strPalavrasPesquisa);
   }
