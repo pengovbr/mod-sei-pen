@@ -1,15 +1,16 @@
 <?php
+
 /**
  *
  */
-require_once DIR_SEI_WEB.'/SEI.php';
+require_once DIR_SEI_WEB . '/SEI.php';
 
 try {
 
-    session_start();
+  session_start();
 
-    $objPaginaSEI = PaginaSEI::getInstance();
-    $objSessaoSEI = SessaoSEI::getInstance();
+  $objPaginaSEI = PaginaSEI::getInstance();
+  $objSessaoSEI = SessaoSEI::getInstance();
 
   $objSessaoSEI->validarLink();
   SessaoSEI::getInstance()->validarPermissao($_GET['acao']);
@@ -20,7 +21,7 @@ try {
   PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
 
 
-  $strTitulo = 'Tramite em Bloco';
+  $strTitulo = 'Blocos de Trâmite Externo';
 
   switch ($_GET['acao']) {
     case 'md_pen_tramita_em_bloco_excluir':
@@ -91,9 +92,9 @@ try {
 
   PaginaSEI::getInstance()->prepararOrdenacao($objFiltroDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
 
-    // Verificar no DTO sobre funções de agragação para clausula DISTINCT
-  if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
-      $objFiltroDTO->retDthConclusaoAtividade();
+  // Verificar no DTO sobre funções de agragação para clausula DISTINCT
+  if (get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
+    $objFiltroDTO->retDthConclusaoAtividade();
   }
     // $objPaginaSEI->prepararPaginacao($objFiltroDTO, 50);
 
@@ -104,7 +105,7 @@ try {
     $colunas = array(
       'id' => 'Número',
       'estado' => 'Estados',
-      'descricao' => 'Descrições',
+      'descricao' => 'Descrição',
       'acao' => 'Ações'
     );
 
@@ -120,32 +121,38 @@ try {
       $tabelaLinhas[] = $arr;
     }
 
-    $numRegistros = count($arrObjBlocosListar);
+  $numRegistros = count($arrObjBlocosListar);
+
 
   $arrComandos = [];
-  $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-  $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-  $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelar()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
   $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-  $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+  $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+  $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton d-none d-md-inline-block"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+  if ($numRegistros > 0) {
+    $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelar()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
+    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+  }
+  
+  
 
   // Início da tabela
   $strSumarioTabela = 'Tabela de Blocos Tramitados.';
   $strCaptionTabela = 'Blocos';
 
-  $strResultado = "<table width='99%' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
-  $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros).'</caption>';
+  $strResultado = "<table width='99%' id='tblBlocos' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
+  $strResultado .= '<caption class="infraCaption">' . PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
   $strResultado .= "<tr>";
-  $strResultado .= '<th class="infraTh" width="1%">'.PaginaSEI::getInstance()->getThCheck().'</th>'."\n";
+  $strResultado .= '<th class="infraTh" width="1%">' . PaginaSEI::getInstance()->getThCheck() . '</th>' . "\n";
 
-  foreach ($colunas as $key => $coluna) {
+  foreach ($colunas as $coluna) {
+    
     $strResultado .= "<th class='infraTh'>{$coluna}</th>";
   }
   $strResultado .= "</tr>";
 
-  foreach ($tabelaLinhas as $linha) {
+  foreach ($tabelaLinhas as $cont => $linha) {
       $strResultado .= "<tr class='infraTrClara'>";
-      $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($linha['id'], $linha['id'], $linha['id']).'</td>';
+      $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']).'</td>';
        // $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($i,$idBlocoTramite,$idBlocoTramite).'</td>';
       foreach ($colunas as $key => $coluna) {
         $idBlocoTramite = $linha['id']; // $idBlocoTramite = $idBlocoTramite;
@@ -181,10 +188,8 @@ try {
 
   // Fim da tabela
   $strResultado .= "</table>";
-
-}
-catch (Exception $e) {
-    $objPaginaSEI->processarExcecao($e);
+} catch (Exception $e) {
+  $objPaginaSEI->processarExcecao($e);
 }
 
 $objPaginaSEI->montarDocType();
@@ -195,73 +200,72 @@ $objPaginaSEI->montarTitle(':: ' . $objPaginaSEI->getStrNomeSistema() . ' - ' . 
 $objPaginaSEI->montarStyle();
 ?>
 <style type="text/css">
+  table.tabelaProcessos {
+    background-color: white;
+    border: 0px solid white;
+    border-spacing: .1em;
+  }
 
-table.tabelaProcessos {
-    background-color:white;
-    border:0px solid white;
-    border-spacing:.1em;
-}
+  table.tabelaProcessos tr {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
 
-table.tabelaProcessos tr{
-    margin:0;
-    border:0;
-    padding:0;
-}
+  table.tabelaProcessos img {
+    width: 1.1em;
+    height: 1.1em;
+  }
 
-table.tabelaProcessos img{
-    width:1.1em;
-    height:1.1em;
-}
+  table.tabelaProcessos a {
+    text-decoration: none;
+  }
 
-table.tabelaProcessos a{
-    text-decoration:none;
-}
-
-table.tabelaProcessos a:hover{
-    text-decoration:underline;
-}
+  table.tabelaProcessos a:hover {
+    text-decoration: underline;
+  }
 
 
-table.tabelaProcessos caption{
+  table.tabelaProcessos caption {
     font-size: 1em;
     text-align: right;
     color: #666;
-}
+  }
 
-th.tituloProcessos{
-    font-size:1em;
+  th.tituloProcessos {
+    font-size: 1em;
     font-weight: bold;
     text-align: center;
     color: #000;
     background-color: #dfdfdf;
     border-spacing: 0;
-}
+  }
 
-a.processoNaoVisualizado{
-    color:red;
-}
+  a.processoNaoVisualizado {
+    color: red;
+  }
 
-#divTabelaRecebido {
-    margin:2em;
-    float:left;
-    display:inline;
-    width:40%;
-}
+  #divTabelaRecebido {
+    margin: 2em;
+    float: left;
+    display: inline;
+    width: 40%;
+  }
 
-#divTabelaRecebido table{
-    width:100%;
-}
+  #divTabelaRecebido table {
+    width: 100%;
+  }
 
-#divTabelaGerado {
-    margin:2em;
-    float:right;
-    display:inline;
-    width:40%;
-}
+  #divTabelaGerado {
+    margin: 2em;
+    float: right;
+    display: inline;
+    width: 40%;
+  }
 
-#divTabelaGerado table{
-    width:100%;
-}
+  #divTabelaGerado table {
+    width: 100%;
+  }
 
   select.infraSelect,
   input.infraText {
@@ -273,19 +277,18 @@ a.processoNaoVisualizado{
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
 <script type="text/javascript">
-
-function inicializar(){
+  function inicializar() {
 
     infraEfeitoTabelas();
-}
+  }
 
-function inicializar(){
-  infraEfeitoTabelas();
-  var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
-   if(strMensagens) {
-       alert(strMensagens);
-   }
-}
+  function inicializar() {
+    infraEfeitoTabelas();
+    var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
+    if (strMensagens) {
+      alert(strMensagens);
+    }
+  }
 
   function onClickBtnPesquisar() {
 
@@ -294,30 +297,30 @@ function inicializar(){
     form.submit();
   }
 
-function tratarEnter(ev){
+  function tratarEnter(ev) {
     var key = infraGetCodigoTecla(ev);
-    if (key == 13){
-        onClickBtnPesquisar();
+    if (key == 13) {
+      onClickBtnPesquisar();
     }
     return true;
-}
+  }
 
-function onCLickLinkDelete(url, link) {
+  function onCLickLinkDelete(url, link) {
     var row = jQuery(link).parents('tr:first');
     var strEspecieDocumental = row.find('td:eq(1)').text();
-    var strTipoDocumento     = row.find('td:eq(2)').text();
+    var strTipoDocumento = row.find('td:eq(2)').text();
 
-    if(confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento +'"?')){
-        window.location = url;
+    if (confirm('Confirma a exclusão do bloco de trâmite externo: "' +strEspecieDocumental + '"?')) {
+      window.location = url;
     }
-}
+  }
 
   function onClickBtnCancelarTramite(url, link) {
       var row = jQuery(link).parents('tr:first');
       var strEspecieDocumental = row.find('td:eq(1)').text();
       var strTipoDocumento = row.find('td:eq(2)').text();
       console.log(link)
-      if (confirm('Confirma a cancelamento dos trâmites do Bloco "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
+      if (confirm('Confirma o cancelamento dos trâmites do Bloco "' + strEspecieDocumental + '"?')) {
           window.location = url;
       }
   }
@@ -347,23 +350,21 @@ function onCLickLinkDelete(url, link) {
   function onClickBtnExcluir() {
 
     try {
-        var len = jQuery('input[name*=chkInfraItem]:checked').length;
+      var len = jQuery('input[name*=chkInfraItem]:checked').length;
 
-        if(len > 0){
-            if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
-                var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_envio_listar'); ?>');
-                form.submit();
-            }
+      if (len > 0) {
+        if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
+          var form = jQuery('#frmBlocoLista');
+          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem=md_pen_tramita_em_bloco&acao_retorno=md_pen_tramita_em_bloco'); ?>');
+          form.submit();
         }
-        else {
-            alert('Selecione pelo menos um mapeamento para Excluir');
-        }
+      } else {
+        alert('Selecione pelo menos um mapeamento para Excluir');
+      }
+    } catch (e) {
+      alert('Erro : ' + e.message);
     }
-    catch(e){
-        alert('Erro : ' + e.message);
-    }
-}
+  }
 
   function validarCadastro() {
 
@@ -372,20 +373,22 @@ function onCLickLinkDelete(url, link) {
   function OnSubmitForm() {
     return validarCadastro();
   }
+
+
 </script>
 
 <?php
 $objPaginaSEI->fecharHead();
-$objPaginaSEI->abrirBody( $strTitulo, 'onload="inicializar();"');
+$objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmBlocoLista" method="post" onsubmit="return OnSubmitForm();" action="<?=$strActionPadrao?>">
+<form id="frmBlocoLista" method="post" onsubmit="return OnSubmitForm();" action="<?= $strActionPadrao ?>">
   <?php
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   ?>
-<div class="row">
-  <div id="divPesquisa1" class="col-12 col-md-3">
-    <label id="lblPalavrasPesquisaBloco" for="txtPalavrasPesquisaBloco" accesskey="" class="infraLabelOpcional">Palavras-chave para pesquisa:</label>
-    <input type="text" id="txtPalavrasPesquisaBloco" name="txtPalavrasPesquisaBloco" class="infraText" value="<?=PaginaSEI::tratarHTML($strPalavrasPesquisa)?>" onkeypress="return tratarDigitacao(event);" tabindex="<?=$objPaginaSEI->getProxTabDados()?>" />
+  <div class="row">
+    <div id="divPesquisa1" class="col-12 col-md-3">
+      <label id="lblPalavrasPesquisaBloco" for="txtPalavrasPesquisaBloco" accesskey="" class="infraLabelOpcional">Palavras-chave para pesquisa:</label>
+      <input type="text" id="txtPalavrasPesquisaBloco" name="txtPalavrasPesquisaBloco" class="infraText" value="<?= PaginaSEI::tratarHTML($strPalavrasPesquisa) ?>" onkeypress="return tratarDigitacao(event);" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
 
       <div id="divLinkVisualizacao">
         <?php if ($strTipoAtribuicao == BlocoRN::$TA_MINHAS) : ?>
@@ -432,10 +435,10 @@ $objPaginaSEI->abrirBody( $strTitulo, 'onload="inicializar();"');
           </div>
 
         </fieldset>
+      </div>
     </div>
   </div>
-</div>
-  <input type="hidden" id="hdnMeusBlocos" name="hdnMeusBlocos" value="<?=$strTipoAtribuicao?>" />
+  <input type="hidden" id="hdnMeusBlocos" name="hdnMeusBlocos" value="<?= $strTipoAtribuicao ?>" />
   <input type="hidden" id="hdnFlagBlocos" name="hdnFlagBlocos" value="1" />
   <?php
 
