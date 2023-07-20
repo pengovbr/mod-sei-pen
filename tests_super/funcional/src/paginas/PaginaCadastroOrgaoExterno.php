@@ -24,8 +24,10 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function novo()
     {
-        $this->selectRepositorio('RE CGPRO');
-        $this->selectUnidade('Fabrica-org2');
+        $this->selectRepositorio('RE CGPRO', 'Origem');
+        $this->selectUnidade('Fabrica-org2', 'Origem');
+        $this->selectRepositorio('RE CGPRO', 'Destino');
+        $this->selectUnidade('Fabrica-org1', 'Destino');
         $this->salvar();
     }
 
@@ -35,15 +37,15 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * @param string $siglaRepositorio
      * @return string
      */
-    private function selectRepositorio($siglaRepositorio)
+    private function selectRepositorio($siglaRepositorio, $origemDestino)
     {
-        $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
+        $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas' . $origemDestino));
 
         if(isset($siglaRepositorio)){
             $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
         }
 
-        return $this->test->byId('selRepositorioEstruturas')->value();
+        return $this->test->byId('selRepositorioEstruturas' . $origemDestino)->value();
     }
 
     /**
@@ -53,14 +55,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * @param ?string  $hierarquia
      * @return string
      */
-    private function selectUnidade($nomeUnidade, $hierarquia = null)
+    private function selectUnidade($nomeUnidade, $origemDestino, $hierarquia = null)
     {
-        $this->unidadeInput = $this->test->byId('txtUnidade');
+        $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
         $this->unidadeInput->value($nomeUnidade);
         $this->test->keys(Keys::ENTER);
-        $this->test->waitUntil(function($testCase) use($hierarquia) {
+        $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
             $bolExisteAlerta=null;
-            $nomeUnidade = $testCase->byId('txtUnidade')->value();
+            $nomeUnidade = $testCase->byId('txtUnidade' . $origemDestino)->value();
             if(!empty($hierarquia)){
                 $nomeUnidade .= ' - ' . $hierarquia;
             }
@@ -75,6 +77,15 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         }, PEN_WAIT_TIMEOUT);
 
         return $this->unidadeInput->value();
+    }
+
+    /**
+     * Description 
+     * @return void
+     */
+    public function novoMapOrgao()
+    {
+        $this->test->byId("btnNovo")->click();
     }
 
     /**

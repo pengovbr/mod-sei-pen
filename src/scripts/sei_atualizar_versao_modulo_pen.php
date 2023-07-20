@@ -2540,7 +2540,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           'str_orgao_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
           'id_estrutura_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
           'str_estrutura_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
-          'sin_extender_sub_unidades' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::NNULLO, 'N'),
           'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
           'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
           'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)

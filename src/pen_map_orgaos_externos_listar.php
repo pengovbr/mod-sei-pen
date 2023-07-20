@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_orgaos_externos_listar');
 define('PEN_RECURSO_BASE', 'pen_map_orgaos_externos');
-define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos Externos para Mapeamento de Tipo de Processo');
+define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos');
 define('PEN_PAGINA_GET_ID', 'id');
 
 
@@ -180,7 +180,7 @@ try {
                     $arrComandos[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton">Reativar</button>';
                     $botaoReativarAdicionado = 'S';
                 } 
-                $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Mapeamento" alt="Reativar Mapeamento" class="infraImg"></a>';
+                $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
@@ -348,7 +348,7 @@ $objPagina->montarStyle();
 
     function acaoReativar(id){
 
-        if (confirm("Confirma a reativação do mapeamento?")) {
+        if (confirm("Confirma a reativação do relacionamento entre órgãos?")) {
             document.getElementById('hdnInfraItemId').value=id;
             document.getElementById('frmAcompanharEstadoProcesso').action='<?=$strLinkReativar?>';
             document.getElementById('frmAcompanharEstadoProcesso').submit();
@@ -359,13 +359,13 @@ $objPagina->montarStyle();
         try {
             var len = jQuery('input[name*=chkInfraItem]:checked').length;
             if (len > 0) {
-                if (confirm('Confirma a reativação de ' + len + ' mapeamento(s) ?')) {
+                if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
                     var form = jQuery('#frmAcompanharEstadoProcesso');
                     form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
                     form.submit();
                 }
             } else {
-                alert('Selecione pelo menos um mapeamento para reativar');
+                alert('Selecione pelo menos um relacionamento para reativar');
             }
         } catch(e) {
             alert('Erro : ' + e.message);

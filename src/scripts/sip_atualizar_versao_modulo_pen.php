@@ -1838,19 +1838,17 @@ class PenAtualizarSipRN extends InfraRN
     // Adicionar submenu
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos
-    $numIdItemMenu = $this->criarMenu('Órgãos Externos', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+    $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir mapeamento de Orgãos Externos', $numIdSistema);
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar mapeamento de Orgãos Externos', $numIdSistema);
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de mapeamento de Orgãos Externos', $numIdSistema);
-    $this->criarMenu('Listar', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
-    
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Novo
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar mapeamento de Orgão Externo', $numIdSistema);
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de mapeamento de Orgãos Externos', $numIdSistema);
-    $this->criarMenu('Novo', 10, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
+    $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+    $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar relacionamento entre órgãos', $numIdSistema);
     
     // Nova versão
     $this->atualizarNumeroVersao("3.4.0");
