@@ -73,7 +73,7 @@ try {
                 break;
 
             case 'pen_map_orgaos_externos_reativar':
-                if(isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) {
+                if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
                     foreach ($arrHdnInInfraItensSelecionados as $id) {
                         $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
@@ -361,6 +361,8 @@ $objPagina->montarStyle();
             if (len > 0) {
                 if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
                     var form = jQuery('#frmAcompanharEstadoProcesso');
+                    var acaoReativar = $("<input>").attr({ type: "hidden", name: "hdnAcaoReativar", value: "1" });
+                    form.append(acaoReativar);
                     form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
                     form.submit();
                 }
