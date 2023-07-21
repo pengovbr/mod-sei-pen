@@ -70,7 +70,7 @@ try {
   switch ($_GET['acao']) {
 
     case 'pen_expedir_lote':
-        $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processo do Bloco' : 'Envio Externo de Processo em Lote';
+        $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processos do Bloco de Trâmite' : 'Envio Externo de Processo em Lote';
         $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
         $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 

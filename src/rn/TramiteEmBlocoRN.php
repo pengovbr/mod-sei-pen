@@ -13,7 +13,6 @@ class TramiteEmBlocoRN extends InfraRN {
     public static $TB_REUNIAO = 'R';
     public static $TB_INTERNO = 'I';
 
-
     public static $TE_ABERTO = 'A';
     public static $TE_DISPONIBILIZADO = 'D';
     public static $TE_RETORNADO = 'R';
@@ -31,21 +30,6 @@ class TramiteEmBlocoRN extends InfraRN {
         return BancoSEI::getInstance();
     }
 
-    /**
-     * Método utilizado para exclusão de dados.
-     * @param TramiteEmBlocoDTO $objDTO
-     * @return array
-     * @throws InfraException
-     */
-    protected function excluirControlado(TramiteEmBlocoDTO $objDTO)
-    {
-        try {
-            $objBD = new TramiteEmBlocoBD(BancoSEI::getInstance());
-            return $objBD->excluir($objDTO);
-        } catch (Exception $e) {
-            throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
-        }
-    }
     public function getNumMaxTamanhoDescricao(){
         return 250;
     }
@@ -138,7 +122,7 @@ class TramiteEmBlocoRN extends InfraRN {
 
             $objEstadoBlocoDTO = new EstadoBlocoDTO();
             $objEstadoBlocoDTO->setStrStaEstado(self::$TE_ABERTO);
-            $objEstadoBlocoDTO->setStrDescricao('Gerado');
+            $objEstadoBlocoDTO->setStrDescricao('Aberto');
             $objArrEstadoBlocoDTO[] = $objEstadoBlocoDTO;
 
             $objEstadoBlocoDTO = new EstadoBlocoDTO();
@@ -161,7 +145,7 @@ class TramiteEmBlocoRN extends InfraRN {
     public function retornarEstadoDescricao($estado){
         try {
             $arg = [
-               self::$TE_ABERTO => 'Gerado',
+               self::$TE_ABERTO => 'Aberto',
                self::$TE_DISPONIBILIZADO = 'Em Processamento',
                self::$TE_RETORNADO = 'Retornado',
             ];
