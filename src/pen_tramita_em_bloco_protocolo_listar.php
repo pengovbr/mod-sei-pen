@@ -76,7 +76,11 @@ try {
     default:
       throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
   $arrComandos = array();
   $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
@@ -91,9 +95,13 @@ try {
   $objTramitaEmBlocoProtocoloDTO->retNumIdUnidadeBloco();
   $objTramitaEmBlocoProtocoloDTO->retStrStaEstadoProtocolo();
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
+<<<<<<< HEAD
 
   $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
 
+=======
+  $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtProcedimentoFormatado');
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
   if ($strPalavrasPesquisa!=''){
     $objTramitaEmBlocoProtocoloDTO->setStrPalavrasPesquisa($strPalavrasPesquisa);
   }
@@ -140,7 +148,11 @@ try {
 
       $id = $objDTO->getNumId().'-'.$objDTO->getDblIdProtocolo().'-'.$_GET['id_bloco'];
       $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $id, $id) . '</td>';
+<<<<<<< HEAD
       $strResultado .= '<td align="center">' . ($i + 1) . '</td>';
+=======
+      $strResultado .= '<td align="center">' . $objDTO->getNumSequencia() . '</td>';
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
 
       $strResultado .= '<td align="center">';
       $strResultado .= '<a onclick="infraLimparFormatarTrAcessada(this.parentNode.parentNode);" href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objDTO->getDblIdProtocolo()) . '" target="_blank" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '" class="' . $strClassProtocolo . '" alt="" title="">' . $objDTO->getStrIdxRelBlocoProtocolo() . '</a>';
@@ -198,7 +210,11 @@ try {
     $strResultado .= '</table>';
   }
 
+<<<<<<< HEAD
   $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco&acao_origem=' . $_GET['acao'] . $objPaginaSEI->montarAncora($numIdGrupoSerie)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+=======
+  $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $objPaginaSEI->montarAncora($numIdGrupoSerie)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
 } catch (Exception $e) {
   $objPaginaSEI->processarExcecao($e);
 }
@@ -268,7 +284,11 @@ infraEfeitoTabelas();
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento = row.find('td:eq(2)').text();
 
+<<<<<<< HEAD
     if (confirm('Confirma retirada do processo ' + strTipoDocumento + ' do bloco de trâmite externo?')) {
+=======
+    if (confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
       window.location = url;
     }
   }
@@ -279,7 +299,11 @@ infraEfeitoTabelas();
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
 
       if (len > 0) {
+<<<<<<< HEAD
         if (confirm('Confirma retirada de ' + len + ' protocolo(s) selecionado(s) do bloco de trâmite externo?')) {
+=======
+        if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
+>>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
           var form = jQuery('#frmProcessosListar');
           form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
           form.submit();
