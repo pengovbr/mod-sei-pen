@@ -215,6 +215,20 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
 
+      // Verifica se é passada uma hipotese legal e se a mesma está cadastrada no destino.
+      if (isset($objProtocolo->hipoteseLegal) && !empty($objProtocolo->hipoteseLegal->identificacao)) {
+        $objHipoteseLegalDTO = new HipoteseLegalDTO();
+        $objHipoteseLegalDTO->retStrStaNivelAcesso();
+        $objHipoteseLegalDTO->setNumIdHipoteseLegal($objProtocolo->hipoteseLegal->identificacao);
+      
+        $objHipoteseLegalRN = new HipoteseLegalRN();
+        $objHipoteseLegalDTO = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+      
+        if ($objHipoteseLegalDTO==null){
+          $this->objProcessoEletronicoRN->recusarTramite($numIdTramite, sprintf('O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.'), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+        }
+      }
+
       $this->validarDadosDestinatario($parObjMetadadosProcedimento);
       $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
       $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
