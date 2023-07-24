@@ -44,6 +44,32 @@ try {
         $idTramiteEmBloco = null;
         $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
     }
+    $tramiteEmBloco = isset($_GET['tramite_em_bloco']) ? $_GET['tramite_em_bloco'] : null;
+    if ($tramiteEmBloco == 1) {
+        if (isset($_GET['id_tramita_em_bloco'])) {
+            $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+            $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_tramita_em_bloco']);
+            $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+            $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+        } else {
+            $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
+            $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+            $objTramitaEmBlocoProtocoloDTO->setNumId($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
+            $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+            $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+        }
+
+        $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+        $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+        $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
+        $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
+        foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
+            $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();
+        }
+    } else {
+        $idTramiteEmBloco = null;
+        $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
+    }
 
   if (count($arrProtocolosOrigem)==0){
       $arrProtocolosOrigem = explode(',', $_POST['hdnIdProcedimento']);
@@ -70,11 +96,7 @@ try {
   switch ($_GET['acao']) {
 
     case 'pen_expedir_lote':
-<<<<<<< HEAD
         $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processos do Bloco de Trâmite' : 'Envio Externo de Processo em Lote';
-=======
-        $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processo do Bloco' : 'Envio Externo de Processo em Lote';
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
         $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
         $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
@@ -137,6 +159,19 @@ try {
           $objPenExpedirLoteRN = new PenExpedirLoteRN();
           $ret = $objPenExpedirLoteRN->cadastrarLote($objPenExpedirLoteDTO);
           $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
+
+          // Atualiza estado do bloco em tramite para em processamento
+          if (isset($_POST['hdIdTramiteEmBloco']) && $_POST['hdIdTramiteEmBloco'] != null) {
+            $strParametros .= '&id_bloco=' . $_POST['hdIdTramiteEmBloco'];
+            $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
+
+            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+            $objTramiteEmBlocoDTO->setNumId($_POST['hdIdTramiteEmBloco']);
+            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
+
+            $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+          }
 
           // Atualiza estado do bloco em tramite para em processamento
           if (isset($_POST['hdIdTramiteEmBloco']) && $_POST['hdIdTramiteEmBloco'] != null) {

@@ -21,11 +21,7 @@ try {
   PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
 
 
-<<<<<<< HEAD
   $strTitulo = 'Blocos de Trâmite Externo';
-=======
-  $strTitulo = 'Tramite em Bloco';
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
 
   switch ($_GET['acao']) {
     case 'md_pen_tramita_em_bloco_excluir':
@@ -58,24 +54,6 @@ try {
           'chkSinEstadoDisponibilizado' => TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
           'chkSinEstadoConcluido' => TramiteEmBlocoRN::$TE_CONCLUIDO
       ];
-<<<<<<< HEAD
-      
-
-      foreach ($checkboxesEstados as $checkbox => $strEstado) {
-          if (isset($_POST[$checkbox])) {
-          //  print_r($_POST); die('aki');
-              $arrEstadosSelecionados[] = $strEstado;
-          }
-      }
-
-
-
-      
-      // $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
-      // $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
-      // $setStrPalavrasPesquisa = $strPalavrasPesquisa != '' ? $objBlocoDTOPesquisa->setStrPalavrasPesquisa($strPalavrasPesquisa) : '';
-      // print_r($setStrPalavrasPesquisa); die('aki');
-=======
 
       foreach ($checkboxesEstados as $checkbox => $strEstado) {
           if (isset($_POST[$checkbox])) {
@@ -85,7 +63,6 @@ try {
       $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisa');
       $setStrPalavrasPesquisa = $strPalavrasPesquisa != '' ? $objBlocoDTOPesquisa->setStrPalavrasPesquisa($strPalavrasPesquisa) : '';
 
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
       break;
     case 'pen_tramite_em_bloco_cancelar':
       $arrEstadosSelecionados = [];
@@ -106,27 +83,12 @@ try {
   $objFiltroDTO->retNumId();
   $objFiltroDTO->retStrStaEstado();
   $objFiltroDTO->retStrDescricao();
-<<<<<<< HEAD
-
-  $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
-  if ($strPalavrasPesquisa) {
-    $objFiltroDTO->setStrPalavrasPesquisa($setStrPalavrasPesquisa);
-    $objFiltroDTO = InfraString::prepararPesquisaDTO($objFiltroDTO, "PalavrasPesquisa", "Descricao");
-    // $objFiltroDTO->setStrPalavrasPesquisa($setStrPalavrasPesquisa);
-  }
- 
-  
-  // if (count($arrEstadosSelecionados)) {
-  //   $objFiltroDTO->setStrStaEstado($arrEstadosSelecionados, InfraDTO::$OPER_IN);
-  // }
-=======
   $objFiltroDTO->setStrPalavrasPesquisa($setStrPalavrasPesquisa);
 
 
   if (count($arrEstadosSelecionados)) {
     $objFiltroDTO->setStrStaEstado($arrEstadosSelecionados, InfraDTO::$OPER_IN);
   }
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
 
   PaginaSEI::getInstance()->prepararOrdenacao($objFiltroDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
 
@@ -143,18 +105,13 @@ try {
     $colunas = array(
       'id' => 'Número',
       'estado' => 'Estados',
-<<<<<<< HEAD
       'descricao' => 'Descrição',
-=======
-      'descricao' => 'Descrições',
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
       'acao' => 'Ações'
     );
 
     // Corpo Tabela
     $tabelaLinhas = [];
     foreach ($arrObjBlocosListar as $objFiltro) {
-     // print_r($objFiltro->getNumId()); die('aki2');
       $arr['id'] = $objFiltro->getNumId();
       $arr['estado'] = $obgTramiteEmBloco->retornarEstadoDescricao($objFiltro->getStrStaEstado());
       $arr['descricao'] = $objFiltro->getStrDescricao();
@@ -163,7 +120,6 @@ try {
       $tabelaLinhas[] = $arr;
     }
 
-<<<<<<< HEAD
   $numRegistros = count($arrObjBlocosListar);
 
 
@@ -177,49 +133,25 @@ try {
   }
   
   
-=======
-    $numRegistros = count($arrObjBlocosListar);
-
-  $arrComandos = [];
-  $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-  $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-  $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelar()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
-  $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-  $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
 
   // Início da tabela
   $strSumarioTabela = 'Tabela de Blocos Tramitados.';
   $strCaptionTabela = 'Blocos';
 
-<<<<<<< HEAD
   $strResultado = "<table width='99%' id='tblBlocos' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
-=======
-  $strResultado = "<table width='99%' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
   $strResultado .= '<caption class="infraCaption">' . PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
   $strResultado .= "<tr>";
   $strResultado .= '<th class="infraTh" width="1%">' . PaginaSEI::getInstance()->getThCheck() . '</th>' . "\n";
 
-<<<<<<< HEAD
   foreach ($colunas as $coluna) {
     
-=======
-  foreach ($colunas as $key => $coluna) {
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
     $strResultado .= "<th class='infraTh'>{$coluna}</th>";
   }
   $strResultado .= "</tr>";
 
-<<<<<<< HEAD
   foreach ($tabelaLinhas as $cont => $linha) {
       $strResultado .= "<tr class='infraTrClara'>";
       $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']).'</td>';
-=======
-  foreach ($tabelaLinhas as $linha) {
-      $strResultado .= "<tr class='infraTrClara'>";
-      $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($linha['id'], $linha['id'], $linha['id']).'</td>';
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
        // $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($i,$idBlocoTramite,$idBlocoTramite).'</td>';
       foreach ($colunas as $key => $coluna) {
         $idBlocoTramite = $linha['id']; // $idBlocoTramite = $idBlocoTramite;
@@ -240,7 +172,7 @@ try {
         $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
 
         // Tramitar bloco
-        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Tramitar Bloco" class="infraImg iconTramita" /></a>&nbsp;';
+        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
 
         // Cancelar tramite
         if ($objFiltro->getStrStaEstado() != TramiteEmBlocoRN::$TE_ABERTO) {
@@ -365,10 +297,6 @@ $objPaginaSEI->montarStyle();
   }
 
   function tratarEnter(ev) {
-<<<<<<< HEAD
-    die('enter');
-=======
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
     var key = infraGetCodigoTecla(ev);
     if (key == 13) {
       onClickBtnPesquisar();
@@ -381,11 +309,7 @@ $objPaginaSEI->montarStyle();
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento = row.find('td:eq(2)').text();
 
-<<<<<<< HEAD
     if (confirm('Confirma a exclusão do bloco de trâmite externo: "' +strEspecieDocumental + '"?')) {
-=======
-    if (confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
       window.location = url;
     }
   }
@@ -395,11 +319,7 @@ $objPaginaSEI->montarStyle();
       var strEspecieDocumental = row.find('td:eq(1)').text();
       var strTipoDocumento = row.find('td:eq(2)').text();
       console.log(link)
-<<<<<<< HEAD
       if (confirm('Confirma o cancelamento dos trâmites do Bloco "' + strEspecieDocumental + '"?')) {
-=======
-      if (confirm('Confirma a cancelamento dos trâmites do Bloco "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
           window.location = url;
       }
   }
@@ -444,27 +364,6 @@ $objPaginaSEI->montarStyle();
       alert('Erro : ' + e.message);
     }
   }
-<<<<<<< HEAD
-  function validarPesquisa() {
-
-    if (!document.getElementById('chkSinEstadoGerado').checked &&
-        !document.getElementById('chkSinEstadoDisponibilizado').checked &&
-        !document.getElementById('chkSinEstadoRecebido').checked &&
-        !document.getElementById('chkSinEstadoRetornado').checked &&
-        !document.getElementById('chkSinEstadoConcluido').checked){
-      alert('Nenhum Estado selecionado.');
-      return false;
-    }
-
-    return true;
-    }
-
-  function OnSubmitForm() {
-    return validarPesquisa();
-  }
-
-
-=======
 
   function validarCadastro() {
 
@@ -473,7 +372,8 @@ $objPaginaSEI->montarStyle();
   function OnSubmitForm() {
     return validarCadastro();
   }
->>>>>>> 4be085dd884b03050a0840fc35dfbcff27659250
+
+
 </script>
 
 <?php
