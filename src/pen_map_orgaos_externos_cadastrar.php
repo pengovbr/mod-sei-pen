@@ -54,17 +54,22 @@ try {
     // Órgão de destino
     $numIdOrgaoDestino = $_POST['hdnIdUnidadeDestino'];
     $strNomeOrgaoDestino = $_POST['txtUnidadeDestino'];
-    $numIdRepositorioDestino = $_POST['selRepositorioEstruturasDestino'];
-    $txtRepositorioEstruturasDestino = $_POST['txtRepositorioEstruturasDestino'];
+
+    $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
+    $strLinkAjaxUnidadeDestino = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_mapeados&acao=' . $_GET['acao']);
 
     switch ($_GET['acao']) {
         case 'pen_map_orgaos_externos_salvar':
-            if (is_null($numIdRepositorioOrigem) || is_null($numIdRepositorioDestino)) {
-                $objPaginaSEI->adicionarMensagem('selecione um repositório de destino.', InfraPagina::$TIPO_MSG_AVISO);
+            if (is_null($numIdRepositorioOrigem)) {
+                $objPaginaSEI->adicionarMensagem('selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
-            } elseif (is_null($numIdOrgaoOrigem) || is_null($numIdOrgaoDestino)) {
-                $objPaginaSEI->adicionarMensagem('o orgão não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+            } elseif (is_null($numIdOrgaoOrigem)) {
+                $objPaginaSEI->adicionarMensagem('o orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
+                exit(0);
+            } elseif (is_null($numIdOrgaoDestino)) {
+                $objPaginaSEI->adicionarMensagem('o orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             } 
@@ -74,7 +79,6 @@ try {
             $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($numIdOrgaoOrigem);
             $objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalOrigem($numIdRepositorioOrigem);
             $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($numIdOrgaoDestino);
-            $objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalDestino($numIdRepositorioDestino);
             $objPenOrgaoExternoDTO->setNumMaxRegistrosRetorno(1);
 
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
@@ -96,8 +100,6 @@ try {
             // Órgão de destino
             $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($numIdOrgaoDestino);
             $objPenOrgaoExternoDTO->setStrOrgaoDestino($strNomeOrgaoDestino);
-            $objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalDestino($numIdRepositorioDestino);
-            $objPenOrgaoExternoDTO->setStrEstrutaOrganizacionalDestino($txtRepositorioEstruturasDestino);
 
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
             $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
@@ -122,7 +124,6 @@ try {
             $idRepositorioSelecionado = (isset($numIdRepositorioOrigem)) ? $numIdRepositorioOrigem : '';
             $strItensSelRepositorioEstruturasOrigem = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
-            $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
             $strLinkAjaxProcedimentoApensado = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_apensados_auto_completar_expedir_procedimento');
             $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstruturaOrigem=1');
             break;
@@ -160,9 +161,6 @@ margin-bottom: 10px;
 #lblRepositorioEstruturasOrigem {position:absolute;left:0%;top:0%;}
 #selRepositorioEstruturasOrigem {position:absolute;left:0%;top:38%;}
 
-#lblRepositorioEstruturasDestino {position:absolute;left:0%;top:0%;}
-#selRepositorioEstruturasDestino {position:absolute;left:0%;top:38%;}
-
 #lblUnidadesOrigem {position:absolute;left:0%;top:0%;}
 #txtUnidadeOrigem {left:0%;top:38%;width:100%;border:.1em solid #666;}
 #imgLupaUnidadesOrigem {position:absolute;left:52%;top:48%;}
@@ -185,6 +183,7 @@ margin-bottom: 10px;
 .panelOrgao {
     color: #fff;
     width: 48%;
+    height: 22em;
     float: left;
     padding: 1em 0em 5em 2em;
     border: 2px solid #999;
@@ -254,18 +253,14 @@ $objPaginaSEI->montarJavaScript();
     }
 
     function inicializarDestino() {
-        objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturasDestino', 'hdnUnidadesAdministrativas', '<?= $strLinkUnidadesAdministrativasSelecao ?>');
-
-        objAutoCompletarEstruturaDestino = new infraAjaxAutoCompletar('hdnIdUnidadeDestino', 'txtUnidadeDestino', '<?= $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada");
+        objAutoCompletarEstruturaDestino = new infraAjaxAutoCompletar('hdnIdUnidadeDestino', 'txtUnidadeDestino', '<?= $strLinkAjaxUnidadeDestino ?>', "Nenhuma unidade foi encontrada");
         objAutoCompletarEstruturaDestino.bolExecucaoAutomatica = false;
         objAutoCompletarEstruturaDestino.mostrarAviso = true;
         objAutoCompletarEstruturaDestino.limparCampo = false;
         objAutoCompletarEstruturaDestino.tempoAviso = 10000000;
 
         objAutoCompletarEstruturaDestino.prepararExecucao = function() {
-            var selRepositorioEstruturasDestino = document.getElementById('selRepositorioEstruturasDestino');
             var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidadeDestino').value;
-            parametros += '&id_repositorio=' + selRepositorioEstruturasDestino.options[selRepositorioEstruturasDestino.selectedIndex].value
             return parametros;
         };
 
@@ -277,20 +272,6 @@ $objPaginaSEI->montarJavaScript();
             objAutoCompletarEstruturaDestino.executar();
             objAutoCompletarEstruturaDestino.procurar();
         });
-        
-
-        //Botão de pesquisa avançada
-        $('#imgPesquisaAvancada').click(function() {
-            var idRepositorioEstrutura = $('#selRepositorioEstruturasDestino :selected').val();
-            if ((idRepositorioEstruturaDestino != '') && (idRepositorioEstruturaDestino != 'null')) {
-                $("#hdnUnidadesAdministrativas").val(idRepositorioEstruturaDestino);
-                objLupaUnidadesAdministrativas.selecionar(700, 500);
-            } else {
-                alert('Selecione um repositório de Estruturas Organizacionais');
-            }
-        });
-        document.getElementById('selRepositorioEstruturasDestino').focus();
-        selecionarRepositorioDestino();
     }
 
     //Caso não tenha unidade encontrada
@@ -321,23 +302,6 @@ $objPaginaSEI->montarJavaScript();
         } else {
             txtUnidadeOrigem.removeClass('infraReadOnly');
             $('#txtRepositorioEstruturasOrigem').val($("#selRepositorioEstruturasOrigem option:selected").text());
-        }
-    }
-
-    function selecionarRepositorioDestino() {
-        var txtUnidadeDestino= $('#txtUnidadeDestino');
-        var selRepositorioEstruturasDestino = $('#selRepositorioEstruturasDestino');
-
-        var txtUnidadeDestinoEnabled = selRepositorioEstruturasDestino.val() > 0;
-        txtUnidadeDestino.prop('disabled', !txtUnidadeDestinoEnabled);
-        $('#hdnIdUnidadeDestino').val('');
-        txtUnidadeDestino.val('');
-
-        if (!txtUnidadeDestinoEnabled) {
-            txtUnidadeDestino.addClass('infraReadOnly');
-        } else {
-            txtUnidadeDestino.removeClass('infraReadOnly');
-            $('#txtRepositorioEstruturasDestino').val($("#selRepositorioEstruturasDestino option:selected").text());
         }
     }
 
@@ -457,22 +421,14 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
     <div class="panelOrgao divOrgaoDestino">
         <h4>Órgão Destino</h4>
 
-        <div id="divRepositorioEstruturasDestino" class="infraAreaDados" style="height: 4.5em;">
-            <label id="lblRepositorioEstruturasDestino" for="selRepositorioEstruturasDestino" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
-            <select id="selRepositorioEstruturasDestino" name="selRepositorioEstruturasDestino" class="infraSelect" onchange="selecionarRepositorioDestino();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
-                <?= $strItensSelRepositorioEstruturasOrigem ?>
-            </select>
-
-            <input type="hidden" id="txtRepositorioEstruturasDestino" name="txtRepositorioEstruturasDestino" class="infraText" value="<?= $txtRepositorioEstruturasDestino; ?>" />
-        </div>
-
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Orgão Destino:</label>
             <div class="alinhamentoBotaoImput">
-                <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" class="infraText infraReadOnly" disabled="disabled" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= $strNomeOrgaoDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" class="infraText infraReadOnly"
+                    placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" 
+                    value="<?= PaginaSEI::tratarHTML($strNomeOrgaoDestino); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
                 <br /><br />
                 <button id="btnIdUnidadeDestino" type="button" class="infraButton">Consultar</button>
-                <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
             </div>
 
             <input type="hidden" id="hdnIdUnidadeDestino" name="hdnIdUnidadeDestino" class="infraText" value="<?= $numIdOrgaoDestino; ?>" />
