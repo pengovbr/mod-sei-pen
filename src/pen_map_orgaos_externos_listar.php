@@ -67,6 +67,9 @@ try {
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
                 break;
+            case 'pen_importar_tipos_processos': {
+                var_dump($_POST);
+            }
 
             case 'pen_map_orgaos_externos_listar':
                 // Ação padrão desta tela
@@ -85,6 +88,7 @@ try {
     //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
     $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    #$arrComandos[] = '<button type="button" accesskey="M" id="btnImportar" value="Importar" onclick="infraImportarCsv();" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
 
     //--------------------------------------------------------------------------
     // DTO de paginao
@@ -152,6 +156,11 @@ try {
             $strResultado .= '<td align="center">';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
+                $strResultado .= '<a href="#" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getNumIdOrgaoDestino(). ')">'
+                    . '<img src='
+                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif")
+                    . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
+                    . '</a>';
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
                     . $objSessao->assinarLink(
                         'controlador.php?acao=pen_map_orgaos_externos_excluir&acao_origem='
@@ -317,13 +326,69 @@ $objPagina->montarStyle();
             alert('Erro : ' + e.message);
         }
     }
+
+    function infraImportarCsv(orgaoId) {
+        document.getElementById('orgaoId').value = orgaoId;
+        $('#importArquivoCsv').click();
+    }
+
+    function processarDados(csv) {
+        const lines = csv.split(/\r\n|\n/);
+        const data = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const formatLine = lines[i]
+            const lineData = formatLine.toString().split(';');
+            if (isNaN(parseInt(lineData[0]))) {
+                continue;
+            }
+            const tipoProcessoId = parseInt(lineData[0]);
+
+            data.push(tipoProcessoId);
+        }
+
+        return data;
+    }
+
+    function importarCsv(event, orgaoId) {
+        const file = event.target.files[0];
+
+        if (!file) {
+            console.error("Nenhum arquivo selecionado.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function (event) {
+            const csvContent = event.target.result;
+            const data = $('#dadosInput').val(JSON.stringify(processarDados(csvContent)));
+            console.log(processarDados(csvContent))
+            enviarFormulario(processarDados(csvContent))
+        };
+        reader.readAsText(file);
+    }
+
+    function enviarFormulario(data, orgaoId) {
+        const dataInput = document.getElementById('dadosInput');
+        const orgaoInput = document.getElementById('dadosInput');
+        orgaoInput.value = orgaoId;
+        dataInput.value = JSON.stringify(data);
+        const form = jQuery('#formImportarDados');
+        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=pen_importar_tipos_processos&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
+        form.submit();
+    }
 </script>
 <?php
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
+<input style="display: none" type="file" id="importArquivoCsv" accept=".csv" onchange="importarCsv(event)">
+<form id="formImportarDados" method="post" action="">
+    <input type="hidden" name="orgaoId" id="orgaoId">
+    <input type="hidden" name="dados" id="dadosInput">
+</form>
 <form id="frmAcompanharEstadoProcesso" method="post" action="">
-
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->abrirAreaDados('5em'); ?>
 

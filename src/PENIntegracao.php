@@ -453,6 +453,7 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_map_orgaos_externos_listar':
       case 'pen_map_orgaos_externos_excluir':
+      case 'pen_importar_tipos_processos':
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_listar.php';
         break;
 
