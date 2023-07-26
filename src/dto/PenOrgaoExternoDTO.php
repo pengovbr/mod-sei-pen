@@ -26,8 +26,6 @@ class PenOrgaoExternoDTO extends InfraDTO {
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdOrgaoDestino', 'id_orgao_destino');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'OrgaoDestino', 'str_orgao_destino');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstrutaOrganizacionalDestino', 'id_estrutura_destino');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'EstrutaOrganizacionalDestino', 'str_estrutura_destino');
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');

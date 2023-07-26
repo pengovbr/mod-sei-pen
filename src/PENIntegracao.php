@@ -516,7 +516,31 @@ class PENIntegracao extends SeiIntegracao
             return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
+      case 'pen_unidade_auto_completar_mapeados':
+        // DTO de paginao
+        $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+        $objPenUnidadeDTOFiltro->retStrSigla();
+        $objPenUnidadeDTOFiltro->retStrDescricao();
+        $objPenUnidadeDTOFiltro->retNumIdUnidade();
+        $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
 
+         // Filtragem
+        if(!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
+          $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['palavras_pesquisa'].'%', InfraDTO::$OPER_LIKE);
+        }
+
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
+        if (count($objArrPenUnidadeDTO) > 0) {
+          foreach ($objArrPenUnidadeDTO as $dto) {
+            $dto->setNumIdUnidadeMap($dto->getNumIdUnidade());
+            $dto->setStrDescricaoMap($dto->getStrSigla() . '-' . $dto->getStrDescricao());
+          }
+          $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
+        } else {
+            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+        }
+        break;
       case 'pen_apensados_auto_completar_expedir_procedimento':
           $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
           $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
