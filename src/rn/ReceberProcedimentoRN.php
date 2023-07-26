@@ -215,20 +215,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
 
-      // Verifica se é passada uma hipotese legal e se a mesma está cadastrada no destino.
-      if (isset($objProtocolo->hipoteseLegal) && !empty($objProtocolo->hipoteseLegal->identificacao)) {
-        $objHipoteseLegalDTO = new HipoteseLegalDTO();
-        $objHipoteseLegalDTO->retStrStaNivelAcesso();
-        $objHipoteseLegalDTO->setNumIdHipoteseLegal($objProtocolo->hipoteseLegal->identificacao);
-      
-        $objHipoteseLegalRN = new HipoteseLegalRN();
-        $objHipoteseLegalDTO = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
-      
-        if ($objHipoteseLegalDTO==null){
-          $this->objProcessoEletronicoRN->recusarTramite($numIdTramite, sprintf('O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.'), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
-        }
-      }
-
+      $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
       $this->validarDadosDestinatario($parObjMetadadosProcedimento);
       $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
       $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
@@ -1967,6 +1954,38 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+  private function validarHipoteseLegalPadrao($parObjProtocolo, $parNumIdTramite) {
+    if($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
+      if (isset($parObjProtocolo->hipoteseLegal) && !empty($parObjProtocolo->hipoteseLegal->identificacao)) {
+        // Captura o Id da hipótese legal
+        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parObjProtocolo->hipoteseLegal->identificacao);
+
+        // Checa se a hipótese legal está cadastrada para recebimento no orgão destino
+        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+        $objPenRelHipoteseLegalDTO->setStrTipo('R');
+        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+        $objPenRelHipoteseLegalDTO->retNumIdHipoteseLegal();
+
+        $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+        $hipoteseLegalRecebimento = $objPenRelHipoteseLegalRN->listar($objPenRelHipoteseLegalDTO);
+        if ($hipoteseLegalRecebimento == null) {
+          $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+
+          $objHipoteseLegalDTO = new HipoteseLegalDTO();
+          $objHipoteseLegalDTO->retStrStaNivelAcesso();
+          $objHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+
+          $objHipoteseLegalRN = new HipoteseLegalRN();
+          $objHipoteseLegalDTO = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+        
+          if ($objHipoteseLegalDTO==null){
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, sprintf('O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.'), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+          }
+        }
+      }
+    }
+  }
 
   private function validarDadosDestinatario($parObjMetadadosProcedimento)
     {
