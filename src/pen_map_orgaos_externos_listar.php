@@ -68,7 +68,23 @@ try {
                 }
                 break;
             case 'pen_importar_tipos_processos': {
-                var_dump($_POST);
+                try{
+                    $arrProcedimentoDTO = [];
+                    $procedimentos = $_POST['dados'];
+                    foreach ($procedimentos as $procedimento) {
+                        $procedimentoDTO = new PenMapTipoProcedimentoDTO();
+                        $procedimentoDTO->setNumIdMapOrgao($_POST['orgaoId']);
+                        $procedimentoDTO->setNumIdProcedimentoOrigem($procedimento);
+                        $arrProcedimentoDTO[] = $procedimentoDTO;
+                    }
+                    $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+                    $penMapTipoProcedimentoRN->cadastrar($arrProcedimentoDTO);
+                    header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+                    exit(0);
+                } catch (Exception $e) {
+                    throw new InfraException('Erro durante importação de processos.');
+                }
+
             }
 
             case 'pen_map_orgaos_externos_listar':
@@ -156,7 +172,7 @@ try {
             $strResultado .= '<td align="center">';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
-                $strResultado .= '<a href="#" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getNumIdOrgaoDestino(). ')">'
+                $strResultado .= '<a href="#" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
                     . '<img src='
                     . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif")
                     . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
