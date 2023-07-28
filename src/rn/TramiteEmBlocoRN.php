@@ -9,6 +9,10 @@ require_once DIR_SEI_WEB . '/SEI.php';
  */
 class TramiteEmBlocoRN extends InfraRN {
 
+    public static $TB_ASSINATURA = 'A';
+    public static $TB_REUNIAO = 'R';
+    public static $TB_INTERNO = 'I';
+
     public static $TE_ABERTO = 'A';
     public static $TE_DISPONIBILIZADO = 'D';
     public static $TE_RETORNADO = 'R';
