@@ -96,16 +96,4 @@ class PenMapTipoProcedimentoRN extends InfraRN
       throw new InfraException('Erro contando mapeamento de procedimento.', $e);
     }
   }
-
-  public function importarTipoProcedimentoControlado(array $objDTO)
-  {
-    try {
-      $objBD = new PenMapTipoProcedimentoBD($this->getObjInfraIBanco());
-      foreach ($objDTO as $procedimentoDTO) {
-
-      }
-    } catch (Exception $e) {
-        throw new InfraException('Erro importando mapeamento de procedimento.', $e);
-    }
-  }
 }

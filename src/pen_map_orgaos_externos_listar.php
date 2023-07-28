@@ -68,21 +68,29 @@ try {
                 }
                 break;
             case 'pen_importar_tipos_processos': {
+
                 try{
+                    $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
                     $arrProcedimentoDTO = [];
-                    $procedimentos = $_POST['dados'];
+                    $procedimentos = explode(',', $_POST['dados']);
+                    var_dump($procedimentos[0]);
                     foreach ($procedimentos as $procedimento) {
                         $procedimentoDTO = new PenMapTipoProcedimentoDTO();
-                        $procedimentoDTO->setNumIdMapOrgao($_POST['orgaoId']);
-                        $procedimentoDTO->setNumIdProcedimentoOrigem($procedimento);
-                        $arrProcedimentoDTO[] = $procedimentoDTO;
+                        $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
+                        $procedimentoDTO->setNumIdProcessoOrigem($procedimento);
+                        $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
+                        $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
+                        if ($penMapTipoProcedimentoRN->contar($procedimentoDTO)) {
+                            continue;
+                        }
+                        $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
                     }
-                    $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-                    $penMapTipoProcedimentoRN->cadastrar($arrProcedimentoDTO);
+                    // $objPagina->adicionarMensagem('Importação realizada com sucesso.');
                     header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+                    $objPagina->adicionarMensagem('Importação realizada com sucesso.');
                     exit(0);
                 } catch (Exception $e) {
-                    throw new InfraException('Erro durante importação de processos.');
+                    throw new InfraException($e->getMessage());
                 }
 
             }
@@ -344,7 +352,7 @@ $objPagina->montarStyle();
     }
 
     function infraImportarCsv(orgaoId) {
-        document.getElementById('orgaoId').value = orgaoId;
+        document.getElementById('mapId').value = orgaoId;
         $('#importArquivoCsv').click();
     }
 
@@ -363,7 +371,7 @@ $objPagina->montarStyle();
             data.push(tipoProcessoId);
         }
 
-        return data;
+        return data.join(',').replaceAll('""', '"');
     }
 
     function importarCsv(event, orgaoId) {
@@ -389,7 +397,8 @@ $objPagina->montarStyle();
         const dataInput = document.getElementById('dadosInput');
         const orgaoInput = document.getElementById('dadosInput');
         orgaoInput.value = orgaoId;
-        dataInput.value = JSON.stringify(data);
+        dataInput.value = data;
+
         const form = jQuery('#formImportarDados');
         form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=pen_importar_tipos_processos&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
         form.submit();
@@ -401,7 +410,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
 <input style="display: none" type="file" id="importArquivoCsv" accept=".csv" onchange="importarCsv(event)">
 <form id="formImportarDados" method="post" action="">
-    <input type="hidden" name="orgaoId" id="orgaoId">
+    <input type="hidden" name="mapId" id="mapId">
     <input type="hidden" name="dados" id="dadosInput">
 </form>
 <form id="frmAcompanharEstadoProcesso" method="post" action="">

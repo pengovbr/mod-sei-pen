@@ -17,15 +17,13 @@ class PenMapTipoProcedimentoDTO extends InfraDTO {
     
   public function montar() {
       
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'Id');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'id');
 
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Id', 'id_orgao_origem');
-
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'idMapOrgao', 'id_map_orgao');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdMapOrgao', 'id_map_orgao');
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
     $this->configurarFK('IdMapOrgao', 'mapeamento_orgao', 'id_map_orgao');
 
-      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdProcessoOrigem', 'id_processo_origem');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdProcessoOrigem', 'id_processo_origem');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdProcessoDestino', 'id_processo_destino');
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
