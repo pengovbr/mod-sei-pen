@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.0");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -282,6 +282,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.4.0':
+            $this->instalarV3040();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -624,12 +626,37 @@ class PenAtualizarSipRN extends InfraRN
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
       //----------------------------------------------------------------------
+      // Tramita.GOV.BR
+      //----------------------------------------------------------------------
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      //----------------------------------------------------------------------
+      // Tramita.GOV.BR
+      //----------------------------------------------------------------------
+      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita.GOV.BR', $numIdSistema);
+      $this->criarMenu('Tramita.GOV.BR', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      //Atribui as permissões aos recursos e menus
+      $this->atribuirPerfil($numIdSistema);
+
+
+      //----------------------------------------------------------------------
       // Expedir procedimento
       //----------------------------------------------------------------------
       $this->criarRecurso('pen_procedimento_expedir', 'Expedir Procedimento', $numIdSistema);
       $this->criarRecurso('apensados_selecionar_expedir_procedimento', 'Processos Apensados', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
-      $this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+      //$numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
+      //$this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+
       //----------------------------------------------------------------------
       // Mapeamento de documentos enviados
       //----------------------------------------------------------------------
@@ -1179,11 +1206,11 @@ class PenAtualizarSipRN extends InfraRN
       $objRecursoDTO->retNumIdRecurso();
       $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
       $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-    if (isset($objRecursoDTO)) {
+      if (isset($objRecursoDTO)) {
         $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
         $objRecursoDTO->setStrDescricao('Processos Tramitados Externamente');
         $objRecursoBD->alterar($objRecursoDTO);
-    }
+      }
 
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdItemMenuPai(null);
@@ -1194,12 +1221,11 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->retNumIdItemMenu();
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
-    if (isset($objItemMenuDTO)) {
+      if (isset($objItemMenuDTO)) {
         $objItemMenuDTO->setStrDescricao('Processos Tramitados Externamente');
         $objItemMenuDTO->setStrRotulo('Processos Tramitados Externamente');
         $objItemMenuBD->alterar($objItemMenuDTO);
-    }
-
+      }
 
       $this->atualizarNumeroVersao('1.1.9');
   }
@@ -1209,6 +1235,56 @@ class PenAtualizarSipRN extends InfraRN
      */
   private function instalarV1110()
     {
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      //Menu Tramita.GOV.BR
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (empty($objItemMenuDTO)) {
+        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
+      }
+
+      // ---------- antigo método (instalarV006R004S001US043) ---------- //
+      $objBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objDTO = new ItemMenuDTO();
+      $objDTO->setNumIdSistema($numIdSistema);
+      $objDTO->setNumIdMenu($numIdMenu);
+      $objDTO->setStrRotulo('Tramita.GOV.BR');
+      $objDTO->setNumMaxRegistrosRetorno(1);
+      $objDTO->retNumIdItemMenu();
+
+      $objDTO = $objBD->consultar($objDTO);
+      if (empty($objDTO)) {
+        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
+      }
+
+      $numIdItemMenuPai = $objDTO->getNumIdItemMenu();
+
+      $numIdRecurso = $this->criarRecurso('pen_tramite_bloco_listar', 'Blocos de Trâmite Externo', $numIdSistema);
+      $this->criarMenu('Blocos de Trâmite Externo', 57, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Tramitados Externamente', $numIdSistema);
+      $this->criarMenu('Processos Tramitados Externamente', 55, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Lote', $numIdSistema);
+      $this->criarMenu('Processos Tramitados em Lote', 56, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $this->atribuirPerfil($numIdSistema);
+
       $this->atualizarNumeroVersao('1.1.10');
   }
 
@@ -1475,17 +1551,17 @@ class PenAtualizarSipRN extends InfraRN
 
 
       $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
-      $strNomeMenuProcessosTramitados = "Processos Tramitados Externamente";
+      $strNomeMenuProcessosTramitados = "Tramita.GOV.BR";
       $numIdSistemaSei = ScriptSip::obterIdSistema('SEI');
       $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
       $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
       // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
+     /* ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
       $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');
       $numIdMenuProcessoTramitados = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSei, $strNomeMenuProcessosTramitados);
       ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
-      ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
+      ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);*/
 
       $this->atualizarNumeroVersao("2.0.0-beta1");
   }
@@ -1629,8 +1705,8 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarRecurso('pen_expedir_lote', 'Expedir Procedimento em Lote', $numIdSistema);
       ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote');
 
-      $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
-      ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
+      //$numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
+      //ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
 
       $this->atualizarNumeroVersao("3.1.0");
   }
@@ -1811,6 +1887,76 @@ class PenAtualizarSipRN extends InfraRN
     {
         $this->atualizarNumeroVersao("3.3.0");
     }
+
+    protected function instalarV3040()
+    {
+      /* Corrige nome de menu de trâmite de documentos */
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      //Corrige nome do recurso
+      $objRecursoDTO = new RecursoDTO();
+      $objRecursoDTO->setNumIdSistema($numIdSistema);
+      $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
+      $objRecursoDTO->retNumIdRecurso();
+      $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
+      $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
+    if (isset($objRecursoDTO)) {
+        $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
+        $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objRecursoBD->alterar($objRecursoDTO);
+    }
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenuPai(null);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+        $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+    // adicionar submenu
+    //   if (!empty($objItemMenuDTO)) {
+
+    //     $numIdItemMenuMapeamento = $objItemMenuDTO->getNumIdItemMenu();
+
+    //     $objDTO = new ItemMenuDTO();
+    //     $objDTO->setNumIdSistema($numIdSistema);
+    //     $objDTO->setNumIdMenu($numIdMenu);
+    //     $objDTO->setNumIdItemMenuPai($numIdItemMenuMapeamento);
+    //     $objDTO->retTodos();
+
+    //     $arrObjDTO = $objItemMenuDTO->listar($objDTO);
+
+    //   if (!empty($arrObjDTO)) {
+    //       $numIdItemMenuPai = $this->criarMenu('Listagem', 0, $numIdItemMenuMapeamento, $numIdMenu, null, $numIdSistema);
+    //       $numIdItemMenuPai = $this->criarMenu('Mapeamento de Tipos de Documento', 10, $numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
+
+    //     foreach ($arrObjDTO as $objDTO) {
+    //       $objDTO->setNumIdItemMenuPai($numIdItemMenuPai);
+    //       $objItemMenuDTO->alterar($objDTO);
+    //     }
+
+    //       $objItemMenuDTO->excluir($objItemMenuDTO);
+    //   }
+    // }
+
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // adicionar permissão
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'md_pen_tramita_em_bloco');
+
+    $this->atualizarNumeroVersao("3.4.0");
+  }
 }
 
 

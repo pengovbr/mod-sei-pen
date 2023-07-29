@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.0");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -157,6 +157,8 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
         $strAcoesProcedimento .= '</a>';
     }
+
+    $strAcoesProcedimento .= '<a>TESTE AQUII</a>';
 
       return array($strAcoesProcedimento);
   }
@@ -375,6 +377,11 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
           break;
 
+      case 'pen_tramite_bloco_listar':
+        require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
+        break;
+
+
       case 'pen_map_tipo_documento_envio_listar';
       case 'pen_map_tipo_documento_envio_excluir';
       case 'pen_map_tipo_documento_envio_desativar';
@@ -474,9 +481,15 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_expedir_lote.php';
           break;
 
+
       case 'pen_expedir_lote_listar':
-          require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
-          break;
+        require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+        break;
+
+      // novo
+      case 'md_pen_tramita_em_bloco':
+        require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
+        break;
 
       default:
           return false;
