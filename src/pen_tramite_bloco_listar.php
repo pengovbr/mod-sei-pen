@@ -70,7 +70,15 @@ try {
       if (count($arrStrIds) > 0) {
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoRN->cancelar($arrStrIds);
+
+          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+          $objTramiteEmBlocoDTO->setNumId($_GET['id_tramita_em_bloco']);
+          $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+    
+          $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+          $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
       }
+
       PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
 
@@ -128,7 +136,6 @@ try {
   $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
   $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton d-none d-md-inline-block"><span class="infraTeclaAtalho">I</span>mprimir</button>';
   if ($numRegistros > 0) {
-    $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelar()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
   }
   
@@ -171,11 +178,21 @@ try {
 
         $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
 
-        // Tramitar bloco
-        $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
+        $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+        $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoTramite);
+        $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+        $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+        $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+        $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
 
-        // Cancelar tramite
-        if ($objFiltro->getStrStaEstado() != TramiteEmBlocoRN::$TE_ABERTO) {
+
+        // Tramitar bloco
+        if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $obgTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
+          $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
+        }
+        
+        // Cancelar tramite retornarEstadoDescricao
+        if ($linha['estado'] != $obgTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
           $strResultado .= '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite.'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite do Bloco" alt="Cancelar Tramite do Bloco" class="infraImg iconTramita" /></a>&nbsp;';
         }
 

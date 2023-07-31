@@ -146,8 +146,8 @@ class TramiteEmBlocoRN extends InfraRN {
         try {
             $arg = [
                self::$TE_ABERTO => 'Aberto',
-               self::$TE_DISPONIBILIZADO = 'Em Processamento',
-               self::$TE_RETORNADO = 'Retornado',
+               self::$TE_DISPONIBILIZADO => 'Em processamento',
+               self::$TE_RETORNADO => 'Retornado',
             ];
 
             return $arg[$estado];
