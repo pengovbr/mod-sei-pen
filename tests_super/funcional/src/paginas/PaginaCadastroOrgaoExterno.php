@@ -25,9 +25,8 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     public function novo()
     {
         $this->selectRepositorio('RE CGPRO', 'Origem');
-        $this->selectUnidade('Fabrica-org2', 'Origem');
-        $this->selectRepositorio('RE CGPRO', 'Destino');
-        $this->selectUnidade('Fabrica-org1', 'Destino');
+        $this->selectUnidade('Fabrica-org2', 'Origem'); // Seleciona Orgão de Origem
+        $this->selectUnidade('TESTE - Unidade de Teste 1', 'Destino'); // Seleciona Orgão de Destino
         $this->salvar();
     }
 
