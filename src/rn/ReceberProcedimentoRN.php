@@ -2515,7 +2515,9 @@ class ReceberProcedimentoRN extends InfraRN
      $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
     if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)){
           $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-          $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
+          $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
+          $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
+          $strMensagemErro .= "- Metadados enviado: ". json_encode($arrObjDocumentosMetadados).". \n";
     }
 
     if(!InfraString::isBolVazia($strMensagemErro)){
