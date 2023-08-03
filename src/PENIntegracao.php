@@ -173,10 +173,11 @@ class PENIntegracao extends SeiIntegracao
   public function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO) {
     $exception = new InfraException();
     foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
-        $objProcedimentoDTO = new ProcedimentoDTO();
-        $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
+        $objProcedimentoDTO = new PenParametroDTO();
+        $objProcedimentoDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
+        $objProcedimentoDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
+        $objProcedimentoRN = new PenParametroRN();
+        $objProcedimentoDTO = $objProcedimentoRN->contar($objProcedimentoDTO);
         if ($objProcedimentoDTO > 0) {
             $exception->lancarValidacao('Nao é possível desativar "'. $objProcedimento->getNome().'".');
         }
