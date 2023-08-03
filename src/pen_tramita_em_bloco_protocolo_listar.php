@@ -119,19 +119,35 @@ try {
     $strSumarioTabela = 'Tabela de Processo em Lote.';
     $strCaptionTabela = 'Processo em Lote';
 
-    $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
+    $strResultado .= '<table width="99%" id="tblBlocos" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
     $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
-    $strResultado .= '<tr>';
+    $strResultado .= '<thead>';
     $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="10%">' . $objPaginaSEI->getThOrdenacao($objTramitaEmBlocoProtocoloDTO, 'Seq', 'Sequencia', $arrTramitaEmBlocoProtocoloDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objTramitaEmBlocoProtocoloDTO, 'Processo', 'IdxRelBlocoProtocolo', $arrTramitaEmBlocoProtocoloDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objTramitaEmBlocoProtocoloDTO, 'Anotações', 'Anotacoes', $arrTramitaEmBlocoProtocoloDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="10%">';
+    
+    $strResultado .= '<div class="infraDivOrdenacao">';
+    $strResultado .= '<div class="infraDivRotuloOrdenacao">Seq</div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="/infra_css/svg/seta_acima.svg" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="/infra_css/svg/seta_abaixo_selecionada.svg" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '</div>';
+
+    $strResultado .= '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">';
+
+    $strResultado .= '<div class="infraDivOrdenacao">';
+    $strResultado .= '<div class="infraDivRotuloOrdenacao">Processo</div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="/infra_css/svg/seta_acima.svg" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="/infra_css/svg/seta_abaixo_selecionada.svg" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '</div>';
+
+    $strResultado .= '</th>' . "\n";
+   // $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objTramitaEmBlocoProtocoloDTO, 'Anotações', 'Anotacoes', $arrTramitaEmBlocoProtocoloDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
     $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
     $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
     $strResultado .= '<th class="infraTh">Situação</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="10%">Ações</th>' . "\n";
-    $strResultado .= '</tr>' . "\n";
+    $strResultado .= '</thead>' . "\n";
     $strCssTr = '';
     foreach ($arrTramitaEmBlocoProtocoloDTO as $i => $objDTO) {
       $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
@@ -145,7 +161,7 @@ try {
       $strResultado .= '<a onclick="infraLimparFormatarTrAcessada(this.parentNode.parentNode);" href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objDTO->getDblIdProtocolo()) . '" target="_blank" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '" class="' . $strClassProtocolo . '" alt="" title="">' . $objDTO->getStrIdxRelBlocoProtocolo() . '</a>';
       $strResultado .= '</td>';
 
-      $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
+      // $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
 
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
       if ($objTramiteDTO) {
@@ -207,35 +223,46 @@ $objPaginaSEI->abrirHtml();
 $objPaginaSEI->abrirHead();
 $objPaginaSEI->montarMeta();
 $objPaginaSEI->montarTitle($objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo);
-$objPaginaSEI->montarStyle();
-$objPaginaSEI->abrirStyle();
-?>
-
-#lblProcedimentoFormatado {position:absolute;left:0%;top:0%;width:20%;}
-#txtProcedimentoFormatado {position:absolute;left:0%;top:40%;width:20%;}
-input.infraText {width: 100%;}
+$objPaginaSEI->montarStyle(); ?>
+<style>
+#lblProcedimentoFormatado {
+    position:absolute;left:0%;top:0%;width:20%;
+}
+#txtProcedimentoFormatado {
+  position:absolute;left:0%;top:40%;width:20%;
+}
+input.infraText {
+  width: 100%;
+}
 .iconTramita {max-width: 1.5rem;}
 
-<?
-$objPaginaSEI->fecharStyle();
-$objPaginaSEI->montarJavaScript();
-$objPaginaSEI->abrirJavaScript();
-?>
-
-function inicializar(){
-if ('<?= $_GET['acao'] ?>'=='serie_selecionar'){
-infraReceberSelecao();
-document.getElementById('btnFecharSelecao').focus();
-}else{
-document.getElementById('btnFechar').focus();
+ /* Personalize o estilo da paginação */
+.dataTables_paginate {
+  margin: 10px;
+  text-align: end;
 }
 
-infraEfeitoTabelas();
+.dataTables_paginate .paginate_button {
+  padding: 5px 10px;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  background-color: #f2f2f2;
+  color: #333;
+  cursor: pointer;
 }
 
-<?php $objPaginaSEI->fecharStyle(); ?>
-<?php $objPaginaSEI->montarJavaScript(); ?>
+.dataTables_paginate .paginate_button.current {
+  background-color: var(--color-primary-default);
+  color: #fff;
+}
+
+</style>
+
+<?php
+$objPaginaSEI->montarJavaScript(); ?>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
+
   function inicializar() {
     infraEfeitoTabelas();
   }
@@ -332,6 +359,27 @@ infraEfeitoTabelas();
       alert('Erro : ' + e.message);
     }
   }
+
+  $(document).ready(function() {
+    $('#tblBlocos').dataTable({
+      "searching": false,
+      "columnDefs": [
+          { targets: [0, 3, 4], orderable: false } // Define as colunas 1 e 5 como não ordenáveis
+        ],
+
+      "language": {
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "lengthMenu": "Mostrar _MENU_ registros por página",
+        "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+        "zeroRecords": "Nenhum registro encontrado",
+        "paginate": {
+          "previous": "Anterior",
+          "next": "Próximo"
+        },
+      }
+    } );
+  } );
+  
 </script>
 <?
 $objPaginaSEI->fecharHead();
