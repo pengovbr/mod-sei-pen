@@ -37,4 +37,22 @@ class MapeamentoOrgaoExterno extends CenarioBaseTestCase
 
         $this->assertTrue(true);
     }
+
+    /**
+     * @return void
+     * @depends test_novo_mapeamento_orgao_externo
+     */
+    public function test_importar_csv()
+    {
+
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->navegarPara('pen_map_orgaos_externos_listar');
+        $this->paginaCadastroOrgaoExterno->abrirSelecaoDeArquivoParaImportacao();
+
+        sleep(10);
+
+        $this->assertTrue(true);
+
+    }
 }

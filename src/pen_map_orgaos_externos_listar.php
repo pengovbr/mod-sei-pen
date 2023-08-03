@@ -180,10 +180,10 @@ try {
             $strResultado .= '<td align="center">';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
-                $strResultado .= '<a href="#" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
+                $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
                     . '<img src='
-                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif")
-                    . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
+                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
+                    . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
                     . '</a>';
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
                     . $objSessao->assinarLink(

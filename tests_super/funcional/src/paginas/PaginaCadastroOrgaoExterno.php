@@ -26,8 +26,8 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     {
         $this->selectRepositorio('RE CGPRO', 'Origem');
         $this->selectUnidade('Fabrica-org2', 'Origem');
-        $this->selectRepositorio('RE CGPRO', 'Destino');
-        $this->selectUnidade('Fabrica-org1', 'Destino');
+        //$this->selectRepositorio('RE CGPRO', 'Destino');
+        $this->selectUnidade('Teste', 'Destino');
         $this->salvar();
     }
 
@@ -77,6 +77,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         }, PEN_WAIT_TIMEOUT);
 
         return $this->unidadeInput->value();
+    }
+
+    public function abrirSelecaoDeArquivoParaImportacao()
+    {
+        $this->test->byId('importarCsvButton')->click();
+        $this->test->waitUntil(function($testCase) {
+            return true;
+        });
     }
 
     /**
