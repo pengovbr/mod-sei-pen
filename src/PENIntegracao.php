@@ -31,7 +31,7 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function getInstituicao() {
-      return 'Ministério da Economia - ME';
+      return 'Ministério da Gestão e Inovação - MGI';
   }
 
   public function obterDiretorioIconesMenu() {
