@@ -85,9 +85,8 @@ try {
                         }
                         $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
                     }
-                    // $objPagina->adicionarMensagem('Importação realizada com sucesso.');
+                    $objPagina->adicionarMensagem('Importação realizada com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
                     header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-                    $objPagina->adicionarMensagem('Importação realizada com sucesso.');
                     exit(0);
                 } catch (Exception $e) {
                     throw new InfraException($e->getMessage());
