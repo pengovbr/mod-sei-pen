@@ -46,23 +46,33 @@ class PenParametroRN extends InfraRN {
     }
   }
 
-  protected function cadastrarControlado(PenParametroDTO $objDTO){
+  protected function cadastrarControlado(PenParametroDTO $objPenParametroDTO){
 
     try {
+        $objInfraException = new InfraException();
+        $this->validarUnidadeRecebimento($objPenParametroDTO, $objInfraException);
+        $this->validarTipoProcessoExterno($objPenParametroDTO, $objInfraException);
+        $objInfraException->lancarValidacoes();
+
         $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-        return $objBD->cadastrar($objDTO);
+        return $objBD->cadastrar($objPenParametroDTO);
     }
     catch (Exception $e) {
         throw new InfraException('Erro ao cadastrar parâmetro.', $e);
     }
   }
 
-  protected function alterarControlado(PenParametroDTO $objDTO){
+  protected function alterarControlado(PenParametroDTO $objPenParametroDTO){
 
     try {
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao_alterar', __METHOD__, $objDTO);
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_parametros_configuracao_alterar', __METHOD__, $objPenParametroDTO);
+        $objInfraException = new InfraException();
+        $this->validarUnidadeRecebimento($objPenParametroDTO, $objInfraException);
+        $this->validarTipoProcessoExterno($objPenParametroDTO, $objInfraException);
+        $objInfraException->lancarValidacoes();
+
         $objBD = new PenParametroBD($this->inicializarObjInfraIBanco());
-        return $objBD->alterar($objDTO);
+        return $objBD->alterar($objPenParametroDTO);
     }
     catch (Exception $e) {
         throw new InfraException('Erro ao alterar parâmetro.', $e);
@@ -137,4 +147,46 @@ class PenParametroRN extends InfraRN {
         throw new InfraException("Erro ao persistir parâmetro $parStrNome", $e);
     }
   }
+
+
+
+  private function validarTipoProcessoExterno(PenParametroDTO $objPenParametroDTO, InfraException $objInfraException){
+
+    if($objPenParametroDTO->getStrNome() == "PEN_TIPO_PROCESSO_EXTERNO"){
+        $objRelTipoProcedimentoAssuntoDTO = new RelTipoProcedimentoAssuntoDTO();
+        $objRelTipoProcedimentoAssuntoDTO->retNumIdTipoProcedimento();
+        $objRelTipoProcedimentoAssuntoDTO->setNumIdTipoProcedimento($objPenParametroDTO->getStrValor());
+        $objRelTipoProcedimentoAssuntoDTO->setDistinct(true);
+
+        $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
+        $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
+
+        if (empty($arrObjTipoProcedimentoAssunto)) {
+            $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
+            $objInfraException->adicionarValidacao($strMensagemErro);
+        }
+    }
+  }
+
+  private function validarUnidadeRecebimento(PenParametroDTO $objPenParametroDTO, InfraException $objInfraException){
+
+    if($objPenParametroDTO->getStrNome() == "PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO"){
+        $strIdUnidadeRecebimento = $objPenParametroDTO->getStrValor();
+
+        $objUnidadeDTO = new UnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidade();
+        $objUnidadeDTO->retStrSinEnvioProcesso();
+        $objUnidadeDTO->setNumIdUnidade($strIdUnidadeRecebimento);
+
+        $objUnidadeBD = new UnidadeBD($this->inicializarObjInfraIBanco());
+        $objUnidadeDTO = $objUnidadeBD->consultar($objUnidadeDTO);
+
+        if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
+            $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
+            $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
+            $objInfraException->adicionarValidacao($strMensagemErro);
+        }
+    }
+  }
+
 }

@@ -27,8 +27,8 @@ SEI_BIN_DIR = dist/sei/bin/mod-pen
 SEI_MODULO_DIR = dist/sei/web/modulos/pen
 SIP_SCRIPTS_DIR = dist/sip/scripts/mod-pen
 PEN_MODULO_COMPACTADO = mod-sei-pen-$(VERSAO_MODULO).zip
-PEN_TEST_FUNC = tests/tests_$(sistema)/funcional
-PEN_TEST_UNIT = tests/tests_$(sistema)/unitario
+PEN_TEST_FUNC = tests_$(sistema)/funcional
+PEN_TEST_UNIT = tests_$(sistema)/unitario
 PARALLEL_TEST_NODES = 5
 
 -include $(PEN_TEST_FUNC)/.env
@@ -123,6 +123,10 @@ clean:
 	@rm -f dist/$(PEN_MODULO_COMPACTADO)
 	@echo "Limpeza do diretório de distribuição do realizada com sucesso"
 
+config:  ## Configura o ambiente para outro banco de dados (mysql|sqlserver|oracle|postgresql). Ex: make config base=oracle 
+	@cp -f $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env;
+	@echo "$(SUCCESS)Ambiente configurado para utilizar a base de dados $(base).$(NC)"
+
 
 install: check-isalive
 	$(CMD_COMPOSE_FUNC) up -d	
@@ -169,19 +173,19 @@ down: .env
 
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
-test-functional: .env $(FILE_VENDOR_FUNCIONAL)
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste))
+test-functional: .env $(FILE_VENDOR_FUNCIONAL) up
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
-test-functional-parallel: $(FILE_VENDOR_FUNCIONAL)
+test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
 
 
-test-parallel-otimizado:
+test-parallel-otimizado: .env $(FILE_VENDOR_FUNCIONAL) up
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit: .env $(FILE_VENDOR_UNITARIO)
+test-unit: $(FILE_VENDOR_UNITARIO)
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
 
 test: test-unit test-functional
@@ -201,39 +205,37 @@ bash_org2:
 	$(CMD_COMPOSE_FUNC) exec org2-http bash
 
 atualizaSequencia:
-	docker exec -it org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-	docker exec -it org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
-
-deletarHttpProxy:
-	docker container rm proxy org1-http org2-http
+	$(CMD_COMPOSE_FUNC) exec org1-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
+	$(CMD_COMPOSE_FUNC) exec org2-http php -c /opt/php.ini /opt/sei/scripts/atualizar_sequencias.php 
 
 tramitar-pendencias:
 	i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T1 $$i"; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done & i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T2 $$i"; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done
 
 tramitar-pendencias-simples:
-	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
-	i=1; while [ "$$i" -le 3000 ]; do \
-    	echo "Executando $$i" >/dev/null 2>&1; \
-		docker exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1 & \
-		docker exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php >/dev/null 2>&1; \
+	@echo 'Executando monitoramento de pendências do Org1 e Org2'
+	@i=1; while [ "$$i" -le 3000 ]; do \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 & \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 ; \
 		i=$$((i + 1));\
   	done 
 
 #deve ser rodado em outro terminal
 stop-test-container:
 	docker stop $$(docker ps -a -q --filter="name=php-test")
+
 

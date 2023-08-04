@@ -1539,7 +1539,7 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite. ". $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -1563,7 +1563,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $resultado->conteudoDoReciboDeEnvio;
     }
     catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite de envio. " . $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -2098,8 +2098,13 @@ class ProcessoEletronicoRN extends InfraRN
         $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
         $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
     } catch(Exception $e){
-        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]. Detalhes: " . $e->getMessage();
         LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+    finally{
+      if (empty($numTamanhoBlocoMB)){
+        $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+      }
     }
 
     return $numTamanhoBlocoMB;
@@ -2210,6 +2215,37 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $strTexto;
   }
+
+    public static function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
+
+        if(!is_readable($strCaminhoAnexoCompactado)) {
+            throw new InfraException("Anexo de documento não pode ser localizado");
+        }
+
+        $objAnexoRN = new AnexoRN();
+        $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
+
+        $arrStrNomeArquivos = array();
+        $zipArchive = new ZipArchive();
+        if($zipArchive->open($strCaminhoAnexoCompactado)){
+            try {
+                for($i = 0; $i < $zipArchive->numFiles; $i++){
+                    $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
+                }
+
+                $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
+                $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
+                copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
+            } finally {
+                $zipArchive->close();
+            }
+        } else {
+            throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
+        }
+
+        return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
+    }
+
 
     /**
      * Recupera a lista de todos os documentos do processo, principal ou anexados, mantendo a ordem correta entre eles e indicando qual

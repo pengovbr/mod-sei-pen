@@ -480,10 +480,12 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null){
-      if(!isset($objExpedirProcedimentoDTO)){
-          throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
-      }
+        if(!isset($objExpedirProcedimentoDTO)){
+            throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
+        }
 
+        // Atenção: Comportamento desativado até que seja tratado o recebimento de um processo recebendo um novo documento
+        // com mesmo arquivo/hash de outro documento já existente no processo
         $bolObrigarEnvioDeTodosOsComponentesDigitais = !$this->enviarApenasComponentesDigitaisPendentes(
             $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
             $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
@@ -1100,16 +1102,19 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
         $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
-
-      if($objPenRelTipoDocMapEnviadoDTO == null) {
+        
+        //Mapeamento achado
+        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
+        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
+      //O padrão de recebimento está nulo e não achou mapeamento
+      if($numCodigoEspecieMapeada == null) {
           $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
           $objPenRelTipoDocMapEnviadoDTO->retNumCodigoEspecie();
           $objPenRelTipoDocMapEnviadoDTO->setNumMaxRegistrosRetorno(1);
           $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
+          $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
       }
-
-        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
-        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
+      
 
       if(!isset($numCodigoEspecieMapeada)) {
           throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
@@ -1415,7 +1420,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $strNomeComponenteDigital = "";
           if($bolMultiplosComponentes){
             $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-            list($strCaminhoAnexoTemporario, $strNomeComponenteDigital) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+            list($strCaminhoAnexoTemporario, $strNomeComponenteDigital) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
             $strCaminhoAnexo = $strCaminhoAnexoTemporario;
           } else {
               $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
@@ -1534,36 +1539,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       return $strConteudoFS;
     }
 
-
-    private function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
-
-      if(!is_readable($strCaminhoAnexoCompactado)) {
-          throw new InfraException("Anexo de documento não pode ser localizado");
-      }
-
-        $objAnexoRN = new AnexoRN();
-        $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
-
-        $arrStrNomeArquivos = array();
-        $zipArchive = new ZipArchive();
-      if($zipArchive->open($strCaminhoAnexoCompactado)){
-        try {
-          for($i = 0; $i < $zipArchive->numFiles; $i++){
-            $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
-          }
-
-            $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
-            $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
-            copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
-        } finally {
-            $zipArchive->close();
-        }
-      } else {
-          throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
-      }
-
-        return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
-    }
 
     private function obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $arrPenMimeTypes, $strProtocoloDocumentoFormatado){
         $strDadosComplementaresDoTipoDeArquivo = "";
@@ -2135,7 +2110,7 @@ class ExpedirProcedimentoRN extends InfraRN {
                   if($bolMultiplosComponentes){
                         $numOrdemComponenteDigital = $objComponenteDigitalDTO->getNumOrdem();
                         $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-                        list($strCaminhoAnexoTemporario, ) = $this->descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+                        list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                         $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                   } else {
                         $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
