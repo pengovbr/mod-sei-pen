@@ -73,7 +73,6 @@ try {
                     $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
                     $arrProcedimentoDTO = [];
                     $procedimentos = explode(',', $_POST['dados']);
-                    var_dump($procedimentos[0]);
                     foreach ($procedimentos as $procedimento) {
                         $procedimentoDTO = new PenMapTipoProcedimentoDTO();
                         $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
