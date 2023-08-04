@@ -31,20 +31,19 @@ class MapeamentoOrgaoExterno extends CenarioBaseTestCase
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
         $this->paginaCadastroOrgaoExterno->novoMapOrgao();
-        $this->paginaCadastroOrgaoExterno->novo();
-        
-        sleep(10);
+        $this->paginaCadastroOrgaoExterno->novoMapeamentoOrgaoExterno();
 
         $this->assertTrue(true);
     }
 
     /**
      * @return void
+     *
      * @depends test_novo_mapeamento_orgao_externo
      */
     public function test_importar_csv()
     {
-
+        // $this->paginaCadastroOrgaoExterno->createFileToOpen();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
