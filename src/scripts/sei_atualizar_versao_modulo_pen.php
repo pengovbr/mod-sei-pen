@@ -263,6 +263,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.3.0':
+            $this->instalarV3031();
+
         case '3.4.0':
             $this->instalarV3040();
         case '3.4.1':
@@ -2524,7 +2527,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("3.3.0");
   }
 
-  protected function instalarV3040() 
+  protected function instalarV3031() {
+    $this->atualizarNumeroVersao("3.3.1");
+}
+
+  protected function instalarV3040()
   {
     $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
     $objMetaBD = $this->objMeta;

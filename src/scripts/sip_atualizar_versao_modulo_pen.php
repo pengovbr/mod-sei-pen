@@ -282,6 +282,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.3.0':
+            $this->instalarV3031();
         case '3.4.0':
             $this->instalarV3040();
 
@@ -1809,11 +1811,16 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("3.2.4");
   }
 
-    protected function instalarV3030()
-    {
-        $this->atualizarNumeroVersao("3.3.0");
-    }
-  
+  protected function instalarV3030()
+  {
+      $this->atualizarNumeroVersao("3.3.0");
+  }
+
+  protected function instalarV3031()
+  {
+      $this->atualizarNumeroVersao("3.3.1");
+  }
+
   protected function instalarV3040()
   {
     /* Corrige nome de menu de trâmite de documentos */
@@ -1834,7 +1841,7 @@ class PenAtualizarSipRN extends InfraRN
     if (empty($objItemMenuDTO)) {
       throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
     }
-  
+
     // Adicionar submenu
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
@@ -1848,7 +1855,7 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
-    
+
     // Nova versão
     $this->atualizarNumeroVersao("3.4.0");
   }
