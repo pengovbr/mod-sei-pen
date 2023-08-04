@@ -38,6 +38,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaReordenarProcesso = null;
 
     public function setUpPage(): void
     {
@@ -56,6 +57,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaReordenarProcesso = new PaginaReordenarProcesso($this);
         $this->currentWindow()->maximize();
     }
 
