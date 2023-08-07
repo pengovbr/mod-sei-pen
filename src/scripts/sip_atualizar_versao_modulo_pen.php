@@ -1848,6 +1848,8 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
     
     // Nova versão
     $this->atualizarNumeroVersao("3.4.0");

@@ -34,11 +34,29 @@ class PenOrgaoExternoRN extends InfraRN
       throw new InfraException('Erro listando orgãos externos.', $e);
     }
   }
+  
+  /**
+   * Método utilizado para consulta de dados.
+   * @param PenOrgaoExternoDTO $objDTO
+   * @return PenOrgaoExternoDTO
+   * @throws InfraException
+   */
+  protected function consultarConectado(PenOrgaoExternoDTO $objDTO)
+  {
+    try {
+      //Valida Permissao
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_orgaos_externos_visualizar', __METHOD__, $objDTO);
+      $objBD = new PenOrgaoExternoBD(BancoSEI::getInstance());
+      return $objBD->consultar($objDTO);
+    } catch (Exception $e) {
+      throw new InfraException('Erro consultando mapeamento de unidades.', $e);
+    }
+  }
 
   /**
    * Método utilizado para alteração de dados.
    * @param PenOrgaoExternoDTO $objDTO
-   * @return array
+   * @return PenOrgaoExternoDTO
    * @throws InfraException
    */
   protected function alterarControlado(PenOrgaoExternoDTO $objDTO)

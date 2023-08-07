@@ -158,22 +158,23 @@ try {
             $strResultado .= '<td align="center">';
 
             $strResultado .= '<a href="'
-                . $objSessao->assinarLink('controlador.php?'.PEN_RECURSO_BASE
+                . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
                 . '_visualizar&acao_origem='.$_GET['acao_origem']
                 . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
                 . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") 
                 . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
 
-            if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
+            if($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
                 $strResultado .= '<a href="'
                     . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
-                    . '_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao']
+                    . '_atualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao']
                     . '&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
                     . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
                     . ' title="Alterar Mapeamento" alt="Alterar Mapeamento Entre Órgãos" class="infraImg"></a>';
             }
 
-            $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
+            $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'
+                . PaginaSEI::getInstance()->getIconeDesativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
