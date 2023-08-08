@@ -1973,6 +1973,9 @@ class ReceberProcedimentoRN extends InfraRN
         $numIdRepositorioDestinoProcesso = $objDestinatario->identificacaoDoRepositorioDeEstruturas;
         $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
     }
+    
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $objRepositorio = $objProcessoEletronicoRN->consultarEstrutura($numIdRepositorioDestinoProcesso, $numeroDeIdentificacaoDaEstrutura);
 
       //Validação do repositório de destino do processo
     if($numIdRepositorioDestinoProcesso != $numIdRepositorioOrigem){
@@ -1988,9 +1991,12 @@ class ReceberProcedimentoRN extends InfraRN
       $objUnidadeRN = new UnidadeRN();
       $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
-    if(!isset($objUnidadeDTO)){
-        $objInfraException->adicionarValidacao("Unidade [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber processos externos no sistema de destino.");
-    }
+      if(!isset($objUnidadeDTO)){
+        $strMsg = "O processo/ documento avulso foi recusado: A Unidade \"%s\" não está configurada para receber "
+          . "processos/ documentos avulsos por meio da plataforma. "
+          . "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro";
+        $objInfraException->adicionarValidacao(sprintf($strMsg, $objRepositorio->getStrNome()));
+      }
 
       $objInfraException->lancarValidacoes();
   }
