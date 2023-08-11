@@ -524,7 +524,10 @@ class ProcessoEletronicoRN extends InfraRN
         $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
         $xpath->registerNamespace('x', $rootNamespace);
         $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
-
+        if (count($entries) == 0){
+          $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
+          throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
+        }
         $resultado = array();
       foreach ($entries as $entry) {
         $valor = $entry->getAttribute('value');

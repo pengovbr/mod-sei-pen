@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.4.0");
+define("VERSAO_MODULO_PEN", "3.3.2");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -31,7 +31,7 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function getInstituicao() {
-      return 'Ministério da Economia - ME';
+      return 'Ministério da Gestão e da Inovação em Serviços Públicos - MGI';
   }
 
   public function obterDiretorioIconesMenu() {

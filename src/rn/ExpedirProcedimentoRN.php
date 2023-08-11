@@ -1114,9 +1114,8 @@ class ExpedirProcedimentoRN extends InfraRN {
           $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
       }
       
-
       if(!isset($numCodigoEspecieMapeada)) {
-          throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
+          throw new InfraException("Não foi encontrado nenhum mapeamento de tipo documental. Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
       }
 
         return $numCodigoEspecieMapeada;
