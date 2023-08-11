@@ -22,7 +22,7 @@ pipeline {
         
 	    string(
 	        name: 'versoes',
-	        defaultValue:"SPE=4.0.8,NOME_SPE=sei4,VERSAO_MODULO=3.0.2;SPE=4.0.9,NOME_SPE=sei4,VERSAO_MODULO=3.0.2;",
+	        defaultValue:"SPE=4.0.11,NOME_SPE=sei4,VERSAO_MODULO=master;SPE=4.0.10,NOME_SPE=sei4,VERSAO_MODULO=master;",
 	        description: "Lista de versoes do SPE e modulo no formato como exemplo acima, separados por ;")
     	
 

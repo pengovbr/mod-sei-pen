@@ -263,6 +263,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.3.0':
+            $this->instalarV3031();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2520,6 +2522,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $this->atualizarNumeroVersao("3.3.0");
   }
+
+  protected function instalarV3031() {
+    $this->atualizarNumeroVersao("3.3.1");
+}
 }
 
 
