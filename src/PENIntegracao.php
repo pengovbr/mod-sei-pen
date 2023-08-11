@@ -491,12 +491,16 @@ class PENIntegracao extends SeiIntegracao
 
     switch ($_GET['acao_ajax']) {
       case 'pen_listar_repositorios_estruturas_auto_completar':
-        $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarRepositorioEstruturas($_POST['palavras_pesquisa']);
-
-        if (count($arrObjEstruturaDTO) > 0) {
-            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
-        } else {
-            return '<itens><item id="0" descricao="Repositório de estruturas não Encontrado."></item></itens>';
+        try {
+          $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarRepositorioEstruturas($_POST['palavras_pesquisa']);
+          if (count($arrObjEstruturaDTO) > 0) {
+              $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
+          } else {
+              return '<itens><item id="0" descricao="Repositório de Estruturas não Encontrado."></item></itens>';
+          }
+        }catch(Throwable $e){
+          $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+          throw new InfraException($mensagem, $e);
         }
           break;
       case 'pen_unidade_auto_completar_expedir_procedimento':
