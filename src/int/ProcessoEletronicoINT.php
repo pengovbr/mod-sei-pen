@@ -124,7 +124,7 @@ class ProcessoEletronicoINT extends InfraINT {
             break;
         case '/pen_consultar_recibos.png':
             // return '/infra_css/svg/pesquisar.svg';
-            return 'modulos/' . $strModulo . '/imagens/processo_pesquisar_pen.png';
+            return 'modulos/' . $strModulo . '/imagens/consultar_recibo.png';
             break;
         case '/pen_cancelar_tramite.gif':
             // return '/infra_css/svg/remover.svg';
