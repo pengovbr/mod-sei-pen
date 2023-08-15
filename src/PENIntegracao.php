@@ -1,7 +1,7 @@
 <?php
 
-// IdentificaÁ„o da vers„o do mÛdulo. Este dever· ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.0");
+// Identifica√ß√£o da vers√£o do m√≥dulo. Este dever√° ser atualizado e sincronizado com constante VERSAO_MODULO
+define("VERSAO_MODULO_PEN", "3.3.1");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -21,7 +21,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function getNome() {
-    return 'IntegraÁ„o Processo EletrÙnico Nacional - PEN';
+    return 'Integra√ß√£o Processo Eletr√¥nico Nacional - PEN';
   }
 
 
@@ -31,7 +31,7 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function getInstituicao() {
-    return 'MinistÈrio da Economia - ME';
+      return 'Minist√©rio da Gest√£o e da Inova√ß√£o em Servi√ßos P√∫blicos - MGI';
   }
 
   public function obterDiretorioIconesMenu() {
@@ -68,7 +68,7 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objPenUnidadeRN = new PenUnidadeRN();
 
-      //Apresenta o bot„o de expedir processo
+      //Apresenta o bot√£o de expedir processo
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
@@ -107,7 +107,7 @@ class PENIntegracao extends SeiIntegracao
     $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
     $bolFlagAberto = count($arrObjProcedimentoDTO) == 1;
 
-    //VerificaÁ„o da RestriÁ„o de Acesso ‡ Funcionalidade
+    //Verifica√ß√£o da Restri√ß√£o de Acesso √† Funcionalidade
     $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
@@ -117,7 +117,7 @@ class PENIntegracao extends SeiIntegracao
       ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
     ));
 
-    //Apresenta o bot„o de expedir processo
+    //Apresenta o bot√£o de expedir processo
     if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
@@ -131,7 +131,7 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    //Apresenta o bot„o da p·gina de recibos
+    //Apresenta o bot√£o da p√°gina de recibos
     if($bolAcaoExpedirProcesso){
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTO->retDblIdProcedimento();
@@ -145,7 +145,7 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    //Apresenta o bot„o de cancelar tr‚mite
+    //Apresenta o bot√£o de cancelar tr√¢mite
     $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
     if (
       $objAtividadeDTO 
@@ -153,9 +153,9 @@ class PENIntegracao extends SeiIntegracao
     ) {
       $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
       $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-      $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar TramitaÁ„o Externa" title="Cancelar TramitaÁ„o Externa" />';
+      $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramita√ß√£o Externa" title="Cancelar Tramita√ß√£o Externa" />';
       $strAcoesProcedimento .= '</a>';
-        //Apresenta o bot„o de cancelar tr‚mite
+        //Apresenta o bot√£o de cancelar tr√¢mite
         $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
     }
     if (
@@ -165,7 +165,7 @@ class PENIntegracao extends SeiIntegracao
         ) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar TramitaÁ„o Externa" title="Cancelar TramitaÁ„o Externa" />';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramita√ß√£o Externa" title="Cancelar Tramita√ß√£o Externa" />';
         $strAcoesProcedimento .= '</a>';
     }
 
@@ -175,42 +175,107 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
   {
-    $arrStrIcone = array();
-    $arrDblIdProcedimento = array();
+      $arrStrIcone = array();
+      $arrDblIdProcedimento = array();
 
-    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-      $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-    }
+      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+      }
 
+      $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
+      $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
+
+      return $arrStrIcone;
+  }
+
+  private function montarIconeRecusa($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
     $objProcedimentoDTO = new ProcedimentoDTO();
     $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
     $objProcedimentoDTO->retDblIdProcedimento();
     $objProcedimentoDTO->retStrStaEstadoProtocolo();
-
     $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
     $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
 
     if (!empty($arrObjProcedimentoDTO)) {
 
       foreach ($arrObjProcedimentoDTO as $objProcedimentoDTO) {
-
         $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
         $objPenProtocoloDTO = new PenProtocoloDTO();
         $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
         $objPenProtocoloDTO->retStrSinObteveRecusa();
         $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
-
         $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
         if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-          $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um tr‚mite para esse processo foi recusado" />');
+          $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um tr√¢mite para esse processo foi recusado" />');
         }
-
       }
     }
 
     return $arrStrIcone;
+  }
+
+  private function montarIconeTramite($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
+    $arrTiProcessoEletronico = array(
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO)
+    );
+    
+    foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+      
+      $objAtividadeRN = new AtividadeRN();
+      $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+      
+      if (!empty($ObjAtividadeDTO)) {
+        switch ($ObjAtividadeDTO->getNumIdTarefa()) {
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um tr√¢mite para esse processo foi envidado" />');
+            break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um tr√¢mite para esse processo foi recebido" />');
+            break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+            if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+              $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um tr√¢mite para esse processo foi recebido" />');
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    return $arrStrIcone;
+  }
+  
+  private function consultarProcessoRecebido($dblIdProtocolo)
+  {
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProtocolo);
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+    $objAtividadeRN = new AtividadeRN();
+    $arrObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    return !empty($arrObjAtividadeDTO);
   }
 
   public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP)
@@ -221,11 +286,11 @@ class PENIntegracao extends SeiIntegracao
     $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
     $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
     $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
-    $objArvoreAcaoItemAPI->setTitle('Um tr‚mite para esse processo foi recusado');
+    $objArvoreAcaoItemAPI->setTitle('Um tr√¢mite para esse processo foi recusado');
     $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/pen_tramite_recusado.png');
 
     $objArvoreAcaoItemAPI->setTarget(null);
-    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um tr‚mite para esse processo foi recusado\');');
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um tr√¢mite para esse processo foi recusado\');');
 
     $objArvoreAcaoItemAPI->setSinHabilitado('S');
 
@@ -250,11 +315,111 @@ class PENIntegracao extends SeiIntegracao
       if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
         $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
       }
+
+      $arrObjArvoreAcaoItemAPI = $this->getObjArvoreAcao(
+        $dblIdProcedimento,
+        $arrObjArvoreAcaoItemAPI
+      );
     } else {
       return array();
     }
 
     return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcao($dblIdProcedimento, $arrObjArvoreAcaoItemAPI)
+  {
+    // $objAtividadeDTO = new AtividadeDTO();
+    // $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    // $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo($idTarefaAtividade));
+    // $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    // $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    // $objAtividadeDTO->retNumIdAtividade();
+    
+    // $objAtividadeRN = new AtividadeRN();
+    // $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    
+    // if (!empty($objAtividadeDTO)) {
+    //   if ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) {
+    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
+    //   } elseif ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) {
+    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+    //   }
+    // }
+
+    $arrTiProcessoEletronico = array(
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
+    );
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retNumIdAtividade();
+    
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+    
+    if (!empty($objAtividadeDTO)) {
+      switch ($objAtividadeDTO->getNumIdTarefa()) {
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+          $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
+          break;
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+          $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+          break;
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+          if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+            $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoRecebido($dblIdProcedimento)
+  {
+    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+    $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+    $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setTitle('Um tr√¢mite para esse processo foi recebido');
+    $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png');
+
+    $objArvoreAcaoItemAPI->setTarget(null);
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um tr√¢mite para esse processo foi recebido\');');
+
+    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+    return $objArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoEnviado($dblIdProcedimento)
+  {
+    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+    $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+    $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setTitle('Um tr√¢mite para esse processo foi enviado');
+    $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png');
+
+    $objArvoreAcaoItemAPI->setTarget(null);
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um tr√¢mite para esse processo foi enviado\');');
+
+    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+    return $objArvoreAcaoItemAPI;
   }
 
   public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO)
@@ -282,7 +447,7 @@ class PENIntegracao extends SeiIntegracao
       $objAtributoAndamentoRN = new AtributoAndamentoRN();
       $objAtributoAndamentoDTO = $objAtributoAndamentoRN->consultarRN1366($objAtributoAndamentoDTO);
 
-      return sprintf('Processo em tr‚mite externo para "%s".', $objAtributoAndamentoDTO->getStrValor());
+      return sprintf('Processo em tr√¢mite externo para "%s".', $objAtributoAndamentoDTO->getStrValor());
     }
   }
 
@@ -353,7 +518,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * MÈtodo respons·vel de criar listagem de item para XML
+   * M√©todo respons√°vel de criar listagem de item para XML
    */
   public static function gerarXMLItensArrInfraDTOAutoCompletar(
     $arr,
@@ -391,7 +556,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * MÈtodo de formataÁ„o para caracteres especiais XML
+   * M√©todo de formata√ß√£o para caracteres especiais XML
    */
   private static function formatarXMLAjax($str)
   {
@@ -408,7 +573,7 @@ class PENIntegracao extends SeiIntegracao
 
   public function processarControlador($strAcao)
   {
-    //ConfiguraÁ„o de p·ginas do contexto da ·rvore do processo para apresentaÁ„o de erro de forma correta
+    //Configura√ß√£o de p√°ginas do contexto da √°rvore do processo para apresenta√ß√£o de erro de forma correta
     $bolArvore = in_array($strAcao, array('pen_procedimento_estado'));
     PaginaSEI::getInstance()->setBolArvore($bolArvore);
 
@@ -466,7 +631,7 @@ class PENIntegracao extends SeiIntegracao
         break;
 
       case 'pen_unidades_administrativas_externas_selecionar_expedir_procedimento':
-        //verifica qual o tipo de seleÁ„o passado para carregar o arquivo especifico.
+        //verifica qual o tipo de sele√ß√£o passado para carregar o arquivo especifico.
         if($_GET['tipo_pesquisa'] == 1){
           require_once dirname(__FILE__) . '/pen_unidades_administrativas_selecionar_expedir_procedimento.php';
         }else {
@@ -478,7 +643,7 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_procedimento_estado.php';
         break;
 
-        // Mapeamento de HipÛteses Legais de Envio
+        // Mapeamento de Hip√≥teses Legais de Envio
       case 'pen_map_hipotese_legal_envio_cadastrar';
       case 'pen_map_hipotese_legal_envio_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
@@ -489,7 +654,7 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
         break;
 
-        // Mapeamento de HipÛteses Legais de Recebimento
+        // Mapeamento de Hip√≥teses Legais de Recebimento
       case 'pen_map_hipotese_legal_recebimento_cadastrar';
       case 'pen_map_hipotese_legal_recebimento_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
@@ -566,7 +731,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade n„o Encontrada."></item></itens>';
+          return '<itens><item grupo="vazio" id="0" descricao="Unidade n√£o Encontrada."></item></itens>';
         }
         break;
 
@@ -660,7 +825,7 @@ class PENIntegracao extends SeiIntegracao
 
 
   /**
-   * MÈtodo respons·vel por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
+   * M√©todo respons√°vel por recuperar a hierarquia da unidade e montar o seu nome com as SIGLAS da hierarquia
    * @param $idRepositorioEstruturaOrganizacional
    * @param $arrEstruturas
    * @return mixed
@@ -692,10 +857,10 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Verifica a compatibilidade e correta configuracao do mÛdulo de Barramento, registrando mensagem de alerta no log do sistema
+   * Verifica a compatibilidade e correta configuracao do m√≥dulo de Barramento, registrando mensagem de alerta no log do sistema
    *
-   * Regras de verificaÁ„o da disponibilidade do PEN n„o devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
-   * caso de indisponibilidade moment‚nea do Barramento de ServiÁos.
+   * Regras de verifica√ß√£o da disponibilidade do PEN n√£o devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
+   * caso de indisponibilidade moment√¢nea do Barramento de Servi√ßos.
    */
   public static function verificarCompatibilidadeConfiguracoes(){
     $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
@@ -712,8 +877,8 @@ class PENIntegracao extends SeiIntegracao
       LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
     }
 
-    // Desativado verificaÁıes de compatibilidade do banco de dados por n„o ser todas as versıes
-    // que necessitam mudanÁas no banco de dados
+    // Desativado verifica√ß√µes de compatibilidade do banco de dados por n√£o ser todas as vers√µes
+    // que necessitam mudan√ßas no banco de dados
     // try {
     //     $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
     // } catch (\Exception $e) {
@@ -722,12 +887,12 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Compara duas diferentes versıes do sistem para avaliar a precedÍncia de ambas
+   * Compara duas diferentes vers√µes do sistem para avaliar a preced√™ncia de ambas
    *
-   * Normaliza o formato de n˙mero de vers„o considerando dois caracteres para cada item (3.0.15 -> 030015)
-   * - Se resultado for IGUAL a 0, versıes iguais
-   * - Se resultado for MAIOR que 0, vers„o 1 È posterior a vers„o 2
-   * - Se resultado for MENOR que 0, vers„o 1 È anterior a vers„o 2
+   * Normaliza o formato de n√∫mero de vers√£o considerando dois caracteres para cada item (3.0.15 -> 030015)
+   * - Se resultado for IGUAL a 0, vers√µes iguais
+   * - Se resultado for MAIOR que 0, vers√£o 1 √© posterior a vers√£o 2
+   * - Se resultado for MENOR que 0, vers√£o 1 √© anterior a vers√£o 2
    */
   public static function compararVersoes($strVersao1, $strVersao2){
     $numVersao1 = explode('.', $strVersao1);
