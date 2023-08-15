@@ -416,21 +416,21 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
         foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
-                $item = new EstruturaDTO();
-                $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-                $item->setStrNome(utf8_decode($estrutura->nome));
-                $item->setStrSigla(utf8_decode($estrutura->sigla));
-                $item->setBolAtivo($estrutura->ativo);
-                $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
-                $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
-                $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
+          $item = new EstruturaDTO();
+          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+          $item->setStrNome(utf8_decode($estrutura->nome));
+          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setBolAtivo($estrutura->ativo);
+          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+          $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
 
           if(!empty($estrutura->hierarquia->nivel)) {
-                $array = array();
+            $array = array();
             foreach($estrutura->hierarquia->nivel as $nivel) {
-                $array[] = utf8_decode($nivel->sigla);
+              $array[] = utf8_decode($nivel->sigla);
             }
-                $item->setArrHierarquia($array);
+            $item->setArrHierarquia($array);
           }
 
                 $arrObjEstruturaDTO[] = $item;
@@ -444,6 +444,107 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       return $arrObjEstruturaDTO;
+  }
+
+  public function listarEstruturasAutoCompletar(
+    $idRepositorioEstrutura,
+    $nome = '',
+    $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
+    $nomeUnidade = null,
+    $siglaUnidade = null,
+    $offset = null,
+    $registrosPorPagina = null,
+    $parBolPermiteRecebimento = null,
+    $parBolPermiteEnvio = null
+  ) {
+    $arrObjEstruturaDTO = array('diferencaDeRegistros' => 0, 'itens' => array());
+
+    try {
+      $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
+      if (!$idRepositorioEstrutura) {
+        throw new InfraException("Repositório de Estruturas inválido");
+      }
+
+      $parametros = new stdClass();
+      $parametros->filtroDeEstruturas = new stdClass();
+      $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+      $parametros->filtroDeEstruturas->apenasAtivas = true;
+
+      if (!is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta)) {
+        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstruturaRaizDaConsulta = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta;
+      } else {
+        $nome = trim($nome);
+        if (is_numeric($nome)) {
+          $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
+        } else {
+          $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+        }
+      }
+
+      if (!is_null($siglaUnidade)) {
+        $parametros->filtroDeEstruturas->sigla = $siglaUnidade;
+      }
+
+      if (!is_null($nomeUnidade)) {
+        $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
+      }
+
+      if (!is_null($registrosPorPagina) && !is_null($offset)) {
+        $parametros->filtroDeEstruturas->paginacao = new stdClass();
+        $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
+        $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
+      }
+
+      if (!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true) {
+        $parametros->filtroDeEstruturas->permiteRecebimento = true;
+      }
+
+      if (!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true) {
+        $parametros->filtroDeEstruturas->permiteEnvio = true;
+      }
+
+      $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+        return $objPenWs->consultarEstruturas($parametros);
+      });
+
+      if ($result->estruturasEncontradas->totalDeRegistros > 0) {
+
+        if (!is_array($result->estruturasEncontradas->estrutura)) {
+          $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
+        }
+
+        foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
+          $item = new EstruturaDTO();
+          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+          $item->setStrNome(utf8_decode($estrutura->nome));
+          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setBolAtivo($estrutura->ativo);
+          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+          $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
+
+          if (!empty($estrutura->hierarquia->nivel)) {
+            $array = array();
+            foreach ($estrutura->hierarquia->nivel as $nivel) {
+              $array[] = utf8_decode($nivel->sigla);
+            }
+            $item->setArrHierarquia($array);
+          }
+
+          $arrObjEstruturaDTO["itens"][] = $item;
+        }
+        
+        $totalDeRegistros = $result->estruturasEncontradas->totalDeRegistros;
+        $arrObjEstruturaDTO["diferencaDeRegistros"] = $totalDeRegistros > count($arrObjEstruturaDTO["itens"]) ?
+              $totalDeRegistros - count($arrObjEstruturaDTO["itens"]) : 0;
+      }
+    } catch (Exception $e) {
+      $mensagem = "Falha na obtenção de unidades externas";
+      $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+      throw new InfraException($mensagem, $e, $detalhes);
+    }
+
+    return $arrObjEstruturaDTO;
   }
 
   public function consultarMotivosUrgencia()
