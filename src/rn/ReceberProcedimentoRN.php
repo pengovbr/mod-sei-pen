@@ -215,6 +215,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
 
+      $this->processoDocumentoMesmoNumero($objProtocolo, $numIdTramite);
       $this->validarDadosDestinatario($parObjMetadadosProcedimento);
       $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
       $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
@@ -1993,6 +1994,18 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objInfraException->lancarValidacoes();
+  }
+
+  private function processoDocumentoMesmoNumero($parObjProtocolo, $parNumIdTramite) {
+    $msg = 'O processo/documento avulso foi recusado: Um processo com o número de protocolo '.$parObjProtocolo->protocolo.' já existe no sistema de destino. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.';
+    if ($parObjProtocolo->staTipoProtocolo == ProtocoloRN::$TP_PROCEDIMENTO) {
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        if (trim($objInfraParametro->getValor('SEI_FEDERACAO_NUMERO_PROCESSO')) != '1'){
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, $msg, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+        }
+    } else {
+        $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, $msg, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+    }
   }
 
   private function obterNivelSigiloSEI($strNivelSigiloPEN) {
