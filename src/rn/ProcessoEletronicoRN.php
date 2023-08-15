@@ -416,21 +416,21 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
         foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
-                $item = new EstruturaDTO();
-                $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-                $item->setStrNome(utf8_decode($estrutura->nome));
-                $item->setStrSigla(utf8_decode($estrutura->sigla));
-                $item->setBolAtivo($estrutura->ativo);
-                $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
-                $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
-                $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
+          $item = new EstruturaDTO();
+          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+          $item->setStrNome(utf8_decode($estrutura->nome));
+          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setBolAtivo($estrutura->ativo);
+          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+          $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
 
           if(!empty($estrutura->hierarquia->nivel)) {
-                $array = array();
+            $array = array();
             foreach($estrutura->hierarquia->nivel as $nivel) {
-                $array[] = utf8_decode($nivel->sigla);
+              $array[] = utf8_decode($nivel->sigla);
             }
-                $item->setArrHierarquia($array);
+            $item->setArrHierarquia($array);
           }
 
                 $arrObjEstruturaDTO[] = $item;
@@ -444,6 +444,107 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       return $arrObjEstruturaDTO;
+  }
+
+  public function listarEstruturasAutoCompletar(
+    $idRepositorioEstrutura,
+    $nome = '',
+    $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
+    $nomeUnidade = null,
+    $siglaUnidade = null,
+    $offset = null,
+    $registrosPorPagina = null,
+    $parBolPermiteRecebimento = null,
+    $parBolPermiteEnvio = null
+  ) {
+    $arrObjEstruturaDTO = array('diferencaDeRegistros' => 0, 'itens' => array());
+
+    try {
+      $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
+      if (!$idRepositorioEstrutura) {
+        throw new InfraException("Repositório de Estruturas inválido");
+      }
+
+      $parametros = new stdClass();
+      $parametros->filtroDeEstruturas = new stdClass();
+      $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
+      $parametros->filtroDeEstruturas->apenasAtivas = true;
+
+      if (!is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta)) {
+        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstruturaRaizDaConsulta = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta;
+      } else {
+        $nome = trim($nome);
+        if (is_numeric($nome)) {
+          $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
+        } else {
+          $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+        }
+      }
+
+      if (!is_null($siglaUnidade)) {
+        $parametros->filtroDeEstruturas->sigla = $siglaUnidade;
+      }
+
+      if (!is_null($nomeUnidade)) {
+        $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
+      }
+
+      if (!is_null($registrosPorPagina) && !is_null($offset)) {
+        $parametros->filtroDeEstruturas->paginacao = new stdClass();
+        $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
+        $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
+      }
+
+      if (!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true) {
+        $parametros->filtroDeEstruturas->permiteRecebimento = true;
+      }
+
+      if (!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true) {
+        $parametros->filtroDeEstruturas->permiteEnvio = true;
+      }
+
+      $result = $this->tentarNovamenteSobErroHTTP(function ($objPenWs) use ($parametros) {
+        return $objPenWs->consultarEstruturas($parametros);
+      });
+
+      if ($result->estruturasEncontradas->totalDeRegistros > 0) {
+
+        if (!is_array($result->estruturasEncontradas->estrutura)) {
+          $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
+        }
+
+        foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
+          $item = new EstruturaDTO();
+          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+          $item->setStrNome(utf8_decode($estrutura->nome));
+          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setBolAtivo($estrutura->ativo);
+          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+          $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
+
+          if (!empty($estrutura->hierarquia->nivel)) {
+            $array = array();
+            foreach ($estrutura->hierarquia->nivel as $nivel) {
+              $array[] = utf8_decode($nivel->sigla);
+            }
+            $item->setArrHierarquia($array);
+          }
+
+          $arrObjEstruturaDTO["itens"][] = $item;
+        }
+        
+        $totalDeRegistros = $result->estruturasEncontradas->totalDeRegistros;
+        $arrObjEstruturaDTO["diferencaDeRegistros"] = $totalDeRegistros > count($arrObjEstruturaDTO["itens"]) ?
+              $totalDeRegistros - count($arrObjEstruturaDTO["itens"]) : 0;
+      }
+    } catch (Exception $e) {
+      $mensagem = "Falha na obtenção de unidades externas";
+      $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+      throw new InfraException($mensagem, $e, $detalhes);
+    }
+
+    return $arrObjEstruturaDTO;
   }
 
   public function consultarMotivosUrgencia()
@@ -524,7 +625,10 @@ class ProcessoEletronicoRN extends InfraRN
         $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
         $xpath->registerNamespace('x', $rootNamespace);
         $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
-
+        if (count($entries) == 0){
+          $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
+          throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
+        }
         $resultado = array();
       foreach ($entries as $entry) {
         $valor = $entry->getAttribute('value');
@@ -1499,7 +1603,7 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite. ". $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -1523,7 +1627,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $resultado->conteudoDoReciboDeEnvio;
     }
     catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite de envio. " . $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -2058,8 +2162,13 @@ class ProcessoEletronicoRN extends InfraRN
         $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
         $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
     } catch(Exception $e){
-        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]. Detalhes: " . $e->getMessage();
         LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+    finally{
+      if (empty($numTamanhoBlocoMB)){
+        $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+      }
     }
 
     return $numTamanhoBlocoMB;
