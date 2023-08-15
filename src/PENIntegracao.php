@@ -163,43 +163,110 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
-    {
+  {
       $arrStrIcone = array();
       $arrDblIdProcedimento = array();
 
-    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-        $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-    }
+      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+      }
 
-      $objProcedimentoDTO = new ProcedimentoDTO();
-      $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
-      $objProcedimentoDTO->retDblIdProcedimento();
-      $objProcedimentoDTO->retStrStaEstadoProtocolo();
+      $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
+      $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
 
-      $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
-      $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
+      return $arrStrIcone;
+  }
+
+  private function montarIconeRecusa($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
+    $objProcedimentoDTO = new ProcedimentoDTO();
+    $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
+    $objProcedimentoDTO->retDblIdProcedimento();
+    $objProcedimentoDTO->retStrStaEstadoProtocolo();
+
+    $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
+    $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
 
     if (!empty($arrObjProcedimentoDTO)) {
 
       foreach ($arrObjProcedimentoDTO as $objProcedimentoDTO) {
+        $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+        $objPenProtocoloDTO = new PenProtocoloDTO();
+        $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenProtocoloDTO->retStrSinObteveRecusa();
+        $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-          $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-          $objPenProtocoloDTO = new PenProtocoloDTO();
-          $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
-          $objPenProtocoloDTO->retStrSinObteveRecusa();
-          $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
-
-          $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-          $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+        $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+        $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
         if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
           $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" />');
         }
-
       }
     }
 
-      return $arrStrIcone;
+    return $arrStrIcone;
+  }
+
+  private function montarIconeTramite($arrDblIdProcedimento = array(), $arrStrIcone = array())
+  {
+    $arrTiProcessoEletronico = array(
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO)
+    );
+    
+    foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+      
+      $objAtividadeRN = new AtividadeRN();
+      $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+      
+      if (!empty($ObjAtividadeDTO)) {
+        switch ($ObjAtividadeDTO->getNumIdTarefa()) {
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi envidado" />');
+            break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
+            break;
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+            if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+              $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
+            }
+            break;
+          default:
+            break;
+        }
+      }
+    }
+
+    return $arrStrIcone;
+  }
+  
+  private function consultarProcessoRecebido($dblIdProtocolo)
+  {
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProtocolo);
+    $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO));
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+    $objAtividadeRN = new AtividadeRN();
+    $arrObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    return !empty($arrObjAtividadeDTO);
   }
 
   public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP)
@@ -239,11 +306,111 @@ class PENIntegracao extends SeiIntegracao
       if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
         $arrObjArvoreAcaoItemAPI[] = $objArvoreAcaoItemAPI;
       }
+
+      $arrObjArvoreAcaoItemAPI = $this->getObjArvoreAcao(
+        $dblIdProcedimento,
+        $arrObjArvoreAcaoItemAPI
+      );
     } else {
         return array();
     }
 
       return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcao($dblIdProcedimento, $arrObjArvoreAcaoItemAPI)
+  {
+    // $objAtividadeDTO = new AtividadeDTO();
+    // $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    // $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo($idTarefaAtividade));
+    // $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    // $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    // $objAtividadeDTO->retNumIdAtividade();
+    
+    // $objAtividadeRN = new AtividadeRN();
+    // $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    
+    // if (!empty($objAtividadeDTO)) {
+    //   if ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) {
+    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
+    //   } elseif ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) {
+    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+    //   }
+    // }
+
+    $arrTiProcessoEletronico = array(
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
+    );
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retNumIdAtividade();
+    
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+    
+    if (!empty($objAtividadeDTO)) {
+      switch ($objAtividadeDTO->getNumIdTarefa()) {
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
+          $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
+          break;
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+          $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+          break;
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
+          if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
+            $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+
+    return $arrObjArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoRecebido($dblIdProcedimento)
+  {
+    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+    $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+    $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setTitle('Um trâmite para esse processo foi recebido');
+    $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png');
+
+    $objArvoreAcaoItemAPI->setTarget(null);
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi recebido\');');
+
+    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+    return $objArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoEnviado($dblIdProcedimento)
+  {
+    $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+    $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+    $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+    $objArvoreAcaoItemAPI->setTitle('Um trâmite para esse processo foi enviado');
+    $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png');
+
+    $objArvoreAcaoItemAPI->setTarget(null);
+    $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi enviado\');');
+
+    $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+    return $objArvoreAcaoItemAPI;
   }
 
   public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO)
