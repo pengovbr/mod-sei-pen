@@ -113,31 +113,6 @@ class PENIntegracao extends SeiIntegracao
     }
   }
 
-  public function excluirHipoteseLegal($arrObjHipoteseLegalDTO) {
-    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO);
-  }
-
-  public function desativarHipoteseLegal($arrObjHipoteseLegalDTO) {
-    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO);
-  }
-
-  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI)
-  {
-    $excecao = new InfraException();
-    foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
-      $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
-      $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getNumIdHipoteseLegal());
-      $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
-      $objPenHipoteseLegalDTO->retStrNome();
-
-      $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
-      $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
-      if (!is_null($objPenHipoteseLegalDTO)) {
-          $excecao->lancarValidacao('Não é permitido excluir ou desativar a hipotese legal "' . $objPenHipoteseLegalDTO->getStrNome() . '"');
-      }
-    }
-  }
-
   public function desativarUnidade($arrObjUnidadeAPI) {
     $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
   }
