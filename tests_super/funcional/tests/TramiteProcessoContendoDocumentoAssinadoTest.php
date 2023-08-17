@@ -1,6 +1,6 @@
 <?php
 
-class TramiteProcessoContendoDocumentoExternoAssinadoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoAssinadoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
