@@ -257,7 +257,12 @@ class ReceberProcedimentoRN extends InfraRN
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
-        $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
+        $nrTamanhoBytesMaximo = $numParamTamMaxDocumentoMb * pow(1024, 2);
+
+        // Comparar tamanho do arquivo enviado com o tamanho maximo permitido na instancia destinataria
+        if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+          throw new InfraException("O processo/documento avulso foi recusado: O tamanho máximo geral permitido para documentos externos é {$numParamTamMaxDocumentoMb} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.");
+        }
 
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
 
