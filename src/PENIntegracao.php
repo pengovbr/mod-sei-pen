@@ -275,7 +275,20 @@ class PENIntegracao extends SeiIntegracao
     }
   }
 
+  public function assinarDocumento($arrObjDocumentoAPI)
+  {
 
+    $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+    $objComponenteDigitalDTO->retTodos();
+    $objComponenteDigitalDTO->setDblIdDocumento($arrObjDocumentoAPI[0]->getIdDocumento());
+    $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+
+    if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0){
+      $objInfraException = new InfraException();
+      $objInfraException->adicionarValidacao('O Documento foi tramitado anteriormente por meio da plataforma Tramita.GOV.BR. Por esse motivo, não é possível a inclusão de novas assinaturas.');
+      $objInfraException->lancarValidacoes();
+    }
+  }
 
   public function montarIconeDocumento(ProcedimentoAPI $objProcedimentoAPI, $arrObjDocumentoAPI)
     {
