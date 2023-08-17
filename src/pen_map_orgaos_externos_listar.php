@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_orgaos_externos_listar');
 define('PEN_RECURSO_BASE', 'pen_map_orgaos_externos');
-define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos');
+define('PEN_PAGINA_TITULO', 'Relacionamento entre Órgãos');
 define('PEN_PAGINA_GET_ID', 'id');
 
 
@@ -58,7 +58,7 @@ try {
                         $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
                     }
 
-                    $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
+                    $objPagina->adicionarMensagem('Relacionamento entre órgãos foi excluído com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
 
                     header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
                     exit(0);
@@ -105,7 +105,16 @@ try {
     //--------------------------------------------------------------------------
 
     $arrComandos = array();
-    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo Relacionamento</button>';
+    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
+    $btnDesativar = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
+    $btnExcluir = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
+        . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
+        . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    
 
     //--------------------------------------------------------------------------
     // DTO de paginao
@@ -173,15 +182,34 @@ try {
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
             $strResultado .= '<td align="center">';
 
+            $strResultado .= '<a href="'
+                . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
+                . '_visualizar&acao_origem='.$_GET['acao_origem']
+                . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
+                . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") 
+                . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
+
+            if($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
+                $strResultado .= '<a href="'
+                    . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
+                    . '_atualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao']
+                    . '&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
+                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
+                    . ' title="Alterar Mapeamento" alt="Alterar Mapeamento Entre Órgãos" class="infraImg"></a>';
+            }
+
             if($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
                 $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
                 $strId = $objPenOrgaoExternoDTO->getDblId();
                 if ($botaoReativarAdicionado == 'N') {
-                    $arrComandos[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton">Reativar</button>';
+                    $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton">Reativar</button>';
                     $botaoReativarAdicionado = 'S';
                 } 
                 $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
+
+            $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'
+                . PaginaSEI::getInstance()->getIconeDesativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
@@ -205,10 +233,8 @@ try {
         }
         $strResultado .= '</table>';
     }
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $arrComandos = array($btnPesquisar, $btnNovo, $btnReativar,$btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
+    $arrComandosFinal = array($btnNovo, $btnReativar, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 } catch (InfraException $e) {
     $objPagina->processarExcecao($e);
 }
@@ -298,7 +324,7 @@ $objPagina->montarStyle();
         var strEspecieDocumental = row.find('td:eq(1)').text();
         var strTipoDocumento = row.find('td:eq(2)').text();
 
-        if (confirm('Confirma a exclusão do mapeamento do orgao?')) {
+        if (confirm('Confirma a exclusão do relacionamento entre órgãos?')) {
 
             window.location = url;
         }
@@ -326,22 +352,17 @@ $objPagina->montarStyle();
     function onClickBtnExcluir() {
 
         try {
-
             var len = jQuery('input[name*=chkInfraItem]:checked').length;
-
             if (len > 0) {
-
-                if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
+                if (confirm('Confirma a exclusão do relacionamento entre órgãos?')) {
                     var form = jQuery('#frmAcompanharEstadoProcesso');
                     form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_excluir&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
                     form.submit();
                 }
             } else {
-
-                alert('Selecione pelo menos um mapeamento para Excluir');
+                alert('Selecione pelo menos um mapeamento para excluir');
             }
         } catch (e) {
-
             alert('Erro : ' + e.message);
         }
     }
@@ -407,6 +428,8 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
         <div style="clear:both;margin:2em"></div>
         <p>Nenhum registro encontrado</p>
     <?php endif; ?>
+
+    <?php $objPagina->montarBarraComandosSuperior($arrComandosFinal); ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>

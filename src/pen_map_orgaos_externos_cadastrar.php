@@ -27,12 +27,6 @@ try {
         $strParametros .= '&arvore=' . $_GET['arvore'];
     }
 
-    $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_salvar&acao_origem=' . $_GET['acao'] . $strParametros));
-
-    //Preparação dos dados para montagem da tela de expedição de processos
-    $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-    $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-
     $objUnidadeDTO = new PenUnidadeDTO();
     $objUnidadeDTO->retNumIdUnidadeRH();
     $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -58,27 +52,73 @@ try {
     $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
     $strLinkAjaxUnidadeDestino = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_mapeados&acao=' . $_GET['acao']);
 
+    $id = isset($_GET['id']) ? $_GET['id'] : null;
+    if (!is_null($id)) {
+        $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+        $objPenOrgaoExternoDTO->setDblId($id);
+        $objPenOrgaoExternoDTO->retDblId();
+        $objPenOrgaoExternoDTO->retNumIdOrgaoOrigem();
+        $objPenOrgaoExternoDTO->retStrOrgaoOrigem();
+        $objPenOrgaoExternoDTO->retNumIdOrgaoDestino();
+        $objPenOrgaoExternoDTO->retNumIdEstrutaOrganizacionalOrigem();
+        $objPenOrgaoExternoDTO->retStrEstrutaOrganizacionalOrigem();
+        $objPenOrgaoExternoDTO->retStrOrgaoDestino();
+        $objPenOrgaoExternoDTO->retStrAtivo();
+        
+
+        $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+        $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
+
+        if (!is_null($respObjPenOrgaoExternoDTO)) {
+            // Órgão de origem
+            $numIdOrgaoOrigem = $respObjPenOrgaoExternoDTO->getNumIdOrgaoOrigem();
+            $strNomeOrgaoOrigem = $respObjPenOrgaoExternoDTO->getStrOrgaoOrigem();
+            $numIdRepositorioOrigem = $respObjPenOrgaoExternoDTO->getNumIdEstrutaOrganizacionalOrigem();
+            $txtRepositorioEstruturasOrigem = $respObjPenOrgaoExternoDTO->getStrEstrutaOrganizacionalOrigem();
+            // Órgão de destino
+            $numIdOrgaoDestino = $respObjPenOrgaoExternoDTO->getNumIdOrgaoDestino();
+            $strNomeOrgaoDestino = $respObjPenOrgaoExternoDTO->getStrOrgaoDestino();
+        }
+        $strParametros .= '&id=' . $id;
+    }
+
+    $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_salvar&acao_origem=' . $_GET['acao'] . $strParametros));
+
+    $disabilitarVisualizar = "";
     switch ($_GET['acao']) {
         case 'pen_map_orgaos_externos_salvar':
-            if (is_null($numIdRepositorioOrigem)) {
+            $acao = !is_null($id) ? 'pen_map_orgaos_externos_atualizar' : 'pen_map_orgaos_externos_cadastrar';
+            if (is_null($_POST['selRepositorioEstruturasOrigem']) || is_null($_POST['txtRepositorioEstruturasOrigem'])) {
                 $objPaginaSEI->adicionarMensagem('selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
-                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
-                exit(0);
-            } elseif (is_null($numIdOrgaoOrigem)) {
-                $objPaginaSEI->adicionarMensagem('o orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
-                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
-                exit(0);
-            } elseif (is_null($numIdOrgaoDestino)) {
-                $objPaginaSEI->adicionarMensagem('o orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
-                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             } 
-            
+            if (is_null($_POST['hdnIdUnidadeOrigem']) || is_null($_POST['txtUnidadeOrigem'])) {
+                $objPaginaSEI->adicionarMensagem('o orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
+                exit(0);
+            } 
+            if (is_null($_POST['hdnIdUnidadeDestino']) || is_null($_POST['txtUnidadeDestino'])) {
+                $objPaginaSEI->adicionarMensagem('o orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
+                exit(0);
+            }
+
+            $numIdOrgaoOrigem = $_POST['hdnIdUnidadeOrigem'];
+            $strNomeOrgaoOrigem = $_POST['txtUnidadeOrigem'];
+            $numIdRepositorioOrigem = $_POST['selRepositorioEstruturasOrigem'];
+            $txtRepositorioEstruturasOrigem = $_POST['txtRepositorioEstruturasOrigem'];
+            $numIdOrgaoDestino = $_POST['hdnIdUnidadeDestino'];
+            $strNomeOrgaoDestino = $_POST['txtUnidadeDestino'];
+
             $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
             $objPenOrgaoExternoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
             $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($numIdOrgaoOrigem);
             $objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalOrigem($numIdRepositorioOrigem);
             $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($numIdOrgaoDestino);
+            if (!is_null($id)) {
+                $objPenOrgaoExternoDTO->setDblId(array($id), InfraDTO::$OPER_NOT_IN);
+            }
             $objPenOrgaoExternoDTO->setNumMaxRegistrosRetorno(1);
 
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
@@ -102,25 +142,41 @@ try {
             $objPenOrgaoExternoDTO->setStrOrgaoDestino($strNomeOrgaoDestino);
 
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-            $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
-            $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+            if (!is_null($id)) {
+                $objPenOrgaoExternoDTO->setDblId($id);
+                $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+            } else {
+                $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+            }
             header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
             exit(0);
             break;
+        case 'pen_map_orgaos_externos_visualizar':
+        case 'pen_map_orgaos_externos_atualizar':
         case 'pen_map_orgaos_externos_cadastrar':
             $strTitulo = 'Cadastro de Relacionamento entre Órgãos';
 
             //Monta os botões do topo
-            if ($objSessaoSEI->verificarPermissao('pen_map_orgaos_externos_cadastrar')) {
+            if (
+                $_GET['acao'] != 'pen_map_orgaos_externos_visualizar'
+                && $objSessaoSEI->verificarPermissao('pen_map_orgaos_externos_cadastrar')
+                && $objSessaoSEI->verificarPermissao('pen_map_orgaos_externos_atualizar')
+            ) {
                 $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
                 $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
             } else {
-                $arrComandos[] = '<button type="button" id="btnCancelar" value="Voltar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+                $disabilitarVisualizar = " disabled='disabled' ";
+                $arrComandos[] = '<button type="button" id="btnCancelar" value="Voltar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">V</span>oltar</button>';
             }
+
+            //Preparação dos dados para montagem da tela de expedição de processos
+            $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
 
             //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
             $objPenParametroRN = new PenParametroRN();
-            $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
             $idRepositorioSelecionado = (isset($numIdRepositorioOrigem)) ? $numIdRepositorioOrigem : '';
             $strItensSelRepositorioEstruturasOrigem = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
@@ -249,7 +305,9 @@ $objPaginaSEI->montarJavaScript();
             }
         });
         document.getElementById('selRepositorioEstruturasOrigem').focus();
-        selecionarRepositorioOrigem();
+        <?php if ($_GET['acao'] == 'pen_map_orgaos_externos_cadastrar') { ?>
+            selecionarRepositorioOrigem();
+        <?php } ?>
     }
 
     function inicializarDestino() {
@@ -292,17 +350,19 @@ $objPaginaSEI->montarJavaScript();
         var txtUnidadeOrigem = $('#txtUnidadeOrigem');
         var selRepositorioEstruturasOrigem = $('#selRepositorioEstruturasOrigem');
 
-        var txtUnidadeOrigemEnabled = selRepositorioEstruturasOrigem.val() > 0;
-        txtUnidadeOrigem.prop('disabled', !txtUnidadeOrigemEnabled);
-        $('#hdnIdUnidadeOrigem').val('');
-        txtUnidadeOrigem.val('');
+        <?php if ($_GET['acao'] != 'pen_map_orgaos_externos_visualizar') { ?>
+            var txtUnidadeOrigemEnabled = selRepositorioEstruturasOrigem.val() > 0;
+            txtUnidadeOrigem.prop('disabled', !txtUnidadeOrigemEnabled);
+            $('#hdnIdUnidadeOrigem').val('');
+            txtUnidadeOrigem.val('');
 
-        if (!txtUnidadeOrigemEnabled) {
-            txtUnidadeOrigem.addClass('infraReadOnly');
-        } else {
-            txtUnidadeOrigem.removeClass('infraReadOnly');
-            $('#txtRepositorioEstruturasOrigem').val($("#selRepositorioEstruturasOrigem option:selected").text());
-        }
+            if (!txtUnidadeOrigemEnabled) {
+                txtUnidadeOrigem.addClass('infraReadOnly');
+            } else {
+                txtUnidadeOrigem.removeClass('infraReadOnly');
+                $('#txtRepositorioEstruturasOrigem').val($("#selRepositorioEstruturasOrigem option:selected").text());
+            }
+        <?php } ?>
     }
 
     function avaliarPreCondicoes() {
@@ -397,21 +457,27 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
 
         <div id="divRepositorioEstruturasOrigem" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblRepositorioEstruturasOrigem" for="selRepositorioEstruturasOrigem" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
-            <select id="selRepositorioEstruturasOrigem" name="selRepositorioEstruturasOrigem" class="infraSelect" onchange="selecionarRepositorioOrigem();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
+            <select id="selRepositorioEstruturasOrigem" name="selRepositorioEstruturasOrigem" class="infraSelect" 
+                onchange="selecionarRepositorioOrigem();" <?= $disabilitarVisualizar ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
                 <?= $strItensSelRepositorioEstruturasOrigem ?>
             </select>
 
-            <input type="hidden" id="txtRepositorioEstruturasOrigem" name="txtRepositorioEstruturasOrigem" class="infraText" value="<?= $txtRepositorioEstruturasOrigem; ?>" />
+            <input type="hidden" id="txtRepositorioEstruturasOrigem" name="txtRepositorioEstruturasOrigem" <?= $disabilitarVisualizar ?>  class="infraText" value="<?= $txtRepositorioEstruturasOrigem; ?>" />
         </div>
 
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Orgão Origem:</label>
             <div class="alinhamentoBotaoImput">
-                <input type="text" id="txtUnidadeOrigem" name="txtUnidadeOrigem" class="infraText infraReadOnly" disabled="disabled" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= $strNomeOrgaoDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                <input type="text" id="txtUnidadeOrigem" name="txtUnidadeOrigem" class="infraText infraReadOnly" 
+                    <?php empty($strNomeOrgaoOrigem) ? 'disabled="disabled"' : '' ?> 
+                    placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" 
+                    value="<?= PaginaSEI::tratarHTML($strNomeOrgaoOrigem); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
                 <br />
                 <br />
-                <button id="btnIdUnidadeOrigem" type="button" class="infraButton">Consultar</button>
-                <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
+                <?php if ($_GET['acao'] != 'pen_map_orgaos_externos_visualizar') { ?>
+                    <button id="btnIdUnidadeOrigem" type="button" class="infraButton">Consultar</button>
+                    <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
+                <?php } ?>
             </div>
 
             <input type="hidden" id="hdnIdUnidadeOrigem" name="hdnIdUnidadeOrigem" class="infraText" value="<?= $numIdOrgaoOrigem; ?>" />
@@ -424,11 +490,13 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
             <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Orgão Destino:</label>
             <div class="alinhamentoBotaoImput">
-                <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" class="infraText infraReadOnly"
+                <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" <?= $disabilitarVisualizar ?> class="infraText infraReadOnly"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" 
-                    value="<?= PaginaSEI::tratarHTML($strNomeOrgaoDestino); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                    value="<?= PaginaSEI::tratarHTML($strNomeOrgaoDestino); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
                 <br /><br />
-                <button id="btnIdUnidadeDestino" type="button" class="infraButton">Consultar</button>
+                <?php if ($_GET['acao'] != 'pen_map_orgaos_externos_visualizar') { ?> 
+                    <button id="btnIdUnidadeDestino" type="button" class="infraButton">Consultar</button>
+                <?php } ?>
             </div>
 
             <input type="hidden" id="hdnIdUnidadeDestino" name="hdnIdUnidadeDestino" class="infraText" value="<?= $numIdOrgaoDestino; ?>" />
