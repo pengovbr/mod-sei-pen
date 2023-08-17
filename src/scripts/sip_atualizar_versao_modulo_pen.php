@@ -284,6 +284,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3030();
         case '3.3.0':
             $this->instalarV3031();
+        case '3.3.1':
+            $this->instalarV3032();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1817,6 +1819,44 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3031()
   {
       $this->atualizarNumeroVersao("3.3.1");
+  }
+
+  public function instalarV3032()
+  {
+      /* Corrige nome de menu de trâmite de documentos */
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Administração');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (empty($objItemMenuDTO)) {
+        throw new InfraException('Menu "Administração" não foi localizado');
+      }
+
+      // Adicionar submenu
+      $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+      $numIdRecurso = $this->criarRecurso('pen_map_retricao_envio_comp_digitais_listar', 'Listar restrição envio componentes digitais', $numIdSistema);
+      // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+      $numIdItemMenu = $this->criarMenu('Restrição Envio Componentes Digitais', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_salvar', 'Salvar restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_excluir', 'Excluir restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_cadastrar', 'Cadastro de restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_atualizar', 'Atualizar restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_visualizar', 'Visualizar restrição envio componentes digitais', $numIdSistema);
+
+      // Nova versão
+      $this->atualizarNumeroVersao("3.3.2");
   }
 }
 
