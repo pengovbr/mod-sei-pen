@@ -3,7 +3,7 @@
 /**
  * Testes de mapeamento de envio de componentes digitais
  */
-class MapeamentoOrgaoExterno extends CenarioBaseTestCase
+class MapEnvioCompDigitaisTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
