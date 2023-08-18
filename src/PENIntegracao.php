@@ -477,6 +477,15 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_expedir_lote_listar':
           require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
           break;
+      case 'pen_map_restricao_envio_comp_digitais_listar':
+      case 'pen_map_restricao_envio_comp_digitais_excluir':
+        require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_listar.php';
+        break;
+      case 'pen_map_restricao_envio_comp_digitais_salvar':
+      case 'pen_map_restricao_envio_comp_digitais_cadastrar':
+      case 'pen_map_restricao_envio_comp_digitais_visualizar':
+        require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_cadastrar.php';
+        break;
 
       default:
           return false;

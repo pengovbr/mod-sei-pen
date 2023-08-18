@@ -1845,15 +1845,15 @@ class PenAtualizarSipRN extends InfraRN
       // Adicionar submenu
       $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
-      $numIdRecurso = $this->criarRecurso('pen_map_retricao_envio_comp_digitais_listar', 'Listar restrição envio componentes digitais', $numIdSistema);
+      $numIdRecurso = $this->criarRecurso('pen_map_restricao_envio_comp_digitais_listar', 'Listar restrição envio componentes digitais', $numIdSistema);
       // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
       $numIdItemMenu = $this->criarMenu('Restrição Envio Componentes Digitais', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
 
-      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_salvar', 'Salvar restrição envio componentes digitais', $numIdSistema);
-      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_excluir', 'Excluir restrição envio componentes digitais', $numIdSistema);
-      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_cadastrar', 'Cadastro de restrição envio componentes digitais', $numIdSistema);
-      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_atualizar', 'Atualizar restrição envio componentes digitais', $numIdSistema);
-      $this->criarRecurso('pen_map_retricao_envio_comp_digitais_visualizar', 'Visualizar restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_salvar', 'Salvar restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_excluir', 'Excluir restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_cadastrar', 'Cadastro de restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_atualizar', 'Atualizar restrição envio componentes digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_visualizar', 'Visualizar restrição envio componentes digitais', $numIdSistema);
 
       // Nova versão
       $this->atualizarNumeroVersao("3.3.2");
