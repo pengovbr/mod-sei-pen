@@ -35,7 +35,9 @@ try {
     $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
     if (!$objUnidadeDTO) {
-        throw new InfraException("A unidade atual não foi mapeada.");
+        $objPaginaSEI->adicionarMensagem('A unidade atual não foi mapeada.', InfraPagina::$TIPO_MSG_ERRO);
+        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
+        exit(0);
     }
 
     $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
@@ -174,7 +176,7 @@ try {
             //Preparação dos dados para montagem da tela de expedição de processos
             $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
             $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-
+            
             //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
             $objPenParametroRN = new PenParametroRN();
             $idRepositorioSelecionado = (isset($numIdRepositorioOrigem)) ? $numIdRepositorioOrigem : '';
