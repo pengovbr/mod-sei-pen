@@ -26,7 +26,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     {
         $this->selectRepositorio('RE CGPRO', 'Origem');
         $this->selectUnidade('Fabrica-org2', 'Origem'); // Seleciona Orgão de Origem
-        $this->selectUnidade('TESTE - Unidade de Teste 1', 'Destino'); // Seleciona Orgão de Destino
+        $this->selectUnidadeDestino('TESTE', 'Destino'); // Seleciona Orgão de Destino
         $this->salvar();
     }
 
@@ -72,6 +72,37 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
             }catch(Exception $e){
             }
             $testCase->byPartialLinkText($nomeUnidade)->click();
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        return $this->unidadeInput->value();
+    }
+
+    /**
+     * Seleciona unidade por nome
+     * 
+     * @param string $nomeUnidade
+     * @param ?string  $hierarquia
+     * @return string
+     */
+    private function selectUnidadeDestino($nomeUnidade, $origemDestino, $hierarquia = null)
+    {
+        $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
+        $this->unidadeInput->value($nomeUnidade);
+        $this->test->keys(Keys::ENTER);
+        $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
+            $bolExisteAlerta=null;
+            $nomeUnidade = $testCase->byId('txtUnidade' . $origemDestino)->value();
+            if(!empty($hierarquia)){
+                $nomeUnidade .= ' - ' . $hierarquia;
+            }
+
+            try{
+                $bolExisteAlerta=$this->alertTextAndClose();
+                if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);
+            }catch(Exception $e){
+            }
+            $testCase->byPartialLinkText($nomeUnidade . '-Unidade de Teste 1')->click();
             return true;
         }, PEN_WAIT_TIMEOUT);
 
