@@ -6,7 +6,7 @@
  * Este mesmo documento deve ser recebido e assinalado como cancelado no destinatário e
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
  */
-class MapeamentoOrgaoExterno extends CenarioBaseTestCase
+class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
