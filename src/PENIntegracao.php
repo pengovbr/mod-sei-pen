@@ -117,7 +117,7 @@ class PENIntegracao extends SeiIntegracao
       ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
     ));
 
-    //Apresenta o botÃ£o de expedir processo
+    //Apresenta o botão de expedir processo
     if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
@@ -131,7 +131,7 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    //Apresenta o botÃ£o da pÃ¡gina de recibos
+    //Apresenta o botão da página de recibos
     if($bolAcaoExpedirProcesso){
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTO->retDblIdProcedimento();
@@ -145,19 +145,8 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    //Apresenta o botÃ£o de cancelar trÃ¢mite
+    //Apresenta o botão de cancelar trâmite
     $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
-    if (
-      $objAtividadeDTO 
-      && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
-    ) {
-      $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-      $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-      $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
-      $strAcoesProcedimento .= '</a>';
-        //Apresenta o botÃ£o de cancelar trÃ¢mite
-        $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
-    }
     if (
             $objAtividadeDTO &&
             $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) &&
