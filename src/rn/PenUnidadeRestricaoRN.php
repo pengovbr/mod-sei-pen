@@ -45,6 +45,7 @@ class PenUnidadeRestricaoRN extends InfraRN
    */
   public function prepararRepoEstruturas($IdUnidade, $IdUnidadeRH, $hdnRepoEstruturas)
   {
+    $arrUnidadesSelecionadas = array();
     $arrayObjPenUnidadeRestricaoDTO = array();
     $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnRepoEstruturas);
     foreach ($arrOpcoes as $opcoes) {
@@ -52,22 +53,28 @@ class PenUnidadeRestricaoRN extends InfraRN
       if(array_key_exists($hdnRepoEstruturasUnidades, $_POST) && !empty($_POST[$hdnRepoEstruturasUnidades])) {
         $arrOpcoesUnidades = PaginaSEI::getInstance()->getArrOptionsSelect($_POST[$hdnRepoEstruturasUnidades]);
         foreach ($arrOpcoesUnidades as $opcoesUnidades) {
+          if (!in_array($opcoesUnidades[0], $arrUnidadesSelecionadas)) {
+            $arrUnidadesSelecionadas[] = $opcoesUnidades[0];
+            $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+            $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
+            $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($opcoesUnidades[0]);
+            $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($opcoesUnidades[1]);
+            $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
+          }
+        }
+      } else {
+        if (!in_array($opcoes[0], $arrUnidadesSelecionadas)) {
+          $arrUnidadesSelecionadas[] = $opcoes[0];
           $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
           $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
           $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
           $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
           $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
-          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($opcoesUnidades[0]);
-          $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($opcoesUnidades[1]);
           $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
         }
-      } else {
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($IdUnidade);
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($IdUnidadeRH);
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($opcoes[0]);
-        $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($opcoes[1]);
-        $arrayObjPenUnidadeRestricaoDTO[] = $objPenUnidadeRestricaoDTO;
       }
     }
     return $arrayObjPenUnidadeRestricaoDTO;
