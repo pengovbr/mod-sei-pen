@@ -49,7 +49,8 @@ try {
                     $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
                     
                     if (is_array($arrParam['hdnInfraItensSelecionados'])) {
-                        foreach ($arrParam['hdnInfraItensSelecionados'] as $dblId) {
+                        foreach ($arrParam['hdnInfraItensSelecionados'] as $arr) {
+                            $dblId = explode(";", $arr)[0];
                             $objPenOrgaoExternoDTO->setDblId($dblId);
                             $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
                         }
@@ -75,7 +76,8 @@ try {
             case 'pen_map_orgaos_externos_reativar':
                 if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
-                    foreach ($arrHdnInInfraItensSelecionados as $id) {
+                    foreach ($arrHdnInInfraItensSelecionados as $arr) {
+                        $id = explode(";", $arr)[0];
                         $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                         $objPenOrgaoExternoDTO->setDblId($id);
                         $objPenOrgaoExternoDTO->setStrAtivo('S');
@@ -100,7 +102,8 @@ try {
             case 'pen_map_orgaos_externos_desativar':
                 if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoDesativar'])) {
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
-                    foreach ($arrHdnInInfraItensSelecionados as $id) {
+                    foreach ($arrHdnInInfraItensSelecionados as $arr) {
+                        $id = explode(";", $arr)[0];
                         $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                         $objPenOrgaoExternoDTO->setDblId($id);
                         $objPenOrgaoExternoDTO->setStrAtivo('N');
@@ -202,7 +205,7 @@ try {
             $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
             $strResultado .= '<tr class="' . $strCssTr . '">';
-            $strResultado .= '<td align="center">' . $objPagina->getTrCheck($index, $objPenOrgaoExternoDTO->getDblId(), '') . '</td>';
+            $strResultado .= '<td align="center">' . $objPagina->getTrCheck($index, $objPenOrgaoExternoDTO->getDblId() . ';' . $objPenOrgaoExternoDTO->getStrAtivo(), '') . '</td>';
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoOrigem() . '</td>';
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoOrigem() . '</td>';
             $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoDestino() . '</td>';
@@ -229,7 +232,7 @@ try {
                 $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
                 $strId = $objPenOrgaoExternoDTO->getDblId();
                 if ($btnReativarAdicionado == 'N') {
-                    $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton">Reativar</button>';
+                    $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar">Reativar</button>';
                     $btnReativarAdicionado = 'S';
                 } 
                 $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
@@ -239,7 +242,7 @@ try {
                 $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
                 $strId = $objPenOrgaoExternoDTO->getDblId();
                 if ($btnDesativarAdicionado == 'N') {
-                    $btnDesativar = '<button type="button" id="btnDesativar" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
+                    $btnDesativar = '<button type="button" id="btnDesativar" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton btnDesativar">Desativar</button>';
                     $btnDesativarAdicionado = 'S';
                 }
                 $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'
@@ -446,6 +449,51 @@ $objPagina->montarStyle();
         }
     }
 
+    setTimeout(function () {
+        const checkboxes = document.querySelectorAll('.infraCheckboxInput');
+        const checkboxesAll = document.getElementById('lnkInfraCheck');
+        checkboxesAll.addEventListener('click', function () {
+            tratarVisualizacaoBtn();
+        });
+
+        checkboxes.forEach(function(checkbox) {
+            checkbox.addEventListener('click', function() {
+                tratarVisualizacaoBtn();
+            });
+        });
+
+        function tratarVisualizacaoBtn () {
+            checkboxsSelecionados = document.querySelectorAll('input[name*="chkInfraItem"]:checked');
+            if (checkboxsSelecionados.length > 0) {
+                let primeiroCheckboxMarcado = checkboxsSelecionados[0].value.split(';')[1];
+                if (primeiroCheckboxMarcado == 'S') {
+                    document.getElementsByClassName("btnDesativar")[0].style.display = 'inline';
+                    document.getElementsByClassName("btnReativar")[0].style.display = 'none';
+                    document.getElementsByClassName("btnDesativar")[1].style.display = 'inline';
+                    document.getElementsByClassName("btnReativar")[1].style.display = 'none';
+                } else if (primeiroCheckboxMarcado == 'N') {
+                    document.getElementsByClassName("btnDesativar")[0].style.display = 'none';
+                    document.getElementsByClassName("btnReativar")[0].style.display = 'inline';
+                    document.getElementsByClassName("btnDesativar")[1].style.display = 'none';
+                    document.getElementsByClassName("btnReativar")[1].style.display = 'inline';
+                }
+                checkboxsSelecionados.forEach(function (checkboxSelecionado) {
+                    if (checkboxSelecionado.value.split(';')[1] !== primeiroCheckboxMarcado) {
+                        document.getElementsByClassName("btnDesativar")[0].style.display = 'none';
+                        document.getElementsByClassName("btnReativar")[0].style.display = 'none';
+                        document.getElementsByClassName("btnDesativar")[1].style.display = 'none';
+                        document.getElementsByClassName("btnReativar")[1].style.display = 'none';
+                    }
+                })
+            } else {
+                document.getElementsByClassName("btnDesativar")[0].style.display = 'inline';
+                document.getElementsByClassName("btnReativar")[0].style.display = 'inline';
+                document.getElementsByClassName("btnDesativar")[1].style.display = 'inline';
+                document.getElementsByClassName("btnReativar")[1].style.display = 'inline';
+            }
+        }
+
+    }, 1000); 
 </script>
 <?php
 $objPagina->fecharHead();
