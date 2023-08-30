@@ -550,10 +550,8 @@ class ProcessoEletronicoRN extends InfraRN
                 $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
             }
 
-            if (strpos($strMensagem, 'já possui trâmite em andamento')) {
-                $strMensagem = $this->validarTramitaEmAndamento($parametros->dblIdProcedimento, $strMensagem);
-                $e->faultstring = $strMensagem;
-            }
+            $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
+
             $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
             throw new InfraException($strMensagem, $e, $strDetalhes);
         } catch (\Exception $e) {
@@ -563,32 +561,19 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
-    private function validarTramitaEmAndamento($dblIdProcedimento, $strMensagem)
+    private function validarTramitaEmAndamento($parametros, $strMensagem)
     {
-        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+        if (strpos($strMensagem, 'já possui trâmite em andamento')) {
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoDTO->setDblIdProcedimento($parametros->dblIdProcedimento);
 
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
-        $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+            $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
 
-        if (!is_null($numIdTramite) && $numIdTramite > 0) {
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
-            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
-            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-            $objAtividadeDTO->retNumIdAtividade();
-            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-
-            # PROTOCOLO
-            $objProtocoloDTO = new ProtocoloDTO();
-            $objProtocoloDTO->setDblIdProtocolo($objAtividadeDTO->getDblIdProtocolo());
-            $objProtocoloDTO->setOrd('IdProtocolo', InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objProtocoloDTO->retStrProtocoloFormatado();
-            $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-            $protocolo = $objProtocoloBD->listar($objProtocoloDTO)[0];
-
-            $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: ".$objUltimoTramiteDTO->getStrNumeroRegistro().". Processo: ".$protocolo->getStrProtocoloFormatado().".";
+            if (!is_null($numIdTramite) && $numIdTramite > 0) {
+                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $objUltimoTramiteDTO->getStrProtocoloFormatado() . ".";
+            }
         }
         return $strMensagem;
 
