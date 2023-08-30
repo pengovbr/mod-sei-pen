@@ -263,6 +263,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3024();
         case '3.2.4':
             $this->instalarV3030();
+        case '3.3.0':
+            $this->instalarV3031();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -1264,6 +1266,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     if (!$objInfraSequencia->verificarSequencia('md_pen_recibo_tramite_hash')) {
         $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
     }
+
+        if (InfraUtil::compararVersoes(SEI_VERSAO, '<=', '4.0.0')) {
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $objInfraParametro->setValor('PEN_VERSAO_MODULO_SEI', '0.0.0');
+        }
 
       $this->atualizarNumeroVersao("1.0.0");
 
@@ -2492,7 +2499,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3030() {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-      $objInfraMetaBD->alterarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+
+      // Modificação de tipo de dados para a coluna ticket_envio_componentes na tabela md_pen_tramite
+      $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'ticket_envio_componentes_temp', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+      BancoSEI::getInstance()->executarSql("update md_pen_tramite set ticket_envio_componentes_temp=ticket_envio_componentes");
+      $objInfraMetaBD->excluirColuna('md_pen_tramite', 'ticket_envio_componentes');
+      $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'ticket_envio_componentes', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
+      BancoSEI::getInstance()->executarSql("update md_pen_tramite set ticket_envio_componentes=ticket_envio_componentes_temp");
+      $objInfraMetaBD->excluirColuna('md_pen_tramite', 'ticket_envio_componentes_temp');
+
       $objInfraMetaBD->adicionarColuna('md_pen_rel_expedir_lote', 'tentativas', $objInfraMetaBD->tipoNumero(), 'null');
 
       $objPenParametroRN = new PenParametroRN();
@@ -2507,6 +2522,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $this->atualizarNumeroVersao("3.3.0");
   }
+
+  protected function instalarV3031() {
+    $this->atualizarNumeroVersao("3.3.1");
+}
 }
 
 

@@ -34,10 +34,10 @@ class VerificadorInstalacaoRN extends InfraRN
         // Versões SEI
         '3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7',
         '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7',
-        '4.0.8', '4.0.9', '4.0.10',
+        '4.0.8', '4.0.9', '4.0.10', '4.0.11',
         // Versões SUPER
         '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.4.6', '4.0.5.7',
-        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13'
+        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13', '4.0.9.14'
     );
 
     public function __construct() {
@@ -171,7 +171,7 @@ class VerificadorInstalacaoRN extends InfraRN
     public function verificarCompatibilidadeBanco()
     {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PenAtualizarSeiRN::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+        $strVersaoBancoModulo = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
 
         $objPENIntegracao = new PENIntegracao();
         $strVersaoModulo = $objPENIntegracao->getVersao();
@@ -208,12 +208,12 @@ class VerificadorInstalacaoRN extends InfraRN
         $strLocalizacaoAjustada = 'file://' . $strLocalizacaoCertificadoDigital;
         $strPublicKey = openssl_pkey_get_public($strLocalizacaoAjustada);
       if(empty($strPublicKey)){
-          throw new InfraException("Chave pública do certificado digital de autenticação no Barramento do PEN não pode ser localizada em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave pública do certificado digital de autenticação no Barramento do PEN não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
@@ -254,12 +254,12 @@ class VerificadorInstalacaoRN extends InfraRN
              $strErrorMsg = curl_error($curl);
           }
           if (isset($strErrorMsg)) {
-              throw new InfraException("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
+              throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
           }
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new InfraException("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
+            throw new Exception("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
         }
 
       } finally{

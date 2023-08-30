@@ -579,7 +579,7 @@ class ReceberProcedimentoRN extends InfraRN
                   $dblIdDocumento = $numIdDocumento;
                   $strHash = $objComponenteDigitalDTO->getStrHashConteudo();
 
-                  //Verificar se documento já foi recebido anteriormente para poder registrar
+              //Verificar se documento já foi recebido anteriormente para poder registrar
               if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)){
                 $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO);
                 $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
@@ -1484,6 +1484,7 @@ class ReceberProcedimentoRN extends InfraRN
       //Obter dados dos documentos já registrados no sistema
       $objComponenteDigitalDTO = new ComponenteDigitalDTO();
       $objComponenteDigitalDTO->retNumOrdem();
+      $objComponenteDigitalDTO->retStrNome();
       $objComponenteDigitalDTO->retDblIdProcedimento();
       $objComponenteDigitalDTO->retDblIdDocumento();
       $objComponenteDigitalDTO->retStrHashConteudo();
@@ -1510,15 +1511,16 @@ class ReceberProcedimentoRN extends InfraRN
         $objComponenteDigitalDTO->setOrdNumOrdemDocumentoAnexado(InfraDTO::$TIPO_ORDENACAO_ASC);
     }
 
-      $strCampoOrdenacao = "OrdemDocumento";
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
       $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-      $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, $strCampoOrdenacao);
+      $arrObjComponenteDigitalDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjComponenteDigitalDTO, "OrdemDocumento", true);
 
       $arrObjDocumentoDTO = array();
+      $arrDocumentosExistentesPorHash = array();
       $arrIdDocumentosRetirados = array();
       $count = count($arrObjDocumentos);
       $this->gravarLogDebug("Quantidade de documentos para recebimento: $count", 2);
+
     foreach($arrObjDocumentos as $objDocumento){
       if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
@@ -1527,12 +1529,22 @@ class ReceberProcedimentoRN extends InfraRN
           $numOrdemDocumento = $numOrdemDocumento ?: $objDocumento->ordem;
 
         if(array_key_exists($numOrdemDocumento, $arrObjComponenteDigitalDTOIndexado)){
-          $objComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$numOrdemDocumento];
+          $arrObjComponenteDigitalDTO = $arrObjComponenteDigitalDTOIndexado[$numOrdemDocumento];
+          $objComponenteDigitalDTO = count($arrObjComponenteDigitalDTO) > 0 ? $arrObjComponenteDigitalDTO[0] : $arrObjComponenteDigitalDTO;
+
           $this->alterarMetadadosDocumento($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento(), $objDocumento);
           $objDocumento->idDocumentoSEI = $objComponenteDigitalDTO->getDblIdDocumento();
           $objDocumento->idProcedimentoSEI = $objComponenteDigitalDTO->getDblIdProcedimento();
           $objDocumento->idProcedimentoAnexadoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
           $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
+
+          foreach ($arrObjComponenteDigitalDTO as $objComponenteDTO) {
+              $arrDocumentosExistentesPorHash[$objComponenteDTO->getStrHashConteudo()] = array(
+                "IdDocumento" => $objComponenteDTO->getDblIdDocumento(),
+                "ComponenteDigitalDTO" => $objComponenteDTO,
+                "MultiplosComponentes" => count($arrObjComponenteDigitalDTO) > 1
+              );
+          }
 
           if(isset($objDocumento->retirado) && $objDocumento->retirado === true) {
                 $arrIdDocumentosRetirados[] = $objDocumento->idDocumentoSEI;
@@ -1673,22 +1685,28 @@ class ReceberProcedimentoRN extends InfraRN
           }
         }
 
-          $arrObjParticipantesDTO = InfraArray::distinctArrInfraDTO($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO(), 'NomeContato');
-          $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
-          $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($arrObjParticipantesDTO);
+        $arrObjParticipantesDTO = InfraArray::distinctArrInfraDTO($objDocumentoDTO->getObjProtocoloDTO()->getArrObjParticipanteDTO(), 'NomeContato');
+        $arrObjParticipantesDTO = $this->prepararParticipantes($arrObjParticipantesDTO);
+        $objDocumentoDTO->getObjProtocoloDTO()->setArrObjParticipanteDTO($arrObjParticipantesDTO);
 
-          $objDocumentoRN = new DocumentoRN();
-          $objDocumentoDTO->setStrConteudo(null);
-          $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objDocumentoDTO->setStrSinBloqueado('N');
+        $objDocumentoRN = new DocumentoRN();
+        $objDocumentoDTO->setStrConteudo(null);
+        $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objDocumentoDTO->setStrSinBloqueado('N');
 
-          //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
-          $this->atribuirComponentesDigitais($objDocumentoDTO, $objDocumento->componenteDigital);
-          $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
+        // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
+        $this->atribuirComponentesJaExistentesNoProcesso(
+            $objDocumentoDTO,
+            $objDocumento->componenteDigital,
+            $arrDocumentosExistentesPorHash,
+            $parObjMetadadosProcedimento->arrHashComponenteBaixados
+        );
 
-          $objAtividadeDTOVisualizacao = new AtividadeDTO();
-          $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
-          $objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
+
+        $objAtividadeDTOVisualizacao = new AtividadeDTO();
+        $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+        $objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
         if (!$bolReabriuAutomaticamente){
             $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_ATENCAO);
@@ -1696,12 +1714,12 @@ class ReceberProcedimentoRN extends InfraRN
             $objAtividadeDTOVisualizacao->setNumTipoVisualizacao(AtividadeRN::$TV_NAO_VISUALIZADO | AtividadeRN::$TV_ATENCAO);
         }
 
-          $objAtividadeRN = new AtividadeRN();
-          $objAtividadeRN->atualizarVisualizacaoUnidade($objAtividadeDTOVisualizacao);
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividadeRN->atualizarVisualizacaoUnidade($objAtividadeDTOVisualizacao);
 
-          $objDocumento->idDocumentoSEI = $objDocumentoDTOGerado->getDblIdDocumento();
-          $objDocumento->idProcedimentoSEI = $objDocumentoDTO->getDblIdProcedimento();
-          $objDocumento->protocoloProcedimentoSEI = $objProcedimentoDTO2->getStrProtocoloProcedimentoFormatado();
+        $objDocumento->idDocumentoSEI = $objDocumentoDTOGerado->getDblIdDocumento();
+        $objDocumento->idProcedimentoSEI = $objDocumentoDTO->getDblIdProcedimento();
+        $objDocumento->protocoloProcedimentoSEI = $objProcedimentoDTO2->getStrProtocoloProcedimentoFormatado();
 
         if(!$bolDocumentoAvulso && $objProcessoPrincipal->protocolo != $parObjProtocolo->protocolo){
             $objDocumento->protocoloProcedimentoSEI = $parObjProtocolo->protocolo;
@@ -1752,6 +1770,64 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
+  private function atribuirComponentesJaExistentesNoProcesso($objDocumentoDTO, $objComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados){
+    $arrObjAnexosDTO = array();
+    foreach ($objComponentesDigitais as $objComponenteDigital) {
+        $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
+        $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
+        $bolComponenteDigitalExistente = array_key_exists($strHashComponenteDigital, $arrDocumentosExistentesPorHash);
+        if(!$bolComponenteDigitalBaixado && $bolComponenteDigitalExistente){
+            $arrDocumentoExistente = $arrDocumentosExistentesPorHash[$strHashComponenteDigital];
+            $arr = $this->clonarComponentesJaExistentesNoProcesso(
+                $objDocumentoDTO,
+                $arrDocumentoExistente["IdDocumento"],
+                $arrDocumentoExistente["ComponenteDigitalDTO"],
+                $arrDocumentoExistente["MultiplosComponentes"]
+            );
+
+            $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
+        }
+    }
+    $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
+  }
+
+
+  private function clonarComponentesJaExistentesNoProcesso($objDocumentoDTO, $dblIdDocumentoReferencia, $objComponenteDigitalDTO, $bolMultiplosComponentes){
+
+    $objAnexoDTO = new AnexoDTO();
+    $objAnexoDTO->retNumIdAnexo();
+    $objAnexoDTO->retStrNome();
+    $objAnexoDTO->retNumTamanho();
+    $objAnexoDTO->retDthInclusao();
+    $objAnexoDTO->setDblIdProtocolo($dblIdDocumentoReferencia);
+
+    $objAnexoRN = new AnexoRN();
+    $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
+    if(!empty($arrObjAnexoDTO)){
+        foreach($arrObjAnexoDTO as $objAnexoDTO){
+            $strSinDuplicado = 'S';
+            $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+            if($bolMultiplosComponentes){
+                $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
+                list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
+                $strCaminhoAnexo = $strCaminhoAnexoTemporario;
+                $strSinDuplicado = 'N';
+            }
+
+            $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
+            $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
+            copy($strCaminhoAnexo, $strNomeUploadCompleto);
+            $objAnexoDTO->setNumIdAnexo($strNomeUpload);
+            $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+            $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
+            $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
+        }
+    }
+
+    return $arrObjAnexoDTO;
+  }
+
+
     /**
      * Cancela os documentos no processo, verificando se os mesmos j<E1> tinha sido cancelados anteriormente
      *
@@ -1784,7 +1860,6 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
-    //TODO: Método deverá poderá ser transferido para a classe responsável por fazer o recebimento dos componentes digitais
   private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
     {
     if(!isset($parArrObjComponentesDigitais)) {
@@ -2440,7 +2515,9 @@ class ReceberProcedimentoRN extends InfraRN
      $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
     if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)){
           $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-          $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
+          $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
+          $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
+          $strMensagemErro .= "- Metadados enviado: ". json_encode($arrObjDocumentosMetadados).". \n";
     }
 
     if(!InfraString::isBolVazia($strMensagemErro)){
