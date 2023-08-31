@@ -578,7 +578,7 @@ class ProcessoEletronicoRN extends InfraRN
             $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
 
             if (!is_null($numIdTramite) && $numIdTramite > 0) {
-                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $objUltimoTramiteDTO->getStrProtocoloFormatado() . ".";
+                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $objUltimoTramiteDTO->getStrProtocoloProcedimentoFormatado() . ".";
             }
         }
         return $strMensagem;
