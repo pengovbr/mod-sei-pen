@@ -557,7 +557,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
         $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
-
+        $strMensagem = $e->faultstring;
         $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
         throw new InfraException($strMensagem, $e, $strDetalhes);
     } catch (\Exception $e) {
@@ -578,7 +578,7 @@ class ProcessoEletronicoRN extends InfraRN
             $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
 
             if (!is_null($numIdTramite) && $numIdTramite > 0) {
-                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $objUltimoTramiteDTO->getStrProtocoloProcedimentoFormatado() . ".";
+                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $parametros->novoTramiteDeProcesso->processo->protocolo . ".";
             }
         }
         return $strMensagem;
