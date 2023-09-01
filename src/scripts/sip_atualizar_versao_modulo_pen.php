@@ -1980,19 +1980,6 @@ class PenAtualizarSipRN extends InfraRN
       $numIdSistema = $this->getNumIdSistema('SEI');
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
-      //Corrige nome do recurso
-    //   $objRecursoDTO = new RecursoDTO();
-    //   $objRecursoDTO->setNumIdSistema($numIdSistema);
-    //   $objRecursoDTO->setStrNome('md_pen_tramita_em_bloco');
-    //   $objRecursoDTO->retNumIdRecurso();
-    //   $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
-    //   $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-    // if (isset($objRecursoDTO)) {
-    //     $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
-    //     $objRecursoDTO->setStrDescricao('Blocos de Trâmite Externo');
-    //     $objRecursoBD->alterar($objRecursoDTO);
-    // }
-
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdItemMenuPai(null);
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
@@ -2008,15 +1995,11 @@ class PenAtualizarSipRN extends InfraRN
         $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
         $objItemMenuBD->alterar($objItemMenuDTO);
       }
-    // adicionar submenu
 
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
-    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
-    // adicionar permissão
     // adicionar permissão
     $numIdPerfilSeiTramitador = ScriptSip::obterIdPerfil($numIdSistema, "Tramitador de Processos em Bloco");
-    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
@@ -2048,7 +2031,6 @@ class PenAtualizarSipRN extends InfraRN
 
     // adicionar permissão
     $numIdPerfilSeiTramitador = ScriptSip::obterIdPerfil($numIdSistema, "Tramitador de Processos em Bloco");
-    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Blocos de Trâmite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Blocos de Trâmite Externo', $numIdSistema);
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiTramitador, 'md_pen_tramita_em_bloco_excluir');
 

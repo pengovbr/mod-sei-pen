@@ -1,8 +1,4 @@
 <?
-/**
- *
- *
- */
 try {
   require_once DIR_SEI_WEB.'/SEI.php';
 
@@ -11,7 +7,7 @@ try {
   $objSessaoSEI = SessaoSEI::getInstance();
   $objPaginaSEI = PaginaSEI::getInstance();
 
-  $objSessaoSEI->validarLink();
+  // $objSessaoSEI->validarLink();
   //$objSessaoSEI->validarPermissao($_GET['acao']);
 
   //////////////////////////////////////////////////////////////////////////////
@@ -72,20 +68,23 @@ try {
       $objTramiteEmBlocoProtocoloDTO->setNumId(null);
       $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($_GET['id_procedimento']);
       $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_POST['id_tramita_bloco']);
-      $objTramiteEmBlocoProtocoloDTO->setStrAnotacao(null);
-      $objTramiteEmBlocoProtocoloDTO->setNumSequencia(null);
       $objTramiteEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($protocolo);
 
       if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
         try{
-
           $objTramiteEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $validar = $objTramiteEmBlocoProtocoloRN->validarBlocoDeTramite($objTramiteEmBlocoProtocoloDTO);
 
-          $objTramiteEmBlocoProtocoloDTO = $objTramiteEmBlocoProtocoloRN->cadastrar($objTramiteEmBlocoProtocoloDTO);
-          PaginaSEI::getInstance()->setStrMensagem('Incluir Processo em Bloco "' . $objTramiteEmBlocoProtocoloDTO->getNumId() . '" cadastrado com sucesso.');
-          // header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));        
-          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
-
+          if ($validar) {
+            $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+          } else {
+            $objTramiteEmBlocoProtocoloDTO = $objTramiteEmBlocoProtocoloRN->cadastrar($objTramiteEmBlocoProtocoloDTO);
+            PaginaSEI::getInstance()->setStrMensagem('Incluir Processo em Bloco "' . $objTramiteEmBlocoProtocoloDTO->getNumId() . '" cadastrado com sucesso.');
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));        
+            // header('Location: ' .SessaoInfra::getInstance()->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem=' . $_GET['acao'] . '&id_bloco=' . $_POST['id_tramita_bloco'] . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoProtocoloDTO->getNumId())));
+            die();
+            die; 
+          }
         }catch(Exception $e){
           PaginaSEI::getInstance()->processarExcecao($e);
         }
@@ -108,7 +107,7 @@ try {
   $objTramiteEmBlocoDTO->retStrDescricao();
 
   foreach ($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO) as $dados) {
-    $arrMapIdBloco[$dados->getNumId()] = $dados->getStrDescricao();
+    $arrMapIdBloco[$dados->getNumId()] = "{$dados->getNumId()} - {$dados->getStrDescricao()}";
   }
 
 } catch(Exception $e) {
@@ -181,7 +180,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 
   <label id="lblBlocos" for="lblIdBloco" class="infraLabelObrigatorio">Blocos :</label>
   <select id="selBlocos" name="id_tramita_bloco" class="infraSelect" >
-    <?php print InfraINT::montarSelectArray('', 'Selecione', $objTramiteEmBlocoProtocoloDTO->getNumId(), $arrMapIdBloco); ?>
+    <?php print InfraINT::montarSelectArray('', 'Selecione', $objTramiteEmBlocoProtocoloDTO->getNumId(), array_filter($arrMapIdBloco)); ?>
   </select>
 
   <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="<?=$objTramiteEmBlocoProtocoloDTO->getNumId();?>" />

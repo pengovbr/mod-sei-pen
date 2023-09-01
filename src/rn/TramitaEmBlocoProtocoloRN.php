@@ -131,16 +131,16 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         }
     }
 
-  protected function montarIndexacaoControlado(TramitaEmBlocoProtocoloDTO $obTramitaEmBlocoProtocoloDTO){
+  protected function montarIndexacaoControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO){
     try{
 
       $dto = new TramitaEmBlocoProtocoloDTO();
       $dto->retNumId();
 
-      if (is_array($obTramitaEmBlocoProtocoloDTO->getNumId())) {
-        $dto->setNumId($obTramitaEmBlocoProtocoloDTO->getNumId(), InfraDTO::$OPER_IN);
+      if (is_array($objTramitaEmBlocoProtocoloDTO->getNumId())) {
+        $dto->setNumId($objTramitaEmBlocoProtocoloDTO->getNumId(), InfraDTO::$OPER_IN);
       } else {
-        $dto->setNumId($obTramitaEmBlocoProtocoloDTO->getNumId());
+        $dto->setNumId($objTramitaEmBlocoProtocoloDTO->getNumId());
       }
 
       $objTramitaEmBlocoProtocoloDTOIdx = new TramitaEmBlocoProtocoloDTO();
@@ -153,11 +153,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
         $objTramitaEmBlocoProtocoloDTOIdx->setNumId($dto->getNumId());
         $objTramitaEmBlocoProtocoloDTOIdx->setStrIdxRelBlocoProtocolo(InfraString::prepararIndexacao($dto->getNumId()));
-
-       // $this->validarStrIdxRelBlocoProtocolo($objTramitaEmBlocoProtocoloDTOIdx, $objInfraException);
-       // $objInfraException->lancarValidacoes();
-
-        //$objTramitaEmBlocoProtocoloBD->alterar($objTramitaEmBlocoProtocoloDTOIdx);
       }
 
     } catch(Exception $e) {
@@ -169,15 +164,10 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     try {
 
       //Valida Permissao
-     // SessaoSEI::getInstance()->validarAuditarPermissao('pen_incluir_processo_em_bloco_tramite',__METHOD__,$objTramitaEmBlocoProtocoloDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramite_em_bloco_cadastrar', __METHOD__, $objTramitaEmBlocoProtocoloDTO);
 
       //Regras de Negocio
       $objInfraException = new InfraException();
-
-      //$this->validarStrAnotacao($objTramitaEmBlocoProtocoloDTO, $objInfraException);
-     // $this->validarStrIdxRelBlocoProtocolo($objTramitaEmBlocoProtocoloDTO, $objInfraException);
-
-      $objInfraException->lancarValidacoes();
 
       $objTramiteEmBlocoBD = new TramitaEmBlocoProtocoloBD($this->getObjInfraIBanco());
       $ret = $objTramiteEmBlocoBD->cadastrar($objTramitaEmBlocoProtocoloDTO);
@@ -189,5 +179,25 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     } catch (Exception $e) {
       throw new InfraException('Erro cadastrando Processo em Bloco.',$e);
     }
+  }
+
+  protected function validarBlocoDeTramiteControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO) {
+    
+    if (empty($objTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco())) {
+      return 'Nenhum bloco foi selecionado! Por favor, selecione um bloco.';
+    }
+
+    $dto = new TramitaEmBlocoProtocoloDTO();
+    $dto->retNumId();
+    $dto->setDblIdProtocolo($objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo());
+    
+    $dto->setNumIdTramitaEmBloco($objTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+    $arrTramitaEmBloco = $this->listar($dto);
+
+    if ($arrTramitaEmBloco != null) {
+      return "O processo atual já consta no bloco {$objTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco()}";
+    }
+
+    return false;
   }
 }
