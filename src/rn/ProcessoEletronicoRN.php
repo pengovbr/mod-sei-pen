@@ -728,7 +728,7 @@ class ProcessoEletronicoRN extends InfraRN
 
         // Fixação de mensagem de erro para quando já existe um trâmite em andamento
       if($strWsException->codigoErro == "0044"){
-        $mensagem = 'Processo já possui um trâmite em andamento. Mensagem original do tramita: '.$mensagem;
+        $mensagem = 'Processo já possui um trâmite em andamento.';
       }
     }
 
