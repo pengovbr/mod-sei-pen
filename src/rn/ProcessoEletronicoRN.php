@@ -657,6 +657,8 @@ class ProcessoEletronicoRN extends InfraRN
           $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
       }
 
+        $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
+        $strMensagem = $e->faultstring;
         $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
         throw new InfraException($strMensagem, $e, $strDetalhes);
     } catch (\Exception $e) {
@@ -665,6 +667,24 @@ class ProcessoEletronicoRN extends InfraRN
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
+
+    private function validarTramitaEmAndamento($parametros, $strMensagem)
+    {
+        if (strpos($strMensagem, 'já possui trâmite em andamento')) {
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoDTO->setDblIdProcedimento($parametros->dblIdProcedimento);
+
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+            $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+
+            if (!is_null($numIdTramite) && $numIdTramite > 0) {
+                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $parametros->novoTramiteDeProcesso->processo->protocolo . ".";
+            }
+        }
+        return $strMensagem;
+
+    }
 
   public function listarPendencias($bolTodasPendencias)
     {

@@ -216,6 +216,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $param->novoTramiteDeProcesso = new stdClass();
           $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
           $param->novoTramiteDeProcesso->processo = $objProcesso;
+          $param->dblIdProcedimento = $dblIdProcedimento;
           $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
 
           $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
