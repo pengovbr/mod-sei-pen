@@ -102,11 +102,11 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-    if(array_key_exists('txtSiglaUnidade', $_POST) && (!empty($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== 'null')) {
-        $objPenUnidadeDTOFiltro->setStrSigla('%'.$_POST['txtSiglaUnidade'].'%', InfraDTO::$OPER_LIKE);
+    if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
+        $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
     }
 
-    if(array_key_exists('txtDescricaoUnidade', $_POST) && (!empty($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== 'null')) {
+    if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
         $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
     }
 
