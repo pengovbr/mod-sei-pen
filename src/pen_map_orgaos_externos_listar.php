@@ -105,11 +105,11 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-    if (array_key_exists('txtSiglaOrigem', $_POST) && (!empty($_POST['txtSiglaOrigem']) && $_POST['txtSiglaOrigem'] !== 'null')) {
+    if (array_key_exists('txtSiglaOrigem', $_POST) && ((!empty($_POST['txtSiglaOrigem']) && $_POST['txtSiglaOrigem'] !== 'null') || $_POST['txtSiglaOrigem'] == "0")) {
         $objPenOrgaoExternoDTO->setStrOrgaoOrigem('%' . $_POST['txtSiglaOrigem'] . '%', InfraDTO::$OPER_LIKE);
     }
 
-    if (array_key_exists('txtSiglaDestino', $_POST) && (!empty($_POST['txtSiglaDestino']) && $_POST['txtSiglaDestino'] !== 'null')) {
+    if (array_key_exists('txtSiglaDestino', $_POST) && ((!empty($_POST['txtSiglaDestino']) && $_POST['txtSiglaDestino'] !== 'null') || $_POST['txtSiglaDestino'] == "0")) {
         $objPenOrgaoExternoDTO->setStrOrgaoDestino('%' . $_POST['txtSiglaDestino'] . '%', InfraDTO::$OPER_LIKE);
     }
 
