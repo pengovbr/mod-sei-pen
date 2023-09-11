@@ -265,6 +265,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3030();
         case '3.3.0':
             $this->instalarV3031();
+        case '3.3.1':
+            $this->instalarV3032();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2525,7 +2527,46 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3031() {
     $this->atualizarNumeroVersao("3.3.1");
-}
+  }
+
+  protected function instalarV3032() {
+    $hipoteseLegalDTO = new HipoteseLegalDTO();
+    $hipoteseLegalDTO->setStrSinAtivo('S');
+    $hipoteseLegalDTO->retStrNome();
+    $hipoteseLegalDTO->retNumIdHipoteseLegal();
+    $hipoteseLegalRN = new HipoteseLegalRN();
+    $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
+    foreach ($arrHipoteseLegal as $hipoteseLegal) {
+      $penHipoteseLegalRN = new PenHipoteseLegalRN();
+      $penHipoteseLegal = new PenHipoteseLegalDTO();
+      $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
+      $penHipoteseLegal->setStrAtivo('S');
+      $penHipoteseLegal->retStrNome();
+      $penHipoteseLegal->retNumIdHipoteseLegal();
+
+      $penHipoteseLegal = $penHipoteseLegalRN->listar($penHipoteseLegal)[0];
+
+      if ($penHipoteseLegal) {
+        $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
+        $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
+        $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
+        $penRelHipoteseLegal->retDblIdMap();
+        $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+        $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
+
+        $penRelHipoteseLegal->setStrTipo('R');
+        if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
+          $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
+        }
+
+        $penRelHipoteseLegal->setStrTipo('E');
+        if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
+          $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
+        }
+      }
+    }
+    $this->atualizarNumeroVersao('3.3.2');
+  }
 }
 
 
