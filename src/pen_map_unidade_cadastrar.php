@@ -79,7 +79,19 @@ try {
       $objResultado = $objGenericoBD->listar($objPenUnidadeRHDTO);
 
     if (count($objResultado) > 0) {
-        throw new InfraException('Já existe um registro com a "Unidade RH" para o código: ' .$_POST['id_unidade_rh'] );
+
+        $unidadeDTO = new UnidadeDTO();
+        $unidadeDTO->setNumIdUnidade($objPenUnidadeRHDTO->getNumIdUnidade(), InfraDTO::$OPER_IGUAL);
+
+        $unidadeDTO->retNumIdUnidade();
+        $unidadeDTO->retStrSigla();
+
+        $penUnidadeRN = new PenUnidadeRN();
+        foreach ($penUnidadeRN->listar($unidadeDTO) as $dados) {
+            $mapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla();
+        }
+
+        throw new InfraException('A unidade ' . $mapIdUnidade[$objPenUnidadeRHDTO->getNumIdUnidade()] .' do sistema já está mapeada com a unidade do Portal de Administração.');
     }
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
