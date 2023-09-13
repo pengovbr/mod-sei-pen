@@ -25,19 +25,23 @@ try {
       try {
         $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
         $arrObjTramiteEmBlocoDTO = array();
+        $arrIds = array();
+      
         if (count($arrStrIds) > 0) {
           for ($i = 0; $i < count($arrStrIds); $i++) {
-            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-            $objTramiteEmBlocoDTO->setNumId($arrStrIds[$i]);
-            $arrObjTramiteEmBlocoDTO[] = $objTramiteEmBlocoDTO;
+            $arrIds[] = $arrStrIds[$i];
           }
         } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
-          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-          $objTramiteEmBlocoDTO->setNumId(intval($_GET['hdnInfraItensSelecionados']));
-          $arrObjTramiteEmBlocoDTO[] = $objTramiteEmBlocoDTO;
+          $arrIds[] = intval($_GET['hdnInfraItensSelecionados']);
         }
+        $dto = new TramiteEmBlocoDTO();
+        $dto->setNumId($arrIds, InfraDTO::$OPER_IN);
+        $dto->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $dto->retNumId();
+
         $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        $objTramiteEmBlocoRN->excluir($arrObjTramiteEmBlocoDTO);
+        $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($dto);
+        $objTramiteEmBlocoRN->excluir($arrTramiteEmBloco);
         PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
