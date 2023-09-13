@@ -38,6 +38,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaMapeamentoUnidade = null;
 
     public function setUpPage(): void
     {
@@ -56,6 +57,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
         $this->currentWindow()->maximize();
     }
 
@@ -761,6 +763,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
         }
         $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
+    }
+
+    protected function navegarMapeamentoUnidade () {
+        $this->frame(null);
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
+        $this->paginaMapeamentoUnidade->navegarMapeamentoUnidade();
     }
 
     public function atualizarTramitesPEN($bolOrg1 = true, $bolOrg2 = true, $org2Primeiro = true, $quantidade = 1)
