@@ -524,7 +524,10 @@ class ProcessoEletronicoRN extends InfraRN
         $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
         $xpath->registerNamespace('x', $rootNamespace);
         $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
-
+        if (count($entries) == 0){
+          $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
+          throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
+        }
         $resultado = array();
       foreach ($entries as $entry) {
         $valor = $entry->getAttribute('value');
@@ -1499,7 +1502,7 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite. ". $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -1523,7 +1526,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $resultado->conteudoDoReciboDeEnvio;
     }
     catch (\Exception $e) {
-        $mensagem = "Falha no recebimento de recibo de trâmite";
+        $mensagem = "Falha no recebimento de recibo de trâmite de envio. " . $this->tratarFalhaWebService($e);
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -2058,8 +2061,13 @@ class ProcessoEletronicoRN extends InfraRN
         $numTamanhoBlocoMB = intval($numTamanhoBlocoMB) ?: ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
         $numTamanhoBlocoMB = max(min($numTamanhoBlocoMB, 200), 1);
     } catch(Exception $e){
-        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]";
+        $strMensagem = "Erro na recuperação do tamanho do bloco de arquivos para transferência para o Tramita.gov.br. Parâmetro [TamanhoBlocoArquivoTransferencia]. Detalhes: " . $e->getMessage();
         LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+    }
+    finally{
+      if (empty($numTamanhoBlocoMB)){
+        $numTamanhoBlocoMB = ProcessoEletronicoRN::WS_TAMANHO_BLOCO_TRANSFERENCIA;
+      }
     }
 
     return $numTamanhoBlocoMB;

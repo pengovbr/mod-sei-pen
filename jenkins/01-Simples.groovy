@@ -25,6 +25,10 @@ pipeline {
     }
 
     parameters {
+		string(
+		    name: 'versaoModulo',
+		    defaultValue:"master",
+		    description: "branch/versao do modulo a executar os testes")
         choice(
             name: 'database',
             choices: "mysql\noracle\nsqlserver",
@@ -135,7 +139,7 @@ pipeline {
 
     stages {
 
-        stage('Checkout-SISTEMA'){
+        stage('Inicializar'){
 
             steps {
 
@@ -144,6 +148,8 @@ pipeline {
 					GITURL = params.urlGitSpe
 					GITCRED = params.credentialGitSpe
 					GITBRANCH = params.branchGitSpe
+                    
+                    VERSAOMODULO = params.versaoModulo
 
 					FOLDERSPE = params.folderSpe
 					SISTEMA = params.sistema
@@ -203,6 +209,66 @@ pipeline {
 				    rm -rf ${FOLDERMODULO}
 					mkdir -p ${FOLDERMODULO}
 				fi
+				"""
+
+                dir("${FOLDERSPE}"){
+
+                    sh """
+                    sudo rm -rf ${FOLDERSPE}/* || true
+                    
+                    git config --global http.sslVerify false
+                    """
+
+                    git branch: 'main',
+                        credentialsId: GITCRED,
+                        url: GITURL
+
+                    sh """
+                    git checkout ${GITBRANCH}
+                    ls -l
+                    
+    				if [ -f ${FOLDERSPE}/src/sei/web/SEI.php ]; then
+    				    rm -rf sei sip infra
+                        mv src/sei src/sip src/infra .
+    				fi 
+                    """
+
+                }
+
+            }
+        }
+        
+        stage('Checkout Modulo'){
+
+            steps {
+
+                sh """
+                git config --global http.sslVerify false
+                """
+
+                git branch: 'master',
+                    //credentialsId: GITCRED,
+                    url: "https://github.com/supergovbr/mod-sei-pen"
+
+                sh """
+                git checkout ${VERSAOMODULO}
+                ls -l
+                """
+
+				sh """
+				ifconfig || true
+				if [ -f ${FOLDERMODULO}/Makefile ]; then
+				    make destroy || true
+				fi
+
+				mkdir -p ${FOLDERMODULO}
+			    sudo chown -R jenkins ${FOLDERMODULO} || true
+				sudo chmod +w -R ${FOLDERMODULO} || true
+
+				if [ "${BOLFOLDERMODULODEL}" = "true" ]; then
+				    rm -rf ${FOLDERMODULO}
+					mkdir -p ${FOLDERMODULO}
+				fi
 
 				\\cp -R * ${FOLDERMODULO}
 
@@ -233,24 +299,6 @@ pipeline {
 					
 				}
 
-
-                dir("${FOLDERSPE}"){
-
-                    sh """
-                    git config --global http.sslVerify false
-                    """
-
-                    git branch: 'main',
-                        credentialsId: GITCRED,
-                        url: GITURL
-
-                    sh """
-                    git checkout ${GITBRANCH}
-                    ls -l
-                    """
-
-                }
-
             }
         }
 
@@ -264,10 +312,12 @@ pipeline {
 					sed -i "s|sistema=.*|sistema=${SISTEMA}|g" Makefile
 					sed -i "s|PARALLEL_TEST_NODES =.*|PARALLEL_TEST_NODES = ${TESTE_PARALLEL}|g" Makefile
 					rm -rf ${FOLDER_FUNCIONAIS}/.env
-					\\cp ${FOLDER_FUNCIONAIS}/.env_${DATABASE} ${FOLDER_FUNCIONAIS}/.env
+					\\cp ${FOLDER_FUNCIONAIS}/env_${DATABASE} ${FOLDER_FUNCIONAIS}/.env
 					sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}|g" ${FOLDER_FUNCIONAIS}/.env
 					sed -i "s|ORG1_CERTIFICADO_SENHA=.*|ORG1_CERTIFICADO_SENHA=$ORG1_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
 					sed -i "s|ORG2_CERTIFICADO_SENHA=.*|ORG2_CERTIFICADO_SENHA=$ORG2_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
+
+                    \\cp tests_sei4/funcional/phpunit.xml ${FOLDER_FUNCIONAIS}/phpunit.xml || true
 
 					sed -i "s|.*PEN_WAIT_TIMEOUT\\".*|<const name=\\"PEN_WAIT_TIMEOUT\\" value=\\"40000\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
 					sed -i "s|.*PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES\\".*|<const name=\\"PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES\\" value=\\"180000\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml

@@ -259,7 +259,7 @@ class PendenciasTramiteRN extends InfraRN
           $strResultadoJSON = curl_exec($curl);
           if(curl_errno($curl)) {
             if (curl_errno($curl) != 28){
-              throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_errno($curl));
+              throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_error($curl));
             }
 
                 $bolEncontrouPendencia = false;
