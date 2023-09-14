@@ -31,7 +31,7 @@ class PENIntegracao extends SeiIntegracao
 
 
   public function getInstituicao() {
-      return 'Ministério da Gestão e Inovação - MGI';
+      return 'Ministério da Gestão e da Inovação em Serviços Públicos - MGI';
   }
 
   public function obterDiretorioIconesMenu() {
