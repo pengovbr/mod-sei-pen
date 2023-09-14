@@ -265,6 +265,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3030();
         case '3.3.0':
             $this->instalarV3031();
+        case '3.3.1':
+            $this->instalarV3032();
 
         case '3.4.0':
             $this->instalarV3040();
@@ -2529,6 +2531,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3031() {
     $this->atualizarNumeroVersao("3.3.1");
+  }
+
+protected function instalarV3032() {
+  $this->atualizarNumeroVersao("3.3.2");
 }
 
   protected function instalarV3040()
