@@ -1,6 +1,6 @@
 <?php
 
-class MapeamentoUnidadeTest extends CenarioBaseTestCase
+class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
 {
     public static $remetente;
 
