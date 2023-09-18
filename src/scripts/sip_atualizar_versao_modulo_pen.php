@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.1");
+define("VERSAO_MODULO_PEN", "3.3.2");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -286,6 +286,9 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.2':
+            $this->instalarV3033();
+            
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1821,7 +1824,12 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("3.3.1");
   }
 
-  public function instalarV3032()
+  protected function instalarV3032()
+  {
+      $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  public function instalarV3033()
   {
       /* Corrige nome de menu de trâmite de documentos */
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
@@ -1856,7 +1864,7 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarRecurso('pen_map_restricao_envio_comp_digitais_visualizar', 'Visualizar restrição envio componentes digitais', $numIdSistema);
 
       // Nova versão
-      $this->atualizarNumeroVersao("3.3.2");
+      $this->atualizarNumeroVersao("3.3.3");
   }
 }
 

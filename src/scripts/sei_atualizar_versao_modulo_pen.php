@@ -267,6 +267,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.2':
+            $this->instalarV3033();
+
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2526,9 +2529,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3031() {
     $this->atualizarNumeroVersao("3.3.1");
+    }
+
+    
+  protected function instalarV3032() {
+    $this->atualizarNumeroVersao("3.3.2");
   }
 
-  protected function instalarV3032()
+  protected function instalarV3033()
   {
     $objInfraBanco = BancoSEI::getInstance();
     $objMetaBD = $this->objMeta;
@@ -2567,8 +2575,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-    $this->atualizarNumeroVersao("3.3.2");
+    $this->atualizarNumeroVersao("3.3.3");
   }
+
 }
 
 
