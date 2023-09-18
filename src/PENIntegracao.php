@@ -231,15 +231,30 @@ class PENIntegracao extends SeiIntegracao
       if (!empty($ObjAtividadeDTO)) {
         switch ($ObjAtividadeDTO->getNumIdTarefa()) {
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
-            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trÃ¢mite para esse processo foi envidado" />');
+            $arrayIcone = array('<img src="' . $this->getDiretorioImagens() . '/icone-ENVIADO-tramita.png" title="Um trâmite para esse processo foi enviado" />');
+            if (!isset($arrStrIcone[$dblIdProcedimento])) {
+              $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
+            } else {
+              $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
+            }
             break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
-            $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trÃ¢mite para esse processo foi recebido" />');
+            $arrayIcone = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
+            if (!isset($arrStrIcone[$dblIdProcedimento])) {
+              $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
+            } else {
+              $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
+            }
             break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
             if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
-              $arrStrIcone[$dblIdProcedimento] = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trÃ¢mite para esse processo foi recebido" />');
+              $arrayIcone = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
+              if (!isset($arrStrIcone[$dblIdProcedimento])) {
+                $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
+              } else {
+                $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
+              }
             }
             break;
           default:
