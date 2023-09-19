@@ -35,6 +35,10 @@ class PenMetaBD extends InfraMetaBD {
       case 'InfraOracle':
           $strQuery =  sprintf("ALTER TABLE %s MODIFY %s DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
           break;
+
+      case 'InfraPostgreSql':
+          $strQuery = sprintf("ALTER TABLE %s ALTER COLUMN %s SET DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
+          break;
     }
 
     if($bolRetornarQuery === false) {
@@ -87,6 +91,7 @@ class PenMetaBD extends InfraMetaBD {
         }
       case 'InfraSqlServer':
       case 'InfraOracle':
+      case 'InfraPostgreSql':
           break;
 
       default:
@@ -141,6 +146,10 @@ class PenMetaBD extends InfraMetaBD {
         case 'InfraOracle':
           $strQuery = sprintf("RENAME TABLE %s TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
             break;
+
+        case 'InfraPostgreSql':
+          $strQuery = sprintf("ALTER TABLE %s RENAME TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
       }
 
         $objInfraBanco->executarSql($strQuery);
@@ -166,6 +175,7 @@ class PenMetaBD extends InfraMetaBD {
             break;
 
         case 'InfraOracle':
+        case 'InfraPostgreSql':
             $strQuery = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
             break;
       }
