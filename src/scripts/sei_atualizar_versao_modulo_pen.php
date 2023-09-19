@@ -267,6 +267,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.2':
+            $this->instalarV3033();
+
+
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2527,9 +2531,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.3.1");
   }
 
-  protected function instalarV3032(): void
-  {
+  protected function instalarV3032() {
     $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  protected function instalarV3033(): void
+  {
+    $this->atualizarNumeroVersao("3.3.3");
     $objMetaBD = $this->objMeta;
     // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
     $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
@@ -2566,6 +2574,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
   }
+
 }
 
 

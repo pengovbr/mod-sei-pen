@@ -43,6 +43,41 @@ class ProcessoEletronicoINT extends InfraINT {
       return $estruturas;
   }
 
+  /**
+   * Concate as siglas das hierarquias no nome da unidade
+   *
+   * @param array(EstruturaDTO) $estruturas
+   * @return array
+   */
+  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = array())
+  {
+
+    if (empty($estruturas['itens'])) {
+      return $estruturas;
+    }
+
+    foreach ($estruturas['itens'] as &$estrutura) {
+      if ($estrutura->isSetArrHierarquia()) {
+        $nome  = $estrutura->getStrNome();
+        $nome .= ' - ';
+
+        $array = array($estrutura->getStrSigla());
+        foreach ($estrutura->getArrHierarquia() as $sigla) {
+          if (trim($sigla) !== '' && !in_array($sigla, array(
+            'PR', 'PE', 'UNIAO'
+          ))) {
+            $array[] = $sigla;
+          }
+        }
+
+        $nome .= implode(' / ', $array);
+        $estrutura->setStrNome($nome);
+      }
+    }
+
+    return $estruturas;
+  }
+
   public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false) {
        
        
@@ -54,6 +89,25 @@ class ProcessoEletronicoINT extends InfraINT {
       );
 
       return static::gerarHierarquiaEstruturas($arrObjEstruturas);
+  }
+
+  public static function autoCompletarEstruturasAutoCompletar($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false)
+  {
+
+    $objConecaoWebServerRN = new ProcessoEletronicoRN();
+    $arrObjEstruturas = $objConecaoWebServerRN->listarEstruturasAutoCompletar(
+      $idRepositorioEstrutura,
+      $strPalavrasPesquisa,
+      null,
+      null,
+      null,
+      null,
+      null,
+      true,
+      $bolPermiteEnvio
+    );
+
+    return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
   }
 
   public static function autoCompletarRepositorioEstruturas($strPalavrasPesquisa)
@@ -133,15 +187,15 @@ class ProcessoEletronicoINT extends InfraINT {
         case '/pen_expedir_procedimento.gif':
             // return '/infra_css/svg/upload.svg';
             // return 'svg/arquivo_mapeamento_assunto.svg';
-            return 'modulos/' . $strModulo . '/imagens/pen_enviar.png';
+            return 'modulos/' . $strModulo . '/imagens/pen_expedir_procedimento.png';
             break;
         case '/pen_consultar_recibos.png':
             // return '/infra_css/svg/pesquisar.svg';
-            return 'modulos/' . $strModulo . '/imagens/processo_pesquisar_pen.png';
+            return 'modulos/' . $strModulo . '/imagens/consultar_recibo.png';
             break;
         case '/pen_cancelar_tramite.gif':
             // return '/infra_css/svg/remover.svg';
-            return 'modulos/' . $strModulo . '/imagens/pen_cancelar_envio.png';
+            return 'modulos/' . $strModulo . '/imagens/pen_cancelar_envio.svg';
             break;
         case '/infra_js/arvore/plus.gif':
             return '/infra_css/svg/mais.svg';
