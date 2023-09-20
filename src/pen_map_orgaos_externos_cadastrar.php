@@ -90,18 +90,18 @@ try {
     switch ($_GET['acao']) {
         case 'pen_map_orgaos_externos_salvar':
             $acao = !is_null($id) ? 'pen_map_orgaos_externos_atualizar' : 'pen_map_orgaos_externos_cadastrar';
-            if (is_null($_POST['selRepositorioEstruturasOrigem']) || is_null($_POST['txtRepositorioEstruturasOrigem'])) {
-                $objPaginaSEI->adicionarMensagem('selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
+            if (empty($_POST['selRepositorioEstruturasOrigem']) || empty($_POST['txtRepositorioEstruturasOrigem'])) {
+                $objPaginaSEI->adicionarMensagem('Selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
+                exit(0);
+            }
+            if (empty($_POST['hdnIdUnidadeOrigem']) || empty($_POST['txtUnidadeOrigem'])) {
+                $objPaginaSEI->adicionarMensagem('O orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             } 
-            if (is_null($_POST['hdnIdUnidadeOrigem']) || is_null($_POST['txtUnidadeOrigem'])) {
-                $objPaginaSEI->adicionarMensagem('o orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
-                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
-                exit(0);
-            } 
-            if (is_null($_POST['hdnIdUnidadeDestino']) || is_null($_POST['txtUnidadeDestino'])) {
-                $objPaginaSEI->adicionarMensagem('o orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+            if (empty($_POST['hdnIdUnidadeDestino']) || empty($_POST['txtUnidadeDestino'])) {
+                $objPaginaSEI->adicionarMensagem('O orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             }
