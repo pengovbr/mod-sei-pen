@@ -96,12 +96,12 @@ try {
                 exit(0);
             }
             if (empty($_POST['hdnIdUnidadeOrigem']) || empty($_POST['txtUnidadeOrigem'])) {
-                $objPaginaSEI->adicionarMensagem('O orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+                $objPaginaSEI->adicionarMensagem('O Órgão Origem não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             } 
             if (empty($_POST['hdnIdUnidadeDestino']) || empty($_POST['txtUnidadeDestino'])) {
-                $objPaginaSEI->adicionarMensagem('O orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+                $objPaginaSEI->adicionarMensagem('O Órgão Destino não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             }
@@ -126,7 +126,7 @@ try {
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
             $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->contar($objPenOrgaoExternoDTO);
             if ($respObjPenOrgaoExternoDTO > 0) {
-                $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre Órgãos ja existe.', InfraPagina::$TIPO_MSG_ERRO);
+                $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre órgãos já existente.', InfraPagina::$TIPO_MSG_ERRO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             }
@@ -468,7 +468,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
         </div>
 
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-            <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Orgão Origem:</label>
+            <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Órgão Origem:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidadeOrigem" name="txtUnidadeOrigem" class="infraText infraReadOnly" 
                     <?php empty($strNomeOrgaoOrigem) ? 'disabled="disabled"' : '' ?> 
@@ -490,7 +490,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
         <h4>Órgão Destino</h4>
 
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-            <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Orgão Destino:</label>
+            <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Órgão Destino:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" <?= $disabilitarVisualizar ?> class="infraText infraReadOnly"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" 
