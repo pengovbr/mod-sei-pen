@@ -17,12 +17,11 @@ class PenHipoteseLegalRN extends InfraRN
   protected function listarConectado(PenHipoteseLegalDTO $objDTO)
     {               
     try {
-        //SessaoSEI::getInstance()->validarAuditarPermissao('email_sistema_excluir', __METHOD__, $arrObjEmailSistemaDTO);
         $objBD = new GenericoBD($this->inicializarObjInfraIBanco());            
         return $objBD->listar($objDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+        throw new InfraException('Erro ao listar hipóteses legais.', $e);
     }
   }
 
@@ -34,7 +33,7 @@ class PenHipoteseLegalRN extends InfraRN
         return $objBD->consultar($objDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+        throw new InfraException('Erro ao consultar hipóteses legais.', $e);
     }
   }
 }
