@@ -216,6 +216,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $param->novoTramiteDeProcesso = new stdClass();
           $param->novoTramiteDeProcesso->cabecalho = $objCabecalho;
           $param->novoTramiteDeProcesso->processo = $objProcesso;
+          $param->dblIdProcedimento = $dblIdProcedimento;
           $novoTramite = $this->objProcessoEletronicoRN->enviarProcesso($param);
 
           $numIdTramite = $novoTramite->dadosTramiteDeProcessoCriado->IDT;
@@ -1101,19 +1102,21 @@ class ExpedirProcedimentoRN extends InfraRN {
 
         $objGenericoBD = new GenericoBD($this->getObjInfraIBanco());
         $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
-
-      if($objPenRelTipoDocMapEnviadoDTO == null) {
+        
+        //Mapeamento achado
+        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
+        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
+      //O padrão de recebimento está nulo e não achou mapeamento
+      if($numCodigoEspecieMapeada == null) {
           $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
           $objPenRelTipoDocMapEnviadoDTO->retNumCodigoEspecie();
           $objPenRelTipoDocMapEnviadoDTO->setNumMaxRegistrosRetorno(1);
           $objPenRelTipoDocMapEnviadoDTO = $objGenericoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
+          $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
       }
-
-        $numCodigoEspecieMapeada = isset($objPenRelTipoDocMapEnviadoDTO) ? $objPenRelTipoDocMapEnviadoDTO->getNumCodigoEspecie() : null;
-        $numCodigoEspecieMapeada = $numCodigoEspecieMapeada ?: $this->objPenRelTipoDocMapEnviadoRN->consultarEspeciePadrao();
-
+      
       if(!isset($numCodigoEspecieMapeada)) {
-          throw new InfraException("Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
+          throw new InfraException("Não foi encontrado nenhum mapeamento de tipo documental. Código de identificação da espécie documental não pode ser localizada para o tipo de documento {$parNumIdSerie}.");
       }
 
         return $numCodigoEspecieMapeada;
@@ -1726,17 +1729,17 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objDocumento->identificacao = new stdClass();
           $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
           $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
-          $objDocumento->identificacao->complemento = $this->objProcessoEletronicoRN->reduzirCampoTexto(utf8_encode($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo()), 100);
+          $objDocumento->identificacao->complemento = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
       }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO){
           $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
           $objDocumento->identificacao = new stdClass();
           $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
           $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($objOrgaoDTO->getStrSigla());
-          $objDocumento->identificacao->complemento = $this->objProcessoEletronicoRN->reduzirCampoTexto(utf8_encode($objOrgaoDTO->getStrDescricao()), 100);
+          $objDocumento->identificacao->complemento = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
       }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE){
           $objDocumento->identificacao = new stdClass();
           $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
-          $objDocumento->identificacao->complemento = $this->objProcessoEletronicoRN->reduzirCampoTexto(utf8_encode($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo()), 100);
+          $objDocumento->identificacao->complemento = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
           $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
           $objDocumento->identificacao->ano = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
       }else if($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO){
@@ -1744,7 +1747,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objDocumento->identificacao = new stdClass();
           $objDocumento->identificacao->numero = utf8_encode($parObjDocumentoDTO->getStrNumero());
           $objDocumento->identificacao->siglaDaUnidadeProdutora = utf8_encode($objOrgaoDTO->getStrSigla());
-          $objDocumento->identificacao->complemento = $this->objProcessoEletronicoRN->reduzirCampoTexto(utf8_encode($objOrgaoDTO->getStrDescricao()), 100);
+          $objDocumento->identificacao->complemento = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
           $objDocumento->identificacao->ano = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
       }
     }

@@ -4,40 +4,40 @@ require_once DIR_SEI_WEB . '/SEI.php';
 
 
 /**
- * Classe respons·vel pela verificaÁ„o da corretaÁ„o instalaÁ„o e configuraÁ„o do mÛdulo no sistema
+ * Classe respons√°vel pela verifica√ß√£o da correta√ß√£o instala√ß√£o e configura√ß√£o do m√≥dulo no sistema
  *
- * A verificaÁ„o cobre os aspectos tÈcnicos como tambÈm os negÛciais realizados pelos administradores do SEI via interface da sistema
+ * A verifica√ß√£o cobre os aspectos t√©cnicos como tamb√©m os neg√≥ciais realizados pelos administradores do SEI via interface da sistema
  *
- * VERIFICA«’ES T…CNICAS DA INSTALA«√O
- * [] Verificar o correto posicionamento dos arquivos apÛs instalaÁ„o
- * [] Verificar se o mÛdulo foi ativado no arquivo de configuraÁıes do sistema
- * [] Verificar se os par‚metros obrigatÛrios foram devidamente configurados
- * [] Verifica se o endereÁo do webservice È valido
+ * VERIFICA√á√ïES T√âCNICAS DA INSTALA√á√ÉO
+ * [] Verificar o correto posicionamento dos arquivos ap√≥s instala√ß√£o
+ * [] Verificar se o m√≥dulo foi ativado no arquivo de configura√ß√µes do sistema
+ * [] Verificar se os par√¢metros obrigat√≥rios foram devidamente configurados
+ * [] Verifica se o endere√ßo do webservice √© valido
  * [] Verifica se o arquivo de certificado digital configurado existe
  * [] Verificar se a base de dados do SEI foi atualizada corretamente
  * [] Verificar se a base de dados do SIP foi atualizada corretamente
- * [] Verificar a conex„o com o Barramento de ServiÁos do PEN
+ * [] Verificar a conex√£o com o Barramento de Servi√ßos do PEN
  *
- * VERIFICA«’ES NEGOCIAIS
- * [] Verificar se os par‚metros obrigatÛrios do sistema foram definidos em Par‚metros de ConfiguraÁıes
+ * VERIFICA√á√ïES NEGOCIAIS
+ * [] Verificar se os par√¢metros obrigat√≥rios do sistema foram definidos em Par√¢metros de Configura√ß√µes
  * [] Verificar se o mapeamento de pelo menos uma unidade foi realizado
- * [] Verificar se o mapeamento de espÈcies documentais foi realizado
- * [] Verificar se a EspÈcie Documental padr„o para envio foi corretamente definida
- * [] Verificar se o Tipo de Documento padr„o para recebimento foi corretamente definido
- * [] Verificar se o mapeamento de hipÛteses legais foi realizado
- * [] Verificar se a HipÛtese Legal padr„o foi corretamente definida
+ * [] Verificar se o mapeamento de esp√©cies documentais foi realizado
+ * [] Verificar se a Esp√©cie Documental padr√£o para envio foi corretamente definida
+ * [] Verificar se o Tipo de Documento padr√£o para recebimento foi corretamente definido
+ * [] Verificar se o mapeamento de hip√≥teses legais foi realizado
+ * [] Verificar se a Hip√≥tese Legal padr√£o foi corretamente definida
  */
 class VerificadorInstalacaoRN extends InfraRN
 {
-    // A partir da vers„o 2.0.0, o mÛdulo de integraÁ„o do SEI com o PEN n„o ser· mais compatÌvel com o SEI 3.0.X
+    // A partir da vers√£o 2.0.0, o m√≥dulo de integra√ß√£o do SEI com o PEN n√£o ser√° mais compat√≠vel com o SEI 3.0.X
     const COMPATIBILIDADE_MODULO_SEI = array(
-        // Versıes SEI
+        // Vers√µes SEI
         '3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7',
         '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7',
-        '4.0.8', '4.0.9', '4.0.10',
-        // Versıes SUPER
+        '4.0.8', '4.0.9', '4.0.10', '4.0.11', '4.0.12',
+        // Vers√µes SUPER
         '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.4.6', '4.0.5.7',
-        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13'
+        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13', '4.0.9.14'
     );
 
     public function __construct() {
@@ -49,7 +49,7 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
     /**
-     * Verifica se todos os arquivos do mÛdulo foram posicionados nos locais corretos
+     * Verifica se todos os arquivos do m√≥dulo foram posicionados nos locais corretos
      *
      * @return bool
      */
@@ -67,7 +67,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
 
     /**
-     * Verifica se o mÛdulo foi devidamente ativado nas configuraÁıes do sistema
+     * Verifica se o m√≥dulo foi devidamente ativado nas configura√ß√µes do sistema
      *
      * @return bool
      */
@@ -76,20 +76,20 @@ class VerificadorInstalacaoRN extends InfraRN
         global $SEI_MODULOS;
 
       if(!array_key_exists("PENIntegracao", $SEI_MODULOS)){
-          throw new InfraException("Chave de ativaÁ„o do mÛdulo mod-sei-pen (PENIntegracao) n„o definido nas configuraÁıes de mÛdulos do SEI");
+          throw new InfraException("Chave de ativa√ß√£o do m√≥dulo mod-sei-pen (PENIntegracao) n√£o definido nas configura√ß√µes de m√≥dulos do SEI");
       }
 
       if(is_null($SEI_MODULOS['PENIntegracao'])){
           $objConfiguracaoSEI = ConfiguracaoSEI::getInstance();
 
         if (!$objConfiguracaoSEI->isSetValor('SEI', 'Modulos')){
-            throw new InfraException("Chave de configuraÁ„o de MÛdulos n„o definida nas configuraÁıes do sistema. (ConfiguracaoSEI.php | SEI > Modulos)");
+            throw new InfraException("Chave de configura√ß√£o de M√≥dulos n√£o definida nas configura√ß√µes do sistema. (ConfiguracaoSEI.php | SEI > Modulos)");
         }
 
           $arrModulos = $objConfiguracaoSEI->getValor('SEI', 'Modulos');
           $strDiretorioModPEN = basename($arrModulos['PENIntegracao']);
           $strDiretorioModulos = dirname ($arrModulos['PENIntegracao']);
-          throw new InfraException("DiretÛrio do mÛdulo ($strDiretorioModPEN) n„o pode ser localizado em $strDiretorioModulos");
+          throw new InfraException("Diret√≥rio do m√≥dulo ($strDiretorioModPEN) n√£o pode ser localizado em $strDiretorioModulos");
       }
 
         return true;
@@ -97,46 +97,46 @@ class VerificadorInstalacaoRN extends InfraRN
 
 
     /**
-    * Verifica a correta definiÁ„o de todos os par‚metros de configuraÁ„o do mÛdulo
+    * Verifica a correta defini√ß√£o de todos os par√¢metros de configura√ß√£o do m√≥dulo
     *
     * @return bool
     */
     public function verificarArquivoConfiguracao()
     {
-        // Valida se arquivo de configuraÁ„o est· presente na instalaÁ„o do sistema
+        // Valida se arquivo de configura√ß√£o est√° presente na instala√ß√£o do sistema
         $strArquivoConfiguracao = DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
       if (file_exists($strArquivoConfiguracao) && is_readable($strArquivoConfiguracao)) {
           require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
       } else {
-          $strMensagem = "Arquivo de configuraÁ„o do mÛdulo de integraÁ„o do SEI com o Barramento PEN (mod-sei-pen) n„o pode ser localizado";
-          $strDetalhes = "As configuraÁıes do mÛdulo mod-sei-pen n„o foram encontradas em $strArquivoConfiguracao \n";
-          $strDetalhes .= "Verifique se a instalaÁ„o foi feita corretamente seguindo os procedimentos do manual de instalaÁ„o.";
+          $strMensagem = "Arquivo de configura√ß√£o do m√≥dulo de integra√ß√£o do SEI com o Barramento PEN (mod-sei-pen) n√£o pode ser localizado";
+          $strDetalhes = "As configura√ß√µes do m√≥dulo mod-sei-pen n√£o foram encontradas em $strArquivoConfiguracao \n";
+          $strDetalhes .= "Verifique se a instala√ß√£o foi feita corretamente seguindo os procedimentos do manual de instala√ß√£o.";
           throw new InfraException($strMensagem, null, $strDetalhes);
       }
 
-        // Valida se arquivo de configuraÁ„o est· Ìntegro e se a classe de configuraÁ„o est· presente
+        // Valida se arquivo de configura√ß√£o est√° √≠ntegro e se a classe de configura√ß√£o est√° presente
       if(!class_exists("ConfiguracaoModPEN")){
-          $strMensagem = "DefiniÁ„o de configuraÁıes do mÛdulo de integraÁ„o do SEI com o Barramento PEN (mod-sei-pen) n„o pode ser localizada";
-          $strDetalhes = "Verifique se o arquivo de configuraÁ„o localizado em $strArquivoConfiguracao encontra-se Ìntegro.";
+          $strMensagem = "Defini√ß√£o de configura√ß√µes do m√≥dulo de integra√ß√£o do SEI com o Barramento PEN (mod-sei-pen) n√£o pode ser localizada";
+          $strDetalhes = "Verifique se o arquivo de configura√ß√£o localizado em $strArquivoConfiguracao encontra-se √≠ntegro.";
           throw new InfraException($strMensagem, null, $strDetalhes);
       }
 
-        // Valida se todos os par‚metros de configuraÁ„o est„o presentes no arquivo de configuraÁ„o
+        // Valida se todos os par√¢metros de configura√ß√£o est√£o presentes no arquivo de configura√ß√£o
         $arrStrChavesConfiguracao = ConfiguracaoModPEN::getInstance()->getArrConfiguracoes();
       if(!array_key_exists("PEN", $arrStrChavesConfiguracao)){
-          $strMensagem = "Grupo de parametrizaÁ„o 'PEN' n„o pode ser localizado no arquivo de configuraÁ„o do mÛdulo de integraÁ„o do SEI com o Barramento PEN (mod-sei-pen)";
-          $strDetalhes = "Verifique se o arquivo de configuraÁ„o localizado em $strArquivoConfiguracao encontra-se Ìntegro.";
+          $strMensagem = "Grupo de parametriza√ß√£o 'PEN' n√£o pode ser localizado no arquivo de configura√ß√£o do m√≥dulo de integra√ß√£o do SEI com o Barramento PEN (mod-sei-pen)";
+          $strDetalhes = "Verifique se o arquivo de configura√ß√£o localizado em $strArquivoConfiguracao encontra-se √≠ntegro.";
           throw new InfraException($strMensagem, null, $strDetalhes);
       }
 
 
-        // Valida se todas as chaves de configuraÁ„o obrigatÛrias foram atribuÌdas
+        // Valida se todas as chaves de configura√ß√£o obrigat√≥rias foram atribu√≠das
         $arrStrChavesConfiguracao = $arrStrChavesConfiguracao["PEN"];
         $arrStrParametrosExperados = array("WebService", "LocalizacaoCertificado", "SenhaCertificado");
       foreach ($arrStrParametrosExperados as $strChaveConfiguracao) {
         if(!array_key_exists($strChaveConfiguracao, $arrStrChavesConfiguracao)){
-            $strMensagem = "Par‚metro 'PEN > $strChaveConfiguracao' n„o pode ser localizado no arquivo de configuraÁ„o do mÛdulo de integraÁ„o do SEI com o Barramento PEN (mod-sei-pen)";
-            $strDetalhes = "Verifique se o arquivo de configuraÁ„o localizado em $strArquivoConfiguracao encontra-se Ìntegro.";
+            $strMensagem = "Par√¢metro 'PEN > $strChaveConfiguracao' n√£o pode ser localizado no arquivo de configura√ß√£o do m√≥dulo de integra√ß√£o do SEI com o Barramento PEN (mod-sei-pen)";
+            $strDetalhes = "Verifique se o arquivo de configura√ß√£o localizado em $strArquivoConfiguracao encontra-se √≠ntegro.";
             throw new InfraException($strMensagem, null, $strDetalhes);
         }
       }
@@ -146,7 +146,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
 
     /**
-    * Verifica a compatibilidade da vers„o do mÛdulo com a atual vers„o do SEI em que est· sendo feita a instalaÁ„o
+    * Verifica a compatibilidade da vers√£o do m√≥dulo com a atual vers√£o do SEI em que est√° sendo feita a instala√ß√£o
     *
     * @return bool
     */
@@ -155,7 +155,7 @@ class VerificadorInstalacaoRN extends InfraRN
         $strVersaoSEI = SEI_VERSAO;
       if(!in_array($strVersaoSEI, self::COMPATIBILIDADE_MODULO_SEI)) {
           $objPENIntegracao = new PENIntegracao();
-          $strMensagem = sprintf("MÛdulo %s (vers„o %s) n„o È compatÌvel com a vers„o %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI);
+          $strMensagem = sprintf("M√≥dulo %s (vers√£o %s) n√£o √© compat√≠vel com a vers√£o %s do SEI.", $objPENIntegracao->getNome(), $objPENIntegracao->getVersao(), $strVersaoSEI);
           throw new ModuloIncompativelException($strMensagem);
       }
 
@@ -163,10 +163,10 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
     /**
-    * MÈtodo respons·vel pela validaÁ„o da compatibilidade do banco de dados do mÛdulo em relaÁ„o ao vers„o instalada
+    * M√©todo respons√°vel pela valida√ß√£o da compatibilidade do banco de dados do m√≥dulo em rela√ß√£o ao vers√£o instalada
     *
-    * @param  boolean $bolGerarExcecao Flag para geraÁ„o de exceÁ„o do tipo InfraException caso base de dados incompatÌvel
-    * @return boolean                  Indicardor se base de dados È compatÌvel
+    * @param  boolean $bolGerarExcecao Flag para gera√ß√£o de exce√ß√£o do tipo InfraException caso base de dados incompat√≠vel
+    * @return boolean                  Indicardor se base de dados √© compat√≠vel
     */
     public function verificarCompatibilidadeBanco()
     {
@@ -178,7 +178,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
       if($strVersaoModulo !== $strVersaoBancoModulo){
           $strMensagem = sprintf(
-              "Base de dados do mÛdulo '%s' (vers„o %s) encontra-se incompatÌvel. A vers„o da base de dados atualmente instalada È a %s. \n ".
+              "Base de dados do m√≥dulo '%s' (vers√£o %s) encontra-se incompat√≠vel. A vers√£o da base de dados atualmente instalada √© a %s. \n ".
               "Favor entrar em contato com o administrador do sistema.", $objPENIntegracao->getNome(), $strVersaoModulo, $strVersaoBancoModulo
           );
 
@@ -189,7 +189,7 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
     /**
-    * Verifica a validaÁ„o do Certificado Digital, verificando sua localizaÁ„o e a validaÁ„o das senhas de criptografia
+    * Verifica a valida√ß√£o do Certificado Digital, verificando sua localiza√ß√£o e a valida√ß√£o das senhas de criptografia
     *
     * @return bool
     */
@@ -202,25 +202,25 @@ class VerificadorInstalacaoRN extends InfraRN
       if(!file_exists($strLocalizacaoCertificadoDigital)){
           $strNomeCertificado = basename($parStrLocalizacaoArquivo);
           $strDiretorioCertificado = dirname($parStrLocalizacaoArquivo);
-          throw new InfraException("Certificado digital $strNomeCertificado n„o pode ser localizado em $strDiretorioCertificado");
+          throw new InfraException("Certificado digital $strNomeCertificado n√£o pode ser localizado em $strDiretorioCertificado");
       }
 
         $strLocalizacaoAjustada = 'file://' . $strLocalizacaoCertificadoDigital;
         $strPublicKey = openssl_pkey_get_public($strLocalizacaoAjustada);
       if(empty($strPublicKey)){
-          throw new InfraException("Chave p˙blica do certificado digital de autenticaÁ„o no Barramento do PEN n„o pode ser localizada em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave p√∫blica do certificado digital de autentica√ß√£o no Barramento do PEN n√£o pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticaÁ„o no Barramento do PEN n„o pode ser extraÌda em $strLocalizacaoCertificadoDigital");
+          throw new InfraException("Chave privada do certificado digital de autentica√ß√£o no Barramento do PEN n√£o pode ser extra√≠da em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
     }
 
     /**
-    * Verifica a conex„o com o Barramento de ServiÁos do PEN, utilizando o endereÁo e certificados informados
+    * Verifica a conex√£o com o Barramento de Servi√ßos do PEN, utilizando o endere√ßo e certificados informados
     *
     * @return bool
     */
@@ -257,7 +257,7 @@ class VerificadorInstalacaoRN extends InfraRN
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new Exception("Falha na validaÁ„o do WSDL do webservice de integraÁ„o com o Barramento de ServiÁos do PEN localizado em $strEnderecoWSDL");
+            throw new Exception("Falha na valida√ß√£o do WSDL do webservice de integra√ß√£o com o Barramento de Servi√ßos do PEN localizado em $strEnderecoWSDL");
         }
 
       } finally{
@@ -269,20 +269,20 @@ class VerificadorInstalacaoRN extends InfraRN
 
 
     /**
-    * Verifica a conex„o com o Barramento de ServiÁos do PEN, utilizando o endereÁo e certificados informados
+    * Verifica a conex√£o com o Barramento de Servi√ßos do PEN, utilizando o endere√ßo e certificados informados
     *
     * @return bool
     */
     public function verificarAcessoPendenciasTramitePEN()
     {
-        // Processa uma chamada ao Barramento de ServiÁos para certificar que o atual certificado est· corretamente vinculado ‡ um
-        // comitÍ de protocolo v·lido
+        // Processa uma chamada ao Barramento de Servi√ßos para certificar que o atual certificado est√° corretamente vinculado √† um
+        // comit√™ de protocolo v√°lido
       try{
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
           $objProcessoEletronicoRN->listarPendencias(false);
           return true;
       } catch(Exception $e){
-          throw new InfraException("Falha no acesso aos serviÁos de integraÁ„o do Barramento de ServiÁos do PEN: $e");
+          throw new InfraException("Falha no acesso aos servi√ßos de integra√ß√£o do Barramento de Servi√ßos do PEN: $e");
       }
     }
 
@@ -299,13 +299,13 @@ class VerificadorInstalacaoRN extends InfraRN
         $strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
 
       if(empty($strGearmanServidor)) {
-          // N„o processa a verificaÁ„o da instalaÁ„o do Gearman caso n„o esteja configurado
+          // N√£o processa a verifica√ß√£o da instala√ß√£o do Gearman caso n√£o esteja configurado
           return false;
       }
 
       if(!class_exists("GearmanClient")){
-          throw new InfraException("N„o foi possÌvel localizar as bibliotecas do PHP para conex„o ao GEARMAN." .
-              "Verifique os procedimentos de instalaÁ„o do mod-sei-pen para maiores detalhes");
+          throw new InfraException("N√£o foi poss√≠vel localizar as bibliotecas do PHP para conex√£o ao GEARMAN." .
+              "Verifique os procedimentos de instala√ß√£o do mod-sei-pen para maiores detalhes");
       }
 
       try{
@@ -314,7 +314,7 @@ class VerificadorInstalacaoRN extends InfraRN
           $objGearmanClient->setTimeout(10000);
           $objGearmanClient->ping("health");
       } catch (\Exception $e) {
-          $strMensagemErro = "N„o foi possÌvel conectar ao servidor Gearman (%s, %s). Erro: %s";
+          $strMensagemErro = "N√£o foi poss√≠vel conectar ao servidor Gearman (%s, %s). Erro: %s";
           $strMensagem = sprintf($strMensagemErro, $strGearmanServidor, $strGearmanPorta, $objGearmanClient->error());
           throw new InfraException($strMensagem);
       }
@@ -327,7 +327,7 @@ class VerificadorInstalacaoRN extends InfraRN
       if(!file_exists($parStrLocalizacaoArquivo)){
           $strNomeArquivo = basename($parStrLocalizacaoArquivo);
           $strDiretorioArquivo = dirname($parStrLocalizacaoArquivo);
-          throw new InfraException("Arquivo do $strNomeArquivo n„o pode ser localizado em $strDiretorioArquivo");
+          throw new InfraException("Arquivo do $strNomeArquivo n√£o pode ser localizado em $strDiretorioArquivo");
       }
     }
 }

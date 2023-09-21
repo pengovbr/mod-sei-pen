@@ -1,4 +1,4 @@
-## NOTAS DE VERSÃO MOD-SEI-PEN (<VERSAO>)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.3.2)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
@@ -7,7 +7,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
     * 3.1.0 até 3.1.7, 
-    * 4.0.0 até 4.0.x
+    * 4.0.0 até 4.0.12
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
@@ -19,16 +19,37 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Erro ao tramitar com unidade com descrição maior que 100 caracteres 'is not a valid utf-8 string' (#294) 
 
-#### Descrição da melhoria 001 (#00)
+Unidade adminstrativa com descrição de 100 caracteres dava erro caso tivesse algum caractere acentuado.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+#### Atualização do ícone de Envio Externo (#296)
 
-#### Descrição da melhoria 002 (#00)
+Novo ícone de envio externo.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+#### Atualização do ícone de 'Consultar Recibos'. (#308)
 
+Novo ícone de Consultar Recibos.
 
+#### Criação de Ícone para indicativo de processo enviado por meio do Tramita.GOV.BR (#226)
+
+Criado ícone Nna tela de controle de processos e do detalhes do processo para indicar que o processo já foi tramitado alguma vez pelo Tramita. 
+
+#### Atualização do ícone do Cancelamento de Envio Externo (#297)
+
+Novo ícone de Cancelamento de Envio Externo.
+
+#### Módulo do Tramita não exibe todas as unidades disponíveis para envio de processo (#242)
+
+Ao buscar na lista de unidades disponíveis para envio a partir de um determinado critério qualquer de busca (como um trecho de nome ou de sigla de órgão ou unidade), a droplist exibida com os resultados sugeridos apresenta apenas as 20 (vinte) primeiras ocorrências, deixando de fora - nos casos em que há mais de 20 unidades disponíveis que satisfaçam o critério - quaisquer unidades que não as 20 primeiras. Agora é listado todas as unidades.
+
+#### Recusa por Hipótese Legal não encontrada. (#275)
+
+Nova mensagem 'O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado' para a recusa com a antiga mensagem 'Hipótese legal não encotrada'.
+
+#### Ícone de Cancelar Tramitação Externa Duplicado (#355)
+
+Remoção de ícone duplicado da tramitação externa.
 
 ### Atualização de Versão
 

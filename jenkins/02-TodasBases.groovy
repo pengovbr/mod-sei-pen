@@ -20,8 +20,12 @@ pipeline {
     parameters {
         
 	    string(
+	        name: 'versaoModulo',
+	        defaultValue:"master",
+	        description: "Branch/Tag do git onde encontra-se o Modulo")
+	    string(
 	        name: 'branchGitSpe',
-	        defaultValue:"4.0.9",
+	        defaultValue:"4.0.11",
 	        description: "Branch/Tag do git onde encontra-se o Sistema")
         choice(
             name: 'sistema',
@@ -46,8 +50,9 @@ pipeline {
                         warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faça login novamente')
                     }
 				    
-					branchGitSpe = params.branchGitSpe
+					BRANCHGITSPE = params.branchGitSpe
 					SISTEMA = params.sistema
+                    VERSAOMODULO = params.versaoModulo
 					
 				    withCredentials([file(credentialsId: "instanciamysql", variable: 'INSTANCIA_MYSQL'),
 					                 file(credentialsId: "instanciasqlserver", variable: 'INSTANCIA_SQLSERVER'),
@@ -116,8 +121,9 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-								string(name: 'branchGitSpe', value: branchGitSpe),
+								string(name: 'branchGitSpe', value: BRANCHGITSPE),
 								string(name: 'sistema', value: SISTEMA),
+                                string(name: 'versaoModulo', value: VERSAOMODULO),
                             ], wait: true
 					}}
 				
@@ -174,7 +180,9 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
 								string(name: 'sistema', value: SISTEMA),
+                                string(name: 'versaoModulo', value: VERSAOMODULO),
                             ], wait: true
 					}}
 				
@@ -230,7 +238,9 @@ pipeline {
 								string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
 								string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
 								string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
 								string(name: 'sistema', value: SISTEMA),
+                                string(name: 'versaoModulo', value: VERSAOMODULO),
                             ], wait: true
 					}}
 				

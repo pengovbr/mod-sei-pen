@@ -215,6 +215,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
 
+      $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
       $this->validarDadosDestinatario($parObjMetadadosProcedimento);
       $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
       $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
@@ -1953,6 +1954,38 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+  private function validarHipoteseLegalPadrao($parObjProtocolo, $parNumIdTramite) {
+    if($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO) {
+      if (isset($parObjProtocolo->hipoteseLegal) && !empty($parObjProtocolo->hipoteseLegal->identificacao)) {
+        // Captura o Id da hipótese legal
+        $objHipoteseLegalRecebido = new PenRelHipoteseLegalRecebidoRN();
+        $numIdHipoteseLegal = $objHipoteseLegalRecebido->getIdHipoteseLegalSEI($parObjProtocolo->hipoteseLegal->identificacao);
+
+        // Checa se a hipótese legal está cadastrada para recebimento no orgão destino
+        $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+        $objPenRelHipoteseLegalDTO->setStrTipo('R');
+        $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseLegal);
+        $objPenRelHipoteseLegalDTO->retNumIdHipoteseLegal();
+
+        $objPenRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
+        $hipoteseLegalRecebimento = $objPenRelHipoteseLegalRN->listar($objPenRelHipoteseLegalDTO);
+        if ($hipoteseLegalRecebimento == null) {
+          $numIdHipoteseLegalPadrao = $this->objPenParametroRN->getParametro('HIPOTESE_LEGAL_PADRAO');
+
+          $objHipoteseLegalDTO = new HipoteseLegalDTO();
+          $objHipoteseLegalDTO->retStrStaNivelAcesso();
+          $objHipoteseLegalDTO->setNumIdHipoteseLegal($numIdHipoteseLegalPadrao);
+
+          $objHipoteseLegalRN = new HipoteseLegalRN();
+          $objHipoteseLegalDTO = $objHipoteseLegalRN->consultar($objHipoteseLegalDTO);
+        
+          if ($objHipoteseLegalDTO==null){
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdTramite, sprintf('O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado.'), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+          }
+        }
+      }
+    }
+  }
 
   private function validarDadosDestinatario($parObjMetadadosProcedimento)
     {
@@ -2515,7 +2548,9 @@ class ReceberProcedimentoRN extends InfraRN
      $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
     if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)){
           $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-          $strMensagemErro = "- Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente. \n";
+          $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
+          $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
+          $strMensagemErro .= "- Metadados enviado: ". json_encode($arrObjDocumentosMetadados).". \n";
     }
 
     if(!InfraString::isBolVazia($strMensagemErro)){

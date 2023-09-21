@@ -1,4 +1,4 @@
-# Manual de Instalação do Módulo de Integração do Processo Eletrônico Nacional - PEN
+# Manual de Instalação do Módulo de Integração do Tramita.gov.br
 
 O objetivo deste documento é descrever os procedimento para realizar a INSTALAÇÃO INICIAL do Módulo de Integração com o Tramita.GOV.BR (**mod-sei-pen**) no Sistema Eletrônico de Informações (SEI).
 
@@ -165,6 +165,7 @@ Os endereços disponíveis são os seguintes (verifique se houve atualizações 
     * Homologação: https://homolog.pendencias.processoeletronico.gov.br/
     * Produção: https://pendencias.conectagov.processoeletronico.gov.br/  
 
+
 ---
 
 ### 1.6. Atualizar a base de dados do SIP com as tabelas do **mod-sei-pen**
@@ -295,6 +296,8 @@ Como o recebimento é realizado de forma automática, o sistema precisa atribuir
 *Identificação da unidade administrativa que representará órgãos e unidades externas nos históricos de andamento do processo. Esta configuração também é necessária para que o sistema possa aplicar corretamente as regras de restrição de modificação de dados cadastrais de processos e documentos criados por outras instituições.*
 
 A unidade a ser definida neste parâmetro será utilizada internamente pelo módulo e não deverá ter acesso de nenhum usuário do sistema. Por isto, não deve ser utilizada uma unidade pré-existente da própria instituição, sendo recomendado a criação de uma nova unidade administrativa "virtual" no SIP para esta configuração.
+
+Essa unidade **não deve ser mapeada no item de [Administração > Processo Eletrônico Nacional > Mapeamento de Unidades]**.
 
 A opção "Disponível para recebimento de processos" deverá estar habilitada para o cadastro da unidade selecionada neste campo.
 
@@ -744,6 +747,30 @@ Caso o órgão tenha alterado o atributo "Sigla do Órgão" será necessário ad
                                 "atual"=>"ABCD",
                                 "antiga"=>"ABC"),
     )
+```
+
+### 4.9. Erro de validação de hash de documentos ao reenviar processos pelo Tramita.gov.br
+
+Em situações expecíficas, podem ocorrer erros de validação de hash em documentos de processo enviado em versões antigas do módulo. Isto ocorre devido o reenvio de documentos que já estão em posse do órgão destinatário e que sofreram mudanças no texto de tarjas de validação de assinatura. 
+
+Para tratar esse problema, o parâmetro "EnviarApenasComponentesDigitaisPendentes" (descrito abaixo) poderá ser utilizado para enviar apenas os documentos faltantes no órgão destinatário. **Atenção!** Esse parâmetro somente poderá ser ativado para os órgãos que já possuem o módulo **mod-sei-pen** na versão 3.3.0 ou superior.
+
+
+**EnviarApenasComponentesDigitaisPendentes** _(opcional)_  
+Deverá ser informado o identificador do repositório de unidades e a lista de identificadores das unidades do Tramita.gov.br, conforme demonstrado no exemplo abaixo. 
+
+Exemplo:
+ ```php
+   "EnviarApenasComponentesDigitaisPendentes" => array(
+       "1" => array(    // 1 = Poder Executivo Federal
+           "1500330",   // Id de estrutura de unidade X do Poder Executivo Federal
+           "1500440"    // Id de estrutura de unidade Y do Poder Executivo Federal
+       ),
+       "21" => array(   // 21 = Poder Legislativo Federal
+           "4600330",   // Id de estrutura de unidade X do Poder Legislativo Federal
+           "4600440"    // Id de estrutura de unidade Y do Poder Legislativo Federal
+       )
+   )
 ```
 
 ---
