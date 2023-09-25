@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.4.0");
+define("VERSAO_MODULO_PEN", "3.3.4");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -283,9 +283,11 @@ class PenAtualizarSipRN extends InfraRN
         case '3.2.4':
             $this->instalarV3030();
         case '3.3.0':
-          $this->instalarV3031();
-        case '3.4.0':
-            $this->instalarV3040();
+            $this->instalarV3031();
+        case '3.3.1':
+          $this->instalarV3032();
+        case '3.3.2':
+          $this->instalarV3034();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1811,17 +1813,22 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("3.2.4");
   }
 
-    protected function instalarV3030()
-    {
-        $this->atualizarNumeroVersao("3.3.0");
-    }
-  
-    protected function instalarV3031()
-    {
-        $this->atualizarNumeroVersao("3.3.1");
-    }
+  protected function instalarV3030()
+  {
+      $this->atualizarNumeroVersao("3.3.0");
+  }
 
-  protected function instalarV3040()
+  protected function instalarV3031()
+  {
+      $this->atualizarNumeroVersao("3.3.1");
+  }
+
+  protected function instalarV3032()
+  {
+      $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  protected function instalarV3034()
   {
     /* Corrige nome de menu de trâmite de documentos */
     $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
@@ -1859,7 +1866,7 @@ class PenAtualizarSipRN extends InfraRN
     $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
     
     // Nova versão
-    $this->atualizarNumeroVersao("3.4.0");
+    $this->atualizarNumeroVersao("3.3.4");
   }
 }
 

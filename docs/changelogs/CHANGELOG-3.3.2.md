@@ -1,4 +1,4 @@
-# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.3.1)
+# NOTAS DE VERSÃO MOD-SEI-PEN (versão 3.3.2)
 
 Este documento descreve as principais mudanças aplicadas nesta versão do módulo de integração do SEI com o TRAMITA.GOV.BR.
 
@@ -7,7 +7,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
     * 3.1.0 até 3.1.7, 
-    * 4.0.0 até 4.0.11
+    * 4.0.0 até 4.0.12
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
@@ -19,37 +19,37 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Erro ao tramitar com unidade com descrição maior que 100 caracteres 'is not a valid utf-8 string' (#294) 
 
-#### Quando não existe o mapeamento de tipo de documento estava sendo usado o primeiro valor da tabela e não o valor padrão (#309) 
+Unidade adminstrativa com descrição de 100 caracteres dava erro caso tivesse algum caractere acentuado.
 
-Agora o módulo vai usar o valor padrão no envio e, caso não exista um valor padrão, vai ser usado o primeiro valor da tabela de relacionamento.
+#### Atualização do ícone de Envio Externo (#296)
 
-#### Detalhamento no log de verificação da disponibilidade do Tramita.gov.br (#270)
+Novo ícone de envio externo.
 
-O log foi melhorado para contemplar mais detalhes e facilitar o entendimento do problema antes da abertura de chamado para a Central de Atendimento.
+#### Atualização do ícone de 'Consultar Recibos'. (#308)
 
+Novo ícone de Consultar Recibos.
 
-#### Antigo log 'Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente' foi alterado [commit](https://github.com/supergovbr/mod-sei-pen/commit/238c1d831add25e0cd5d45a9ab97c21c80479592)
+#### Criação de Ícone para indicativo de processo enviado por meio do Tramita.GOV.BR (#226)
 
-Novo log agora consta com a quantidade encontrada e listagem dos documentos além do metadado recebido. Mensagem antiga era: 'Número de documentos do processo não confere com o registrado nos dados do processo no enviado externamente'
+Criado ícone Nna tela de controle de processos e do detalhes do processo para indicar que o processo já foi tramitado alguma vez pelo Tramita. 
 
+#### Atualização do ícone do Cancelamento de Envio Externo (#297)
 
-#### Deixa log mais verboso ao dar falha no recebimento de recibo tanto de envio como de recebimento [commit](https://github.com/supergovbr/mod-sei-pen/commit/a971c6f2dead2898c90cf3f038fdf3942632addb)
+Novo ícone de Cancelamento de Envio Externo.
 
-A mensagem anterior era 'Falha no recebimento de recibo de trâmite'
-Agora a mensagem terá mais detalhes.
+#### Módulo do Tramita não exibe todas as unidades disponíveis para envio de processo (#242)
 
-#### Ao receber arquivos ocorre erro de division by zero pela variável numParamTamMaxDocumentoMb estar com valor NULL. (#311)
+Ao buscar na lista de unidades disponíveis para envio a partir de um determinado critério qualquer de busca (como um trecho de nome ou de sigla de órgão ou unidade), a droplist exibida com os resultados sugeridos apresenta apenas as 20 (vinte) primeiras ocorrências, deixando de fora - nos casos em que há mais de 20 unidades disponíveis que satisfaçam o critério - quaisquer unidades que não as 20 primeiras. Agora é listado todas as unidades.
 
-Havia change de ocorrer uma divisão por zero devido a falha de obtenção de valor da variável 'numParamTamMaxDocumentoMb'. Agora o tratamento será por padrão 50 megas caso ocorra erro ao obter a variável.
+#### Recusa por Hipótese Legal não encontrada. (#275)
 
-#### Inclui mais log na verificação do certificado público e privado [commit](https://github.com/supergovbr/mod-sei-pen/commit/9463d50af299c3167ce02864c62e466210ba75a2)
+Nova mensagem 'O Administrador do Sistema de Destino não definiu uma Hipótese de Restrição Padrão para o recebimento de trâmites por meio do Tramita.GOV.BR. Por esse motivo, o trâmite foi recusado' para a recusa com a antiga mensagem 'Hipótese legal não encotrada'.
 
-Ao tentar verificar a validade do certificado SSL caso ocorra algum erro é exibido os detalhes mais verbosos. Mensagem antiga era: 'Chave pública/privada do certificado digital de autenticação no Barramento do PEN não pode ser localizada em'
+#### Ícone de Cancelar Tramitação Externa Duplicado (#355)
 
-#### I nclui mais log no uso do Pendências [commit](https://github.com/supergovbr/mod-sei-pen/commit/f9c77c642865d7943dc24ad83f09bdd2024e3007)
-
-Ao obter as pendências do trâmite vai trazer mais detalhes caso ocorra um erro. Mensagem antiga: 'Erro na requisição do serviço de monitoramento de pendências'
+Remoção de ícone duplicado da tramitação externa.
 
 ### Atualização de Versão
 
