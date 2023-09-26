@@ -26,6 +26,8 @@ class PenUnidadeDTO extends UnidadeDTO {
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh'); 
       $this->configurarPK('IdUnidade', InfraDTO::$TIPO_PK_INFORMADO);
         
+      $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidadeMap');
+      $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'DescricaoMap');
       // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
       // esta na InfraDTO e ela confunde em função do extends, então tenho que 
       // criar uma nova instância

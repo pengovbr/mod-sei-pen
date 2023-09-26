@@ -86,7 +86,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         SessaoSEI::getInstance(false)->simularLogin(SessaoSEI::$USUARIO_SEI, SessaoSEI::$UNIDADE_TESTE);
 
-        //testando permissoes de criações de tabelas
+        //testando permissoes de criaÃ§Ãµes de tabelas
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
       if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
@@ -96,12 +96,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
-        // Aplicação de scripts de atualização de forma incremental
+        // AplicaÃ§Ã£o de scripts de atualizaÃ§Ã£o de forma incremental
         $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
       switch ($strVersaoModuloPen) {
         case '':
         case '0.0.0':
-            $this->instalarV100(); // Nenhuma versão instalada
+            $this->instalarV100(); // Nenhuma versÃ£o instalada
         case '1.0.0':
             $this->instalarV101();
         case '1.0.1':
@@ -265,9 +265,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3030();
         case '3.3.0':
             $this->instalarV3031();
-        case '3.3.1':
-            $this->instalarV3032();
-
+        case '3.4.0':
+            $this->instalarV3040();
+        case '3.4.1':
+            $this->instalarV3041();
+        case '3.4.2':
+            $this->instalarV3042();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1456,7 +1459,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $objEspecieDocumentalDTO->setDblIdEspecie($dblIdEspecie);
         if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
             $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
-            // Descrição da espécie documental não mais necessária a partir da versão 2.0.0
+            // DescriÃ§Ã£o da espÃ©cie documental nÃ£o mais necessÃ¡ria a partir da versÃ£o 2.0.0
             //$objEspecieDocumentalDTO->setStrDescricao($strDescricao);
             $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
         }
@@ -2529,9 +2532,129 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.3.1");
   }
 
-protected function instalarV3032() {
-  $this->atualizarNumeroVersao("3.3.2");
-}
+  protected function instalarV3040()
+  {
+    $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+    $objMetaBD = $this->objMeta;
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_orgao_externo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_orgao_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_orgao_origem' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'id_estrutura_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_estrutura_origem' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'id_orgao_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_orgao_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+        ),
+        'pk' => array('cols' => array('id')),
+        'fks' => array(
+          'unidade' => array('nome' => 'fk_md_pen_mapeamento_orgao_externo', 'cols' => array('id_unidade', 'id_unidade')),
+        )
+    ));
+
+    # Criar sequencia para tramite em bloco
+
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_tramita_em_bloco
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_orgao_externo', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_orgao_externo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.4.0");
+  }
+
+  protected function instalarV3041()
+  {
+        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+        $objMetaBD = $this->objMeta;
+
+        $objMetaBD->criarTabela(array(
+            'tabela' => 'md_pen_map_tipo_processo',
+            'cols' => array(
+                'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_map_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_processo_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'id_processo_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+                'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+                'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+                'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+            ),
+            'pk' => array('cols' => array('id')),
+            'fks' => array(
+                'unidade' => array('nome' => 'fk_md_pen_mapeamento_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
+                'md_pen_orgao_externo' => array('nome' => 'fk_md_pen_mapeamento_orgao', 'cols' => array('id', 'id_map_orgao')),
+            )
+        ));
+
+        # Criar sequencia
+        $objInfraSequenciaRN = new InfraSequenciaRN();
+        $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+        //Sequência
+        $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+        $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+				if(!$objMetaBD->isTabelaExiste('md_pen_seq_map_tipo_procedimento')) {
+						BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
+						$objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
+						$objInfraSequenciaDTO->retStrNome();
+						$arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+						$objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+				}
+
+        $this->atualizarNumeroVersao("3.4.1");
+  }
+
+  protected function instalarV3042() {
+    $hipoteseLegalDTO = new HipoteseLegalDTO();
+    $hipoteseLegalDTO->setStrSinAtivo('S');
+    $hipoteseLegalDTO->retStrNome();
+    $hipoteseLegalDTO->retNumIdHipoteseLegal();
+    $hipoteseLegalRN = new HipoteseLegalRN();
+    $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
+    foreach ($arrHipoteseLegal as $hipoteseLegal) {
+      $penHipoteseLegalRN = new PenHipoteseLegalRN();
+      $penHipoteseLegal = new PenHipoteseLegalDTO();
+      $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
+      $penHipoteseLegal->setStrAtivo('S');
+      $penHipoteseLegal->retStrNome();
+      $penHipoteseLegal->retNumIdHipoteseLegal();
+
+      $penHipoteseLegal = $penHipoteseLegalRN->listar($penHipoteseLegal)[0];
+
+      if ($penHipoteseLegal) {
+        $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
+        $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
+        $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
+        $penRelHipoteseLegal->retDblIdMap();
+        $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+        $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
+
+        $penRelHipoteseLegal->setStrTipo('R');
+        if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
+          $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
+        }
+
+        $penRelHipoteseLegal->setStrTipo('E');
+        if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
+          $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
+        }
+      }
+    }
+    $this->atualizarNumeroVersao('3.4.2');
+  }
 }
 
 
