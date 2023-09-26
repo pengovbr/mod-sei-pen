@@ -82,6 +82,24 @@ final class ProcessoEletronicoRNTest extends TestCase
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
         $this->assertTrue(strlen($strResultadoAtual) <= 150);
 
+        $strTexto =             "ããããã ããããã";
+        $strResultadoEsperado = utf8_encode("ããããã ...");
+        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 9));
+        $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen(utf8_decode($strResultadoAtual)) <= 9);
+
+        $strTexto =             "ããããã ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniamr quis";
+        $strResultadoEsperado = utf8_encode("ããããã ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniam ...");
+        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 150));
+        $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(mb_strlen($strResultadoAtual) <= 150);
+
+        $strTexto =             "Assessoria de Comunicação do Gabinete do Diretor-Presidente da Autoridade Nacional dede Proteção de dados";
+        $strResultadoEsperado = utf8_encode("Assessoria de Comunicação do Gabinete do Diretor-Presidente da Autoridade Nacional dede Proteçã ...");
+        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 100));
+        $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
+        $this->assertTrue(strlen(utf8_decode($strResultadoAtual)) <= 100);
+
     }
 
     public function testCompararVersoes(){
