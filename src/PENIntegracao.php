@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.2");
+define("VERSAO_MODULO_PEN", "3.4.1");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -446,6 +446,17 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
           break;
 
+      case 'pen_map_orgaos_externos_salvar':
+      case 'pen_map_orgaos_externos_cadastrar':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
+        break;
+
+      case 'pen_map_orgaos_externos_listar':
+      case 'pen_map_orgaos_externos_excluir':
+      case 'pen_importar_tipos_processos':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_listar.php';
+        break;
+
       case 'pen_map_unidade_listar';
       case 'pen_map_unidade_excluir':
           require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
@@ -505,7 +516,31 @@ class PENIntegracao extends SeiIntegracao
             return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
+      case 'pen_unidade_auto_completar_mapeados':
+        // DTO de paginao
+        $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+        $objPenUnidadeDTOFiltro->retStrSigla();
+        $objPenUnidadeDTOFiltro->retStrDescricao();
+        $objPenUnidadeDTOFiltro->retNumIdUnidade();
+        $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
 
+         // Filtragem
+        if(!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
+          $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['palavras_pesquisa'].'%', InfraDTO::$OPER_LIKE);
+        }
+
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
+        if (count($objArrPenUnidadeDTO) > 0) {
+          foreach ($objArrPenUnidadeDTO as $dto) {
+            $dto->setNumIdUnidadeMap($dto->getNumIdUnidade());
+            $dto->setStrDescricaoMap($dto->getStrSigla() . '-' . $dto->getStrDescricao());
+          }
+          $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
+        } else {
+            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+        }
+        break;
       case 'pen_apensados_auto_completar_expedir_procedimento':
           $dblIdProcedimentoAtual = $_POST['id_procedimento_atual'];
           $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
