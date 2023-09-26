@@ -265,12 +265,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3030();
         case '3.3.0':
             $this->instalarV3031();
-        case '3.3.1':
-            $this->instalarV3032();
         case '3.4.0':
             $this->instalarV3040();
         case '3.4.1':
             $this->instalarV3041();
+        case '3.4.2':
+            $this->instalarV3042();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2532,46 +2532,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.3.1");
   }
 
-  protected function instalarV3032() {
-    $hipoteseLegalDTO = new HipoteseLegalDTO();
-    $hipoteseLegalDTO->setStrSinAtivo('S');
-    $hipoteseLegalDTO->retStrNome();
-    $hipoteseLegalDTO->retNumIdHipoteseLegal();
-    $hipoteseLegalRN = new HipoteseLegalRN();
-    $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
-    foreach ($arrHipoteseLegal as $hipoteseLegal) {
-      $penHipoteseLegalRN = new PenHipoteseLegalRN();
-      $penHipoteseLegal = new PenHipoteseLegalDTO();
-      $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
-      $penHipoteseLegal->setStrAtivo('S');
-      $penHipoteseLegal->retStrNome();
-      $penHipoteseLegal->retNumIdHipoteseLegal();
-
-      $penHipoteseLegal = $penHipoteseLegalRN->listar($penHipoteseLegal)[0];
-
-      if ($penHipoteseLegal) {
-        $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
-        $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
-        $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
-        $penRelHipoteseLegal->retDblIdMap();
-        $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
-        $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
-
-        $penRelHipoteseLegal->setStrTipo('R');
-        if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
-          $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
-        }
-
-        $penRelHipoteseLegal->setStrTipo('E');
-        if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
-          $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
-        }
-      }
-    }
-    $this->atualizarNumeroVersao('3.3.2');
-  }
-}
-
   protected function instalarV3040()
   {
     $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -2646,13 +2606,54 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
         $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
-        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
-        $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
-        $objInfraSequenciaDTO->retStrNome();
-        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+				if(!$objMetaBD->isTabelaExiste('md_pen_seq_map_tipo_procedimento')) {
+						BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
+						$objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
+						$objInfraSequenciaDTO->retStrNome();
+						$arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+						$objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+				}
 
         $this->atualizarNumeroVersao("3.4.1");
+  }
+
+  protected function instalarV3042() {
+    $hipoteseLegalDTO = new HipoteseLegalDTO();
+    $hipoteseLegalDTO->setStrSinAtivo('S');
+    $hipoteseLegalDTO->retStrNome();
+    $hipoteseLegalDTO->retNumIdHipoteseLegal();
+    $hipoteseLegalRN = new HipoteseLegalRN();
+    $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
+    foreach ($arrHipoteseLegal as $hipoteseLegal) {
+        $penHipoteseLegalRN = new PenHipoteseLegalRN();
+        $penHipoteseLegal = new PenHipoteseLegalDTO();
+        $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
+        $penHipoteseLegal->setStrAtivo('S');
+        $penHipoteseLegal->retStrNome();
+        $penHipoteseLegal->retNumIdHipoteseLegal();
+
+        $penHipoteseLegal = $penHipoteseLegalRN->listar($penHipoteseLegal)[0];
+
+        if ($penHipoteseLegal) {
+            $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
+            $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
+            $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
+            $penRelHipoteseLegal->retDblIdMap();
+            $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+            $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
+
+            $penRelHipoteseLegal->setStrTipo('R');
+            if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
+                $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
+            }
+
+            $penRelHipoteseLegal->setStrTipo('E');
+            if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
+                $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
+            }
+        }
+    }
+    $this->atualizarNumeroVersao('3.4.2');
   }
 }
 
