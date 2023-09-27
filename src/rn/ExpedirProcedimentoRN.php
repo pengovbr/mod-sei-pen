@@ -506,7 +506,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino){
-        $bolResultado = false;
         if (InfraUtil::compararVersoes(VERSAO_MODULO_PEN, ">=", "3.3.3")) {
           $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
           $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
@@ -528,11 +527,10 @@ class ExpedirProcedimentoRN extends InfraRN {
               $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadeRh();
             }
 
-            $bolResultado = in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+            return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
           }
-          return $bolResultado;
         }
-
+        $bolResultado = false;
         $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes", false);
         $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
 
