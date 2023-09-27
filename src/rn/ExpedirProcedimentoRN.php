@@ -507,6 +507,32 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino){
         $bolResultado = false;
+        if (InfraUtil::compararVersoes(VERSAO_MODULO_PEN, ">=", "3.3.3")) {
+          $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadeRh();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUsuario();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidade();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
+          $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+
+          $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
+          $arrObjPenRestricaoEnvioComponentesDigitaisDTO =
+                    $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
+          if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
+            $arrIdUnidadesParaEnvioPendentes = array();
+            foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
+              $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadeRh();
+            }
+
+            $bolResultado = in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+          }
+          return $bolResultado;
+        }
+
         $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes", false);
         $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
 
