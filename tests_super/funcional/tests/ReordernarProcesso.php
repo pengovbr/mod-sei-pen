@@ -70,4 +70,46 @@ class ReordernarProcesso extends CenarioBaseTestCase
             $this->assinarDocumento($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], $remetente['SENHA']);
         }
     }
+
+    public function test_reordenar_processo_com_adicao_de_documento()
+    {
+        //Aumenta o tempo de timeout devido à quantidade de arquivos
+        $this->setSeleniumServerRequestsTimeout(6000);
+
+        // Configuração do dados para teste do cenário
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+        self::$documentosTeste[] = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        self::$documentosTeste[] = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        self::$documentosTeste[] = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+
+
+        $this->assinarDocumentosInterno(self::$processoTeste, self::$documentosTeste, self::$remetente, self::$destinatario);
+        $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
+        sleep(3);
+        $this->paginaReordenarProcesso->irParaPaginaMudarOrdem();
+        $this->paginaReordenarProcesso->clicarReordenar();
+        sleep(3);
+        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$protocoloTeste, self::$documentosTeste, self::$remetente, self::$destinatario);
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $this->sairSistema();
+
+        // Configuração do dados para teste do cenário
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$documentosTeste = [];
+        self::$documentosTeste[] = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        self::$documentosTeste[] = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        $this->assinarDocumentosInterno(self::$processoTeste, self::$documentosTeste, self::$remetente, self::$destinatario);
+
+        $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
+        self::$processoTeste = self::$protocoloTeste["PROTOCOLO"];
+
+        sleep(3);
+        $this->paginaReordenarProcesso->irParaPaginaMudarOrdem();
+
+
+        $this->assertTrue(true);
+    }
 }
