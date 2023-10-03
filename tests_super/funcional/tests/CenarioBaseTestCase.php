@@ -358,6 +358,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
     }
 
     protected function tramitarProcessoExternamenteGestorNaoResponsavelUnidade ($repositorio, $unidadeDestino, $unidadeDestinoHierarquia) {
+
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=? where id_unidade=?", array('151105', '110000001'));
+
         // Acessar funcionalidade de trâmite externo
         try {
             $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
@@ -398,6 +402,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             }
         }
 
+        $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=? where id_unidade=?", array(CONTEXTO_ORGAO_A_ID_ESTRUTURA, '110000001'));
     }
 
     protected function tramitarProcessoInternamente($unidadeDestino)
