@@ -750,7 +750,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
       case 'pen_unidade_auto_completar_mapeados':
@@ -775,7 +775,7 @@ class PENIntegracao extends SeiIntegracao
           }
           $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
         break;
       case 'pen_apensados_auto_completar_expedir_procedimento':
