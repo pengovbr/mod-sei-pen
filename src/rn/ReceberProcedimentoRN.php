@@ -257,8 +257,15 @@ class ReceberProcedimentoRN extends InfraRN
         //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
-        $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
+        
         $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
+
+        // Comparar tamanho do arquivo enviado com o tamanho maximo permitido na instancia destinataria
+        if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
+          throw new InfraException("O tamanho máximo geral permitido para documentos externos é {$numParamTamMaxDocumentoMb}MB.");
+        }
+
+        // $numParamTamMaxDocumentoMb = $this->objPenParametroRN->getParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
 
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
 
@@ -288,6 +295,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objAnexoBaixadoPraPastaTemp = $arrAnexosComponentes[$key][$strHashComponentePendente];
         $objAnexoBaixadoPraPastaTemp->hash = $strHashComponentePendente;
 
+        $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
         //Valida a integridade do componente via hash
         $this->gravarLogDebug("Validando integridade de componente digital $numOrdemComponente", 4);
         $numTempoInicialValidacao = microtime(true);
@@ -296,7 +304,7 @@ class ReceberProcedimentoRN extends InfraRN
         );
         $numTempoTotalValidacao = round(microtime(true) - $numTempoInicialValidacao, 2);
         $numVelocidade = round($nrTamanhoArquivoKB / max([$numTempoTotalValidacao, 1]), 2);
-        $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 4);
+        $this->gravarLogDebug("Tempo total de validação de integridade: {$numTempoTotalValidacao}s ({$numVelocidade} kb/s)", 5);
       }
     }
 
