@@ -286,6 +286,20 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(2);
     }
 
+    protected function assinarDocumentoCertificadoDigital($siglaOrgao, $cargoAssinante, $loginSenha)
+    {
+        // Navegar para página de assinatura
+        $this->paginaDocumento->navegarParaAssinarDocumento();
+        sleep(2);
+
+        // Assinar documento
+        $this->paginaAssinaturaDocumento->selecionarOrgaoAssinante($siglaOrgao);
+        $this->paginaAssinaturaDocumento->selecionarCargoAssinante($cargoAssinante);
+        $this->paginaAssinaturaDocumento->assinarComCertificadoDigital();
+        $this->window('');
+        sleep(2);
+    }
+
     protected function anexarProcesso($protocoloProcessoAnexado)
     {
         $this->paginaProcesso->navegarParaAnexarProcesso();
@@ -785,41 +799,46 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $conexaoSip = new PDO($dns, $user, $password);
         $conexaoSip->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $sql = "select id_usuario FROM usuario WHERE sigla = 'teste1'";
-        $usuario = $conexaoSip->query($sql)->fetch(PDO::FETCH_ASSOC);
-            
-        if (!isset($usuario['id_usuario'])) {
-            // Insere usuário no sip
-            $sql = "select MAX(id_usuario) as ultimo_id FROM usuario";
-            $usuario = $conexaoSip->query($sql)->fetch(PDO::FETCH_ASSOC);
-            $idUsuario = $usuario['ultimo_id'] + 1;
-            $insertUsuarioSip = "insert into usuario (id_usuario, id_orgao, sigla, nome, sin_ativo, nome_registro_civil, sin_bloqueado) values (?, ?, ?, ?, ?, ?, ?);";
-            $conexaoSip->prepare($insertUsuarioSip)->execute(array($idUsuario, 0, 'teste1', 'teste1', 'S', 'teste1', 'N'));
-
-            // Insere a permissão básica para o usuário criado no sip
-            $sql = "insert into permissao(id_perfil, id_sistema, id_usuario, id_unidade, id_tipo_permissao, dta_inicio, sin_subunidades) values(100000938, 100000100, ?, 110000000, 1, '".date('Y-m-d')." 00:00:00', 'N');";
-            $conexaoSip->prepare($sql)->execute(array($idUsuario));
-            
-            // Cria conexão com o sei
-            $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-            
-            // Insere registro na tabela de contatos do sei
-            $sql = "select MAX(id_contato) as ultimo_id FROM contato";
-            $contato = $bancoOrgaoA->query($sql, array());
-            $idContato = $contato[0]['ultimo_id'] + 1;            
-            $bancoOrgaoA->execute("insert into contato (id_contato, nome, sin_ativo, sta_natureza, sin_endereco_associado, id_contato_associado, id_tipo_contato, idx_contato, dth_cadastro) values (?, 'teste1', 'S', 'J', 'N', ?, 6, 'TESTE 1 - USR', '".date('Y-m-d')." 00:00:01')", array($idContato, $idContato));
-
-            // Cadastra usuário na tabela usuario do sei
-            $sql = "select MAX(id_usuario) as ultimo_id FROM usuario";
-            $usuario = $bancoOrgaoA->query($sql, array());
-            $idUsuario = $usuario[0]['ultimo_id'] + 1;
-
-            $insertUsuario = "insert into usuario (id_usuario,sin_ativo,sigla,nome,id_contato,id_orgao,idx_usuario,sta_tipo,sin_acessibilidade,nome_registro_civil) values (?,?,?,?,?,?,?,?,?,?)";
-            $bancoOrgaoA->execute($insertUsuario, array($idUsuario,'S','teste1','TESTE 1 - USR', $idContato, 0, 'teste1 teste 1 - usr', '0', 'N', 'TESTE 1 - USR'));
+        // Verificando se a conexão com o banco de dados é oracle para fazer a conversão da data correta
+        if ($conexaoSip->getAttribute(PDO::ATTR_DRIVER_NAME) == "oci") {
+            $dataAnterior = "TO_DATE('". date('Y-m-d', strtotime('-1 day', strtotime(date('Y-m-d')))) . "00:00:01', 'YYYY-MM-DD HH24:MI:SS')";
+        } else {
+            $dataAnterior = "'".date('Y-m-d', strtotime('-1 day', strtotime(date('Y-m-d')))) . " 00:00:01'";
         }
 
+        
+        // Insere usuário no sip
+        $sql = 'select MAX(id_usuario) as "ultimo_id" FROM usuario';
+        $usuario = $conexaoSip->query($sql)->fetch(PDO::FETCH_ASSOC);
+        $idUsuarioSip = $usuario['ultimo_id'] + 1;
+        $insertUsuarioSip = "insert into usuario (id_usuario, id_orgao, sigla, nome, sin_ativo, nome_registro_civil, sin_bloqueado) values (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $conexaoSip->prepare($insertUsuarioSip);
+        $stmt->execute(array($idUsuarioSip, 0, 'testeuserdoc1', 'testeuserdoc1', 'S', 'testeuserdoc1', 'N'));
+
+        // Insere a permissão básica para o usuário criado no sip
+        $sql = "insert into permissao(id_perfil, id_sistema, id_usuario, id_unidade, id_tipo_permissao, dta_inicio, sin_subunidades) values(100000938, 100000100, ?, 110000000, 1, ". $dataAnterior .", 'N')";
+        $stmt = $conexaoSip->prepare($sql);
+        $stmt->execute(array($idUsuarioSip));
+        
+        // Cria conexão com o sei
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        
+        // Insere registro na tabela de contatos do sei
+        $sql = 'select MAX(id_contato) as "ultimo_id" FROM contato';
+        $contato = $bancoOrgaoA->query($sql, array());
+        $idContato = $contato[0]['ultimo_id'] + 1;            
+        $bancoOrgaoA->execute("insert into contato (id_contato, nome, sin_ativo, sta_natureza, sin_endereco_associado, id_contato_associado, id_tipo_contato, idx_contato, dth_cadastro, cpf) values (?, 'testeuserdoc1', 'S', 'J', 'N', ?, 6, 'TESTE 1 - USR', ".$dataAnterior.", '123456789')", array($idContato, $idContato));
+
+        // Cadastra usuário na tabela usuario do sei
+        $sql = 'select MAX(id_usuario) as "ultimo_id" FROM usuario';
+        $usuario = $bancoOrgaoA->query($sql, array());
+        $idUsuario = $usuario[0]['ultimo_id'] + 1;
+
+        $insertUsuario = "insert into usuario (id_usuario,sin_ativo,sigla,nome,id_contato,id_orgao,idx_usuario,sta_tipo,sin_acessibilidade,nome_registro_civil) values (?,?,?,?,?,?,?,?,?,?)";
+        $bancoOrgaoA->execute($insertUsuario, array($idUsuario,'S','testeuserdoc1','TESTE 1 - USR', $idContato, 0, 'testeuserdoc1 teste 1 - usr', '0', 'N', 'TESTE 1 - USR'));
+
         // 1 - Acessar sistema do REMETENTE do processo
-        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], 'teste1', 'teste1');
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], 'testeuserdoc1', 'testeuserdoc1');
 
 
         $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
@@ -832,7 +851,33 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(2, count($listaDocumentosProcessoPrincipal));
         $this->paginaProcesso->selecionarDocumento($listaDocumentosProcessoPrincipal[0]);
-        $this->assinarDocumento($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], 'teste1');
+        $this->assinarDocumento($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], 'testeuserdoc1');
+
+
+        $this->waitUntil(function ($testCase)  {
+            $testCase->frame(null);
+            $testCase->frame("modal-frame");
+            $menssagemValidacao = utf8_encode('O Documento foi tramitado anteriormente por meio da plataforma Tramita.GOV.BR. Por esse motivo, não é possível a inclusão de novas assinaturas.');
+            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    protected function assinarDocumentoCertificadoDigitalTramitadoAnteriormente($remetente, $strProtocoloTeste) {
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], 'testeuserdoc1', 'testeuserdoc1');
+
+
+        $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
+            sleep(5);
+            $this->abrirProcesso($strProtocoloTeste);
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        // Assinar documento interno criado anteriormente
+        $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
+        $this->assertEquals(2, count($listaDocumentosProcessoPrincipal));
+        $this->paginaProcesso->selecionarDocumento($listaDocumentosProcessoPrincipal[0]);
+        $this->assinarDocumentoCertificadoDigital($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], 'testeuserdoc1');
 
 
         $this->waitUntil(function ($testCase)  {
@@ -843,5 +888,40 @@ class CenarioBaseTestCase extends Selenium2TestCase
             return true;
         }, PEN_WAIT_TIMEOUT);
 
+        // Cria conexão com o sip
+        $dns = getenv(CONTEXTO_ORGAO_A . '_DB_SIP_DSN');
+        $user = getenv("SIP_DATABASE_USER");
+        $password = getenv("SIP_DATABASE_PASSWORD");
+        $conexaoSip = new PDO($dns, $user, $password);
+        $conexaoSip->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Exclui o usuário criado no sip
+        $stmt = $conexaoSip->prepare('SELECT ID_USUARIO FROM usuario WHERE sigla = ?');
+        $usuario = $stmt->execute(array('testeuserdoc1'));
+
+        $stmt = $conexaoSip->prepare('SELECT ID_USUARIO FROM usuario WHERE sigla = ?');
+        $stmt->execute(array('testeuserdoc1'));
+        $usuario = $stmt->fetchAll();
+        
+        $stmt = $conexaoSip->prepare("DELETE FROM permissao WHERE id_usuario = ?");
+        $stmt->execute(array($usuario[0]['ID_USUARIO']));
+
+        $stmt = $conexaoSip->prepare("DELETE FROM login WHERE id_usuario = ?");
+        $stmt->execute(array($usuario[0]['ID_USUARIO']));
+
+        $stmt = $conexaoSip->prepare("DELETE FROM usuario WHERE id_usuario = ?");
+        $stmt->execute(array($usuario[0]['ID_USUARIO']));
+
+        // // Conexão com o sei.
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        // Exclui o usuário criado no sei
+        $usuario = $bancoOrgaoA->query("SELECT ID_USUARIO FROM usuario WHERE sigla = ?", array('testeuserdoc1'));
+        $atividade = $bancoOrgaoA->query("SELECT ID_ATIVIDADE FROM atividade WHERE id_usuario_conclusao = ?", array($usuario[0]['ID_USUARIO']));
+
+        $bancoOrgaoA->execute("DELETE FROM atributo_andamento WHERE id_atividade = ? ", array($atividade[0]['ID_ATIVIDADE']));
+        $bancoOrgaoA->execute("DELETE FROM atividade WHERE id_usuario_conclusao = ? ", array($usuario[0]['ID_USUARIO']));
+        $bancoOrgaoA->execute("DELETE FROM atividade WHERE id_usuario_origem = ? ", array($usuario[0]['ID_USUARIO']));
+        $bancoOrgaoA->execute("DELETE FROM usuario WHERE id_usuario = ? ", array($usuario[0]['ID_USUARIO']));
+        $bancoOrgaoA->execute("DELETE FROM contato WHERE nome = ?", array('testeuserdoc1'));
     }
 }

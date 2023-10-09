@@ -6,6 +6,10 @@ SEI_DATABASE_NAME=sei
 SEI_DATABASE_USER=sei_user
 SEI_DATABASE_PASSWORD=sei_user
 
+SIP_DATABASE_NAME=sip
+SIP_DATABASE_USER=sip_user
+SIP_DATABASE_PASSWORD=sip_user
+
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############
 ORG1_HOSTNAME=org1-http
 ORG1_SIGLA_ORGAO=ABC
@@ -19,6 +23,7 @@ ORG1_DATABASE_NAME=sqlserver
 ORG1_DATABASE_GUEST_PORT=1433
 ORG1_DATABASE_HOST_PORT=14331
 CONTEXTO_ORGAO_A_DB_SEI_DSN=sqlsrv:server=org1-database,1433; Database=sei
+CONTEXTO_ORGAO_A_DB_SIP_DSN=sqlsrv:server=org1-database,1433; Database=sip
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############

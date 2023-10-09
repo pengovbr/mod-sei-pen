@@ -32,6 +32,7 @@ ORG1_DATABASE_GUEST_PORT=3306
 ORG1_DATABASE_HOST_PORT=33061
 ORG1_DATABASE_DATA_DIR=/var/lib/mysql
 CONTEXTO_ORGAO_A_DB_SEI_DSN=mysql:host=org1-database;port=3306;dbname=sei
+CONTEXTO_ORGAO_A_DB_SIP_DSN=mysql:host=org1-database;port=3306;dbname=sip
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############

@@ -30,7 +30,7 @@ ORG1_DATABASE_GUEST_PORT=1433
 ORG1_DATABASE_HOST_PORT=14331
 ORG1_DATABASE_DATA_DIR=/var/opt/mssql 
 CONTEXTO_ORGAO_A_DB_SEI_DSN =sqlsrv:server=org1-database,1433; Database=sei
-
+CONTEXTO_ORGAO_A_DB_SIP_DSN =sqlsrv:server=org1-database,1433; Database=sip
 
 
 

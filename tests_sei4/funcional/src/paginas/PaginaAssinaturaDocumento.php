@@ -64,4 +64,11 @@ class PaginaAssinaturaDocumento extends PaginaTeste
         $this->test->keys(Keys::ENTER);
     }
 
+	public function assinarComCertificadoDigital()
+	{
+        $this->test->frame(null);
+		$this->test->frame("modal-frame");
+		$input = $this->test->byId("lblCertificadoDigital")->click();
+    }
+
 }
