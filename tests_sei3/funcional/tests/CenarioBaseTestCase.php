@@ -228,6 +228,17 @@ class CenarioBaseTestCase extends Selenium2TestCase
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
     }
 
+    protected function navegarPara($acao) 
+    {
+        $this->frame(null);
+        $acao = "acao={$acao}";
+        $xpath = "//a[contains(@href, '$acao')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+
+        $this->url($url);
+    }
+
     protected function selecionarUnidadeInterna($unidadeDestino)
     {
         PaginaTeste::selecionarUnidadeContexto($this, $unidadeDestino);
