@@ -85,14 +85,13 @@ try {
   $objTramitaEmBlocoProtocoloDTO->retNumId();
   $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
   $objTramitaEmBlocoProtocoloDTO->retNumSequencia();
-  $objTramitaEmBlocoProtocoloDTO->retStrAnotacao();
   $objTramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
   $objTramitaEmBlocoProtocoloDTO->retNumIdUsuario();
   $objTramitaEmBlocoProtocoloDTO->retNumIdUnidadeBloco();
   $objTramitaEmBlocoProtocoloDTO->retStrStaEstadoProtocolo();
   $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
 
-  $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaBloco');
+  $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtProcedimentoFormatado');
   if ($strPalavrasPesquisa!=''){
     $objTramitaEmBlocoProtocoloDTO->setStrPalavrasPesquisa($strPalavrasPesquisa);
   }
@@ -164,10 +163,13 @@ try {
       // $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
 
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
+
       if ($objTramiteDTO) {
+
+       
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getDthRegistro()) . '</td>';
-        $strResultado .= '<td align="center">' . /*PaginaSEI::tratarHTML($objTramiteDTO->getStrUnidadeDestino()) .*/ '</td>';
+       $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) . '</td>';
 
       } else {
         $strResultado .= '<td align="center"></td>' . "\n";
@@ -204,7 +206,12 @@ try {
         $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
         $strProtocoloId = $objDTO->getDblIdProtocolo();
         $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
-        $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+        
+        if ($objDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_NORMAL) {
+          $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
+          // $strResultado .= $objDTO->getStrStaEstadoProtocolo();
+        }
+       
         $strResultado .= $objDTO->getNumStaIdTarefa() == $PROCESSO_EXPEDIDO_ID ? '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite" alt="Cancelar Tramite" class="infraImg iconTramita" /></a>&nbsp;' : '';
       }
       $strResultado .= '</td>' . "\n";
@@ -390,8 +397,9 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   $objPaginaSEI->abrirAreaDados('4.5em');
   ?>
+  
   <label id="lblProcedimentoFormatado" for="txtProcedimentoFormatado" accesskey="" class="infraLabelOpcional">Número do Processo:</label>
-  <input type="text" id="txtProcedimentoFormatado" name="txtProcedimentoFormatado" value="<?= $strProcedimentoFormatado ?>" class="infraText" />
+  <input type="text" id="txtProcedimentoFormatado" name="txtProcedimentoFormatado" value="<?= $strPalavrasPesquisa ?>" class="infraText" />
 <?
   $objPaginaSEI->fecharAreaDados();
   $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros);

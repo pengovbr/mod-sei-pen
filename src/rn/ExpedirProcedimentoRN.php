@@ -290,11 +290,12 @@ class ExpedirProcedimentoRN extends InfraRN {
               // Atualizar Bloco para concluido
               $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
               $objTramitaEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
-              $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-              $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-              $objTramitaEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-              if ($objTramitaEmBlocoProtocoloDTO != null ) {
+              if ($objTramitaEmBlocoProtocoloDTO != null) {
+
+                $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+                $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+                $objTramitaEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
                 $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
                 $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
@@ -311,14 +312,14 @@ class ExpedirProcedimentoRN extends InfraRN {
               
             }
 
-                  $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
+            $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
-                  $this->receberReciboDeEnvio($objTramite->IDT);
+            $this->receberReciboDeEnvio($objTramite->IDT);
 
-                  $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+            $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
 
-                  $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
-                  $this->gravarLogDebug("Finalizado o envio de protocolo número " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
+            $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
+            $this->gravarLogDebug("Finalizado o envio de protocolo número " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
           }
           catch (\Exception $e) {
           //Realiza o desbloqueio do processo

@@ -51,6 +51,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
                 $objTramiteDTO->setNumMaxRegistrosRetorno(1);
                 $objTramiteDTO->retNumIdTramite();
                 $objTramiteDTO->retDthRegistro();
+                $objTramiteDTO->retNumIdEstruturaDestino();
                 $objTramiteDTO->retStrNomeUsuario();
 
                 $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
