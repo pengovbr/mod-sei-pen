@@ -214,7 +214,7 @@ class PENIntegracao extends SeiIntegracao
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO)
     );
-    
+
     foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
       $objAtividadeDTO = new AtividadeDTO();
       $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -224,10 +224,10 @@ class PENIntegracao extends SeiIntegracao
       $objAtividadeDTO->retNumIdAtividade();
       $objAtividadeDTO->retNumIdTarefa();
       $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-      
+
       $objAtividadeRN = new AtividadeRN();
       $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-      
+
       if (!empty($ObjAtividadeDTO)) {
         switch ($ObjAtividadeDTO->getNumIdTarefa()) {
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
@@ -265,7 +265,7 @@ class PENIntegracao extends SeiIntegracao
 
     return $arrStrIcone;
   }
-  
+
   private function consultarProcessoRecebido($dblIdProtocolo)
   {
     $objAtividadeDTO = new AtividadeDTO();
@@ -339,11 +339,11 @@ class PENIntegracao extends SeiIntegracao
     // $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
     // $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
     // $objAtividadeDTO->retNumIdAtividade();
-    
+
     // $objAtividadeRN = new AtividadeRN();
     // $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
-    
+
     // if (!empty($objAtividadeDTO)) {
     //   if ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) {
     //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
@@ -366,10 +366,10 @@ class PENIntegracao extends SeiIntegracao
     $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
     $objAtividadeDTO->retNumIdTarefa();
     $objAtividadeDTO->retNumIdAtividade();
-    
+
     $objAtividadeRN = new AtividadeRN();
     $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-    
+
     if (!empty($objAtividadeDTO)) {
       switch ($objAtividadeDTO->getNumIdTarefa()) {
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
@@ -727,9 +727,9 @@ class PENIntegracao extends SeiIntegracao
         try {
           $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarRepositorioEstruturas($_POST['palavras_pesquisa']);
           if (count($arrObjEstruturaDTO) > 0) {
-              $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
+            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
           } else {
-              return '<itens><item id="0" descricao="Repositório de Estruturas não Encontrado."></item></itens>';
+            return '<itens><item grupo="vazio" id="0" descricao="Repositório de Estruturas não Encontrado."></item></itens>';
           }
         }catch(Throwable $e){
           $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
@@ -750,7 +750,7 @@ class PENIntegracao extends SeiIntegracao
 
           $objUnidadeRN = new UnidadeRN();
           $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-          
+
           $arrObjEstruturaDTO = array();
           try {
             $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
@@ -759,7 +759,7 @@ class PENIntegracao extends SeiIntegracao
             $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
             $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
             $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
-            
+
             $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
             $restricaoCadastrada = $objPenUnidadeRestricaoRN->contar($objPenUnidadeRestricaoDTO);
             $restricaoCadastrada = $restricaoCadastrada > 0;
@@ -767,7 +767,7 @@ class PENIntegracao extends SeiIntegracao
             if ($restricaoCadastrada) {
               $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
               $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-              
+
               foreach ($arrEstruturas as $key => $unidade) {
                 if ($unidade->getNumIdUnidadeRHRestricao() != null) {
                   $arrObjEstruturaDTO[] = $unidade;
@@ -776,7 +776,7 @@ class PENIntegracao extends SeiIntegracao
             }
           } catch (Exception $e) {
           }
-          
+
           if (count($arrObjEstruturaDTO) > 0) {
             $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
           } else if ($restricaoCadastrada) {
