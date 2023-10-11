@@ -220,6 +220,7 @@ class VerificadorInstalacaoRN extends InfraRN
     }
 
 
+
     /**
     * Verifica a conexão com o Barramento de Serviços do PEN, utilizando o endereço e certificados informados
     *
