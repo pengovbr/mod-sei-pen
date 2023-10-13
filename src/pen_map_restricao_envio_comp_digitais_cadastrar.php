@@ -29,16 +29,17 @@ try {
     $disabilitarVisualizar = "";
     switch ($_GET['acao']) {
         case 'pen_map_restricao_envio_comp_digitais_salvar':
-            $acao = !is_null($id) ?
+            $acao = !empty($id) ?
                 'pen_map_restricao_envio_comp_digitais_atualizar' :
                 'pen_map_restricao_envio_comp_digitais_cadastrar';
-            if (is_null($_POST['selRepositorioEstruturas']) || is_null($_POST['txtRepositorioEstruturas'])) {
-                $objPaginaSEI->adicionarMensagem('repositório não selecionado', InfraPagina::$TIPO_MSG_AVISO);
+            
+            if (empty($_POST['selRepositorioEstruturas']) || empty($_POST['txtRepositorioEstruturas']) || $_POST['txtRepositorioEstruturas'] == "0") {
+                $objPaginaSEI->adicionarMensagem('O Repositório de Estruturas Organizacionais não foi selecionado', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_='.$_GET['acao_']));
                 exit(0);
             }
-            if (is_null($_POST['hdnIdUnidade']) || is_null($_POST['txtUnidade'])) {
-                $objPaginaSEI->adicionarMensagem('o orgão  não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+            if (empty($_POST['hdnIdUnidade']) || empty($_POST['txtUnidade']) || $_POST['txtUnidade'] == "0") {
+                $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: '.$objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_='.$_GET['acao_']));
                 exit(0);
             }
@@ -52,7 +53,7 @@ try {
             $objDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
             $objDTO->setNumIdEstrutura($numIdRepositorio);
             $objDTO->setNumIdUnidadeRh($numIdUnidadeRh);
-            if (!is_null($id)) {
+            if (!empty($id)) {
                 $objDTO->setDblId(array($id), InfraDTO::$OPER_NOT_IN);
             }
             $objDTO->setNumMaxRegistrosRetorno(1);
@@ -60,7 +61,7 @@ try {
             $objDTO = $objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO);
             if ($objDTO > 0) {
                 $objPaginaSEI->adicionarMensagem(
-                    'Cadastro de relacionamento entre Órgãos ja existe.', InfraPagina::$TIPO_MSG_ERRO
+                    'Cadastro de relacionamento entre órgãos já existente', InfraPagina::$TIPO_MSG_ERRO
                 );
                 header('Location: '
                     . $objSessaoSEI->assinarLink(
@@ -105,9 +106,9 @@ try {
                 if ($_GET['acao'] == 'pen_map_restricao_envio_comp_digitais_visualizar') {
                     $nomeTitle = 'Visualizar';
                 }
-                $strTitulo = $nomeTitle . ' Mapeamento de Restrição de Envio de Compnentes Digitais';
+                $strTitulo = $nomeTitle . ' Mapeamento de Restrição de Envio de Componentes Digitais';
             } else {
-                $strTitulo = 'Novo Mapeamento de Restrição de Envio de Compnentes Digitais';
+                $strTitulo = 'Novo Mapeamento de Restrição de Envio de Componentes Digitais';
             }
 
             //Monta os botões do topo
@@ -454,7 +455,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
     </div>
     
     <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-        <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Orgão :</label>
+        <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Órgão :</label>
         <div class="alinhamentoBotaoImput">
             <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly"
                 <?= $disabilitarVisualizar ?>

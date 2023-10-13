@@ -3,7 +3,7 @@
 /**
  * Testes de mapeamento de envio de componentes digitais
  */
-class MapEnvioCompDigitaisTest extends CenarioBaseTestCase
+class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -30,7 +30,9 @@ class MapEnvioCompDigitaisTest extends CenarioBaseTestCase
             self::$remetente['LOGIN'],
             self::$remetente['SENHA']
         );
+        
         $this->navegarPara('pen_map_restricao_envio_comp_digitais_listar');
+        sleep(10);
         $this->paginaCadastroMapEnvioCompDigitais->novoMap();
         $this->paginaCadastroMapEnvioCompDigitais->novo();
 

@@ -65,7 +65,7 @@ try {
     }
     //--------------------------------------------------------------------------
 
-    $strTitulo = 'Lista dos Mapeamentos de Restrição de Envio de Compnentes Digitais';
+    $strTitulo = 'Lista dos Mapeamentos de Restrição de Envio de Componentes Digitais';
 
     $strBotaoEspeciePadrao = "";
     if (SessaoSEI::getInstance()->verificarPermissao('pen_map_restricao_envio_comp_digitais_consultar')) {
@@ -80,11 +80,13 @@ try {
     }
 
     $arrComandos = array();
-    $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-    $arrComandos[] = $strBotaoEspeciePadrao;
-    $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    $btnExcluir = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+
+    $arrComandos = array($btnPesquisar, $strBotaoEspeciePadrao, $btnNovo, $btnExcluir, $btnImprimir);
+    $arrComandosFinal = array($btnNovo, $btnExcluir, $btnImprimir);
 
     $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
     $objPenRestricaoEnvioComponentesDigitaisDTO->retTodos(true);
@@ -121,8 +123,10 @@ try {
             . '</caption>';
         $strResultado .= '<tr>';
         $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
-        $strResultado .= '<th class="infraTh" width="35%">Id da Unidade</th>' . "\n";
-        $strResultado .= '<th class="infraTh" width="35%">Nome da Unidade</th>' . "\n";
+        $strResultado .= '<th class="infraTh" width="18%">ID do Repositório</th>' . "\n";
+        $strResultado .= '<th class="infraTh" width="18%">Nome do Repositório</th>' . "\n";
+        $strResultado .= '<th class="infraTh" width="18%">ID da Unidade</th>' . "\n";
+        $strResultado .= '<th class="infraTh" width="18%">Nome da Unidade</th>' . "\n";
         $strResultado .= '<th class="infraTh" width="14%">Ações</th>' . "\n";
         $strResultado .= '</tr>' . "\n";
         $strCssTr = '';
@@ -139,11 +143,18 @@ try {
                     $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId(),
                     ''
                 ) . '</td>';
+
+            $strResultado .= '<td style="text-align: center;">'
+                . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura()
+                . '</td>';
+            $strResultado .= '<td style="text-align: center;">'
+                . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrEstrutura()
+                . '</td>';
+
             $strResultado .= '<td style="text-align: center;">'
                 . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadeRh()
                 . '</td>';
             $strResultado .= '<td style="text-align: center;">'
-                . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrEstrutura() . ' - '
                 . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadeRh()
                 . '</td>';
             $strResultado .= '<td align="center">';
@@ -335,14 +346,12 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 
     <?php $objPaginaSEI->fecharAreaDados(); ?>
 
-    <?php if ($numRegistros > 0) : ?>
+    <?php if ($numRegistros > 0) { ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
-    <?php else : ?>
-        <div style="clear:both"></div>
-        <p>Nenhum estado foi encontrado para este procedimento</p>
-    <?php endif; ?>
+    <?php } ?>
     
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?= $bolErrosValidacao ?>" />
+    <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandosFinal); ?>
 </form>
 <?php $objPaginaSEI->fecharBody(); ?>
 <?php $objPaginaSEI->fecharHtml(); ?>
