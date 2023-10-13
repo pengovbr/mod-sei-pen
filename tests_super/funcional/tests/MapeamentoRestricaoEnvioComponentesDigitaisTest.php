@@ -32,7 +32,6 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
         );
         
         $this->navegarPara('pen_map_restricao_envio_comp_digitais_listar');
-        sleep(10);
         $this->paginaCadastroMapEnvioCompDigitais->novoMap();
         $this->paginaCadastroMapEnvioCompDigitais->novo();
 
