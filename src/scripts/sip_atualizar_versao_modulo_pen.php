@@ -1854,9 +1854,7 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
       $numIdRecurso = $this->criarRecurso('pen_map_restricao_envio_comp_digitais_listar', 'Listar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
-      // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
-      // Mapeamentos de Restrição de Envio de Componentes Digitais
-      $numIdItemMenu = $this->criarMenu('Restrição de Envio Componentes Digitais', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+      $this->criarMenu('Restrição de Envio Componentes Digitais', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
 
       $this->criarRecurso('pen_map_restricao_envio_comp_digitais_salvar', 'Salvar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
       $this->criarRecurso('pen_map_restricao_envio_comp_digitais_excluir', 'Excluir Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
@@ -1867,6 +1865,11 @@ class PenAtualizarSipRN extends InfraRN
       $numIdSistemaSei = $this->getNumIdSistema('SEI');
       $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_listar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_salvar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_cadastrar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_atualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_visualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_map_restricao_envio_comp_digitais_excluir');
       
       // Nova versão
       $this->atualizarNumeroVersao("3.3.3");
