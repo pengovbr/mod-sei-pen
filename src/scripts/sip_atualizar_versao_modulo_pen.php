@@ -1853,8 +1853,10 @@ class PenAtualizarSipRN extends InfraRN
       // Adicionar submenu
       $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
+      $numIdItemMenu = $this->criarMenu('Mapeamento de Envio Parcial', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
       $numIdRecurso = $this->criarRecurso('pen_map_restricao_envio_comp_digitais_listar', 'Listar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
-      $this->criarMenu('Restrição de Envio Componentes Digitais', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+      $this->criarMenu('Restrição de Envio de Componentes Digitais', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
 
       $this->criarRecurso('pen_map_restricao_envio_comp_digitais_salvar', 'Salvar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
       $this->criarRecurso('pen_map_restricao_envio_comp_digitais_excluir', 'Excluir Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);

@@ -357,7 +357,7 @@ $objPaginaSEI->montarJavaScript();
         });
         document.getElementById('selRepositorioEstruturas').focus();
         <?php if ($_GET['acao'] == 'pen_map_restricao_envio_comp_digitais_cadastrar') { ?>
-            selecionarRepositorio();
+            iniciarRepositorio();
         <?php } ?>
     }
 
@@ -370,7 +370,7 @@ $objPaginaSEI->montarJavaScript();
         });
     });
 
-    function selecionarRepositorio() {
+    function iniciarRepositorio() {
         var txtUnidade = $('#txtUnidade');
         var selRepositorioEstruturas = $('#selRepositorioEstruturas');
 
@@ -381,6 +381,24 @@ $objPaginaSEI->montarJavaScript();
                 $('#hdnIdUnidade').val('');
                 txtUnidade.val('');
             <?php } ?>
+
+            if (!txtUnidadeEnabled) {
+                txtUnidade.addClass('infraReadOnly');
+            } else {
+                txtUnidade.removeClass('infraReadOnly');
+                $('#txtRepositorioEstruturas').val($("#selRepositorioEstruturas option:selected").text());
+            }
+        <?php } ?>
+    }
+    function selecionarRepositorio() {
+        var txtUnidade = $('#txtUnidade');
+        var selRepositorioEstruturas = $('#selRepositorioEstruturas');
+
+        <?php if ($_GET['acao'] != 'pen_map_restricao_envio_comp_digitais_visualizar') { ?>
+            var txtUnidadeEnabled = selRepositorioEstruturas.val() > 0;
+            txtUnidade.prop('disabled', !txtUnidadeEnabled);
+            $('#hdnIdUnidade').val('');
+            txtUnidade.val('');
 
             if (!txtUnidadeEnabled) {
                 txtUnidade.addClass('infraReadOnly');

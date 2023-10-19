@@ -24,9 +24,8 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      */
     public function novo()
     {
-        var_dump(2);
         $this->selectRepositorio('RE CGPRO');
-        $this->selectUnidade('Fabrica-org2');
+        $this->selectUnidade('Fabrica-org1');
         $this->salvar();
     }
 
