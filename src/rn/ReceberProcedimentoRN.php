@@ -258,6 +258,7 @@ class ReceberProcedimentoRN extends InfraRN
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
+        $nrTamanhMegaByte = $nrTamanhoBytesArquivo / (1024 * 1024);
         $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
 
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
@@ -270,6 +271,32 @@ class ReceberProcedimentoRN extends InfraRN
             $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
           );
+
+          // Obtenha a extensão do nome do arquivo
+          $nomeArquivo = $objAnexoDTO->getStrNome();
+          $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
+          $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
+
+          $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
+          $objArquivoExtensaoDTO->retStrExtensao();
+          $objArquivoExtensaoDTO->retNumTamanhoMaximo();
+          $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
+          $objArquivoExtensaoDTO->setNumTamanhoMaximo(null,InfraDTO::$OPER_DIFERENTE);
+          $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
+    
+          $objArquivoExtensaoRN = new ArquivoExtensaoRN();
+          $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
+
+          // Verificar o tamanho máximo permitido
+          if ($objArquivoExtensaoDTO !== null) {
+              $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
+              if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
+                  $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
+                  $mensagemErro = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+                  throw new InfraException($mensagemErro);
+              }
+          }
+
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
