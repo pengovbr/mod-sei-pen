@@ -2326,7 +2326,7 @@ class ReceberProcedimentoRN extends InfraRN
             $arquivoExtensaoDTO->retStrExtensao();
 
           if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0) {
-                $strMensagem = "O processo/documento avulso foi recusado: O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.";
+                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.";
                 $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
                 throw new InfraException($strMensagem);
           }
