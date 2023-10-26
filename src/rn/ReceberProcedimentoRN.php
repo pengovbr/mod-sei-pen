@@ -1992,9 +1992,9 @@ class ReceberProcedimentoRN extends InfraRN
       $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
       if(!isset($objUnidadeDTO)){
-        $strMsg = "O processo/ documento avulso foi recusado: A Unidade \"%s\" não está configurada para receber "
-          . "processos/ documentos avulsos por meio da plataforma. "
-          . "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro";
+        $strMsg = "O processo/documento avulso foi recusado: A Unidade \"%s\" não está configurada para receber "
+          . "processos/documentos avulsos por meio da plataforma. "
+          . "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
         $objInfraException->adicionarValidacao(sprintf($strMsg, $objRepositorio->getStrNome()));
       }
 
