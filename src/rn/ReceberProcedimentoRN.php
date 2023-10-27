@@ -257,12 +257,7 @@ class ReceberProcedimentoRN extends InfraRN
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
-        $nrTamanhoBytesMaximo = $numParamTamMaxDocumentoMb * pow(1024, 2);
-
-        // Comparar tamanho do arquivo enviado com o tamanho maximo permitido na instancia destinataria
-        if ($nrTamanhoBytesArquivo > $nrTamanhoBytesMaximo) {
-          throw new InfraException("O processo/documento avulso foi recusado: O tamanho máximo geral permitido para documentos externos é {$numParamTamMaxDocumentoMb} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.");
-        }
+        $nrTamanhMegaByte = $nrTamanhoBytesArquivo / (1024 * 1024);
 
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
 
@@ -274,6 +269,41 @@ class ReceberProcedimentoRN extends InfraRN
             $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
           );
+
+          // Obtenha a extensão do nome do arquivo
+          $nomeArquivo = $objAnexoDTO->getStrNome();
+          $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
+          $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
+
+          $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
+          $objArquivoExtensaoDTO->retStrExtensao();
+          $objArquivoExtensaoDTO->retNumTamanhoMaximo();
+          $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
+          $objArquivoExtensaoDTO->setNumTamanhoMaximo(null,InfraDTO::$OPER_DIFERENTE);
+          $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
+
+          $objArquivoExtensaoRN = new ArquivoExtensaoRN();
+          $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
+
+          // Verificar o tamanho máximo permitido
+          if ($objArquivoExtensaoDTO != null) {
+            $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
+
+            if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
+              $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
+              $mensagemErro = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+              throw new InfraException($mensagemErro);
+            }
+          } else {
+            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+            $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+
+            if ($numTamDocExterno < $nrTamanhMegaByte) {
+              $mensagemErro = 'O tamanho máximo geral permitido para documentos externos é ' . $numTamDocExterno . 'Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+              throw new InfraException($mensagemErro);
+            }
+          }
+
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
