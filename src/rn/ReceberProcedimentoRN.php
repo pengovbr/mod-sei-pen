@@ -298,7 +298,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
             $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
 
-            if ($numTamDocExterno < $nrTamanhMegaByte) {
+            if (!empty($numTamDocExterno) && $numTamDocExterno < $nrTamanhMegaByte) {
               $mensagemErro = 'O tamanho máximo geral permitido para documentos externos é ' . $numTamDocExterno . 'Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
               throw new InfraException($mensagemErro);
             }
