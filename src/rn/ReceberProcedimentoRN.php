@@ -1863,28 +1863,47 @@ class ReceberProcedimentoRN extends InfraRN
      * @param array $parArrIdDocumentosCancelamento Lista de documentos que ser<E3>o cancelados
      * @return void
      */
-  private function cancelarDocumentosProcesso($parDblIdProcedimento, $parArrIdDocumentosCancelamento)
-    {
-    foreach($parArrIdDocumentosCancelamento as $numIdDocumento){
-        $objProtocoloDTO = new ProtocoloDTO();
-        $objProtocoloDTO->setDblIdProtocolo($numIdDocumento);
-        $objProtocoloDTO->retStrStaEstado();
-        $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+  private function cancelarDocumentosProcesso($parDblIdProcedimento, $parArrIdDocumentosCancelamento){
 
-        // Verifica se documento está atualmente associado ao processo e não foi movido para outro
-        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-        $objRelProtocoloProtocoloDTO->retNumSequencia();
-        $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parDblIdProcedimento);
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($numIdDocumento);
-        $bolDocumentoMovidoProcesso = $this->objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+    try{
+      $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
-      if(!$bolDocumentoMovidoProcesso && ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)){
-        $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
-        $objEntradaCancelarDocumentoAPI->setIdDocumento($numIdDocumento);
-        $objEntradaCancelarDocumentoAPI->setMotivo('Documento retirado do processo pelo remetente');
-        $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+      foreach($parArrIdDocumentosCancelamento as $numIdDocumento){
+          $objProtocoloDTO = new ProtocoloDTO();
+          $objProtocoloDTO->setDblIdProtocolo($numIdDocumento);
+          $objProtocoloDTO->retStrStaEstado();
+          $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+          // Verifica se documento está atualmente associado ao processo e não foi movido para outro
+          $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+          $objRelProtocoloProtocoloDTO->retNumSequencia();
+          $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+          $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parDblIdProcedimento);
+          $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($numIdDocumento);
+          $bolDocumentoMovidoProcesso = $this->objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+
+        if(!$bolDocumentoMovidoProcesso && ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)){
+          $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+          $objEntradaCancelarDocumentoAPI->setIdDocumento($numIdDocumento);
+          $objEntradaCancelarDocumentoAPI->setMotivo('Documento retirado do processo pelo remetente');
+
+          $objDocumentoDTO = new DocumentoDTO();
+          $objDocumentoDTO->retNumIdUnidadeGeradoraProtocolo();
+          $objDocumentoDTO->setDblIdDocumento($numIdDocumento);
+          $objDocumentoRN = new DocumentoRN();
+          $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo());
+
+          $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+        }
       }
+    } catch(Exception $e) {
+      $mensagemErro = InfraException::inspecionar($e);
+      $this->gravarLogDebug($mensagemErro);
+      LogSEI::getInstance()->gravar($mensagemErro);
+      throw $e;
+    }finally{
+      SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeAtual);
     }
   }
 
