@@ -64,7 +64,7 @@ try {
 
             $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
 
-            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_retorno'].'&acao_origem='.$_GET['acao_origem']));
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao_retorno']).'&acao_origem='.htmlspecialchars($_GET['acao_origem'])));
             exit(0);
         }
         else {
@@ -183,13 +183,13 @@ try {
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrNomeUnidadeRH().'</td>';
         $strResultado .= '<td align="center">';
 
-        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
+        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.htmlspecialchars($_GET['acao']).'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
       if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
-        $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+        $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao']).'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
 
       if($objSessao->verificarPermissao('pen_map_unidade_excluir')) {
-          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem'])].'&acao_retorno='.htmlspecialchars($_GET['acao']).'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
       }
 
         $strResultado .= '</td>';
@@ -244,7 +244,7 @@ function inicializar(){
 }
 
 function onClickBtnPesquisar(){
-  document.getElementById('frmAcompanharEstadoProcesso').action='<?php print $objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno']); ?>';
+  document.getElementById('frmAcompanharEstadoProcesso').action='<?php print $objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_retorno'])); ?>';
   document.getElementById('frmAcompanharEstadoProcesso').submit();
 }
 
@@ -272,7 +272,7 @@ function onCLickLinkDelete(url, link) {
 
 function onClickBtnNovo(){
 
-    window.location = '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+    window.location = '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_origem'])); ?>';
 }
 
 function onClickBtnAtivar(){
@@ -280,7 +280,7 @@ function onClickBtnAtivar(){
    try {
 
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_ativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -295,7 +295,7 @@ function onClickBtnDesativar(){
     try {
 
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -314,7 +314,7 @@ function onClickBtnExcluir(){
 
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
                 var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+                form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
                 form.submit();
             }
         }
@@ -341,10 +341,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('5em'); ?>
 
         <label for="txtSiglaUnidade" id="lblSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset($_POST['txtSiglaUnidade']) ? $_POST['txtSiglaUnidade'] : ''); ?>">
+        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset(htmlspecialchars($_POST['sigla'])) ? htmlspecialchars($_POST['sigla']) : ''); ?>">
 
         <label for="txtDescricaoUnidade" id="lblDescricaoUnidade" class="infraLabelOpcional">Descrição:</label>
-        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['txtDescricaoUnidade']) ? $_POST['txtDescricaoUnidade'] : ''); ?>">
+        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset(htmlspecialchars($_POST['descricao'])) ? htmlspecialchars($_POST['descricao']) : ''); ?>">
 
     <?php $objPagina->fecharAreaDados(); ?>
 

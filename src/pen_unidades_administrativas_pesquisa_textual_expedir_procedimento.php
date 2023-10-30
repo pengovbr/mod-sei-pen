@@ -339,7 +339,7 @@ try {
 ?>
     <div id="divInfraAreaTela" class="infraAreaTela">
         <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao" >Pesquisa textual de unidades externas</div> &nbsp;
-        <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_orgao='.$_GET['id_orgao'])?>">
+        <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_orgao='.htmlspecialchars($_GET['id_orgao']))?>">
             <input type="hidden" id="hdnIdUnidadeRaiz" name="hdnIdUnidadeRaiz" value="" />
             <?php
                 PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
