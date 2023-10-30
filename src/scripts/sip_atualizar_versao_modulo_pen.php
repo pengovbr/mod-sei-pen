@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.2");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -286,7 +286,9 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
-        
+        case '3.4.0':
+            $this->instalarV3040();
+
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1824,6 +1826,45 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3032()
   {
       $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  protected function instalarV3040()
+  {
+    /* Corrige nome de menu de trâmite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+    if (empty($objItemMenuDTO)) {
+      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+    }
+
+    // Adicionar submenu
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+    $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
+    $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+    $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
+
+    // Nova versão
+    $this->atualizarNumeroVersao("3.4.0");
   }
 }
 

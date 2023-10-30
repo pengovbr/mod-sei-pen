@@ -38,6 +38,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaCadastroOrgaoExterno = null;
 
     public function setUpPage(): void
     {
@@ -56,6 +57,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->currentWindow()->maximize();
     }
 
@@ -221,6 +223,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
+    }
+
+    protected function navegarPara($acao) 
+    {
+        $this->frame(null);
+        $acao = "acao={$acao}";
+        $xpath = "//a[contains(@href, '$acao')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)
