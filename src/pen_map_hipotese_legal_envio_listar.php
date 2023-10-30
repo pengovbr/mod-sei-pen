@@ -229,7 +229,7 @@ function inicializar(){
 }
 
 function onClickBtnPesquisar(){
-  document.getElementById('frmAcompanharEstadoProcesso').action='<?php print $objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno']); ?>';
+  document.getElementById('frmAcompanharEstadoProcesso').action='<?php print $objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_retorno'])); ?>';
   document.getElementById('frmAcompanharEstadoProcesso').submit();
 }
 
@@ -257,7 +257,7 @@ function onCLickLinkDelete(url, link) {
 
 function onClickBtnNovo(){
     
-    window.location = '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+    window.location = '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_origem'])); ?>';
 }
 
 function onClickBtnAtivar(){
@@ -265,7 +265,7 @@ function onClickBtnAtivar(){
    try {
         
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_ativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_ativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -280,7 +280,7 @@ function onClickBtnDesativar(){
     try {
         
         var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
         form.submit();
     }
     catch(e){
@@ -299,7 +299,7 @@ function onClickBtnExcluir(){
         
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
                 var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+                form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
                 form.submit();
             }
         }

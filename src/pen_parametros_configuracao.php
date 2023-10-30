@@ -144,7 +144,7 @@ $objPagina->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= $_GET['acao'] ?>'=='pen_parametros_configuracao_selecionar'){
+    if ('<?= htmlspecialchars($_GET['acao'])?>'=='pen_parametros_configuracao_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{
@@ -183,7 +183,7 @@ $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 
-<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'_salvar&acao_origem='.$_GET['acao'])?>">
+<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'_salvar&acao_origem='.htmlspecialchars($_GET['acao']))?>">
     <?
     $objPagina->montarBarraComandosSuperior($arrComandos);
     $objPagina->getInstance()->abrirAreaDados('30em');
