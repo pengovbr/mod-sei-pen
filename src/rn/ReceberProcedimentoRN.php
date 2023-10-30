@@ -95,7 +95,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-
+  
   protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
     try {
@@ -1460,7 +1460,8 @@ class ReceberProcedimentoRN extends InfraRN
 
       return $objUnidadeDTOEnvio;
   }
-
+  
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function atribuirDocumentos($parObjProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $parObjMetadadosProcedimento, $parStrNumeroRegistro, $parDblIdProcedimentoAnexado = null)
     {
     if(!isset($parObjProtocolo)) {

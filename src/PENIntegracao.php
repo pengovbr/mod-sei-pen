@@ -575,6 +575,7 @@ class PENIntegracao extends SeiIntegracao
     return $str;
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function processarControlador($strAcao)
   {
     //Configuração de páginas do contexto da Árvore do processo para apresentação de erro de forma correta
@@ -608,27 +609,27 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
           break;
 
-      case 'pen_map_tipo_documento_envio_listar';
-      case 'pen_map_tipo_documento_envio_excluir';
-      case 'pen_map_tipo_documento_envio_desativar';
+      case 'pen_map_tipo_documento_envio_listar':
+      case 'pen_map_tipo_documento_envio_excluir':
+      case 'pen_map_tipo_documento_envio_desativar':
       case 'pen_map_tipo_documento_envio_ativar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_envio_cadastrar';
+      case 'pen_map_tipo_documento_envio_cadastrar':
       case 'pen_map_tipo_documento_envio_visualizar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_recebimento_listar';
+      case 'pen_map_tipo_documento_recebimento_listar':
       case 'pen_map_tipo_documento_recebimento_excluir':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_recebimento_cadastrar';
+      case 'pen_map_tipo_documento_recebimento_cadastrar':
       case 'pen_map_tipo_documento_recebimento_visualizar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
-        break;
+          break;
 
       case 'pen_apensados_selecionar_expedir_procedimento':
         require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
@@ -648,56 +649,56 @@ class PENIntegracao extends SeiIntegracao
           break;
 
         // Mapeamento de Hipóteses Legais de Envio
-      case 'pen_map_hipotese_legal_envio_cadastrar';
+      case 'pen_map_hipotese_legal_envio_cadastrar':
       case 'pen_map_hipotese_legal_envio_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_envio_listar';
+      case 'pen_map_hipotese_legal_envio_listar':
       case 'pen_map_hipotese_legal_envio_excluir':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
-        break;
+          break;
 
         // Mapeamento de Hipóteses Legais de Recebimento
-      case 'pen_map_hipotese_legal_recebimento_cadastrar';
+      case 'pen_map_hipotese_legal_recebimento_cadastrar':
       case 'pen_map_hipotese_legal_recebimento_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_recebimento_listar';
+      case 'pen_map_hipotese_legal_recebimento_listar':
       case 'pen_map_hipotese_legal_recebimento_excluir':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_listar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_padrao_cadastrar';
+      case 'pen_map_hipotese_legal_padrao_cadastrar':
       case 'pen_map_hipotese_legal_padrao_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_unidade_cadastrar';
+      case 'pen_map_unidade_cadastrar':
       case 'pen_map_unidade_visualizar':
         require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_unidade_listar';
+      case 'pen_map_unidade_listar':
       case 'pen_map_unidade_excluir':
         require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
-        break;
+          break;
 
-      case 'pen_parametros_configuracao';
+      case 'pen_parametros_configuracao':
       case 'pen_parametros_configuracao_salvar':
         require_once dirname(__FILE__) . '/pen_parametros_configuracao.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_envio_padrao_atribuir';
+      case 'pen_map_tipo_documento_envio_padrao_atribuir':
       case 'pen_map_tipo_documento_envio_padrao_consultar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_padrao.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_doc_recebimento_padrao_atribuir';
+      case 'pen_map_tipo_doc_recebimento_padrao_atribuir':
       case 'pen_map_tipo_doc_recebimento_padrao_consultar':
         require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebimento_padrao.php';
-        break;
+          break;
 
       case 'pen_envio_processo_lote_cadastrar':
         require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';

@@ -739,7 +739,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
     }
 
-    public static function receberRecusaProcedimento($motivo, $unidade_destino, $numUnidadeDestino = null, $idProtocolo)
+    public static function receberRecusaProcedimento($motivo, $unidade_destino, $idProtocolo, $numUnidadeDestino = null)
     {
       try{
           //Muda o status do protocolo para "Normal"
@@ -1283,7 +1283,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         return (count($arrObjComponenteDigitalDTO) > 0) ? $arrObjComponenteDigitalDTO[0] : null;
     }
 
-
+    // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
     private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO, $paramStrStaAssociacao, $bolMultiplosComponentes = false, $numOrdemComponenteDigital = 1)
     {
       if(!isset($objDocumentoDTO)){
