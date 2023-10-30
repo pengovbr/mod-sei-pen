@@ -480,9 +480,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null){
-        if(!isset($objExpedirProcedimentoDTO)){
-            throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
-        }
+      if(!isset($objExpedirProcedimentoDTO)){
+          throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
+      }
 
         // Atenção: Comportamento desativado até que seja tratado o recebimento de um processo recebendo um novo documento
         // com mesmo arquivo/hash de outro documento já existente no processo
