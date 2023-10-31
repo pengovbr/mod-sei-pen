@@ -36,12 +36,13 @@ class VersaoSip4RN extends InfraScriptVersao
 
       return $objInfraParametroDTO->getStrNome();
   }
-
+  
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   public function versao_0_0_0($strVersaoAtual)
     {
   }
 
-  function atualizarVersaoCompatibilidade($strVersaoAtual)
+  public function atualizarVersaoCompatibilidade($strVersaoAtual)
     {
       $objAtualizarRN = new PenAtualizarSipRN();
       $objAtualizarRN->atualizarVersao();
@@ -84,6 +85,7 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar($strTitulo);
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function atualizarVersaoConectado()
     {
     try {
@@ -113,10 +115,9 @@ class PenAtualizarSipRN extends InfraRN
         // Aplicação de scripts de atualização de forma incremental
         // Ausência de [break;] proposital para realizar a atualização incremental de versões
         $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-
+      // phpcs:disable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
       switch ($strVersaoModuloPen) {
-              //case '' - Nenhuma versão instalada
-        case '':
+        case '': //case '' - Nenhuma versão instalada
         case '0.0.0':
             $this->instalarV100();
         case '1.0.0':
@@ -136,7 +137,7 @@ class PenAtualizarSipRN extends InfraRN
         case '1.1.5': //Não houve atualização no banco de dados
         case '1.1.6': //Não houve atualização no banco de dados
         case '1.1.7': //Não houve atualização no banco de dados
-        case '1.1.8':
+        case '1.1.8': 
             $this->instalarV119();
         case '1.1.9':
             $this->instalarV1110();
@@ -186,11 +187,11 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV1502();
         case '1.5.2':
             $this->instalarV1503();
-        case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.6'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.7':
+        case '1.5.3': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.4': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.5': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.6': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.7': 
             $this->instalarV2000_beta1();
         case '2.0.0-beta1':
             $this->instalarV2000_beta2();
@@ -294,6 +295,7 @@ class PenAtualizarSipRN extends InfraRN
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
       }
+      // phpcs:enable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
 
 
         $this->finalizar('FIM');
@@ -1405,6 +1407,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   private function instalarV2000_beta1()
     {
       // Criar novos recursos de configuração de espécie documental padrão para envio de processos
@@ -1500,6 +1503,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta2()
     {
       $this->atualizarNumeroVersao("2.0.0-beta2");
@@ -1509,6 +1513,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta3()
     {
       $this->atualizarNumeroVersao("2.0.0-beta3");
@@ -1517,6 +1522,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta4()
     {
       $this->atualizarNumeroVersao("2.0.0-beta4");
@@ -1525,6 +1531,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta5
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta5()
     {
       $this->atualizarNumeroVersao("2.0.0-beta5");
