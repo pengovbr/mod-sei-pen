@@ -161,10 +161,10 @@ class PenParametroRN extends InfraRN {
         $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
         $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
 
-        if (empty($arrObjTipoProcedimentoAssunto)) {
-            $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
-            $objInfraException->adicionarValidacao($strMensagemErro);
-        }
+      if (empty($arrObjTipoProcedimentoAssunto)) {
+          $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
+          $objInfraException->adicionarValidacao($strMensagemErro);
+      }
     }
   }
 
@@ -181,11 +181,11 @@ class PenParametroRN extends InfraRN {
         $objUnidadeBD = new UnidadeBD($this->inicializarObjInfraIBanco());
         $objUnidadeDTO = $objUnidadeBD->consultar($objUnidadeDTO);
 
-        if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
-            $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
-            $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
-            $objInfraException->adicionarValidacao($strMensagemErro);
-        }
+      if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
+          $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
+          $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
+          $objInfraException->adicionarValidacao($strMensagemErro);
+      }
     }
   }
 

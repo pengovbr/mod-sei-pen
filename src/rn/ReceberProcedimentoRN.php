@@ -95,7 +95,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-
+  
   protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
     try {
@@ -1460,7 +1460,8 @@ class ReceberProcedimentoRN extends InfraRN
 
       return $objUnidadeDTOEnvio;
   }
-
+  
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function atribuirDocumentos($parObjProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $parObjMetadadosProcedimento, $parStrNumeroRegistro, $parDblIdProcedimentoAnexado = null)
     {
     if(!isset($parObjProtocolo)) {
@@ -1777,17 +1778,17 @@ class ReceberProcedimentoRN extends InfraRN
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
         $bolComponenteDigitalExistente = array_key_exists($strHashComponenteDigital, $arrDocumentosExistentesPorHash);
-        if(!$bolComponenteDigitalBaixado && $bolComponenteDigitalExistente){
-            $arrDocumentoExistente = $arrDocumentosExistentesPorHash[$strHashComponenteDigital];
-            $arr = $this->clonarComponentesJaExistentesNoProcesso(
-                $objDocumentoDTO,
-                $arrDocumentoExistente["IdDocumento"],
-                $arrDocumentoExistente["ComponenteDigitalDTO"],
-                $arrDocumentoExistente["MultiplosComponentes"]
-            );
+      if(!$bolComponenteDigitalBaixado && $bolComponenteDigitalExistente){
+          $arrDocumentoExistente = $arrDocumentosExistentesPorHash[$strHashComponenteDigital];
+          $arr = $this->clonarComponentesJaExistentesNoProcesso(
+              $objDocumentoDTO,
+              $arrDocumentoExistente["IdDocumento"],
+              $arrDocumentoExistente["ComponenteDigitalDTO"],
+              $arrDocumentoExistente["MultiplosComponentes"]
+          );
 
-            $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
-        }
+          $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
+      }
     }
     $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
   }
@@ -1805,24 +1806,24 @@ class ReceberProcedimentoRN extends InfraRN
     $objAnexoRN = new AnexoRN();
     $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
     if(!empty($arrObjAnexoDTO)){
-        foreach($arrObjAnexoDTO as $objAnexoDTO){
-            $strSinDuplicado = 'S';
-            $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-            if($bolMultiplosComponentes){
-                $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
-                list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
-                $strCaminhoAnexo = $strCaminhoAnexoTemporario;
-                $strSinDuplicado = 'N';
-            }
-
-            $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
-            $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
-            copy($strCaminhoAnexo, $strNomeUploadCompleto);
-            $objAnexoDTO->setNumIdAnexo($strNomeUpload);
-            $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
-            $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
-            $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
+      foreach($arrObjAnexoDTO as $objAnexoDTO){
+          $strSinDuplicado = 'S';
+          $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+        if($bolMultiplosComponentes){
+            $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
+            list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
+            $strCaminhoAnexo = $strCaminhoAnexoTemporario;
+            $strSinDuplicado = 'N';
         }
+
+          $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
+          $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
+          copy($strCaminhoAnexo, $strNomeUploadCompleto);
+          $objAnexoDTO->setNumIdAnexo($strNomeUpload);
+          $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+          $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
+          $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
+      }
     }
 
     return $arrObjAnexoDTO;

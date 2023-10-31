@@ -480,9 +480,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     private function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null){
-        if(!isset($objExpedirProcedimentoDTO)){
-            throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
-        }
+      if(!isset($objExpedirProcedimentoDTO)){
+          throw new InfraException('Parâmetro $objExpedirProcedimentoDTO não informado.');
+      }
 
         // Atenção: Comportamento desativado até que seja tratado o recebimento de um processo recebendo um novo documento
         // com mesmo arquivo/hash de outro documento já existente no processo
@@ -739,7 +739,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
     }
 
-    public static function receberRecusaProcedimento($motivo, $unidade_destino, $numUnidadeDestino = null, $idProtocolo)
+    public static function receberRecusaProcedimento($motivo, $unidade_destino, $idProtocolo, $numUnidadeDestino = null)
     {
       try{
           //Muda o status do protocolo para "Normal"
@@ -1283,7 +1283,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         return (count($arrObjComponenteDigitalDTO) > 0) ? $arrObjComponenteDigitalDTO[0] : null;
     }
 
-
+    // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
     private function obterDadosArquivo(DocumentoDTO $objDocumentoDTO, $paramStrStaAssociacao, $bolMultiplosComponentes = false, $numOrdemComponenteDigital = 1)
     {
       if(!isset($objDocumentoDTO)){
