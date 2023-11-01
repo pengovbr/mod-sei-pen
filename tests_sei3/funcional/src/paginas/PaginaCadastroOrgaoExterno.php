@@ -15,25 +15,22 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     }
 
     /**
-     * Criar novo mapeamento de orgãos externos
-     * Chama seleção de repositorios
-     * Chama seleção de unidade
-     * Chama botão salvar
+     * Setar parametro para novo mapeamento de orgãos externos
      * 
      * @return void
      */
-    public function novo()
+    public function setarParametros($estrutura, $origem, $destino)
     {
-        $this->selectRepositorio('RE CGPRO', 'Origem');
-        $this->selectUnidade('Fabrica-org2', 'Origem'); // Seleciona Orgão de Origem
-        $this->selectUnidadeDestino('TESTE', 'Destino'); // Seleciona Orgão de Destino
-        $this->salvar();
+        $this->selectRepositorio($estrutura, 'Origem');
+        $this->selectUnidade($origem, 'Origem'); // Seleciona Orgão de Origem
+        $this->selectUnidadeDestino($destino, 'Destino'); // Seleciona Orgão de Destino
     }
 
     /**
      * Seleciona repositório por sigla
      * 
      * @param string $siglaRepositorio
+     * @param string $origemDestino
      * @return string
      */
     private function selectRepositorio($siglaRepositorio, $origemDestino)
@@ -51,12 +48,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * Seleciona unidade por nome
      * 
      * @param string $nomeUnidade
+     * @param string $origemDestino
      * @param ?string  $hierarquia
      * @return string
      */
     private function selectUnidade($nomeUnidade, $origemDestino, $hierarquia = null)
     {
         $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
+        $this->unidadeInput->clear();
         $this->unidadeInput->value($nomeUnidade);
         $this->test->keys(Keys::ENTER);
         $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
@@ -82,12 +81,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * Seleciona unidade por nome
      * 
      * @param string $nomeUnidade
-     * @param ?string  $hierarquia
+     * @param string $origemDestino
+     * @param ?string $hierarquia
      * @return string
      */
     private function selectUnidadeDestino($nomeUnidade, $origemDestino, $hierarquia = null)
     {
         $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
+        $this->unidadeInput->clear();
         $this->unidadeInput->value($nomeUnidade);
         $this->test->keys(Keys::ENTER);
         $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
@@ -110,7 +111,8 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     }
 
     /**
-     * Description 
+     * Seleciona botão novo da página
+     * 
      * @return void
      */
     public function novoMapOrgao()
@@ -119,11 +121,83 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     }
 
     /**
-     * Description 
+     * Seleciona botão editar da primeira linha de tabela
+     * 
      * @return void
      */
-    private function salvar()
+    public function editarMapOrgao()
+    {
+        $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
+    }
+
+    /**
+     * Selecionar primeira checkbox de exclusão
+     * Seleciona botão excluir
+     * Seleciona botão de confirmação
+     *  
+     * @return void
+     */
+    public function selecionarExcluirMapOrgao()
+    {
+        $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
+        $this->test->byId("btnExcluir")->click();
+        $this->test->acceptAlert();
+    }
+
+    /**
+     * Buscar mensagem de alerta da página
+     *
+     * @return string
+     */
+    public function buscarMensagemAlerta()
+    {
+        $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
+        return !empty($alerta->text()) ? $alerta->text() : "";
+    }
+
+    /**
+     * Selcionar botão salvar da página
+     * 
+     * @return void
+     */
+    public function salvar()
     {
         $this->test->byId("btnSalvar")->click();
+    }
+
+    /**
+     * Buscar orgão de origem por nome
+     *
+     * @param string $origem
+     * @return string|null
+     */
+    public function buscarOrgaoOrigem($origem)
+    {
+        try {
+            $orgaoOrigem = $this->test->byXPath("//td[contains(.,'" . $origem . "')]")->text();
+            return !empty($orgaoOrigem) && !is_null($orgaoOrigem) ?
+                $orgaoOrigem : 
+                null;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Buscar orgão de destino por nome
+     *
+     * @param string $origem
+     * @return string|null
+     */
+    public function buscarOrgaoDestino($destino)
+    {
+        try {
+            $orgaoDestino = $this->test->byXPath("//td[contains(.,'" . $destino . "')]")->text();
+            return !empty($orgaoDestino) && !is_null($orgaoDestino) ?
+                $orgaoDestino : 
+                null;
+        } catch (Exception $ex) {
+            return null;
+        }
     }
 }

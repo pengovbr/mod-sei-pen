@@ -1865,12 +1865,20 @@ class PenAtualizarSipRN extends InfraRN
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
     $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
-
+    
     $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
+
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_salvar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_atualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_visualizar');
     
     // Nova versão
     $this->atualizarNumeroVersao("3.3.4");

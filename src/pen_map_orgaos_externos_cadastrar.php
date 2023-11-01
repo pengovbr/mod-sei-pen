@@ -31,8 +31,8 @@ try {
     $objUnidadeDTO->retNumIdUnidadeRH();
     $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-    $objUnidadeRN = new UnidadeRN();
-    $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+    $objUnidadeRN = new PenUnidadeRN();
+    $objUnidadeDTO = $objUnidadeRN->consultar($objUnidadeDTO);
 
     if (!$objUnidadeDTO) {
         $objPaginaSEI->adicionarMensagem('A unidade atual não foi mapeada.', InfraPagina::$TIPO_MSG_ERRO);
@@ -147,12 +147,12 @@ try {
             if (!is_null($id)) {
                 $objPenOrgaoExternoDTO->setDblId($id);
                 $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-                $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
             } else {
                 $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
-                $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
             }
-            header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
             exit(0);
             break;
         case 'pen_map_orgaos_externos_visualizar':
