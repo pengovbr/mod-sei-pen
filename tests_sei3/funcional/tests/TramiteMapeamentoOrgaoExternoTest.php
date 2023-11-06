@@ -6,6 +6,7 @@
 class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
 {
     public static $remetente;
+    public static $remetenteB;
 
     /**
      * Teste para cadastro de mapeamento de orgão exteno
@@ -19,18 +20,16 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
-        $estrutura = 'RE CGPRO';
-        $origem = 'Fabrica-org2';
-        $destino = 'TESTE';
-
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
         $this->paginaCadastroOrgaoExterno->novoMapOrgao();
-        $this->paginaCadastroOrgaoExterno->setarParametros($estrutura, $origem, $destino);
+        $this->paginaCadastroOrgaoExterno->setarParametros(
+            self::$remetente['REP_ESTRUTURAS'], self::$remetente['NOME_UNIDADE_ESTRUTURA'], self::$remetente['SIGLA_UNIDADE']
+        );
         $this->paginaCadastroOrgaoExterno->salvar();
 
-        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem($origem);
-        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino($destino);
+        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
+        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino(self::$remetente['SIGLA_UNIDADE']);
 
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
@@ -54,14 +53,12 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
-        $estrutura = 'RE CGPRO';
-        $origem = 'Fabrica-org2';
-        $destino = 'TESTE';
-
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
         $this->paginaCadastroOrgaoExterno->novoMapOrgao();
-        $this->paginaCadastroOrgaoExterno->setarParametros($estrutura, $origem, $destino);
+        $this->paginaCadastroOrgaoExterno->setarParametros(
+            self::$remetente['REP_ESTRUTURAS'], self::$remetente['NOME_UNIDADE_ESTRUTURA'], self::$remetente['SIGLA_UNIDADE']
+        );
         $this->paginaCadastroOrgaoExterno->salvar();
 
         sleep(1);
@@ -83,20 +80,19 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
     {
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-
-        $estrutura = 'RE CGPRO';
-        $origem = 'Fabrica-org1';
-        $destino = 'TESTE';
+        self::$remetenteB = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
 
         $this->paginaCadastroOrgaoExterno->editarMapOrgao();
-        $this->paginaCadastroOrgaoExterno->setarParametros($estrutura, $origem, $destino);
+        $this->paginaCadastroOrgaoExterno->setarParametros(
+            self::$remetenteB['REP_ESTRUTURAS'], self::$remetenteB['NOME_UNIDADE_ESTRUTURA'], self::$remetenteB['SIGLA_UNIDADE']
+        );
         $this->paginaCadastroOrgaoExterno->salvar();
 
-        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem($origem);
-        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino($destino);
+        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem(self::$remetenteB['NOME_UNIDADE_ESTRUTURA']);
+        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino(self::$remetenteB['SIGLA_UNIDADE']);
 
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
