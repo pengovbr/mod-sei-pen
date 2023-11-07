@@ -26,14 +26,6 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         $this->selectUnidadeDestino($destino, 'Destino'); // Seleciona Orgão de Destino
     }
 
-    public function novoMapeamentoOrgaoExterno()
-    {
-        $this->selectRepositorio('RE CGPRO', 'Origem');
-        $this->selectUnidade('Fabrica-org2', 'Origem');
-        $this->selectUnidade('Teste', 'Destino');
-        $this->salvar();
-    }
-
     /**
      * Seleciona repositório por sigla
      * 
@@ -83,20 +75,6 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         }, PEN_WAIT_TIMEOUT);
 
         return $this->unidadeInput->value();
-    }
-
-    public function abrirSelecaoDeArquivoParaImportacao()
-    {
-        $this->test->byId('importarCsvButton')->click();
-        $fileChooser = $this->test->byId('importArquivoCsv');
-        $this->test->waitUntil(function ($testCase) use ($fileChooser) {
-            $fileChooser
-                ->sendKeys('/opt/sei/web/modulosmod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
-                ->keys(Keys::ENTER);
-        },PEN_WAIT_TIMEOUT);
-        $this->test->waitUntil(function($testCase) {
-            return true;
-        });
     }
 
     /**

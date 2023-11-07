@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.4.0");
+define("VERSAO_MODULO_PEN", "3.3.4");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -36,12 +36,13 @@ class VersaoSip4RN extends InfraScriptVersao
 
       return $objInfraParametroDTO->getStrNome();
   }
-
+  
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   public function versao_0_0_0($strVersaoAtual)
     {
   }
 
-  function atualizarVersaoCompatibilidade($strVersaoAtual)
+  public function atualizarVersaoCompatibilidade($strVersaoAtual)
     {
       $objAtualizarRN = new PenAtualizarSipRN();
       $objAtualizarRN->atualizarVersao();
@@ -84,6 +85,7 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar($strTitulo);
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function atualizarVersaoConectado()
     {
     try {
@@ -113,10 +115,9 @@ class PenAtualizarSipRN extends InfraRN
         // Aplicação de scripts de atualização de forma incremental
         // Ausência de [break;] proposital para realizar a atualização incremental de versões
         $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-
+      // phpcs:disable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
       switch ($strVersaoModuloPen) {
-              //case '' - Nenhuma versão instalada
-        case '':
+        case '': //case '' - Nenhuma versão instalada
         case '0.0.0':
             $this->instalarV100();
         case '1.0.0':
@@ -136,7 +137,7 @@ class PenAtualizarSipRN extends InfraRN
         case '1.1.5': //Não houve atualização no banco de dados
         case '1.1.6': //Não houve atualização no banco de dados
         case '1.1.7': //Não houve atualização no banco de dados
-        case '1.1.8':
+        case '1.1.8': 
             $this->instalarV119();
         case '1.1.9':
             $this->instalarV1110();
@@ -186,11 +187,11 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV1502();
         case '1.5.2':
             $this->instalarV1503();
-        case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.6'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.7':
+        case '1.5.3': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.4': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.5': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.6': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.7': 
             $this->instalarV2000_beta1();
         case '2.0.0-beta1':
             $this->instalarV2000_beta2();
@@ -285,15 +286,16 @@ class PenAtualizarSipRN extends InfraRN
         case '3.3.0':
             $this->instalarV3031();
         case '3.3.1':
-            $this->instalarV3032();
-        case '3.4.0':
-            $this->instalarV3040();
+          $this->instalarV3032();
+        case '3.3.2':
+          $this->instalarV3034();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
       }
+      // phpcs:enable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
 
 
         $this->finalizar('FIM');
@@ -1405,6 +1407,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   private function instalarV2000_beta1()
     {
       // Criar novos recursos de configuração de espécie documental padrão para envio de processos
@@ -1500,6 +1503,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta2()
     {
       $this->atualizarNumeroVersao("2.0.0-beta2");
@@ -1509,6 +1513,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta3()
     {
       $this->atualizarNumeroVersao("2.0.0-beta3");
@@ -1517,6 +1522,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta4()
     {
       $this->atualizarNumeroVersao("2.0.0-beta4");
@@ -1525,6 +1531,7 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta5
      */
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta5()
     {
       $this->atualizarNumeroVersao("2.0.0-beta5");
@@ -1828,7 +1835,7 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("3.3.2");
   }
 
-  protected function instalarV3040()
+  protected function instalarV3034()
   {
     /* Corrige nome de menu de trâmite de documentos */
     $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
@@ -1858,13 +1865,23 @@ class PenAtualizarSipRN extends InfraRN
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
     $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
     $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
-
+    
     $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
 
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_salvar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_atualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_visualizar');
+    
     // Nova versão
-    $this->atualizarNumeroVersao("3.4.0");
+    $this->atualizarNumeroVersao("3.3.4");
   }
 }
 

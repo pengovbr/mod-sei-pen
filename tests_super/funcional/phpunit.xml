@@ -15,28 +15,31 @@
     <const name="PEN_ENDERECO_WEBSERVICE"
       value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/?wsdl" />
 
-    <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
+    <!-- Chaves de configuraÃ§Ãµes gerais do teste do Barramento de ServiÃ§os do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
     <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800000" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
 
-    <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de
-    Serviços do PEN -->
-    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
+    <!-- Chaves de configuraÃ§Ã£o dos diferentes ambientes envolvidos no teste do Barramento de
+    ServiÃ§os do PEN -->
+    <!-- CONFIGURAÃÃES DE TESTE ÃRGÃO 1 -->
     <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" />
     <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_A_UNIDADE_ESTRUTURAS" 
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
+    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
-      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
+      value="Fabrica-org2" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.1]" />
@@ -45,32 +48,34 @@
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
-    <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
+    <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO" value="ArrecadaÃ§Ã£o: CobranÃ§a" />
     <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO_SIGILOSO"
-      value="Acesso à Informação: Demanda do e-SIC" />
-    <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO" value="Ofício" />
+      value="Acesso Ã  InformaÃ§Ã£o: Demanda do e-SIC" />
+    <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO" value="OfÃ­cio" />
     <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO_SIGILOSO"
-      value="Acesso à Informação: Demanda do e-SIC" />
+      value="Acesso Ã  InformaÃ§Ã£o: Demanda do e-SIC" />
     <const name="CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO" value="Voto" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO"
-      value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
+      value="Documento PreparatÃ³rio (Art. 7Âº, Â§ 3Âº, da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_NAO_MAPEADO"
-      value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
+      value="InformaÃ§Ã£o Pessoal (Art. 31 da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_A_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_PADRAO"
-      value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+      value="Controle Interno (Art. 26, Â§ 3Âº, da Lei nÂº 10.180/2001)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_INATIVA"
-      value="Situação Econômico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nº 5.172/1966 - CTN)" />
+      value="SituaÃ§Ã£o EconÃ´mico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nÂº 5.172/1966 - CTN)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_SIGILOSO"
-      value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
+      value="Sigilo do InquÃ©rito Policial (Art. 20 do CÃ³digo de Processo Penal)" />
 
-    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
+    <!-- CONFIGURAÃÃES DE TESTE ÃRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_B_UNIDADE_ESTRUTURAS" 
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
@@ -83,27 +88,27 @@
     <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_SECUNDARIA" value="XXXXXXXXXXXXXX" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_B_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
+    <const name="CONTEXTO_ORGAO_B_TIPO_PROCESSO" value="ArrecadaÃ§Ã£o: CobranÃ§a" />
     <const name="CONTEXTO_ORGAO_B_TIPO_PROCESSO_SIGILOSO"
-      value="Acesso à Informação: Demanda do e-SIC" />
-    <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO" value="Ofício" />
+      value="Acesso Ã  InformaÃ§Ã£o: Demanda do e-SIC" />
+    <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO" value="OfÃ­cio" />
     <const name="CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO" value="Nota" />
     <const name="CONTEXTO_ORGAO_B_TIPO_PROCESSO_SIGILOSO"
-      value="Acesso à Informação: Demanda do e-SIC" />
+      value="Acesso Ã  InformaÃ§Ã£o: Demanda do e-SIC" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO"
-      value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
+      value="Documento PreparatÃ³rio (Art. 7Âº, Â§ 3Âº, da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_NAO_MAPEADO"
-      value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
+      value="InformaÃ§Ã£o Pessoal (Art. 31 da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_INATIVA"
-      value="Situação Econômico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nº 5.172/1966 - CTN)" />
+      value="SituaÃ§Ã£o EconÃ´mico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nÂº 5.172/1966 - CTN)" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_SIGILOSO"
-      value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
+      value="Sigilo do InquÃ©rito Policial (Art. 20 do CÃ³digo de Processo Penal)" />
     <const name="CONTEXTO_ORGAO_B_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO"
-      value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+      value="Controle Interno (Art. 26, Â§ 3Âº, da Lei nÂº 10.180/2001)" />
 
 
-    <!-- CONFIGURAÇÕES DE TESTE Órgão 3, caso de sem hierarquia pai -->
+    <!-- CONFIGURAÃÃES DE TESTE ÃrgÃ£o 3, caso de sem hierarquia pai -->
     <const name="CONTEXTO_ORGAO_C" value="CONTEXTO_ORGAO_C" />
     <const name="CONTEXTO_ORGAO_C_URL" value="http://xxxxx/sei" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_ORGAO" value="ABC" />
@@ -119,16 +124,16 @@
     <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
-    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
-    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO" value="Ofício" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO" value="ArrecadaÃ§Ã£o: CobranÃ§a" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO" value="OfÃ­cio" />
     <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO_NAO_MAPEADO" value="Nota" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO"
-      value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
+      value="Documento PreparatÃ³rio (Art. 7Âº, Â§ 3Âº, da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO"
-      value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
+      value="InformaÃ§Ã£o Pessoal (Art. 31 da Lei nÂº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO"
-      value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+      value="Controle Interno (Art. 26, Â§ 3Âº, da Lei nÂº 10.180/2001)" />
   </php>
 
   <testsuites>
