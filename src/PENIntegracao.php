@@ -680,7 +680,9 @@ class PENIntegracao extends SeiIntegracao
         break;
 
       case 'pen_map_orgaos_externos_salvar':
+      case 'pen_map_orgaos_externos_atualizar':
       case 'pen_map_orgaos_externos_cadastrar':
+      case 'pen_map_orgaos_externos_visualizar':
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
         break;
 
