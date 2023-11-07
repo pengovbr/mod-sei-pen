@@ -32,6 +32,7 @@ class Editor3011RN extends InfraRN
     return BancoSEI::getInstance();
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function montarSimplesConectado(EditorDTO $objEditorDTO)
   {
 
@@ -224,6 +225,7 @@ class Editor3011RN extends InfraRN
     return $arrRetorno;
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function montarControlado(EditorDTO $parObjEditorDTO)
   {
     try {
@@ -539,6 +541,7 @@ class Editor3011RN extends InfraRN
     return str_replace(array('<o:p>', '</o:p>'), '', $strConteudo);
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function gerarVersaoInicialControlado(EditorDTO $parObjEditorDTO)
   {
     try {
@@ -915,6 +918,7 @@ class Editor3011RN extends InfraRN
     }
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function adicionarVersaoControlado(EditorDTO $parObjEditorDTO)
   {
     try {
@@ -1574,6 +1578,7 @@ class Editor3011RN extends InfraRN
     return $html;
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function consultarHtmlVersaoConectado($dados)
   {
     $parObjEditorDTO=$dados["parObjEditorDTO"];
@@ -2055,6 +2060,8 @@ class Editor3011RN extends InfraRN
     }, $strConteudo);
     return $strConteudo;
   }
+
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function obterParametros(EditorDTO $parObjEditorDTO, $parStrTag){
 
     global $SEI_MODULOS;
@@ -2958,6 +2965,7 @@ class Editor3011RN extends InfraRN
 
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function montarTagsContato(ContatoDTO $objContatoDTO, $strTipo){
 
     if ($objContatoDTO->getStrStaGenero()==ContatoRN::$TG_MASCULINO){
