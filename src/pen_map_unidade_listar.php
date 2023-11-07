@@ -176,7 +176,7 @@ try {
       }
 
       if($objSessao->verificarPermissao('pen_map_unidade_excluir')) {
-          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem'])].'&acao_retorno='.htmlspecialchars($_GET['acao']).'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao']).'&hdnInfraItensSelecionados='.$objPenUnidadeDTO->getNumIdUnidade()).'\', this)"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif") . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
       }
 
         $strResultado .= '</td>';
@@ -320,10 +320,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('5em'); ?>
 
         <label for="txtSiglaUnidade" id="lblSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset(htmlspecialchars($_POST['sigla'])) ? htmlspecialchars($_POST['sigla']) : ''); ?>">
+        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['sigla'])) ? htmlspecialchars($_POST['sigla']) : ''); ?>">
 
         <label for="txtDescricaoUnidade" id="lblDescricaoUnidade" class="infraLabelOpcional">Descrição:</label>
-        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset(htmlspecialchars($_POST['descricao'])) ? htmlspecialchars($_POST['descricao']) : ''); ?>">
+        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['descricao'])) ? htmlspecialchars($_POST['descricao']) : ''); ?>">
 
     <?php $objPagina->fecharAreaDados(); ?>
 
