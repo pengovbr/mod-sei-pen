@@ -487,24 +487,29 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bolPossuiDocumentoReferenciado = !is_null($dadosDocumento['ORDEM_DOCUMENTO_REFERENCIADO']);
         $this->assertTrue($this->paginaProcesso->deveSerDocumentoAnexo($bolPossuiDocumentoReferenciado, $nomeDocArvore));
 
-        $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
-        $this->paginaDocumento->navegarParaConsultarDocumento();
-        $mesmoOrgao = $dadosDocumento['ORIGEM'] == $destinatario['URL'];
-        if ($mesmoOrgao && $dadosDocumento['TIPO'] == 'G') {
-            $this->assertEquals($dadosDocumento["DESCRICAO"], $this->paginaDocumento->descricao());
-            if (!$mesmoOrgao) {
-                $observacoes = ($unidadeSecundaria) ? $this->paginaDocumento->observacoesNaTabela() : $this->paginaDocumento->observacoes();
-                $this->assertEquals($dadosDocumento['OBSERVACOES'], $observacoes);
-            }
-        } else {
-            $this->assertNotNull($this->paginaDocumento->nomeAnexo());
-            $contemVariosComponentes = is_array($dadosDocumento['ARQUIVO']);
-            if (!$contemVariosComponentes) {
-                $nomeArquivo = $dadosDocumento['ARQUIVO'];
-                $this->assertStringContainsString(basename($nomeArquivo), $this->paginaDocumento->nomeAnexo());
-                if ($hipoteseLegal != null) {
-                    $hipoteseLegalDocumento = $this->paginaDocumento->recuperarHipoteseLegal();
-                    $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
+        if (($this->paginaProcesso->ehDocumentoCancelado($nomeDocArvore) == false) and ($this->paginaProcesso->ehDocumentoMovido($nomeDocArvore) == false)) {
+
+            $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
+            $this->paginaDocumento->navegarParaConsultarDocumento();
+                        
+            $mesmoOrgao = $dadosDocumento['ORIGEM'] == $destinatario['URL'];
+
+            if ($mesmoOrgao && $dadosDocumento['TIPO'] == 'G') {
+                $this->assertEquals($dadosDocumento["DESCRICAO"], $this->paginaDocumento->descricao());
+                if (!$mesmoOrgao) {
+                    $observacoes = ($unidadeSecundaria) ? $this->paginaDocumento->observacoesNaTabela() : $this->paginaDocumento->observacoes();
+                    $this->assertEquals($dadosDocumento['OBSERVACOES'], $observacoes);
+                }
+            } else {
+                $this->assertNotNull($this->paginaDocumento->nomeAnexo());
+                $contemVariosComponentes = is_array($dadosDocumento['ARQUIVO']);
+                if (!$contemVariosComponentes) {
+                    $nomeArquivo = $dadosDocumento['ARQUIVO'];
+                    $this->assertStringContainsString(basename($nomeArquivo), $this->paginaDocumento->nomeAnexo());
+                    if ($hipoteseLegal != null) {
+                        $hipoteseLegalDocumento = $this->paginaDocumento->recuperarHipoteseLegal();
+                        $this->assertEquals($hipoteseLegal, $hipoteseLegalDocumento);
+                    }
                 }
             }
         }
