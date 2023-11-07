@@ -707,7 +707,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // Abrir protocolo na tela de controle de processos pelo texto da descrição
-        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloProcesso) {
+        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloTeste) {
             sleep(5);
             $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
             $this->assertNotFalse($strProtocoloTeste);
@@ -729,6 +729,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         for ($i = 0; $i < count($listaDocumentos); $i++) {
             $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
         }
+
+        return array(
+            "TIPO_PROCESSO" => $destinatario['TIPO_PROCESSO'],
+            "DESCRICAO" => $documentosTeste[0]['DESCRICAO'],
+            "OBSERVACOES" => null,
+            "INTERESSADOS" => $documentosTeste[0]['INTERESSADOS'],
+            "RESTRICAO" => $documentosTeste[0]['RESTRICAO'],
+            "ORIGEM" => $destinatario['URL'],
+            "PROTOCOLO" => $strProtocoloTeste
+        );
     }
 
     public function realizarValidacaoNAORecebimentoProcessoNoDestinatario($destinatario, $processoTeste)
