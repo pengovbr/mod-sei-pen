@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.4.1");
+define("VERSAO_MODULO_PEN", "3.3.4");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -68,7 +68,7 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objPenUnidadeRN = new PenUnidadeRN();
 
-        //Apresenta o botão de expedir processo
+      //Apresenta o botão de expedir processo
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
@@ -107,7 +107,7 @@ class PENIntegracao extends SeiIntegracao
     $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
     $bolFlagAberto = count($arrObjProcedimentoDTO) == 1;
 
-    //Verificação da Restrição de Acesso a Funcionalidade
+    //Verificação da Restrição de Acesso à Funcionalidade
     $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
@@ -183,17 +183,20 @@ class PENIntegracao extends SeiIntegracao
     $objProcedimentoDTO->setDblIdProcedimento($arrDblIdProcedimento, InfraDTO::$OPER_IN);
     $objProcedimentoDTO->retDblIdProcedimento();
     $objProcedimentoDTO->retStrStaEstadoProtocolo();
+
     $objProcedimentoBD = new ProcedimentoBD(BancoSEI::getInstance());
     $arrObjProcedimentoDTO = $objProcedimentoBD->listar($objProcedimentoDTO);
 
     if (!empty($arrObjProcedimentoDTO)) {
 
       foreach ($arrObjProcedimentoDTO as $objProcedimentoDTO) {
+
         $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
         $objPenProtocoloDTO = new PenProtocoloDTO();
         $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
         $objPenProtocoloDTO->retStrSinObteveRecusa();
         $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
         $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
@@ -578,7 +581,7 @@ class PENIntegracao extends SeiIntegracao
   // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function processarControlador($strAcao)
   {
-    //Configuração de páginas do contexto da Árvore do processo para apresentação de erro de forma correta
+    //Configuração de páginas do contexto da árvore do processo para apresentação de erro de forma correta
     $bolArvore = in_array($strAcao, array('pen_procedimento_estado'));
     PaginaSEI::getInstance()->setBolArvore($bolArvore);
 
@@ -687,6 +690,8 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
         break;
 
+      case 'pen_map_orgaos_externos_reativar':
+      case 'pen_map_orgaos_externos_desativar':  
       case 'pen_map_orgaos_externos_listar':
       case 'pen_map_orgaos_externos_excluir':
       case 'pen_importar_tipos_processos':
@@ -749,7 +754,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
       case 'pen_unidade_auto_completar_mapeados':
@@ -774,7 +779,7 @@ class PENIntegracao extends SeiIntegracao
           }
           $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
         } else {
-            return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
         break;
       case 'pen_apensados_auto_completar_expedir_procedimento':
@@ -902,7 +907,7 @@ class PENIntegracao extends SeiIntegracao
    * Verifica a compatibilidade e correta configuracao do módulo de Barramento, registrando mensagem de alerta no log do sistema
    *
    * Regras de verificação da disponibilidade do PEN não devem ser aplicadas neste ponto pelo risco de erro geral no sistema em
-   * caso de indisponibilidade momentãnea do Barramento de Serviços.
+   * caso de indisponibilidade momentânea do Barramento de Serviços.
    */
   public static function verificarCompatibilidadeConfiguracoes(){
     $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
@@ -919,8 +924,8 @@ class PENIntegracao extends SeiIntegracao
       LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
     }
 
-    // Desativado verificaÃ§Ãµes de compatibilidade do banco de dados por nÃ£o ser todas as versÃµes
-    // que necessitam mudanÃ§as no banco de dados
+    // Desativado verificações de compatibilidade do banco de dados por não ser todas as versões
+    // que necessitam mudanças no banco de dados
     // try {
     //     $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
     // } catch (\Exception $e) {
@@ -929,12 +934,12 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Compara duas diferentes versÃµes do sistem para avaliar a precedÃªncia de ambas
+   * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
    *
-   * Normaliza o formato de nÃºmero de versÃ£o considerando dois caracteres para cada item (3.0.15 -> 030015)
-   * - Se resultado for IGUAL a 0, versÃµes iguais
-   * - Se resultado for MAIOR que 0, versÃ£o 1 Ã© posterior a versÃ£o 2
-   * - Se resultado for MENOR que 0, versÃ£o 1 Ã© anterior a versÃ£o 2
+   * Normaliza o formato de número de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+   * - Se resultado for IGUAL a 0, versões iguais
+   * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
+   * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
    */
   public static function compararVersoes($strVersao1, $strVersao2){
     $numVersao1 = explode('.', $strVersao1);

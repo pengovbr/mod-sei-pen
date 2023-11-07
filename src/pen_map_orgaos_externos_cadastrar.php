@@ -31,8 +31,8 @@ try {
     $objUnidadeDTO->retNumIdUnidadeRH();
     $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-    $objUnidadeRN = new UnidadeRN();
-    $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+    $objUnidadeRN = new PenUnidadeRN();
+    $objUnidadeDTO = $objUnidadeRN->consultar($objUnidadeDTO);
 
     if (!$objUnidadeDTO) {
         $objPaginaSEI->adicionarMensagem('A unidade atual não foi mapeada.', InfraPagina::$TIPO_MSG_ERRO);
@@ -90,18 +90,18 @@ try {
     switch ($_GET['acao']) {
         case 'pen_map_orgaos_externos_salvar':
             $acao = !is_null($id) ? 'pen_map_orgaos_externos_atualizar' : 'pen_map_orgaos_externos_cadastrar';
-            if (is_null($_POST['selRepositorioEstruturasOrigem']) || is_null($_POST['txtRepositorioEstruturasOrigem'])) {
-                $objPaginaSEI->adicionarMensagem('selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
+            if (empty($_POST['selRepositorioEstruturasOrigem']) || empty($_POST['txtRepositorioEstruturasOrigem'])) {
+                $objPaginaSEI->adicionarMensagem('Selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
+                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
+                exit(0);
+            }
+            if (empty($_POST['hdnIdUnidadeOrigem']) || empty($_POST['txtUnidadeOrigem'])) {
+                $objPaginaSEI->adicionarMensagem('O Órgão Origem não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             } 
-            if (is_null($_POST['hdnIdUnidadeOrigem']) || is_null($_POST['txtUnidadeOrigem'])) {
-                $objPaginaSEI->adicionarMensagem('o orgão origem não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
-                header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
-                exit(0);
-            } 
-            if (is_null($_POST['hdnIdUnidadeDestino']) || is_null($_POST['txtUnidadeDestino'])) {
-                $objPaginaSEI->adicionarMensagem('o orgão destino não foi selecionado.', InfraPagina::$TIPO_MSG_AVISO);
+            if (empty($_POST['hdnIdUnidadeDestino']) || empty($_POST['txtUnidadeDestino'])) {
+                $objPaginaSEI->adicionarMensagem('O Órgão Destino não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao='.$acao.'&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             }
@@ -126,7 +126,7 @@ try {
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
             $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->contar($objPenOrgaoExternoDTO);
             if ($respObjPenOrgaoExternoDTO > 0) {
-                $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre Órgãos ja existe.', InfraPagina::$TIPO_MSG_ERRO);
+                $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre órgãos já existente.', InfraPagina::$TIPO_MSG_ERRO);
                 header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
                 exit(0);
             }
@@ -147,12 +147,12 @@ try {
             if (!is_null($id)) {
                 $objPenOrgaoExternoDTO->setDblId($id);
                 $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-                $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
             } else {
                 $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
-                $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);
+                $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
             }
-            header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
             exit(0);
             break;
         case 'pen_map_orgaos_externos_visualizar':
@@ -468,7 +468,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
         </div>
 
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-            <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Orgão Origem:</label>
+            <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Órgão Origem:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidadeOrigem" name="txtUnidadeOrigem" class="infraText infraReadOnly" 
                     <?php empty($strNomeOrgaoOrigem) ? 'disabled="disabled"' : '' ?> 
@@ -490,7 +490,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
         <h4>Órgão Destino</h4>
 
         <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-            <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Orgão Destino:</label>
+            <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Órgão Destino:</label>
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" <?= $disabilitarVisualizar ?> class="infraText infraReadOnly"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" 

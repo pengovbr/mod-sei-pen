@@ -270,11 +270,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
-
-        case '3.4.0':
-            $this->instalarV3040();
-        case '3.4.1':
-            $this->instalarV3041();
+        case '3.3.4':
+            $this->instalarV3033();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2547,7 +2544,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.3.2");
   }
 
-  protected function instalarV3040()
+  protected function instalarV3033()
   {
     $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
     $objMetaBD = $this->objMeta;
@@ -2587,48 +2584,41 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-    $this->atualizarNumeroVersao("3.4.0");
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_map_tipo_processo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_map_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_processo_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_processo_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+          'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+          'unidade' => array('nome' => 'fk_md_pen_mapeamento_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
+          'md_pen_orgao_externo' => array('nome' => 'fk_md_pen_mapeamento_orgao', 'cols' => array('id', 'id_map_orgao')),
+      )
+    ));
+
+    # Criar sequencia
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.3.4");
   }
 
-  protected function instalarV3041()
-  {
-        $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-        $objMetaBD = $this->objMeta;
-
-        $objMetaBD->criarTabela(array(
-            'tabela' => 'md_pen_map_tipo_processo',
-            'cols' => array(
-                'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-                'id_map_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-                'id_processo_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-                'id_processo_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
-                'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
-                'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-                'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
-            ),
-            'pk' => array('cols' => array('id')),
-            'fks' => array(
-                'unidade' => array('nome' => 'fk_md_pen_mapeamento_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
-                'md_pen_orgao_externo' => array('nome' => 'fk_md_pen_mapeamento_orgao', 'cols' => array('id', 'id_map_orgao')),
-            )
-        ));
-
-        # Criar sequencia
-        $objInfraSequenciaRN = new InfraSequenciaRN();
-        $objInfraSequenciaDTO = new InfraSequenciaDTO();
-
-        //Sequência
-        $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
-        $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
-
-        BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
-        $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
-        $objInfraSequenciaDTO->retStrNome();
-        $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-        $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
-        $this->atualizarNumeroVersao("3.4.1");
-  }
 }
 
 

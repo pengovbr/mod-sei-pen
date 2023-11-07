@@ -121,6 +121,21 @@ class PenUnidadeRN extends InfraRN {
     catch(Exception $e){
         throw new InfraException('Erro contando mapeamento de unidades.', $e);
     }
-  }    
-
+  }  
+  
+  /**
+   * Método utilizado para consultar dados.
+   * @param UnidadeDTO $objDTO
+   * @return PenUnidadeDTO
+   * @throws InfraException
+   */
+  protected function consultarConectado(PenUnidadeDTO $objDTO){
+    try {
+        $objBD = new PenUnidadeBD(BancoSEI::getInstance());
+        return $objBD->consultar($objDTO);
+    } 
+    catch (Exception $e) {
+        throw new InfraException('Erro consultar mapeamento de unidades.', $e);
+    }
+  }
 }

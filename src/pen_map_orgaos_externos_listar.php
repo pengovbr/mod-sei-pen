@@ -163,12 +163,17 @@ try {
     $btnReativar = '';
     $btnDesativar = '';
     $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo Relacionamento</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
     //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-    $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-    #$arrComandos[] = '<button type="button" accesskey="M" id="btnImportar" value="Importar" onclick="infraImportarCsv();" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
+    $btnDesativar = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
+    $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
+        . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
+        . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    
+    $arrComandos = array($btnPesquisar, $btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
+    $arrComandosFinal = array($btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 
     //--------------------------------------------------------------------------
     // DTO de paginao
@@ -183,11 +188,11 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-    if (array_key_exists('txtSiglaOrigem', $_POST) && (!empty($_POST['txtSiglaOrigem']) && $_POST['txtSiglaOrigem'] !== 'null')) {
+    if (array_key_exists('txtSiglaOrigem', $_POST) && ((!empty($_POST['txtSiglaOrigem']) && $_POST['txtSiglaOrigem'] !== 'null') || $_POST['txtSiglaOrigem'] == "0")) {
         $objPenOrgaoExternoDTO->setStrOrgaoOrigem('%' . $_POST['txtSiglaOrigem'] . '%', InfraDTO::$OPER_LIKE);
     }
 
-    if (array_key_exists('txtSiglaDestino', $_POST) && (!empty($_POST['txtSiglaDestino']) && $_POST['txtSiglaDestino'] !== 'null')) {
+    if (array_key_exists('txtSiglaDestino', $_POST) && ((!empty($_POST['txtSiglaDestino']) && $_POST['txtSiglaDestino'] !== 'null') || $_POST['txtSiglaDestino'] == "0")) {
         $objPenOrgaoExternoDTO->setStrOrgaoDestino('%' . $_POST['txtSiglaDestino'] . '%', InfraDTO::$OPER_LIKE);
     }
 

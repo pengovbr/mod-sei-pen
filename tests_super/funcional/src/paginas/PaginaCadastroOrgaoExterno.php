@@ -30,6 +30,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * Seleciona repositório por sigla
      * 
      * @param string $siglaRepositorio
+     * @param string $origemDestino
      * @return string
      */
     private function selectRepositorio($siglaRepositorio, $origemDestino)
@@ -47,7 +48,8 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * Seleciona unidade por nome
      * 
      * @param string $nomeUnidade
-     * @param ?string  $hierarquia
+     * @param string $origemDestino
+     * @param ?string $hierarquia
      * @return string
      */
     private function selectUnidade($nomeUnidade, $origemDestino, $hierarquia = null)
@@ -107,9 +109,10 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
         return $this->unidadeInput->value();
     }
-    
+
     /**
-     * Description 
+     * Seleciona botão novo da página
+     * 
      * @return void
      */
     public function novoMapOrgao()
@@ -118,7 +121,32 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
     }
 
     /**
-     * Description 
+     * Seleciona botão editar da primeira linha de tabela
+     * 
+     * @return void
+     */
+    public function editarMapOrgao()
+    {
+        $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
+    }
+
+    /**
+     * Selecionar primeira checkbox de exclusão
+     * Seleciona botão excluir
+     * Seleciona botão de confirmação
+     *  
+     * @return void
+     */
+    public function selecionarExcluirMapOrgao()
+    {
+        $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
+        $this->test->byId("btnExcluir")->click();
+        $this->test->acceptAlert();
+    }
+
+    /**
+     * Selcionar botão salvar da página
+     * 
      * @return void
      */
     public function salvar()
