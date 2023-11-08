@@ -21,7 +21,6 @@ $objBanco = BancoSEI::getInstance();
 $objSessao = SessaoSEI::getInstance();
 $objDebug = InfraDebug::getInstance();
 
-
 try {
 
     $objDebug->setBolLigado(false);
@@ -126,6 +125,7 @@ try {
 
             case 'pen_map_orgaos_externos_desativar':
                 if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoDesativar'])) {
+                    $btnDesativar = null;
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
                     foreach ($arrHdnInInfraItensSelecionados as $arr) {
                         $id = explode(";", $arr)[0];
@@ -157,28 +157,10 @@ try {
     }
     //--------------------------------------------------------------------------
 
-    $arrComandos = array();
-    $btnReativarAdicionado = 'N';
-    $btnDesativarAdicionado = 'N';
-    $btnReativar = '';
-    $btnDesativar = '';
-    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    $btnDesativar = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
-    $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-    $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
-        . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
-        . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-    
-    $arrComandos = array($btnPesquisar, $btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
-    $arrComandosFinal = array($btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
-
-    //--------------------------------------------------------------------------
     // DTO de paginao
     $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
     $objPenOrgaoExternoDTO->setNumIdUnidade($objSessao->getNumIdUnidadeAtual());
+    $objPenOrgaoExternoDTO->setStrAtivo('S');
     $objPenOrgaoExternoDTO->retDblId();
     $objPenOrgaoExternoDTO->retNumIdOrgaoOrigem();
     $objPenOrgaoExternoDTO->retStrOrgaoOrigem();
@@ -199,6 +181,28 @@ try {
     if (array_key_exists('txtEstado', $_POST) && (!empty($_POST['txtEstado']) && $_POST['txtEstado'] !== 'null')) {
         $objPenOrgaoExternoDTO->setStrAtivo($_POST['txtEstado']);
     }
+
+    //--------------------------------------------------------------------------
+
+    $btnReativarAdicionado = 'N';
+    $btnDesativarAdicionado = 'N';
+    $btnReativar = '';
+    $btnDesativar = null;
+    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
+    if ($_POST['txtEstado'] == 'S') {
+        $btnDesativar = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
+    }
+    
+    $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
+        . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
+        . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    
+    $arrComandos = array($btnPesquisar, $btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
+    $arrComandosFinal = array($btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 
     //--------------------------------------------------------------------------
 
@@ -296,7 +300,6 @@ try {
                     . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
                     . '</a>';
             }
-
             $strResultado .= '</td>';
             $strResultado .= '</tr>' . "\n";
 
@@ -304,6 +307,7 @@ try {
         }
         $strResultado .= '</table>';
     }
+    
     $arrComandos = array($btnPesquisar, $btnNovo, $btnReativar,$btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
     $arrComandosFinal = array($btnNovo, $btnReativar, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 } catch (InfraException $e) {
@@ -557,8 +561,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>
     <input type="text" id="txtEstado" name="txtEstado" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) ? $_POST['txtEstado'] : ''); ?>">
     <select id="txtEstadoSelect" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
-        <option value=""></option>
-        <option value="S" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] == "S" ? 'selected="selected"' : ''); ?>>Ativo</option>
+        <option value="S" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : ''); ?>>Ativo</option>
         <option value="N" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] == "N" ? 'selected="selected"' : ''); ?>>Inativo</option>
     </select>
 
