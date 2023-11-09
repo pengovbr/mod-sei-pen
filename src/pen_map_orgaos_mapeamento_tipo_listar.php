@@ -5,7 +5,6 @@ require_once DIR_SEI_WEB . '/SEI.php';
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
  *
- *
  */
 
 session_start();
@@ -146,10 +145,20 @@ try {
         $strResultado .= $strCssTr;
 
         $strResultado .= '<td>'.PaginaSEI::tratarHTML(AssuntoINT::formatarCodigoDescricaoRI0568($numIdAssuntoOrigem, $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso())).'</td>';
-        
-        
-        
-        $strResultado .= '<td> <input type="text" value="'.$numIdAssuntoDestino.'" id="txtAssunto'.$numIdAssuntoOrigem.'" name="txtAssunto'.$numIdAssuntoOrigem.'" class="infraText" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'" style="width:99.5%" />
+
+        $descricaoTipoProcedimento = '';
+        if ($numIdAssuntoDestino != null) {
+            $tipoProcedimentoDTO = new TipoProcedimentoDTO();
+            $tipoProcedimentoDTO->retNumIdTipoProcedimento();
+            $tipoProcedimentoDTO->retStrNome();
+            $tipoProcedimentoDTO->setNumIdTipoProcedimento($numIdAssuntoDestino);
+
+            $tipoProcedimentoRN = new TipoProcedimentoRN();
+            $objTipoProcedimentoDTO = $tipoProcedimentoRN->consultarRN0267($tipoProcedimentoDTO);
+            $descricaoTipoProcedimento = $numIdAssuntoDestino . ' - ' . $objTipoProcedimentoDTO->getStrNome();
+        }
+
+        $strResultado .= '<td> <input type="text" value="'.$descricaoTipoProcedimento.'" id="txtAssunto'.$numIdAssuntoOrigem.'" name="txtAssunto'.$numIdAssuntoOrigem.'" class="infraText" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'" style="width:99.5%" />
         <input type="hidden" id="hdnIdAssunto'.$numIdAssuntoOrigem.'" name="hdnIdAssunto'.$numIdAssuntoOrigem.'" class="infraText" value="'.$numIdAssuntoDestino.'" /></td>';
   
         $strResultado .= '</tr>'."\n";

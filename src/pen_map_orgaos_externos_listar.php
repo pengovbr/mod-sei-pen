@@ -290,19 +290,34 @@ try {
                     . PaginaSEI::getInstance()->getIconeDesativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
 
-            $strResultado .= '<a href="'
-                . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
-                . '_mapeamento&acao_origem='.$_GET['acao_origem']
-                . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
-                . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") 
-                . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
+           
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
-                $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
+
+                $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+                $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
+                $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
+                $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
+                
+            
+                $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+                $arrPenOrgaoExternoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
+
+                if ($arrPenOrgaoExternoDTO == null) {
+                    $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
                     . '<img src='
                     . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
                     . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
                     . '</a>';
+                } else {
+                    $strResultado .= '<a href="'
+                    . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
+                    . '_mapeamento&acao_origem='.$_GET['acao_origem']
+                    . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
+                    . ProcessoEletronicoINT::getCaminhoIcone("svg/arquivo_mapeamento_assunto.svg") 
+                    . ' title="Mapear tipos de processos" alt="Mapear tipos de processos" class="infraImg"></a>';
+                }
+
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
                     . $objSessao->assinarLink(
                         'controlador.php?acao=pen_map_orgaos_externos_excluir&acao_origem='
