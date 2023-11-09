@@ -23,8 +23,10 @@ class PenMapTipoProcedimentoDTO extends InfraDTO {
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
     $this->configurarFK('IdMapOrgao', 'mapeamento_orgao', 'id_map_orgao');
 
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdProcessoOrigem', 'id_processo_origem');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdProcessoDestino', 'id_processo_destino');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTipoProcessoOrigem', 'id_tipo_processo_origem');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTipoProcessoDestino', 'id_tipo_processo_destino');
+
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeTipoProcesso', 'nome_tipo_processo');
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');

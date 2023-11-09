@@ -72,11 +72,20 @@ try {
                 try{
                     $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
                     $arrProcedimentoDTO = [];
+                    $tipoDeProcedimentos = array();
                     $procedimentos = explode(',', $_POST['dados']);
-                    foreach ($procedimentos as $procedimento) {
+                    for ($i = 0; $i < count($procedimentos); $i += 2) {
+                        $key = trim($procedimentos[$i]);
+                        $value = trim($procedimentos[$i + 1], '"');
+                        $tipoDeProcedimentos[$key] = $value;
+                    }
+
+                    
+                    foreach ($tipoDeProcedimentos as $idProcedimento => $nomeProcedimento) {
                         $procedimentoDTO = new PenMapTipoProcedimentoDTO();
                         $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
-                        $procedimentoDTO->setNumIdProcessoOrigem($procedimento);
+                        $procedimentoDTO->setNumIdTipoProcessoOrigem($idProcedimento);
+                        $procedimentoDTO->setStrNomeTipoProcesso($nomeProcedimento);
                         $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
                         $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
                         if ($penMapTipoProcedimentoRN->contar($procedimentoDTO)) {
@@ -280,6 +289,13 @@ try {
                 $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'
                     . PaginaSEI::getInstance()->getIconeDesativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
+
+            $strResultado .= '<a href="'
+                . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
+                . '_mapeamento&acao_origem='.$_GET['acao_origem']
+                . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
+                . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") 
+                . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
                 $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
@@ -498,12 +514,15 @@ $objPagina->montarStyle();
         for (let i = 1; i < lines.length; i++) {
             const formatLine = lines[i]
             const lineData = formatLine.toString().split(';');
+            
             if (isNaN(parseInt(lineData[0]))) {
                 continue;
             }
             const tipoProcessoId = parseInt(lineData[0]);
+            const tipoProcessoNome = lineData[1];
 
             data.push(tipoProcessoId);
+            data.push(tipoProcessoNome);
         }
 
         return data.join(',').replaceAll('""', '"');

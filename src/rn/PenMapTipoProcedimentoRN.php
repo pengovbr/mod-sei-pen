@@ -33,6 +33,22 @@ class PenMapTipoProcedimentoRN extends InfraRN
     }
   }
 
+    /**
+   * Método utilizado para listagem de dados.
+   * @param PenMapTipoProcedimentoDTO $objDTO
+   * @return array
+   * @throws InfraException
+   */
+  protected function consultarConectado(PenMapTipoProcedimentoDTO $objDTO)
+  {
+    try {
+      $objBD = new PenMapTipoProcedimentoBD($this->getObjInfraIBanco());
+      return $objBD->consultar($objDTO);
+    } catch (Exception $e) {
+      throw new InfraException('Erro listando mapeamento externos.', $e);
+    }
+  }
+
   /**
    * Método utilizado para alteração de dados.
    * @param PenMapTipoProcedimentoDTO $objDTO
