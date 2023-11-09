@@ -279,7 +279,7 @@ try {
   PaginaSEI::getInstance()->fecharHead();
   PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
   ?>
-  <form id="frmMapeamentoOrgaosLista" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].$strParametros)?>">
+  <form id="frmMapeamentoOrgaosLista" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id='. $idOrgaoExterno)?>">
     <?
     PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
     PaginaSEI::getInstance()->abrirAreaDados('17em');
