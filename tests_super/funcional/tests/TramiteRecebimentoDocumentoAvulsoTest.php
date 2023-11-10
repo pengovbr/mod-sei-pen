@@ -22,7 +22,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
     public static $documentoTeste5;
 
     /**
-     * Teste de recebimento dedocumento avulso com 2 componentes digitais
+     * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
      * 
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
