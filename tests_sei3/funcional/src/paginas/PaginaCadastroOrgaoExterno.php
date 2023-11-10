@@ -139,7 +139,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function selecionarExcluirMapOrgao()
     {
-        $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
         $this->test->byId("btnExcluir")->click();
         $this->test->acceptAlert();
     }
@@ -211,7 +211,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function buscarMensagemAlerta()
     {
-        $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-        return !empty($alerta->text()) ? $alerta->text() : "";
+        $alerta = $this->test->alertText();
+        return !empty($alerta) ? $alerta : "";
     }
 }
