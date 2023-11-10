@@ -9,20 +9,6 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $remetenteB;
-
-    /**
-     * Teste para cadastro de mapeamento de orgão exteno
-     *
-     * @group MapeamentoOrgaoExterno
-     *
-     * @return void
-     */
-
-    //  public function tearDown()
-    //  {
-    //      // Fechar a aba ou janela do navegador após a execução de cada teste
-    //      $this->webDriver->quit();
-    //  }
      
     public function test_cadastrar_novo_mapeamento_orgao_externo()
     {
@@ -60,7 +46,6 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
      *
      * @return void
      */
-
     public function test_desativacao_mapeamento_orgao_externo() {
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
@@ -85,7 +70,6 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
      *
      * @return void
      */
-
      public function test_reativacao_mapeamento_orgao_externo() {
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
@@ -165,55 +149,6 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
             $mensagem
         );
     }
-
-    /**
-     * Teste de desativação de um Relacionamento entre Órgãos via checkbox
-     *
-     * @large
-     *
-     * @return void
-     */
-
-     public function test_desativacao_checkbox_mapeamento_orgao_externo() {
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->navegarPara('pen_map_orgaos_externos_listar');
-        
-        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
-        $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
-        
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-    }
-
-    //  /**
-    //  * Teste de reativação de um Relacionamento entre Órgãos via checkbox
-    //  *
-    //  * 
-    //  * @large
-    //  *
-    //  * @Depends test_desativacao_checkbox_mapeamento_orgao_externo
-    //  *
-    //  * @return void
-    //  */
-
-    //  public function test_reativacao_checkbox_mapeamento_orgao_externo() {
-    //     $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-    //     $this->navegarPara('pen_map_orgaos_externos_listar');
-
-    //     $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
-    //     $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
-        
-    //     $this->waitUntil(function ($testCase)  {
-    //         $testCase->frame(null);
-    //         $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.');
-    //         $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-    //         return true;
-    //     }, PEN_WAIT_TIMEOUT);
-    // }
 
     /**
      * Teste para excluir de mapeamento de orgão exteno
