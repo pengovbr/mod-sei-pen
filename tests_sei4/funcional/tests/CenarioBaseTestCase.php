@@ -66,8 +66,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $parametrosOrgaoA = new ParameterUtils(CONTEXTO_ORGAO_A);
         $parametrosOrgaoA->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS);
         $parametrosOrgaoA->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
-        $parametrosOrgaoA->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
         $parametrosOrgaoA->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
+        $parametrosOrgaoA->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
@@ -93,13 +93,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Habilitação da extensão docx
         $bancoOrgaoA->execute("update arquivo_extensao set sin_ativo=? where extensao=?", array('S', 'docx'));
 
-
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 2 *****************/
         $parametrosOrgaoB = new ParameterUtils(CONTEXTO_ORGAO_B);
         $parametrosOrgaoB->setParameter('PEN_ID_REPOSITORIO_ORIGEM', CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS);
         $parametrosOrgaoB->setParameter('PEN_TIPO_PROCESSO_EXTERNO', '100000256');
-        $parametrosOrgaoB->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
         $parametrosOrgaoB->setParameter('HIPOTESE_LEGAL_PADRAO', '1'); // Controle Interno
+        $parametrosOrgaoB->setParameter('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '110000003');
 
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
@@ -118,11 +117,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
-
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
         //para corrigir o erro do oracle que retorna stream sem acentuação das palavras no teste de URL
-
         if ($bancoOrgaoA->getBdType() == "oci") {
             $result = $bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V", "S"));
             $strTarja = stream_get_contents($result[0]["TEXTO"]);
@@ -513,7 +510,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->byLinkText("Menu")->click();
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
         $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
@@ -710,7 +707,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // Abrir protocolo na tela de controle de processos pelo texto da descrição
-        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloProcesso) {
+        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloTeste) {
             sleep(5);
             $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
             $this->assertNotFalse($strProtocoloTeste);
@@ -732,6 +729,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         for ($i = 0; $i < count($listaDocumentos); $i++) {
             $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], $destinatario, $unidadeSecundaria);
         }
+
+        return array(
+            "TIPO_PROCESSO" => $destinatario['TIPO_PROCESSO'],
+            "DESCRICAO" => $documentosTeste[0]['DESCRICAO'],
+            "OBSERVACOES" => null,
+            "INTERESSADOS" => $documentosTeste[0]['INTERESSADOS'],
+            "RESTRICAO" => $documentosTeste[0]['RESTRICAO'],
+            "ORIGEM" => $destinatario['URL'],
+            "PROTOCOLO" => $strProtocoloTeste
+        );
     }
 
     public function realizarValidacaoNAORecebimentoProcessoNoDestinatario($destinatario, $processoTeste)
