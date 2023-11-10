@@ -2,12 +2,6 @@
 
 require_once DIR_SEI_WEB . '/SEI.php';
 
-/**
- * Consulta os logs do estado do procedimento ao ser expedido
- *
- *
- */
-
 session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_orgaos_externos_listar');
@@ -15,12 +9,13 @@ define('PEN_RECURSO_BASE', 'pen_map_orgaos_externos');
 define('PEN_PAGINA_TITULO', 'Relacionamento entre Orgãos');
 define('PEN_PAGINA_GET_ID', 'id');
 
-
 $objPagina = PaginaSEI::getInstance();
 $objBanco = BancoSEI::getInstance();
 $objSessao = SessaoSEI::getInstance();
 $objDebug = InfraDebug::getInstance();
 
+PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaMapeamento'));
+$palavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaMapeamento');
 
 try {
 
@@ -37,7 +32,7 @@ try {
         case 'pen_map_orgaos_externos_mapeamento_gerenciar':
           try{
 
-            $arrTiposProcessos = array_filter($_POST);
+            $arrTiposProcessos = $_POST;
             foreach(array_keys($arrTiposProcessos) as $strKeyPost){
               if (substr($strKeyPost,0,10) == 'txtAssunto'){
 
@@ -67,7 +62,7 @@ try {
             PaginaSEI::getInstance()->processarExcecao($e);
           } 
 
-          header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].'&id='.$_POST['hdnFlag']));
+          header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].'&id='.$_POST['idOrgaoExterno']));
           die;
         case 'pen_map_orgaos_externos_mapeamento':
           $strTitulo = 'Mapeamento de Tipo de Processo';
@@ -89,6 +84,17 @@ try {
     $objMapeamentoTipoProcedimentoDTO->retStrNomeTipoProcesso();
     $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
 
+    if (isset($_POST['chkSinAssuntosNaoMapeados'])) {
+        $objMapeamentoTipoProcedimentoDTO->setNumIdTipoProcessoDestino(null);
+    } 
+
+    $filtro = (int) $palavrasPesquisa;    
+    if (!empty($filtro) && $filtro != null || $filtro != 0) {
+        $objMapeamentoTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($palavrasPesquisa, InfraDTO::$OPER_IGUAL);
+    } else {
+        $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso('%' . trim($palavrasPesquisa . '%'), InfraDTO::$OPER_LIKE);
+    }
+
     $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
     $objPenOrgaoExternoDTO->setDblId($idOrgaoExterno);
     $objPenOrgaoExternoDTO->retStrOrgaoDestino();
@@ -99,12 +105,12 @@ try {
     $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
 
   
-      PaginaSEI::getInstance()->prepararPaginacao($objMapeamentoTipoProcedimentoDTO,100);
+    PaginaSEI::getInstance()->prepararPaginacao($objMapeamentoTipoProcedimentoDTO,100);
   
-      $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-      $arrObjMapeamentoAssuntoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
-  
-      PaginaSEI::getInstance()->processarPaginacao($objMapeamentoTipoProcedimentoDTO);
+    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+    $arrObjMapeamentoAssuntoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
+
+    PaginaSEI::getInstance()->processarPaginacao($objMapeamentoTipoProcedimentoDTO);
   
   
     $numRegistros = InfraArray::contar($arrObjMapeamentoAssuntoDTO);
@@ -146,10 +152,20 @@ try {
         $strResultado .= $strCssTr;
 
         $strResultado .= '<td>'.PaginaSEI::tratarHTML(AssuntoINT::formatarCodigoDescricaoRI0568($numIdAssuntoOrigem, $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso())).'</td>';
-        
-        
-        
-        $strResultado .= '<td> <input type="text" value="'.$numIdAssuntoDestino.'" id="txtAssunto'.$numIdAssuntoOrigem.'" name="txtAssunto'.$numIdAssuntoOrigem.'" class="infraText" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'" style="width:99.5%" />
+
+        $descricaoTipoProcedimento = '';
+        if ($numIdAssuntoDestino != null) {
+            $tipoProcedimentoDTO = new TipoProcedimentoDTO();
+            $tipoProcedimentoDTO->retNumIdTipoProcedimento();
+            $tipoProcedimentoDTO->retStrNome();
+            $tipoProcedimentoDTO->setNumIdTipoProcedimento($numIdAssuntoDestino);
+
+            $tipoProcedimentoRN = new TipoProcedimentoRN();
+            $objTipoProcedimentoDTO = $tipoProcedimentoRN->consultarRN0267($tipoProcedimentoDTO);
+            $descricaoTipoProcedimento = $numIdAssuntoDestino . ' - ' . $objTipoProcedimentoDTO->getStrNome();
+        }
+
+        $strResultado .= '<td> <input type="text" value="'.$descricaoTipoProcedimento.'" id="txtAssunto'.$numIdAssuntoOrigem.'" name="txtAssunto'.$numIdAssuntoOrigem.'" class="infraText" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'" style="width:99.5%" />
         <input type="hidden" id="hdnIdAssunto'.$numIdAssuntoOrigem.'" name="hdnIdAssunto'.$numIdAssuntoOrigem.'" class="infraText" value="'.$numIdAssuntoDestino.'" /></td>';
   
         $strResultado .= '</tr>'."\n";
@@ -164,12 +180,6 @@ try {
         '    bolAlteracao = true;'."\n".
         '  }'."\n\n";
   
-        //processarResultado
-  
-        // if ($numIdAssuntoDestino!=null){
-        //   $strAjaxInicializar .= '  objAutoCompletarAssunto'.$numIdAssuntoOrigem.'.selecionar(\''.$numIdAssuntoDestino.'\',\''.PaginaSEI::getInstance()->formatarParametrosJavaScript(AssuntoINT::formatarCodigoDescricaoRI0568($codigoEstruturado, 'descricaoAssuntoOrigem')).'\');'."\n\n";
-        // }
-  
       }
   
       $strResultado .= '</table>';
@@ -177,21 +187,6 @@ try {
 
   
     $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\''.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.PaginaSEI::getInstance()->getAcaoRetorno().'&acao_origem='.$_GET['acao'].$strParametros.PaginaSEI::getInstance()->montarAncora($idOrgaoExterno)).'\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  
-    $objTabelaAssuntosDTO = new TabelaAssuntosDTO();
-    $objTabelaAssuntosDTO->retStrNome();
-    $objTabelaAssuntosDTO->retStrSinAtual();
-  
-    if (!PaginaSEI::getInstance()->isBolPaginaSelecao()) {
-      $objTabelaAssuntosDTO->setNumIdTabelaAssuntos(1);
-    }else{
-      $objTabelaAssuntosDTO->setStrSinAtual('S');
-    }
-  
-    $objTabelaAssuntosRN = new TabelaAssuntosRN();
-    $objTabelaAssuntosDTOOrigem = $objTabelaAssuntosRN->consultar($objTabelaAssuntosDTO);
-  
-    $strItensSelTabelaAssuntosDestino = TabelaAssuntosINT::montarSelectNomeMapeamento('null','&nbsp;',2,1);
   
   }catch(Exception $e){
     PaginaSEI::getInstance()->processarExcecao($e);
@@ -204,23 +199,6 @@ try {
   PaginaSEI::getInstance()->montarTitle(PaginaSEI::getInstance()->getStrNomeSistema().' - '.$strTitulo);
   PaginaSEI::getInstance()->montarStyle();
   PaginaSEI::getInstance()->abrirStyle();
-  ?>
-  #lblTabelaAssuntosOrigem {position:absolute;left:0%;top:0%;width:40%;}
-  #txtTabelaAssuntosOrigem {position:absolute;left:0%;top:11%;width:40%;}
-  
-  #lblTabelaAssuntosDestino {position:absolute;left:0%;top:28%;width:40%;}
-  #selTabelaAssuntosDestino {position:absolute;left:0%;top:39%;width:40%;}
-  
-  #lblPalavrasPesquisaMapeamentoAssuntos {position:absolute;left:0%;top:56%;width:70%;}
-  #txtPalavrasPesquisaMapeamentoAssuntos {position:absolute;left:0%;top:67%;width:70%;}
-  
-  #divSinAssuntosNaoMapeados {position:absolute;left:0%;top:85%;}
-
-  .inputCenter{top: 11%;}
-  
-  table input.infraText {font-size:1em}
-  
-  <?
   PaginaSEI::getInstance()->fecharStyle();
   PaginaSEI::getInstance()->montarJavaScript();
   PaginaSEI::getInstance()->abrirJavaScript();
@@ -241,8 +219,6 @@ try {
   
     //infraEfeitoTabelas();
   }
-  
-
   
   function gerenciar() {
 
@@ -265,39 +241,40 @@ try {
   
   
   //</script>
-  <?
+  <?php
   PaginaSEI::getInstance()->fecharJavaScript();
   PaginaSEI::getInstance()->fecharHead();
   PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
   ?>
-  <form id="frmMapeamentoOrgaosLista" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].$strParametros)?>">
-    <?
+  <form id="frmMapeamentoOrgaosLista" method="post" onsubmit="return OnSubmitForm();" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id='. $idOrgaoExterno)?>">
+    <?php
     PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
     PaginaSEI::getInstance()->abrirAreaDados('17em');
     ?>
-    <!-- <label id="lblTabelaAssuntosOrigem" class="infraLabelObrigatorio">Órgão Origem:</label>
-    <input type="text" id="txtTabelaAssuntosOrigem" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly" value=" <?=PaginaSEI::tratarHTML($objTabelaAssuntosDTOOrigem->getStrNome())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
-    <br>
-    <label id="lblTabelaAssuntosOrigem" class="infraLabelObrigatorio">Órgão Destino:</label>
-    <input type="text" id="txtTabelaAssuntosOrigem" name="txtTabelaAssuntosDestino" readonly="readonly" class="infraText infraReadOnly" value=" <?=PaginaSEI::tratarHTML($objTabelaAssuntosDTOOrigem->getStrNome())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" /> -->
-
+    
     <div style="display:grid; width: 40% ">
-         <label id="" class="infraLabelObrigatorio">Órgão Origem:</label>
-        <input type="text" id="" disabled="disabled" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly inputCenter" value=" <?=PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+         <label class="infraLabelObrigatorio">Órgão Origem:</label>
+        <input type="text" disabled="disabled" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly inputCenter" value=" <?=PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
 
         <label class="infraLabelObrigatorio">Órgão Destino:</label>
-        <input type="text" id="" disabled="disabled" name="" class="infraText infraReadOnly inputCenter" value=" <?=PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoDestino())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+        <input type="text" disabled="disabled" name="" class="infraText infraReadOnly inputCenter" value=" <?=PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoDestino())?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
 
-        <label id="" for="txtPalavrasPesquisaMapeamento" class="infraLabelOpcional">Palavras para Pesquisa:</label>
-        <input type="text" id="txtPalavrasPesquisaMapeamentoA" name="txtPalavrasPesquisaMapeamentoAssuntos" value="" class="infraText inputCenter" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+        <label for="txtPalavrasPesquisaMapeamento" class="infraLabelOpcional">Palavras para Pesquisa:</label>
+        <input type="text" 
+            id="txtPalavrasPesquisaMapeamentoA" 
+            name="txtPalavrasPesquisaMapeamento" 
+            value="<?php echo $palavrasPesquisa != null ? $palavrasPesquisa : ''; ?>" 
+            class="infraText inputCenter" 
+            tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>"
+            />
     </div>
     
     <div id="divSinAssuntosNaoMapeados" class="infraDivCheckbox">
-        <input type="checkbox" id="chkSinAssuntosNaoMapeados" name="chkSinAssuntosNaoMapeados" onchange="this.form.submit()" class="infraCheckbox" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
-        <label id="lblSinAssuntosNaoMapeados" for="chkSinAssuntosNaoMapeados" accesskey="" class="infraLabelCheckbox" >Exibir apenas assuntos sem mapeamento definido</label>
+        <input type="checkbox" id="chkSinAssuntosNaoMapeados" <?php echo isset($_POST['chkSinAssuntosNaoMapeados']) ? 'checked' : ''; ?> name="chkSinAssuntosNaoMapeados"class="infraCheckbox" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+        <label id="lblSinAssuntosNaoMapeados" for="chkSinAssuntosNaoMapeados" class="infraLabelCheckbox" >Exibir apenas assuntos sem mapeamento definido</label>
     </div>
   
-    <input type="hidden" name="hdnFlag" value="<?php echo $idOrgaoExterno; ?>" />
+    <input type="hidden" name="idOrgaoExterno" value="<?php echo $idOrgaoExterno; ?>" />
     <?
     PaginaSEI::getInstance()->fecharAreaDados();
     PaginaSEI::getInstance()->montarAreaTabela($strResultado,$numRegistros);
@@ -306,7 +283,7 @@ try {
     ?>
   
   </form>
-  <?
+  <?php
   PaginaSEI::getInstance()->fecharBody();
   PaginaSEI::getInstance()->fecharHtml();
   ?>
