@@ -760,6 +760,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO = $this->atualizarProcedimento($dblIdProcedimento, $parObjMetadadosProcedimento, $parObjProtocolo);
     }
     else {
+        $this->consultarProtocoloExistente($parObjProtocolo);
         $objProcedimentoDTO = $this->gerarProcedimento($parObjMetadadosProcedimento, $parObjProtocolo);
     }
 
@@ -1130,6 +1131,31 @@ class ReceberProcedimentoRN extends InfraRN
       $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
 
       return $objProcedimentoDTO;
+  }
+
+  /**
+   * Consultar protocolo existente
+   *
+   * @param \stdClass $parObjProtocolo
+   * @return void
+   * @throws InfraException
+   */
+  public function consultarProtocoloExistente($parObjProtocolo)
+  {
+    $objProtocoloDTO = new ProtocoloDTO();
+    $objProtocoloDTO->retDblIdProtocolo();
+    $objProtocoloDTO->setStrProtocoloFormatado($parObjProtocolo->protocolo);
+
+    $objProcedimentoBD = new ProcedimentoBD($this->getObjInfraIBanco());
+    $arrayObjProtocoloDTO = $objProcedimentoBD->contar($objProtocoloDTO);
+    if ($arrayObjProtocoloDTO > 0) {
+      $strDescricao  = sprintf(
+        'Um processo com o número de protocolo %s já existe no sistema de destino. '
+        . 'OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.',
+        utf8_decode($parObjProtocolo->protocolo)
+      ).PHP_EOL;
+      throw new InfraException($strDescricao);
+    }
   }
 
     /**
