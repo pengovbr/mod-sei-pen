@@ -25,35 +25,35 @@ Um documento avulso foi recebido pelo SEI e convertido em processo. O usuário i
 
 #### Melhoria da Mensagem - Alteração de Unidade de Mapeamento. (#277)
 
-Ao alterar um mapeamento já existente para alguma unidade mapeada anteriormente acontece um erro no momento de salvar( veja o vídeo abaixo): Já existe um registro com a 'Unidade RH' para o código 151860.
+Nova mensagem 'A unidade [Nome da Unidade] do sistema já está mapeada a unidade [Nome da Unidade] do Portal de Administração'.
 
 #### Melhoria de Mensagem: Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente. (#332)
 
-A mensagem Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente não está clara e dificulta a análise pelo Gestor de Protocolo.
+Nova mensagem 'Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita.GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento'.
 
 #### Melhoria da Mensagem - Unidade [Estrutura: XXXXXX] não configurada para receber processos externos no sistema de destino. (#337)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: Unidade [Estrutura: XXXX] não configurada para receber processos externos no sistema de destino.
+Nova mensagem 'A Unidade [Nome da Unidade cadastrada no Portal de Administração] não está configurada para receber processos/documentos avulsos por meio da plataforma. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - Processo recusado devido a existência de documento em formato teste não permitido pelo sistema. (#338)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: Processo recusado devido a existência de documento em formato [Nome do Formato4] não permitido pelo sistema.
+Nova mensagem 'O formato [Nome do Formato] não é permitido pelo sistema de destino. Lembre-se que cada órgão/ entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - Já existe um processo utilizando o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX. (#339)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: Já existe um processo utilizando o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX.
+Nova mensagem 'Um processo com o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX já existe no sistema de destino. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - O tamanho máximo permitido para arquivos XXXXX é XXXMb. (#340)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: O tamanho máximo permitido para arquivos XXXXXXX é XXXMb.
+Nova mensagem 'O tamanho máximo permitido para arquivo XXXXX é XXXMb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - Documento do tipo XXXXX não está mapeado (#342)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: Documento do tipo XXXXX não está mapeado.
+Nova mensagem 'O Documento do tipo XXXXX não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - O tamanho máximo geral permitido para documentos externos é XXXX Mb. (#343)
 
-Ao enviar um processo de um órgão para outro, o mesmo pode ser recusado pelo seguinte motivo: O tamanho máximo geral permitido para documentos externos é XXXX Mb.
+Nova mensagem 'O tamanho máximo geral permitido para documentos externos é XXXX Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Sistema não está aplicando os filtros de pesquisa da tela de mapeamento de unidades. (#347)
 
