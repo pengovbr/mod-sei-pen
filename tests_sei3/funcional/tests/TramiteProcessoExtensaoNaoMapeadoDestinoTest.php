@@ -60,7 +60,7 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends CenarioBaseTestCase
         }, PEN_WAIT_TIMEOUT);
 
         // Validar histórico de trâmite do processo
-        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, "Processo recusado devido a existência de documento em formato docx não permitido pelo sistema");
+        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, "O formato docx não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.");
 
         // Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
