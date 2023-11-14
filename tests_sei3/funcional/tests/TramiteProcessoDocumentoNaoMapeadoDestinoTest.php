@@ -86,7 +86,7 @@ class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
         // Validar histórico de trâmite do processo
         $nomeTipoDocumentoNaoMapeado = mb_convert_encoding(self::$destinatario['TIPO_DOCUMENTO_NAO_MAPEADO'], "ISO-8859-1");
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true,
-        "O Documento do tipo Nota não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.");
+        sprintf("O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.", $nomeTipoDocumentoNaoMapeado));
 
 
         // Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
