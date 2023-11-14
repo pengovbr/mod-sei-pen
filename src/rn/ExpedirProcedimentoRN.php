@@ -186,11 +186,11 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
           $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
-          if(isset($objMetadadosProcessoTramiteAnterior->documento)){
-            $strNumeroRegistro = null;
-          }else{
-            $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
-          }
+        if(isset($objMetadadosProcessoTramiteAnterior->documento)){
+          $strNumeroRegistro = null;
+        }else{
+          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+        }
 
           $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 

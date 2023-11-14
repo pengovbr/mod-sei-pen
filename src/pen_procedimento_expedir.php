@@ -529,7 +529,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 
     <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?=$numIdProcedimento ?>" />
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
-    <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=$_POST['hdnProcedimentosApensados']?>" />
+    <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
 <?
 //$objPaginaSEI->montarBarraComandosInferior($arrComandos);

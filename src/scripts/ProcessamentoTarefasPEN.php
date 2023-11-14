@@ -14,7 +14,7 @@ class ProcessamentoTarefasPEN
       return self::$instance;
   }
 
-  function __construct()
+  public function __construct()
     {
       ini_set('max_execution_time', '0');
       ini_set('memory_limit', '-1');

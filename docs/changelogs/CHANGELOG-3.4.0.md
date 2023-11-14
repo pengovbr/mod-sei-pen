@@ -19,6 +19,10 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Mapeamento de Unidade - Inclusão do campo Unidade Tramita.GOV.BR (#238)
+
+Adiciona texto com sigla e descrição da unidade mapeada do Tramita.GOV.BR para a unidade do SEI.
+
 #### Erro no Trâmite de Processo convertido de Documento Avulso (#239) 
 
 Um documento avulso foi recebido pelo SEI e convertido em processo. O usuário incluiu novos documentos e tentou tramitar novamente.
@@ -29,7 +33,7 @@ Nova mensagem 'A unidade [Nome da Unidade] do sistema já está mapeada a unidad
 
 #### Melhoria de Mensagem: Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente. (#332)
 
-Nova mensagem 'Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita.GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento'.
+Nova mensagem 'Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento'.
 
 #### Melhoria da Mensagem - Unidade [Estrutura: XXXXXX] não configurada para receber processos externos no sistema de destino. (#337)
 
@@ -37,11 +41,11 @@ Nova mensagem 'A Unidade [Nome da Unidade cadastrada no Portal de Administraçã
 
 #### Melhoria da Mensagem - Processo recusado devido a existência de documento em formato teste não permitido pelo sistema. (#338)
 
-Nova mensagem 'O formato [Nome do Formato] não é permitido pelo sistema de destino. Lembre-se que cada órgão/ entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
+Nova mensagem 'O formato [Nome do Formato] não é permitido pelo sistema de destino. Lembre-se que cada órgão/ entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - Já existe um processo utilizando o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX. (#339)
 
-Nova mensagem 'Um processo com o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX já existe no sistema de destino. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
+Nova mensagem 'Um processo com o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX já existe no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - O tamanho máximo permitido para arquivos XXXXX é XXXMb. (#340)
 
@@ -62,6 +66,10 @@ Foi verificado que na tela de mapeamento de unidades, o sistema não está obede
 #### Recusa pelo motivo "Documento não foi recebido pela unidade atual." (#379)
 
 Ao tentar devolver um processo onde foram retirados documentos originalmente criados por um determinado órgão o SEI recusa informando que: "Documento não foi recebido pela unidade atual.".
+
+#### Correção do phpcs e alertas de XSS
+
+Correção dos alertas apontados pelo phpcs.
 
 ### Atualização de Versão
 

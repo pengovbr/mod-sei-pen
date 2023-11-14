@@ -21,6 +21,7 @@ try {
 
     $objPenParametroDTO = new PenParametroDTO();
     $objPenParametroDTO->retTodos();
+    $objPenParametroDTO->setStrNome(array('PEN_TIPO_PROCESSO_EXTERNO'), InfraDTO::$OPER_NOT_IN);
     $objPenParametroDTO->setNumSequencia(null, InfraDTO::$OPER_DIFERENTE);
     $objPenParametroDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
 
@@ -81,8 +82,7 @@ try {
             }
           }
         }
-
-
+        PaginaSEI::getInstance()->adicionarMensagem('Parâmetros de Configuração gravados com sucesso.', 5);
       } catch (Exception $e) {
           $objPagina->processarExcecao($e);
       }
@@ -144,7 +144,7 @@ $objPagina->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= $_GET['acao'] ?>'=='pen_parametros_configuracao_selecionar'){
+    if ('<?= htmlspecialchars($_GET['acao'])?>'=='pen_parametros_configuracao_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{
@@ -158,7 +158,6 @@ function OnSubmitForm() {
 
     var camposValidacao = [
         {'id': 'PEN_ID_REPOSITORIO_ORIGEM', 'mensagem': 'Selecione um Repositório de Estruturas de Origem.'},
-        {'id': 'PEN_TIPO_PROCESSO_EXTERNO', 'mensagem': 'Selecione um Tipo de Processo Externo.'},
         {'id': 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', 'mensagem': 'Selecione uma Unidade Geradora de Processo e Documento Recebido.'},
         {'id': 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'mensagem': 'Selecione uma opção para Envio de E-mail de Notificação de Recebimento.'},
     ];
@@ -183,7 +182,7 @@ $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 
-<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.$_GET['acao'].'_salvar&acao_origem='.$_GET['acao'])?>">
+<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'_salvar&acao_origem='.htmlspecialchars($_GET['acao']))?>">
     <?
     $objPagina->montarBarraComandosSuperior($arrComandos);
     $objPagina->getInstance()->abrirAreaDados('30em');
@@ -191,35 +190,35 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
         //echo '<div class="container">';
        //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
-      if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO') {
+      if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO' && $parametro->getStrNome() != 'PEN_TIPO_PROCESSO_EXTERNO') {
         ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?php
-      }
+        }
 
         //Constrói o campo de valor
-      switch ($parametro->getStrNome()) {
-        case 'PEN_ID_REPOSITORIO_ORIGEM':
-          try {
-            $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-            $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
-            $textoAjuda="Selecionar o repositório, configurado no Portal do PEN, que seu órgão faz parte";
-            echo '<div class="div_input">';
-            echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
-            echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
-            echo '</select>';
-            echo "<a class='pen_ajuda' id='ajuda_repositorio' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
-            echo '</div>';
-          } catch (Exception $e) {
+        switch ($parametro->getStrNome()) {
+          case 'PEN_ID_REPOSITORIO_ORIGEM':
+            try {
+              $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+              $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+              $idRepositorioSelecionado = (!is_null($parametro->getStrValor())) ? $parametro->getStrValor() : '';
+              $textoAjuda="Selecionar o repositório, configurado no Portal do PEN, que seu órgão faz parte";
+              echo '<div class="div_input">';
+              echo '<select id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraSelect input-field">';
+              echo InfraINT::montarSelectArray('null', '&nbsp;', $idRepositorioSelecionado, $repositorios);
+              echo '</select>';
+              echo "<a class='pen_ajuda' id='ajuda_repositorio' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
+              echo '</div>';
+            } catch (Exception $e) {
               // Caso ocorra alguma falha na obtenção de dados dos serviços do PEN, apresenta estilo de campo padrão
               echo '<div class="div_input">';
               echo '<input type="text" id="PEN_ID_REPOSITORIO_ORIGEM" name="parametro[PEN_ID_REPOSITORIO_ORIGEM]" class="infraText" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
               echo '<img class="erro_pen" src=" ' . ProcessoEletronicoINT::getCaminhoIcone("imagens/sei_erro.png") . '" title="Não foi possível carregar os Repositórios de Estruturas disponíveis no Tramita.GOV.BR devido à falha de acesso aos Serviços. O valor apresentação no campo é o código do repositório configurado anteriormente">';
               echo '</div>';
-          }
-            break;
+            }
+              break;
 
 
-        case 'PEN_TIPO_PROCESSO_EXTERNO':
+          case 'PEN_TIPO_PROCESSO_EXTERNO':
             $textoAjuda="Selecionar o tipo de processo que será utilizado no envio. Nesta listagem não estão presentes os tipos que permitem a classificação como sigilosos ou não possuam assunto associado";
             echo '<div class="div_input">';
             echo '<select id="PEN_TIPO_PROCESSO_EXTERNO" name="parametro[PEN_TIPO_PROCESSO_EXTERNO]" class="infraSelect input-field" >';
@@ -227,9 +226,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             echo '<select>';
             echo "<a class='pen_ajuda' id='ajuda_tipo_processo'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
             echo '</div>';
-            break;
+              break;
 
-        case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
+          case 'PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO':
             $textoAjuda="Selecionar a unidade que representa os órgãos externos";
             echo '<div class="div_input">';
             echo '<select id="PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO" name="parametro[PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO]" class="infraSelect input-field" >';
@@ -237,9 +236,9 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             echo '<select>';
             echo "<a class='pen_ajuda' id='ajuda_unidade'" . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
             echo '</div>';
-            break;
+              break;
 
-        case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
+          case 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO':
             $textoAjuda="Selecionar caso queira receber notificações de recebimento";
             echo '<div class="div_input">';
             echo '<select id="PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO" name="parametro[PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO]" class="infraSelect input-field" >';
@@ -248,16 +247,16 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
             echo '<select>';
             echo "<a class='pen_ajuda' id='ajuda_notificacao' " . PaginaSEI::montarTitleTooltip($textoAjuda) . "><img src=" . PaginaSEI::getInstance()->getDiretorioImagensGlobal() . "/ajuda.gif class='infraImg'/></a>";
             echo '</div>';
-            break;
+              break;
 
-        default:
+          default:
             echo '<div class="div_input">';
             echo '<input type="text" id="PARAMETRO_'.$parametro->getStrNome().'" name="parametro['.$parametro->getStrNome().']" class="infraText input-field" value="'.$objPagina->tratarHTML($parametro->getStrValor()).'" onkeypress="return infraMascaraTexto(this,event);" tabindex="'.$objPagina->getProxTabDados().'" maxlength="100" />';
             echo '</div>';
-            break;
-      }
-    }
-    ?>
+              break;
+        }
+        }
+        ?>
 </form>
 
 <?

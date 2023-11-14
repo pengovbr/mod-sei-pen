@@ -1,7 +1,7 @@
 <?php
 
-// Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.3");
+// Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODUL
+define("VERSAO_MODULO_PEN", "3.5.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -526,6 +526,36 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
+   * @param array $arrObjTipoProcedimentoDTO
+   * @return void
+   */
+  public function desativarTipoProcesso($arrObjTipoProcedimentoDTO)
+  {
+    $mensagem = "Prezado(a) usuário(a), você está tentando desativar um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
+          ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
+          ."mencionados o Tipo de Processo: \"%s\".";
+
+    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
+  }
+
+  /**
+   * @param array $arrObjTipoProcedimentoDTO
+   * @return void
+   */
+  public function excluirTipoProcesso($arrObjTipoProcedimentoDTO)
+  {
+    $mensagem = "Prezado(a) usuário(a), você está tentando excluir um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
+      ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
+      ."mencionados o Tipo de Processo: \"%s\".";
+
+    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
+  }
+
+
+
+  /**
    * MÃ©todo responsÃ¡vel de criar listagem de item para XML
    */
   public static function gerarXMLItensArrInfraDTOAutoCompletar(
@@ -684,6 +714,37 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
           break;
 
+      case 'pen_map_orgaos_externos_salvar':
+      case 'pen_map_orgaos_externos_atualizar':
+      case 'pen_map_orgaos_externos_cadastrar':
+      case 'pen_map_orgaos_externos_visualizar':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
+          break;
+
+      case 'pen_map_orgaos_externos_reativar':
+      case 'pen_map_orgaos_externos_desativar':  
+      case 'pen_map_orgaos_externos_listar':
+      case 'pen_map_orgaos_externos_excluir':
+      case 'pen_map_orgaos_importar_tipos_processos':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_listar.php';
+          break;
+
+      case 'pen_map_tipo_processo_padrao':
+      case 'pen_map_tipo_processo_padrao_salvar':
+        require_once dirname(__FILE__) . '/pen_map_tipo_processo_padrao.php';
+          break;
+      
+      case 'pen_map_orgaos_exportar_tipos_processos':
+        require_once dirname(__FILE__) . '/pen_tipo_procedimento_lista.php';
+          break;
+
+      case 'pen_map_orgaos_externos_mapeamento_desativar':
+      case 'pen_map_orgaos_externos_mapeamento':
+      case 'pen_map_orgaos_externos_mapeamento_gerenciar':
+      case 'pen_map_orgaos_externos_mapeamento_excluir':
+        require_once dirname(__FILE__) . '/pen_map_orgaos_mapeamento_tipo_listar.php';
+          break;
+
       case 'pen_map_unidade_listar':
       case 'pen_map_unidade_excluir':
         require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
@@ -740,7 +801,33 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+        }
+          break;
+
+      case 'pen_unidade_auto_completar_mapeados':
+        // DTO de paginao
+        $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+        $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
+        $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
+        $objPenUnidadeDTOFiltro->retNumIdUnidade();
+        $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
+
+          // Filtragem
+        if(!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
+          $objPenUnidadeDTOFiltro->setStrNomeUnidadeRH('%'.$_POST['palavras_pesquisa'].'%', InfraDTO::$OPER_LIKE);
+        }
+        
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
+        if (count($objArrPenUnidadeDTO) > 0) {
+          foreach ($objArrPenUnidadeDTO as $dto) {
+            $dto->setNumIdUnidadeMap($dto->getNumIdUnidadeRH());
+            $dto->setStrDescricaoMap($dto->getStrNomeUnidadeRH(). '-' . $dto->getStrSiglaUnidadeRH());
+          }
+          $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
+        } else {
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
 

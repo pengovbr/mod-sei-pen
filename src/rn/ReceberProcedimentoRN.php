@@ -272,31 +272,8 @@ class ReceberProcedimentoRN extends InfraRN
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
           );
 
-          // Obtenha a extensão do nome do arquivo
-          $nomeArquivo = $objAnexoDTO->getStrNome();
-          $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
-          $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
-
-          $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
-          $objArquivoExtensaoDTO->retStrExtensao();
-          $objArquivoExtensaoDTO->retNumTamanhoMaximo();
-          $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
-          $objArquivoExtensaoDTO->setNumTamanhoMaximo(null,InfraDTO::$OPER_DIFERENTE);
-          $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
-    
-          $objArquivoExtensaoRN = new ArquivoExtensaoRN();
-          $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
-
-          // Verificar o tamanho máximo permitido
-          if ($objArquivoExtensaoDTO !== null) {
-              $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
-              if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
-                  $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
-                  $mensagemErro = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
-                  throw new InfraException($mensagemErro);
-              }
-          }
-
+          ReceberProcedimentoRN::validaTamanhoMaximoAnexo($objAnexoDTO->getStrNome(), $nrTamanhMegaByte);
+ 
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
@@ -1085,7 +1062,9 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
       $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
-      $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio);
+      $remetente = $objMetadadosProcedimento->metadados->remetente;
+      $destinatario = $objMetadadosProcedimento->metadados->destinatario;
+      $this->atribuirTipoProcedimento($objProcedimentoDTO, $remetente, $destinatario, $numIdTipoProcedimento, $strProcessoNegocio);
 
       // Obtém código da unidade através de mapeamento entre SEI e Barramento
       $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
@@ -1151,7 +1130,7 @@ class ReceberProcedimentoRN extends InfraRN
     if ($arrayObjProtocoloDTO > 0) {
       $strDescricao  = sprintf(
         'Um processo com o número de protocolo %s já existe no sistema de destino. '
-        . 'OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.',
+        . 'OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.',
         utf8_decode($parObjProtocolo->protocolo)
       ).PHP_EOL;
       throw new InfraException($strDescricao);
@@ -1380,6 +1359,47 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setArrObjParticipanteDTO($arrObjParticipanteDTO);
   }
 
+  /**
+   * Verificar se tem mapeamento entre orgão
+   *
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $strProcessoNegocio
+   * @return TipoProcedimentoDTO
+   */
+  public function obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio) {
+
+    $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+
+    $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setStrAtivo('S');
+
+    $objPenOrgaoExternoDTO->retDblId();
+
+    $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+    $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
+
+    if (!is_null($objPenOrgaoExternoDTO)) {
+      $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+      $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
+      $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso('%'.$strProcessoNegocio.'%', InfraDTO::$OPER_LIKE);
+      $objMapeamentoTipoProcedimentoDTO->setStrAtivo('S');
+
+      $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
+
+      $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+      $objMapeamentoTipoProcedimentoDTO = $objMapeamentoTipoProcedimentoRN->consultar($objMapeamentoTipoProcedimentoDTO);
+
+      if (!is_null($objMapeamentoTipoProcedimentoDTO)) {
+        $idTipoProcessoDestino = $objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino();
+
+        return $this->obterTipoProcessoPadrao($idTipoProcessoDestino);
+      }
+    }
+
+    return null;
+  }
 
   private function obterTipoProcessoPadrao($numIdTipoProcedimento) {
 
@@ -1452,18 +1472,39 @@ class ReceberProcedimentoRN extends InfraRN
     return $objTipoProcedimentoDTO;
   }
 
-  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
-    {
+  /**
+   * Atribuir tipo de procedimento
+   * Procura tipo de procedimento
+   * Procura tipo de procedimento no mapeamento entre orgão
+   * Procura tipo de procedimento padrão
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $numIdTipoProcedimento
+   * @param string|int $strProcessoNegocio
+   * @return ProcedimentoDTO
+   * @throws InfraException
+   */
+  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $remetente, $destinatario, $numIdTipoProcedimento, $strProcessoNegocio)
+  {
     if(!empty(trim($strProcessoNegocio))){
+      // Verifica se existe relacionamento entre orgãos
+      $objTipoProcedimentoDTO = $this->obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio);
+      
+      if(is_null($objTipoProcedimentoDTO)){
+        // Verifica se existe tipo de processo igual cadastrado
         $objTipoProcedimentoDTO = $this->obterTipoProcessoPeloNomeOrgaoUnidade(
           $strProcessoNegocio,
           SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(),
           SessaoSEI::getInstance()->getNumIdUnidadeAtual()
         );
+      }
     }
 
     if(is_null($objTipoProcedimentoDTO)){
-        $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
+      // Verifica tipo de processo padrão cadastrado
+      $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
     }
 
     if (is_null($objTipoProcedimentoDTO)){
@@ -1919,8 +1960,21 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumentoRN = new DocumentoRN();
           $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
           SessaoSEI::getInstance()->setNumIdUnidadeAtual($objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo());
-
+          //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
+          $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
+ 
+          //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
+          $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
+ 
           $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+
+          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+          $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+
+          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+          $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
         }
       }
     } catch(Exception $e) {
@@ -1933,6 +1987,25 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+  //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+  private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeRN = new AtividadeRN();
+
+    if ($objAtividadeRN->consultarRN0033($objAtividadeDTO)==null){
+      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+      $objReabrirProcessoDTO->setDblIdProcedimento($parDblIdProcedimento);
+      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+    }
+  }
 
   private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
     {
@@ -2404,7 +2477,7 @@ class ReceberProcedimentoRN extends InfraRN
             $arquivoExtensaoDTO->retStrExtensao();
 
           if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0) {
-                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.";
+                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
                 $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
                 throw new InfraException($strMensagem);
           }
@@ -2741,6 +2814,43 @@ class ReceberProcedimentoRN extends InfraRN
             }
           }
         }
+      }
+    }
+  }
+
+  private static function validaTamanhoMaximoAnexo($nomeArquivo, $nrTamanhMegaByte){
+    // Obtenha a extensão do nome do arquivo
+    $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
+    $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
+
+    $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
+    $objArquivoExtensaoDTO->retStrExtensao();
+    $objArquivoExtensaoDTO->retNumTamanhoMaximo();
+    $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
+    $objArquivoExtensaoDTO->setNumTamanhoMaximo(null, InfraDTO::$OPER_DIFERENTE);
+    $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
+
+    $objArquivoExtensaoRN = new ArquivoExtensaoRN();
+    $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
+
+    // Verificar o tamanho máximo permitido
+    if ($objArquivoExtensaoDTO != null) {
+      $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
+
+      if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
+        $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
+        $mensagemErro  = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
+      }
+    } else {
+      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+
+      if (!empty($numTamDocExterno) && $numTamDocExterno < $nrTamanhMegaByte) {
+        $mensagemErro  = "O tamanho máximo geral permitido para documentos externos é $numTamDocExterno Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
       }
     }
   }

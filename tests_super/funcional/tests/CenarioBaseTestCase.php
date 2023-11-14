@@ -37,8 +37,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaProcessosTramitadosExternamente = null;
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
+    protected $paginaMoverDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
     protected $paginaMapeamentoUnidade = null;
+    protected $paginaCadastroOrgaoExterno = null;
+    protected $paginaTramiteMapeamentoOrgaoExterno = null;
+    protected $paginaExportarTiposProcesso = null;
 
     public function setUpPage(): void
     {
@@ -58,6 +62,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
+        $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
+        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->currentWindow()->maximize();
     }
 
@@ -194,6 +201,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
+            'NOME_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_UNIDADE_ESTRUTURAS'),
+            'NOME_UNIDADE_ORGAO_DESTINO' => constant($nomeContexto . '_MAPEAMENTO_ORGAO'),
+            'ID_UNIDADE_ORGAO_DESTINO' => constant($nomeContexto . '_ID_MAPEAMENTO_ORGAO'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
             'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
@@ -223,6 +233,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
+    }
+
+    protected function navegarPara($acao) 
+    {
+        $this->frame(null);
+        $acao = "acao={$acao}";
+        $xpath = "//a[contains(@href, '$acao')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)
@@ -379,7 +401,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $callbackEnvio = function ($testCase) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemValidacao = utf8_encode('Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita.GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.');
+                $mensagemValidacao = utf8_encode('Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.');
                 $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
