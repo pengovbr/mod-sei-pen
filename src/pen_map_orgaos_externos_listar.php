@@ -67,41 +67,7 @@ try {
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
                 break;
-            case 'pen_importar_tipos_processos': {
-
-                try{
-                    $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-                    $arrProcedimentoDTO = [];
-                    $tipoDeProcedimentos = array();
-                    $procedimentos = explode(',', $_POST['dados']);
-                    for ($i = 0; $i < count($procedimentos); $i += 2) {
-                        $key = trim($procedimentos[$i]);
-                        $value = trim($procedimentos[$i + 1], '"');
-                        $tipoDeProcedimentos[$key] = $value;
-                    }
-
-                    
-                    foreach ($tipoDeProcedimentos as $idProcedimento => $nomeProcedimento) {
-                        $procedimentoDTO = new PenMapTipoProcedimentoDTO();
-                        $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
-                        $procedimentoDTO->setNumIdTipoProcessoOrigem($idProcedimento);
-                        $procedimentoDTO->setStrNomeTipoProcesso($nomeProcedimento);
-                        $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
-                        $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
-                        if ($penMapTipoProcedimentoRN->contar($procedimentoDTO)) {
-                            continue;
-                        }
-                        $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
-                    }
-                    $objPagina->adicionarMensagem('Importação realizada com sucesso.', 5);
-                    header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-                    exit(0);
-                } catch (Exception $e) {
-                    throw new InfraException($e->getMessage());
-                }
-
-            }
-
+            
             case 'pen_map_orgaos_externos_listar':
                 // Ação padrão desta tela
                 break;
@@ -304,7 +270,9 @@ try {
                 $arrPenOrgaoExternoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
 
                 if ($arrPenOrgaoExternoDTO == null) {
-                    $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('. $objPenOrgaoExternoDTO->getDblId(). ')">'
+                    $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('
+                        . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao='.$objPenOrgaoExternoDTO->getDblId())
+                        . "'," .$objPenOrgaoExternoDTO->getDblId().')">'
                     . '<img src='
                     . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
                     . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
@@ -317,6 +285,8 @@ try {
                     . ProcessoEletronicoINT::getCaminhoIcone("svg/arquivo_mapeamento_assunto.svg") 
                     . ' title="Mapear tipos de processos" alt="Mapear tipos de processos" class="infraImg"></a>';
                 }
+
+                $strResultado .= ' <input type="hidden" id="dblId_'.$objPenOrgaoExternoDTO->getDblId().'" name="dblId_'.$objPenOrgaoExternoDTO->getDblId().'" value="'.$objPenOrgaoExternoDTO->getDblId().'" />';
 
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
                     . $objSessao->assinarLink(
@@ -338,7 +308,7 @@ try {
         }
         $strResultado .= '</table>';
     }
-    
+            
     $arrComandos = array($btnPesquisar, $btnNovo, $btnReativar,$btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
     $arrComandosFinal = array($btnNovo, $btnReativar, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 } catch (InfraException $e) {
@@ -404,6 +374,12 @@ $objPagina->montarStyle();
 </style>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
+    var objInfraTableToTable = null;
+
+    function reloadWindow() {
+        window.location.reload();
+    }
+
     function inicializar() {
 
         infraEfeitoTabelas();
@@ -517,71 +493,15 @@ $objPagina->montarStyle();
         }
     }
 
-    function infraImportarCsv(orgaoId) {
-        document.getElementById('mapId').value = orgaoId;
-        $('#importArquivoCsv').click();
-    }
-
-    function processarDados(csv) {
-        const lines = csv.split(/\r\n|\n/);
-        const data = [];
-
-        for (let i = 1; i < lines.length; i++) {
-            const formatLine = lines[i]
-            const lineData = formatLine.toString().split(';');
-            
-            if (isNaN(parseInt(lineData[0]))) {
-                continue;
-            }
-            const tipoProcessoId = parseInt(lineData[0]);
-            const tipoProcessoNome = lineData[1];
-
-            data.push(tipoProcessoId);
-            data.push(tipoProcessoNome);
-        }
-
-        return data.join(',').replaceAll('""', '"');
-    }
-
-    function importarCsv(event, orgaoId) {
-        const file = event.target.files[0];
-
-        if (!file) {
-            console.error("Nenhum arquivo selecionado.");
-            return;
-        }
-
-        const reader = new FileReader();
-
-        reader.onload = function (event) {
-            const csvContent = event.target.result;
-            const data = $('#dadosInput').val(JSON.stringify(processarDados(csvContent)));
-            console.log(processarDados(csvContent))
-            enviarFormulario(processarDados(csvContent))
-        };
-        reader.readAsText(file);
-    }
-
-    function enviarFormulario(data, orgaoId) {
-        const dataInput = document.getElementById('dadosInput');
-        const orgaoInput = document.getElementById('dadosInput');
-        orgaoInput.value = orgaoId;
-        dataInput.value = data;
-
-        const form = jQuery('#formImportarDados');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=pen_importar_tipos_processos&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
-        form.submit();
+    function infraImportarCsv(linkOrgaoId, orgaoId) {
+        objInfraTableToTable = new infraLupaText('dblId_' + orgaoId, 'tableTipoProcessos', linkOrgaoId);
+        objInfraTableToTable.selecionar(700, 500);
     }
 </script>
 <?php
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
-<input style="display: none" type="file" id="importArquivoCsv" accept=".csv" onchange="importarCsv(event)">
-<form id="formImportarDados" method="post" action="">
-    <input type="hidden" name="mapId" id="mapId">
-    <input type="hidden" name="dados" id="dadosInput">
-</form>
 <form id="frmAcompanharEstadoProcesso" method="post" action="">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->abrirAreaDados('5em'); ?>
@@ -598,6 +518,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
         <option value="S" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : ''); ?>>Ativo</option>
         <option value="N" <?= PaginaSEI::tratarHTML(isset($_POST['txtEstado']) && $_POST['txtEstado'] == "N" ? 'selected="selected"' : ''); ?>>Inativo</option>
     </select>
+    <input type="hidden" id="tableTipoProcessos" name="tableTipoProcessos" value="" />
 
     <?php $objPagina->fecharAreaDados(); ?>
     <br />
