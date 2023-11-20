@@ -18,7 +18,7 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
     }
 
     public function reativarMapeamentoCheckbox() {
-        $this->test->byXPath("//div[contains(@class, 'infraCheckboxDiv')]")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
         $this->test->byId("btnReativar")->click();
         $bolExisteAlerta=$this->alertTextAndClose();
         if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);
@@ -33,7 +33,7 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
     }
 
     public function desativarMapeamentoCheckbox() {
-        $this->test->byXPath("//div[contains(@class, 'infraCheckboxDiv')]")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
         $this->test->byId("btnDesativar")->click();
         $bolExisteAlerta=$this->alertTextAndClose();
         if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);

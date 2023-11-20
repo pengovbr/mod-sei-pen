@@ -31,9 +31,9 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
         $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino(self::$remetente['SIGLA_UNIDADE']);
 
+        sleep(2);
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
-        sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Relacionamento cadastrado com sucesso.'),
@@ -51,7 +51,8 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      *
      * @return void
      */
-    public function test_desativacao_mapeamento_orgao_externo() {
+    public function test_desativacao_mapeamento_orgao_externo() 
+    {
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
         
