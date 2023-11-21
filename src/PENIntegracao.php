@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.3.2");
+define("VERSAO_MODULO_PEN", "3.3.3");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -712,6 +712,17 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
           break;
 
+      case 'pen_map_restricao_envio_comp_digitais_listar':
+      case 'pen_map_restricao_envio_comp_digitais_excluir':
+          require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_listar.php';
+          break;
+
+      case 'pen_map_restricao_envio_comp_digitais_salvar':
+      case 'pen_map_restricao_envio_comp_digitais_cadastrar':
+      case 'pen_map_restricao_envio_comp_digitais_visualizar':
+          require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_cadastrar.php';
+          break;
+
       default:
           return false;
 
@@ -736,7 +747,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
 

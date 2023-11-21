@@ -287,6 +287,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.2':
+           $this->instalarV3033();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1831,6 +1833,54 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3032()
   {
       $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  public function instalarV3033()
+  {
+      /* Corrige nome de menu de trâmite de documentos */
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Administração');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (empty($objItemMenuDTO)) {
+        throw new InfraException('Menu "Administração" não foi localizado');
+      }
+
+      // Adicionar submenu
+      $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+      $numIdItemMenu = $this->criarMenu('Mapeamento de Envio Parcial', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+      $numIdRecurso = $this->criarRecurso('pen_map_restricao_envio_comp_digitais_listar', 'Listar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarMenu('Restrição de Envio de Componentes Digitais', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_salvar', 'Salvar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_excluir', 'Excluir Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_cadastrar', 'Cadastro de Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_atualizar', 'Atualizar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_visualizar', 'Visualizar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+
+      $numIdSistemaSei = $this->getNumIdSistema('SEI');
+      $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_listar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_salvar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_cadastrar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_atualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_visualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_excluir');
+
+      // Nova versão
+      $this->atualizarNumeroVersao("3.3.3");
   }
 }
 

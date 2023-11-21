@@ -270,6 +270,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.2':
+            $this->instalarV3033();
 
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2541,6 +2543,48 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3032() {
     $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  protected function instalarV3033()
+  {
+    $objInfraBanco = BancoSEI::getInstance();
+    $objMetaBD = $this->objMeta;
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_envio_comp_digitais',
+      'cols' => array(
+        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_estrutura' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'str_estrutura' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'str_unidade_rh' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
+        'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO)
+      ),
+      'pk' => array('cols' => array('id')),
+      'uk' => array('id_estrutura', 'id_unidade_rh', 'id_unidade'),
+      'fks' => array(
+        'usuario' => array('id_usuario', 'id_usuario'),
+        'unidade' => array('id_unidade', 'id_unidade'),
+      )
+    ));
+
+    # Criar sequencia para tramite em bloco
+
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_tramita_em_bloco
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_envio_comp_digitais');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_envio_comp_digitais', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_envio_comp_digitais');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.3.3");
   }
 }
 
