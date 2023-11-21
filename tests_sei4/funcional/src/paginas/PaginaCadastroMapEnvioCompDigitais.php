@@ -2,6 +2,10 @@
 
 use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
+/**
+ * Classe responsável por teste funcional de 
+ * mapeamento de envio parcial de componentes digitais
+ */
 class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 {
     /**
@@ -15,7 +19,8 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
-     * Description
+     * Clicar no botão novo
+     *
      * @return void
      */
     public function novo()
@@ -24,11 +29,11 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
-     * Criar novo mapeamento
-     * Chama seleção de repositorios
-     * Chama seleção de unidade
-     * Chama botão salvar
+     * Selecionar repositório
+     * Selecionar unidade
      *
+     * @param string $estrutura
+     * @param string $unidade
      * @return void
      */
     public function setarParametros($estrutura, $unidade)
@@ -58,7 +63,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      * Seleciona unidade por nome
      *
      * @param string $nomeUnidade
-     * @param ?string  $hierarquia
+     * @param ?string $hierarquia
      * @return string
      */
     private function selectUnidade($nomeUnidade, $hierarquia = null)
@@ -87,7 +92,8 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
-     * Description
+     * Clicar no botão salvar
+     *
      * @return void
      */
     public function salvar()
@@ -120,10 +126,11 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
-     * Selecionar primeira checkbox de exclusão
-     * Seleciona botão excluir
-     * Seleciona botão de confirmação
-     *  
+     * Lispar campo de pesquisa
+     * Colocar texto para pesquisa
+     * Clicar no botão pesquisar
+     *
+     * @param string $textoPesquisa
      * @return void
      */
     public function selecionarPesquisa($textoPesquisa)
@@ -134,9 +141,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
-     * Selecionar primeira checkbox de exclusão
-     * Seleciona botão excluir
-     * Seleciona botão de confirmação
+     * Selecionar todos os intens para impressão
      *  
      * @return void
      */
@@ -149,15 +154,15 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     /**
      * Buscar item de tabela por nome
      *
-     * @param string $origem
+     * @param string $nome
      * @return string|null
      */
     public function buscarNome($nome)
     {
         try {
-            $orgaoOrigem = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
-            return !empty($nome) && !is_null($nome) ?
-                $nome : 
+            $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
+            return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
+                $nomeSelecionado : 
                 null;
         } catch (Exception $ex) {
             return null;

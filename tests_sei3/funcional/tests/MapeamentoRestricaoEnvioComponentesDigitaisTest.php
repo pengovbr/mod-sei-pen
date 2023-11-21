@@ -8,9 +8,8 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     public static $remetente;
     public static $remetenteB;
 
-
     /**
-     * Teste inicial de mapeamento de componentes digitais
+     * Teste inicial de cadastro de mapeamento de componentes digitais
      *
      * @group mapeamento
      *
@@ -39,7 +38,7 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
         $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['REP_ESTRUTURAS']);
         $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);  
 
-        sleep(1);
+        sleep(2);
         $this->assertNotNull($nomeRepositorioCadastrado);
         $this->assertNotNull($nomeUnidadeCadastrado);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
@@ -50,9 +49,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para editar mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -91,9 +90,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para pesquisar mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -123,9 +122,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para imprimir mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -149,9 +148,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para excluir de mapeamento de orgão exteno
+     * Teste para excluir mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */

@@ -10,7 +10,7 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
 
 
     /**
-     * Teste inicial de mapeamento de componentes digitais
+     * Teste inicial de cadastro de mapeamento de componentes digitais
      *
      * @group mapeamento
      *
@@ -50,9 +50,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para editar mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -91,9 +91,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para pesquisar mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -123,9 +123,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para editar mapeamento de orgão exteno
+     * Teste para imprimir mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
@@ -149,9 +149,9 @@ class MapeamentoRestricaoEnvioComponentesDigitaisTest extends CenarioBaseTestCas
     }
 
     /**
-     * Teste para excluir de mapeamento de orgão exteno
+     * Teste para excluir mapeamento de componentes digitais
      *
-     * @group MapeamentoOrgaoExterno
+     * @group mapeamento
      *
      * @return void
      */
