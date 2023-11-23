@@ -76,22 +76,26 @@ try {
     }
       $objPenUnidadeRHDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
       $objPenUnidadeRHDTO->retTodos();
-      $objResultado = $objGenericoBD->listar($objPenUnidadeRHDTO);
+      $objPenUnidadeRN = new PenUnidadeRN();
+      $objResultado = $objPenUnidadeRN->listar($objPenUnidadeRHDTO);
 
     if (count($objResultado) > 0) {
 
         $unidadeDTO = new UnidadeDTO();
-        $unidadeDTO->setNumIdUnidade($objPenUnidadeRHDTO->getNumIdUnidade(), InfraDTO::$OPER_IGUAL);
+        $unidadeDTO->setNumIdUnidade($objResultado[0]->getNumIdUnidade(), InfraDTO::$OPER_IGUAL);
 
         $unidadeDTO->retNumIdUnidade();
         $unidadeDTO->retStrSigla();
 
         $penUnidadeRN = new PenUnidadeRN();
-        foreach ($penUnidadeRN->listar($unidadeDTO) as $dados) {
-            $mapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla();
-        }
+        $dados = $penUnidadeRN->listar($unidadeDTO);
+   
+      foreach ($penUnidadeRN->listar($unidadeDTO) as $dados) {
+          $mapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla();
+      }
 
-        throw new InfraException('A unidade ' . $mapIdUnidade[$objPenUnidadeRHDTO->getNumIdUnidade()] .' do sistema já está mapeada com a unidade do Portal de Administração.');
+        $objInfraException = new InfraException();
+        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' com ID: ' . $objResultado[0]->getNumIdUnidade() . ' do sistema já está mapeada com a unidade '. $_POST['id_unidade_rh'] . ' do Portal de Administração.');
     }
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
@@ -181,9 +185,42 @@ $objPagina->abrirHead();
 $objPagina->montarMeta();
 $objPagina->montarTitle(':: ' . $objPagina->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPagina->montarStyle();
+if ($objPenUnidadeDTO!= null)
+{
+    $classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcarSelecao' : '';
+}else
+{
+  if(empty($objPenUnidadeDTO)){
+      $objPenUnidadeDTO = new PenUnidadeDTO();
+      $objPenUnidadeDTO->setNumIdUnidade('');
+      $objPenUnidadeDTO->setNumIdUnidadeRH('');
+  }
+  
+  
+  if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+      $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
+  }
+  
+      //Monta o select das unidades
+      $objUnidadeDTO = new UnidadeDTO();
+      $arrNumIdUnidadeUsados = $objPenUnidadeRN->getIdUnidadeEmUso($objPenUnidadeDTO);
+  
+  if(!empty($arrNumIdUnidadeUsados)) {
+      // Remove os que já estão em uso
+      $objUnidadeDTO->setNumIdUnidade($arrNumIdUnidadeUsados, InfraDTO::$OPER_NOT_IN);
+  }
+  
+      $objUnidadeDTO->retNumIdUnidade();
+      $objUnidadeDTO->retStrSigla();
+      $objUnidadeDTO->retStrDescricao();
+      $arrMapIdUnidade = array();
+      $objPenUnidadeRN = new PenUnidadeRN();
+  foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
+      $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
+  }
+    $classMarcacao = '';
 
-$classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcarSelecao' : '';
-
+}
 ?>
 <style type="text/css">
 
@@ -254,7 +291,6 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
-    <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('15em'); ?>
 
     <label id="lblUnidadeSei" for="id_unidade" class="infraLabelObrigatorio">Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>

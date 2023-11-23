@@ -379,7 +379,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $callbackEnvio = function ($testCase) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemValidacao = utf8_encode('Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita.GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.');
+                $mensagemValidacao = utf8_encode('Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.');
                 $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();

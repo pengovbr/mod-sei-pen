@@ -29,7 +29,7 @@ Nova mensagem 'A unidade [Nome da Unidade] do sistema já está mapeada a unidad
 
 #### Melhoria de Mensagem: Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente. (#332)
 
-Nova mensagem 'Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita.GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento'.
+Nova mensagem 'Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento'.
 
 #### Melhoria da Mensagem - Unidade [Estrutura: XXXXXX] não configurada para receber processos externos no sistema de destino. (#337)
 

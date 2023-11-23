@@ -272,31 +272,8 @@ class ReceberProcedimentoRN extends InfraRN
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
           );
 
-          // Obtenha a extensão do nome do arquivo
-          $nomeArquivo = $objAnexoDTO->getStrNome();
-          $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
-          $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
-
-          $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
-          $objArquivoExtensaoDTO->retStrExtensao();
-          $objArquivoExtensaoDTO->retNumTamanhoMaximo();
-          $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
-          $objArquivoExtensaoDTO->setNumTamanhoMaximo(null,InfraDTO::$OPER_DIFERENTE);
-          $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
-    
-          $objArquivoExtensaoRN = new ArquivoExtensaoRN();
-          $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
-
-          // Verificar o tamanho máximo permitido
-          if ($objArquivoExtensaoDTO !== null) {
-              $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
-              if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
-                  $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
-                  $mensagemErro = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
-                  throw new InfraException($mensagemErro);
-              }
-          }
-
+          ReceberProcedimentoRN::validaTamanhoMaximoAnexo($objAnexoDTO->getStrNome(), $nrTamanhMegaByte);
+ 
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
@@ -2741,6 +2718,43 @@ class ReceberProcedimentoRN extends InfraRN
             }
           }
         }
+      }
+    }
+  }
+
+  private static function validaTamanhoMaximoAnexo($nomeArquivo, $nrTamanhMegaByte){
+    // Obtenha a extensão do nome do arquivo
+    $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
+    $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
+
+    $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
+    $objArquivoExtensaoDTO->retStrExtensao();
+    $objArquivoExtensaoDTO->retNumTamanhoMaximo();
+    $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
+    $objArquivoExtensaoDTO->setNumTamanhoMaximo(null, InfraDTO::$OPER_DIFERENTE);
+    $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
+
+    $objArquivoExtensaoRN = new ArquivoExtensaoRN();
+    $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
+
+    // Verificar o tamanho máximo permitido
+    if ($objArquivoExtensaoDTO != null) {
+      $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
+
+      if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
+        $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
+        $mensagemErro  = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
+      }
+    } else {
+      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+
+      if (!empty($numTamDocExterno) && $numTamDocExterno < $nrTamanhMegaByte) {
+        $mensagemErro  = "O tamanho máximo geral permitido para documentos externos é $numTamDocExterno Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
       }
     }
   }
