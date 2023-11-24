@@ -23,7 +23,7 @@ class PaginaIniciarProcesso extends PaginaTeste
             $this->test->byLinkText($tipoProcesso)->click();
         }
         catch (Exception $e){
-            $this->test->byId("imgExibirTiposProcedimento")->click();
+            $this->test->byId("ancExibirTiposProcedimento")->click();
             $this->test->byId('txtFiltro')->value($tipoProcesso);
             sleep(2);
             $this->test->byLinkText($tipoProcesso)->click();

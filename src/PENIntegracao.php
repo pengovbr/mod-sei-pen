@@ -167,9 +167,9 @@ class PENIntegracao extends SeiIntegracao
       $arrStrIcone = array();
       $arrDblIdProcedimento = array();
 
-      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-      }
+    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+        $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+    }
 
       $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
       $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
@@ -237,7 +237,7 @@ class PENIntegracao extends SeiIntegracao
             } else {
               $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
             }
-            break;
+              break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
             $arrayIcone = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
             if (!isset($arrStrIcone[$dblIdProcedimento])) {
@@ -245,7 +245,7 @@ class PENIntegracao extends SeiIntegracao
             } else {
               $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
             }
-            break;
+              break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
             if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
@@ -256,9 +256,9 @@ class PENIntegracao extends SeiIntegracao
                 $arrStrIcone[$dblIdProcedimento] = array_merge($arrStrIcone[$dblIdProcedimento], $arrayIcone);
               }
             }
-            break;
+              break;
           default:
-            break;
+              break;
         }
       }
     }
@@ -374,18 +374,18 @@ class PENIntegracao extends SeiIntegracao
       switch ($objAtividadeDTO->getNumIdTarefa()) {
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
           $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
-          break;
+            break;
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
           $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
-          break;
+            break;
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO):
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO):
           if ($this->consultarProcessoRecebido($dblIdProcedimento)) {
             $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
           }
-          break;
+            break;
         default:
-          break;
+            break;
       }
     }
 
@@ -565,16 +565,17 @@ class PENIntegracao extends SeiIntegracao
   private static function formatarXMLAjax($str)
   {
     if (!is_numeric($str)){
-      $str = str_replace('&','&amp;',$str);
-      $str = str_replace('<','&amp;lt;',$str);
-      $str = str_replace('>','&amp;gt;',$str);
-      $str = str_replace('\"','&amp;quot;',$str);
-      $str = str_replace('"','&amp;quot;',$str);
+      $str = str_replace('&', '&amp;', $str);
+      $str = str_replace('<', '&amp;lt;', $str);
+      $str = str_replace('>', '&amp;gt;', $str);
+      $str = str_replace('\"', '&amp;quot;', $str);
+      $str = str_replace('"', '&amp;quot;', $str);
       //$str = str_replace("\n",'_',$str);
     }
     return $str;
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function processarControlador($strAcao)
   {
     //Configuração de páginas do contexto da Árvore do processo para apresentação de erro de forma correta
@@ -590,49 +591,49 @@ class PENIntegracao extends SeiIntegracao
     switch ($strAcao) {
       case 'pen_procedimento_expedir':
         require_once dirname(__FILE__) . '/pen_procedimento_expedir.php';
-        break;
+          break;
 
       case 'pen_unidade_sel_expedir_procedimento':
         require_once dirname(__FILE__) . '/pen_unidade_sel_expedir_procedimento.php';
-        break;
+          break;
 
       case 'pen_procedimento_processo_anexado':
         require_once dirname(__FILE__) . '/pen_procedimento_processo_anexado.php';
-        break;
+          break;
 
       case 'pen_procedimento_cancelar_expedir':
         require_once dirname(__FILE__) . '/pen_procedimento_cancelar_expedir.php';
-        break;
+          break;
 
       case 'pen_procedimento_expedido_listar':
         require_once dirname(__FILE__) . '/pen_procedimento_expedido_listar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_envio_listar';
-      case 'pen_map_tipo_documento_envio_excluir';
-      case 'pen_map_tipo_documento_envio_desativar';
+      case 'pen_map_tipo_documento_envio_listar':
+      case 'pen_map_tipo_documento_envio_excluir':
+      case 'pen_map_tipo_documento_envio_desativar':
       case 'pen_map_tipo_documento_envio_ativar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_listar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_envio_cadastrar';
+      case 'pen_map_tipo_documento_envio_cadastrar':
       case 'pen_map_tipo_documento_envio_visualizar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_recebimento_listar';
+      case 'pen_map_tipo_documento_recebimento_listar':
       case 'pen_map_tipo_documento_recebimento_excluir':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_listar.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_recebimento_cadastrar';
+      case 'pen_map_tipo_documento_recebimento_cadastrar':
       case 'pen_map_tipo_documento_recebimento_visualizar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_recebimento_cadastrar.php';
-        break;
+          break;
 
       case 'pen_apensados_selecionar_expedir_procedimento':
         require_once dirname(__FILE__) . '/apensados_selecionar_expedir_procedimento.php';
-        break;
+          break;
 
       case 'pen_unidades_administrativas_externas_selecionar_expedir_procedimento':
         //verifica qual o tipo de seleção passado para carregar o arquivo especifico.
@@ -641,43 +642,43 @@ class PENIntegracao extends SeiIntegracao
         }else {
           require_once dirname(__FILE__) . '/pen_unidades_administrativas_pesquisa_textual_expedir_procedimento.php';
         }
-        break;
+          break;
 
       case 'pen_procedimento_estado':
         require_once dirname(__FILE__) . '/pen_procedimento_estado.php';
-        break;
+          break;
 
         // Mapeamento de Hipóteses Legais de Envio
-      case 'pen_map_hipotese_legal_envio_cadastrar';
+      case 'pen_map_hipotese_legal_envio_cadastrar':
       case 'pen_map_hipotese_legal_envio_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_envio_listar';
+      case 'pen_map_hipotese_legal_envio_listar':
       case 'pen_map_hipotese_legal_envio_excluir':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_envio_listar.php';
-        break;
+          break;
 
         // Mapeamento de Hipóteses Legais de Recebimento
-      case 'pen_map_hipotese_legal_recebimento_cadastrar';
+      case 'pen_map_hipotese_legal_recebimento_cadastrar':
       case 'pen_map_hipotese_legal_recebimento_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_recebimento_listar';
+      case 'pen_map_hipotese_legal_recebimento_listar':
       case 'pen_map_hipotese_legal_recebimento_excluir':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_recebimento_listar.php';
-        break;
+          break;
 
-      case 'pen_map_hipotese_legal_padrao_cadastrar';
+      case 'pen_map_hipotese_legal_padrao_cadastrar':
       case 'pen_map_hipotese_legal_padrao_visualizar':
         require_once dirname(__FILE__) . '/pen_map_hipotese_legal_padrao_cadastrar.php';
-        break;
+          break;
 
-      case 'pen_map_unidade_cadastrar';
+      case 'pen_map_unidade_cadastrar':
       case 'pen_map_unidade_visualizar':
         require_once dirname(__FILE__) . '/pen_map_unidade_cadastrar.php';
-        break;
+          break;
 
       case 'pen_map_orgaos_externos_salvar':
       case 'pen_map_orgaos_externos_cadastrar':
@@ -693,37 +694,48 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_map_unidade_listar';
       case 'pen_map_unidade_excluir':
         require_once dirname(__FILE__) . '/pen_map_unidade_listar.php';
-        break;
+          break;
 
-      case 'pen_parametros_configuracao';
+      case 'pen_parametros_configuracao':
       case 'pen_parametros_configuracao_salvar':
         require_once dirname(__FILE__) . '/pen_parametros_configuracao.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_documento_envio_padrao_atribuir';
+      case 'pen_map_tipo_documento_envio_padrao_atribuir':
       case 'pen_map_tipo_documento_envio_padrao_consultar':
         require_once dirname(__FILE__) . '/pen_map_tipo_documento_envio_padrao.php';
-        break;
+          break;
 
-      case 'pen_map_tipo_doc_recebimento_padrao_atribuir';
+      case 'pen_map_tipo_doc_recebimento_padrao_atribuir':
       case 'pen_map_tipo_doc_recebimento_padrao_consultar':
         require_once dirname(__FILE__) . '/pen_map_tipo_doc_recebimento_padrao.php';
-        break;
+          break;
 
       case 'pen_envio_processo_lote_cadastrar':
         require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
-        break;
+          break;
 
       case 'pen_expedir_lote':
         require_once dirname(__FILE__) . '/pen_expedir_lote.php';
-        break;
+          break;
 
       case 'pen_expedir_lote_listar':
         require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
-        break;
+          break;
+
+      case 'pen_map_restricao_envio_comp_digitais_listar':
+      case 'pen_map_restricao_envio_comp_digitais_excluir':
+          require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_listar.php';
+          break;
+
+      case 'pen_map_restricao_envio_comp_digitais_salvar':
+      case 'pen_map_restricao_envio_comp_digitais_cadastrar':
+      case 'pen_map_restricao_envio_comp_digitais_visualizar':
+          require_once dirname(__FILE__) . '/pen_map_restricao_envio_comp_digitais_cadastrar.php';
+          break;
 
       default:
-        return false;
+          return false;
 
     }
     return true;
@@ -746,7 +758,7 @@ class PENIntegracao extends SeiIntegracao
         if (count($arrObjEstruturaDTO['itens']) > 0) {
           $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
         } else {
-          return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
         }
           break;
       case 'pen_unidade_auto_completar_mapeados':
@@ -779,23 +791,23 @@ class PENIntegracao extends SeiIntegracao
         $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
         $arrObjProcedimentoDTO = ProcessoEletronicoINT::autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $_POST['palavras_pesquisa']);
         $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjProcedimentoDTO, 'IdProtocolo', 'ProtocoloFormatadoProtocolo');
-        break;
+          break;
 
 
       case 'pen_procedimento_expedir_validar':
         require_once dirname(__FILE__) . '/pen_procedimento_expedir_validar.php';
-        break;
+          break;
 
       case 'pen_validar_expedir_lote':
         require_once dirname(__FILE__) . '/pen_validar_expedir_lote.php';
-        break;
+          break;
 
       case 'pen_procedimento_expedir_cancelar':
         $numIdTramite = $_POST['id_tramite'];
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $result = json_encode($objProcessoEletronicoRN->cancelarTramite($numIdTramite));
         InfraAjax::enviarJSON($result);
-        exit(0);
+          exit(0);
         break;
 
       case 'pen_pesquisar_unidades_administrativas_estrutura_pai':
@@ -806,7 +818,7 @@ class PENIntegracao extends SeiIntegracao
         $arrEstruturas = $objProcessoEletronicoRN->consultarEstruturasPorEstruturaPai($idRepositorioEstruturaOrganizacional, $numeroDeIdentificacaoDaEstrutura == "" ? null : $numeroDeIdentificacaoDaEstrutura);
 
         print json_encode($arrEstruturas);
-        exit(0);
+          exit(0);
         break;
 
 
@@ -842,7 +854,7 @@ class PENIntegracao extends SeiIntegracao
         }
 
         print json_encode($arrEstruturas);
-        exit(0);
+          exit(0);
         break;
     }
 
@@ -856,7 +868,7 @@ class PENIntegracao extends SeiIntegracao
     switch ($_GET['servico']) {
       case 'modpen':
         $strArq =  dirname(__FILE__) . '/ws/modpen.wsdl';
-        break;
+          break;
     }
 
     return $strArq;
@@ -936,12 +948,12 @@ class PENIntegracao extends SeiIntegracao
   public static function compararVersoes($strVersao1, $strVersao2){
     $numVersao1 = explode('.', $strVersao1);
       $numVersao1 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao1);
+      }, $numVersao1);
     $numVersao1 = intval(join($numVersao1));
 
     $numVersao2 = explode('.', $strVersao2);
       $numVersao2 = array_map(function($item){ return str_pad($item, 2, '0', STR_PAD_LEFT);
-    }, $numVersao2);
+      }, $numVersao2);
     $numVersao2 = intval(join($numVersao2));
 
     return $numVersao1 - $numVersao2;
