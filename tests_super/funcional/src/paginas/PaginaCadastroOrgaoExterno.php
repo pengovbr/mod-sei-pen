@@ -156,12 +156,13 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     public function abrirSelecaoDeArquivoParaImportacao()
     {
-        $this->test->byId('importarCsvButton')->click();
+        $this->test->byXPath("(//img[@title='Importar CSV'])[1]")->click();
+        sleep(2);
         $fileChooser = $this->test->byId('importArquivoCsv');
         $this->test->waitUntil(function ($testCase) use ($fileChooser) {
             $fileChooser
-                ->sendKeys('/opt/sei/web/modulosmod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
-                ->keys(Keys::ENTER);
+                ->sendKeys('/opt/sei/web/modulos/mod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
+                ->keys(Keys::CLEAR);
         },PEN_WAIT_TIMEOUT);
         $this->test->waitUntil(function($testCase) {
             return true;

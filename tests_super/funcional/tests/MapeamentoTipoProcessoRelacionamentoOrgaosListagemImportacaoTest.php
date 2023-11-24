@@ -115,13 +115,11 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends C
 
         // Buscar pesquisa vazia
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA'] . 'B');
-        sleep(1);
         $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
         $this->assertNull($nomeRepositorioCadastrado);
 
         // Buscar pesquisa com sucesso
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
-        sleep(1);
         $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
         $this->assertNotNull($nomeRepositorioCadastrado);
 

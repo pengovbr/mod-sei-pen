@@ -306,8 +306,8 @@ try {
                         . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao=' . $objPenOrgaoExternoDTO->getDblId())
                         . "'," . $objPenOrgaoExternoDTO->getDblId() . ')">'
                         . '<img src='
-                        . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
-                        . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
+                        . ProcessoEletronicoINT::getCaminhoIcone("/importar.svg", 'modulos/mod-sei-pen/src/imagens')
+                        . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px; width: 20px;">'
                         . '</a>';
                 } else {
                     $strResultado .= '<a href="'
