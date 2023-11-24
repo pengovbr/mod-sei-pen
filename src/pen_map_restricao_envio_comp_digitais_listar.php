@@ -92,11 +92,11 @@ try {
     $objPenRestricaoEnvioComponentesDigitaisDTO->retTodos(true);
     $objPenRestricaoEnvioComponentesDigitaisDTO->setOrdDblId(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-    if (array_key_exists('nome_estrutura', $_POST) && !empty($_POST['nome_estrutura'])) {
+    if (array_key_exists('nome_estrutura', $_POST) && ((!empty($_POST['nome_estrutura']) && $_POST['nome_estrutura'] !== 'null') || $_POST['nome_estrutura'] == "0")) {
         $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrEstrutura('%' . $_POST['nome_estrutura'] . '%', InfraDTO::$OPER_LIKE);
     }
 
-    if (array_key_exists('nome_unidade', $_POST) && !empty($_POST['nome_unidade'])) {
+    if (array_key_exists('nome_unidade', $_POST) && ((!empty($_POST['nome_unidade']) && $_POST['nome_unidade'] !== 'null') || $_POST['nome_unidade'] == "0")) {
         $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadeRh('%' . $_POST['nome_unidade'] . '%', InfraDTO::$OPER_LIKE);
     }
 
