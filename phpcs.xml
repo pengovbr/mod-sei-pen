@@ -14,7 +14,6 @@
     <exclude-pattern>*/tests/*</exclude-pattern>
     <exclude-pattern>*/vendor/*</exclude-pattern>
     <exclude-pattern>/infra_php/*</exclude-pattern>
-    <exclude-pattern>/modulos/*</exclude-pattern>
     <exclude-pattern>*/src/Standards/*/Tests/*\.(inc|css|js)$</exclude-pattern>
     <exclude-pattern>*/tests/Core/*/*\.(inc|css|js)$</exclude-pattern>
 
