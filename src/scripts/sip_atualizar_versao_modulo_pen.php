@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.2");
+define("VERSAO_MODULO_PEN", "3.4.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -287,7 +287,11 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
-        
+        case '3.3.2':
+           $this->instalarV3033();
+        case '3.4.0':
+            $this->instalarV3040();
+
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -1831,6 +1835,104 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3032()
   {
       $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  public function instalarV3033()
+  {
+      /* Corrige nome de menu de trâmite de documentos */
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Administração');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (empty($objItemMenuDTO)) {
+        throw new InfraException('Menu "Administração" não foi localizado');
+      }
+
+      // Adicionar submenu
+      $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+      $numIdItemMenu = $this->criarMenu('Mapeamento de Envio Parcial', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+      $numIdRecurso = $this->criarRecurso('pen_map_restricao_envio_comp_digitais_listar', 'Listar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $numIdItemMenuRecuso = $this->criarMenu('Restrição de Envio de Componentes Digitais', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_salvar', 'Salvar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_excluir', 'Excluir Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_cadastrar', 'Cadastro de Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_atualizar', 'Atualizar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+      $this->criarRecurso('pen_map_restricao_envio_comp_digitais_visualizar', 'Visualizar Mapeamentos de Restrição de Envio de Componentes Digitais', $numIdSistema);
+
+      $numIdSistemaSei = $this->getNumIdSistema('SEI');
+      $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_listar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_salvar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_cadastrar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_atualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_visualizar');
+      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_restricao_envio_comp_digitais_excluir');
+
+      $objDTO = new RelPerfilItemMenuDTO();
+      $objBD = new RelPerfilItemMenuBD(BancoSip::getInstance());
+
+      $objDTO->setNumIdPerfil($numIdPerfilSeiAdministrador);
+      $objDTO->setNumIdSistema($numIdSistema);
+      $objDTO->setNumIdRecurso($numIdRecurso);
+      $objDTO->setNumIdMenu($numIdMenu);
+      $objDTO->setNumIdItemMenu($numIdItemMenuRecuso);
+ 
+    if ($objBD->contar($objDTO) == 0) {
+        $objBD->cadastrar($objDTO);
+    }
+      // Nova versão
+      $this->atualizarNumeroVersao("3.3.3");
+  }
+
+  protected function instalarV3040()
+  {
+    /* Corrige nome de menu de trâmite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+    if (empty($objItemMenuDTO)) {
+      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+    }
+
+    // Adicionar submenu
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+    $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
+    $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+    $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
+
+    // Nova versão
+    $this->atualizarNumeroVersao("3.4.0");
   }
 }
 
