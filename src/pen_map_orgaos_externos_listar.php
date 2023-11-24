@@ -46,7 +46,7 @@ try {
                     $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
 
                     $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
-                    
+
                     if (is_array($arrParam['hdnInfraItensSelecionados'])) {
                         foreach ($arrParam['hdnInfraItensSelecionados'] as $arr) {
                             $dblId = explode(";", $arr)[0];
@@ -67,31 +67,63 @@ try {
                     throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
                 }
                 break;
-            
+
             case 'pen_map_orgaos_externos_listar':
                 // Ação padrão desta tela
                 break;
+            case 'pen_map_orgaos_importar_tipos_processos':
+                try {
+                    $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+                    $arrProcedimentoDTO = [];
+                    $tipoDeProcedimentos = array();
+                    $procedimentos = explode(',', $_POST['dados']);
+                    for ($i = 0; $i < count($procedimentos); $i += 2) {
+                        $key = trim($procedimentos[$i]);
+                        $value = trim($procedimentos[$i + 1], '"');
+                        $tipoDeProcedimentos[$key] = $value;
+                    }
+
+
+                    foreach ($tipoDeProcedimentos as $idProcedimento => $nomeProcedimento) {
+                        $procedimentoDTO = new PenMapTipoProcedimentoDTO();
+                        $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
+                        $procedimentoDTO->setNumIdTipoProcessoOrigem($idProcedimento);
+                        $procedimentoDTO->setStrNomeTipoProcesso($nomeProcedimento);
+                        $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
+                        $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
+                        if ($penMapTipoProcedimentoRN->contar($procedimentoDTO)) {
+                            continue;
+                        }
+                        $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
+                    }
+                    $objPagina->adicionarMensagem('Importação realizada com sucesso.', 5);
+                    header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+                    exit(0);
+                } catch (Exception $e) {
+                    throw new InfraException($e->getMessage());
+                }
+            break;
 
             case 'pen_map_orgaos_externos_reativar':
-                if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
+                if ((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
                     foreach ($arrHdnInInfraItensSelecionados as $arr) {
                         $id = explode(";", $arr)[0];
                         $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                         $objPenOrgaoExternoDTO->setDblId($id);
                         $objPenOrgaoExternoDTO->setStrAtivo('S');
-    
+
                         $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
                         $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
                     }
                     $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
                 }
-    
+
                 if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
                     $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                     $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
                     $objPenOrgaoExternoDTO->setStrAtivo('S');
-    
+
                     $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
                     $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
                     $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
@@ -99,7 +131,7 @@ try {
                 break;
 
             case 'pen_map_orgaos_externos_desativar':
-                if((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoDesativar'])) {
+                if ((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoDesativar'])) {
                     $btnDesativar = null;
                     $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
                     foreach ($arrHdnInInfraItensSelecionados as $arr) {
@@ -107,18 +139,18 @@ try {
                         $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                         $objPenOrgaoExternoDTO->setDblId($id);
                         $objPenOrgaoExternoDTO->setStrAtivo('N');
-    
+
                         $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
                         $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
                     }
                     $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
                 }
-    
+
                 if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
                     $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
                     $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
                     $objPenOrgaoExternoDTO->setStrAtivo('N');
-    
+
                     $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
                     $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
                     $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
@@ -169,13 +201,13 @@ try {
     if ($_POST['txtEstado'] == 'S') {
         $btnDesativar = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
     }
-    
+
     $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
     $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
     $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
         . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
         . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-    
+
     $arrComandos = array($btnPesquisar, $btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
     $arrComandosFinal = array($btnNovo, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
 
@@ -220,43 +252,43 @@ try {
             $strResultado .= '<td align="center">';
 
             $strResultado .= '<a href="'
-                . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
-                . '_visualizar&acao_origem='.$_GET['acao_origem']
-                . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
-                . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif") 
+                . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
+                    . '_visualizar&acao_origem=' . $_GET['acao_origem']
+                    . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
+                . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif")
                 . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
 
-            if($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
+            if ($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
                 $strResultado .= '<a href="'
-                    . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
-                    . '_atualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao']
-                    . '&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
+                    . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
+                        . '_atualizar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao']
+                        . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
                     . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
                     . ' title="Alterar Mapeamento" alt="Alterar Mapeamento Entre Órgãos" class="infraImg"></a>';
             }
 
-            if($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
-                $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
+            if ($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
+                $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
                 $strId = $objPenOrgaoExternoDTO->getDblId();
                 if ($btnReativarAdicionado == 'N') {
                     $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar">Reativar</button>';
                     $btnReativarAdicionado = 'S';
-                } 
-                $strResultado .= '<a class="reativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoReativar(\''.$strId.'\')"><img src="'. PaginaSEI::getInstance()->getIconeReativar() .'" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
+                }
+                $strResultado .= '<a class="reativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoReativar(\'' . $strId . '\')"><img src="' . PaginaSEI::getInstance()->getIconeReativar() . '" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
 
-            if($objSessao->verificarPermissao('pen_map_orgaos_externos_desativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'S') {
-                $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenOrgaoExternoDTO->getDblId());
+            if ($objSessao->verificarPermissao('pen_map_orgaos_externos_desativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'S') {
+                $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
                 $strId = $objPenOrgaoExternoDTO->getDblId();
                 if ($btnDesativarAdicionado == 'N') {
                     $btnDesativar = '<button type="button" id="btnDesativar" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton btnDesativar">Desativar</button>';
                     $btnDesativarAdicionado = 'S';
                 }
-                $strResultado .= '<a class="desativar" href="'.PaginaSEI::getInstance()->montarAncora($strId).'" onclick="acaoDesativar(\''.$strId.'\')"><img src="'
-                    . PaginaSEI::getInstance()->getIconeDesativar() .'" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
+                $strResultado .= '<a class="desativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoDesativar(\'' . $strId . '\')"><img src="'
+                    . PaginaSEI::getInstance()->getIconeDesativar() . '" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
             }
 
-           
+
 
             if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir')) {
 
@@ -264,29 +296,29 @@ try {
                 $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
                 $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
                 $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
-                
-            
+
+
                 $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
                 $arrPenOrgaoExternoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
 
                 if ($arrPenOrgaoExternoDTO == null) {
                     $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('
-                        . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao='.$objPenOrgaoExternoDTO->getDblId())
-                        . "'," .$objPenOrgaoExternoDTO->getDblId().')">'
-                    . '<img src='
-                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
-                    . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
-                    . '</a>';
+                        . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao=' . $objPenOrgaoExternoDTO->getDblId())
+                        . "'," . $objPenOrgaoExternoDTO->getDblId() . ')">'
+                        . '<img src='
+                        . ProcessoEletronicoINT::getCaminhoIcone("imagens/clonar.gif")
+                        . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px">'
+                        . '</a>';
                 } else {
                     $strResultado .= '<a href="'
-                    . $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE
-                    . '_mapeamento&acao_origem='.$_GET['acao_origem']
-                    . '&acao_retorno='.$_GET['acao'].'&id='.$objPenOrgaoExternoDTO->getDblId()).'"><img src='
-                    . ProcessoEletronicoINT::getCaminhoIcone("svg/arquivo_mapeamento_assunto.svg") 
-                    . ' title="Mapear tipos de processos" alt="Mapear tipos de processos" class="infraImg"></a>';
+                        . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
+                            . '_mapeamento&acao_origem=' . $_GET['acao_origem']
+                            . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
+                        . ProcessoEletronicoINT::getCaminhoIcone("svg/arquivo_mapeamento_assunto.svg")
+                        . ' title="Mapear tipos de processos" alt="Mapear tipos de processos" class="infraImg"></a>';
                 }
 
-                $strResultado .= ' <input type="hidden" id="dblId_'.$objPenOrgaoExternoDTO->getDblId().'" name="dblId_'.$objPenOrgaoExternoDTO->getDblId().'" value="'.$objPenOrgaoExternoDTO->getDblId().'" />';
+                $strResultado .= ' <input type="hidden" id="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" name="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" value="' . $objPenOrgaoExternoDTO->getDblId() . '" />';
 
                 $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
                     . $objSessao->assinarLink(
@@ -307,10 +339,26 @@ try {
             $index++;
         }
         $strResultado .= '</table>';
+
+        $strResultadoImportar = '';
+
+        $strResultadoImportar .= '<table width="99%" class="infraTable" id="tableImportar">' . "\n";
+        $strResultadoImportar .= '<caption class="infraCaption" id="tableTotal"></caption>';
+
+        $strResultadoImportar .= '<tr>';
+        $strResultadoImportar .= '<th class="infraTh" width="30%">ID</th>' . "\n";
+        $strResultadoImportar .= '<th class="infraTh">Tipo de Processo</th>' . "\n";
+        $strResultadoImportar .= '</tr>' . "\n";
+        $strResultadoImportar .= '</table>';
     }
-            
-    $arrComandos = array($btnPesquisar, $btnNovo, $btnReativar,$btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
+
+    $arrComandos = array($btnPesquisar, $btnNovo, $btnReativar, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
     $arrComandosFinal = array($btnNovo, $btnReativar, $btnDesativar, $btnExcluir, $btnImprimir, $btnFechar);
+
+    $btnImportar = '<button type="button" accesskey="F" id="btnImportar" value="Fechar" onclick="" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
+    $btnFecharModal = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    $arrComandosModal = array($btnImportar, $btnFecharModal);
+    $arrComandosModalFinal = array($btnImportar, $btnFecharModal);
 } catch (InfraException $e) {
     $objPagina->processarExcecao($e);
 }
@@ -324,6 +372,24 @@ $objPagina->montarTitle(':: ' . $objPagina->getStrNomeSistema() . ' - ' . PEN_PA
 $objPagina->montarStyle();
 ?>
 <style type="text/css">
+    .no-close .ui-dialog-titlebar-close {
+        display: none;
+    }
+
+    .ui-dialog .ui-dialog-title {
+        margin: 0.4em 0;
+    }
+
+    .ui-widget-header {
+        background: #1351b4;
+        border: 0;
+        color: #fff;
+        font-weight: normal;
+        padding: 2px;
+    }
+
+    /* fim */
+
     .lblSiglaOrigem {
         position: absolute;
         left: 0%;
@@ -365,6 +431,7 @@ $objPagina->montarStyle();
         top: 50%;
         width: 25%;
     }
+
     #txtEstadoSelect {
         position: absolute;
         left: 52%;
@@ -376,14 +443,8 @@ $objPagina->montarStyle();
 <script type="text/javascript">
     var objInfraTableToTable = null;
 
-    function reloadWindow() {
-        window.location.reload();
-    }
-
     function inicializar() {
-
         infraEfeitoTabelas();
-
     }
 
     function onClickBtnPesquisar() {
@@ -425,24 +486,27 @@ $objPagina->montarStyle();
             if (len > 0) {
                 if (confirm('Confirma a desativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
                     var form = jQuery('#frmAcompanharEstadoProcesso');
-                    var acaoReativar = $("<input>").attr({ type: "hidden", name: "hdnAcaoDesativar", value: "1" });
+                    var acaoReativar = $("<input>").attr({
+                        type: "hidden",
+                        name: "hdnAcaoDesativar",
+                        value: "1"
+                    });
                     form.append(acaoReativar);
-                    form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+                    form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_desativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
                     form.submit();
                 }
             } else {
                 alert('Selecione pelo menos um relacionamento para desativar');
             }
-        } catch(e) {
+        } catch (e) {
             alert('Erro : ' + e.message);
         }
     }
 
-    function acaoDesativar(id){
-
+    function acaoDesativar(id) {
         if (confirm("Confirma a desativação do relacionamento entre órgãos?")) {
-            document.getElementById('hdnInfraItemId').value=id;
-            document.getElementById('frmAcompanharEstadoProcesso').action='<?=$strLinkDesativar?>';
+            document.getElementById('hdnInfraItemId').value = id;
+            document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkDesativar ?>';
             document.getElementById('frmAcompanharEstadoProcesso').submit();
         }
     }
@@ -465,43 +529,129 @@ $objPagina->montarStyle();
         }
     }
 
-    function acaoReativar(id){
+    function acaoReativar(id) {
 
         if (confirm("Confirma a reativação do relacionamento entre órgãos?")) {
-            document.getElementById('hdnInfraItemId').value=id;
-            document.getElementById('frmAcompanharEstadoProcesso').action='<?=$strLinkReativar?>';
+            document.getElementById('hdnInfraItemId').value = id;
+            document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkReativar ?>';
             document.getElementById('frmAcompanharEstadoProcesso').submit();
         }
     }
 
-    function onClickBtnReativar(){
+    function onClickBtnReativar() {
         try {
             var len = jQuery('input[name*=chkInfraItem]:checked').length;
             if (len > 0) {
                 if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
                     var form = jQuery('#frmAcompanharEstadoProcesso');
-                    var acaoReativar = $("<input>").attr({ type: "hidden", name: "hdnAcaoReativar", value: "1" });
+                    var acaoReativar = $("<input>").attr({
+                        type: "hidden",
+                        name: "hdnAcaoReativar",
+                        value: "1"
+                    });
                     form.append(acaoReativar);
-                    form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_reativar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
+                    form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_reativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
                     form.submit();
                 }
             } else {
                 alert('Selecione pelo menos um relacionamento para reativar');
             }
-        } catch(e) {
+        } catch (e) {
             alert('Erro : ' + e.message);
         }
     }
 
     function infraImportarCsv(linkOrgaoId, orgaoId) {
-        objInfraTableToTable = new infraLupaText('dblId_' + orgaoId, 'tableTipoProcessos', linkOrgaoId);
-        objInfraTableToTable.selecionar(700, 500);
+        document.getElementById('mapId').value = orgaoId;
+        $('#importArquivoCsv').click();
+    }
+
+    function processarDados(csv) {
+        const lines = csv.split(/\r\n|\n/);
+        const data = [];
+
+        //document.getElementById('tableTotal').text = lines.length;
+        //const strCssTr = "infraTrClara";
+        for (let i = 1; i < lines.length; i++) {
+            //strCssTr = (strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+            const formatLine = lines[i]
+            const lineData = formatLine.toString().split(';');
+            
+            if (isNaN(parseInt(lineData[0]))) {
+                continue;
+            }
+            const tipoProcessoId = parseInt(lineData[0]);
+            const tipoProcessoNome = lineData[1].replace(/["]/g, '');
+
+            data.push(tipoProcessoId);
+            data.push(tipoProcessoNome);
+
+            const td1 = $('<td>', {'align': "center"})
+                .text(tipoProcessoId);
+            const td2 = $('<td>', {'align': "center"})
+                .text(tipoProcessoNome);
+            $('<tr>')
+                //.addClass(strCssTr)
+                .append(td1)
+                .append(td2)
+                .appendTo($('#tableImportar'));
+        }
+
+        // document.getElementById('btnImportar').style = "display: none;";
+        // document.getElementById('btnProsseguir').style = "";
+
+        return data.join(',').replace(/["]/g, '');
+    }
+
+    function importarCsv(event, orgaoId) {
+        const file = event.target.files[0];
+
+        if (!file) {
+            console.error("Nenhum arquivo selecionado.");
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(event) {
+            const csvContent = event.target.result;
+            console.log(event.target.result);
+            enviarFormulario(processarDados(csvContent));
+        };
+        reader.readAsText(file, 'ISO-8859-1');
+    }
+
+    function enviarFormulario(data) {
+        const dataInput = document.getElementById('dadosInput');
+        const orgaoId = document.getElementById('mapId');
+        dataInput.value = data;
+        
+        $('#btnImportar').click(function(e) {
+            e.preventDefault();
+            const form = jQuery('#formImportarDados');
+            form.submit();
+        })
+        $('#btnFecharSelecao').click(function(e) {
+            e.preventDefault();
+            window.location.reload();
+            $('#formImportarDados').dialog('close');
+        })
+        
+        // <img title="Maximizar janela" onmouseover="this.src=INFRA_PATH_JS + '/modal/maximizar_cinza.png'" onmouseout="this.src=INFRA_PATH_JS + '/modal/maximizar_branco.png'" src="/infra_js/modal/maximizar_branco.png" tabindex="1">
+        $('#formImportarDados').dialog({
+            height: 400,
+            width: 600,
+            modal: true,
+            resizable: true,
+            dialogClass: 'no-close success-dialog'
+        });
     }
 </script>
 <?php
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
+<input style="display: none" type="file" id="importArquivoCsv" encoding="ISO-8859-1" accept=".csv" onchange="importarCsv(event)">
 <form id="frmAcompanharEstadoProcesso" method="post" action="">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->abrirAreaDados('5em'); ?>
@@ -530,7 +680,19 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
         <p>Nenhum registro encontrado</p>
     <?php endif; ?>
 
-    <?php $objPagina->montarBarraComandosSuperior($arrComandosFinal); ?>
+    <?php $objPagina->montarBarraComandosInferior($arrComandosFinal); ?>
+</form>
+<form id="formImportarDados" method="post" action="<?php print $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_importar_tipos_processos&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>" style="display: none;">
+    <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">Pré-visualização da Importação</div>
+    <input type="hidden" name="mapId" id="mapId">
+    <input type="hidden" name="dados" id="dadosInput">
+    <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
+    <?php $objPagina->abrirAreaDados('5em'); ?>
+    <div id="divImportarDados">
+        <?php $objPagina->montarAreaTabela($strResultadoImportar, 1); ?>
+    </div>
+    <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosModalFinal); ?>
+    <?php $objPagina->fecharAreaDados(); ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>

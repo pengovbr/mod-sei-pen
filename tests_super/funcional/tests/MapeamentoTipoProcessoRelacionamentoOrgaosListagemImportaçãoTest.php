@@ -5,7 +5,7 @@
  *
  * Esse teste é responsável por executar e validar todos os testes referentes a mapeamentos.
  */
-class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportaçãoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $remetenteB;

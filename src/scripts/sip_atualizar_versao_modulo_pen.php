@@ -1859,22 +1859,16 @@ class PenAtualizarSipRN extends InfraRN
     // Adicionar submenu
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
-    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
-    $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
-
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
-    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
-    $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
-    
     $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_desativar', 'Desativar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar relacionamento entre órgãos', $numIdSistema);
-    
-
     $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre órgãos', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_importar_tipos_processos', 'Importar tipos de processoa', $numIdSistema);
+
+    $numIdRecurso = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
 
     $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_listar');
@@ -1885,6 +1879,26 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_visualizar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_desativar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_externos_reativar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_orgaos_importar_tipos_processos'); 
+
+    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+    $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
+
+    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
+    $numIdItemMenuRecuso = $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+    $objDTO = new RelPerfilItemMenuDTO();
+    $objBD = new RelPerfilItemMenuBD(BancoSip::getInstance());
+
+    $objDTO->setNumIdPerfil($numIdPerfilSeiAdministrador);
+    $objDTO->setNumIdSistema($numIdSistema);
+    $objDTO->setNumIdRecurso($numIdRecurso);
+    $objDTO->setNumIdMenu($numIdMenu);
+    $objDTO->setNumIdItemMenu($numIdItemMenuRecuso);
+
+    if ($objBD->contar($objDTO) == 0) {
+        $objBD->cadastrar($objDTO);
+    }
     
     // Nova versão
     $this->atualizarNumeroVersao("3.3.4");

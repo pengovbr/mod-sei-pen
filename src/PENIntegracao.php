@@ -215,7 +215,8 @@ class PENIntegracao extends SeiIntegracao
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
-      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO)
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO)
     );
 
     foreach ($arrDblIdProcedimento as $dblIdProcedimento) {
@@ -242,6 +243,7 @@ class PENIntegracao extends SeiIntegracao
             }
               break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
+          case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
             $arrayIcone = array('<img src="' . $this->getDiretorioImagens() . '/icone-RECEBIDO-tramita.png" title="Um trâmite para esse processo foi recebido" />');
             if (!isset($arrStrIcone[$dblIdProcedimento])) {
               $arrStrIcone[$dblIdProcedimento] = $arrayIcone;
@@ -360,6 +362,7 @@ class PENIntegracao extends SeiIntegracao
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO)
     );
 
     $objAtividadeDTO = new AtividadeDTO();
@@ -378,6 +381,7 @@ class PENIntegracao extends SeiIntegracao
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
           $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
             break;
+        case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO):
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
           $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
             break;
@@ -689,16 +693,12 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_map_orgaos_externos_visualizar':
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_cadastrar.php';
         break;
-
-      case 'pen_map_orgaos_externos_tipo_processo_listar':
-      case 'pen_importar_tipos_processos':
-        require_once dirname(__FILE__) . '/pen_map_orgaos_externos_tipo_processo_listar.php';
-        break;
         
       case 'pen_map_orgaos_externos_reativar':
       case 'pen_map_orgaos_externos_desativar':  
       case 'pen_map_orgaos_externos_listar':
       case 'pen_map_orgaos_externos_excluir':
+      case 'pen_map_orgaos_importar_tipos_processos':
         require_once dirname(__FILE__) . '/pen_map_orgaos_externos_listar.php';
         break;
 
