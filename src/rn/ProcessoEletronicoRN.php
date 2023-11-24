@@ -652,7 +652,12 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\SoapFault $e) {
+      $naoRespEstruturaOrg = 'Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente';
+      if (InfraString::formatarJavaScript(utf8_decode($e->faultstring)) == $naoRespEstruturaOrg) {
+        $strMensagem = "Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.";
+      } else {
         $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
+      }
       if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
           $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
       }

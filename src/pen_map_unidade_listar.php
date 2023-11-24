@@ -102,23 +102,23 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-  if(array_key_exists('sigla', $_POST) && (!empty($_POST['sigla']) && $_POST['sigla'] !== 'null')) {
-      $objPenUnidadeDTOFiltro->setStrSigla('%'.$_POST['sigla'].'%', InfraDTO::$OPER_LIKE);
-  }
+    if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
+        $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
+    }
 
-  if(array_key_exists('descricao', $_POST) && (!empty($_POST['descricao']) && $_POST['descricao'] !== 'null')) {
-      $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['descricao'].'%', InfraDTO::$OPER_LIKE);
-  }
+    if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
+        $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
+    }
 
     $objFiltroDTO = clone $objPenUnidadeDTOFiltro;
 
-  if(!$objFiltroDTO->isSetStrSigla()) {
-      $objFiltroDTO->setStrSigla('');
-  }
+    if(!$objFiltroDTO->isSetStrSigla()) {
+        $objFiltroDTO->setStrSigla('');
+    }
 
-  if(!$objFiltroDTO->isSetStrDescricao()) {
-      $objFiltroDTO->setStrDescricao('');
-  }
+    if(!$objFiltroDTO->isSetStrDescricao()) {
+        $objFiltroDTO->setStrDescricao('');
+    }
 
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);
@@ -320,10 +320,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('5em'); ?>
 
         <label for="txtSiglaUnidade" id="lblSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset($_POST['sigla']) ? $_POST['sigla'] : ''); ?>">
+        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(isset($_POST['txtSiglaUnidade']) ? $_POST['txtSiglaUnidade'] : ''); ?>">
 
         <label for="txtDescricaoUnidade" id="lblDescricaoUnidade" class="infraLabelOpcional">Descrição:</label>
-        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['descricao']) ? $_POST['descricao'] : ''); ?>">
+        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(isset($_POST['txtDescricaoUnidade']) ? $_POST['txtDescricaoUnidade'] : ''); ?>">
 
     <?php $objPagina->fecharAreaDados(); ?>
 
