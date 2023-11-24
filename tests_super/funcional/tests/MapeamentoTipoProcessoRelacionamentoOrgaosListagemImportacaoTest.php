@@ -5,15 +5,13 @@
  *
  * Esse teste é responsável por executar e validar todos os testes referentes a mapeamentos.
  */
-class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $remetenteB;
-
+     
     /**
-     * Teste para cadastro de mapeamento de orgão exteno
-     *
-     * @group MapeamentoOrgaoExterno
+     * Teste de cadastro de novo mapeamento entre ogrãos
      *
      * @return void
      */
@@ -53,20 +51,23 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
      *
      * @return void
      */
-    public function test_desativacao_mapeamento_orgao_externo() 
+    public function test_desativacao_mapeamento_orgao_externo()
     {
+        // Configuração do dados para teste do cenário
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
         
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamento();
-
-        sleep(1);
-        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
-        $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.'),
-            $mensagem
-        );
+        
+        $this->waitUntil(function ($testCase)  {
+            $testCase->frame(null);
+            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
+            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
     }
 
     /**
@@ -78,19 +79,52 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
      *
      * @return void
      */
-     public function test_reativacao_mapeamento_orgao_externo() {
+    public function test_reativacao_mapeamento_orgao_externo()
+    {
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->navegarPara('pen_map_orgaos_externos_listar');
 
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamento();
         
-        sleep(1);
-        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
-        $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.'),
-            $mensagem
+        $this->waitUntil(function ($testCase)  {
+            $testCase->frame(null);
+            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.');
+            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    /**
+     * Teste para pesquisar mapeamento entre orgãos
+     *
+     * @Depends test_desativacao_mapeamento_orgao_externo
+     *
+     * @return void
+     */
+    public function test_pesquisar_mapeamento_orgao_externo()
+    {
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        $this->acessarSistema(
+            self::$remetente['URL'],
+            self::$remetente['SIGLA_UNIDADE'],
+            self::$remetente['LOGIN'],
+            self::$remetente['SENHA']
         );
+        $this->navegarPara('pen_map_orgaos_externos_listar');
+
+        // Buscar pesquisa vazia
+        $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA'] . 'B');
+        sleep(1);
+        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
+        $this->assertNull($nomeRepositorioCadastrado);
+
+        // Buscar pesquisa com sucesso
+        $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
+        sleep(1);
+        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
+        $this->assertNotNull($nomeRepositorioCadastrado);
+
     }
 
     /**
@@ -156,6 +190,52 @@ class TramiteMapeamentoOrgaoExternoTest extends CenarioBaseTestCase
             utf8_encode('Relacionamento atualizado com sucesso.'),
             $mensagem
         );
+    }
+
+    /**
+     * Teste de desativação de um Relacionamento entre Órgãos via checkbox
+     *
+     * @large
+     *
+     * @return void
+     */
+    public function test_desativacao_checkbox_mapeamento_orgao_externo()
+    {
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->navegarPara('pen_map_orgaos_externos_listar');
+        
+        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
+        $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
+        
+        $this->waitUntil(function ($testCase)  {
+            $testCase->frame(null);
+            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
+            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    /**
+     * Teste de desativação de um Relacionamento entre Órgãos via checkbox
+     *
+     * @large
+     *
+     * @return void
+     */
+    public function test_reativar_checkbox_mapeamento_orgao_externo()
+    {
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->navegarPara('pen_map_orgaos_externos_listar');
+        
+        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
+        $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
+        
+        $this->waitUntil(function ($testCase)  {
+            $testCase->frame(null);
+            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.');
+            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
     }
 
     /**

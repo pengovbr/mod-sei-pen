@@ -214,4 +214,37 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
         return !empty($alerta->text()) ? $alerta->text() : "";
     }
+
+    /**
+     * Lispar campo de pesquisa
+     * Colocar texto para pesquisa
+     * Clicar no bot?o pesquisar
+     *
+     * @param string $textoPesquisa
+     * @return void
+     */
+    public function selecionarPesquisa($textoPesquisa)
+    {
+        $this->test->byId('txtSiglaOrigem')->clear();
+        $this->test->byId('txtSiglaOrigem')->value($textoPesquisa);
+        $this->test->byId("btnPesquisar")->click();
+    }
+
+    /**
+     * Buscar item de tabela por nome
+     *
+     * @param string $nome
+     * @return string|null
+     */
+    public function buscarNome($nome)
+    {
+        try {
+            $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
+            return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
+                $nomeSelecionado : 
+                null;
+        } catch (Exception $ex) {
+            return null;
+        }
+    }
 }

@@ -28,6 +28,8 @@ try {
     
     $idOrgaoExterno = $_GET['id'];
 
+    $arrParam = array_merge($_GET, $_POST);
+
     switch($_GET['acao']){
         case 'pen_map_orgaos_externos_mapeamento_gerenciar':
           try{
@@ -67,7 +69,34 @@ try {
         case 'pen_map_orgaos_externos_mapeamento':
           $strTitulo = 'Mapeamento de Tipo de Processo';
           break;
-    
+        case 'pen_map_orgaos_externos_mapeamento_excluir':
+          if (array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
+
+              $objExclusaoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+              $objExclusaoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+
+              $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
+              
+              if (is_array($arrParam['hdnInfraItensSelecionados'])) {
+                  foreach ($arrParam['hdnInfraItensSelecionados'] as $arr) {
+                      $dblId = explode(";", $arr)[0];
+                      $objExclusaoTipoProcedimentoDTO->setDblId($dblId);
+                      $objExclusaoTipoProcedimentoRN->excluir($objExclusaoTipoProcedimentoDTO);
+                  }
+              } else {
+                  $objExclusaoTipoProcedimentoDTO->setDblId($arrParam['hdnInfraItensSelecionados']);
+                  $objExclusaoTipoProcedimentoRN->excluir($objExclusaoTipoProcedimentoDTO);
+              }
+
+              PaginaSEI::getInstance()->adicionarMensagem('Mapeamento de tipos de processo foi excluído com sucesso.');
+              header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].'&id='.$idOrgaoExterno));
+              exit(0);
+          } else {
+            $objPagina->adicionarMensagem('Não existe nenum registro de mapeamento para tipos de processo.', InfraPagina::$TIPO_MSG_AVISO);
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao_origem'].'&acao_origem='.$_GET['acao'].'&id='.$idOrgaoExterno));
+            exit(0);
+          }
+          break;
         default:
           throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
       }
@@ -78,6 +107,7 @@ try {
   
     $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
     $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($idOrgaoExterno);
+    $objMapeamentoTipoProcedimentoDTO->retDblId();
     $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
     $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoOrigem();
     $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
@@ -118,6 +148,7 @@ try {
     if ($numRegistros > 0){
   
         $arrComandos[] = '<button type="button" accesskey="S" id="btnSalvar" value="Salvar" onclick="gerenciar();" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
+        $arrComandos[] = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
         $strLinkGerenciar = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento_gerenciar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].$strParametros);
   
       $bolAcaoExcluir = SessaoSEI::getInstance()->verificarPermissao('mapeamento_assunto_excluir');
@@ -133,8 +164,12 @@ try {
       $strResultado .= '<caption class="infraCaption">'.PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela,$numRegistros).'</caption>';
       $strResultado .= '<tr>';
   
+      
+      $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
+      
       $strResultado .= '<th width="45%" class="infraTh">'.PaginaSEI::getInstance()->getThOrdenacao($objMapeamentoTipoProcedimentoDTO,'Tipo de Processo Origem','id',$arrObjMapeamentoAssuntoDTO).'</th>'."\n";
       $strResultado .= '<th width="45%" class="infraTh">Tipo de Processo Destino</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="15%">Ações</th>' . "\n";
   
       $strResultado .= '</tr>'."\n";
       $strCssTr='';
@@ -150,6 +185,8 @@ try {
         }
   
         $strResultado .= $strCssTr;
+
+        $strResultado .= '<td align="center">' . $objPagina->getTrCheck($i, $arrObjMapeamentoAssuntoDTO[$i]->getDblId() . ';' . $arrObjMapeamentoAssuntoDTO[$i]->getStrAtivo(), '') . '</td>';
 
         $strResultado .= '<td>'.PaginaSEI::tratarHTML(AssuntoINT::formatarCodigoDescricaoRI0568($numIdAssuntoOrigem, $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso())).'</td>';
 
@@ -168,6 +205,22 @@ try {
         $strResultado .= '<td> <input type="text" value="'.$descricaoTipoProcedimento.'" id="txtAssunto'.$numIdAssuntoOrigem.'" name="txtAssunto'.$numIdAssuntoOrigem.'" class="infraText" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'" style="width:99.5%" />
         <input type="hidden" id="hdnIdAssunto'.$numIdAssuntoOrigem.'" name="hdnIdAssunto'.$numIdAssuntoOrigem.'" class="infraText" value="'.$numIdAssuntoDestino.'" /></td>';
   
+        $strResultado .= '<td align="center">';
+
+        $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
+                    . SessaoSEI::getInstance()->assinarLink(
+                          'controlador.php?acao=pen_map_orgaos_externos_mapeamento_excluir&acao_origem='.$_GET['acao']
+                            . '&hdnInfraItensSelecionados=' . $arrObjMapeamentoAssuntoDTO[$i]->getDblId()
+                            . '&id='. $idOrgaoExterno
+                    )
+                    . '\', this)">'
+                    . '<img src='
+                    . ProcessoEletronicoINT::getCaminhoIcone("imagens/excluir.gif")
+                    . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
+                    . '</a>';
+                    
+        $strResultado .= '</td>';
+
         $strResultado .= '</tr>'."\n";
   
         $strAjaxVariaveis .= 'var objAutoCompletarAssunto'.$numIdAssuntoOrigem.';'."\n";
@@ -228,7 +281,37 @@ try {
   
     infraExibirAviso(false);
   }
-  
+
+  function onClickBtnExcluir() {
+      try {
+          var len = jQuery('input[name*=chkInfraItem]:checked').length;
+          if (len > 0) {
+              if (confirm('Confirma a exclusão do(s) mapeamento(s) de tipos de processo?')) {
+                  var form = jQuery('#frmMapeamentoOrgaosLista');
+                  form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento_excluir&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=pen_map_orgaos_externos_mapeamento&id='. $idOrgaoExterno); ?>');
+                  form.submit();
+              }
+          } else {
+              alert('Selecione pelo menos um mapeamento para excluir');
+          }
+      } catch (e) {
+          alert('Erro : ' + e.message);
+      }
+  }
+
+  function onCLickLinkDelete(url, link) {
+
+    var row = jQuery(link).parents('tr:first');
+
+    var strEspecieDocumental = row.find('td:eq(1)').text();
+    var strTipoDocumento = row.find('td:eq(2)').text();
+
+    if (confirm('Confirma a exclusão do mapeamento de tipos de processo?')) {
+
+        window.location = url;
+    }
+
+  }
   
   function OnSubmitForm() {
   

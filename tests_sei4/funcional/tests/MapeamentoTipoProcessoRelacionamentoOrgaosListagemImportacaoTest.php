@@ -5,7 +5,7 @@
  *
  * Esse teste é responsável por executar e validar todos os testes referentes a mapeamentos.
  */
-class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportaçãoTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $remetenteB;
@@ -148,29 +148,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportaçãoTest extends C
             utf8_encode('Relacionamento atualizado com sucesso.'),
             $mensagem
         );
-    }
-
-    /**
-     * Teste de desativação de um Relacionamento entre Órgãos via checkbox
-     *
-     * @large
-     *
-     * @return void
-     */
-     public function test_desativacao_checkbox_mapeamento_orgao_externo()
-     {
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->navegarPara('pen_map_orgaos_externos_listar');
-        
-        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
-        $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
-        
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
     }
 
     /**

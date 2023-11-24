@@ -703,7 +703,8 @@ class PENIntegracao extends SeiIntegracao
         break;
 
       case 'pen_map_orgaos_externos_mapeamento':
-      case 'pen_map_orgaos_externos_mapeamento_gerenciar':  
+      case 'pen_map_orgaos_externos_mapeamento_gerenciar':
+      case 'pen_map_orgaos_externos_mapeamento_excluir':
         require_once dirname(__FILE__) . '/pen_map_orgaos_mapeamento_tipo_listar.php';
         break;
 
