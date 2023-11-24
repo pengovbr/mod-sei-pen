@@ -37,11 +37,11 @@ Nova mensagem 'A Unidade [Nome da Unidade cadastrada no Portal de Administraçã
 
 #### Melhoria da Mensagem - Processo recusado devido a existência de documento em formato teste não permitido pelo sistema. (#338)
 
-Nova mensagem 'O formato [Nome do Formato] não é permitido pelo sistema de destino. Lembre-se que cada órgão/ entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
+Nova mensagem 'O formato [Nome do Formato] não é permitido pelo sistema de destino. Lembre-se que cada órgão/ entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - Já existe um processo utilizando o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX. (#339)
 
-Nova mensagem 'Um processo com o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX já existe no sistema de destino. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro'.
+Nova mensagem 'Um processo com o número de protocolo XXXXXX.XXXXXX/XXXXXX -XX já existe no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro'.
 
 #### Melhoria da Mensagem - O tamanho máximo permitido para arquivos XXXXX é XXXMb. (#340)
 

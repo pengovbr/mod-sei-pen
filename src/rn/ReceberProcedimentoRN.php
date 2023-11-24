@@ -1128,7 +1128,7 @@ class ReceberProcedimentoRN extends InfraRN
     if ($arrayObjProtocoloDTO > 0) {
       $strDescricao  = sprintf(
         'Um processo com o número de protocolo %s já existe no sistema de destino. '
-        . 'OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.',
+        . 'OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.',
         utf8_decode($parObjProtocolo->protocolo)
       ).PHP_EOL;
       throw new InfraException($strDescricao);
@@ -2381,7 +2381,7 @@ class ReceberProcedimentoRN extends InfraRN
             $arquivoExtensaoDTO->retStrExtensao();
 
           if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0) {
-                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é um das três formas de conclusão de trâmite. Portanto, não é um erro.";
+                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
                 $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
                 throw new InfraException($strMensagem);
           }
