@@ -39,5 +39,6 @@ jobs:
              echo "ORG2_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG2" >> tests_super/funcional/.env
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_super/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_super/funcional/assets/config/certificado_org2.pem
+             sed -i 's/exec/exec \-T/' Makefile
              make up; make update; make install; 
              make tramitar-pendencias-silent &; make test-functional
