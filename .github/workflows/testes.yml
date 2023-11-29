@@ -4,6 +4,9 @@ on: [push, pull_request]
 env: # Or as an environment variable
   CERTIFICADO_ORG1: ${{ secrets.CERTIFICADO_ORG1 }}
   CERTIFICADO_ORG2: ${{ secrets.CERTIFICADO_ORG2 }}
+  GIT_ACTION_SENHA_ORG1: ${{ secrets.GIT_ACTION_SENHA_ORG1 }}
+  GIT_ACTION_SENHA_ORG2: ${{ secrets.GIT_ACTION_SENHA_ORG2 }}
+
   
 jobs:
   test:
@@ -32,8 +35,8 @@ jobs:
              sed -i 's/\[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2\]/GIT\_ACTION\_ORG2/' tests_super/funcional/phpunit.xml
              sed -e '/ORG1_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_super/funcional/.env
              sed -e '/ORG2_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_super/funcional/.env
-             echo "ORG1_CERTIFICADO_SENHA=${ {secrets.GIT_ACTION_SENHA_ORG1} }" >> tests_super/funcional/.env
-             echo "ORG2_CERTIFICADO_SENHA=${ {secrets.GIT_ACTION_SENHA_ORG2} }"" >> tests_super/funcional/.env
+             echo "ORG1_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG1" >> tests_super/funcional/.env
+             echo "ORG2_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG2" >> tests_super/funcional/.env
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_super/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_super/funcional/assets/config/certificado_org2.pem
              make up; make update; make install; 
