@@ -26,7 +26,7 @@ jobs:
       - name: Run make test
         run: | 
              cd sei/src/sei/web/modulos/mod-sei-pen
-             make config;
+             make config
              sed -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\]/155275/' tests_super/funcional/phpunit.xml
              sed -i 's/\[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1\]/GIT\_ACTION\_ORG1/' tests_super/funcional/phpunit.xml
              sed -z -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\.1\]/155277/' tests_super/funcional/phpunit.xml
@@ -40,6 +40,7 @@ jobs:
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_super/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_super/funcional/assets/config/certificado_org2.pem
              sed -i 's/exec/exec \-T/' Makefile
-             sed -i 's/cp\ $(PEN\_TEST\_FUNC)\/\.tmp\/\*/cp -r $(PEN\_TEST\_FUNC)\/\.tmp\//' Makefile
-             make up; make update; make install; 
-             make tramitar-pendencias-silent &; make test-functional
+             make up
+             make update
+             make install 
+             make test-functional
