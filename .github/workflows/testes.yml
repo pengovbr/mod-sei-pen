@@ -40,5 +40,6 @@ jobs:
              echo $CERTIFICADO_ORG1 | base64 --decode > tests_super/funcional/assets/config/certificado_org1.pem
              echo $CERTIFICADO_ORG2 | base64 --decode > tests_super/funcional/assets/config/certificado_org2.pem
              sed -i 's/exec/exec \-T/' Makefile
+             sed -i 's/cp\ $(PEN\_TEST\_FUNC)\/\.tmp\/\*/cp -r $(PEN\_TEST\_FUNC)\/\.tmp\//' Makefile
              make up; make update; make install; 
              make tramitar-pendencias-silent &; make test-functional
