@@ -1896,8 +1896,14 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumentoRN = new DocumentoRN();
           $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
           SessaoSEI::getInstance()->setNumIdUnidadeAtual($objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo());
-
+          //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
+          $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
+ 
           $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+
+          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+          $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
         }
       }
     } catch(Exception $e) {
@@ -1910,6 +1916,25 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+  //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+  private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+  	$objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+  	$objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeRN = new AtividadeRN();
+
+    if ($objAtividadeRN->consultarRN0033($objAtividadeDTO)==null){
+      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+      $objReabrirProcessoDTO->setDblIdProcedimento($parDblIdProcedimento);
+      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+    }
+  }
 
   private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
     {
