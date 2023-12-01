@@ -44,9 +44,10 @@ jobs:
 
       - name: Executa update, install e tramita silent
         run: |
+             cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
              make tramitar-pendencias-silent &
 
       - name: Testes funcionais
-        run: make test-functional
+        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional
