@@ -95,12 +95,19 @@ try {
       }
 
         $objInfraException = new InfraException();
-        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' com ID: ' . $objResultado[0]->getNumIdUnidade() . ' do sistema já está mapeada com a unidade '. $_POST['id_unidade_rh'] . ' do Portal de Administração.');
+        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' com ID: ' . $objResultado[0]->getNumIdUnidade() . ' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' ('. $_POST['id_unidade_rh'] . ') do Portal de Administração.');
     }
+      // CARREGAR NOME E SIGLA DA ESTRUTURA
+      $objProcessoEletronico     = new ProcessoEletronicoRN();
+      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
 
+      $nomeUnidadeRH = $objProcessoEletronicoDTO[0]->getStrNome();
+      $siglaUnidadeRH = $objProcessoEletronicoDTO[0]->getStrSigla();
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($_POST['id_unidade']);
       $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+      $objPenUnidadeDTO->setStrNomeUnidadeRH($nomeUnidadeRH);
+      $objPenUnidadeDTO->setStrSiglaUnidadeRH($siglaUnidadeRH);
 
       $numIdUnidade = '';
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
