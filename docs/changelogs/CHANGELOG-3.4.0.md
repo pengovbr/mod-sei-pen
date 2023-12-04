@@ -19,6 +19,10 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### Mapeamento de Unidade - Inclusão do campo Unidade Tramita.GOV.BR (#238)
+
+Adiciona texto com sigla e descrição da unidade mapeada do Tramita.GOV.BR para a unidade do SEI.
+
 #### Erro no Trâmite de Processo convertido de Documento Avulso (#239) 
 
 Um documento avulso foi recebido pelo SEI e convertido em processo. O usuário incluiu novos documentos e tentou tramitar novamente.
@@ -62,6 +66,10 @@ Foi verificado que na tela de mapeamento de unidades, o sistema não está obede
 #### Recusa pelo motivo "Documento não foi recebido pela unidade atual." (#379)
 
 Ao tentar devolver um processo onde foram retirados documentos originalmente criados por um determinado órgão o SEI recusa informando que: "Documento não foi recebido pela unidade atual.".
+
+#### Correção do phpcs e alertas de XSS
+
+Correção dos alertas apontados pelo phpcs.
 
 ### Atualização de Versão
 
