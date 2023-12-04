@@ -1,4 +1,4 @@
-# Módulo de Integração do SEI ao Tramita.GOV.BR
+# Módulo de Integração do SEI ao Tramita.GOV.BR [![PHP_CodeSniffer](https://github.com/pengovbr/mod-sei-pen/actions/workflows/phpcs.yml/badge.svg)](https://github.com/pengovbr/mod-sei-pen/actions/workflows/phpcs.yml)
 
 O módulo **PEN** é o responsável por integrar o Sistema Eletrônico de Informações - SEI ao Tramita.GOV.BR. Este projeto tem como objetivo interligar todos os sistema de processo eletrônico do Poder Executivo Federal a fim de proporcionar a troca de documentos oficiais de forma rápida, simples e segura.
 
