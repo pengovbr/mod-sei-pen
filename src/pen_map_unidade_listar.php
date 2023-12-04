@@ -174,7 +174,7 @@ try {
         $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
         $strResultado .= '<tr class="'.$strCssTr.'">';
-        $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
+        $strResultado .= '<td align="center">'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
