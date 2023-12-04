@@ -95,8 +95,7 @@ try {
       }
 
         $objInfraException = new InfraException();
-        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' com ID: ' . $objResultado[0]->getNumIdUnidade() . ' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' ('. $_POST['id_unidade_rh'] . ') do Portal de Administração.');
-    }
+        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' do Portal de Administração.');     }
       // CARREGAR NOME E SIGLA DA ESTRUTURA
       $objProcessoEletronico     = new ProcessoEletronicoRN();
       $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $_POST['id_unidade_rh']);

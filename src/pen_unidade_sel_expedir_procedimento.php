@@ -34,7 +34,7 @@ try {
         break;
 
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Ação '" . htmlspecialchars($_GET['acao']) . "' não reconhecida.");
   }
 
     $arrComandos = array();
@@ -60,7 +60,7 @@ try {
     </header>
     <body>
 
-        <form id="frmUnidadeLista" method="post" action="<?= PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'])) ?>">
+        <form id="frmUnidadeLista" method="post" action="<?= PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . htmlspecialchars($_GET['acao']) . '&acao_origem=' . htmlspecialchars($_GET['acao']))) ?>">
 <?
 //PaginaSEI::getInstance()->montarBarraLocalizacao($strTitulo);
 PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);

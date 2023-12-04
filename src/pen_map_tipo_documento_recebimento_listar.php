@@ -19,7 +19,7 @@ $objSessaoSEI = SessaoSEI::getInstance();
 
 $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
  
-$strProprioLink = 'controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_retorno'];
+$strProprioLink = 'controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_retorno']);
 
 try {
     
@@ -235,7 +235,7 @@ function onCLickLinkDelete(url, link) {
 }
 
 function onClickBtnNovo(){    
-    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_origem'])); ?>';
 }
 
 function onClickBtnExcluir(){    
@@ -244,7 +244,7 @@ function onClickBtnExcluir(){
         if(len > 0){        
             if(confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
                 var form = jQuery('#frmAcompanharEstadoProcesso');
-                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno=pen_map_tipo_documento_recebimento_listar'); ?>');
+                form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_excluir&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno=pen_map_tipo_documento_recebimento_listar'); ?>');
                 form.submit();
             }
         }
@@ -266,10 +266,10 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPaginaSEI->abrirAreaDados('5em'); ?>
         <label for="nome_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
-        <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_especie']; ?>"/>
+        <input type="text" name="nome_especie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print htmlspecialchars($_POST['nome_especie']); ?>"/>
 
         <label for="nome_serie" class="infraLabelObrigatorio input-label-second">Tipo de Documento SEI:</label>
-        <input type="text" name="nome_serie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print $_POST['nome_serie']; ?>"/>
+        <input type="text" name="nome_serie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print htmlspecialchars($_POST['nome_serie']); ?>"/>
     <?php $objPaginaSEI->fecharAreaDados(); ?>
     
     <?php if($numRegistros > 0): ?>

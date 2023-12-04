@@ -155,7 +155,7 @@ $objPaginaSEI->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= $_GET['acao'] ?>'=='serie_selecionar'){
+    if ('<?= htmlspecialchars($_GET['acao']) ?>'=='serie_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{
@@ -178,7 +178,7 @@ $objPaginaSEI->fecharJavaScript();
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmLoteListar" method="post" action="<?= $objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao']) ?>">
+<form id="frmLoteListar" method="post" action="<?= $objSessaoSEI->assinarLink('controlador.php?acao=' . htmlspecialchars($_GET['acao']) . '&acao_origem=' . htmlspecialchars($_GET['acao'])) ?>">
     <?
     $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     $objPaginaSEI->abrirAreaDados('4.5em');
