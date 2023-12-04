@@ -39,6 +39,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
     protected $paginaMapeamentoUnidade = null;
+    protected $paginaMoverDocumento = null;
+    protected $paginaTramiteMapeamentoOrgaoExterno = null;
+    protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoProcessoReativar = null;
+    protected $paginaCadastroOrgaoExterno = null;
 
     public function setUpPage(): void
     {
@@ -58,6 +63,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
+        $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
+        $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
+        $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
+        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->currentWindow()->maximize();
     }
 
@@ -194,6 +203,13 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
+
+            'ID_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_ID_UNIDADE_ESTRUTURAS'),
+            'SIGLA_UNIDADE_ESTRUTURAS' => constant($nomeContexto . '_SIGLA_UNIDADE_ESTRUTURAS'),
+            'NOME_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_NOME_UNIDADE_ESTRUTURAS'),
+            'ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM' => constant($nomeContexto . '_ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM'),
+            'NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM' => constant($nomeContexto . '_NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM'),
+            
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
             'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
@@ -223,6 +239,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)

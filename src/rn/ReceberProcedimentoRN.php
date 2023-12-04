@@ -1062,7 +1062,15 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
       $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
-      $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio);
+      $remetente = $objMetadadosProcedimento->metadados->remetente;
+      $destinatario = $objMetadadosProcedimento->metadados->destinatario;
+      $this->atribuirTipoProcedimento(
+        $objProcedimentoDTO,
+        $remetente,
+        $destinatario,
+        $numIdTipoProcedimento,
+        $strProcessoNegocio
+      );
 
       // Obtém código da unidade através de mapeamento entre SEI e Barramento
       $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
@@ -1429,18 +1437,39 @@ class ReceberProcedimentoRN extends InfraRN
     return $objTipoProcedimentoDTO;
   }
 
-  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
-    {
+  /**
+   * Atribuir tipo de procedimento
+   * Procura tipo de procedimento
+   * Procura tipo de procedimento no mapeamento entre orgão
+   * Procura tipo de procedimento padrão
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $numIdTipoProcedimento
+   * @param string|int $strProcessoNegocio
+   * @return ProcedimentoDTO
+   * @throws InfraException
+   */
+  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $remetente, $destinatario, $numIdTipoProcedimento, $strProcessoNegocio)
+  {
     if(!empty(trim($strProcessoNegocio))){
+      // Verifica se existe relacionamento entre orgãos
+      $objTipoProcedimentoDTO = $this->obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio);
+
+      if(is_null($objTipoProcedimentoDTO)){
+        // Verifica se existe tipo de processo igual cadastrado
         $objTipoProcedimentoDTO = $this->obterTipoProcessoPeloNomeOrgaoUnidade(
           $strProcessoNegocio,
           SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(),
           SessaoSEI::getInstance()->getNumIdUnidadeAtual()
         );
+      }
     }
 
     if(is_null($objTipoProcedimentoDTO)){
-        $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
+      // Verifica tipo de processo padrão cadastrado
+      $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
     }
 
     if (is_null($objTipoProcedimentoDTO)){
@@ -1468,6 +1497,48 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objProcedimentoDTO->getObjProtocoloDTO()->setArrObjRelProtocoloAssuntoDTO($arrObjAssuntoDTO);
+  }
+
+  /**
+   * Verificar se tem mapeamento entre orgão
+   *
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $strProcessoNegocio
+   * @return TipoProcedimentoDTO
+   */
+  public function obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio)
+  {
+    $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+
+    $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setStrAtivo('S');
+
+    $objPenOrgaoExternoDTO->retDblId();
+
+    $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+    $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
+
+    if (!is_null($objPenOrgaoExternoDTO)) {
+      $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+      $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
+      $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso('%'.$strProcessoNegocio.'%', InfraDTO::$OPER_LIKE);
+      $objMapeamentoTipoProcedimentoDTO->setStrAtivo('S');
+
+      $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
+
+      $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+      $objMapeamentoTipoProcedimentoDTO = $objMapeamentoTipoProcedimentoRN->consultar($objMapeamentoTipoProcedimentoDTO);
+
+      if (!is_null($objMapeamentoTipoProcedimentoDTO) && !is_null($objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino())) {
+        $idTipoProcessoDestino = $objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino();
+
+        return $this->obterTipoProcessoPadrao($idTipoProcessoDestino);
+      }
+    }
+
+    return null;
   }
 
   private function atribuirDadosUnidade(ProcedimentoDTO $objProcedimentoDTO, $objDestinatario)

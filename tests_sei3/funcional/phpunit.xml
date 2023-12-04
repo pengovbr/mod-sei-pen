@@ -29,6 +29,15 @@
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <!--Início Configuração de mapeamento de unidades-->
+    <const name="CONTEXTO_ORGAO_A_ID_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_ESTRUTURAS" value="" />
+    <!--Fim Configuração de mapeamento de unidades-->
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_A_ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <!--Fim Configuração de mapeamento entre orgãos origem-->
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
@@ -69,6 +78,16 @@
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <!--Fim Configuração de mapeamento de unidades-->
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_B_ID_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_ESTRUTURAS" value="" />
+    <!--Fim Configuração de mapeamento de unidades-->
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_B_ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <!--Fim Configuração de mapeamento entre orgãos origem-->
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG2]" />
