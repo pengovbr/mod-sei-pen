@@ -104,23 +104,23 @@ try {
 
     //--------------------------------------------------------------------------
     // Filtragem
-    if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
-        $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
-    }
+  if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
+      $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
+  }
 
-    if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
-        $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
-    }
+  if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
+      $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
+  }
 
     $objFiltroDTO = clone $objPenUnidadeDTOFiltro;
 
-    if(!$objFiltroDTO->isSetStrSigla()) {
-        $objFiltroDTO->setStrSigla('');
-    }
+  if(!$objFiltroDTO->isSetStrSigla()) {
+      $objFiltroDTO->setStrSigla('');
+  }
 
-    if(!$objFiltroDTO->isSetStrDescricao()) {
-        $objFiltroDTO->setStrDescricao('');
-    }
+  if(!$objFiltroDTO->isSetStrDescricao()) {
+      $objFiltroDTO->setStrDescricao('');
+  }
 
     //--------------------------------------------------------------------------
     $objGenericoBD = new GenericoBD($objBanco);

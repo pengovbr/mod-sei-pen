@@ -1921,8 +1921,8 @@ class ReceberProcedimentoRN extends InfraRN
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->retNumIdAtividade();
     $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-  	$objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
-  	$objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
     $objAtividadeDTO->setDthConclusao(null);
     $objAtividadeRN = new AtividadeRN();
 
