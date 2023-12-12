@@ -65,6 +65,7 @@ try {
             $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
 
             header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao_retorno']).'&acao_origem='.htmlspecialchars($_GET['acao_origem'])));
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao_retorno']).'&acao_origem='.htmlspecialchars($_GET['acao_origem'])));
             exit(0);
         }
         else {
@@ -109,7 +110,13 @@ try {
   if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
       $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
   }
+  if (isset($_POST['txtSiglaUnidade']) && $_POST['txtSiglaUnidade'] !== null) {
+      $objPenUnidadeDTOFiltro->setStrSigla('%' . $_POST['txtSiglaUnidade'] . '%', InfraDTO::$OPER_LIKE);
+  }
 
+  if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
+      $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
+  }
   if (isset($_POST['txtDescricaoUnidade']) && $_POST['txtDescricaoUnidade'] !== null) {
       $objPenUnidadeDTOFiltro->setStrDescricao('%'.$_POST['txtDescricaoUnidade'].'%', InfraDTO::$OPER_LIKE);
   }
@@ -119,7 +126,13 @@ try {
   if(!$objFiltroDTO->isSetStrSigla()) {
       $objFiltroDTO->setStrSigla('');
   }
+  if(!$objFiltroDTO->isSetStrSigla()) {
+      $objFiltroDTO->setStrSigla('');
+  }
 
+  if(!$objFiltroDTO->isSetStrDescricao()) {
+      $objFiltroDTO->setStrDescricao('');
+  }
   if(!$objFiltroDTO->isSetStrDescricao()) {
       $objFiltroDTO->setStrDescricao('');
   }
@@ -178,7 +191,6 @@ try {
         $strResultado .= '<tr class="'.$strCssTr.'">';
         $strResultado .= '<td align="center">'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
-        $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
         $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';

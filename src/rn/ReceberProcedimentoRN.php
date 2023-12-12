@@ -274,6 +274,8 @@ class ReceberProcedimentoRN extends InfraRN
 
           ReceberProcedimentoRN::validaTamanhoMaximoAnexo($objAnexoDTO->getStrNome(), $nrTamanhMegaByte);
  
+          ReceberProcedimentoRN::validaTamanhoMaximoAnexo($objAnexoDTO->getStrNome(), $nrTamanhMegaByte);
+ 
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
@@ -1391,7 +1393,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
       $objMapeamentoTipoProcedimentoDTO = $objMapeamentoTipoProcedimentoRN->consultar($objMapeamentoTipoProcedimentoDTO);
 
-      if (!is_null($objMapeamentoTipoProcedimentoDTO)) {
+      if (!is_null($objMapeamentoTipoProcedimentoDTO) && !is_null($objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino())) {
         $idTipoProcessoDestino = $objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino();
 
         return $this->obterTipoProcessoPadrao($idTipoProcessoDestino);
@@ -1963,14 +1965,7 @@ class ReceberProcedimentoRN extends InfraRN
           //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
           $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
  
-          //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
-          $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
- 
           $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
-
-          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
-          $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
-          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
 
           $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
           $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
@@ -1987,6 +1982,25 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
+  //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+  private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeRN = new AtividadeRN();
+
+    if ($objAtividadeRN->consultarRN0033($objAtividadeDTO)==null){
+      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+      $objReabrirProcessoDTO->setDblIdProcedimento($parDblIdProcedimento);
+      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+    }
+  }
   //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
   private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
     $objAtividadeDTO = new AtividadeDTO();

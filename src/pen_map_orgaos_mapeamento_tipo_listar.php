@@ -89,7 +89,7 @@ try {
           }
         }
 
-        PaginaSEI::getInstance()->adicionarMensagem('Operação realizada com sucesso.');
+        $objPagina->adicionarMensagem(sprintf('Inclusão de %s realizada com sucesso.', PEN_PAGINA_TITULO), 5);
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
@@ -555,6 +555,11 @@ PaginaSEI::getInstance()->montarStyle();
       alert('Erro : ' + e.message);
     }
   }
+  $(function () {
+    $('#chkSinAssuntosNaoMapeados').click(function () {
+      $('#btnPesquisar').click();
+    });
+  });
 </script>
 <?php
 PaginaSEI::getInstance()->fecharHead();
