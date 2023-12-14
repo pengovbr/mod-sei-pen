@@ -39,10 +39,10 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
         sleep(1);
-        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+        $mensagemRetornoAlert = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Relacionamento cadastrado com sucesso.'),
-            $mensagem
+            $mensagemRetornoAlert
         );
     }
 
@@ -70,12 +70,11 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
             self::$remetente['NOME_UNIDADE_ORGAO_DESTINO']
         );
         $this->paginaCadastroOrgaoExterno->salvar();
-
         sleep(1);
-        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+        $mensagemRetornoAlert = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Cadastro de relacionamento entre órgãos já existente.'),
-            $mensagem
+            $mensagemRetornoAlert
         );
     }
 
@@ -112,10 +111,10 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
         sleep(1);
-        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+        $mensagemRetornoAlert = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Relacionamento atualizado com sucesso.'),
-            $mensagem
+            $mensagemRetornoAlert
         );
     }
 

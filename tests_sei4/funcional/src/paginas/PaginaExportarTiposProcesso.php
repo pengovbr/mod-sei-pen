@@ -14,6 +14,14 @@ class PaginaExportarTiposProcesso extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarExportarTiposProcessos()
+    {
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Exportação de Tipos de Processo'));
+        
+        $this->test->byLinkText(utf8_encode('Exportação de Tipos de Processo'))->click();
+        $this->test->byXPath("//a[@link='pen_map_orgaos_exportar_tipos_processos']")->click();
+    }
+
     /**
      * Seleciona botão editar da primeira linha de tabela
      * 
@@ -57,14 +65,23 @@ class PaginaExportarTiposProcesso extends PaginaTeste
      * Lispar campo de pesquisa
      * Colocar texto para pesquisa
      *
-     * @param string $textoPesquisa
      * @return void
      */
-    public function selecionarPesquisaSinalizacao()
+    public function selecionarPesquisa()
+    {
+        $this->test->byId('txtNomeTipoProcessoPesquisa')->clear();
+        $this->test->byId('txtNomeTipoProcessoPesquisa')->value('Ouvidoria');
+        $this->test->byId("sbmPesquisar")->click();
+    }
+
+    /**
+     * Buscar se foi pesquisado
+     *
+     * @return void
+     */
+    public function buscarPesquisa()
     {
         try {
-            $this->test->select($this->test->byId('selSinalizacaoTipoProcedimento'))
-                ->selectOptionByLabel("Exclusivo da ouvidoria");
             $elementos = $this->test->byXPath("//td[contains(.,'Ouvidoria:')]")->text();
             return !empty($elementos) && !is_null($elementos);
         } catch (Exception $e) {

@@ -46,7 +46,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends C
             self::$remetente['SENHA']
         );
         
-        $this->navegarPara('pen_map_orgaos_externos_listar');
+        $this->paginaCadastroOrgaoExterno->navegarCadastroOrgaoExterno();
 
         // Buscar pesquisa vazia
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA'] . 'B');
@@ -57,6 +57,5 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends C
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
         $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);
         $this->assertNotNull($nomeRepositorioCadastrado);
-        $this->paginaCadastroOrgaoExterno->quit();
     }
 }

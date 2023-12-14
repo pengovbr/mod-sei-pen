@@ -14,6 +14,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarCadastroOrgaoExterno()
+    {
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Órgãos'));
+        
+        $this->test->byLinkText(utf8_encode('Relacionamento entre Órgãos'))->click();
+        $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
+    }
+
     /**
      * Setar parametro para novo mapeamento de orgãos externos
      * 
@@ -137,16 +145,9 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      *  
      * @return void
      */
-    public function selecionarExcluirMapOrgao($idMap = null)
+    public function selecionarExcluirMapOrgao()
     {
-        $parametro = "(//label[@for='chkInfraItem0'])[1]";
-        if (!is_null($idMap)) {
-            $id = $this->test->byXPath(
-                "(//input[@class='infraCheckboxInput' and @value='".$idMap.";S'])[1]"
-            )->attribute('id');
-            $parametro = "(//label[@for='".$id."'])[1]";
-        }
-        $this->test->byXPath($parametro)->click();
+        $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
         $this->test->byId("btnExcluir")->click();
         $this->test->acceptAlert();
     }
@@ -254,15 +255,5 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         } catch (Exception $ex) {
             return null;
         }
-    }
-
-    /**
-     * Fechar teste funcional
-     *
-     * @return void
-     */
-    public function quit()
-    {
-        //$this->test->close();
     }
 }

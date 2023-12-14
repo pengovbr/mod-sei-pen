@@ -10,6 +10,14 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
 
     }
 
+    public function navegarRelacionamentoEntreOrgaos()
+    {
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Órgãos'));
+        
+        $this->test->byLinkText(utf8_encode('Relacionamento entre Órgãos'))->click();
+        $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
+    }
+
     public function reativarMapeamento () {
         $this->test->select($this->test->byId('txtEstadoSelect'))->selectOptionByLabel("Inativo");
         $this->test->byXPath("//a[contains(@class, 'reativar')]")->click();

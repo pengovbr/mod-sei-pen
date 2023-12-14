@@ -103,7 +103,7 @@ try {
     ? $_POST['txtNomeTipoProcessoPesquisa']
     : "";
   if (trim($strNomeTipoProcessoPesquisa) != '') {
-    $objTipoProcedimentoDTO->setStrNome(trim($strNomeTipoProcessoPesquisa));
+    $objTipoProcedimentoDTO->setStrNome('%' . trim($strNomeTipoProcessoPesquisa) . '%', InfraDTO::$OPER_LIKE);
   }
 
   $strIdAssunto = !empty($_POST['hdnIdAssuntoTipoProcesso']) && !is_null($_POST['hdnIdAssuntoTipoProcesso']) 

@@ -14,6 +14,15 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarCadastroOrgaoExterno()
+    {
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=pen_map_orgaos_externos_listar')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
+    }
+
     /**
      * Setar parametro para novo mapeamento de orgãos externos
      * 
@@ -103,7 +112,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
                 if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);
             }catch(Exception $e){
             }
-            $testCase->byPartialLinkText($nomeUnidade . '-Unidade de Teste 1')->click();
+            $testCase->byPartialLinkText($nomeUnidade)->click();
             return true;
         }, PEN_WAIT_TIMEOUT);
 
@@ -127,22 +136,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function editarMapOrgao()
     {
-        $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
-    }
-
-    /**
-     * Lispar campo de pesquisa
-     * Colocar texto para pesquisa
-     * Clicar no bot?o pesquisar
-     *
-     * @param string $textoPesquisa
-     * @return void
-     */
-    public function selecionarPesquisa($textoPesquisa)
-    {
-        $this->test->byId('txtSiglaOrigem')->clear();
-        $this->test->byId('txtSiglaOrigem')->value($textoPesquisa);
-        $this->test->byId("btnPesquisar")->click();
+        $this->test->byXPath("(//img[@title='Alterar Relacionamento'])[1]")->click();
     }
 
     /**
@@ -154,9 +148,11 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function selecionarExcluirMapOrgao()
     {
-        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem0'])")->click();
         $this->test->byId("btnExcluir")->click();
         $this->test->acceptAlert();
+
+        // return $this->alertTextAndClose();
     }
 
     /**
@@ -171,12 +167,13 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     public function abrirSelecaoDeArquivoParaImportacao()
     {
-        $this->test->byId('importarCsvButton')->click();
+        $this->test->byXPath("(//img[@title='Importar CSV'])[1]")->click();
+        sleep(2);
         $fileChooser = $this->test->byId('importArquivoCsv');
         $this->test->waitUntil(function ($testCase) use ($fileChooser) {
             $fileChooser
-                ->sendKeys('/opt/sei/web/modulosmod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
-                ->keys(Keys::ENTER);
+                ->sendKeys('/opt/sei/web/modulos/mod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
+                ->keys(Keys::CLEAR);
         },PEN_WAIT_TIMEOUT);
         $this->test->waitUntil(function($testCase) {
             return true;
@@ -226,11 +223,27 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function buscarMensagemAlerta()
     {
-        $alerta = $this->test->alertText();
-        return !empty($alerta) ? $alerta : "";
+        $bolExisteAlerta = $this->alertTextAndClose();
+        $bolExisteAlerta != null ? $this->test->keys(Keys::ENTER) : null;
+
+        return $bolExisteAlerta;
     }
 
-    
+    /**
+     * Lispar campo de pesquisa
+     * Colocar texto para pesquisa
+     * Clicar no bot?o pesquisar
+     *
+     * @param string $textoPesquisa
+     * @return void
+     */
+    public function selecionarPesquisa($textoPesquisa)
+    {
+        $this->test->byId('txtSiglaOrigem')->clear();
+        $this->test->byId('txtSiglaOrigem')->value($textoPesquisa);
+        $this->test->byId("btnPesquisar")->click();
+    }
+
     /**
      * Buscar item de tabela por nome
      *
