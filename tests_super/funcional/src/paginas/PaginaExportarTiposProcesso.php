@@ -14,6 +14,14 @@ class PaginaExportarTiposProcesso extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarExportarTiposProcessos()
+    {
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Exportação de Tipos de Processo'));
+        
+        $this->test->byLinkText(utf8_encode('Exportação de Tipos de Processo'))->click();
+        $this->test->byXPath("//a[@link='pen_map_orgaos_exportar_tipos_processos']")->click();
+    }
+
     /**
      * Seleciona botão editar da primeira linha de tabela
      * 

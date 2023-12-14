@@ -14,6 +14,14 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarCadastroOrgaoExterno()
+    {
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Órgãos'));
+        
+        $this->test->byLinkText(utf8_encode('Relacionamento entre Órgãos'))->click();
+        $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
+    }
+
     /**
      * Setar parametro para novo mapeamento de orgãos externos
      * 
@@ -103,7 +111,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
                 if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);
             }catch(Exception $e){
             }
-            $testCase->byPartialLinkText($nomeUnidade . '-Unidade de Teste 1')->click();
+            $testCase->byPartialLinkText($nomeUnidade)->click();
             return true;
         }, PEN_WAIT_TIMEOUT);
 
@@ -127,7 +135,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      */
     public function editarMapOrgao()
     {
-        $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
+        $this->test->byXPath("(//img[@title='Alterar Relacionamento'])[1]")->click();
     }
 
     /**

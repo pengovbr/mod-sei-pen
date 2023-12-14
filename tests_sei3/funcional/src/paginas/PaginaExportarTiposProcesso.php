@@ -14,6 +14,15 @@ class PaginaExportarTiposProcesso extends PaginaTeste
         parent::__construct($test);
     }
 
+    public function navegarExportarTiposProcessos()
+    {
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=pen_map_orgaos_exportar_tipos_processos')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
+    }
+
     /**
      * Seleciona botão editar da primeira linha de tabela
      * 
@@ -21,10 +30,10 @@ class PaginaExportarTiposProcesso extends PaginaTeste
      */
     public function selecionarParaExportar()
     {
-        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
-        $this->test->byXPath("(//input[@id='chkInfraItem2'])[1]")->click();
-        $this->test->byXPath("(//input[@id='chkInfraItem3'])[1]")->click();
-        $this->test->byXPath("(//input[@id='chkInfraItem5'])[1]")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem0'])")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem2'])")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem3'])")->click();
+        $this->test->byXPath("(//input[@id='chkInfraItem5'])")->click();
         $this->test->byId("btnExportar")->click();
     }
 
@@ -51,5 +60,33 @@ class PaginaExportarTiposProcesso extends PaginaTeste
     {
         $this->test->byId("btnExportarModal")->click();
         sleep(5);
+    }
+
+    /**
+     * Lispar campo de pesquisa
+     * Colocar texto para pesquisa
+     *
+     * @return void
+     */
+    public function selecionarPesquisa()
+    {
+        $this->test->byId('txtNomeTipoProcessoPesquisa')->clear();
+        $this->test->byId('txtNomeTipoProcessoPesquisa')->value('Ouvidoria');
+        $this->test->byId("sbmPesquisar")->click();
+    }
+
+    /**
+     * Buscar se foi pesquisado
+     *
+     * @return void
+     */
+    public function buscarPesquisa()
+    {
+        try {
+            $elementos = $this->test->byXPath("//td[contains(.,'Ouvidoria:')]")->text();
+            return !empty($elementos) && !is_null($elementos);
+        } catch (Exception $e) {
+            return false;
+        }
     }
 }

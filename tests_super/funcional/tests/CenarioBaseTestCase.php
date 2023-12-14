@@ -39,8 +39,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCancelarDocumento = null;
     protected $paginaMoverDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
-    protected $paginaMapeamentoUnidade = null;
     protected $paginaCadastroOrgaoExterno = null;
+    protected $paginaMapeamentoUnidade = null;
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
 
@@ -233,17 +233,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
-        $this->url($url);
-    }
-
-    protected function navegarPara($acao) 
-    {
-        $this->frame(null);
-        $acao = "acao={$acao}";
-        $xpath = "//a[contains(@href, '$acao')]";
-        $link = $this->byXPath($xpath);
-        $url = $link->attribute('href');
-
         $this->url($url);
     }
 
