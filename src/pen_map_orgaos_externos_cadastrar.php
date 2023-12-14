@@ -237,7 +237,7 @@ height: 20px;
 
 .panelOrgao {
 color: #fff;
-width: 48%;
+width: 45%;
 height: 22em;
 float: left;
 padding: 1em 0em 5em 2em;
@@ -445,12 +445,12 @@ $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarOrigem(); inicializarDestino();"');
 ?>
 <form id="frmGravarOrgaoExterno" name="frmGravarOrgaoExterno" method="post" action="<?= $strLinkValidacao ?>">
-  <div class='conteiner'>
+
+  <?php $objPaginaSEI->abrirAreaDados('5em'); ?>
     <?php
     $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     ?>
-  </div>
-
+  <?php $objPaginaSEI->fecharAreaDados(); ?>
   <div class="panelOrgao divOrgaoOrigem">
     <h4>Órgão Origem</h5>
 

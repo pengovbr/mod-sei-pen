@@ -293,11 +293,11 @@ PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 <form id="formExportarDados" method="post" style="display: none;" action="<?= SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $acao) ?>">
   <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">Pré-visualização da Exportação</div>
   <input type="hidden" name="dadosInput" id="dadosInput">
-  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
   <?php PaginaSEI::getInstance()->abrirAreaDados('5em'); ?>
+  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
+  <?php PaginaSEI::getInstance()->fecharAreaDados(); ?>
   <?= $strResultadoExportar ?>
   <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosModalFinal, true); ?>
-  <?php PaginaSEI::getInstance()->fecharAreaDados(); ?>
 </form>
 <?
 PaginaSEI::getInstance()->fecharBody();

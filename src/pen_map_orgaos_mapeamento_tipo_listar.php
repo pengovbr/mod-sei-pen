@@ -573,7 +573,7 @@ $acao = $_GET['acao'];
   PaginaSEI::getInstance()->abrirAreaDados('17em');
   ?>
 
-  <div style="display:grid; width: 40% ">
+  <div style="display:grid; width: 40%;float: left;">
     <label class="infraLabelObrigatorio">Órgão Origem:</label>
     <input type="text" disabled="disabled" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly inputCenter" value=" <?= PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem()) ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
 
@@ -582,12 +582,12 @@ $acao = $_GET['acao'];
 
     <label for="txtPalavrasPesquisaMapeamento" class="infraLabelOpcional">Palavras para Pesquisa:</label>
     <input type="text" id="txtPalavrasPesquisaMapeamentoA" name="txtPalavrasPesquisaMapeamento" value="<?php echo $palavrasPesquisa != null ? $palavrasPesquisa : ''; ?>" class="infraText inputCenter" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
-  </div>
-
-  <div id="divSinAssuntosNaoMapeados" class="infraDivCheckbox">
-    <?php $chkSinAssuntosNaoMapeados = $_POST['chkSinAssuntosNaoMapeados']; ?>
-    <input type="checkbox" id="chkSinAssuntosNaoMapeados" <?= isset($chkSinAssuntosNaoMapeados) ? 'checked' : ''; ?> name="chkSinAssuntosNaoMapeados" class="infraCheckbox" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
-    <label id="lblSinAssuntosNaoMapeados" for="chkSinAssuntosNaoMapeados" class="infraLabelCheckbox">Exibir apenas tipos de processo sem mapeamento definido</label>
+  
+    <div id="divSinAssuntosNaoMapeados" class="infraDivCheckbox" style="padding-top: 10px;">
+      <?php $chkSinAssuntosNaoMapeados = $_POST['chkSinAssuntosNaoMapeados']; ?>
+      <input type="checkbox" id="chkSinAssuntosNaoMapeados" <?= isset($chkSinAssuntosNaoMapeados) ? 'checked' : ''; ?> name="chkSinAssuntosNaoMapeados" class="infraCheckbox" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
+      <label id="lblSinAssuntosNaoMapeados" for="chkSinAssuntosNaoMapeados" class="infraLabelCheckbox">Exibir apenas tipos de processo sem mapeamento definido</label>
+    </div>
   </div>
 
   <input type="hidden" name="idOrgaoExterno" value="<?php echo $idOrgaoExterno; ?>" />
@@ -602,13 +602,13 @@ $acao = $_GET['acao'];
   <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">Pré-visualização da Importação</div>
   <input type="hidden" name="mapId" id="mapId">
   <input type="hidden" name="dados" id="dadosInput">
-  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
   <?php $objPagina->abrirAreaDados('5em'); ?>
+  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
+  <?php $objPagina->fecharAreaDados(); ?>
   <div id="divImportarDados">
     <?php $objPagina->montarAreaTabela($strResultadoImportar, 1); ?>
   </div>
   <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosModalFinal, true); ?>
-  <?php $objPagina->fecharAreaDados(); ?>
 </form>
 <?php
 PaginaSEI::getInstance()->fecharBody();

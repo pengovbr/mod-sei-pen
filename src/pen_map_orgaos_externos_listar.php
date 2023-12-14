@@ -461,6 +461,7 @@ $objPagina->montarStyle();
     left: 52%;
     top: 50%;
     width: 25%;
+    height: 19px;
   }
 
   .ui-dialog {
@@ -692,13 +693,13 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   $idTxtEstado = isset($_POST['txtEstado']) ? $_POST['txtEstado'] : '';
   ?>
   <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Órgão Origem:</label>
-  <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>">
+  <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />
 
   <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Órgão Destino:</label>
-  <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaDestino); ?>">
+  <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaDestino); ?>" />
 
   <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>
-  <input type="text" id="txtEstado" name="txtEstado" class="infraText" value="<?= PaginaSEI::tratarHTML($idTxtEstado); ?>">
+  <input type="hidden" id="txtEstado" name="txtEstado" class="infraText" value="<?= PaginaSEI::tratarHTML($idTxtEstado); ?>" />
   <select id="txtEstadoSelect" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
     <option value="S" <?= PaginaSEI::tratarHTML($txtEstado); ?>>Ativo</option>
     <option value="N" <?= PaginaSEI::tratarHTML($txtEstado); ?>>Inativo</option>
@@ -706,24 +707,22 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   <input type="hidden" id="tableTipoProcessos" name="tableTipoProcessos" value="" />
 
   <?php $objPagina->fecharAreaDados(); ?>
-  <?php $objPagina->abrirAreaDados('10em'); ?>
   <?php if ($numRegistros > 0) { ?>
     <?php PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros); ?>
     <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosFinal, true); ?>
   <?php } ?>
-  <?php $objPagina->fecharAreaDados(); ?>
 </form>
 <form id="formImportarDados" method="post" action="<?php print $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_importar_tipos_processos&acao_origem=' . $acaoOrigem . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>" style="display: none;">
   <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">Pré-visualização da Importação</div>
   <input type="hidden" name="mapId" id="mapId">
   <input type="hidden" name="dados" id="dadosInput">
-  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
   <?php $objPagina->abrirAreaDados('5em'); ?>
+  <?php PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandosModal); ?>
+  <?php $objPagina->fecharAreaDados(); ?>
   <div id="divImportarDados">
     <?php $objPagina->montarAreaTabela($strResultadoImportar, 1); ?>
   </div>
   <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosModalFinal, true); ?>
-  <?php $objPagina->fecharAreaDados(); ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>
