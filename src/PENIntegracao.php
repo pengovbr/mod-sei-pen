@@ -537,6 +537,13 @@ class PENIntegracao extends SeiIntegracao
 
     $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
     $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
+
+    $mensagem = "Prezado(a) usu·rio(a), vocÍ est· tentando excluir um Tipo de Processo que se encontra mapeado para o Tipo de Processo Padr„o "
+      ."\"%s\". Para continuar com essa aÁ„o È necess·rio remover o mapeamento "
+      ."mencionado.";
+
+    $objPenParametroRN = new PenParametroRN();
+    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
   }
 
   /**
@@ -551,9 +558,14 @@ class PENIntegracao extends SeiIntegracao
 
     $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
     $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
+
+    $mensagem = "Prezado(a) usu·rio(a), vocÍ est· tentando excluir um Tipo de Processo que se encontra mapeado para o Tipo de Processo Padr„o "
+      ."\"%s\". Para continuar com essa aÁ„o È necess·rio remover o mapeamento "
+      ."mencionado.";
+
+    $objPenParametroRN = new PenParametroRN();
+    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
   }
-
-
 
   /**
    * M√©todo respons√°vel de criar listagem de item para XML

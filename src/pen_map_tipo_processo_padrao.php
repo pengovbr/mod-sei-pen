@@ -37,7 +37,7 @@ try {
         
         PaginaSEI::getInstance()->adicionarMensagem('Atricuição de Tipo de Processo Padrão realizada com sucesso.', 5);
       } catch (Exception $e) {
-        PaginaSEI::getInstance()->adicionarMensagem('Não foi possível atribuir o Tipo de Processo Padrão.', InfraPagina::$TIPO_MSG_ERRO);
+        PaginaSEI::getInstance()->processarExcecao($e);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_padrao&acao_origem=' . $_GET['acao']));
       die;
