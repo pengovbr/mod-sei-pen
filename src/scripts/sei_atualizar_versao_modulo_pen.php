@@ -272,8 +272,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3032();
         case '3.3.2':
             $this->instalarV3040();
-        case '3.3.3':
-            $this->instalarV3041();
+        case '3.4.0':
+            $this->instalarV3050();
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2552,7 +2552,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.4.0");
   }
 
-  protected function instalarV3041()
+  protected function instalarV3050()
   {
     $objMetaBD = $this->objMeta;
 

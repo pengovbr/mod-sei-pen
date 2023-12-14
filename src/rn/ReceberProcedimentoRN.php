@@ -2001,25 +2001,6 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
     }
   }
-  //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
-  private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
-    $objAtividadeDTO = new AtividadeDTO();
-    $objAtividadeDTO->retNumIdAtividade();
-    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-    $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
-    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-    $objAtividadeDTO->setDthConclusao(null);
-    $objAtividadeRN = new AtividadeRN();
-
-    if ($objAtividadeRN->consultarRN0033($objAtividadeDTO)==null){
-      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
-      $objReabrirProcessoDTO->setDblIdProcedimento($parDblIdProcedimento);
-      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objProcedimentoRN = new ProcedimentoRN();
-      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
-    }
-  }
 
   private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
     {

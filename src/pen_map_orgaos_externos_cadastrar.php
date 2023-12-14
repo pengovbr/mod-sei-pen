@@ -135,15 +135,21 @@ try {
       $objPenOrgaoExternoDTO->setStrOrgaoDestino($strNomeOrgaoDestino);
 
       $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+      $numId = '';
       if (!is_null($id)) {
         $objPenOrgaoExternoDTO->setDblId($id);
         $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-        $objPaginaSEI->adicionarMensagem('Relacionamento atualizado com sucesso.', 5);
+        $numId = $id;
+        $objPaginaSEI->adicionarMensagem('Relacionamento entre Órgãos atualizado com sucesso.', 5);
       } else {
-        $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
-        $objPaginaSEI->adicionarMensagem('Relacionamento cadastrado com sucesso.', 5);
+        $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
+        $numId = $objPenOrgaoExternoDTO->getDblId();
+        $objPaginaSEI->adicionarMensagem('Relacionamento entre Órgãos cadastrado com sucesso.', 5);
       }
-      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']));
+      header('Location: ' . SessaoSEI::getInstance()->assinarLink(
+        'controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']
+        .'&id='.$numId.PaginaSEI::getInstance()->montarAncora($numId.';S')
+      ));
         exit(0);
         break;
     case 'pen_map_orgaos_externos_visualizar':

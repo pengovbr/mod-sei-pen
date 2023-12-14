@@ -733,6 +733,10 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_map_tipo_processo_padrao_salvar':
         require_once dirname(__FILE__) . '/pen_map_tipo_processo_padrao.php';
           break;
+
+      case 'pen_map_tipo_processo_reativar':
+        require_once dirname(__FILE__) . '/pen_map_tipo_processo_reativar.php';
+          break;
       
       case 'pen_map_orgaos_exportar_tipos_processos':
         require_once dirname(__FILE__) . '/pen_tipo_procedimento_lista.php';
