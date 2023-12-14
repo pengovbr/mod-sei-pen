@@ -35,7 +35,7 @@ try {
           }
         }
         
-        PaginaSEI::getInstance()->adicionarMensagem('Atricuição de Tipo de Processo Padrão realizada com sucesso.', 5);
+        PaginaSEI::getInstance()->adicionarMensagem('Atribuição de Tipo de Processo Padrão realizada com sucesso.', 5);
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
