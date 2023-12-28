@@ -2573,7 +2573,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         ),
         'pk' => array('cols' => array('id')),
         'fks' => array(
-          'unidade' => array('nome' => 'fk_md_pen_mapeamento_orgao_externo', 'cols' => array('id_unidade', 'id_unidade')),
+          'unidade' => array('nome' => 'fk_md_pen_orgao_externo', 'cols' => array('id_unidade', 'id_unidade')),
         )
     ));
 
@@ -2605,7 +2605,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       ),
       'pk' => array('cols' => array('id')),
       'fks' => array(
-          'unidade' => array('nome' => 'fk_md_pen_mapeamento_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
+          'unidade' => array('nome' => 'fk_md_pen_map_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
           'md_pen_orgao_externo' => array('nome' => 'fk_md_pen_mapeamento_orgao', 'cols' => array('id', 'id_map_orgao')),
       )
     ));
@@ -2618,7 +2618,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tipo_procedimento', $numMaxId + 1);
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tp_procedimento', $numMaxId + 1);
     $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);

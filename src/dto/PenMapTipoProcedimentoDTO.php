@@ -12,7 +12,7 @@ class PenMapTipoProcedimentoDTO extends InfraDTO {
   }
 
   public function getStrNomeSequenciaNativa() {
-    return 'md_pen_seq_map_tipo_procedimento';
+    return 'md_pen_seq_map_tp_procedimento';
   }
 
   public function montar() {
