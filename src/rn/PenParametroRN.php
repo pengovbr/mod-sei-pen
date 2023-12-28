@@ -188,5 +188,36 @@ class PenParametroRN extends InfraRN {
       }
     }
   }
+  
+  /**
+   * @param array $arrObjTipoProcedimentoDTO
+   * @param string $mensagem
+   * @return void
+   * @throws InfraException
+   */
+  public function validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem)
+  {
+    $mapeamentos = array();
+    foreach ($arrObjTipoProcedimentoDTO as $objTipoProcedimentoDTO) {
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
+      $objPenParametroDTO->retStrNome();
+      $objPenParametroDTO->retStrValor();
+      $objPenParametroDTO = $this->consultarConectado($objPenParametroDTO);
+      if (
+        !is_null($objPenParametroDTO) 
+        && !is_null($objPenParametroDTO->getStrValor())
+        && $objPenParametroDTO->getStrValor() == $objTipoProcedimentoDTO->getIdTipoProcedimento()
+      ) {
+        $mapeamentos[$objTipoProcedimentoDTO->getIdTipoProcedimento()] =
+          $objTipoProcedimentoDTO->getIdTipoProcedimento() . '-' .  $objTipoProcedimentoDTO->getNome();
+      }
+    }
 
+    if (count($mapeamentos) > 0) {
+      $mensagem = sprintf($mensagem, implode('", "', $mapeamentos));
+      LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
+      throw new InfraException($mensagem);
+    }
+  }
 }
