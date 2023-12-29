@@ -3,7 +3,7 @@
 require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
- * Classe reaponsável por manipulação
+ * Classe reaponsÃ¡vel por manipulaÃ§Ã£o
  */
 class PenMapTipoProcedimentoDTO extends InfraDTO {
 
@@ -29,7 +29,6 @@ class PenMapTipoProcedimentoDTO extends InfraDTO {
 
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_criacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');
-
     
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'OrgaoOrigem', 'str_orgao_origem', 'md_pen_orgao_externo');
     $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'OrgaoDestino', 'str_orgao_destino', 'md_pen_orgao_externo');

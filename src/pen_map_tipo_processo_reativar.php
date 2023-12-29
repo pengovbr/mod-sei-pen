@@ -66,7 +66,7 @@ try {
       }
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("AÃ§Ã£o '" . $_GET['acao'] . "' nÃ£o reconhecida.");
   }
 
   $arrComandos = array();
@@ -124,11 +124,11 @@ try {
 
     $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
 
-    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Órgao Origem', 'OrgaoOrigem', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Órgao Destino', 'OrgaoDestino', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Ã“rgao Origem', 'OrgaoOrigem', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Ã“rgao Destino', 'OrgaoDestino', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Origem', 'NomeTipoProcesso', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Destino', 'NomeTipoProcedimento', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="10%">Ações</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="10%">AÃ§Ãµes</th>' . "\n";
 
     $strResultado .= '</tr>' . "\n";
     $strCssTr = '';
@@ -225,7 +225,7 @@ PaginaSEI::getInstance()->montarStyle();
   }
 
   function acaoReativar(id) {
-    if (confirm("Confirma a reativação do Mapeamento de Tipo de Processo?")) {
+    if (confirm("Confirma a reativaÃ§Ã£o do Mapeamento de Tipo de Processo?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmMapeamentoOrgaosLista').action = '<?= $strLinkReativar ?>';
       document.getElementById('frmMapeamentoOrgaosLista').submit();
@@ -236,7 +236,7 @@ PaginaSEI::getInstance()->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a reativação de ' + len + ' mapeamento(s) de tipos de processo ?')) {
+        if (confirm('Confirma a reativaÃ§Ã£o de ' + len + ' mapeamento(s) de tipos de processo ?')) {
           document.getElementById('frmMapeamentoOrgaosLista').action = '<?= $strLinkReativar ?>';
           document.getElementById('frmMapeamentoOrgaosLista').submit();
         }

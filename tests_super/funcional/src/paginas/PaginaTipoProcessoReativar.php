@@ -12,6 +12,7 @@ class PaginaTipoProcessoReativar extends PaginaTeste
     public function navegarTipoProcessoReativar()
     {
         $this->test->byId("txtInfraPesquisarMenu")->value("Reativar Mapeamento de Tipos de Processo");
+
         $this->test->byXPath("//a[@link='pen_map_tipo_processo_reativar']")->click();
     }
 
