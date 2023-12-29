@@ -56,7 +56,7 @@ try {
 
               $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($dblId);
               if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
-                $mensagem = "Relacionamento entre Órgãos possui tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
+                $mensagem = "Relacionamento entre órgãos possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
                 $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
                 header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
                   . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
@@ -69,7 +69,7 @@ try {
           } else {
             $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($arrParam['hdnInfraItensSelecionados']);
             if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
-              $mensagem = "Relacionamento entre Órgãos possui tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
+              $mensagem = "Relacionamento entre órgãos possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
               $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
               header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
                 . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
@@ -80,7 +80,7 @@ try {
             $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
           }
 
-          $objPagina->adicionarMensagem('Relacionamento entre Órgãos foi exclusão com sucesso.', 5);
+          $objPagina->adicionarMensagem('Relacionamento entre órgãos foi excluído com sucesso.', 5);
 
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
           exit(0);
@@ -212,7 +212,7 @@ try {
     $objPenOrgaoExternoDTO->setStrAtivo($_POST['txtEstado']);
   }
 
-  //--------------------------------------------------------------------------'
+  //--------------------------------------------------------------------------
 
   $btnReativarAdicionado = 'N';
   $btnDesativarAdicionado = 'N';
@@ -271,9 +271,9 @@ try {
     $strResultado .= '<tr>';
     $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="12%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Origem</small>', 'IdOrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Orgão Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Órgão Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="12%" style="text-align: center !important;">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Destino</small>', 'IdOrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Orgão Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Órgão Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="15%">Ações</th>' . "\n";
     $strResultado .= '</tr>' . "\n";
     $strCssTr = '';
@@ -321,7 +321,7 @@ try {
           . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao=' . $objPenOrgaoExternoDTO->getDblId())
           . "'," . $objPenOrgaoExternoDTO->getDblId() . ')">'
           . '<img src='
-          . ProcessoEletronicoINT::getCaminhoIcone("/importar.svg", $this->getDiretorioImagens())
+          . ProcessoEletronicoINT::getCaminhoIcone("/importar.svg", 'modulos/mod-sei-pen/src/imagens')
           . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px; width: 20px;">'
           . '</a>';
       } else {
@@ -516,7 +516,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a desativação de ' + len + ' relacionamento(s) entre Órgãos ?')) {
+        if (confirm('Confirma a desativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           var acaoReativar = $("<input>").attr({
             type: "hidden",
@@ -536,7 +536,7 @@ $objPagina->montarStyle();
   }
 
   function acaoDesativar(id) {
-    if (confirm("Confirma a desativação do relacionamento entre Órgãos?")) {
+    if (confirm("Confirma a desativação do relacionamento entre órgãos?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkDesativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
@@ -548,7 +548,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a exclusão do relacionamento entre Órgãos?')) {
+        if (confirm('Confirma a exclusão do relacionamento entre órgãos?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_excluir&acao_origem=' . $acaoOrigem . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
           form.submit();
@@ -563,7 +563,7 @@ $objPagina->montarStyle();
 
   function acaoReativar(id) {
 
-    if (confirm("Confirma a reativação do relacionamento entre Órgãos?")) {
+    if (confirm("Confirma a reativação do relacionamento entre órgãos?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkReativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
@@ -574,7 +574,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre Órgãos ?')) {
+        if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           var acaoReativar = $("<input>").attr({
             type: "hidden",
@@ -691,10 +691,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   $txtEstado = isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : '';
   $idTxtEstado = isset($_POST['txtEstado']) ? $_POST['txtEstado'] : '';
   ?>
-  <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Orgão Origem:</label>
+  <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Órgão Origem:</label>
   <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />
 
-  <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Orgão Destino:</label>
+  <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Órgão Destino:</label>
   <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaDestino); ?>" />
 
   <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>
