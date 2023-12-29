@@ -31,9 +31,20 @@
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <!--Início Configuração de mapeamento de unidades-->
+    <const name="CONTEXTO_ORGAO_A_ID_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_ESTRUTURAS" value="" />
+    <!--Fim Configuração de mapeamento de unidades-->
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_A_ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <!--Fim Configuração de mapeamento entre orgãos origem-->
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA"
+      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
       value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
@@ -64,16 +75,27 @@
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_SIGILOSO"
       value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
 
-    <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
+    <!-- CONFIGURAÃÃES DE TESTE ÃRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_B_ID_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_ESTRUTURAS" value="" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_ESTRUTURAS" value="" />
+    <!--Fim Configuração de mapeamento de unidades-->
+    <!--Início Configuração de mapeamento entre orgãos origem-->
+    <const name="CONTEXTO_ORGAO_B_ID_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE_MAPEAMENTO_ORGAO_ORIGEM" value="" />
+    <!--Fim Configuração de mapeamento entre orgãos origem-->
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA"
+      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
       value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
