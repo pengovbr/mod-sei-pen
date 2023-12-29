@@ -6,7 +6,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_tipo_processo');
 define('PEN_RECURSO_BASE', 'pen_map_tipo_processo_reativar');
-define('PEN_PAGINA_TITULO', 'Reativar de Mapeamento de Tipo de Processo');
+define('PEN_PAGINA_TITULO', 'Reativar de Mapeamento de Tipos de Processo');
 define('PEN_PAGINA_GET_ID', 'id');
 
 $objPagina = PaginaSEI::getInstance();
@@ -35,7 +35,7 @@ try {
 
   switch ($_GET['acao']) {
     case 'pen_map_tipo_processo_reativar':
-      $strTitulo = 'Reativar de Mapeamento de Tipo de Processo';
+      $strTitulo = 'Reativar de Mapeamento de Tipos de Processo';
       if (isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) {
         $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
         foreach ($arrHdnInInfraItensSelecionados as $arr) {
@@ -66,7 +66,7 @@ try {
       }
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("AÃ§Ã£o '" . $_GET['acao'] . "' nÃ£o reconhecida.");
   }
 
   $arrComandos = array();
@@ -81,6 +81,9 @@ try {
   $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoOrigem();
   $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
   $objMapeamentoTipoProcedimentoDTO->retStrNomeTipoProcesso();
+  $objMapeamentoTipoProcedimentoDTO->retStrOrgaoDestino();
+  $objMapeamentoTipoProcedimentoDTO->retStrOrgaoOrigem();
+  $objMapeamentoTipoProcedimentoDTO->retStrNomeTipoProcedimento();
   $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
 
 
@@ -90,23 +93,21 @@ try {
 
   $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso('%' . trim($txtTipoOrigem . '%'), InfraDTO::$OPER_LIKE);
 
-  PaginaSEI::getInstance()->prepararOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_ASC);
-  PaginaSEI::getInstance()->prepararPaginacao($objMapeamentoTipoProcedimentoDTO, 50);
+  $objPagina->prepararOrdenacao($objMapeamentoTipoProcedimentoDTO, 'OrgaoOrigem', InfraDTO::$TIPO_ORDENACAO_ASC);
+  $objPagina->prepararPaginacao($objMapeamentoTipoProcedimentoDTO);
 
   $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
   $arrObjMapeamentoAssuntoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
 
-  PaginaSEI::getInstance()->processarPaginacao($objMapeamentoTipoProcedimentoDTO);
-
-
+  $objPagina->processarPaginacao($objMapeamentoTipoProcedimentoDTO);
   $numRegistros = InfraArray::contar($arrObjMapeamentoAssuntoDTO);
 
   $strAjaxVariaveis = '';
   if ($numRegistros > 0) {
 
-    $arrComandos[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar">Reativar</button>';
+    $arrComandos[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar"><span class="infraTeclaAtalho">R</span>eativar</button>';
 
-    $arrComandosFinal[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar">Reativar</button>';
+    $arrComandosFinal[] = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar"><span class="infraTeclaAtalho">R</span>eativar</button>';
 
     $strLinkGerenciar = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento_gerenciar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . $strParametros);
 
@@ -117,30 +118,21 @@ try {
     $strCaptionTabela = 'tipos de processos para mapeamento';
 
     $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
-    $strResultado .= '<caption class="infraCaption">' . PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
+    $strResultado .= '<caption class="infraCaption">' . $objPagina->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
     $strResultado .= '<tr>';
 
 
     $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
 
-    $strResultado .= '<th class="infraTh">Órgao Origem:</th>' . "\n";
-    $strResultado .= '<th class="infraTh">Órgao Destino:</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . PaginaSEI::getInstance()->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'ID Tipo de Processo Origem', 'Id', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . PaginaSEI::getInstance()->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Origem', 'NomeTipoProcesso', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">Tipo de Processo Destino</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="10%">Ações</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Ã“rgao Origem', 'OrgaoOrigem', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Ã“rgao Destino', 'OrgaoDestino', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Origem', 'NomeTipoProcesso', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Destino', 'NomeTipoProcedimento', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="10%">AÃ§Ãµes</th>' . "\n";
 
     $strResultado .= '</tr>' . "\n";
     $strCssTr = '';
     for ($i = 0; $i < $numRegistros; $i++) {
-
-      $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-      $objPenOrgaoExternoDTO->setDblId($arrObjMapeamentoAssuntoDTO[$i]->getNumIdMapOrgao());
-      $objPenOrgaoExternoDTO->retStrOrgaoDestino();
-      $objPenOrgaoExternoDTO->retStrOrgaoOrigem();
-
-      $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-      $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
 
       $numIdAssuntoOrigem = $arrObjMapeamentoAssuntoDTO[$i]->getNumIdTipoProcessoOrigem();
       $numIdAssuntoDestino = $arrObjMapeamentoAssuntoDTO[$i]->getNumIdTipoProcessoDestino();
@@ -148,25 +140,10 @@ try {
       $strResultado .= ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
 
       $strResultado .= '<td align="center">' . $objPagina->getTrCheck($i, $arrObjMapeamentoAssuntoDTO[$i]->getDblId() . ';' . $arrObjMapeamentoAssuntoDTO[$i]->getStrAtivo(), '') . '</td>';
-      $strResultado .= '<td align="center">'. $objPenOrgaoExternoDTO->getStrOrgaoOrigem() . '';
-      $strResultado .= '<td align="center">'. $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
-      $strResultado .= '<td align="center">' . $numIdAssuntoOrigem . '</td>';
+      $strResultado .= '<td align="center">'. $arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoOrigem() . '';
+      $strResultado .= '<td align="center">'. $arrObjMapeamentoAssuntoDTO[$i]->getStrOrgaoDestino() . '</td>';
       $strResultado .= '<td>' . $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcesso() . '</td>';
-
-      $descricaoTipoProcedimento = '';
-      if ($numIdAssuntoDestino != null) {
-        $tipoProcedimentoDTO = new TipoProcedimentoDTO();
-        $tipoProcedimentoDTO->retNumIdTipoProcedimento();
-        $tipoProcedimentoDTO->retStrNome();
-        $tipoProcedimentoDTO->setNumIdTipoProcedimento($numIdAssuntoDestino);
-
-        $tipoProcedimentoRN = new TipoProcedimentoRN();
-        $objTipoProcedimentoDTO = $tipoProcedimentoRN->consultarRN0267($tipoProcedimentoDTO);
-        $descricaoTipoProcedimento = $numIdAssuntoDestino . ' - ' . $objTipoProcedimentoDTO->getStrNome();
-      }
-
-      $strResultado .= '<td>' . PaginaSEI::tratarHTML($descricaoTipoProcedimento) . '</td>';
-
+      $strResultado .= '<td>' . $arrObjMapeamentoAssuntoDTO[$i]->getStrNomeTipoProcedimento() . '</td>';
       $strResultado .= '<td align="center">';
 
       $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_tipo_processo_reativar&acao_origem=' . $acaoOrigem . '&id=' . $arrObjMapeamentoAssuntoDTO[$i]->getDblId());
@@ -248,7 +225,7 @@ PaginaSEI::getInstance()->montarStyle();
   }
 
   function acaoReativar(id) {
-    if (confirm("Confirma a reativação do Mapeamento de Tipo de Processo?")) {
+    if (confirm("Confirma a reativaÃ§Ã£o do Mapeamento de Tipo de Processo?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmMapeamentoOrgaosLista').action = '<?= $strLinkReativar ?>';
       document.getElementById('frmMapeamentoOrgaosLista').submit();
@@ -259,7 +236,7 @@ PaginaSEI::getInstance()->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a reativação de ' + len + ' mapeamento(s) de tipos de processo ?')) {
+        if (confirm('Confirma a reativaÃ§Ã£o de ' + len + ' mapeamento(s) de tipos de processo ?')) {
           document.getElementById('frmMapeamentoOrgaosLista').action = '<?= $strLinkReativar ?>';
           document.getElementById('frmMapeamentoOrgaosLista').submit();
         }
@@ -281,7 +258,7 @@ PaginaSEI::getInstance()->fecharHead();
 PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 $acao = $_GET['acao'];
 ?>
-<form id="frmMapeamentoOrgaosLista" method="post" onsubmit="return OnSubmitForm();" action="<?= SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $acao . '&id=' . $idOrgaoExterno) ?>">
+<form id="frmMapeamentoOrgaosLista" method="post" action="<?= SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $acao . '&id=' . $idOrgaoExterno) ?>">
   <?php
   PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
   PaginaSEI::getInstance()->abrirAreaDados('5em');
