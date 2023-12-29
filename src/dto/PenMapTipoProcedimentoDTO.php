@@ -3,7 +3,7 @@
 require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
- * Classe reapons√°vel por manipula√ß√£o
+ * Classe reapons·vel por manipulaÁ„o
  */
 class PenMapTipoProcedimentoDTO extends InfraDTO {
 
