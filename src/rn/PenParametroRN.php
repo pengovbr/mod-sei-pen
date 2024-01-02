@@ -3,7 +3,7 @@
 require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
- * Regra de negÃ³cio para o parÃ¢metros do mÃ³dulo PEN
+ * Regra de negócio para o parâmetros do módulo PEN
  */
 class PenParametroRN extends InfraRN {
 
@@ -19,7 +19,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->contar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao contar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao contar parâmetro.', $e);
     }
   }
 
@@ -30,7 +30,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->consultar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao listar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao listar parâmetro.', $e);
     }
   }
 
@@ -42,7 +42,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->listar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao listar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao listar parâmetro.', $e);
     }
   }
 
@@ -58,7 +58,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->cadastrar($objPenParametroDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao cadastrar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao cadastrar parâmetro.', $e);
     }
   }
 
@@ -75,7 +75,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->alterar($objPenParametroDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao alterar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao alterar parâmetro.', $e);
     }
   }
 
@@ -86,7 +86,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->excluir($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao excluir parÃ¢metro.', $e);
+        throw new InfraException('Erro ao excluir parâmetro.', $e);
     }
   }
 
@@ -97,12 +97,12 @@ class PenParametroRN extends InfraRN {
         return $objBD->setValor($strNome, $strValor);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao reativar parÃ¢metro.', $e);
+        throw new InfraException('Erro ao reativar parâmetro.', $e);
     }
   }
 
     /**
-     * Resgata o valor do parÃ¢metro configura
+     * Resgata o valor do parâmetro configura
      * @param string $strNome
      */
   public function getParametro($strNome) {
@@ -118,10 +118,10 @@ class PenParametroRN extends InfraRN {
 
 
     /**
-     * Insere ou alterar o valor de um parÃ¢metro de configuraÃ§Ã£o do mÃ³dulo de integraÃ§Ã£o PEN
+     * Insere ou alterar o valor de um parâmetro de configuração do módulo de integração PEN
      *
-     * @param string $parStrNome Nome do parÃ¢metro
-     * @param string $parStrValor valor do parÃ¢metro
+     * @param string $parStrNome Nome do parâmetro
+     * @param string $parStrValor valor do parâmetro
      * @return void
      */
   public static function persistirParametro($parStrNome, $parStrValor, $parStrDescricao = null, $parNumSequencia = null)
@@ -144,7 +144,7 @@ class PenParametroRN extends InfraRN {
       }
     }
     catch (Exception $e) {
-        throw new InfraException("Erro ao persistir parÃ¢metro $parStrNome", $e);
+        throw new InfraException("Erro ao persistir parâmetro $parStrNome", $e);
     }
   }
 
@@ -162,7 +162,7 @@ class PenParametroRN extends InfraRN {
         $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
 
       if (empty($arrObjTipoProcedimentoAssunto)) {
-          $strMensagemErro = "Tipo de processo externo nÃ£o possui sugestÃ£o de assuntos atribuÃ­da.";
+          $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
           $objInfraException->adicionarValidacao($strMensagemErro);
       }
     }
@@ -182,8 +182,8 @@ class PenParametroRN extends InfraRN {
         $objUnidadeDTO = $objUnidadeBD->consultar($objUnidadeDTO);
 
       if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
-          $strMensagemErro = "NÃ£o Ã© permitido a configuraÃ§Ã£o de uma \"Unidade SEI para RepresentaÃ§Ã£o de Ã“rgÃ£os Externos\" que nÃ£o esteja disponÃ­vel para envio de processo, ";
-          $strMensagemErro .= "opÃ§Ã£o \"DisponÃ­vel para envio de processos\" desmarcado no cadastro da unidade.";
+          $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
+          $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
           $objInfraException->adicionarValidacao($strMensagemErro);
       }
     }
