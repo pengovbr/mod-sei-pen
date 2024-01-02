@@ -89,7 +89,7 @@ try {
           }
         }
 
-        $objPagina->adicionarMensagem(sprintf('Inclus√£o de %s realizada com sucesso.', PEN_PAGINA_TITULO), 5);
+        $objPagina->adicionarMensagem(sprintf('Inclus„o de %s realizada com sucesso.', PEN_PAGINA_TITULO), 5);
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
@@ -123,8 +123,8 @@ try {
             $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
             $contador += 1;
           }
-          $mensagem = "Importa√ß√£o realizada com sucesso. Importado(s) %s tipo(s) de processo(s).\n"
-          . "Obs.: Se algum tipo de processo n√£o foi importado, verifique se ele j√° est√° presente na tabela e/ou se foi desativado.";
+          $mensagem = "ImportaÁ„o realizada com sucesso. Importado(s) %s tipo(s) de processo(s).\n"
+          . "Obs.: Se algum tipo de processo n„o foi importado, verifique se ele j· est· presente na tabela e/ou se foi desativado.";
           $objPagina->adicionarMensagem(sprintf($mensagem, $contador), 5);
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $_POST['mapId']));
           exit(0);
@@ -152,17 +152,17 @@ try {
           $objExclusaoTipoProcedimentoRN->excluir($objExclusaoTipoProcedimentoDTO);
         }
 
-        $objPagina->adicionarMensagem('Mapeamento de tipos de processo foi exclu√≠do com sucesso.', 5);
+        $objPagina->adicionarMensagem('Mapeamento de tipos de processo foi excluÌdo com sucesso.', 5);
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $idOrgaoExterno));
         exit(0);
       } else {
-        $objPagina->adicionarMensagem('N√£o existe nenum registro de mapeamento para tipos de processo.', InfraPagina::$TIPO_MSG_AVISO);
+        $objPagina->adicionarMensagem('N„o existe nenum registro de mapeamento para tipos de processo.', InfraPagina::$TIPO_MSG_AVISO);
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $idOrgaoExterno));
         exit(0);
       }
         break;
     default:
-        throw new InfraException("A√ß√£o '" . $_GET['acao'] . "' n√£o reconhecida.");
+        throw new InfraException("AÁ„o '" . $_GET['acao'] . "' n„o reconhecida.");
   }
 
   $arrComandos = array();
@@ -252,7 +252,7 @@ try {
 
     $strResultado .= '<th width="45%" class="infraTh">' . PaginaSEI::getInstance()->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Origem', 'id', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th width="45%" class="infraTh">Tipo de Processo Destino</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="15%">A√ß√µes</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="15%">AÁıes</th>' . "\n";
 
     $strResultado .= '</tr>' . "\n";
     $strCssTr = '';
@@ -408,7 +408,7 @@ PaginaSEI::getInstance()->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a exclus√£o do(s) mapeamento(s) de tipos de processo?')) {
+        if (confirm('Confirma a exclus„o do(s) mapeamento(s) de tipos de processo?')) {
           var form = jQuery('#frmMapeamentoOrgaosLista');
           form.attr('action', '<?= $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento_excluir&acao_origem=' . $acaoOrigem . '&acao_retorno=pen_map_orgaos_externos_mapeamento&id=' . $idOrgaoExterno); ?>');
           form.submit();
@@ -428,7 +428,7 @@ PaginaSEI::getInstance()->montarStyle();
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento = row.find('td:eq(2)').text();
 
-    if (confirm('Confirma a exclus√£o do mapeamento de tipos de processo?')) {
+    if (confirm('Confirma a exclus„o do mapeamento de tipos de processo?')) {
 
       window.location = url;
     }
@@ -519,7 +519,7 @@ PaginaSEI::getInstance()->montarStyle();
   }
 
   function acaoDesativar(id) {
-    if (confirm("Confirma a desativa√ß√£o do Mapeamento de Tipo de Processo?")) {
+    if (confirm("Confirma a desativaÁ„o do Mapeamento de Tipo de Processo?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmMapeamentoOrgaosLista').action = '<?= $strLinkDesativar ?>';
       document.getElementById('frmMapeamentoOrgaosLista').submit();
@@ -530,7 +530,7 @@ PaginaSEI::getInstance()->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a desativa√ß√£o de ' + len + ' mapeamento(s) de tipos de processo ?')) {
+        if (confirm('Confirma a desativaÁ„o de ' + len + ' mapeamento(s) de tipos de processo ?')) {
           var form = jQuery('#frmMapeamentoOrgaosLista');
           var acaoReativar = $("<input>").attr({
             type: "hidden",
@@ -567,10 +567,10 @@ $acao = $_GET['acao'];
   ?>
 
   <div style="display:grid; width: 40%;float: left;">
-    <label class="infraLabelObrigatorio">√ìrg√£o Origem:</label>
+    <label class="infraLabelObrigatorio">”rg„o Origem:</label>
     <input type="text" disabled="disabled" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly inputCenter" value=" <?= PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem()) ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
 
-    <label class="infraLabelObrigatorio">√ìrg√£o Destino:</label>
+    <label class="infraLabelObrigatorio">”rg„o Destino:</label>
     <input type="text" disabled="disabled" name="" class="infraText infraReadOnly inputCenter" value=" <?= PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoDestino()) ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
 
     <label for="txtPalavrasPesquisaMapeamento" class="infraLabelOpcional">Palavras para Pesquisa:</label>
@@ -592,7 +592,7 @@ $acao = $_GET['acao'];
   ?>
 </form>
 <form id="formImportarDados" method="post" action="<?php print $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $acaoOrigem . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>" style="display: none;">
-  <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">Pr√©-visualiza√ß√£o da Importa√ß√£o</div>
+  <div id="divInfraBarraLocalizacao2" class="infraBarraLocalizacao" tabindex="450">PrÈ-visualizaÁ„o da ImportaÁ„o</div>
   <input type="hidden" name="mapId" id="mapId">
   <input type="hidden" name="dados" id="dadosInput">
   <?php $objPagina->abrirAreaDados('5em'); ?>
