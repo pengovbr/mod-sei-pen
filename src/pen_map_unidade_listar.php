@@ -175,11 +175,11 @@ try {
 
         $strResultado .= '<tr class="'.$strCssTr.'">';
         $strResultado .= '<td>'.$objPagina->getTrCheck($index, $objPenUnidadeDTO->getNumIdUnidade(), '').'</td>';
-        $strResultado .= '<td>'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
-        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSigla().'</td>';
+        $strResultado .= '<td align="center">'.$objPenUnidadeDTO->getNumIdUnidade().'</td>';
+        $strResultado .= '<td align="center">'.$objPenUnidadeDTO->getStrSigla().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrDescricao().'</td>';
         $strResultado .= '<td>'.$arrMapIdUnidadeRH[$objPenUnidadeDTO->getNumIdUnidadeRH()].'</td>';
-        $strResultado .= '<td>'.$objPenUnidadeDTO->getStrSiglaUnidadeRH().'</td>';
+        $strResultado .= '<td align="center">'.$objPenUnidadeDTO->getStrSiglaUnidadeRH().'</td>';
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrNomeUnidadeRH().'</td>';
         $strResultado .= '<td align="center">';
 

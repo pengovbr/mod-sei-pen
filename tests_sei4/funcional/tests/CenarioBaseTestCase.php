@@ -38,6 +38,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaMoverDocumento = null;
+    protected $paginaCadastroOrgaoExterno = null;
+    protected $paginaCadastroMapEnvioCompDigitais = null;
+    protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoProcessoReativar = null;
 
     public function setUpPage(): void
     {
@@ -56,6 +61,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
+        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
+        $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->currentWindow()->maximize();
     }
 
@@ -192,6 +201,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
+            'SIGLA_ESTRUTURA' => constant($nomeContexto . '_SIGLA_ESTRUTURA'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
             'HIPOTESE_SIGILOSO' => constant($nomeContexto . '_HIPOTESE_SIGILOSO'),
@@ -221,6 +231,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)
