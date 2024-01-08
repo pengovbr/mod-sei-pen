@@ -83,20 +83,17 @@ try {
       $acao = !is_null($id) ? 'pen_map_orgaos_externos_atualizar' : 'pen_map_orgaos_externos_cadastrar';
       if (empty($_POST['selRepositorioEstruturasOrigem']) || empty($_POST['txtRepositorioEstruturasOrigem'])) {
         $objPaginaSEI->adicionarMensagem('Selecione um repositório de origem.', InfraPagina::$TIPO_MSG_AVISO);
-        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $_GET['acao_origem']));
-        exit(0);
       }
       if (empty($_POST['hdnIdUnidadeOrigem']) || empty($_POST['txtUnidadeOrigem'])) {
-        $objPaginaSEI->adicionarMensagem('O Órgão Origem não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
-        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $_GET['acao_origem']));
-        exit(0);
+        $objPaginaSEI->adicionarMensagem('A unidade Origem não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
       }
       if (empty($_POST['hdnIdUnidadeDestino']) || empty($_POST['txtUnidadeDestino'])) {
-        $objPaginaSEI->adicionarMensagem('O Órgão Destino não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
+        $objPaginaSEI->adicionarMensagem('A unidade Destino não foi informado.', InfraPagina::$TIPO_MSG_AVISO);
+      }
+      if (!empty($objPaginaSEI->getStrMensagens())){
         header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $_GET['acao_origem']));
         exit(0);
       }
-
       $numIdOrgaoOrigem = $_POST['hdnIdUnidadeOrigem'];
       $strNomeOrgaoOrigem = $_POST['txtUnidadeOrigem'];
       $numIdRepositorioOrigem = $_POST['selRepositorioEstruturasOrigem'];
@@ -116,7 +113,7 @@ try {
       $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
       $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->contar($objPenOrgaoExternoDTO);
       if ($respObjPenOrgaoExternoDTO > 0) {
-        $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre órgãos já existente.', InfraPagina::$TIPO_MSG_ERRO);
+        $objPaginaSEI->adicionarMensagem('Cadastro de relacionamento entre unidades já existente.', InfraPagina::$TIPO_MSG_ERRO);
         header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_orgaos_externos_cadastrar&acao_origem=' . $_GET['acao_origem']));
         exit(0);
       }
@@ -139,11 +136,11 @@ try {
         $objPenOrgaoExternoDTO->setDblId($id);
         $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
         $numId = $id;
-        $objPaginaSEI->adicionarMensagem('Relacionamento entre Órgãos atualizado com sucesso.', 5);
+        $objPaginaSEI->adicionarMensagem('Relacionamento entre Unidades atualizado com sucesso.', 5);
       } else {
         $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->cadastrar($objPenOrgaoExternoDTO);
         $numId = $objPenOrgaoExternoDTO->getDblId();
-        $objPaginaSEI->adicionarMensagem('Relacionamento entre Órgãos cadastrado com sucesso.', 5);
+        $objPaginaSEI->adicionarMensagem('Relacionamento entre Unidades cadastrado com sucesso.', 5);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink(
         'controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao_origem']
@@ -154,7 +151,7 @@ try {
     case 'pen_map_orgaos_externos_visualizar':
     case 'pen_map_orgaos_externos_atualizar':
     case 'pen_map_orgaos_externos_cadastrar':
-      $strTitulo = 'Cadastro de Relacionamento entre Órgãos';
+      $strTitulo = 'Cadastro de Relacionamento entre Unidades';
 
       //Monta os botões do topo
       if (
@@ -333,12 +330,12 @@ $objPaginaSEI->montarJavaScript();
   //Caso não tenha unidade encontrada
   $(document).ready(function() {
     $(document).on('click', '#txtUnidadeOrigem', function() {
-      if ($(this).val() == "Órgão origem não Encontrado.") {
+      if ($(this).val() == "Unidade origem não Encontrado.") {
         $(this).val('');
       }
     });
     $(document).on('click', '#txtUnidadeDestino', function() {
-      if ($(this).val() == "Órgão destino não Encontrado.") {
+      if ($(this).val() == "Unidade destino não Encontrado.") {
         $(this).val('');
       }
     });
@@ -451,7 +448,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
     ?>
   <?php $objPaginaSEI->fecharAreaDados(); ?>
   <div class="panelOrgao divOrgaoOrigem">
-    <h4>Órgão Origem</h5>
+    <h4>Unidade Origem</h5>
 
       <div id="divRepositorioEstruturasOrigem" class="infraAreaDados" style="height: 4.5em;">
         <label id="lblRepositorioEstruturasOrigem" for="selRepositorioEstruturasOrigem" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
@@ -463,14 +460,13 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
       </div>
 
       <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-        <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Órgão Origem:</label>
+        <label id="lblUnidadesOrigem" for="selUnidadesOrigem" class="infraLabelObrigatorio">Unidade Origem:</label>
         <div class="alinhamentoBotaoImput">
           <input type="text" id="txtUnidadeOrigem" name="txtUnidadeOrigem" class="infraText infraReadOnly" <?php empty($strNomeOrgaoOrigem) ? 'disabled="disabled"' : '' ?> placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= PaginaSEI::tratarHTML($strNomeOrgaoOrigem); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
           <br />
           <br />
           <?php if ($_GET['acao'] != 'pen_map_orgaos_externos_visualizar') { ?>
             <button id="btnIdUnidadeOrigem" type="button" class="infraButton">Consultar</button>
-            <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
           <?php } ?>
         </div>
 
@@ -479,10 +475,10 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializarO
   </div>
 
   <div class="panelOrgao divOrgaoDestino">
-    <h4>Órgão Destino</h4>
+    <h4>Unidade Destino</h4>
 
     <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
-      <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Órgão Destino:</label>
+      <label id="lblUnidadesDestino" for="selUnidadesDestino" class="infraLabelObrigatorio">Unidade Destino:</label>
       <div class="alinhamentoBotaoImput">
         <input type="text" id="txtUnidadeDestino" name="txtUnidadeDestino" <?= $disabilitarVisualizar ?> class="infraText infraReadOnly" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= PaginaSEI::tratarHTML($strNomeOrgaoDestino); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
         <br /><br />

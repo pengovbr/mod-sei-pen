@@ -59,7 +59,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Órgãos cadastrado com sucesso.'),
+            utf8_encode('Relacionamento entre Unidades cadastrado com sucesso.'),
             $mensagem
         );
     }
@@ -93,7 +93,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Cadastro de relacionamento entre órgãos já existente.'),
+            utf8_encode('Cadastro de relacionamento entre unidades já existente.'),
             $mensagem
         );
     }
@@ -133,7 +133,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Órgãos atualizado com sucesso.'),
+            utf8_encode('Relacionamento entre Unidades atualizado com sucesso.'),
             $mensagem
         );
     }

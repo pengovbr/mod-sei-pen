@@ -65,6 +65,6 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
 
     public function mensagemValidacao($status)
     {
-        return utf8_encode("Relacionamento entre Órgãos foi {$status} com sucesso.");
+        return utf8_encode("Relacionamento entre Unidades foi {$status} com sucesso.");
     }
 }

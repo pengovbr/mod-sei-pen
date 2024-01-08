@@ -156,7 +156,7 @@ try {
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $idOrgaoExterno));
         exit(0);
       } else {
-        $objPagina->adicionarMensagem('Não existe nenum registro de mapeamento para tipos de processo.', InfraPagina::$TIPO_MSG_AVISO);
+        $objPagina->adicionarMensagem('Não existe nenhum registro de mapeamento para tipos de processo.', InfraPagina::$TIPO_MSG_AVISO);
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $idOrgaoExterno));
         exit(0);
       }
@@ -567,10 +567,10 @@ $acao = $_GET['acao'];
   ?>
 
   <div style="display:grid; width: 40%;float: left;">
-    <label class="infraLabelObrigatorio">Órgão Origem:</label>
+    <label class="infraLabelObrigatorio">Unidade Origem:</label>
     <input type="text" disabled="disabled" name="txtTabelaAssuntosOrigem" readonly="readonly" class="infraText infraReadOnly inputCenter" value=" <?= PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoOrigem()) ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
 
-    <label class="infraLabelObrigatorio">Órgão Destino:</label>
+    <label class="infraLabelObrigatorio">Unidade Destino:</label>
     <input type="text" disabled="disabled" name="" class="infraText infraReadOnly inputCenter" value=" <?= PaginaSEI::tratarHTML($objPenOrgaoExternoDTO->getStrOrgaoDestino()) ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
 
     <label for="txtPalavrasPesquisaMapeamento" class="infraLabelOpcional">Palavras para Pesquisa:</label>

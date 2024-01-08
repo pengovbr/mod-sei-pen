@@ -12,9 +12,9 @@ class PaginaTramiteMapeamentoOrgaoExterno extends PaginaTeste
 
     public function navegarRelacionamentoEntreOrgaos()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Órgãos'));
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Unidades'));
 
-        $this->test->byLinkText(utf8_encode('Relacionamento entre Órgãos'))->click();
+        $this->test->byLinkText(utf8_encode('Relacionamento entre Unidades'))->click();
         $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
     }
 

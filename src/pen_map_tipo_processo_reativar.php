@@ -6,7 +6,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_tipo_processo');
 define('PEN_RECURSO_BASE', 'pen_map_tipo_processo_reativar');
-define('PEN_PAGINA_TITULO', 'Reativar de Mapeamento de Tipos de Processo');
+define('PEN_PAGINA_TITULO', 'Reativar Mapeamento de Tipos de Processo');
 define('PEN_PAGINA_GET_ID', 'id');
 
 $objPagina = PaginaSEI::getInstance();
@@ -35,7 +35,7 @@ try {
 
   switch ($_GET['acao']) {
     case 'pen_map_tipo_processo_reativar':
-      $strTitulo = 'Reativar de Mapeamento de Tipos de Processo';
+      $strTitulo = 'Reativar Mapeamento de Tipos de Processo';
       if (isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) {
         $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
         foreach ($arrHdnInInfraItensSelecionados as $arr) {
@@ -124,8 +124,8 @@ try {
 
     $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
 
-    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Órgao Origem', 'OrgaoOrigem', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Órgao Destino', 'OrgaoDestino', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Unidade Origem', 'OrgaoOrigem', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Unidade Destino', 'OrgaoDestino', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Origem', 'NomeTipoProcesso', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">' . $objPagina->getThOrdenacao($objMapeamentoTipoProcedimentoDTO, 'Tipo de Processo Destino', 'NomeTipoProcedimento', $arrObjMapeamentoAssuntoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="10%">Ações</th>' . "\n";

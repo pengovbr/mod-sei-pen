@@ -16,7 +16,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     public function navegarCadastroOrgaoExterno()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Órgãos'));
+        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Relacionamento entre Unidades'));
         $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
     }
 

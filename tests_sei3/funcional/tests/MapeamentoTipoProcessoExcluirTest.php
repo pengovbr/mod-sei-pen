@@ -56,7 +56,7 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
         $this->paginaCadastroOrgaoExterno->selecionarExcluirMapOrgao(self::$penOrgaoExternoId);
         sleep(1);
         $mensagemRetornoAlert = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
-        $menssagemValidacao = utf8_encode('Relacionamento entre órgãos foi excluído com sucesso.');
+        $menssagemValidacao = utf8_encode('Relacionamento entre unidades foi excluído com sucesso.');
 
         $this->assertStringContainsString(
             $menssagemValidacao,

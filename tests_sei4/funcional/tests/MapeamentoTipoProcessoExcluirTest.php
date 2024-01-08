@@ -56,7 +56,7 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre órgãos foi excluído com sucesso.'),
+            utf8_encode('Relacionamento entre unidades foi excluído com sucesso.'),
             $mensagem
         );
     }

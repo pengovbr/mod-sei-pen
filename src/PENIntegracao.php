@@ -538,11 +538,11 @@ class PENIntegracao extends SeiIntegracao
     $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
     $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
 
-    $mensagem = 'Prezado(a) usuário(a), você está tentando inativar o Tipo de Processo "%s" '
+    $mensagem = 'Prezado(a) usuário(a), você está tentando desativar o Tipo de Processo "%s" '
       . 'que se encontra mapeado para o Tipo de Processo Padrão. '
       . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
       . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Órgãos';
+      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
 
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
@@ -565,7 +565,7 @@ class PENIntegracao extends SeiIntegracao
       . 'que se encontra mapeado para o Tipo de Processo Padrão. '
       . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
       . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Órgãos';
+      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
 
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);

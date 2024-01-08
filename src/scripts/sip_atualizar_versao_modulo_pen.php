@@ -1866,21 +1866,21 @@ class PenAtualizarSipRN extends InfraRN
     // Adicionar submenu
     $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
 
-    $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre órgãos', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre órgãos', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre órgãos', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_desativar', 'Desativar relacionamento entre órgãos', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_salvar', 'Salvar relacionamento entre unidades', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_excluir', 'Excluir relacionamento entre unidades', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_cadastrar', 'Cadastro de relacionamento entre unidades', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_desativar', 'Desativar relacionamento entre unidades', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_reativar', 'Reativar relacionamento entre unidades', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_externos_mapeamento', 'Mapeamento de tipo de processo', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_mapeamento_excluir', 'Excluir apeamento de tipo de processo', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre órgãos', $numIdSistema);
-    $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre órgãos', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_mapeamento_excluir', 'Excluir mapeamento de tipo de processo', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_atualizar', 'Atualizar relacionamento entre unidades', $numIdSistema);
+    $this->criarRecurso('pen_map_orgaos_externos_visualizar', 'Visualizar relacionamento entre unidades', $numIdSistema);
     $this->criarRecurso('pen_map_orgaos_importar_tipos_processos', 'Importar tipos de processo', $numIdSistema);
-    $this->criarRecurso('pen_map_tipo_processo_padrao', 'Importar tipos de processo', $numIdSistema);
-    $this->criarRecurso('pen_map_tipo_processo_padrao_salvar', 'Importar tipos de processo', $numIdSistema);
+    $this->criarRecurso('pen_map_tipo_processo_padrao', 'Consultar tipo de processo padrão', $numIdSistema);
+    $this->criarRecurso('pen_map_tipo_processo_padrao_salvar', 'Cadastrar tipo de processo padrão', $numIdSistema);
 
-    $numIdRecursoListar = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre órgãos', $numIdSistema);
-    $numIdRecursoExportar = $this->criarRecurso('pen_map_orgaos_exportar_tipos_processos', 'Listagem de relacionamento entre órgãos', $numIdSistema);
+    $numIdRecursoListar = $this->criarRecurso('pen_map_orgaos_externos_listar', 'Listagem de relacionamento entre unidades', $numIdSistema);
+    $numIdRecursoExportar = $this->criarRecurso('pen_map_orgaos_exportar_tipos_processos', 'Exportar tipos de processo', $numIdSistema);
     $numIdRecursoReativar = $this->criarRecurso('pen_map_tipo_processo_reativar', 'Reativar mapeamento de tipo de processo', $numIdSistema);
 
     $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
@@ -1904,7 +1904,7 @@ class PenAtualizarSipRN extends InfraRN
     $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
-    $numIdItemMenuRecuso = $this->criarMenu('Relacionamento entre Órgãos', 20, $numIdItemMenu, $numIdMenu, $numIdRecursoListar, $numIdSistema);
+    $numIdItemMenuRecuso = $this->criarMenu('Relacionamento entre Unidades', 20, $numIdItemMenu, $numIdMenu, $numIdRecursoListar, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoListar, $numIdMenu, $numIdItemMenuRecuso);
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Exportar Tipo de Processo

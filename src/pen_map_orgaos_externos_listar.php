@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_orgaos_externos_listar');
 define('PEN_RECURSO_BASE', 'pen_map_orgaos_externos');
-define('PEN_PAGINA_TITULO', 'Relacionamento entre Órgãos');
+define('PEN_PAGINA_TITULO', 'Relacionamento entre Unidades');
 define('PEN_PAGINA_GET_ID', 'id');
 
 
@@ -56,7 +56,7 @@ try {
 
               $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($dblId);
               if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
-                $mensagem = "Relacionamento entre órgãos possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
+                $mensagem = "Relacionamento entre unidades possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
                 $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
                 header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
                   . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
@@ -69,7 +69,7 @@ try {
           } else {
             $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($arrParam['hdnInfraItensSelecionados']);
             if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
-              $mensagem = "Relacionamento entre órgãos possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
+              $mensagem = "Relacionamento entre unidades possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
               $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
               header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
                 . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
@@ -80,7 +80,7 @@ try {
             $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
           }
 
-          $objPagina->adicionarMensagem('Relacionamento entre órgãos foi excluído com sucesso.', 5);
+          $objPagina->adicionarMensagem('Relacionamento entre unidades foi excluído com sucesso.', 5);
 
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
           exit(0);
@@ -271,9 +271,9 @@ try {
     $strResultado .= '<tr>';
     $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="12%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Origem</small>', 'IdOrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Órgão Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="12%" style="text-align: center !important;">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Destino</small>', 'IdOrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Órgão Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="15%">Ações</th>' . "\n";
     $strResultado .= '</tr>' . "\n";
     $strCssTr = '';
@@ -295,7 +295,7 @@ try {
           . '_visualizar&acao_origem=' . $_GET['acao_origem']
           . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
         . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif")
-        . ' title="Consultar Mapeamento Entre Órgãos" alt="Consultar Mapeamento Entre Órgãos" class="infraImg"></a>';
+        . ' title="Consultar Mapeamento Entre Unidades" alt="Consultar Mapeamento Entre Unidades" class="infraImg"></a>';
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
         $strResultado .= '<a href="'
@@ -303,7 +303,7 @@ try {
             . '_atualizar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao']
             . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
           . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
-          . ' title="Alterar Relacionamento" alt="Alterar Relacionamento Entre Órgãos" class="infraImg"></a>';
+          . ' title="Alterar Relacionamento" alt="Alterar Relacionamento Entre Unidades" class="infraImg"></a>';
       }
 
       $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
@@ -336,14 +336,14 @@ try {
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
         $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
         $strId = $objPenOrgaoExternoDTO->getDblId();
-        $strResultado .= '<a class="reativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoReativar(\'' . $strId . '\')"><img src="' . PaginaSEI::getInstance()->getIconeReativar() . '" title="Reativar Relacionamento entre Órgãos" alt="Reativar Relacionamento entre Órgãos" class="infraImg"></a>';
+        $strResultado .= '<a class="reativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoReativar(\'' . $strId . '\')"><img src="' . PaginaSEI::getInstance()->getIconeReativar() . '" title="Reativar Relacionamento entre Unidades" alt="Reativar Relacionamento entre Unidades" class="infraImg"></a>';
       }
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_desativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'S') {
         $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
         $strId = $objPenOrgaoExternoDTO->getDblId();
         $strResultado .= '<a class="desativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoDesativar(\'' . $strId . '\')"><img src="'
-          . PaginaSEI::getInstance()->getIconeDesativar() . '" title="Desativar Relacionamento entre Órgãos" alt="Desativar Relacionamento entre Órgãos" class="infraImg"></a>';
+          . PaginaSEI::getInstance()->getIconeDesativar() . '" title="Desativar Relacionamento entre Unidades" alt="Desativar Relacionamento entre Unidades" class="infraImg"></a>';
       }
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir') && $arrPenOrgaoExternoDTO == null) {
@@ -499,7 +499,7 @@ $objPagina->montarStyle();
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento = row.find('td:eq(2)').text();
 
-    if (confirm('Confirma a exclusão do relacionamento entre órgãos?')) {
+    if (confirm('Confirma a exclusão do relacionamento entre unidades?')) {
 
       window.location = url;
     }
@@ -516,7 +516,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a desativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
+        if (confirm('Confirma a desativação de ' + len + ' relacionamento(s) entre unidades ?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           var acaoReativar = $("<input>").attr({
             type: "hidden",
@@ -536,7 +536,7 @@ $objPagina->montarStyle();
   }
 
   function acaoDesativar(id) {
-    if (confirm("Confirma a desativação do relacionamento entre órgãos?")) {
+    if (confirm("Confirma a desativação do relacionamento entre unidades?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkDesativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
@@ -548,7 +548,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a exclusão do relacionamento entre órgãos?')) {
+        if (confirm('Confirma a exclusão do relacionamento entre unidades?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE . '_excluir&acao_origem=' . $acaoOrigem . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>');
           form.submit();
@@ -563,7 +563,7 @@ $objPagina->montarStyle();
 
   function acaoReativar(id) {
 
-    if (confirm("Confirma a reativação do relacionamento entre órgãos?")) {
+    if (confirm("Confirma a reativação do relacionamento entre unidades?")) {
       document.getElementById('hdnInfraItemId').value = id;
       document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkReativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
@@ -574,7 +574,7 @@ $objPagina->montarStyle();
     try {
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
-        if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre órgãos ?')) {
+        if (confirm('Confirma a reativação de ' + len + ' relacionamento(s) entre unidades ?')) {
           var form = jQuery('#frmAcompanharEstadoProcesso');
           var acaoReativar = $("<input>").attr({
             type: "hidden",
@@ -691,10 +691,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   $txtEstado = isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : '';
   $idTxtEstado = isset($_POST['txtEstado']) ? $_POST['txtEstado'] : '';
   ?>
-  <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Órgão Origem:</label>
+  <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Unidade Origem:</label>
   <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />
 
-  <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Órgão Destino:</label>
+  <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Unidade Destino:</label>
   <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaDestino); ?>" />
 
   <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>

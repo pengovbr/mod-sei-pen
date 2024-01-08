@@ -53,7 +53,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
+            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -80,7 +80,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.');
+            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi reativado com sucesso.');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -107,7 +107,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi desativado com sucesso.');
+            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -134,7 +134,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Órgãos foi reativado com sucesso.');
+            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi reativado com sucesso.');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);

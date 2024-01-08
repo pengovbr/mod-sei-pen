@@ -217,7 +217,9 @@ class PenParametroRN extends InfraRN {
     if (count($mapeamentos) > 0) {
       $mensagem = sprintf($mensagem, implode('", "', $mapeamentos));
       LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
-      throw new InfraException($mensagem);
+      $objInfraException = new InfraException();
+      $objInfraException->adicionarValidacao($mensagem);
+      $objInfraException->lancarValidacoes();
     }
   }
 }
