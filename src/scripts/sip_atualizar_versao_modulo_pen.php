@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.3.2");
+define("VERSAO_MODULO_PEN", "3.6.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -36,13 +36,12 @@ class VersaoSip4RN extends InfraScriptVersao
 
       return $objInfraParametroDTO->getStrNome();
   }
-  
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+
   public function versao_0_0_0($strVersaoAtual)
     {
   }
 
-  public function atualizarVersaoCompatibilidade($strVersaoAtual)
+  function atualizarVersaoCompatibilidade($strVersaoAtual)
     {
       $objAtualizarRN = new PenAtualizarSipRN();
       $objAtualizarRN->atualizarVersao();
@@ -85,7 +84,6 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar($strTitulo);
   }
 
-  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function atualizarVersaoConectado()
     {
     try {
@@ -115,9 +113,10 @@ class PenAtualizarSipRN extends InfraRN
         // Aplicação de scripts de atualização de forma incremental
         // Ausência de [break;] proposital para realizar a atualização incremental de versões
         $strVersaoModuloPen = $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(self::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-      // phpcs:disable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
+
       switch ($strVersaoModuloPen) {
-        case '': //case '' - Nenhuma versão instalada
+              //case '' - Nenhuma versão instalada
+        case '':
         case '0.0.0':
             $this->instalarV100();
         case '1.0.0':
@@ -137,7 +136,7 @@ class PenAtualizarSipRN extends InfraRN
         case '1.1.5': //Não houve atualização no banco de dados
         case '1.1.6': //Não houve atualização no banco de dados
         case '1.1.7': //Não houve atualização no banco de dados
-        case '1.1.8': 
+        case '1.1.8':
             $this->instalarV119();
         case '1.1.9':
             $this->instalarV1110();
@@ -191,7 +190,7 @@ class PenAtualizarSipRN extends InfraRN
         case '1.5.4': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.5': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.6': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.7': 
+        case '1.5.7':
             $this->instalarV2000_beta1();
         case '2.0.0-beta1':
             $this->instalarV2000_beta2();
@@ -287,13 +286,16 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
+        case '3.3.3':
+            $this->instalarV3033();
+        case '3.6.0':
+            $this->instalarV3060();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
       }
-      // phpcs:enable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
 
 
         $this->finalizar('FIM');
@@ -363,7 +365,7 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      *
-     * @return int Código do Menu
+     * @return int código do Menu
      */
   protected function getNumIdMenu($strMenu = 'Principal', $numIdSistema = 0)
     {
@@ -386,7 +388,7 @@ class PenAtualizarSipRN extends InfraRN
 
     /**
      * Cria novo recurso no SIP
-     * @return int Código do Recurso gerado
+     * @return int código do Recurso gerado
      */
   protected function criarRecurso($strNome, $strDescricao, $numIdSistema)
     {
@@ -454,6 +456,27 @@ class PenAtualizarSipRN extends InfraRN
     }
 
       return $objRecursoDTO->getNumIdRecurso();
+  }
+
+  protected function consultarItemMenu($numIdSistema, $strNomeRecurso)
+  {
+    $numIdRecurso = $this->consultarRecurso($numIdSistema, $strNomeRecurso);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setBolExclusaoLogica(false);
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+    $objItemMenuDTO->retNumIdMenu();
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuRN = new ItemMenuRN();
+    $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
+
+    if ($objItemMenuDTO == null){
+      throw new InfraException("Item de menu não pode ser localizado.");
+    }
+
+    return array($objItemMenuDTO->getNumIdItemMenu(), $objItemMenuDTO->getNumIdMenu(), $numIdRecurso);
   }
 
     /**
@@ -630,12 +653,37 @@ class PenAtualizarSipRN extends InfraRN
       $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
 
       //----------------------------------------------------------------------
+      // Tramita.GOV.BR
+      //----------------------------------------------------------------------
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      //----------------------------------------------------------------------
+      // Tramita.GOV.BR
+      //----------------------------------------------------------------------
+      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita.GOV.BR', $numIdSistema);
+      $this->criarMenu('Tramita.GOV.BR', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      //Atribui as permissões aos recursos e menus
+      $this->atribuirPerfil($numIdSistema);
+
+
+      //----------------------------------------------------------------------
       // Expedir procedimento
       //----------------------------------------------------------------------
       $this->criarRecurso('pen_procedimento_expedir', 'Expedir Procedimento', $numIdSistema);
       $this->criarRecurso('apensados_selecionar_expedir_procedimento', 'Processos Apensados', $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
-      $this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+      //$numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Trâmitados Externamente', $numIdSistema);
+      //$this->criarMenu('Processos Trâmitados Externamente', 55, null, $numIdMenu, $numIdRecurso, $numIdSistema);
+
       //----------------------------------------------------------------------
       // Mapeamento de documentos enviados
       //----------------------------------------------------------------------
@@ -850,7 +898,7 @@ class PenAtualizarSipRN extends InfraRN
 
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
 
-      $this->criarMenu('Hipótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+      $this->criarMenu('Himótese de Restrição Padrão', 30, $objDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
       $this->criarRecurso('pen_map_hipotese_legal_padrao', 'Método Cadastrar Padrão da RN de mapeamento de Hipóteses Legais', $numIdSistema);
       $this->atribuirPerfil($numIdSistema);
 
@@ -923,7 +971,7 @@ class PenAtualizarSipRN extends InfraRN
       $objBD = new ItemMenuBD($this->getObjInfraIBanco());
       $objDTO = $objBD->consultar($objDTO);
     if ($objDTO) {
-        $objDTO->setStrRotulo('Hipótese de Restrição Padrão');
+        $objDTO->setStrRotulo('Himótese de Restrição Padrão');
         $objBD->alterar($objDTO);
     }
 
@@ -1185,11 +1233,11 @@ class PenAtualizarSipRN extends InfraRN
       $objRecursoDTO->retNumIdRecurso();
       $objRecursoBD = new RecursoBD($this->getObjInfraIBanco());
       $objRecursoDTO = $objRecursoBD->consultar($objRecursoDTO);
-    if (isset($objRecursoDTO)) {
+      if (isset($objRecursoDTO)) {
         $numIdRecurso = $objRecursoDTO->getNumIdRecurso();
         $objRecursoDTO->setStrDescricao('Processos Tramitados Externamente');
         $objRecursoBD->alterar($objRecursoDTO);
-    }
+      }
 
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdItemMenuPai(null);
@@ -1200,12 +1248,11 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO->retNumIdItemMenu();
       $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
-    if (isset($objItemMenuDTO)) {
+      if (isset($objItemMenuDTO)) {
         $objItemMenuDTO->setStrDescricao('Processos Tramitados Externamente');
         $objItemMenuDTO->setStrRotulo('Processos Tramitados Externamente');
         $objItemMenuBD->alterar($objItemMenuDTO);
-    }
-
+      }
 
       $this->atualizarNumeroVersao('1.1.9');
   }
@@ -1215,6 +1262,59 @@ class PenAtualizarSipRN extends InfraRN
      */
   private function instalarV1110()
     {
+
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      //Menu Tramita.GOV.BR
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdMenu($numIdMenu);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->retNumIdItemMenu();
+
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (empty($objItemMenuDTO)) {
+        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
+      }
+
+      // ---------- antigo método (instalarV006R004S001US043) ---------- //
+      $objBD = new ItemMenuBD(BancoSip::getInstance());
+
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objDTO = new ItemMenuDTO();
+      $objDTO->setNumIdSistema($numIdSistema);
+      $objDTO->setNumIdMenu($numIdMenu);
+      $objDTO->setStrRotulo('Tramita.GOV.BR');
+      $objDTO->setNumMaxRegistrosRetorno(1);
+      $objDTO->retNumIdItemMenu();
+
+      $objDTO = $objBD->consultar($objDTO);
+      if (empty($objDTO)) {
+        throw new InfraException('Menu "Tramita.GOV.BR" não foi localizado');
+      }
+
+      $numIdItemMenuPai = $objDTO->getNumIdItemMenu();
+
+      $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+      $this->criarMenu('Blocos de Trâmite Externo', 57, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+      $numIdRecurso = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+      $this->criarMenu('Blocos de Trâmite Externo', 57, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Tramitados Externamente', $numIdSistema);
+      $this->criarMenu('Processos Tramitados Externamente', 55, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Lote', $numIdSistema);
+      $this->criarMenu('Processos Tramitados em Lote', 56, $numIdItemMenuPai, $numIdMenu, $numIdRecurso, $numIdSistema);
+
+      $this->atribuirPerfil($numIdSistema);
+
       $this->atualizarNumeroVersao('1.1.10');
   }
 
@@ -1405,7 +1505,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0
      */
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   private function instalarV2000_beta1()
     {
       // Criar novos recursos de configuração de espécie documental padrão para envio de processos
@@ -1421,6 +1520,7 @@ class PenAtualizarSipRN extends InfraRN
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_atribuir');
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_consultar');
 
+      $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO PEN');
       $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO PEN');
       $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
       $numIdMenuSEI = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
@@ -1482,17 +1582,17 @@ class PenAtualizarSipRN extends InfraRN
 
 
       $this->logar('Atribuição de permissões do módulo ao perfil Básico do SEI');
-      $strNomeMenuProcessosTramitados = "Processos Tramitados Externamente";
+      $strNomeMenuProcessosTramitados = "Tramita.GOV.BR";
       $numIdSistemaSei = ScriptSip::obterIdSistema('SEI');
       $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");
       $numIdMenuSei = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
       // Remove item de menu e adiciona-o novamente para criá-lo seguindo o padrão definido na rotina adicionarItemMenu
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
+     /* ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedir');
       $objRecursoDTO = ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiBasico, 'pen_procedimento_expedido_listar');
       $numIdMenuProcessoTramitados = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSei, $strNomeMenuProcessosTramitados);
       ScriptSip::removerItemMenu($numIdSistemaSei, $numIdMenuSei, $numIdMenuProcessoTramitados);
-      ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);
+      ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiBasico, $numIdMenuSei, null, $objRecursoDTO->getNumIdRecurso(), $strNomeMenuProcessosTramitados, 55);*/
 
       $this->atualizarNumeroVersao("2.0.0-beta1");
   }
@@ -1501,7 +1601,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta2
      */
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta2()
     {
       $this->atualizarNumeroVersao("2.0.0-beta2");
@@ -1511,7 +1610,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta3
      */
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta3()
     {
       $this->atualizarNumeroVersao("2.0.0-beta3");
@@ -1520,7 +1618,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta4
      */
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta4()
     {
       $this->atualizarNumeroVersao("2.0.0-beta4");
@@ -1529,7 +1626,6 @@ class PenAtualizarSipRN extends InfraRN
     /**
      * Instala/Atualiza os módulo PEN para versão 2.0.0-beta5
      */
-  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta5()
     {
       $this->atualizarNumeroVersao("2.0.0-beta5");
@@ -1640,8 +1736,8 @@ class PenAtualizarSipRN extends InfraRN
       $this->criarRecurso('pen_expedir_lote', 'Expedir Procedimento em Lote', $numIdSistema);
       ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_expedir_lote');
 
-      $numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
-      ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
+      //$numIdRecurso = $this->criarRecurso('pen_expedir_lote_listar', 'Listar Processos Tramitados em Lote', $numIdSistema);
+      //ScriptSip::adicionarItemMenu($numIdSistema, $numIdPerfilSeiAdministrador, $numIdMenu, null, $numIdRecurso, "Processos Tramitados em Lote", 55);
 
       $this->atualizarNumeroVersao("3.1.0");
   }
@@ -1736,7 +1832,7 @@ class PenAtualizarSipRN extends InfraRN
         }
       };
 
-      // A partir da versão 3.0.0 é que o SIP passa a dar suporte à ícones
+      // A partir da versão 3.0.0 é que o SIP passa a dar suporte à í­cones
     if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
         $numIdSistema = $this->getNumIdSistema('SEI');
         $numIdMenuPai = $this->getNumIdMenu('Principal', $numIdSistema);
@@ -1818,20 +1914,122 @@ class PenAtualizarSipRN extends InfraRN
       $this->atualizarNumeroVersao("3.2.4");
   }
 
-  protected function instalarV3030()
-  {
-      $this->atualizarNumeroVersao("3.3.0");
+    protected function instalarV3030()
+    {
+        $this->atualizarNumeroVersao("3.3.0");
+    }
+
+    protected function instalarV3031()
+    {
+        $this->atualizarNumeroVersao("3.3.1");
+    }
+
+    protected function instalarV3032()
+    {
+        $this->atualizarNumeroVersao("3.3.2");
+    }
+
+    //Perfil Tramitador de Processos em Bloco
+    protected function instalarV3033()
+    {
+      //Consulta do Sistema
+      $sistemaDTO = new SistemaDTO();
+      $sistemaDTO->setStrSigla('SEI');
+      $sistemaDTO->setNumRegistrosPaginaAtual(1);
+      $sistemaDTO->retNumIdSistema();
+
+      $sistemaRN = new SistemaRN();
+      $sistemaDTO = $sistemaRN->consultar($sistemaDTO);
+
+      if (!empty($sistemaDTO)) {
+        $numIdSistema = $sistemaDTO->getNumIdSistema();
+      }
+
+      //Cria função genérica de cadastro de perfil
+      $fnCadastrarPerfil = function ($numIdSistema, $nome, $descricao, $coordenado, $ativo) {
+        $objPerfilDTO = new PerfilDTO();
+        $objPerfilDTO->setNumIdSistema($numIdSistema);
+        $objPerfilDTO->setStrNome($nome);
+        $objPerfilDTO->setStrDescricao($descricao);
+        $objPerfilDTO->setStrSinCoordenado($coordenado);
+        $objPerfilDTO->setStrSinAtivo($ativo);
+
+        $objPerfilRN = new PerfilRN();
+        $objPerfilDTO = $objPerfilRN->cadastrar($objPerfilDTO);
+
+        return $objPerfilDTO->getNumIdPerfil();
+      };
+
+      //Cadastrar o perfil
+      $id_perfil_tramitador = $fnCadastrarPerfil($numIdSistema, 'Tramitador de Processos em Bloco', 'Acesso aos recursos especÃ­Â­ficos ao perfil Tramitador de Processos em Bloco', 'N', 'S');
+
+      $this->arrRecurso = [];
+      $this->arrRecurso = array_merge($this->arrRecurso, array(
+        $this->consultarRecurso($numIdSistema, "md_pen_tramita_em_bloco"),
+        $this->consultarRecurso($numIdSistema, "pen_procedimento_expedido_listar"),
+        $this->consultarRecurso($numIdSistema, "pen_expedir_lote_listar")
+      ));
+
+      $this->arrMenu = [];
+      $this->arrMenu = array_merge($this->arrMenu, array(
+        $this->consultarItemMenu($numIdSistema, "md_pen_tramita_em_bloco")
+      ));
+
+      //Atribui as permissões aos recursos e menus
+      $this->atribuirPerfil($numIdSistema, $id_perfil_tramitador);
+
+      $this->atualizarNumeroVersao("3.3.3");
+  }
+  
+    protected function instalarV3060()
+    {
+      /* Corrige nome de menu de trâmite de documentos */
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenuPai(null);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+        $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // adicionar permissão
+    $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_cancelar', 'Cancelar processos do bloco de Tramite Externo', $numIdSistema);
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_alterar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_consultar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_incluir_processo_em_bloco_tramite');
+
+    $this->atualizarNumeroVersao("3.6.0");
   }
 
-  protected function instalarV3031()
-  {
-      $this->atualizarNumeroVersao("3.3.1");
-  }
-
-  protected function instalarV3032()
-  {
-      $this->atualizarNumeroVersao("3.3.2");
-  }
 }
 
 
