@@ -1,57 +1,57 @@
-# NOTAS DE VERS√O MOD-SEI-PEN (vers„o 3.5.0)
+# NOTAS DE VERS√ÉO MOD-SEI-PEN (vers√£o 3.5.0)
 
-Este documento descreve as principais mudanÁas aplicadas nesta vers„o do mÛdulo de integraÁ„o do SEI com o TRAMITA.GOV.BR.
+Este documento descreve as principais mudan√ßas aplicadas nesta vers√£o do m√≥dulo de integra√ß√£o do SEI com o TRAMITA.GOV.BR.
 
-As melhorias entregues em cada uma das versıes s„o cumulativas, ou seja, contÍm todas as implementaÁıes realizadas em versıes anteriores.
+As melhorias entregues em cada uma das vers√µes s√£o cumulativas, ou seja, cont√™m todas as implementa√ß√µes realizadas em vers√µes anteriores.
 
-## Compatibilidade de versıes
-* O mÛdulo È compatÌvel com as seguintes versıes do **SEI**:
-    * 3.1.0 atÈ 3.1.7, 
-    * 4.0.0 atÈ 4.0.12
+## Compatibilidade de vers√µes
+* O m√≥dulo √© compat√≠vel com as seguintes vers√µes do **SEI**:
+    * 3.1.0 at√© 3.1.7, 
+    * 4.0.0 at√© 4.0.12
 
-Para maiores informaÁıes sobre os procedimentos de instalaÁ„o ou atualizaÁ„o, acesse os seguintes documentos localizados no pacote de distribuiÁ„o mod-sei-pen-VERSAO.zip:
-> AtenÁ„o: … impreterÌvel seguir rigorosamente o disposto no README.md do MÛdulo para instalaÁ„o ou atualizaÁ„o com sucesso.
-* **INSTALACAO.md** - Procedimento de instalaÁ„o e configuraÁ„o do mÛdulo
-* **ATUALIZACAO.md** - Procedimento especÌficos para atualizaÁ„o de uma vers„o anterior
+Para maiores informa√ß√µes sobre os procedimentos de instala√ß√£o ou atualiza√ß√£o, acesse os seguintes documentos localizados no pacote de distribui√ß√£o mod-sei-pen-VERSAO.zip:
+> Aten√ß√£o: √â impreter√≠vel seguir rigorosamente o disposto no README.md do M√≥dulo para instala√ß√£o ou atualiza√ß√£o com sucesso.
+* **INSTALACAO.md** - Procedimento de instala√ß√£o e configura√ß√£o do m√≥dulo
+* **ATUALIZACAO.md** - Procedimento espec√≠ficos para atualiza√ß√£o de uma vers√£o anterior
 
-### Lista de melhorias e correÁıes de problemas
+### Lista de melhorias e corre√ß√µes de problemas
 
-Todas as atualizaÁıes podem incluir itens referentes ‡ seguranÁa, requisito em permanente monitoramento e evoluÁ„o, motivo pelo qual a atualizaÁ„o com a maior brevidade possÌvel È sempre recomendada.
+Todas as atualiza√ß√µes podem incluir itens referentes √† seguran√ßa, requisito em permanente monitoramento e evolu√ß√£o, motivo pelo qual a atualiza√ß√£o com a maior brevidade poss√≠vel √© sempre recomendada.
 
-#### Mapeamento de Tipos de Processos: Cadastro de Relacionamento entre ”rg„os (#250)
+#### Mapeamento de Tipos de Processos: Cadastro de Relacionamento entre √ìrg√£os (#250)
 
-Esta melhoria È parte do pacote referente ‡ funcionalidade de Blocos de MigraÁ„o.
+Esta melhoria √© parte do pacote referente √† funcionalidade de Blocos de Migra√ß√£o.
 
-### AtualizaÁ„o de Vers„o
+### Atualiza√ß√£o de Vers√£o
 
-Para obter informaÁıes detalhadas sobre cada um dos passos de atualizaÁ„o, vide arquivo **ATUALIZACAO.md**.
+Para obter informa√ß√µes detalhadas sobre cada um dos passos de atualiza√ß√£o, vide arquivo **ATUALIZACAO.md**.
 
-#### InstruÁıes
+#### Instru√ß√µes
 
-1. Baixar a ˙ltima vers„o do mÛdulo de instalaÁ„o do sistema (arquivo `mod-sei-pen-[VERS√O].zip`) localizado na p·gina de [Releases do projeto MOD-SEI-PEN](https://github.com/spbgovbr/mod-sei-pen/releases), seÁ„o **Assets**. _Somente usu·rios autorizados previamente pela CoordenaÁ„o-Geral do Processo EletrÙnico Nacional podem ter acesso ‡s versıes._
+1. Baixar a √∫ltima vers√£o do m√≥dulo de instala√ß√£o do sistema (arquivo `mod-sei-pen-[VERS√ÉO].zip`) localizado na p√°gina de [Releases do projeto MOD-SEI-PEN](https://github.com/spbgovbr/mod-sei-pen/releases), se√ß√£o **Assets**. _Somente usu√°rios autorizados previamente pela Coordena√ß√£o-Geral do Processo Eletr√¥nico Nacional podem ter acesso √†s vers√µes._
 
-2. Fazer backup dos diretÛrios "sei", "sip" e "infra" do servidor web;
+2. Fazer backup dos diret√≥rios "sei", "sip" e "infra" do servidor web;
 
-3. Descompactar o pacote de instalaÁ„o `mod-sei-pen-[VERS√O].zip`;
+3. Descompactar o pacote de instala√ß√£o `mod-sei-pen-[VERS√ÉO].zip`;
 
-4. Copiar os diretÛrios descompactados "sei", "sip" para os servidores, sobrescrevendo os arquivos existentes;
+4. Copiar os diret√≥rios descompactados "sei", "sip" para os servidores, sobrescrevendo os arquivos existentes;
 
-5. Executar o script de instalaÁ„o/atualizaÁ„o `sei_atualizar_versao_modulo_pen.php` do mÛdulo para o SEI localizado no diretÛrio `sei/scripts/mod-pen/`
+5. Executar o script de instala√ß√£o/atualiza√ß√£o `sei_atualizar_versao_modulo_pen.php` do m√≥dulo para o SEI localizado no diret√≥rio `sei/scripts/mod-pen/`
 
 ```bash
-php -c /etc/php.ini <DIRET”RIO RAIZ DE INSTALA«√O DO SEI E SIP>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
+php -c /etc/php.ini <DIRET√ìRIO RAIZ DE INSTALA√á√ÉO DO SEI E SIP>/sei/scripts/mod-pen/sei_atualizar_versao_modulo_pen.php
 ```
 
-6. Executar o script de instalaÁ„o/atualizaÁ„o `sip_atualizar_versao_modulo_pen.php` do mÛdulo para o SIP localizado no diretÛrio `sip/scripts/mod-pen/`
+6. Executar o script de instala√ß√£o/atualiza√ß√£o `sip_atualizar_versao_modulo_pen.php` do m√≥dulo para o SIP localizado no diret√≥rio `sip/scripts/mod-pen/`
 
 ```bash
-php -c /etc/php.ini <DIRET”RIO RAIZ DE INSTALA«√O DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
+php -c /etc/php.ini <DIRET√ìRIO RAIZ DE INSTALA√á√ÉO DO SEI E SIP>/sip/scripts/mod-pen/sip_atualizar_versao_modulo_pen.php
 ```
 
-7. Verificar a correta instalaÁ„o e configuraÁ„o do mÛdulo
+7. Verificar a correta instala√ß√£o e configura√ß√£o do m√≥dulo
 
-Para executar a verificaÁ„o, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diretÛrio de scripts do SEI ```<DIRET”RIO RAIZ DE INSTALA«√O DO SEI E SIP>/sei/scripts/mod-pen/```.
+Para executar a verifica√ß√£o, execute o script ```verifica_instalacao_modulo_pen.php``` localizado no diret√≥rio de scripts do SEI ```<DIRET√ìRIO RAIZ DE INSTALA√á√ÉO DO SEI E SIP>/sei/scripts/mod-pen/```.
 
 ```bash
-$ php -c /etc/php.ini <DIRET”RIO RAIZ DE INSTALA«√O DO SEI E SIP>/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
+$ php -c /etc/php.ini <DIRET√ìRIO RAIZ DE INSTALA√á√ÉO DO SEI E SIP>/sei/scripts/mod-pen/verifica_instalacao_modulo_pen.php
 ``` 
