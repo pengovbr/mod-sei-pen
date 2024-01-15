@@ -35,7 +35,11 @@ class PenMetaBD extends InfraMetaBD {
       case 'InfraOracle':
           $strQuery =  sprintf("ALTER TABLE %s MODIFY %s DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
           break;
-    }
+
+      case 'InfraPostgreSql':
+          $strQuery =  sprintf("ALTER TABLE %s ALTER COLUMN %s SET DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
+          break;
+      }
 
     if($bolRetornarQuery === false) {
         $objInfraBanco->executarSql($strQuery);
@@ -75,18 +79,19 @@ class PenMetaBD extends InfraMetaBD {
       $strTableDrive = get_parent_class($this->getObjInfraIBanco());
 
     switch($strTableDrive) {
-     
-      case 'InfraMySqli': // Fix para bug de MySQL versão inferior ao 5.5 o default engine
-         // é MyISAM e não tem suporte a FOREING KEYS
+
+      case 'InfraMySqli':
+        // Fix para bug de MySQL versão inferior ao 5.5 o default engine
+        // é MyISAM e não tem suporte a FOREING KEYS
         $version = $this->getObjInfraIBanco()->consultarSql('SELECT VERSION() as versao');
         $version = $version[0]['versao'];
         $arrVersion = explode('.', $version);
         if($arrVersion[0].$arrVersion[1] < 56){
             $this->getObjInfraIBanco()->executarSql('@SET STORAGE_ENGINE=InnoDB');
         }
-          break;
       case 'InfraSqlServer':
       case 'InfraOracle':
+      case 'InfraPostgreSql':
           break;
 
       default:
@@ -141,6 +146,11 @@ class PenMetaBD extends InfraMetaBD {
         case 'InfraOracle':
           $strQuery = sprintf("RENAME TABLE %s TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
             break;
+
+        case 'InfraPostgreSql':
+          $strQuery = sprintf("ALTER TABLE `%s` RENAME TO `%s`", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
+    
       }
 
         $objInfraBanco->executarSql($strQuery);
@@ -158,17 +168,22 @@ class PenMetaBD extends InfraMetaBD {
       switch ($strTableDrive) {
 
         case 'InfraMySqli':
-          $strQuery = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo);
+            $strQuery = sprintf("ALTER TABLE `%s` CHANGE `%s` `%s` %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova, $strTipo);
             break;
 
         case 'InfraSqlServer':
-          $strQuery = sprintf("SP_RENAME '%s.%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+            $strQuery = sprintf("SP_RENAME '%s.%s', '%s', 'COLUMN'", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
             break;
 
         case 'InfraOracle':
             $strQuery = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
             break;
-      }
+            
+        case 'InfraPostgreSql':
+            $strQuery = sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s", $strNomeTabela, $strNomeColunaAtual, $strNomeColunaNova);
+            break;
+
+        }
 
         $objInfraBanco->executarSql($strQuery);
     }
