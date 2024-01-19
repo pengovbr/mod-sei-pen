@@ -56,8 +56,35 @@ try {
         $objPenParametroRN = new PenParametroRN();
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
-        //Preparação dos dados para montagem da tela de expedição de processos
-        $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        try {
+            $objUnidadeDTO = new PenUnidadeDTO();
+            $objUnidadeDTO->retNumIdUnidadeRH();
+            $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+
+            $objUnidadeRN = new UnidadeRN();
+            $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+            $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+            $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+            $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+            $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+            $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+
+            $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+            $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+            //Preparação dos dados para montagem da tela de expedição de processos
+            if ($arrIdUnidadeRestricao != null) {
+                $repositorios = array();
+                foreach ($arrIdUnidadeRestricao as $value) {
+                    $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+                }
+            } else {
+                $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+            }
+        } catch (Exception $e) {
+            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        }
+
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 
         $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
@@ -71,13 +98,6 @@ try {
 
         $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
         $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
-
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->retNumIdUnidadeRH();
-        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
       if (!$objUnidadeDTO) {
         throw new InfraException("A unidade atual não foi mapeada.");

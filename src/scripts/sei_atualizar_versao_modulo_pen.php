@@ -274,6 +274,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3040();
         case '3.4.0':
             $this->instalarV3050();
+        case '3.5.0':
+            $this->instalarV3060();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2625,6 +2627,46 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
     $this->atualizarNumeroVersao("3.5.0");
+  }
+
+  protected function instalarV3060()
+  {
+    $this->atualizarNumeroVersao("3.6.0");
+    $objMetaBD = $this->objMeta;
+    // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+    $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_unidade_restricao',
+      'cols' => array(
+        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+        'unidade' => array('id_unidade', 'id_unidade')
+      )
+    ));
+
+    // Criando nova sequência 
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_hipotese_legal
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_unidade_restricao');
+    $numMaxId = $rs[0]['total'];
+    if ($numMaxId == null) {
+      $numMaxId = 0;
+    }
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unidade_restricao', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_unidade_restricao');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
   }
 }
 
