@@ -10,7 +10,12 @@
             "src/"
         ]
     },
-
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "sei/",
+            "Modpen\\Tests\\": "sei/modpen/"
+        }
+    },
     "require-dev": {
         "phpunit/phpunit": "8.*",
         "phpunit/php-code-coverage": "*",

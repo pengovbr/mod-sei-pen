@@ -161,45 +161,36 @@ try {
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
 
       if ($objTramiteDTO) {
-
-
+        $dataEnvio = $objTramiteDTO->getDthRegistro();
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getDthRegistro()) . '</td>';
-       $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) . '</td>';
-
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($dataEnvio) . '</td>';
+        $strResultado .= '<td align="center">' . ($dataEnvio ? PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) : '') . '</td>';
       } else {
-        $strResultado .= '<td align="center"></td>' . "\n";
-        $strResultado .= '<td align="center"></td>' . "\n";
-        $strResultado .= '<td align="center"></td>' . "\n";
+          $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
 
       $strResultado .= '<td align="center">' . "\n";
 
       if ($objDTO->getStrSinObteveRecusa() == 'S') {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_tramite_recusado.png" title="Um trâmite para esse processo foi recusado" alt="Um trâmite para esse processo foi recusado" />';
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
       } else {
         $PROCESSO_CONCLUIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
         $PROCESSO_TRAMITE_CANCELADO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO);
-        $PROCESSO_TRAMITE_PROCESSAMENTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+        $PROCESSO_TRAMITE_PROCESSAMENTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO);
         $PROCESSO_TRAMITE_ABERTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-        
-        $staCancelado = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
-        $staConcluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE;
-        $staEmProcessamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO;
-        $staAberto = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO;
-        
+ 
         switch ($objDTO->getNumStaIdTarefa()) {
           case $PROCESSO_TRAMITE_ABERTO:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_em_processamento.png" title="Em aberto" alt="Em aberto" />';
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
             break;
           case $PROCESSO_TRAMITE_PROCESSAMENTO:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/pen_em_processamento.png" title="Em processamento" alt="Em processamento" />';
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
             break;
           case $PROCESSO_CONCLUIDO:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
-            break;
+              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
+              break;
           case $PROCESSO_TRAMITE_CANCELADO_ID:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_falhou.png" title="Cancelado" alt="Cancelado" />';
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
             break;
 
             

@@ -52,4 +52,4 @@ jobs:
              make tramitar-pendencias-silent &
 
       - name: Testes funcionais
-        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional-parallel
+        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional
