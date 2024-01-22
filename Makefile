@@ -174,7 +174,7 @@ down: .env
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml $(addprefix /tests/tests/,$(addsuffix .php,$(teste))) ;
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
