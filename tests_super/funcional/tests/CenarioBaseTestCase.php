@@ -40,13 +40,19 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaTramitarProcessoEmLote = null;
     protected $paginaMapeamentoUnidade = null;
 <<<<<<< HEAD
+<<<<<<< HEAD
     protected $paginaCadastrarProcessoEmBloco = null;
 =======
+=======
+>>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
     protected $paginaMoverDocumento = null;
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
     protected $paginaCadastroOrgaoExterno = null;
+<<<<<<< HEAD
+>>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
+=======
 >>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
 
     public function setUpPage(): void
@@ -68,12 +74,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
 <<<<<<< HEAD
+<<<<<<< HEAD
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
 =======
+=======
+>>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+<<<<<<< HEAD
+>>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
+=======
 >>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
         $this->currentWindow()->maximize();
     }

@@ -1,11 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-<<<<<<< HEAD
 define("VERSAO_MODULO_PEN", "3.6.0");
-=======
-define("VERSAO_MODULO_PEN", "3.5.0");
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -290,17 +286,12 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
-<<<<<<< HEAD
-        case '3.3.3':
-            $this->instalarV3033();
-        case '3.6.0':
-            $this->instalarV3060();
-=======
         case '3.3.2':
             $this->instalarV3040();
         case '3.4.0':
             $this->instalarV3050();
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
+        case '3.6.0':
+            $this->instalarV3060();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -1940,119 +1931,6 @@ class PenAtualizarSipRN extends InfraRN
         $this->atualizarNumeroVersao("3.3.2");
     }
 
-    //Perfil Tramitador de Processos em Bloco
-    protected function instalarV3033()
-    {
-      //Consulta do Sistema
-      $sistemaDTO = new SistemaDTO();
-      $sistemaDTO->setStrSigla('SEI');
-      $sistemaDTO->setNumRegistrosPaginaAtual(1);
-      $sistemaDTO->retNumIdSistema();
-
-      $sistemaRN = new SistemaRN();
-      $sistemaDTO = $sistemaRN->consultar($sistemaDTO);
-
-      if (!empty($sistemaDTO)) {
-        $numIdSistema = $sistemaDTO->getNumIdSistema();
-      }
-
-      //Cria função genérica de cadastro de perfil
-      $fnCadastrarPerfil = function ($numIdSistema, $nome, $descricao, $coordenado, $ativo) {
-        $objPerfilDTO = new PerfilDTO();
-        $objPerfilDTO->setNumIdSistema($numIdSistema);
-        $objPerfilDTO->setStrNome($nome);
-        $objPerfilDTO->setStrDescricao($descricao);
-        $objPerfilDTO->setStrSinCoordenado($coordenado);
-        $objPerfilDTO->setStrSinAtivo($ativo);
-
-        $objPerfilRN = new PerfilRN();
-        $objPerfilDTO = $objPerfilRN->cadastrar($objPerfilDTO);
-
-        return $objPerfilDTO->getNumIdPerfil();
-      };
-
-      //Cadastrar o perfil
-      $id_perfil_tramitador = $fnCadastrarPerfil($numIdSistema, 'Tramitador de Processos em Bloco', 'Acesso aos recursos especÃ­Â­ficos ao perfil Tramitador de Processos em Bloco', 'N', 'S');
-
-      $this->arrRecurso = [];
-      $this->arrRecurso = array_merge($this->arrRecurso, array(
-        $this->consultarRecurso($numIdSistema, "md_pen_tramita_em_bloco"),
-        $this->consultarRecurso($numIdSistema, "pen_procedimento_expedido_listar"),
-        $this->consultarRecurso($numIdSistema, "pen_expedir_lote_listar")
-      ));
-
-      $this->arrMenu = [];
-      $this->arrMenu = array_merge($this->arrMenu, array(
-        $this->consultarItemMenu($numIdSistema, "md_pen_tramita_em_bloco")
-      ));
-
-      //Atribui as permissões aos recursos e menus
-      $this->atribuirPerfil($numIdSistema, $id_perfil_tramitador);
-
-      $this->atualizarNumeroVersao("3.3.3");
-  }
-  
-    protected function instalarV3060()
-    {
-      /* Corrige nome de menu de trâmite de documentos */
-      $numIdSistema = $this->getNumIdSistema('SEI');
-      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
-
-      $objItemMenuDTO = new ItemMenuDTO();
-      $objItemMenuDTO->setNumIdItemMenuPai(null);
-      $objItemMenuDTO->setNumIdSistema($numIdSistema);
-      $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
-      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
-      $objItemMenuDTO->retNumIdMenu();
-      $objItemMenuDTO->retNumIdItemMenu();
-      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
-      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
-
-      if (isset($objItemMenuDTO)) {
-        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
-        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
-        $objItemMenuBD->alterar($objItemMenuDTO);
-      }
-
-    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
-
-    // adicionar permissão
-    $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
-    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
-    $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
-    $this->criarRecurso('pen_tramita_em_bloco_protocolo_cancelar', 'Cancelar processos do bloco de Tramite Externo', $numIdSistema);
-
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco_excluir');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cadastrar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_alterar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_consultar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cancelar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_listar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_excluir');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_cancelar');
-    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_incluir_processo_em_bloco_tramite');
-
-    $this->atualizarNumeroVersao("3.6.0");
-  }
-
-<<<<<<< HEAD
-=======
-  protected function instalarV3031()
-  {
-      $this->atualizarNumeroVersao("3.3.1");
-  }
-
-  protected function instalarV3032()
-  {
-      $this->atualizarNumeroVersao("3.3.2");
-  }
-
   protected function instalarV3040()
   {
       $this->atualizarNumeroVersao("3.4.0");
@@ -2135,6 +2013,55 @@ class PenAtualizarSipRN extends InfraRN
     $this->atualizarNumeroVersao("3.5.0");
   }
 
+  protected function instalarV3060()
+  {
+      /* Corrige nome de menu de trâmite de documentos */
+      $numIdSistema = $this->getNumIdSistema('SEI');
+      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenuPai(null);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+      $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+        $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+        $objItemMenuDTO->setStrRotulo('Blocos de Trâmite Externo');
+        $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    // adicionar permissão
+    $numIdPerfilSeiBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+    $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_cancelar', 'Cancelar processos do bloco de Tramite Externo', $numIdSistema);
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'md_pen_tramita_em_bloco_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_alterar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_consultar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramite_em_bloco_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_tramita_em_bloco_protocolo_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiBasico, 'pen_incluir_processo_em_bloco_tramite');
+
+    $this->atualizarNumeroVersao("3.6.0");
+  }
+
   /**
    * Cadastrar item do menu em um perfil expecifico
    * 
@@ -2157,9 +2084,7 @@ class PenAtualizarSipRN extends InfraRN
         $objBD->cadastrar($objDTO);
     }
   }
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
 }
-
 
 try {
     session_start();

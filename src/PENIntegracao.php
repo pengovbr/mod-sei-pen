@@ -1,11 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-<<<<<<< HEAD
 define("VERSAO_MODULO_PEN", "3.6.0");
-=======
-define("VERSAO_MODULO_PEN", "3.5.0");
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
 
 class PENIntegracao extends SeiIntegracao
 {

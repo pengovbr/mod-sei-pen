@@ -272,14 +272,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3032();
         case '3.3.2':
             $this->instalarV3040();
-<<<<<<< HEAD
-        case '3.6.0':
-          $this->instalarV3060();
-
-=======
         case '3.4.0':
             $this->instalarV3050();
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
+        case '3.6.0':
+          $this->instalarV3060();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2559,34 +2555,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.4.0");
   }
 
-<<<<<<< HEAD
-  // novo tramite em bloco
-  protected function instalarV3060() {
-    $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
-
-    $objMetaBD = $this->objMeta;
-    $objMetaBD->criarTabela(array(
-      'tabela' => 'md_pen_tramita_em_bloco',
-      'cols' => array(
-          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
-          'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
-          'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
-          'idx_bloco' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
-          'sta_tipo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
-          'sta_estado' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
-      ),
-      'pk' => array('cols' => array('id')),
-      'uk' => array(),
-      'fks' => array(
-        'unidade' => array('nome' => 'fk_tramite_bloco_unidade', 'cols' => array('id_unidade', 'id_unidade')),
-        'usuario' => array('nome' => 'fk_tramite_bloco_usuario', 'cols' => array('id_usuario', 'id_usuario')),
-      )
-    ));
-
-    # Criar sequencia para tramite em bloco
-
-=======
   protected function instalarV3050()
   {
     $objMetaBD = $this->objMeta;
@@ -2612,54 +2580,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     ));
 
     # Criar sequencia para tramite em bloco
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
     //Sequência: md_pen_seq_tramita_em_bloco
-<<<<<<< HEAD
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco');
-    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
-
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco', $numMaxId + 1);
-    $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco');
-=======
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
     BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_orgao_externo', $numMaxId + 1);
     $objInfraSequenciaDTO->setStrNome('md_pen_orgao_externo');
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
     $objMetaBD->criarTabela(array(
-<<<<<<< HEAD
-      'tabela' => 'md_pen_tramita_em_bloco_protocolo',
-      'cols' => array(
-          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-          'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-          'id_tramita_em_bloco' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-          'anotacao' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
-          'sequencia' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
-          'idx_rel_bloco_protocolo' => array($objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO),
-      ),
-      'pk' => array('cols' => array('id')),
-      'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
-      'fks' => array(
-        'protocolo' => array('nome' => 'fk_tramita_em_bloco_protocolo_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
-        //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
-      )
-    ));
-
-    //Sequência: md_pen_tramita_em_bloco_protocolo
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco_protocolo');
-    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
-
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco_protocolo', $numMaxId + 1);
-    $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco_protocolo');
-=======
       'tabela' => 'md_pen_map_tipo_processo',
       'cols' => array(
           'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
@@ -2688,20 +2622,88 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tp_procedimento', $numMaxId + 1);
     $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-<<<<<<< HEAD
-    $this->atualizarNumeroVersao("3.6.0");
-  }
-  
-=======
     $this->atualizarNumeroVersao("3.5.0");
   }
->>>>>>> 7e226f5a6a8bef6e5bca892c0676ef2e4167eea0
+
+    // novo tramite em bloco
+  protected function instalarV3060() {
+      $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+  
+      $objMetaBD = $this->objMeta;
+      $objMetaBD->criarTabela(array(
+        'tabela' => 'md_pen_tramita_em_bloco',
+        'cols' => array(
+            'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+            'idx_bloco' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+            'sta_tipo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+            'sta_estado' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+        ),
+        'pk' => array('cols' => array('id')),
+        'uk' => array(),
+        'fks' => array(
+          'unidade' => array('nome' => 'fk_tramite_bloco_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+          'usuario' => array('nome' => 'fk_tramite_bloco_usuario', 'cols' => array('id_usuario', 'id_usuario')),
+        )
+      ));
+  
+      # Criar sequencia para tramite em bloco
+  
+      $objInfraSequenciaRN = new InfraSequenciaRN();
+      $objInfraSequenciaDTO = new InfraSequenciaDTO();
+  
+      //Sequência: md_pen_seq_tramita_em_bloco
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco');
+      $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+  
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+  
+      $objMetaBD->criarTabela(array(
+        'tabela' => 'md_pen_tramita_em_bloco_protocolo',
+        'cols' => array(
+            'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+            'id_tramita_em_bloco' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'anotacao' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+            'sequencia' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'idx_rel_bloco_protocolo' => array($objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO),
+        ),
+        'pk' => array('cols' => array('id')),
+        'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
+        'fks' => array(
+          'protocolo' => array('nome' => 'fk_tramita_em_bloco_protocolo_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
+          //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
+        )
+      ));
+  
+      //Sequência: md_pen_tramita_em_bloco_protocolo
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco_protocolo');
+      $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+  
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco_protocolo', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco_protocolo');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+  
+      $this->atualizarNumeroVersao("3.6.0");
+    }
+
+
+
 }
+
+
 
 
 try {
