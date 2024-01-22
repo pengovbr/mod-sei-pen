@@ -2699,12 +2699,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("3.6.0");
     }
 
-
-
 }
-
-
-
 
 try {
     session_start();
