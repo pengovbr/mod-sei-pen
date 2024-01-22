@@ -1,7 +1,5 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 abstract class FixtureBase extends \InfraRN
 {
     abstract protected function cadastrar($dados);

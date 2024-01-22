@@ -1,12 +1,10 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 // use Tests\Funcional\Fixture;
 use TarefaRN;
 use DocumentoRN;
 
-class DocumentoFixture extends FixtureBase
+class DocumentoFixture extends \FixtureBase
 {
     protected $objDocumentoDTO;
     
@@ -58,7 +56,12 @@ class DocumentoFixture extends FixtureBase
                 'IdTarefa' => TarefaRN::$TI_GERACAO_DOCUMENTO,
             ]
         );
-
+        
+        $objParticipanteFixture = new \ParticipanteFixture();
+        $objParticipanteFixture->carregar([
+            'IdProtocolo' => $protocoloDTO->getDblIdProtocolo(),
+        ]);
+        
         $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
         $objAtributoAndamentoFixture->carregarVariados([
             [

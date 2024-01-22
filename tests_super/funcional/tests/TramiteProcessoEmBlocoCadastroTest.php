@@ -38,8 +38,6 @@ class TramiteProcessoEmBlocoCadastroTest extends CenarioBaseTestCase
     /**
      * Teste para editar bloco de trâmite externo já criado
      *
-     * @group MapeamentoOrgaoExterno
-     *
      * @return void
      */
     public function test_editar_bloco_de_tramite()

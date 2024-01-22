@@ -1,12 +1,10 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use Faker\Factory;
 use InfraData;
 use SecaoDocumentoDTO;
 
-class SecaoDocumentoFixture extends FixtureBase
+class SecaoDocumentoFixture extends \FixtureBase
 {
     protected $objProtocoloDTO;
     protected $objProtocoloRN;

@@ -1,12 +1,10 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 // use Tests\Funcional\Fixture;
 // use Faker\Factory;
 use InfraData;
 
-class AtividadeFixture extends FixtureBase
+class AtividadeFixture extends \FixtureBase
 {
     protected $objAtividadeDTO;
 

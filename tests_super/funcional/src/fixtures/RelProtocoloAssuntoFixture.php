@@ -1,11 +1,9 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use Tests\Funcional\Fixture;
 use RelProtocoloAssuntoDTO;
 
-class RelProtocoloAssuntoFixture extends FixtureBase
+class RelProtocoloAssuntoFixture extends \FixtureBase
 {
     const ID_ASSUNTO_PADRAO_TEST = 377;
 

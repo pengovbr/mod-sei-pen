@@ -1,12 +1,10 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 // use Tests\Funcional\Fixture;
 // use Faker\Factory;
 use InfraData;
 
-class AssinaturaFixture extends FixtureBase
+class AssinaturaFixture extends \FixtureBase
 {
     protected $objAssinaturaDTO;
 
@@ -27,8 +25,6 @@ class AssinaturaFixture extends FixtureBase
     {
         $dados['IdAssinatura'] = $this->getObjInfraIBanco()->getValorSequencia('seq_assinatura');
 
-        // print_R($dados); die('aki');
-
         $this->objAssinaturaDTO->setNumIdAssinatura($dados['IdAssinatura'] ?: null);
         $this->objAssinaturaDTO->setDblIdDocumento($dados['IdDocumento'] ?: 4);
         $this->objAssinaturaDTO->setNumIdAtividade($dados['IdAtividade'] ?: null);
@@ -47,6 +43,15 @@ class AssinaturaFixture extends FixtureBase
         
         $objAssinaturaDB = new \AssinaturaBD(\BancoSEI::getInstance());
         $objAssinaturaDB->cadastrar($this->objAssinaturaDTO);
+
+        $objAtividadeFixture = new AtividadeFixture();
+        $objAtividadeDTO = $objAtividadeFixture->cadastrar(
+            [
+                'IdProtocolo' => $dados['IdProtocolo'],
+                'IdTarefa' => TarefaRN::$TI_ASSINATURA_DOCUMENTO,
+            ]
+        );
+        
 
         return $this->objAssinaturaDTO;
     }

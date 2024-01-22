@@ -1,10 +1,8 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use Tests\Funcional\Fixture;
 
-class DocumentoConteudoFixture extends FixtureBase
+class DocumentoConteudoFixture extends \FixtureBase
 {
     protected $objDocumentoConteudoDTO;
 

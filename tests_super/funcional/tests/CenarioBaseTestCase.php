@@ -225,6 +225,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)

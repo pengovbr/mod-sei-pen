@@ -7,13 +7,13 @@
 
     "autoload": {
         "classmap": [
-            "src/"
+            "src/",
+            "sei/modpen/"
         ]
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "sei/",
-            "Modpen\\Tests\\": "sei/modpen/"
+            "Tests\\": "sei/"
         }
     },
     "require-dev": {

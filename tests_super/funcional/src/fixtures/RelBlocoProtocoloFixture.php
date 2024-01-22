@@ -1,7 +1,5 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use Tests\Funcional\Fixture;
 
 class RelBlocoProtocoloFixture extends Fixture

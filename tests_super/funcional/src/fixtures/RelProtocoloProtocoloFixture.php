@@ -1,11 +1,9 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use RelProtocoloProtocoloDTO;
 use InfraData;
 
-class RelProtocoloProtocoloFixture extends FixtureBase
+class RelProtocoloProtocoloFixture extends \FixtureBase
 {
     protected function inicializarObjInfraIBanco()
     {

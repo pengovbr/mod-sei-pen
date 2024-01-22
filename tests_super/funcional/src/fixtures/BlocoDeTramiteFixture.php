@@ -1,23 +1,16 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 //use Tests\Funcional\Fixture;
 // use Faker\Factory;
 use InfraData;
-// use TramiteEmBlocoDTO;
+// use \TramiteEmBlocoDTO;
 
-class BlocoDeTramiteFixture extends FixtureBase
+class BlocoDeTramiteFixture extends \FixtureBase
 {
     protected $objBlocoDeTramiteDTO;
 
     CONST TRATAMENTO = 'Presidente, Substituto';
     CONST ID_TARJA_ASSINATURA = 2;
-
-    public function __construct()
-    {
-        $this->objBlocoDeTramiteDTO = new \TramiteEmBlocoDTO();
-    }
  
     protected function inicializarObjInfraIBanco()
     {
@@ -26,20 +19,18 @@ class BlocoDeTramiteFixture extends FixtureBase
 
     protected function cadastrar($dados = [])
     {
-        //$dados['IdAssinatura'] = $this->getObjInfraIBanco()->getValorSequencia('seq_assinatura');
+        $objBlocoDeTramiteDTO = new TramiteEmBlocoDTO();
 
-        // print_R($dados); die('aki');
-        $this->$objBlocoDeTramiteDTO->setNumIdUnidade(2);
-        $this->$objBlocoDeTramiteDTO->setNumIdUsuario(110000001);
-        $this->$objBlocoDeTramiteDTO->setStrDescricao(100000001);
-        $this->$objBlocoDeTramiteDTO->setStrIdxBloco('STATUC Novo bloco');
-        $this->$objBlocoDeTramiteDTO->setStrStaTipo('1 novo bloco');
-        $this->$objBlocoDeTramiteDTO->setStrStaEstado('A');
+        $objBlocoDeTramiteDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objBlocoDeTramiteDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
+        $objBlocoDeTramiteDTO->setStrDescricao($dados['Descricao'] ?: 'Bloco para envio');
+        $objBlocoDeTramiteDTO->setStrIdxBloco($dados['IdxBloco'] ?: 'Bloco para envio');
+        $objBlocoDeTramiteDTO->setStrStaTipo($dados['IdxBloco'] ?: 'I');
+        $objBlocoDeTramiteDTO->setStrStaEstado($dados['IdxBloco'] ?: 'A');
 
-        
         $objBlocoDeTramiteDB = new \TramiteEmBlocoBD(\BancoSEI::getInstance());
-        $objBlocoDeTramiteDB->cadastrar($this->objBlocoDeTramiteDTO);
+        $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
 
-        return $this->objBlocoDeTramiteDTO;
+        return $objBlocoDeTramiteDTO;
     }
 }

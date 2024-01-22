@@ -1,14 +1,12 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 use Tests\Funcional\Fixture;
 // use Faker\Factory;
 use InfraData;
 use ProcedimentoDTO;
 use ProtocoloDTO;
 
-class ProcedimentoFixture extends FixtureBase
+class ProcedimentoFixture extends \FixtureBase
 {
     const TIPO_PROCEDIMENTO_PADRAO = '100000256'; // cobrança
     

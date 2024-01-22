@@ -1,11 +1,9 @@
 <?php
 
-namespace Modpen\Tests\fixtures;
-
 // use Tests\Funcional\Fixture;
 use InfraData;
 
-class AtributoAndamentoFixture extends FixtureBase
+class AtributoAndamentoFixture extends \FixtureBase
 {
     protected $objAtributoAndamentoDTO;
 
