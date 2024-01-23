@@ -64,6 +64,7 @@ class TramiteProcessoEmBlocoCadastroTest extends CenarioBaseTestCase
 
     public static function tearDownAfterClass(): void
     {
-        parent::tearDownAfterClass();
+        // $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
+        // $objBlocoDeTramiteFixture->excluir(1);
     }
 }

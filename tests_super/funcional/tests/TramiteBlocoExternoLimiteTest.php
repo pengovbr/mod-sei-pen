@@ -4,38 +4,53 @@
  * EnviarProcessoTest
  * @group group
  */
-class TramiteProcessoEmBlocoExternoTest extends CenarioBaseTestCase
+class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 {
-    private $objProtocoloFixture;
+    protected static $strQtyProcessos = 10;
+
     public static $remetente;
     public static $destinatario;
+    public static $penOrgaoExternoId;
 
     function setUp(): void 
     {
         parent::setUp();
-        $parametros = [];
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        $this->objProtocoloFixture = new \ProtocoloFixture();
-        $this->objProtocoloFixture->carregar($parametros, function($objProtocoloDTO) {
-            
+        $penMapUnidadesFixture = new \PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
+            'id' => self::$remetente['ID_ESTRUTURA'],
+            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'nome' => self::$remetente['NOME_UNIDADE']
+        ]);
+        $penMapUnidadesFixture->cadastrar();
+        
+        $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
+        $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
+
+        for ($i = 0; $i < $strQtyProcessos; $i++) {
+            $objProtocoloFixture = new \ProtocoloFixture();
+            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar();
+                
             $objProcedimentoFixture = new \ProcedimentoFixture();
             $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
             ]);
 
             $objAtividadeFixture = new \AtividadeFixture();
             $objAtividadeDTO = $objAtividadeFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+                'IdTarefa' => TarefaRN::$TI_GERACAO_PROCEDIMENTO,
             ]);
 
             $objParticipanteFixture = new \ParticipanteFixture();
             $objParticipanteFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
             ]);
 
             $objProtocoloAssuntoFixture = new \RelProtocoloAssuntoFixture();
             $objProtocoloAssuntoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
             ]);
 
             $objAtributoAndamentoFixture = new \AtributoAndamentoFixture();
@@ -45,28 +60,24 @@ class TramiteProcessoEmBlocoExternoTest extends CenarioBaseTestCase
 
             $objDocumentoFixture = new \DocumentoFixture();
             $objDocumentoDTO = $objDocumentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
             ]);
 
             $objAssinaturaFixture = new \AssinaturaFixture();
             $objAssinaturaFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-                'IdAtividade' => $objProtocoloDTO->getDblIdProtocolo()
+                'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
             ]);
-
-            $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
-            $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
 
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdTramitaEmBloco' => $objBlocoDeTramiteDTO->getNumId(),
-                'IdxRelBlocoProtocolo' => $objProtocoloDTO->getStrProtocoloFormatado()
+                'IdxRelBlocoProtocolo' => $objProtocoloFixtureDTO->getStrProtocoloFormatado()
             ]);
-            
-        });
+        }
 
     }
 
@@ -88,7 +99,6 @@ class TramiteProcessoEmBlocoExternoTest extends CenarioBaseTestCase
             self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
         );
-
         sleep(10);
     }
 }

@@ -11,7 +11,6 @@ class ProcedimentoFixture extends \FixtureBase
     const TIPO_PROCEDIMENTO_PADRAO = '100000256'; // cobrança
     
     protected $objProcedimentoDTO;
-    protected $objProtocoloDTO;
 
     public function __construct()
     {
@@ -25,7 +24,7 @@ class ProcedimentoFixture extends \FixtureBase
 
     protected function cadastrar($dados = [])
     {
-        $this->objProcedimentoDTO->setDblIdProcedimento($dados["IdProtocolo"] ?: 2);
+        $this->objProcedimentoDTO->setDblIdProcedimento($dados["IdProtocolo"] ?: null);
         $this->objProcedimentoDTO->setNumIdTipoProcedimento($dados["IdTipoProcedimento"] ?: self::TIPO_PROCEDIMENTO_PADRAO);
         $this->objProcedimentoDTO->setStrStaOuvidoria($dados["StaOuvidoria"] ?: '-');
         $this->objProcedimentoDTO->setStrSinCiencia($dados["SinCiencia"] ?: 'N');

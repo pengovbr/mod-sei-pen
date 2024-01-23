@@ -1,7 +1,5 @@
 <?php
 
-// use Tests\Funcional\Fixture;
-// use Faker\Factory;
 use InfraData;
 
 class AtividadeFixture extends \FixtureBase

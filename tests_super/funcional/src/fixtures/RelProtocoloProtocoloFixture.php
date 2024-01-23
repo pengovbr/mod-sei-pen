@@ -1,8 +1,5 @@
 <?php
 
-use RelProtocoloProtocoloDTO;
-use InfraData;
-
 class RelProtocoloProtocoloFixture extends \FixtureBase
 {
     protected function inicializarObjInfraIBanco()
@@ -12,7 +9,7 @@ class RelProtocoloProtocoloFixture extends \FixtureBase
 
     protected function cadastrar($dados = [])
     {
-        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+        $objRelProtocoloProtocoloDTO = new \RelProtocoloProtocoloDTO();
 
         $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($dados['IdProtocolo']);
         $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($dados['IdDocumento']);

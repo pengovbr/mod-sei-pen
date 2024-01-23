@@ -1,9 +1,5 @@
 <?php
 
-// use Tests\Funcional\Fixture;
-use TarefaRN;
-use DocumentoRN;
-
 class DocumentoFixture extends \FixtureBase
 {
     protected $objDocumentoDTO;
@@ -25,7 +21,7 @@ class DocumentoFixture extends \FixtureBase
         // $dados['IdProtocolo'] = $this->getObjInfraIBanco()->getValorSequencia('seq_protocolo');
         // $dados['IdDocumento'] = $this->getObjInfraIBanco()->getValorSequencia('seq_documento');
         
-        $protocoloFixture = new ProtocoloFixture();
+        $protocoloFixture = new \ProtocoloFixture();
         $protocoloDTO = $protocoloFixture->cadastrar(
             [
                 'StaProtocolo' => \ProtocoloRN::$TP_DOCUMENTO_GERADO,
@@ -49,10 +45,10 @@ class DocumentoFixture extends \FixtureBase
         $objDocumentoDB = new \DocumentoBD(\BancoSEI::getInstance());
         $objDocumentoDB->cadastrar($this->objDocumentoDTO);
 
-        $objAtividadeFixture = new AtividadeFixture();
+        $objAtividadeFixture = new \AtividadeFixture();
         $objAtividadeDTO = $objAtividadeFixture->cadastrar(
             [
-                'IdProtocolo' => $dados['IdProtocolo'],
+                'IdProtocolo' => $protocoloDTO->getDblIdProtocolo(),
                 'IdTarefa' => TarefaRN::$TI_GERACAO_DOCUMENTO,
             ]
         );
@@ -62,7 +58,7 @@ class DocumentoFixture extends \FixtureBase
             'IdProtocolo' => $protocoloDTO->getDblIdProtocolo(),
         ]);
         
-        $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
+        $objAtributoAndamentoFixture = new \AtributoAndamentoFixture();
         $objAtributoAndamentoFixture->carregarVariados([
             [
                 'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
@@ -75,20 +71,20 @@ class DocumentoFixture extends \FixtureBase
             ]
         ]);
 
-        $objDocumentoConteudoFixture = new DocumentoConteudoFixture();
+        $objDocumentoConteudoFixture = new \DocumentoConteudoFixture();
         $objDocumentoConteudoFixture->cadastrar(
             [
                 'IdDocumento' => $this->objDocumentoDTO->getDblIdDocumento(),
             ]
         );
 
-        $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
+        $objProtocoloAssuntoFixture = new \RelProtocoloAssuntoFixture();
         $objProtocoloAssuntoFixture->carregar([
             'IdProtocolo' => $protocoloDTO->getDblIdProtocolo(),
             'IdAssunto' => 2
         ]);
 
-        $ObjProtocoloProtocoloFixture = new RelProtocoloProtocoloFixture();
+        $ObjProtocoloProtocoloFixture = new \RelProtocoloProtocoloFixture();
         $ObjProtocoloProtocoloFixture->cadastrar(
             [
                 'IdProtocolo' => $dados['IdProtocolo'],
@@ -96,7 +92,7 @@ class DocumentoFixture extends \FixtureBase
             ]
         );
 
-        $secaoDocumentoFixture = new SecaoDocumentoFixture();
+        $secaoDocumentoFixture = new \SecaoDocumentoFixture();
         $listaSecao = $secaoDocumentoFixture->conteudoEstatico($this->objDocumentoDTO->getDblIdDocumento());
 
         $secaoDocumentoFixture->carregarVariados($listaSecao);

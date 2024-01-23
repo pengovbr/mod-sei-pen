@@ -1,11 +1,5 @@
 <?php
 
-// namespace Modpen\Tests\fixtures;
-
-// use Tests\Funcional\src\Fixture;
-// use Faker\Factory;
-use InfraData;
-
 class ProtocoloFixture extends \FixtureBase
 {
     protected $objProtocoloDTO;

@@ -1,8 +1,5 @@
 <?php
 
-use Tests\Funcional\Fixture;
-use RelProtocoloAssuntoDTO;
-
 class RelProtocoloAssuntoFixture extends \FixtureBase
 {
     const ID_ASSUNTO_PADRAO_TEST = 377;
@@ -14,7 +11,7 @@ class RelProtocoloAssuntoFixture extends \FixtureBase
 
     protected function cadastrar($dados = [])
     {
-        $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
+        $objRelProtocoloAssuntoDTO = new \RelProtocoloAssuntoDTO();
 
         $objRelProtocoloAssuntoDTO->setDblIdProtocolo($dados['IdProtocolo']);
         $objRelProtocoloAssuntoDTO->setNumIdAssuntoProxy($dados['IdAssunto'] ?: 2);

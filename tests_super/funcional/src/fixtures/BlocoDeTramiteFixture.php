@@ -1,9 +1,6 @@
 <?php
 
-//use Tests\Funcional\Fixture;
-// use Faker\Factory;
 use InfraData;
-// use \TramiteEmBlocoDTO;
 
 class BlocoDeTramiteFixture extends \FixtureBase
 {
@@ -19,7 +16,7 @@ class BlocoDeTramiteFixture extends \FixtureBase
 
     protected function cadastrar($dados = [])
     {
-        $objBlocoDeTramiteDTO = new TramiteEmBlocoDTO();
+        $objBlocoDeTramiteDTO = new \TramiteEmBlocoDTO();
 
         $objBlocoDeTramiteDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
         $objBlocoDeTramiteDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
@@ -32,5 +29,15 @@ class BlocoDeTramiteFixture extends \FixtureBase
         $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
 
         return $objBlocoDeTramiteDTO;
+    }
+
+    public function excluir($id)
+    {
+        $dto = new \TramiteEmBlocoDTO();
+        $dto->setNumId($id);
+        $dto->retNumId();
+
+        $objBD = new \TramiteEmBlocoBD(\BancoSEI::getInstance());
+        $objBD->excluir($dto);
     }
 }
