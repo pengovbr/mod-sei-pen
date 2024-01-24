@@ -16,10 +16,10 @@ class PenOrgaoExternoFixture
 
     public function cadastrar($dados = [])
     {
-        $penMapUnidadesFixture = new \PenMapUnidadesFixture(self::$contexto, $dados);
+        $penMapUnidadesFixture = new PenMapUnidadesFixture(self::$contexto, $dados);
         $penMapUnidadesFixture->gravar();
 
-        $bancoOrgaoA = new \DatabaseUtils(self::$contexto);
+        $bancoOrgaoA = new DatabaseUtils(self::$contexto);
         $bancoOrgaoA->execute(
             "insert into md_pen_orgao_externo ".
             "(id,id_orgao_origem,str_orgao_origem,id_estrutura_origem,str_estrutura_origem,id_orgao_destino,str_orgao_destino,sin_ativo,id_unidade,dth_criacao) ".

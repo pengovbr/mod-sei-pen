@@ -88,7 +88,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         SessaoSEI::getInstance(false)->simularLogin(SessaoSEI::$USUARIO_SEI, SessaoSEI::$UNIDADE_TESTE);
 
-        //testando permissoes de criações de tabelas
+        //testando permissoes de criaÃ§Ãµes de tabelas
         $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
       if (count($objInfraMetaBD->obterTabelas('pen_sei_teste')) == 0) {
@@ -98,24 +98,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
-        // Aplicação de scripts de atualização de forma incremental
+        // AplicaÃ§Ã£o de scripts de atualizaÃ§Ã£o de forma incremental
         $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
       // phpcs:disable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
       switch ($strVersaoModuloPen) {
-        case '': // Não há nenhuma versão instalada
+        case '': // NÃ£o hÃ¡ nenhuma versÃ£o instalada
         case '0.0.0':
-            $this->instalarV100(); // Nenhuma versão instalada
+            $this->instalarV100(); // Nenhuma versÃ£o instalada
         case '1.0.0':
             $this->instalarV101();
         case '1.0.1':
             $this->instalarV110();
         case '1.1.0':
             $this->instalarV111();
-        case '1.1.1': //Não houve atualização no banco de dados
-        case '1.1.2': //Não houve atualização no banco de dados
-        case '1.1.3': //Não houve atualização no banco de dados
-        case '1.1.4': //Não houve atualização no banco de dados
-        case '1.1.5': //Não houve atualização no banco de dados
+        case '1.1.1': //NÃ£o houve atualizaÃ§Ã£o no banco de dados
+        case '1.1.2': //NÃ£o houve atualizaÃ§Ã£o no banco de dados
+        case '1.1.3': //NÃ£o houve atualizaÃ§Ã£o no banco de dados
+        case '1.1.4': //NÃ£o houve atualizaÃ§Ã£o no banco de dados
+        case '1.1.5': //NÃ£o houve atualizaÃ§Ã£o no banco de dados
         case '1.1.6':
             $this->instalarV117();
         case '1.1.7':
@@ -170,10 +170,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV1502();
         case '1.5.2':
             $this->instalarV1503();
-        case '1.5.3': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.4': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.5': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.6': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.3': // Faixa de possÃ­veis versÃµes da release 1.5.x de retrocompatibilidade
+        case '1.5.4': // Faixa de possÃ­veis versÃµes da release 1.5.x de retrocompatibilidade
+        case '1.5.5': // Faixa de possÃ­veis versÃµes da release 1.5.x de retrocompatibilidade
+        case '1.5.6': // Faixa de possÃ­veis versÃµes da release 1.5.x de retrocompatibilidade
         case '1.5.7':
             $this->instalarV2000_beta1();
         case '2.0.0-beta1':
@@ -275,11 +275,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         case '3.4.0':
             $this->instalarV3050();
         case '3.6.0':
-          $this->instalarV3060();
+            $this->instalarV3060();
 
-            break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
+            break; // AusÃªncia de [break;] proposital para realizar a atualizaÃ§Ã£o incremental de versÃµes
         default:
-            $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
+            $this->finalizar('VERSAO DO MÃ“DULO JÃ CONSTA COMO ATUALIZADA');
             return;
       }
       // phpcs:enable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
@@ -294,8 +294,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Cria um novo parâmetro
-     * @return int Código do Parametro gerado
+     * Cria um novo parÃ¢metro
+     * @return int CÃ³digo do Parametro gerado
      */
   protected function criarParametro($strNome, $strValor, $strDescricao)
     {
@@ -312,8 +312,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Remove parâmetro de configuração do módulo da base de dados
-     * @return int Código do Parametro gerado
+     * Remove parÃ¢metro de configuraÃ§Ã£o do mÃ³dulo da base de dados
+     * @return int CÃ³digo do Parametro gerado
      */
   protected function removerParametro($strNome)
     {
@@ -326,8 +326,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Remove um parâmetro do infra_parametros
-     * @return string Nome do parâmetro
+     * Remove um parÃ¢metro do infra_parametros
+     * @return string Nome do parÃ¢metro
      */
   protected function deletaParametroInfra($strNome)
     {
@@ -339,7 +339,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Remove todos os índices criados para o conjunto de tabelas informado
+     * Remove todos os Ã­ndices criados para o conjunto de tabelas informado
      */
   protected function removerIndicesTabela($parObjInfraMetaBD, $parFiltroTabelas)
     {
@@ -357,7 +357,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Atualiza o número de versão do módulo nas tabelas de parâmetro do sistema
+     * Atualiza o nÃºmero de versÃ£o do mÃ³dulo nas tabelas de parÃ¢metro do sistema
      *
      * @param string $parStrNumeroVersao
      * @return void
@@ -377,10 +377,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
 
     /**
-     * Remove a chave primária da tabela indicada, removendo também o índice vinculado, caso seja necessário
+     * Remove a chave primÃ¡ria da tabela indicada, removendo tambÃ©m o Ã­ndice vinculado, caso seja necessÃ¡rio
      *
-     * Necessário dependendo da versão do banco de dados Oracle utilizado que pode não remover um índice criado com mesmo
-     * nome da chave primária, impedindo que este objeto seja recriado posteriormente na base de dados
+     * NecessÃ¡rio dependendo da versÃ£o do banco de dados Oracle utilizado que pode nÃ£o remover um Ã­ndice criado com mesmo
+     * nome da chave primÃ¡ria, impedindo que este objeto seja recriado posteriormente na base de dados
      *
      * @param [type] $parStrNomeTabela
      * @param [type] $parStrNomeChavePrimario
@@ -394,10 +394,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       try {
         $this->objInfraMetaBD->excluirIndice($parStrNomeTabela, $parStrNomeChavePrimaria);
       } catch (\Exception $e) {
-          //Caso o índice não seja localizado, nada deverá ser feito pois a existência depende de versão do banco de dados
+          //Caso o Ã­ndice nÃ£o seja localizado, nada deverÃ¡ ser feito pois a existÃªncia depende de versÃ£o do banco de dados
       }
     } catch (Exception $e) {
-        // Mensagem de erro deve ser suprimida caso seja indicado pelo usuário
+        // Mensagem de erro deve ser suprimida caso seja indicado pelo usuÃ¡rio
       if (!$bolSuprimirErro) {
           throw $e;
       }
@@ -410,7 +410,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     try {
         $this->objInfraMetaBD->excluirChaveEstrangeira($parStrTabela, $parStrNomeChaveEstrangeira);
     } catch (\Exception $e) {
-        // Mensagem de erro deve ser suprimida caso seja indicado pelo usuário
+        // Mensagem de erro deve ser suprimida caso seja indicado pelo usuÃ¡rio
       if (!$bolSuprimirErro) {
           throw $e;
       }
@@ -436,7 +436,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       return $objInfraBanco->consultarSql($sql);
   }
 
-    /* Contêm atualizações da versao 1.0.0 do modulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.0.0 do modulo */
   // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function instalarV100()
     {
@@ -490,7 +490,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           'cols' => array(
               'id_especie' => array($objMetaBD->tipoNumero(16), PenMetaBD::NNULLO),
               'nome_especie' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::NNULLO),
-              // Campo não mais necessário após a versão 2.0.0 do módulo
+              // Campo nÃ£o mais necessÃ¡rio apÃ³s a versÃ£o 2.0.0 do mÃ³dulo
               'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO)
           ),
           'pk' => array('cols' => array('id_especie')),
@@ -701,7 +701,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
 
       //----------------------------------------------------------------------
-      // Novas sequências
+      // Novas sequÃªncias
       //----------------------------------------------------------------------
       $objInfraSequencia = new InfraSequencia($objInfraBanco);
 
@@ -714,7 +714,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
 
       //----------------------------------------------------------------------
-      // Parâmetros
+      // ParÃ¢metros
       //----------------------------------------------------------------------
 
       $objInfraParametro = new InfraParametro($objInfraBanco);
@@ -746,183 +746,183 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      $fnCadastrar(1, 'Abaixo-assinado', 'Podendo ser complementado: de Reivindicação');
-      $fnCadastrar(2, 'Acórdão', 'Expressa decisão proferida pelo Conselho Diretor, não abrangida pelos demais instrumentos deliberativos anteriores.');
-      $fnCadastrar(3, 'Acordo', 'Podendo ser complementado: de Nível de Serviço; Coletivo de Trabalho');
-      $fnCadastrar(4, 'Alvará', 'Podendo ser complementado: de Funcionamento; Judicial');
+      $fnCadastrar(1, 'Abaixo-assinado', 'Podendo ser complementado: de ReivindicaÃ§Ã£o');
+      $fnCadastrar(2, 'AcÃ³rdÃ£o', 'Expressa decisÃ£o proferida pelo Conselho Diretor, nÃ£o abrangida pelos demais instrumentos deliberativos anteriores.');
+      $fnCadastrar(3, 'Acordo', 'Podendo ser complementado: de NÃ­vel de ServiÃ§o; Coletivo de Trabalho');
+      $fnCadastrar(4, 'AlvarÃ¡', 'Podendo ser complementado: de Funcionamento; Judicial');
       $fnCadastrar(5, 'Anais', 'Podendo ser complementado: de Eventos; de Engenharia');
       $fnCadastrar(6, 'Anteprojeto', 'Podendo ser complementado: de Lei');
-      $fnCadastrar(7, 'Apólice', 'Podendo ser complementado: de Seguro');
+      $fnCadastrar(7, 'ApÃ³lice', 'Podendo ser complementado: de Seguro');
       $fnCadastrar(8, 'Apostila', 'Podendo ser complementado: de Curso');
-      $fnCadastrar(9, 'Ata', 'Como Documento Externo pode ser complementado: de Reunião; de Realização de Pregão');
-      $fnCadastrar(10, 'Atestado', 'Podendo ser complementado: Médico; de Comparecimento; de Capacidade Técnica');
-      $fnCadastrar(11, 'Ato', 'Expressa decisão sobre outorga, expedição, modificação, transferência, prorrogação, adaptação e extinção de concessões, permissões e autorizações para exploração de serviços, uso de recursos escassos e exploração de satélite, e Chamamento Público.');
-      $fnCadastrar(12, 'Auto', 'Podendo ser complementado: de Vistoria; de Infração');
-      $fnCadastrar(13, 'Aviso', 'Podendo ser complementado: de Recebimento; de Sinistro; de Férias');
+      $fnCadastrar(9, 'Ata', 'Como Documento Externo pode ser complementado: de ReuniÃ£o; de RealizaÃ§Ã£o de PregÃ£o');
+      $fnCadastrar(10, 'Atestado', 'Podendo ser complementado: MÃ©dico; de Comparecimento; de Capacidade TÃ©cnica');
+      $fnCadastrar(11, 'Ato', 'Expressa decisÃ£o sobre outorga, expediÃ§Ã£o, modificaÃ§Ã£o, transferÃªncia, prorrogaÃ§Ã£o, adaptaÃ§Ã£o e extinÃ§Ã£o de concessÃµes, permissÃµes e autorizaÃ§Ãµes para exploraÃ§Ã£o de serviÃ§os, uso de recursos escassos e exploraÃ§Ã£o de satÃ©lite, e Chamamento PÃºblico.');
+      $fnCadastrar(12, 'Auto', 'Podendo ser complementado: de Vistoria; de InfraÃ§Ã£o');
+      $fnCadastrar(13, 'Aviso', 'Podendo ser complementado: de Recebimento; de Sinistro; de FÃ©rias');
       $fnCadastrar(14, 'Balancete', 'Podendo ser complementado: Financeiro');
-      $fnCadastrar(15, 'Balanço', 'Podendo ser complementado: Patrimonial - BP; Financeiro');
+      $fnCadastrar(15, 'BalanÃ§o', 'Podendo ser complementado: Patrimonial - BP; Financeiro');
       $fnCadastrar(16, 'Bilhete', 'Podendo ser complementado: de Pagamento; de Loteria');
-      $fnCadastrar(17, 'Boletim', 'Podendo ser complementado: de Ocorrência; Informativo');
+      $fnCadastrar(17, 'Boletim', 'Podendo ser complementado: de OcorrÃªncia; Informativo');
       $fnCadastrar(18, 'Carta', 'Podendo ser complementado: Convite');
       $fnCadastrar(19, 'Cartaz', 'Podendo ser complementado: de Evento');
-      $fnCadastrar(20, 'Cédula', 'Podendo ser complementado: de Identidade; de Crédito Bancário; de Crédito Comercial; de Crédito Imobiliário');
-      $fnCadastrar(21, 'Certidão', 'Como Documento Externo pode ser complementado: de Tempo de Serviço; de Nascimento; de Casamento; de Óbito; Negativa de Falência ou Concordata; Negativa de Débitos Trabalhistas; Negativa de Débitos Tributários');
-      $fnCadastrar(22, 'Certificado', 'Podendo ser complementado: de Conclusão de Curso; de Calibração de Equipamento; de Marca');
-      $fnCadastrar(23, 'Cheque', 'Podendo ser complementado: Caução');
-      $fnCadastrar(24, 'Comprovante', 'Podendo ser complementado: de Despesa; de Rendimento; de Residência; de Matrícula; de União Estável');
-      $fnCadastrar(25, 'Comunicado', 'Expediente interno entre uma unidade administrativa e um servidor ou entre um servidor e uma unidade administrativa de um mesmo órgão público.');
-      $fnCadastrar(26, 'Consulta', 'Podendo ser complementado: Pública; Interna');
-      $fnCadastrar(27, 'Contracheque', 'Espécie própria');
+      $fnCadastrar(20, 'CÃ©dula', 'Podendo ser complementado: de Identidade; de CrÃ©dito BancÃ¡rio; de CrÃ©dito Comercial; de CrÃ©dito ImobiliÃ¡rio');
+      $fnCadastrar(21, 'CertidÃ£o', 'Como Documento Externo pode ser complementado: de Tempo de ServiÃ§o; de Nascimento; de Casamento; de Ã“bito; Negativa de FalÃªncia ou Concordata; Negativa de DÃ©bitos Trabalhistas; Negativa de DÃ©bitos TributÃ¡rios');
+      $fnCadastrar(22, 'Certificado', 'Podendo ser complementado: de ConclusÃ£o de Curso; de CalibraÃ§Ã£o de Equipamento; de Marca');
+      $fnCadastrar(23, 'Cheque', 'Podendo ser complementado: CauÃ§Ã£o');
+      $fnCadastrar(24, 'Comprovante', 'Podendo ser complementado: de Despesa; de Rendimento; de ResidÃªncia; de MatrÃ­cula; de UniÃ£o EstÃ¡vel');
+      $fnCadastrar(25, 'Comunicado', 'Expediente interno entre uma unidade administrativa e um servidor ou entre um servidor e uma unidade administrativa de um mesmo Ã³rgÃ£o pÃºblico.');
+      $fnCadastrar(26, 'Consulta', 'Podendo ser complementado: PÃºblica; Interna');
+      $fnCadastrar(27, 'Contracheque', 'EspÃ©cie prÃ³pria');
       $fnCadastrar(28, 'Contrato', 'Como Documento Externo pode ser complementado: Social');
-      $fnCadastrar(29, 'Convênio', 'Espécie própria');
-      $fnCadastrar(30, 'Convite', 'Podendo ser complementado: de Reunião; para Evento; de Casamento');
-      $fnCadastrar(31, 'Convenção', 'Podendo ser complementado: Coletiva de Trabalho; Internacional');
-      $fnCadastrar(32, 'Crachá', 'Podendo ser complementado: de Identificação; de Evento');
+      $fnCadastrar(29, 'ConvÃªnio', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(30, 'Convite', 'Podendo ser complementado: de ReuniÃ£o; para Evento; de Casamento');
+      $fnCadastrar(31, 'ConvenÃ§Ã£o', 'Podendo ser complementado: Coletiva de Trabalho; Internacional');
+      $fnCadastrar(32, 'CrachÃ¡', 'Podendo ser complementado: de IdentificaÃ§Ã£o; de Evento');
       $fnCadastrar(33, 'Cronograma', 'Podendo ser complementado: de Projeto; de Estudos');
-      $fnCadastrar(34, 'Currículo', 'Podendo ser complementado: de Candidato');
-      $fnCadastrar(35, 'Debênture', 'Espécie própria');
-      $fnCadastrar(36, 'Decisão', 'Podendo ser complementado: Administrativa; Judicial');
-      $fnCadastrar(37, 'Declaração', 'Como Documento Externo pode ser complementado: de Imposto de Renda; de Conformidade; de Responsabilidade Técnica; de Acumulação de Aposentadoria; de Acumulação de Cargos; de Informações Econômico-Fiscais da Pessoa Jurídica $fnCadastrar(DIPJ);');
-      $fnCadastrar(38, 'Decreto', 'Espécie própria');
-      $fnCadastrar(39, 'Deliberação', 'Podendo ser complementado: de Recursos; do Conselho');
-      $fnCadastrar(40, 'Demonstrativo', 'Podendo ser complementado: Financeiro; de Pagamento; de Arrecadação');
+      $fnCadastrar(34, 'CurrÃ­culo', 'Podendo ser complementado: de Candidato');
+      $fnCadastrar(35, 'DebÃªnture', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(36, 'DecisÃ£o', 'Podendo ser complementado: Administrativa; Judicial');
+      $fnCadastrar(37, 'DeclaraÃ§Ã£o', 'Como Documento Externo pode ser complementado: de Imposto de Renda; de Conformidade; de Responsabilidade TÃ©cnica; de AcumulaÃ§Ã£o de Aposentadoria; de AcumulaÃ§Ã£o de Cargos; de InformaÃ§Ãµes EconÃ´mico-Fiscais da Pessoa JurÃ­dica $fnCadastrar(DIPJ);');
+      $fnCadastrar(38, 'Decreto', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(39, 'DeliberaÃ§Ã£o', 'Podendo ser complementado: de Recursos; do Conselho');
+      $fnCadastrar(40, 'Demonstrativo', 'Podendo ser complementado: Financeiro; de Pagamento; de ArrecadaÃ§Ã£o');
       $fnCadastrar(41, 'Depoimento', 'Podendo ser complementado: das Testemunhas');
-      $fnCadastrar(42, 'Despacho', 'Espécie própria');
-      $fnCadastrar(43, 'Diário', 'Podendo ser complementado: de Justiça; Oficial');
-      $fnCadastrar(44, 'Diploma', 'Podendo ser complementado: de Conclusão de Curso');
-      $fnCadastrar(45, 'Diretriz', 'Podendo ser complementado: Orçamentária');
-      $fnCadastrar(46, 'Dissertação', 'Podendo ser complementado: de Mestrado');
-      $fnCadastrar(47, 'Dossiê', 'Podendo ser complementado: de Processo; Técnico');
-      $fnCadastrar(48, 'Edital', 'Podendo ser complementado: de Convocação; de Intimação; de Lançamento');
-      $fnCadastrar(49, 'E-mail', 'Indicado nos Parâmetros para corresponder ao envio de Correspondência Eletrônica do SEI');
-      $fnCadastrar(50, 'Embargos', 'Podendo ser complementado: de Declaração; de Execução ou Infringentes');
-      $fnCadastrar(51, 'Emenda', 'Podendo ser complementado: Constitucional; de Comissão; de Bancada; de Relatoria');
-      $fnCadastrar(52, 'Escala', 'Podendo ser complementado: de Férias');
-      $fnCadastrar(53, 'Escritura', 'Podendo ser complementado: Pública; de Imóvel');
+      $fnCadastrar(42, 'Despacho', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(43, 'DiÃ¡rio', 'Podendo ser complementado: de JustiÃ§a; Oficial');
+      $fnCadastrar(44, 'Diploma', 'Podendo ser complementado: de ConclusÃ£o de Curso');
+      $fnCadastrar(45, 'Diretriz', 'Podendo ser complementado: OrÃ§amentÃ¡ria');
+      $fnCadastrar(46, 'DissertaÃ§Ã£o', 'Podendo ser complementado: de Mestrado');
+      $fnCadastrar(47, 'DossiÃª', 'Podendo ser complementado: de Processo; TÃ©cnico');
+      $fnCadastrar(48, 'Edital', 'Podendo ser complementado: de ConvocaÃ§Ã£o; de IntimaÃ§Ã£o; de LanÃ§amento');
+      $fnCadastrar(49, 'E-mail', 'Indicado nos ParÃ¢metros para corresponder ao envio de CorrespondÃªncia EletrÃ´nica do SEI');
+      $fnCadastrar(50, 'Embargos', 'Podendo ser complementado: de DeclaraÃ§Ã£o; de ExecuÃ§Ã£o ou Infringentes');
+      $fnCadastrar(51, 'Emenda', 'Podendo ser complementado: Constitucional; de ComissÃ£o; de Bancada; de Relatoria');
+      $fnCadastrar(52, 'Escala', 'Podendo ser complementado: de FÃ©rias');
+      $fnCadastrar(53, 'Escritura', 'Podendo ser complementado: PÃºblica; de ImÃ³vel');
       $fnCadastrar(54, 'Estatuto', 'Podendo ser complementado: Social');
-      $fnCadastrar(55, 'Exposição de Motivos', 'Espécie própria');
-      $fnCadastrar(56, 'Extrato', 'Podendo ser complementado: de Sistemas; Bancário');
-      $fnCadastrar(57, 'Fatura', 'Espécie própria');
-      $fnCadastrar(58, 'Ficha', 'Podendo ser complementado: de Cadastro; de Inscrição');
+      $fnCadastrar(55, 'ExposiÃ§Ã£o de Motivos', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(56, 'Extrato', 'Podendo ser complementado: de Sistemas; BancÃ¡rio');
+      $fnCadastrar(57, 'Fatura', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(58, 'Ficha', 'Podendo ser complementado: de Cadastro; de InscriÃ§Ã£o');
       $fnCadastrar(59, 'Fluxograma', 'Podendo ser complementado: de Processo; de Documentos; de Blocos');
-      $fnCadastrar(60, 'Folha', 'Podendo ser complementado: de Frequência de Estagiário; de Frequência de Servidor');
+      $fnCadastrar(60, 'Folha', 'Podendo ser complementado: de FrequÃªncia de EstagiÃ¡rio; de FrequÃªncia de Servidor');
       $fnCadastrar(61, 'Folheto/Folder', 'Podendo ser complementado: de Evento');
-      $fnCadastrar(62, 'Formulário', 'Podendo ser complementado: de Contato; de Revisão');
+      $fnCadastrar(62, 'FormulÃ¡rio', 'Podendo ser complementado: de Contato; de RevisÃ£o');
       $fnCadastrar(63, 'Grade Curricular', 'Podendo ser complementado: do Curso');
-      $fnCadastrar(64, 'Guia', 'Podendo ser complementado: de Recolhimento da União');
-      $fnCadastrar(65, 'Histórico', 'Podendo ser complementado: Escolar');
-      $fnCadastrar(66, 'Indicação', 'Espécie própria utilizada pelo Poder Legislativo');
+      $fnCadastrar(64, 'Guia', 'Podendo ser complementado: de Recolhimento da UniÃ£o');
+      $fnCadastrar(65, 'HistÃ³rico', 'Podendo ser complementado: Escolar');
+      $fnCadastrar(66, 'IndicaÃ§Ã£o', 'EspÃ©cie prÃ³pria utilizada pelo Poder Legislativo');
       $fnCadastrar(67, 'Informe', 'Como Documento Externo pode ser complementado: de Rendimentos');
-      $fnCadastrar(68, 'Instrução', 'Podendo ser complementado: Normativa');
-      $fnCadastrar(69, 'Inventário', 'Podendo ser complementado: de Estoque; Extrajudicial; Judicial; em Cartório');
-      $fnCadastrar(70, 'Laudo', 'Podendo ser complementado: Médico; Conclusivo');
+      $fnCadastrar(68, 'InstruÃ§Ã£o', 'Podendo ser complementado: Normativa');
+      $fnCadastrar(69, 'InventÃ¡rio', 'Podendo ser complementado: de Estoque; Extrajudicial; Judicial; em CartÃ³rio');
+      $fnCadastrar(70, 'Laudo', 'Podendo ser complementado: MÃ©dico; Conclusivo');
       $fnCadastrar(71, 'Lei', 'Podendo ser complementado: Complementar');
-      $fnCadastrar(72, 'Lista/Listagem', 'Podendo ser complementado: de Presença');
+      $fnCadastrar(72, 'Lista/Listagem', 'Podendo ser complementado: de PresenÃ§a');
       $fnCadastrar(73, 'Livro', 'Podendo ser complementado: Caixa');
-      $fnCadastrar(74, 'Mandado', 'Podendo ser complementado: de Busca e Apreensão; de Citação; de Intimação');
-      $fnCadastrar(75, 'Manifesto', 'Espécie própria');
-      $fnCadastrar(76, 'Manual', 'Podendo ser complementado: do Usuário; do Sistema; do Equipamento');
+      $fnCadastrar(74, 'Mandado', 'Podendo ser complementado: de Busca e ApreensÃ£o; de CitaÃ§Ã£o; de IntimaÃ§Ã£o');
+      $fnCadastrar(75, 'Manifesto', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(76, 'Manual', 'Podendo ser complementado: do UsuÃ¡rio; do Sistema; do Equipamento');
       $fnCadastrar(77, 'Mapa', 'Podendo ser complementado: de Ruas; de Risco');
-      $fnCadastrar(78, 'Medida Provisória', 'Espécie própria');
+      $fnCadastrar(78, 'Medida ProvisÃ³ria', 'EspÃ©cie prÃ³pria');
       $fnCadastrar(79, 'Memorando', 'Como Documento Externo pode ser complementado: de Entendimento');
-      $fnCadastrar(80, 'Memorando-circular', 'Mesma definição do Memorando com apenas uma diferença: é encaminhado simultaneamente a mais de um cargo.');
-      $fnCadastrar(81, 'Memorial', 'Podendo ser complementado: Descritivo; de Incorporação');
-      $fnCadastrar(82, 'Mensagem', 'Podendo ser complementado: de Aniversário; de Boas Vindas');
-      $fnCadastrar(83, 'Minuta', 'Podendo ser complementado: de Portaria; de Resolução');
-      $fnCadastrar(84, 'Moção', 'Podendo ser complementado: de Apoio; de Pesar; de Repúdio');
-      $fnCadastrar(85, 'Norma', 'Podendo ser complementado: Técnica; de Conduta');
-      $fnCadastrar(86, 'Nota', 'Podendo ser complementado: Técnica; de Empenho');
-      $fnCadastrar(87, 'Notificação', 'Podendo ser complementado: de Lançamento');
-      $fnCadastrar(88, 'Ofício', 'Modalidades de comunicação oficial. É expedido para e pelas autoridades. Tem como finalidade o tratamento de assuntos oficiais pelos órgãos da Administração Pública entre si e também com particulares.');
-      $fnCadastrar(89, 'Ofício-Circular', 'Espécie própria');
-      $fnCadastrar(90, 'Orçamento', 'Podendo ser complementado: de Obra; de Serviço');
-      $fnCadastrar(91, 'Ordem', 'Podendo ser complementado: de Serviço; de Compra; do Dia');
+      $fnCadastrar(80, 'Memorando-circular', 'Mesma definiÃ§Ã£o do Memorando com apenas uma diferenÃ§a: Ã© encaminhado simultaneamente a mais de um cargo.');
+      $fnCadastrar(81, 'Memorial', 'Podendo ser complementado: Descritivo; de IncorporaÃ§Ã£o');
+      $fnCadastrar(82, 'Mensagem', 'Podendo ser complementado: de AniversÃ¡rio; de Boas Vindas');
+      $fnCadastrar(83, 'Minuta', 'Podendo ser complementado: de Portaria; de ResoluÃ§Ã£o');
+      $fnCadastrar(84, 'MoÃ§Ã£o', 'Podendo ser complementado: de Apoio; de Pesar; de RepÃºdio');
+      $fnCadastrar(85, 'Norma', 'Podendo ser complementado: TÃ©cnica; de Conduta');
+      $fnCadastrar(86, 'Nota', 'Podendo ser complementado: TÃ©cnica; de Empenho');
+      $fnCadastrar(87, 'NotificaÃ§Ã£o', 'Podendo ser complementado: de LanÃ§amento');
+      $fnCadastrar(88, 'OfÃ­cio', 'Modalidades de comunicaÃ§Ã£o oficial. Ã‰ expedido para e pelas autoridades. Tem como finalidade o tratamento de assuntos oficiais pelos Ã³rgÃ£os da AdministraÃ§Ã£o PÃºblica entre si e tambÃ©m com particulares.');
+      $fnCadastrar(89, 'OfÃ­cio-Circular', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(90, 'OrÃ§amento', 'Podendo ser complementado: de Obra; de ServiÃ§o');
+      $fnCadastrar(91, 'Ordem', 'Podendo ser complementado: de ServiÃ§o; de Compra; do Dia');
       $fnCadastrar(92, 'Organograma', 'Podendo ser complementado: da Empresa');
-      $fnCadastrar(93, 'Orientação', 'Podendo ser complementado: Normativa; Jurisprudencial');
-      $fnCadastrar(94, 'Panfleto', 'Podendo ser complementado: de Promoção; de Evento');
-      $fnCadastrar(95, 'Parecer', 'Tipo de Documento próprio da AGU e outros órgãos públicos.');
-      $fnCadastrar(96, 'Passaporte', 'Espécie própria');
-      $fnCadastrar(97, 'Pauta', 'Podendo ser complementado: de Julgamentos; de Audiências; das Seções');
-      $fnCadastrar(98, 'Petição', 'Podendo ser complementado: Inicial; Incidental');
-      $fnCadastrar(99, 'Planilha', 'Podendo ser complementado: de Custos e Formação de Preços');
-      $fnCadastrar(100, 'Plano', 'Podendo ser complementado: de Serviço; de Contas Contábil');
-      $fnCadastrar(101, 'Planta', 'Podendo ser complementado: Baixa; de Localização; de Situação');
-      $fnCadastrar(102, 'Portaria', 'Expressa decisão relativa a assuntos de interesse interno da Agência.');
-      $fnCadastrar(103, 'Precatório', 'Podendo ser complementado: Alimentar; Federal; Estadual; Municipal');
+      $fnCadastrar(93, 'OrientaÃ§Ã£o', 'Podendo ser complementado: Normativa; Jurisprudencial');
+      $fnCadastrar(94, 'Panfleto', 'Podendo ser complementado: de PromoÃ§Ã£o; de Evento');
+      $fnCadastrar(95, 'Parecer', 'Tipo de Documento prÃ³prio da AGU e outros Ã³rgÃ£os pÃºblicos.');
+      $fnCadastrar(96, 'Passaporte', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(97, 'Pauta', 'Podendo ser complementado: de Julgamentos; de AudiÃªncias; das SeÃ§Ãµes');
+      $fnCadastrar(98, 'PetiÃ§Ã£o', 'Podendo ser complementado: Inicial; Incidental');
+      $fnCadastrar(99, 'Planilha', 'Podendo ser complementado: de Custos e FormaÃ§Ã£o de PreÃ§os');
+      $fnCadastrar(100, 'Plano', 'Podendo ser complementado: de ServiÃ§o; de Contas ContÃ¡bil');
+      $fnCadastrar(101, 'Planta', 'Podendo ser complementado: Baixa; de LocalizaÃ§Ã£o; de SituaÃ§Ã£o');
+      $fnCadastrar(102, 'Portaria', 'Expressa decisÃ£o relativa a assuntos de interesse interno da AgÃªncia.');
+      $fnCadastrar(103, 'PrecatÃ³rio', 'Podendo ser complementado: Alimentar; Federal; Estadual; Municipal');
       $fnCadastrar(104, 'Processo', 'Processo');
-      $fnCadastrar(105, 'Procuração', 'Espécie própria');
+      $fnCadastrar(105, 'ProcuraÃ§Ã£o', 'EspÃ©cie prÃ³pria');
       $fnCadastrar(106, 'Programa', 'Podendo ser complementado: de Governo; de Melhoria');
-      $fnCadastrar(107, 'Projeto', 'Podendo ser complementado: Técnico; Comercial');
-      $fnCadastrar(108, 'Prontuário', 'Podendo ser complementado: Médico; Odontológico');
-      $fnCadastrar(109, 'Pronunciamento', 'Espécie própria');
-      $fnCadastrar(110, 'Proposta', 'Podendo ser complementado: Comercial; de Orçamento; Técnica');
+      $fnCadastrar(107, 'Projeto', 'Podendo ser complementado: TÃ©cnico; Comercial');
+      $fnCadastrar(108, 'ProntuÃ¡rio', 'Podendo ser complementado: MÃ©dico; OdontolÃ³gico');
+      $fnCadastrar(109, 'Pronunciamento', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(110, 'Proposta', 'Podendo ser complementado: Comercial; de OrÃ§amento; TÃ©cnica');
       $fnCadastrar(111, 'Prospecto', 'Podendo ser complementado: de Fundos');
       $fnCadastrar(112, 'Protocolo', 'Podendo ser complementado: de Entendimentos; de Entrega');
-      $fnCadastrar(113, 'Prova', 'Podendo ser complementado: de Conceito; de Proficiência');
-      $fnCadastrar(114, 'Questionário', 'Podendo ser complementado: de Avaliação; de Pesquisa; Socioeconômico');
-      $fnCadastrar(115, 'Receita', 'Espécie própria');
+      $fnCadastrar(113, 'Prova', 'Podendo ser complementado: de Conceito; de ProficiÃªncia');
+      $fnCadastrar(114, 'QuestionÃ¡rio', 'Podendo ser complementado: de AvaliaÃ§Ã£o; de Pesquisa; SocioeconÃ´mico');
+      $fnCadastrar(115, 'Receita', 'EspÃ©cie prÃ³pria');
       $fnCadastrar(116, 'Recibo', 'Podendo ser complementado: de Pagamento; de Entrega');
       $fnCadastrar(117, 'Recurso', 'Podendo ser complementado: Administrativo; Judicial');
       $fnCadastrar(118, 'Regimento', 'Podendo ser complementado: Interno');
       $fnCadastrar(119, 'Registro', 'Podendo ser complementado: de Detalhes de Chamadas - CDR; de Acesso; Comercial');
-      $fnCadastrar(120, 'Regulamento', 'Podendo ser complementado: Geral; Disciplinar; de Administração');
-      $fnCadastrar(121, 'Relação', 'Podendo ser complementado: de Bens Reversíveis - RBR');
-      $fnCadastrar(122, 'Relatório', 'Podendo ser complementado: de Conformidade; de Medições; de Prestação de Contas; de Viagem a Serviço; Fotográfico; Técnico');
-      $fnCadastrar(123, 'Release', 'Podendo ser complementado: de Resultados; de Produtos; de Serviços');
-      $fnCadastrar(124, 'Representação', 'Podendo ser complementado: Comercial; Processual; Fiscal');
-      $fnCadastrar(125, 'Requerimento', 'Podendo ser complementado: Administrativo; de Adaptação; de Alteração Técnica; de Alteração Técnica; de Autocadastramento de Estação; de Licenciamento de Estação; de Serviço de Telecomunicações');
-      $fnCadastrar(126, 'Requisição', 'Podendo ser complementado: de Auditoria; de Exclusão; de Segunda Via');
-      $fnCadastrar(127, 'Resolução', 'Expressa decisão quanto ao provimento normativo que regula a implementação da política de telecomunicações brasileira, a prestação dos serviços de telecomunicações, a administração dos recursos à prestação e o funcionamento da Agência.');
-      $fnCadastrar(128, 'Resumo', 'Podendo ser complementado: Técnico');
-      $fnCadastrar(129, 'Roteiro', 'Podendo ser complementado: de Instalação; de Inspeção');
-      $fnCadastrar(130, 'Sentença', 'Podendo ser complementado: de Mérito; Terminativa; Declaratória; Constitutiva; Condenatória; Mandamental; Executiva');
-      $fnCadastrar(131, 'Sinopse', 'Podendo ser complementado: do Livro; do Estudo Técnico');
-      $fnCadastrar(132, 'Solicitação', 'Podendo ser complementado: de Pagamento');
-      $fnCadastrar(133, 'Súmula', 'Expressa decisão quanto à interpretação da legislação de telecomunicações e fixa entendimento sobre matérias de competência da Agência, com efeito vinculativo.');
-      $fnCadastrar(134, 'Tabela', 'Podendo ser complementado: de Visto; de Passaporte; de Certidão');
-      $fnCadastrar(135, 'Telegrama', 'Espécie própria');
-      $fnCadastrar(136, 'Termo', 'Podendo ser complementado: de Opção por Auxílio Financeiro; de Opção para Contribuição ao CPSS; de Conciliação; de Devolução; de Doação; de Recebimento; de Rescisão; de Compromisso de Estágio; de Representação; de Responsabilidade de Instalação - TRI');
+      $fnCadastrar(120, 'Regulamento', 'Podendo ser complementado: Geral; Disciplinar; de AdministraÃ§Ã£o');
+      $fnCadastrar(121, 'RelaÃ§Ã£o', 'Podendo ser complementado: de Bens ReversÃ­veis - RBR');
+      $fnCadastrar(122, 'RelatÃ³rio', 'Podendo ser complementado: de Conformidade; de MediÃ§Ãµes; de PrestaÃ§Ã£o de Contas; de Viagem a ServiÃ§o; FotogrÃ¡fico; TÃ©cnico');
+      $fnCadastrar(123, 'Release', 'Podendo ser complementado: de Resultados; de Produtos; de ServiÃ§os');
+      $fnCadastrar(124, 'RepresentaÃ§Ã£o', 'Podendo ser complementado: Comercial; Processual; Fiscal');
+      $fnCadastrar(125, 'Requerimento', 'Podendo ser complementado: Administrativo; de AdaptaÃ§Ã£o; de AlteraÃ§Ã£o TÃ©cnica; de AlteraÃ§Ã£o TÃ©cnica; de Autocadastramento de EstaÃ§Ã£o; de Licenciamento de EstaÃ§Ã£o; de ServiÃ§o de TelecomunicaÃ§Ãµes');
+      $fnCadastrar(126, 'RequisiÃ§Ã£o', 'Podendo ser complementado: de Auditoria; de ExclusÃ£o; de Segunda Via');
+      $fnCadastrar(127, 'ResoluÃ§Ã£o', 'Expressa decisÃ£o quanto ao provimento normativo que regula a implementaÃ§Ã£o da polÃ­tica de telecomunicaÃ§Ãµes brasileira, a prestaÃ§Ã£o dos serviÃ§os de telecomunicaÃ§Ãµes, a administraÃ§Ã£o dos recursos Ã  prestaÃ§Ã£o e o funcionamento da AgÃªncia.');
+      $fnCadastrar(128, 'Resumo', 'Podendo ser complementado: TÃ©cnico');
+      $fnCadastrar(129, 'Roteiro', 'Podendo ser complementado: de InstalaÃ§Ã£o; de InspeÃ§Ã£o');
+      $fnCadastrar(130, 'SentenÃ§a', 'Podendo ser complementado: de MÃ©rito; Terminativa; DeclaratÃ³ria; Constitutiva; CondenatÃ³ria; Mandamental; Executiva');
+      $fnCadastrar(131, 'Sinopse', 'Podendo ser complementado: do Livro; do Estudo TÃ©cnico');
+      $fnCadastrar(132, 'SolicitaÃ§Ã£o', 'Podendo ser complementado: de Pagamento');
+      $fnCadastrar(133, 'SÃºmula', 'Expressa decisÃ£o quanto Ã  interpretaÃ§Ã£o da legislaÃ§Ã£o de telecomunicaÃ§Ãµes e fixa entendimento sobre matÃ©rias de competÃªncia da AgÃªncia, com efeito vinculativo.');
+      $fnCadastrar(134, 'Tabela', 'Podendo ser complementado: de Visto; de Passaporte; de CertidÃ£o');
+      $fnCadastrar(135, 'Telegrama', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(136, 'Termo', 'Podendo ser complementado: de OpÃ§Ã£o por AuxÃ­lio Financeiro; de OpÃ§Ã£o para ContribuiÃ§Ã£o ao CPSS; de ConciliaÃ§Ã£o; de DevoluÃ§Ã£o; de DoaÃ§Ã£o; de Recebimento; de RescisÃ£o; de Compromisso de EstÃ¡gio; de RepresentaÃ§Ã£o; de Responsabilidade de InstalaÃ§Ã£o - TRI');
       $fnCadastrar(137, 'Tese', 'Podendo ser complementado: de Doutorado');
       $fnCadastrar(138, 'Testamento', 'Podendo ser complementado: Particular; Vital; Cerrado; Conjuntivo');
-      $fnCadastrar(139, 'Título', 'Podendo ser complementado: de Eleitor; Público; de Capitalização');
-      $fnCadastrar(140, 'Voto', 'Espécie própria');
-      $fnCadastrar(141, 'Carteira', 'Podendo ser complementado: Nacional de Habilitação');
-      $fnCadastrar(142, 'Cartão', 'Podendo ser complementado: de Identificação');
-      $fnCadastrar(143, 'CPF/CIC', 'Espécie própria');
-      $fnCadastrar(144, 'CNPJ', 'Espécie própria');
-      $fnCadastrar(145, 'Calendário', 'Podendo ser complementado: de Reuniões');
+      $fnCadastrar(139, 'TÃ­tulo', 'Podendo ser complementado: de Eleitor; PÃºblico; de CapitalizaÃ§Ã£o');
+      $fnCadastrar(140, 'Voto', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(141, 'Carteira', 'Podendo ser complementado: Nacional de HabilitaÃ§Ã£o');
+      $fnCadastrar(142, 'CartÃ£o', 'Podendo ser complementado: de IdentificaÃ§Ã£o');
+      $fnCadastrar(143, 'CPF/CIC', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(144, 'CNPJ', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(145, 'CalendÃ¡rio', 'Podendo ser complementado: de ReuniÃµes');
       $fnCadastrar(146, 'CNH', 'CNH');
       $fnCadastrar(147, 'RG', 'RG');
-      $fnCadastrar(148, 'Agenda', 'Podendo ser complementado: de Reunião');
-      $fnCadastrar(149, 'Análise', 'Como Documento Externo pode ser complementado: Contábil');
-      $fnCadastrar(150, 'Anotação', 'Podendo ser complementado: de Responsabilidade Técnica - ART');
-      $fnCadastrar(151, 'Áudio', 'Podendo ser complementado: de Reunião');
-      $fnCadastrar(152, 'Boleto', 'Podendo ser complementado: de Pagamento; de Cobrança; de Cobrança Registrada; de Cobrança sem Registro');
-      $fnCadastrar(153, 'Conta', 'Podendo ser complementado: Telefônica; de Água; de Luz');
-      $fnCadastrar(154, 'Contrarrazões', 'Podendo ser complementado: em Recurso; em Apelação; em Embargos Infringentes');
-      $fnCadastrar(155, 'Correspondência', 'Espécie própria');
-      $fnCadastrar(156, 'Cota', 'Tipo de Documento próprio da AGU.');
-      $fnCadastrar(157, 'Credencial', 'Podendo ser complementado: de Segurança; de Agente de Fiscalização');
+      $fnCadastrar(148, 'Agenda', 'Podendo ser complementado: de ReuniÃ£o');
+      $fnCadastrar(149, 'AnÃ¡lise', 'Como Documento Externo pode ser complementado: ContÃ¡bil');
+      $fnCadastrar(150, 'AnotaÃ§Ã£o', 'Podendo ser complementado: de Responsabilidade TÃ©cnica - ART');
+      $fnCadastrar(151, 'Ãudio', 'Podendo ser complementado: de ReuniÃ£o');
+      $fnCadastrar(152, 'Boleto', 'Podendo ser complementado: de Pagamento; de CobranÃ§a; de CobranÃ§a Registrada; de CobranÃ§a sem Registro');
+      $fnCadastrar(153, 'Conta', 'Podendo ser complementado: TelefÃ´nica; de Ãgua; de Luz');
+      $fnCadastrar(154, 'ContrarrazÃµes', 'Podendo ser complementado: em Recurso; em ApelaÃ§Ã£o; em Embargos Infringentes');
+      $fnCadastrar(155, 'CorrespondÃªncia', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(156, 'Cota', 'Tipo de Documento prÃ³prio da AGU.');
+      $fnCadastrar(157, 'Credencial', 'Podendo ser complementado: de SeguranÃ§a; de Agente de FiscalizaÃ§Ã£o');
       $fnCadastrar(158, 'Croqui', 'Podendo ser complementado: de Acesso, Urbano');
       $fnCadastrar(159, 'Defesa', 'Podendo ser complementado: Administrativa; Judicial');
-      $fnCadastrar(160, 'Demonstração', 'Podendo ser complementado: de Resultado do Exercício - DRE; de Fluxo de Caixa; Financeira; Contábil');
-      $fnCadastrar(161, 'Denúncia', 'Espécie própria');
-      $fnCadastrar(162, 'Esclarecimento', 'Espécie própria utilizada em Licitação $fnCadastrar(ComprasNet);');
-      $fnCadastrar(163, 'Escrituração', 'Podendo ser complementado: Contábil Digital - ECD; Fiscal Digital - EFD; Fiscal Digital - EFD-Contribuições');
-      $fnCadastrar(164, 'Estratégia', 'Podendo ser complementado: da Contratação');
-      $fnCadastrar(165, 'Impugnação', 'Espécie própria utilizada em Licitação $fnCadastrar(ComprasNet);');
-      $fnCadastrar(166, 'Informação', 'Tipo de Documento próprio da AGU.');
-      $fnCadastrar(167, 'Intenção', 'Podendo ser complementado: de Recurso; de Compra; de Venda');
-      $fnCadastrar(168, 'Licença', 'Podendo ser complementado: de Estação');
-      $fnCadastrar(169, 'Matéria', 'Podendo ser complementado: para Apreciação');
-      $fnCadastrar(170, 'Material', 'Podendo ser complementado: Publicitário; de Evento; de Promoção');
-      $fnCadastrar(171, 'Memória', 'Podendo ser complementado: de Cálculo');
-      $fnCadastrar(172, 'Movimentação', 'Podendo ser complementado: de Bens Móveis');
-      $fnCadastrar(173, 'Pedido', 'Podendo ser complementado: de Reconsideração; de Esclarecimento');
-      $fnCadastrar(174, 'Reclamação', 'Espécie própria');
-      $fnCadastrar(175, 'Referendo', 'Espécie própria');
-      $fnCadastrar(176, 'Resultado', 'Podendo ser complementado: de Exame Médico; de Contestação');
-      $fnCadastrar(177, 'Vídeo', 'Podendo ser complementado: de Reunião');
+      $fnCadastrar(160, 'DemonstraÃ§Ã£o', 'Podendo ser complementado: de Resultado do ExercÃ­cio - DRE; de Fluxo de Caixa; Financeira; ContÃ¡bil');
+      $fnCadastrar(161, 'DenÃºncia', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(162, 'Esclarecimento', 'EspÃ©cie prÃ³pria utilizada em LicitaÃ§Ã£o $fnCadastrar(ComprasNet);');
+      $fnCadastrar(163, 'EscrituraÃ§Ã£o', 'Podendo ser complementado: ContÃ¡bil Digital - ECD; Fiscal Digital - EFD; Fiscal Digital - EFD-ContribuiÃ§Ãµes');
+      $fnCadastrar(164, 'EstratÃ©gia', 'Podendo ser complementado: da ContrataÃ§Ã£o');
+      $fnCadastrar(165, 'ImpugnaÃ§Ã£o', 'EspÃ©cie prÃ³pria utilizada em LicitaÃ§Ã£o $fnCadastrar(ComprasNet);');
+      $fnCadastrar(166, 'InformaÃ§Ã£o', 'Tipo de Documento prÃ³prio da AGU.');
+      $fnCadastrar(167, 'IntenÃ§Ã£o', 'Podendo ser complementado: de Recurso; de Compra; de Venda');
+      $fnCadastrar(168, 'LicenÃ§a', 'Podendo ser complementado: de EstaÃ§Ã£o');
+      $fnCadastrar(169, 'MatÃ©ria', 'Podendo ser complementado: para ApreciaÃ§Ã£o');
+      $fnCadastrar(170, 'Material', 'Podendo ser complementado: PublicitÃ¡rio; de Evento; de PromoÃ§Ã£o');
+      $fnCadastrar(171, 'MemÃ³ria', 'Podendo ser complementado: de CÃ¡lculo');
+      $fnCadastrar(172, 'MovimentaÃ§Ã£o', 'Podendo ser complementado: de Bens MÃ³veis');
+      $fnCadastrar(173, 'Pedido', 'Podendo ser complementado: de ReconsideraÃ§Ã£o; de Esclarecimento');
+      $fnCadastrar(174, 'ReclamaÃ§Ã£o', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(175, 'Referendo', 'EspÃ©cie prÃ³pria');
+      $fnCadastrar(176, 'Resultado', 'Podendo ser complementado: de Exame MÃ©dico; de ContestaÃ§Ã£o');
+      $fnCadastrar(177, 'VÃ­deo', 'Podendo ser complementado: de ReuniÃ£o');
 
 
       //----------------------------------------------------------------------
@@ -955,15 +955,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      //TODO: Corrigir mensagem com português errado
-      $fnCadastrar('Processo trâmitado externamente para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_EXPEDIDO');
+      //TODO: Corrigir mensagem com portuguÃªs errado
+      $fnCadastrar('Processo trÃ¢mitado externamente para a entidade @UNIDADE_DESTINO@ - @REPOSITORIO_DESTINO@ (@PROCESSO@, @UNIDADE@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_EXPEDIDO');
       $fnCadastrar('Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_RECEBIDO');
-      $fnCadastrar('O processo foi recusado pelo orgão @UNIDADE_DESTINO@ pelo seguinte motivo: @MOTIVO@', 'S', 'S', 'N', 'N', 'S', 'PEN_PROCESSO_RECUSADO');
-      $fnCadastrar('Trâmite externo do processo cancelado em @DATA_HORA@ pelo Usuário @USUARIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_CANCELADO');
+      $fnCadastrar('O processo foi recusado pelo orgÃ£o @UNIDADE_DESTINO@ pelo seguinte motivo: @MOTIVO@', 'S', 'S', 'N', 'N', 'S', 'PEN_PROCESSO_RECUSADO');
+      $fnCadastrar('TrÃ¢mite externo do processo cancelado em @DATA_HORA@ pelo UsuÃ¡rio @USUARIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_CANCELADO');
       $fnCadastrar('Operacao externa de @OPERACAO@ registrada em @DATA_HORA@ (@PESSOA_IDENTIFICACAO@ - @PESSOA_NOME@)\n @COMPLEMENTO@', 'S', 'S', 'S', 'S', 'N', 'PEN_OPERACAO_EXTERNA');
 
       //----------------------------------------------------------------------
-      // Operações por Tarefas
+      // OperaÃ§Ãµes por Tarefas
       //----------------------------------------------------------------------
       $objDTO = new RelTarefaOperacaoDTO();
 
@@ -978,7 +978,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      //$fnCadastrar("01", 0);// Registro (Padrão);
+      //$fnCadastrar("01", 0);// Registro (PadrÃ£o);
       $fnCadastrar("02", 32); //  Envio de documento avulso/processo ($TI_PROCESSO_REMETIDO_UNIDADE = 32;);
       $fnCadastrar("03", 51); //  Cancelamento/exclusao ou envio de documento ($TI_CANCELAMENTO_DOCUMENTO = 51;);
       $fnCadastrar("04", 13); //  Recebimento de documento ($TI_RECEBIMENTO_DOCUMENTO = 13;);
@@ -1016,9 +1016,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'Verificação dos serviços de fila de processamento estão em execução');
+      $fnCadastrar('PENAgendamentoRN::seiVerificarServicosBarramento', 'VerificaÃ§Ã£o dos serviÃ§os de fila de processamento estÃ£o em execuÃ§Ã£o');
 
-      /* ---------- antigo método (instalarV002R003S000US024) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV002R003S000US024) ---------- */
 
       $objMetaBD->criarTabela(array(
           'tabela' => 'md_pen_tramite_processado',
@@ -1035,7 +1035,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraParametro->setValor('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3');
 
 
-      /* ---------- antigo método (instalarV002R003S000IW001) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV002R003S000IW001) ---------- */
 
       $objDTO = new TarefaDTO();
       $objBD = new TarefaBD($objInfraBanco);
@@ -1063,7 +1063,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $fnAlterar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@');
 
-      /* ---------- antigo método (instalarV002R003S001US035) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV002R003S001US035) ---------- */
       $objMetaBanco = $this->inicializarObjMetaBanco();
 
     if (!$objMetaBanco->isColunaExiste('md_pen_tramite_processado', 'tipo_tramite_processo')) {
@@ -1077,10 +1077,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraMetaBD->adicionarChavePrimaria("md_pen_tramite_processado", "pk_md_pen_tramite_processado", array('id_tramite', 'tipo_tramite_processo'));
     }
 
-      /* ---------- antigo método (instalarV003R003S003IW001) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV003R003S003IW001) ---------- */
 
       //----------------------------------------------------------------------
-      // Novas sequências
+      // Novas sequÃªncias
       //----------------------------------------------------------------------
       $objInfraSequencia = new InfraSequencia($objInfraBanco);
 
@@ -1170,7 +1170,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objMetaBD->removerTabela('md_pen_rel_serie_especie');
     }
 
-      /* ---------- antigo método (instalarV004R003S003IW002) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV004R003S003IW002) ---------- */
 
       $strTipo = $this->inicializarObjMetaBanco()->tipoTextoGrande();
       $objMetaBanco->adicionarColuna('md_pen_recibo_tramite', 'cadeia_certificado_temp', $strTipo, PenMetaBD::SNULLO);
@@ -1194,7 +1194,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
     }
 
-      /* ---------- antigo método (instalarV005R003S005IW018) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV005R003S005IW018) ---------- */
       $objBD = new TarefaBD(BancoSEI::getInstance());
       $objDTO = new TarefaDTO();
 
@@ -1223,9 +1223,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      $fnCadastrar('O trâmite externo do processo foi abortado manualmente devido a falha no trâmite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
+      $fnCadastrar('O trÃ¢mite externo do processo foi abortado manualmente devido a falha no trÃ¢mite', 'S', 'S', 'N', 'N', 'S', 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
 
-      /* ---------- antigo método (instalarV005R003S005IW023) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV005R003S005IW023) ---------- */
       $objBD = new TarefaBD(BancoSEI::getInstance());
 
       $objDTO = new TarefaDTO();
@@ -1246,16 +1246,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objBD->alterar($objTarefaDTO);
         }
       };
-      // Tramitação externa do processo @processo@ concluída com sucesso. Recebido na @UnidadeDestino@ - @hierarquia_superior@ -@repositório_de_estruturas@
-      $fnAtualizar('PEN_PROCESSO_EXPEDIDO', 'Processo em tramitação externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
+      // TramitaÃ§Ã£o externa do processo @processo@ concluÃ­da com sucesso. Recebido na @UnidadeDestino@ - @hierarquia_superior@ -@repositÃ³rio_de_estruturas@
+      $fnAtualizar('PEN_PROCESSO_EXPEDIDO', 'Processo em tramitaÃ§Ã£o externa para @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
       $fnAtualizar('PEN_PROCESSO_RECEBIDO', 'Processo recebido da unidade externa @ENTIDADE_ORIGEM@ - @ENTIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@');
-      $fnAtualizar('PEN_OPERACAO_EXTERNA', 'Tramitação externa do processo @PROTOCOLO_FORMATADO@ concluída com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
+      $fnAtualizar('PEN_OPERACAO_EXTERNA', 'TramitaÃ§Ã£o externa do processo @PROTOCOLO_FORMATADO@ concluÃ­da com sucesso. Recebido em @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@');
 
-      /* ---------- antigo método (instalarV006R004S004WI001) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV006R004S004WI001) ---------- */
       $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
       $objInfraParametro->setValor('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', 50);
 
-      /* ---------- antigo método (instalarV007R004S005WI002) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV007R004S005WI002) ---------- */
 
       $objMetaBD->criarTabela(array(
           'tabela' => 'md_pen_recibo_tramite_hash',
@@ -1289,7 +1289,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
   }
 
-    /* Contêm atualizações da versao 1.0.1 do modulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.0.1 do modulo */
   protected function instalarV101()
     {
       $objBD = new TarefaBD(BancoSEI::getInstance());
@@ -1305,7 +1305,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $objBD->alterar($objTarefaDTO);
 
-      /* ---------- antigo método (instalarV006R004S001US039) ---------- */
+      /* ---------- antigo mÃ©todo (instalarV006R004S001US039) ---------- */
       $objMetaBD = $this->inicializarObjMetaBanco();
       $objInfraBanco = BancoSEI::getInstance();
 
@@ -1383,35 +1383,35 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'Verificação se há novas hipóteses legais do barramento.');
+      $fnCadastrar('PENAgendamentoRN::atualizarHipotesesLegais', 'VerificaÃ§Ã£o se hÃ¡ novas hipÃ³teses legais do barramento.');
 
       $this->atualizarNumeroVersao("1.0.1");
   }
 
-    /* Contêm atualizações da versao 1.1.0 do modulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.0 do modulo */
   protected function instalarV110()
     {
       $objMetaBD = $this->objMeta;
 
-      //Adiciona a coluna de indentificação nas hipóteses que vem do barramento
+      //Adiciona a coluna de indentificaÃ§Ã£o nas hipÃ³teses que vem do barramento
       $objMetaBD->adicionarColuna('md_pen_hipotese_legal', 'identificacao', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
 
-      //Adiciona a coluna de descricao nos parâmetros
+      //Adiciona a coluna de descricao nos parÃ¢metros
       $objMetaBD->adicionarColuna('md_pen_parametro', 'descricao', $this->inicializarObjMetaBanco()->tipoTextoVariavel(255), PenMetaBD::SNULLO);
 
-      //Cria os parâmetros do módulo PEN barramento (md_pen_parametro [ nome, valor ])
-      $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v3/', 'Endereço do Web Service');
-      $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'Endereço do Web Service de Pendências');
-      $this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de Notificação de Recebimento');
-      $this->criarParametro('PEN_ID_REPOSITORIO_ORIGEM', '1', 'ID do Repositório de Origem');
-      $this->criarParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL', '/opt/sei/config/mod-pen/certificado.pem', 'Localização do Certificado Digital');
-      $this->criarParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3', 'Número Máximo de Tentativas de Recebimento');
+      //Cria os parÃ¢metros do mÃ³dulo PEN barramento (md_pen_parametro [ nome, valor ])
+      $this->criarParametro('PEN_ENDERECO_WEBSERVICE', 'https://pen-api.trafficmanager.net/interoperabilidade/soap/v3/', 'EndereÃ§o do Web Service');
+      $this->criarParametro('PEN_ENDERECO_WEBSERVICE_PENDENCIAS', 'https://pen-pendencias.trafficmanager.net/', 'EndereÃ§o do Web Service de PendÃªncias');
+      $this->criarParametro('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO', 'N', 'Envia E-mail de NotificaÃ§Ã£o de Recebimento');
+      $this->criarParametro('PEN_ID_REPOSITORIO_ORIGEM', '1', 'ID do RepositÃ³rio de Origem');
+      $this->criarParametro('PEN_LOCALIZACAO_CERTIFICADO_DIGITAL', '/opt/sei/config/mod-pen/certificado.pem', 'LocalizaÃ§Ã£o do Certificado Digital');
+      $this->criarParametro('PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO', '3', 'NÃºmero MÃ¡ximo de Tentativas de Recebimento');
       $this->criarParametro('PEN_SENHA_CERTIFICADO_DIGITAL', '1234', 'Senha do Certificado Digital');
-      $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho Máximo de Documento Expedido');
+      $this->criarParametro('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO', '50', 'Tamanho MÃ¡ximo de Documento Expedido');
       $this->criarParametro('PEN_TIPO_PROCESSO_EXTERNO', '', 'Tipo de Processo Externo');
       $this->criarParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO', '', 'Unidade Geradora de Processo e Documento Recebido');
 
-      //Deleta os parâmetros do infra_parametros
+      //Deleta os parÃ¢metros do infra_parametros
       $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE');
       $this->deletaParametroInfra('PEN_ENDERECO_WEBSERVICE_PENDENCIAS');
       $this->deletaParametroInfra('PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO');
@@ -1430,34 +1430,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objBD = new PenParametroBD(BancoSEI::getInstance());
       $objDTO = $objBD->consultar($objDTO);
     if ($objDTO) {
-        $objDTO->setStrDescricao('Hipótese Legal Padrão');
+        $objDTO->setStrDescricao('HipÃ³tese Legal PadrÃ£o');
         $objBD->alterar($objDTO);
     } else {
         $objDTO = new PenParametroDTO();
         $objDTO->setStrNome('HIPOTESE_LEGAL_PADRAO');
         $objDTO->setStrValor(1);
-        $objDTO->setStrDescricao('Hipótese Legal Padrão');
+        $objDTO->setStrDescricao('HipÃ³tese Legal PadrÃ£o');
         $objBD->cadastrar($objDTO);
     }
 
       $this->atualizarNumeroVersao("1.1.0");
   }
 
-    /* Contêm atualizações da versao 1.1.1 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.1 do mÃ³dulo */
   protected function instalarV111()
     {
 
-      //Ajuste em nome da variável de versão do módulo VERSAO_MODULO_PEN
+      //Ajuste em nome da variÃ¡vel de versÃ£o do mÃ³dulo VERSAO_MODULO_PEN
       BancoSEI::getInstance()->executarSql("update infra_parametro set nome = '" . PENIntegracao::PARAMETRO_VERSAO_MODULO . "' where nome = '" . PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO . "'");
 
       $this->atualizarNumeroVersao("1.1.1");
   }
 
-    /* Contêm atualizações da versao 1.1.7 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.7 do mÃ³dulo */
   protected function instalarV117()
     {
 
-      /* Cadastramento de novas espécies documentais */
+      /* Cadastramento de novas espÃ©cies documentais */
       $objEspecieDocumentalBD = new EspecieDocumentalBD(BancoSEI::getInstance());
       $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
 
@@ -1466,36 +1466,36 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $objEspecieDocumentalDTO->setDblIdEspecie($dblIdEspecie);
         if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
             $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
-            // Descrição da espécie documental não mais necessária a partir da versão 2.0.0
+            // DescriÃ§Ã£o da espÃ©cie documental nÃ£o mais necessÃ¡ria a partir da versÃ£o 2.0.0
             //$objEspecieDocumentalDTO->setStrDescricao($strDescricao);
             $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
         }
       };
 
-      $fnCadastrar(178, 'Alegações', 'Muito comum no Judiciário, tendo previsão no CPC. Podendo ser complementado "Finais", o que representaria o documento "Alegações Finais".');
-      $fnCadastrar(179, 'Anexo', 'Documento ou processo juntado em caráter definitivo a outro processo, para dar continuidade a uma ação administrativa.');
-      $fnCadastrar(180, 'Documento', 'Informação registrada, qualquer que seja o suporte ou formato, que não está reunida e ordenada em processo.');
-      $fnCadastrar(181, 'Apartado', 'Apartado por si só, autos apartados ou partado sigiloso.');
-      $fnCadastrar(182, 'Apresentação', 'Documentos que são apresentações propriamente ditas.');
-      $fnCadastrar(183, 'Diagnóstico', 'Diagnóstico médico, auditoria, etc.');
-      $fnCadastrar(184, 'Exame', 'Exame laboratorial, médico, etc.');
-      $fnCadastrar(185, 'Página', 'Página do Diário Oficial da União.');
-      $fnCadastrar(186, 'Estudo', 'Podendo ser complementado com "Técnico Preliminar da Contratação"; "Técnico".');
-      $fnCadastrar(999, 'Outra', 'Outras espécies documentais não identificadas.');
+      $fnCadastrar(178, 'AlegaÃ§Ãµes', 'Muito comum no JudiciÃ¡rio, tendo previsÃ£o no CPC. Podendo ser complementado "Finais", o que representaria o documento "AlegaÃ§Ãµes Finais".');
+      $fnCadastrar(179, 'Anexo', 'Documento ou processo juntado em carÃ¡ter definitivo a outro processo, para dar continuidade a uma aÃ§Ã£o administrativa.');
+      $fnCadastrar(180, 'Documento', 'InformaÃ§Ã£o registrada, qualquer que seja o suporte ou formato, que nÃ£o estÃ¡ reunida e ordenada em processo.');
+      $fnCadastrar(181, 'Apartado', 'Apartado por si sÃ³, autos apartados ou partado sigiloso.');
+      $fnCadastrar(182, 'ApresentaÃ§Ã£o', 'Documentos que sÃ£o apresentaÃ§Ãµes propriamente ditas.');
+      $fnCadastrar(183, 'DiagnÃ³stico', 'DiagnÃ³stico mÃ©dico, auditoria, etc.');
+      $fnCadastrar(184, 'Exame', 'Exame laboratorial, mÃ©dico, etc.');
+      $fnCadastrar(185, 'PÃ¡gina', 'PÃ¡gina do DiÃ¡rio Oficial da UniÃ£o.');
+      $fnCadastrar(186, 'Estudo', 'Podendo ser complementado com "TÃ©cnico Preliminar da ContrataÃ§Ã£o"; "TÃ©cnico".');
+      $fnCadastrar(999, 'Outra', 'Outras espÃ©cies documentais nÃ£o identificadas.');
 
       $this->atualizarNumeroVersao("1.1.7");
   }
 
-    /* Contêm atualizações da versao 1.1.8 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.8 do mÃ³dulo */
   protected function instalarV118()
     {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-      //Correção de chave primária para considerar campo de tipo de recibo
+      //CorreÃ§Ã£o de chave primÃ¡ria para considerar campo de tipo de recibo
       $this->excluirChavePrimariaComIndice('md_pen_tramite_processado', 'pk_md_pen_tramite_processado');
       $objInfraMetaBD->adicionarChavePrimaria('md_pen_tramite_processado', 'pk_md_pen_tramite_processado', array('id_tramite', 'tipo_tramite_processo'));
 
-      //Atribuição de dados da unidade de origem e destino no trâmite
+      //AtribuiÃ§Ã£o de dados da unidade de origem e destino no trÃ¢mite
       $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'id_repositorio_origem', $objInfraMetaBD->tipoNumero(16), 'null');
       $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'id_estrutura_origem', $objInfraMetaBD->tipoNumero(16), 'null');
       $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'id_repositorio_destino', $objInfraMetaBD->tipoNumero(16), 'null');
@@ -1504,20 +1504,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.1.8");
   }
 
-    /* Contêm atualizações da versao 1.1.9 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.9 do mÃ³dulo */
   protected function instalarV119()
     {
       $this->atualizarNumeroVersao("1.1.9");
   }
 
 
-    /* Contêm atualizações da versao 1.1.10 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.10 do mÃ³dulo */
   protected function instalarV1110()
     {
       $this->atualizarNumeroVersao("1.1.10");
   }
 
-    /* Contêm atualizações da versao 1.1.11 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.11 do mÃ³dulo */
   protected function instalarV1111()
     {
       BancoSEI::getInstance()->executarSql("DELETE FROM participante WHERE EXISTS (SELECT md_pen_processo_eletronico.id_procedimento FROM md_pen_processo_eletronico WHERE md_pen_processo_eletronico.id_procedimento = participante.id_protocolo AND participante.sta_participacao='R')");
@@ -1526,12 +1526,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
 
-    /* Contêm atualizações da versao 1.1.12 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.12 do mÃ³dulo */
   protected function instalarV1112()
     {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-      //[#22] Correção de erro de consistência no recebimento de processos com concorrência
+      //[#22] CorreÃ§Ã£o de erro de consistÃªncia no recebimento de processos com concorrÃªncia
       $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'sta_tipo_tramite', $objInfraMetaBD->tipoTextoFixo(1), 'null');
       $objInfraMetaBD->alterarColuna('md_pen_procedimento_andamento', 'id_procedimento', $objInfraMetaBD->tipoNumeroGrande(), 'null');
       $objInfraMetaBD->adicionarColuna('md_pen_procedimento_andamento', 'numero_registro', $objInfraMetaBD->tipoTextoFixo(16), 'null');
@@ -1562,7 +1562,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.1.12");
   }
 
-    /* Contêm atualizações da versao 1.1.13 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.13 do mÃ³dulo */
   protected function instalarV1113()
     {
 
@@ -1573,7 +1573,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.1.13");
   }
 
-    /* Contêm atualizações da versao 1.1.14 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.14 do mÃ³dulo */
   protected function instalarV1114()
     {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -1583,15 +1583,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       SessaoInfra::setObjInfraSessao(SessaoSEI::getInstance());
       BancoInfra::setObjInfraIBanco(BancoSEI::getInstance());
 
-      //[Fix-35] Correção de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
+      //[Fix-35] CorreÃ§Ã£o de erro de integridade ao retornar mais de um elemento na consulta de mapeamento
       $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_enviado', 'ak1_rel_doc_map_enviado', array('id_serie'), true);
       $objInfraMetaBD->criarIndice('md_pen_rel_doc_map_recebido', 'ak1_rel_doc_map_recebido', array('codigo_especie'), true);
 
-      //30 - Correção de erros de chave duplicada devido a concorrência de transações
+      //30 - CorreÃ§Ã£o de erros de chave duplicada devido a concorrÃªncia de transaÃ§Ãµes
       $objInfraSequenciaRN = new InfraSequenciaRN();
       $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
-      //Sequência: md_pen_seq_procedimento_andam
+      //SequÃªncia: md_pen_seq_procedimento_andam
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_andamento) as total from md_pen_procedimento_andamento');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1604,7 +1604,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
 
-      //Sequência: md_pen_seq_hipotese_legal
+      //SequÃªncia: md_pen_seq_hipotese_legal
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_hipotese_legal) as total from md_pen_hipotese_legal');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1617,7 +1617,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
 
-      //Sequência: md_pen_seq_rel_hipotese_legal
+      //SequÃªncia: md_pen_seq_rel_hipotese_legal
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_hipotese_legal');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1630,7 +1630,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
 
-      //Sequência: md_pen_seq_recibo_tramite_hash
+      //SequÃªncia: md_pen_seq_recibo_tramite_hash
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_tramite_hash) as total from md_pen_recibo_tramite_hash');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1642,7 +1642,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-      //Sequência: md_pen_seq_rel_doc_map_enviado
+      //SequÃªncia: md_pen_seq_rel_doc_map_enviado
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_enviado');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1654,7 +1654,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-      //Sequência: md_pen_seq_rel_doc_map_recebid
+      //SequÃªncia: md_pen_seq_rel_doc_map_recebid
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_mapeamento) as total from md_pen_rel_doc_map_recebido');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1667,7 +1667,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
 
-      //Sequência: md_pen_seq_tramite_pendente
+      //SequÃªncia: md_pen_seq_tramite_pendente
       $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramite_pendente');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -1686,7 +1686,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
 
-    /* Contêm atualizações da versao 1.1.15 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.15 do mÃ³dulo */
   protected function instalarV1115()
     {
 
@@ -1697,7 +1697,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.1.15");
   }
 
-    /* Contêm atualizações da versao 1.1.16 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.16 do mÃ³dulo */
   protected function instalarV1116()
     {
 
@@ -1708,15 +1708,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.1.16");
   }
 
-    /* Contêm atualizações da versao 1.1.17 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.1.17 do mÃ³dulo */
   protected function instalarV1117()
     {
 
-      // Definição de função anônima responsável por realizar as seguintes tarefas:
+      // DefiniÃ§Ã£o de funÃ§Ã£o anÃ´nima responsÃ¡vel por realizar as seguintes tarefas:
       //  (1) Identificar a tarefa com ID conflitante do SEI
       //  (2) Criar nova tarefa identica mas com ID correto dentro das faixas definidas pelo SEI (maior que 1000)
       //  (3) Atualizar o id_tarefa de todas as atividades relacionadas
-      //  (4) Remover a tarefa anterior com ID inválido
+      //  (4) Remover a tarefa anterior com ID invÃ¡lido
       //  (5) Atualizar o campo id_tarefa_modulo com o valor correspondente
       $fnCadastrar = function ($numIdTarefa, $strIdTarefaModulo) {
 
@@ -1731,7 +1731,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         if (isset($objTarefaDTOAntigo)) {
           try {
             // Criar nova tarefa identica mas com ID correto dentro das faixas definidas pelo SEI (maior que 1000)
-            InfraDebug::getInstance()->gravar("Duplicando tarefa customizadas $strIdTarefaModulo utilizando o controle de sequência 1000");
+            InfraDebug::getInstance()->gravar("Duplicando tarefa customizadas $strIdTarefaModulo utilizando o controle de sequÃªncia 1000");
             $objTarefaDTO = new TarefaDTO();
             $objTarefaDTO->setNumIdTarefa($numIdTarefa);
             $objTarefaDTO->setStrNome($objTarefaDTOAntigo->getStrNome());
@@ -1748,7 +1748,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $numIdTarefaAnterior = $objTarefaDTOAntigo->getNumIdTarefa();
             BancoSEI::getInstance()->executarSql("UPDATE atividade SET id_tarefa = $numIdTarefa where id_tarefa = $numIdTarefaAnterior");
 
-            // Remover a tarefa anterior com ID inválido
+            // Remover a tarefa anterior com ID invÃ¡lido
             InfraDebug::getInstance()->gravar("Apagando a tarefa anterior $strIdTarefaModulo");
             $objTarefaBD->excluir($objTarefaDTOAntigo);
 
@@ -1776,17 +1776,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar(++$numMaxId, 'PEN_OPERACAO_EXTERNA');
       $fnCadastrar(++$numMaxId, 'PEN_EXPEDICAO_PROCESSO_ABORTADA');
 
-      InfraDebug::getInstance()->gravar('Atualizando sequência das tabelas do sistema');
+      InfraDebug::getInstance()->gravar('Atualizando sequÃªncia das tabelas do sistema');
 
-      //Na versão 3.1.0 do SEI, houve uma mudança na rotina de atualização das sequences do banco de dados,
+      //Na versÃ£o 3.1.0 do SEI, houve uma mudanÃ§a na rotina de atualizaÃ§Ã£o das sequences do banco de dados,
       //deixando de se utilizar a classe VersaoRN para utilizar a nova classe ScriptRN.
-      //Devido a esta mudança, é necessário avaliar qual a atual versão do SEI executar a rotina correta
+      //Devido a esta mudanÃ§a, Ã© necessÃ¡rio avaliar qual a atual versÃ£o do SEI executar a rotina correta
     if (InfraUtil::compararVersoes('3.1.0', "<=", SEI_VERSAO)) {
-        //Procedimento de atualização de sequências compatível com SEI 3.1.X
+        //Procedimento de atualizaÃ§Ã£o de sequÃªncias compatÃ­vel com SEI 3.1.X
         $objScriptRN = new ScriptRN();
         $objScriptRN->atualizarSequencias();
     } else {
-        //Procedimento de atualização de sequências compatível com SEI 3.0.X
+        //Procedimento de atualizaÃ§Ã£o de sequÃªncias compatÃ­vel com SEI 3.0.X
         $objVersaoRN = new VersaoRN();
         $objVersaoRN->atualizarSequencias();
     }
@@ -1795,16 +1795,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
 
-    /* Contêm atualizações da versao 1.2.0 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.0 do mÃ³dulo */
   protected function instalarV1200()
     {
       $this->atualizarNumeroVersao("1.2.0");
   }
 
-    /* Contêm atualizações da versao 1.2.1 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.1 do mÃ³dulo */
   protected function instalarV1201()
     {
-      //Fix-47 - Corrigir erro com mapeamento de espécies documentais da origem
+      //Fix-47 - Corrigir erro com mapeamento de espÃ©cies documentais da origem
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
       $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'codigo_especie', $objInfraMetaBD->tipoNumero(), 'null');
       $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'nome_especie_produtor', $objInfraMetaBD->tipoTextoVariavel(255), 'null');
@@ -1812,37 +1812,37 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.2.1");
   }
 
-    /* Contêm atualizações da versao 1.2.2 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.2 do mÃ³dulo */
   protected function instalarV1202()
     {
       $this->atualizarNumeroVersao("1.2.2");
   }
 
-    /* Contêm atualizações da versao 1.2.3 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.3 do mÃ³dulo */
   protected function instalarV1203()
     {
       $this->atualizarNumeroVersao("1.2.3");
   }
 
-    /* Contêm atualizações da versao 1.2.4 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.4 do mÃ³dulo */
   protected function instalarV1204()
     {
       $this->atualizarNumeroVersao("1.2.4");
   }
 
-    /* Contêm atualizações da versao 1.2.5 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.5 do mÃ³dulo */
   protected function instalarV1205()
     {
       $this->atualizarNumeroVersao("1.2.5");
   }
 
-    /* Contêm atualizações da versao 1.2.6 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.2.6 do mÃ³dulo */
   protected function instalarV1206()
     {
       $this->atualizarNumeroVersao("1.2.6");
   }
 
-    /* Contêm atualizações da versao 1.3.0 do módulo */
+    /* ContÃªm atualizaÃ§Ãµes da versao 1.3.0 do mÃ³dulo */
   protected function instalarV1300()
     {
       //Alterar nomeclatura do recurso
@@ -1853,13 +1853,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objPenParametroDTO = $objPenParametroBD->consultar($objPenParametroDTO);
     if ($objPenParametroDTO) {
         $objPenParametroDTO->setStrValor(10);
-        $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+        $objPenParametroDTO->setStrDescricao('Tamanho mÃ¡ximo de bloco para envio de arquivo');
         $objPenParametroBD->alterar($objPenParametroDTO);
     } else {
         $objPenParametroDTO = new PenParametroDTO();
         $objPenParametroDTO->setStrNome('PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO');
         $objPenParametroDTO->setStrValor(10);
-        $objPenParametroDTO->setStrDescricao('Tamanho máximo de bloco para envio de arquivo');
+        $objPenParametroDTO->setStrDescricao('Tamanho mÃ¡ximo de bloco para envio de arquivo');
         $objPenParametroBD->cadastrar($objPenParametroDTO);
     }
 
@@ -1867,10 +1867,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /**
-     * Método Responsavel por realizar as atualizações na Base de Dados referentes as novas implementações
+     * MÃ©todo Responsavel por realizar as atualizaÃ§Ãµes na Base de Dados referentes as novas implementaÃ§Ãµes
      * Receber/Enviar Documento Avulso
      * Receber/Enviar Multiplos Componentes Digitais
-     * @author Josinaldo Júnior <josenaldo.pedro@gmail.com>
+     * @author Josinaldo JÃºnior <josenaldo.pedro@gmail.com>
      * @throws InfraException
      */
   protected function instalarV1400()
@@ -1904,7 +1904,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $fnCadastrar('Documento recebido da entidade @ENTIDADE_ORIGEM@ - @REPOSITORIO_ORIGEM@ (@PROCESSO@, @ENTIDADE_ORIGEM@, @UNIDADE_DESTINO@, @USUARIO@)', 'S', 'S', 'N', 'S', 'N', 'PEN_DOCUMENTO_AVULSO_RECEBIDO');
 
-      // Modificações de Banco referentes a feature 76
+      // ModificaÃ§Ãµes de Banco referentes a feature 76
       $objMetaBD = $this->objMeta;
 
       $objMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
@@ -1912,7 +1912,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       BancoSEI::getInstance()->executarSql("update md_pen_componente_digital set ordem = 1");
       $objMetaBD->alterarColuna('md_pen_componente_digital', 'ordem_documento', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::NNULLO);
 
-      // Adiciona a coluna para identificar se a criação do processo se deu por documento avulso (D) ou processo (P)
+      // Adiciona a coluna para identificar se a criaÃ§Ã£o do processo se deu por documento avulso (D) ou processo (P)
       // Atualizar os registros existentes para P - Tipo Processo
       $objMetaBD->adicionarColuna('md_pen_processo_eletronico', 'sta_tipo_protocolo', $this->inicializarObjMetaBanco()->tipoTextoVariavel(1), PenMetaBD::SNULLO);
       BancoSEI::getInstance()->executarSql("update md_pen_processo_eletronico set sta_tipo_protocolo = 'P'");
@@ -1924,7 +1924,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->excluirChavePrimariaComIndice('md_pen_componente_digital', 'pk_md_pen_componente_digital');
       $objInfraMetaBD->adicionarChavePrimaria('md_pen_componente_digital', 'pk_md_pen_componente_digital', array('numero_registro', 'id_procedimento', 'id_documento', 'id_tramite', 'ordem'));
 
-      // Definição de ordem em que os parâmetros aparecem na página
+      // DefiniÃ§Ã£o de ordem em que os parÃ¢metros aparecem na pÃ¡gina
       $objMetaBD->adicionarColuna('md_pen_parametro', 'sequencia', $this->inicializarObjMetaBanco()->tipoNumero(), PenMetaBD::SNULLO);
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 1 where nome = 'PEN_ENDERECO_WEBSERVICE'");
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 2 where nome = 'PEN_ENDERECO_WEBSERVICE_PENDENCIAS'");
@@ -1936,10 +1936,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 8 where nome = 'PEN_ENVIA_EMAIL_NOTIFICACAO_RECEBIMENTO'");
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = 9 where nome = 'PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO'");
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = null where nome = 'HIPOTESE_LEGAL_PADRAO'");
-      // Este parâmetro passará a ser interno do sistema e será configurado com o valor 5 MB que será o valor fixo utilizado para updaload e download
+      // Este parÃ¢metro passarÃ¡ a ser interno do sistema e serÃ¡ configurado com o valor 5 MB que serÃ¡ o valor fixo utilizado para updaload e download
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set sequencia = null, valor = 5 where nome = 'PEN_TAMANHO_MAXIMO_DOCUMENTO_EXPEDIDO'");
 
-      // Altera o parâmetro da versão de banco
+      // Altera o parÃ¢metro da versÃ£o de banco
       $this->atualizarNumeroVersao("1.4.0");
   }
 
@@ -1947,10 +1947,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-      // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
+      // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptogrÃ¡ficas
       $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
-      // Remove chaves estrangeiras e primárias com supressão de mensagens de erro devido a incompatibilidade de nomes entre diferentes versões do sistema
+      // Remove chaves estrangeiras e primÃ¡rias com supressÃ£o de mensagens de erro devido a incompatibilidade de nomes entre diferentes versÃµes do sistema
       $bolSuprimirError = true;
       $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite", $bolSuprimirError);
       $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram", $bolSuprimirError);
@@ -1964,7 +1964,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraMetaBD->alterarColuna("md_pen_tramite_recibo_envio", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
       $objInfraMetaBD->alterarColuna("md_pen_recibo_tramite_enviado", "hash_assinatura", $objInfraMetaBD->tipoTextoVariavel(1000), "not null");
 
-      // Altera o parâmetro da versão de banco
+      // Altera o parÃ¢metro da versÃ£o de banco
       $this->atualizarNumeroVersao("1.4.1");
   }
 
@@ -1972,10 +1972,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-      // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptográficas
+      // Aumento de tamanho campo de armazenamento do hash dos recibos para contemplar os diferentes tamanhos de chaves criptogrÃ¡ficas
       $this->removerIndicesTabela($objInfraMetaBD, array("md_pen_recibo_tramite_recebido", "md_pen_recibo_tramite", "md_pen_tramite_recibo_envio", "md_pen_recibo_tramite_enviado"));
 
-      // Remove chaves estrangeiras e primárias com supressão de mensagens de erro devido a incompatibilidade de nomes entre diferentes versões do sistema
+      // Remove chaves estrangeiras e primÃ¡rias com supressÃ£o de mensagens de erro devido a incompatibilidade de nomes entre diferentes versÃµes do sistema
       $bolSuprimirError = true;
       $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_tramite_recebido_md_pen_tramite", $bolSuprimirError);
       $this->excluirChaveEstrangeira("md_pen_recibo_tramite_recebido", "fk_md_pen_recibo_receb_tram", $bolSuprimirError);
@@ -2025,7 +2025,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
       $objInfraMetaBD->excluirColuna("md_pen_especie_documental", "descricao");
 
-      // Ajustes em parâmetros de configuração do módulo
+      // Ajustes em parÃ¢metros de configuraÃ§Ã£o do mÃ³dulo
       $objInfraMetaBD->adicionarColuna('md_pen_parametro', 'valor_novo', $objInfraMetaBD->tipoTextoGrande(), 'null');
       BancoSEI::getInstance()->executarSql("update md_pen_parametro set valor_novo = valor");
       $objInfraMetaBD->excluirColuna('md_pen_parametro', 'valor');
@@ -2035,18 +2035,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $objPenParametroDTO = new PenParametroDTO();
       $objPenParametroDTO->setStrNome("PEN_ID_REPOSITORIO_ORIGEM");
-      $objPenParametroDTO->setStrDescricao("Repositório de Estruturas do Órgão");
+      $objPenParametroDTO->setStrDescricao("RepositÃ³rio de Estruturas do Ã“rgÃ£o");
       $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
       $objPenParametroBD->alterar($objPenParametroDTO);
 
       $objPenParametroDTO = new PenParametroDTO();
       $objPenParametroDTO->setStrNome("PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO");
-      $objPenParametroDTO->setStrDescricao("Unidade SEI para Representação de Órgãos Externos");
+      $objPenParametroDTO->setStrDescricao("Unidade SEI para RepresentaÃ§Ã£o de Ã“rgÃ£os Externos");
       $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
       $objPenParametroBD->alterar($objPenParametroDTO);
 
-      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");
-      // Remove agendamento de tarefas de atualização de hipóteses legais
+      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÃ‡ÃƒO DE HIPÃ“TESES LEGAIS E ESPÃ‰CIES DOCUMENTAIS");
+      // Remove agendamento de tarefas de atualizaÃ§Ã£o de hipÃ³teses legais
       $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
       $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
       $objInfraAgendamentoTarefaDTO->setStrComando("PENAgendamentoRN::atualizarHipotesesLegais");
@@ -2056,14 +2056,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
     }
 
-      // Adicionar agendamento de atualização de informações
+      // Adicionar agendamento de atualizaÃ§Ã£o de informaÃ§Ãµes
       $objAgendamentoInformacoesPEN = new InfraAgendamentoTarefaDTO();
       $objAgendamentoInformacoesPEN->setStrComando("PENAgendamentoRN::atualizarInformacoesPEN");
     if ($objInfraAgendamentoTarefaBD->contar($objAgendamentoInformacoesPEN) == 0) {
-        $strDesc = "Atualização de Informações gerais do Barramento para o correto funcionamento do módulo \n\n";
-        $strDesc .= "- Atualização de Hipóteses Legais\n";
-        $strDesc .= "- Atualização de Espécies Documentais\n";
-        $strDesc .= "- Mapeamento de Espécies Documentais com Tipos de Documentos do SEI\n";
+        $strDesc = "AtualizaÃ§Ã£o de InformaÃ§Ãµes gerais do Barramento para o correto funcionamento do mÃ³dulo \n\n";
+        $strDesc .= "- AtualizaÃ§Ã£o de HipÃ³teses Legais\n";
+        $strDesc .= "- AtualizaÃ§Ã£o de EspÃ©cies Documentais\n";
+        $strDesc .= "- Mapeamento de EspÃ©cies Documentais com Tipos de Documentos do SEI\n";
         $objAgendamentoInformacoesPEN->setStrDescricao($strDesc);
         $objAgendamentoInformacoesPEN->setStrStaPeriodicidadeExecucao("S");
         $objAgendamentoInformacoesPEN->setStrPeriodicidadeComplemento("1,2,3,4,5,6,7");
@@ -2072,15 +2072,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraAgendamentoTarefaBD->cadastrar($objAgendamentoInformacoesPEN);
     }
 
-      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA RECEBIMENTO DE PROCESSOS DO BARRAMENTO DO SERVIÇOS DO PEN");
-      // Adicionar agendamento de atualização de informações
+      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA RECEBIMENTO DE PROCESSOS DO BARRAMENTO DO SERVIÃ‡OS DO PEN");
+      // Adicionar agendamento de atualizaÃ§Ã£o de informaÃ§Ãµes
       $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0) {
-        $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
-        $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
-        $strDesc .= " - debug: Indica se o log de debug gerado no processamento será registrado nos logs do sistema (valores: true,false | padrão: false)\n";
-        $strDesc .= " - workers: Quantidade de processos paralelos que serão abertos para processamento de tarefas (valores: 0-9 | padrão: 4)\n";
+        $strDesc = "Recebe as notificaÃ§Ãµes de novos trÃ¢mites de processos/documentos, notificaÃ§Ãµes de conclusÃ£o de trÃ¢mites ou recusas de recebimento de processos por outras instituiÃ§Ãµes. \n\n";
+        $strDesc .= "Este agendamento considera os seguintes parÃ¢metros durante sua execuÃ§Ã£o:\n";
+        $strDesc .= " - debug: Indica se o log de debug gerado no processamento serÃ¡ registrado nos logs do sistema (valores: true,false | padrÃ£o: false)\n";
+        $strDesc .= " - workers: Quantidade de processos paralelos que serÃ£o abertos para processamento de tarefas (valores: 0-9 | padrÃ£o: 4)\n";
         $objReceberProcessosPEN->setStrDescricao($strDesc);
         $objReceberProcessosPEN->setStrStaPeriodicidadeExecucao("N");
         $objReceberProcessosPEN->setStrPeriodicidadeComplemento("0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58");
@@ -2090,7 +2090,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
 
 
-      // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
+      // RemoÃ§Ã£o de agendamento de tarefas do verificaÃ§Ã£o dos serviÃ§os do Barramento por nÃ£o ser mais necessÃ¡rio
       $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
       $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
       $objInfraAgendamentoTarefaDTO->retNumIdInfraAgendamentoTarefa();
@@ -2098,12 +2098,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaDTO->setBolExclusaoLogica(false);
       $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaBD->consultar($objInfraAgendamentoTarefaDTO);
     if (isset($objInfraAgendamentoTarefaDTO)) {
-        $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');
+        $this->logar('Removendo agendamento de verificaÃ§Ã£o de serviÃ§os de integraÃ§Ã£o do Barramento PEN');
         $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
     }
 
-      // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
-      $this->logar("REMOÇÃO DE COLUNAS DE DESATIVAÇÃO DE MAPEAMENTO DE ESPÉCIES NÃO MAIS UTILIZADOS");
+      // RemoÃ§Ã£o de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+      $this->logar("REMOÃ‡ÃƒO DE COLUNAS DE DESATIVAÃ‡ÃƒO DE MAPEAMENTO DE ESPÃ‰CIES NÃƒO MAIS UTILIZADOS");
       $objMetaBD->criarTabela(array(
           'tabela' => 'md_pen_rel_doc_map_enviado_tmp',
           'cols' => array(
@@ -2132,7 +2132,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_enviado (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_enviado_tmp");
       BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_enviado_tmp");
 
-      // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+      // RemoÃ§Ã£o de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
       $objMetaBD->criarTabela(array(
           'tabela' => 'md_pen_rel_doc_map_recebido_tm',
           'cols' => array(
@@ -2161,12 +2161,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       BancoSEI::getInstance()->executarSql("insert into md_pen_rel_doc_map_recebido (id_mapeamento, codigo_especie, id_serie) select id_mapeamento, codigo_especie, id_serie from md_pen_rel_doc_map_recebido_tm");
       BancoSEI::getInstance()->executarSql("drop table md_pen_rel_doc_map_recebido_tm");
 
-      // Atribui automaticamente a espécie documental 999 - Outra como mapeamento padrão de espécies para envio de processo
+      // Atribui automaticamente a espÃ©cie documental 999 - Outra como mapeamento padrÃ£o de espÃ©cies para envio de processo
       PenParametroRN::persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", "999");
 
-      // Remoção de parâmetros do banco de dados do SEI devido a necessidade de migração
-      // para arquivo de configuração do módulo em sei/config/mod-pen/ConfiguracaoModPEN.php
-      $this->logar("REMOÇÃO DE PARÂMETROS DO BANCO DE DADOS DO SEI DEVIDO MIGRAÇÃO PARA ARQUIVO DE CONFIGURAÇÃO");
+      // RemoÃ§Ã£o de parÃ¢metros do banco de dados do SEI devido a necessidade de migraÃ§Ã£o
+      // para arquivo de configuraÃ§Ã£o do mÃ³dulo em sei/config/mod-pen/ConfiguracaoModPEN.php
+      $this->logar("REMOÃ‡ÃƒO DE PARÃ‚METROS DO BANCO DE DADOS DO SEI DEVIDO MIGRAÃ‡ÃƒO PARA ARQUIVO DE CONFIGURAÃ‡ÃƒO");
       $this->removerParametro("PEN_ENDERECO_WEBSERVICE");
       $this->removerParametro("PEN_ENDERECO_WEBSERVICE_PENDENCIAS");
       $this->removerParametro("PEN_SENHA_CERTIFICADO_DIGITAL");
@@ -2174,12 +2174,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->removerParametro("PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO");
 
     try {
-        $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS PEN");
+        $this->logar("ATUALIZANDO LISTA DE HIPÃ“TESES LEGAIS DO BARRAMENTO DE SERVIÃ‡OS PEN");
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarHipotesesLegais();
     } catch (\Exception $th) {
-        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do PEN pois serviço encontra-se inacessível\n";
-        $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+        $strMensagemErroMapeamentoAutomatico = "Aviso: NÃ£o foi possÃ­vel realizar a atualizaÃ§Ã£o automÃ¡tico das hipÃ³teses legais do PEN pois serviÃ§o encontra-se inacessÃ­vel\n";
+        $strMensagemErroMapeamentoAutomatico .= "A atualizaÃ§Ã£o poderÃ¡ ser realizada posteriormente de forma automÃ¡tica pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
     }
 
@@ -2187,16 +2187,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarEspeciesDocumentais();
     } catch (\Exception $th) {
-        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do PEN pois serviço encontra-se inacessível\n";
-        $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
+        $strMensagemErroMapeamentoAutomatico = "Aviso: NÃ£o foi possÃ­vel realizar a atualizaÃ§Ã£o automÃ¡tico das espÃ©cies documentais do PEN pois serviÃ§o encontra-se inacessÃ­vel\n";
+        $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderÃ¡ ser realizado posteriormente de forma automÃ¡tica pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
     }
 
-      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
+      $this->logar("INICIANDO O MAPEAMENTO AUTOMÃTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÃ‰CIES DOCUMENTAIS DO PEN PARA ENVIO");
       $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
       $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
 
-      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
+      $this->logar("INICIANDO O MAPEAMENTO AUTOMÃTICO DAS ESPÃ‰CIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
       $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
       $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
@@ -2270,7 +2270,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
     }
 
-      // Nova coluna para registro de ordem do documento referênciado, apresentado como doc anexado na árvore de processo
+      // Nova coluna para registro de ordem do documento referÃªnciado, apresentado como doc anexado na Ã¡rvore de processo
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
       $objInfraMetaBD->adicionarColuna('md_pen_componente_digital', 'ordem_documento_referenciado', $objInfraMetaBD->tipoNumero(11), 'null');
 
@@ -2347,7 +2347,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           )
       ));
 
-      //Sequência: md_pen_seq_lote
+      //SequÃªncia: md_pen_seq_lote
       $rs = BancoSEI::getInstance()->consultarSql('select max(id_lote) as total from md_pen_expedir_lote');
       $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
@@ -2517,7 +2517,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV3030() {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
-      // Modificação de tipo de dados para a coluna ticket_envio_componentes na tabela md_pen_tramite
+      // ModificaÃ§Ã£o de tipo de dados para a coluna ticket_envio_componentes na tabela md_pen_tramite
       $objInfraMetaBD->adicionarColuna('md_pen_tramite', 'ticket_envio_componentes_temp', $objInfraMetaBD->tipoTextoVariavel(10), 'null');
       BancoSEI::getInstance()->executarSql("update md_pen_tramite set ticket_envio_componentes_temp=ticket_envio_componentes");
       $objInfraMetaBD->excluirColuna('md_pen_tramite', 'ticket_envio_componentes');
@@ -2583,7 +2583,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
-    //Sequência: md_pen_seq_tramita_em_bloco
+    //SequÃªncia: md_pen_seq_tramita_em_bloco
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
@@ -2616,7 +2616,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
-    //Sequência
+    //SequÃªncia
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
@@ -2658,7 +2658,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN = new InfraSequenciaRN();
       $objInfraSequenciaDTO = new InfraSequenciaDTO();
   
-      //Sequência: md_pen_seq_tramita_em_bloco
+      //SequÃªncia: md_pen_seq_tramita_em_bloco
       $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco');
       $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
   
@@ -2686,7 +2686,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         )
       ));
   
-      //Sequência: md_pen_tramita_em_bloco_protocolo
+      //SequÃªncia: md_pen_tramita_em_bloco_protocolo
       $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco_protocolo');
       $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
   
@@ -2712,7 +2712,7 @@ try {
       $objVersaoSeiRN = new VersaoSei4RN();
       $strNomeParametro = $objVersaoSeiRN->verificarVersaoInstalada();
       $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-      $objVersaoSeiRN->setStrNome('Integração Processo Eletrônico Nacional - PEN');
+      $objVersaoSeiRN->setStrNome('IntegraÃ§Ã£o Processo EletrÃ´nico Nacional - PEN');
       $objVersaoSeiRN->setStrVersaoAtual(PENIntegracao::VERSAO_MODULO);
       $objVersaoSeiRN->setStrParametroVersao($strNomeParametro);
       $objVersaoSeiRN->setArrVersoes(array(
@@ -2734,19 +2734,19 @@ try {
       BancoSEI::getInstance()->setBolScript(true);
 
     if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI', 'UsuarioScript')) {
-        throw new InfraException('Chave BancoSEI/UsuarioScript não encontrada.');
+        throw new InfraException('Chave BancoSEI/UsuarioScript nÃ£o encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI', 'UsuarioScript'))) {
-        throw new InfraException('Chave BancoSEI/UsuarioScript não possui valor.');
+        throw new InfraException('Chave BancoSEI/UsuarioScript nÃ£o possui valor.');
     }
 
     if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI', 'SenhaScript')) {
-        throw new InfraException('Chave BancoSEI/SenhaScript não encontrada.');
+        throw new InfraException('Chave BancoSEI/SenhaScript nÃ£o encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI', 'SenhaScript'))) {
-        throw new InfraException('Chave BancoSEI/SenhaScript não possui valor.');
+        throw new InfraException('Chave BancoSEI/SenhaScript nÃ£o possui valor.');
     }
 
       $objAtualizarRN = new PenAtualizarSeiRN();
