@@ -44,8 +44,8 @@ services:
   php-test-functional:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
     depends_on:
-      - org1-database
       - org2-database
+      - org1-database
       - selenium
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
@@ -53,6 +53,11 @@ services:
       - ${SEI_PATH}/infra:/opt/infra
       - ./assets/config:/opt/sei/config/mod-pen
       - .:/tests
+      - ${SEI_PATH}/../tests:/tests/sei
+      - ${SEI_PATH}/../src:/tests/sei/src
+      - ../../src/bd:/tests/sei/modpen/bd
+      - ../../src/dto:/tests/sei/modpen/dto
+      - ../../src/rn:/tests/sei/modpen/rn
       - /tmp:/tmp
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
@@ -66,11 +71,20 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+      - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
+      - DATABASE_HOST=${ORG1_DATABASE_HOST}
+      - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT} 
+      - SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
+      - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
+      - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
+      - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
+      - SIP_DATABASE_USER=${SIP_DATABASE_USER}
+      - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - org1-database:${ORG1_DATABASE_HOST}
-      - org2-database:${ORG2_DATABASE_HOST}
+      - org2-database:${ORG1_DATABASE_HOST}
+      - org1-database:${ORG2_DATABASE_HOST}
       - selenium:selenium
     command: "true"
 
