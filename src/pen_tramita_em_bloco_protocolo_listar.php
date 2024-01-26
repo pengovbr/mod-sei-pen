@@ -174,13 +174,12 @@ try {
       $strResultado .= '<td align="center">' . "\n";
 
       if (!$objTramiteDTO) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Um trâmite para esse processo foi recusado aaaaa" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" title="Em aberto" />';
       } else {
 
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $tramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, null, null, null, null);
         $tramite = $tramites ? $tramites[0] : null;
-
 
         switch ($tramite->situacaoAtual) {
             case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
