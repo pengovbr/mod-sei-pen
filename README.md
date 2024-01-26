@@ -28,12 +28,9 @@ As instruções de instalação e atualização do módulo, assim com o manual d
 
 O mod-sei-pen trata-se de um módulo adicional ao Sistema Eletrônico de Informações (SEI) para adição de novas funcionalidades relacionadas ao trâmite de processos e documentos entre instituições integradas ao Processo Eletrônico Nacional (PEN). Para a sua utilização, é necessário que a instituição possua o sistema SEI e tenha aderido ao Tramita.GOV.BR.
 
-Para informações sobre como aderir ao SEI, acesse: 
-https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/conteudo/sistema-eletronico-de-informacoes-sei
+[Acesse para informações de como aderir ao Tramita.GOV.BR](https://www.gov.br/gestao/pt-br/assuntos/processo-eletronico-nacional/conteudo/tramita.gov.br/tramita-gov.br)
 
-
-Para informações sobre como aderir ao Tramita.GOV.BR, acesse:
-https://www.gov.br/economia/pt-br/assuntos/processo-eletronico-nacional/assuntos/processo-eletronico-nacional-pen
+[Acesse o manual do portal do Tramita gov.br](https://manuais.processoeletronico.gov.br/pt-br/latest/TRAMITA.GOV.BR/index.html)
 
 
 ## CONTRIBUIÇÃO
@@ -42,7 +39,7 @@ Existem diversas formas de colaborar neste projeto:
 
 * Enviar registros de erros ou solicitação de melhorias ([Issues](https://github.com/spbgovbr/mod-sei-pen/issues))
 * Revisar a documentação do projeto e enviar qualquer tipo de contribuição via [Pull Request](https://github.com/spbgovbr/mod-sei-pen/pulls)
-* Ajudar na correção de erros ou melhoria da base de código. Para isto, faça um fork do projeto no GitHub e posteriormente nos envie um [Pull Request](https://github.com/spbgovbr/mod-sei-pen/pulls)
+* Ajudar na correção de erros ou melhoria da base de código. Para isto, faça um fork do projeto no GitHub e posteriormente nos envie um [Pull Request](https://github.com/pengovbr/mod-sei-pen/pulls)
 
 ## DESENVOLVIMENTO
 
