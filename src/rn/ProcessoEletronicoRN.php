@@ -673,6 +673,50 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  /**
+   * Validar qual documento mudou na ordem do processo
+   *
+   * @param int $dblIdProcedimento
+   * @param string $strMensagem
+   * @param array $params
+   * @return string
+   */
+  private function validarMudancaOrdemDocumentos($dblIdProcedimento, $strMensagem, $params = null)
+  {
+    $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+    $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+
+    if (!is_null($numIdTramite) && $numIdTramite > 0) {
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_ALTERACAO_ORDEM_ARVORE);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+
+      $objAtividadeRN = new AtividadeRN();
+      $arrObjAtividadeDTO = $objAtividadeRN->contarRN0035($objAtividadeDTO);
+
+      $msg = "Houve uma alteração na ordem dos documentos no processo, o que impede o reenvio de um processo que já foi tramitado pela plataforma. " .
+      "Portanto, é recomendado reordenar os documentos de acordo com a ordem original. " .
+      "Caso você seja um usuário sem permissão para reordenar o processo, é necessário entrar em contato internamente para identificar quem possui essa permissão.";
+
+      if ($arrObjAtividadeDTO > 0) {
+        $strMensagem = str_replace(
+          'hash de ao menos um componente digital não confere',
+          $msg,
+          $strMensagem
+        );
+      }
+    }
+
+    return $strMensagem;
+  }
+
   private function validarTramitaEmAndamento($parametros, $strMensagem)
     {
     if (strpos($strMensagem, 'já possui trâmite em andamento')) {
