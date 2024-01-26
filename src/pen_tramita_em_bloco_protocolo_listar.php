@@ -174,7 +174,7 @@ try {
       $strResultado .= '<td align="center">' . "\n";
 
       if (!$objTramiteDTO) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Um trâmite para esse processo foi recusado aaaaa" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
       } else {
 
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
