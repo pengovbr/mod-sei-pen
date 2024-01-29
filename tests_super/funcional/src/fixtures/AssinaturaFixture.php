@@ -18,12 +18,22 @@ class AssinaturaFixture extends \FixtureBase
 
     protected function cadastrar($dados = [])
     {
+
+        $objAtividadeFixture = new \AtividadeFixture();
+        $objAtividadeDTO = $objAtividadeFixture->cadastrar(
+            [
+                'IdProtocolo' => $dados['IdProtocolo'],
+                'IdTarefa' => TarefaRN::$TI_ASSINATURA_DOCUMENTO,
+            ]
+        );
+
+
         $dados['IdAssinatura'] = $this->getObjInfraIBanco()->getValorSequencia('seq_assinatura');
 
         $objAssinaturaDTO = new \AssinaturaDTO();
-        // $objAssinaturaDTO->setNumIdAssinatura($dados['IdAssinatura'] ?: null);
+        $objAssinaturaDTO->setNumIdAssinatura($dados['IdAssinatura'] ?: null);
         $objAssinaturaDTO->setDblIdDocumento($dados['IdDocumento'] ?: 4);
-        $objAssinaturaDTO->setNumIdAtividade($dados['IdAtividade'] ?: null);
+        $objAssinaturaDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
         $objAssinaturaDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
         $objAssinaturaDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
         $objAssinaturaDTO->setNumIdTarjaAssinatura($dados['IdTarjaAssinatura'] ?: self::ID_TARJA_ASSINATURA);
@@ -40,14 +50,6 @@ class AssinaturaFixture extends \FixtureBase
         
         $objAssinaturaDB = new \AssinaturaBD(\BancoSEI::getInstance());
         $objAssinaturaDB->cadastrar($objAssinaturaDTO);
-
-        $objAtividadeFixture = new \AtividadeFixture();
-        $objAtividadeDTO = $objAtividadeFixture->cadastrar(
-            [
-                'IdProtocolo' => $dados['IdProtocolo'],
-                'IdTarefa' => TarefaRN::$TI_ASSINATURA_DOCUMENTO,
-            ]
-        );
         
 
         return $objAssinaturaDTO;
