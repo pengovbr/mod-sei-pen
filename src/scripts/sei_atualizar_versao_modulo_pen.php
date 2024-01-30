@@ -2084,7 +2084,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
 
       $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO MÓDULO TRAMITA GOV.BR PARA RECEBIMENTO DE PROCESSOS DO TRAMITA GOV.BR");
-      // Adicionar agendamento de atualização de informações
+     // Adicionar agendamento de atualização de informações
       $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0) {
