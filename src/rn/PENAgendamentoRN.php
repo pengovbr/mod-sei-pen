@@ -58,7 +58,7 @@ class PENAgendamentoRN extends InfraRN
         }
       }
 
-        LogSEI::getInstance()->gravar("Hipóteses Legais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
+        LogSEI::getInstance()->gravar("Hipóteses Legais do Tramita GOV.BR atualizadas com sucesso.", LogSEI::$INFORMACAO);
     } catch (Exception $e) {
         throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
     }
@@ -132,7 +132,7 @@ class PENAgendamentoRN extends InfraRN
         }
       }
 
-        LogSEI::getInstance()->gravar("Espécies Documentais do PEN atualizadas com sucesso.", LogSEI::$INFORMACAO);
+        LogSEI::getInstance()->gravar("Espécies Documentais do Tramita GOV.BR atualizadas com sucesso.", LogSEI::$INFORMACAO);
     } catch (Exception $e) {
         throw new InfraException('Erro no agendamento de atualização de Hipóteses Legais', $e);
     }

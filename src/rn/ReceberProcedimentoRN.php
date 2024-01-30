@@ -360,7 +360,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->gravarLogDebug("Solicitando dados do trâmite " . $parNumIdentificacaoTramite, 1);
       $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
     if(!isset($arrObjTramite) || !array_key_exists(0, $arrObjTramite)){
-        throw new InfraException("Não foi encontrado no PEN o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        throw new InfraException("Não foi encontrado no Tramita GOV.BR o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
     }
 
       $objTramite = $arrObjTramite[0];
@@ -527,7 +527,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objPenProtocoloBD->alterar($objPenProtocolo);
       }
 
-        $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $numIdTramite, 2);
+        $this->gravarLogDebug("Notificando serviços do Tramita GOV.BR sobre ciência da recusa do trâmite " . $numIdTramite, 2);
         $this->objProcessoEletronicoRN->cienciaRecusa($numIdTramite);
 
     } catch (Exception $e) {
@@ -821,7 +821,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           $strProtocoloFormatado = $arrObjProcessoEletronicoDTOIndexado[$dblIdProcedimento]->getStrProtocoloProcedimentoFormatado();
         if($strProtocoloFormatado !== $parStrProtocolo){
-          throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo PEN: $parStrProtocolo)"));
+          throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo Tramita GOV.BR: $parStrProtocolo)"));
         }
       }
     }

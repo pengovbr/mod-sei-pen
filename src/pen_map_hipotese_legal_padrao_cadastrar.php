@@ -11,7 +11,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_hipotese_legal_padrao_cadastrar');
 define('PEN_RECURSO_BASE', 'pen_map_hipotese_legal_padrao');
-define('PEN_PAGINA_TITULO', 'Hipótese de Restrição Padrão - Tramitação PEN');
+define('PEN_PAGINA_TITULO', 'Hipótese de Restrição Padrão - Tramitação Tramita GOV.BR');
 define('PEN_PAGINA_GET_ID', 'id_mapeamento');
 
 

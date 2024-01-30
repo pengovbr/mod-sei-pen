@@ -8,7 +8,7 @@ try {
     session_start();
 
     define('PEN_RECURSO_ATUAL', 'pen_parametros_configuracao');
-    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo de Tramitações PEN');
+    define('PEN_PAGINA_TITULO', 'Parâmetros de Configuração do Módulo de Tramitações Tramita GOV.BR');
 
     $objPagina = PaginaSEI::getInstance();
     $objBanco = BancoSEI::getInstance();
@@ -91,7 +91,7 @@ try {
         die;
 
     case 'pen_parametros_configuracao':
-        $strTitulo = 'Parâmetros de Configuração do Módulo de Tramitações PEN';
+        $strTitulo = 'Parâmetros de Configuração do Módulo de Tramitações Tramita GOV.BR';
         break;
 
     default:

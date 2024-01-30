@@ -179,7 +179,7 @@ function onSubmit() {
     field = jQuery('select[name=id_barramento]', form);
 
     if(field.val() === 'null'){
-        alert('Nenhum "Hipótese Legal PEN" foi selecionado');
+        alert('Nenhum "Hipótese Legal Tramita GOV.BR" foi selecionado');
         field.focus();
         return false;
     }
@@ -200,7 +200,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
         <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
     </select>
 
-    <label for="id_barramento" class="infraLabelObrigatorio input-label-third">Hipótese Legal PEN:</label>
+    <label for="id_barramento" class="infraLabelObrigatorio input-label-third">Hipótese Legal Tramita GOV.BR:</label>
     <select name="id_barramento" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
     </select>
