@@ -156,11 +156,7 @@ try {
       $strResultado .= '<a onclick="infraLimparFormatarTrAcessada(this.parentNode.parentNode);" href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objDTO->getDblIdProtocolo()) . '" target="_blank" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '" class="' . $strClassProtocolo . '" alt="" title="">' . $objDTO->getStrIdxRelBlocoProtocolo() . '</a>';
       $strResultado .= '</td>';
 
-      // $strResultado .= '<td>' . nl2br(InfraString::formatarXML($objDTO->getStrAnotacao())) . '</td>';
-
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
-
-     // print_r($objTramiteDTO); die('aki');
 
       if ($objTramiteDTO) {
         $dataEnvio = $objTramiteDTO->getDthRegistro();
@@ -173,10 +169,7 @@ try {
 
       $strResultado .= '<td align="center">' . "\n";
 
-      if (!$objTramiteDTO) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" title="Em aberto" />';
-      } else {
-
+      if ($objTramiteDTO) {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         $tramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, null, null, null, null);
         $tramite = $tramites ? $tramites[0] : null;
@@ -200,6 +193,9 @@ try {
                 break;
         }
 
+       
+      } else {
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" title="Em aberto" />';
       }
       $strResultado .= '</td>' . "\n";
 

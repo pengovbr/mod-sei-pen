@@ -165,7 +165,7 @@ PaginaSEI::getInstance()->abrirBody($strTitulo,'onload="inicializar();"');
 <?
 PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
 ?>
-  <p style="font-size: 1.0rem;">Atenção!! Cada bloco permite incluir e tramitar, no máximo 100 processos.<p>
+  <p style="font-size: 1.0rem;">Atenção!! Cada bloco permite incluir e tramitar no máximo 100 processos.<p>
   <div id="divIdentificacao" class="infraAreaDados" style="height:5em;">
     <label id="lblIdBloco" for="txtIdBloco" accesskey="" class="infraLabelObrigatorio">Número:</label>
     <input type="text" id="txtIdBloco" name="txtIdBloco" class="infraText" disabled="true" value="<?=$objTramiteEmBlocoDTO->getNumId();?>" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />

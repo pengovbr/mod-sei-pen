@@ -38,13 +38,32 @@ try {
 
         $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
         $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($dto);
+
+        if ($arrTramiteEmBloco == null) {
+          $objPaginaSEI->adicionarMensagem('Blocos que não estão no estado "aberto" não podem ser excluídos.', InfraPagina::$TIPO_MSG_ERRO);
+          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+          exit(0);
+        }
+
         $objTramiteEmBlocoRN->excluir($arrTramiteEmBloco);
-        PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
+
+        $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+        $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($arrIds, InfraDTO::$OPER_IN);
+        $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+        $tramitaEmBlocoProtocoloDTO->retNumId();
+        $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+
+        $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+        $arrtramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
+        $tramitaEmBlocoProtocoloRN->excluir($arrtramitaEmBlocoProtocoloRN);
+
+        $objPaginaSEI->adicionarMensagem('Bloco excluído com sucesso!', 5);
+
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
-      die;
+      exit(0);
     case 'md_pen_tramita_em_bloco':
       $arrEstadosSelecionados = [];
       $checkboxesEstados = [
