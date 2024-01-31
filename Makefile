@@ -173,7 +173,7 @@ down: .env
 
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
-test-functional: .env $(FILE_VENDOR_FUNCIONAL) up
+test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
@@ -238,4 +238,6 @@ tramitar-pendencias-silent:
 stop-test-container:
 	docker stop $$(docker ps -a -q --filter="name=php-test")
 
+vendor: composer.json
+	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
 
