@@ -47,6 +47,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaConfiguracaoModuloRenomeado = null;
     protected $paginaCadastrarProcessoEmBloco = null;
     protected $paginaTramiteEmBloco = null;
+    protected $paginaConfiguracaoModuloRenomeado = null;
 
     public function setUpPage(): void
     {
@@ -73,6 +74,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
         $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
+        $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
         $this->currentWindow()->maximize();
     }
 
