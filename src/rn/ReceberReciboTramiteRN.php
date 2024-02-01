@@ -60,10 +60,41 @@ class ReceberReciboTramiteRN extends InfraRN
   }
 
 
+    /**
+     * Atualizar bloco
+     *
+     */
+    private function atualizarBlocoDeTramiteExterno(ProtocoloDTO $objProtocoloDTO)
+    {
+
+        // Atualizar Bloco para concluido
+        $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+        $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+        $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+        $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+        $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+        $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+
+        if ($tramiteEmBlocoProtocolo == null) {
+          return null;
+        }
+
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo->getNumIdTramitaEmBloco());
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+    }
+
+
   protected function receberReciboDeTramiteInternoControlado($objReciboTramite)
     {
       //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
       ModPenUtilsRN::simularLoginUnidadeRecebimento();
+
+      $this->objPenDebug->gravar("Recebimento ORG1");
 
       $strNumeroRegistro = $objReciboTramite->recibo->NRE;
       $numIdTramite = $objReciboTramite->recibo->IDT;
@@ -139,10 +170,16 @@ class ReceberReciboTramiteRN extends InfraRN
             $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
             $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
+            // atualizar bloco de tramite externo
+            $this->atualizarBlocoDeTramiteExterno($objProtocoloDTO);
+
             $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S'));
             // Registra o recbimento do recibo no histórico e realiza a conclusão do processo
             $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $numIdTramite);
+            // $this->objPenDebug->gravar("ID: Protocolo: {$objProtocoloDTO->getDblIdProtocolo()}");
+            LogSEI::getInstance()->gravar("ID: Protocolo: {$objProtocoloDTO->getDblIdProtocolo()}");
+
 
         } catch (Exception $e) {
             $strMessage = 'Falha ao modificar o estado do procedimento para bloqueado.';

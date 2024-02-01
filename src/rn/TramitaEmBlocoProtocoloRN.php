@@ -62,8 +62,12 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
                 $objAtividadeDTO = new AtividadeDTO();
                 $objAtividadeDTO->setDblIdProtocolo($dto->getDblIdProtocolo());
                 $objAtividadeDTO->setNumIdTarefa([
-                    ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
-                    ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO)
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO),
+                  ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
                 ], InfraDTO::$OPER_IN);
                 $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
                 $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
@@ -86,6 +90,18 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         } catch (Exception $e) {
             throw new InfraException('Erro listando protocolos do bloco.', $e);
         }
+    }
+
+
+
+    protected function consultarConectado(TramitaEmBlocoProtocoloDTO $objDTO)
+    {
+      try {
+        $objTramitaEmBlocoProtocoloBD = new TramitaEmBlocoProtocoloBD($this->getObjInfraIBanco());
+        return $objTramitaEmBlocoProtocoloBD->consultar($objDTO);
+      } catch (Exception $e) {
+        throw new InfraException('Erro consutando blocos.', $e);
+      }
     }
 
     /**

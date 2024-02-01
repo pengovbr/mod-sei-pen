@@ -95,6 +95,7 @@ try {
   $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
   $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->listarProtocolosBloco($objTramitaEmBlocoProtocoloDTO);
 
+
   $arrComandos = array();
 
   $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
@@ -157,7 +158,7 @@ try {
       $strResultado .= '</td>';
 
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
-
+    
       if ($objTramiteDTO) {
         $dataEnvio = $objTramiteDTO->getDthRegistro();
         $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
@@ -169,33 +170,33 @@ try {
 
       $strResultado .= '<td align="center">' . "\n";
 
-      if ($objTramiteDTO) {
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $tramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, null, null, null, null);
-        $tramite = $tramites ? $tramites[0] : null;
-
-        switch ($tramite->situacaoAtual) {
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
-                $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
-                break;
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
-                $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
-                break;
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-            case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-                $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
-                break;
-            default:
-                $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
-                break;
-        }
-
-       
+      if ($objDTO->getStrSinObteveRecusa() == 'S') {
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
       } else {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" title="Em aberto" />';
+
+        $PROCESSO_CONCLUIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO); // 1002
+        $PROCESSO_CONCLUIDO_AVULSO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO); // 1007
+        $PROCESSO_TRAMITE_EXPEDIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO); // 1005
+        $PROCESSO_TRAMITE_CANCELADO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); // 1004
+        $PROCESSO_TRAMITE_PROCESSAMENTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO); // 1001
+        $PROCESSO_TRAMITE_ABERTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+
+        switch ($objDTO->getNumStaIdTarefa()) {
+          case $PROCESSO_TRAMITE_PROCESSAMENTO:
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
+            break;
+          case $PROCESSO_CONCLUIDO_AVULSO:
+          case $PROCESSO_CONCLUIDO:
+          case $PROCESSO_TRAMITE_EXPEDIDO:
+              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
+              break;
+          case $PROCESSO_TRAMITE_CANCELADO_ID:
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
+            break;       
+          default:
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
+            break;
+        }
       }
       $strResultado .= '</td>' . "\n";
 
@@ -268,9 +269,6 @@ $objPaginaSEI->montarJavaScript(); ?>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
 
-  function inicializar() {
-    infraEfeitoTabelas();
-  }
 
   function inicializar() {
     infraEfeitoTabelas();
