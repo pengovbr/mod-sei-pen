@@ -165,8 +165,9 @@ update: ## Atualiza banco de dados através dos scripts de atualização do sist
 
 
 destroy: .env
+	@$(CMD_COMPOSE_FUNC) exec org1-http bash -c "rm -rf /var/sei/arquivos/*"
+	@$(CMD_COMPOSE_FUNC) exec org2-http bash -c "rm -rf /var/sei/arquivos/*"
 	$(CMD_COMPOSE_FUNC) down --volumes
-	@rm -rf /tmp/sei_arquivos_*/*
 
 down: .env
 	$(CMD_COMPOSE_FUNC) stop
