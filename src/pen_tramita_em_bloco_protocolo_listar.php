@@ -158,12 +158,12 @@ try {
       $strResultado .= '</td>';
 
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
-    
-      if ($objTramiteDTO) {
-        $dataEnvio = $objTramiteDTO->getDthRegistro();
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($dataEnvio) . '</td>';
-        $strResultado .= '<td align="center">' . ($dataEnvio ? PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) : '') . '</td>';
+
+      if ($objTramiteDTO && !empty($objTramiteDTO->getDthRegistro())) {
+          $dataEnvio = $objTramiteDTO->getDthRegistro();
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($dataEnvio) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) . '</td>';
       } else {
           $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
