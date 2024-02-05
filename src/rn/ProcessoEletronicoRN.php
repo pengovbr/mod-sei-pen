@@ -1790,6 +1790,52 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+
+  /**
+   * Atualizar Bloco  de tramite externo para concluído
+   */
+  public function atualizarBlocoDeTramiteExterno(ProtocoloDTO $objProtocoloDTO)
+  {
+
+    // verificar se o processo está em algum bloco
+    $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+    $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+    $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+    $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+    $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+
+    if ($tramiteEmBlocoProtocoloDTO == null) {
+      return null;
+    }
+
+    // Não atualizar para concluido caso exista algum processo dentro bloco com estado de recusado
+    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+
+    foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {       
+      $objPenProtocolo = new PenProtocoloDTO();
+      $objPenProtocolo->setDblIdProtocolo($tramiteEmBlocoProtocolo->getDblIdProtocolo());
+      $objPenProtocolo->retDblIdProtocolo();
+      $objPenProtocolo->setStrSinObteveRecusa('S');
+
+      $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+
+      if ($ObjPenProtocoloDTO != null) {
+          return null;
+      }  
+    }
+
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+  }
+
     /**
     * Método que faz a recusa de um trâmite
     *

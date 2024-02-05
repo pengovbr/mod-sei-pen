@@ -525,6 +525,27 @@ class ReceberProcedimentoRN extends InfraRN
           $objPenProtocolo->setStrSinObteveRecusa('S');
           $objPenProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
           $objPenProtocoloBD->alterar($objPenProtocolo);
+
+          // Atualizar Bloco para concluido parcialmente
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+
+          if ($tramiteEmBlocoProtocolo == null) {
+            return null;
+          }
+
+          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+          $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo->getNumIdTramitaEmBloco());
+          $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+
+          $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+          $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+
       }
 
         $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $numIdTramite, 2);

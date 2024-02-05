@@ -38,7 +38,18 @@ try {
         $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
         $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
         foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
-            $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();
+
+            $objPenProtocolo = new PenProtocoloDTO();
+            $objPenProtocolo->setDblIdProtocolo($tramiteEmBlocoProtocolo->getDblIdProtocolo());
+            $objPenProtocolo->retDblIdProtocolo();
+            $objPenProtocolo->setStrSinObteveRecusa('N');
+
+            $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+            $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+
+            if ($ObjPenProtocoloDTO == null) {
+                $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();
+            }       
         }
     } else {
         $idTramiteEmBloco = null;
