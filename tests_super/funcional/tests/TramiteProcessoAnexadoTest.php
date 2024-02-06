@@ -105,6 +105,8 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
                     'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
                     'Descricao' => $documento['DESCRICAO'],
                 ]);
+                
+                // Armazenar nome que o arquivo receberá no org destinatário
                 $docs[$i][] = str_pad($objDocumentoDTO->getDblIdDocumento(), 6, 0, STR_PAD_LEFT).'.html';
 
                 $objAssinaturaFixture = new AssinaturaFixture();
@@ -118,6 +120,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
             $i++;
         }
 
+        // Preencher variaveis que serão usadas posteriormente nos testes
         self::$documentoTeste1['ARQUIVO'] = $docs[0][0];
         self::$documentoTeste2['ARQUIVO'] = $docs[0][1];
         self::$documentoTeste3['ARQUIVO'] = $docs[1][0];

@@ -26,7 +26,7 @@ class ProtocoloFixture extends FixtureBase
         $strProtocoloSemFormato = preg_replace("/[^0-9]/", "", $strProtocoloFormatado);
 
         $this->objProtocoloDTO->setDblIdProtocolo($dados['IdProtocolo']);
-        $this->objProtocoloDTO->setStrIdProtocoloFederacao($dados["IdProtocoloFederacao"] ?: null);
+        // $this->objProtocoloDTO->setStrIdProtocoloFederacao($dados["IdProtocoloFederacao"] ?: null);
         $this->objProtocoloDTO->setDblIdProtocoloAgrupador($dados["IdProtocolo"] ?: 2);
         $this->objProtocoloDTO->setStrProtocoloFormatado($dados["ProtocoloFormatado"] ?: $strProtocoloFormatado);
         $this->objProtocoloDTO->setStrProtocoloFormatadoPesquisa($strProtocoloSemFormato);

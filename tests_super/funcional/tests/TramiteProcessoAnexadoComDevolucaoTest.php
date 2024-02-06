@@ -19,8 +19,6 @@ class TramiteProcessoAnexadoComDevolucaoTest extends CenarioBaseTestCase
     public static $protocoloTesteAnexado;
     public static $protocoloTesteAnexadoId;
     public static $protocoloTestePrincipalId;
-    
-    private $objProtocoloFixture;
 
     /**
      * Teste inicial de trâmite de um processo contendo outro anexado

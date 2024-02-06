@@ -22,12 +22,7 @@ class SecaoDocumentoFixture extends FixtureBase
     {
         $documento = $dados['documento'] ?: false;
 
-        // $dados['IdProtocolo'] = $this->getObjInfraIBanco()->getValorSequencia('seq_protocolo');
-
         $objSecaoDocumentoDTO = new \SecaoDocumentoDTO();
-        
-        // $objSecaoDocumentoDTO->setNumIdSecaoDocumento();
-
         $objSecaoDocumentoDTO->setNumOrdem($dados['Ordem'] ?: 0);
         $objSecaoDocumentoDTO->setStrSinSomenteLeitura($dados['SomenteLeitura'] ?: null); 
         $objSecaoDocumentoDTO->setStrSinAssinatura($dados['Assinatura'] ?: null);
@@ -168,5 +163,4 @@ class SecaoDocumentoFixture extends FixtureBase
             ]
         ];
     }
-
 }

@@ -39,8 +39,7 @@ class AssinaturaFixture extends \FixtureBase
         $objAssinaturaDTO->setStrP7sBase64($dados['P7sBase64'] ?: null);
         $objAssinaturaDTO->setStrNumeroSerieCertificado($dados['NumeroSerieCertificado'] ?: null);
         $objAssinaturaDTO->setStrSinAtivo($dados['SinAtivo'] ?: 'S');
-        $objAssinaturaDTO->setStrModuloOrigem($dados['ModuloOrigem'] ?: null);
-        $objAssinaturaDTO->setOrdDthAberturaAtividade(\InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAssinaturaDTO->setOrdDthAberturaAtividade(InfraDTO::$TIPO_ORDENACAO_ASC);
 
         $objAssinaturaDB = new \AssinaturaBD(\BancoSEI::getInstance());
         $objAssinaturaDB->cadastrar($objAssinaturaDTO);

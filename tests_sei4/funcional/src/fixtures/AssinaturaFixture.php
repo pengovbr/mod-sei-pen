@@ -25,7 +25,7 @@ class AssinaturaFixture extends \FixtureBase
         $dados['IdAssinatura'] = $this->getObjInfraIBanco()->getValorSequencia('seq_assinatura');
 
         $objAssinaturaDTO = new \AssinaturaDTO();
-        $objAssinaturaDTO->setNumIdAssinatura($dados['IdAssinatura'] ?: null);
+        $objAssinaturaDTO->setNumIdAssinatura($dados['IdAssinatura']);
         $objAssinaturaDTO->setDblIdDocumento($dados['IdDocumento'] ?: 4);
         $objAssinaturaDTO->setNumIdAtividade($dados['IdAtividade'] ?: $objAtividadeDTO->getNumIdAtividade());
         $objAssinaturaDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
@@ -39,7 +39,7 @@ class AssinaturaFixture extends \FixtureBase
         $objAssinaturaDTO->setStrP7sBase64($dados['P7sBase64'] ?: null);
         $objAssinaturaDTO->setStrNumeroSerieCertificado($dados['NumeroSerieCertificado'] ?: null);
         $objAssinaturaDTO->setStrSinAtivo($dados['SinAtivo'] ?: 'S');
-        $objAssinaturaDTO->setStrModuloOrigem($dados['ModuloOrigem'] ?: null);
+        // $objAssinaturaDTO->setStrModuloOrigem($dados['ModuloOrigem'] ?: null); Não encontrado BD sei4
         $objAssinaturaDTO->setOrdDthAberturaAtividade(\InfraDTO::$TIPO_ORDENACAO_ASC);
 
         $objAssinaturaDB = new \AssinaturaBD(\BancoSEI::getInstance());
