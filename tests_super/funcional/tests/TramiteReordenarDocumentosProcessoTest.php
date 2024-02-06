@@ -133,7 +133,12 @@ class TramiteReordenarDocumentosProcessoTest extends CenarioBaseTestCase
 
         $callbackEnvio = function ($testCase) {
             $testCase->frame('ifrEnvioProcesso');
-            $mensagemSucesso = utf8_encode('Inconsistência identificada no documento de ordem');
+            $mensagemHash = "Houve uma alteração na ordem dos documentos no processo, "
+                . "o que impede o reenvio de um processo que já foi tramitado pela plataforma. "
+                . "Portanto, é recomendado reordenar os documentos de acordo com a ordem original. "
+                . "Caso você seja um usuário sem permissão para reordenar o processo, é necessário "
+                . "entrar em contato internamente para identificar quem possui essa permissão.";
+            $mensagemSucesso = utf8_encode($mensagemHash);
             $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
             sleep(2);
             $testCase->byXPath("//input[@id='btnFechar']")->click();
