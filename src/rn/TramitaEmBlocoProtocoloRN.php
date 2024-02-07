@@ -230,4 +230,41 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
     return false;
   }
+
+    /**
+   * Atualizar Bloco  de tramite externo para concluído
+   */
+  public function atualizarEstadoDoBloco(TramitaEmBlocoProtocoloDTO $tramiteEmBlocoProtocoloDTO, $novoEstadoDoBloco)
+  {
+
+       // Verificar se tem existe processo recusado dentro de um bloco
+      $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
+      $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+      $objTramiteEmBlocoProtocoloDTO2->retNumIdTramitaEmBloco();
+      $objTramiteEmBlocoProtocoloDTO2->retDblIdProtocolo();
+  
+      $objTramiteEmBlocoProtocoloDTORN = new TramitaEmBlocoProtocoloRN($objTramiteEmBlocoProtocoloDTO2);
+
+      $arrTramiteEmBlocoProtocolo = $objTramiteEmBlocoProtocoloDTORN->listar($objTramiteEmBlocoProtocoloDTO2);
+  
+      $objPenProtocolo = new PenProtocoloDTO();
+      $objPenProtocolo->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo,'IdProtocolo'), InfraDTO::$OPER_IN);
+      $objPenProtocolo->setStrSinObteveRecusa('S');
+      $objPenProtocolo->retDblIdProtocolo();
+    
+      $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+  
+      if ($ObjPenProtocoloDTO != null) {
+        return null;
+      }
+
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+      $objTramiteEmBlocoDTO->setStrStaEstado($novoEstadoDoBloco);
+  
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+
+  }
 }

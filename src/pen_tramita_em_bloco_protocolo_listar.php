@@ -10,7 +10,7 @@ try {
   $objSessaoSEI->validarLink();
   $objSessaoSEI->validarPermissao($_GET['acao']);
 
-  $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado', 'txtNomeUsuario', 'txtUnidadeDestino', 'selAndamento'));
+  $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado', 'txtNomeUsuario', 'txtUnidadeDestino', 'selAndamento')); 
 
   switch ($_GET['acao']) {
     case 'pen_tramita_em_bloco_protocolo_excluir':
@@ -158,12 +158,11 @@ try {
       $strResultado .= '</td>';
 
       $objTramiteDTO = $objDTO->getObjTramiteDTO();
-
       if ($objTramiteDTO && !empty($objTramiteDTO->getDthRegistro())) {
-          $dataEnvio = $objTramiteDTO->getDthRegistro();
           $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getStrNomeUsuario()) . '</td>';
-          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($dataEnvio) . '</td>';
+          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getDthRegistro()) . '</td>';
           $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objTramiteDTO->getNumIdEstruturaDestino()) . '</td>';
+         
       } else {
           $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
@@ -186,7 +185,6 @@ try {
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
             break;
           case $PROCESSO_CONCLUIDO_AVULSO:
-          case $PROCESSO_CONCLUIDO:
           case $PROCESSO_TRAMITE_EXPEDIDO:
               $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
               break;
@@ -201,13 +199,13 @@ try {
       $strResultado .= '</td>' . "\n";
 
       $strResultado .= '<td align="center">' . "\n";
-      // $objDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
+
       if ($objDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
         $strId = $objDTO->getDblIdProtocolo() . '-' . $objDTO->getNumId();
         $strProtocoloId = $objDTO->getDblIdProtocolo();
         $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objDTO->getStrIdxRelBlocoProtocolo());
 
-        if ($objDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_NORMAL) {
+        if ($objDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_NORMAL && $objDTO->getNumStaIdTarefa() != $PROCESSO_TRAMITE_EXPEDIDO) {
           $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
         }
 

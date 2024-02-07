@@ -142,7 +142,18 @@ class ReceberReciboTramiteRN extends InfraRN
             $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
             // atualizar bloco de tramite externo
-            $this->objProcessoEletronicoRN->atualizarBlocoDeTramiteExterno($objProtocoloDTO);
+            $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+            $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+            $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+            $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          
+            $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+            $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+          
+            if ($tramiteEmBlocoProtocoloDTO != null) {
+              $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
+            }
+          
 
             $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S'));
