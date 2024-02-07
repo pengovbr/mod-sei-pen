@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+
 /**
  * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
  */
@@ -19,7 +21,7 @@ class TramiteProcessoAnexadoComDevolucaoTest extends CenarioBaseTestCase
     public static $protocoloTesteAnexado;
     public static $protocoloTesteAnexadoId;
     public static $protocoloTestePrincipalId;
-    
+
     /**
      * Teste inicial de trâmite de um processo contendo outro anexado
      *
@@ -56,10 +58,8 @@ class TramiteProcessoAnexadoComDevolucaoTest extends CenarioBaseTestCase
             ]
         ];
 
-        $objProtocoloFixture1 = new ProtocoloFixture();
-        $objProtocoloFixture2 = new ProtocoloFixture();
-        $objProtocolosDTO[] = $objProtocoloFixture1->carregar($parametros[0]);
-        $objProtocolosDTO[] = $objProtocoloFixture2->carregar($parametros[1]);
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocolosDTO = $objProtocoloFixture->carregarVariados($parametros);
 
         // Cadastrar novo processo de teste principal e incluir documentos relacionados
         $i = 0;

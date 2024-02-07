@@ -15,15 +15,12 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
     public static $documentoTeste4;
     public static $protocoloTestePrincipal;
     public static $protocoloTesteAnexado;
-    public static $protocoloTesteAnexadoId;
-    public static $protocoloTestePrincipalId;
 
     /**
      * Teste inicial de trâmite de um processo contendo outro anexado
      *
      * @group envio
-     * @large
-     * 
+     *
      * @return void
      */
     public function test_tramitar_processo_anexado_da_origem()
@@ -33,112 +30,32 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
 
         // Definição de dados de teste do processo principal
         self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+        self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         // Definição de dados de teste do processo a ser anexado
         self::$processoTesteAnexado = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+        self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        $parametros = [
-            [
-            'Descricao' => self::$processoTestePrincipal['DESCRICAO'],
-            'Interessados' => self::$processoTestePrincipal['INTERESSADOS'],
-            'Documentos' => [self::$documentoTeste1, self::$documentoTeste2],
-            ],
-            [
-            'Descricao' => self::$processoTesteAnexado['DESCRICAO'],
-            'Interessados' => self::$processoTesteAnexado['INTERESSADOS'],
-            'Documentos' => [self::$documentoTeste3, self::$documentoTeste4],
-            ]
-        ];
-
-        $objProtocoloFixture1 = new ProtocoloFixture();
-        $objProtocoloFixture2 = new ProtocoloFixture();
-        $objProtocolosDTO[] = $objProtocoloFixture1->carregar($parametros[0]);
-        $objProtocolosDTO[] = $objProtocoloFixture2->carregar($parametros[1]);
-
-        // Cadastrar novo processo de teste principal e incluir documentos relacionados
-        $i = 0;
-        foreach($objProtocolosDTO as $objProtocoloDTO) {
-            $objProcedimentoFixture = new ProcedimentoFixture();
-
-            $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtividadeFixture = new AtividadeFixture();
-            $objAtividadeDTO = $objAtividadeFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'Conclusao' => \InfraData::getStrDataHoraAtual(),
-                'IdTarefa' => \TarefaRN::$TI_GERACAO_PROCEDIMENTO,
-                'IdUsuarioConclusao' => 100000001
-            ]);
-
-            $objContatoFixture = new ContatoFixture();
-            $objContatoDTO = $objContatoFixture->carregar([
-                'Nome' => self::$processoTestePrincipal['INTERESSADOS']
-            ]);
-
-            $objParticipanteFixture = new ParticipanteFixture();
-            $objParticipanteDTO = $objParticipanteFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdContato' => $objContatoDTO->getNumIdContato()
-            ]);
-
-            $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
-            $objProtocoloAssuntoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
-            $objAtributoAndamentoFixture->carregar([
-                'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-            ]);
-            
-            // Incluir e assinar documentos relacionados
-            foreach($parametros[$i]['Documentos'] as $documento) {
-                $objDocumentoFixture = new DocumentoFixture();
-                $objDocumentoDTO = $objDocumentoFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                    'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
-                    'Descricao' => $documento['DESCRICAO'],
-                ]);
-                // Armazenar nome que o arquivo receberá no org destinatário
-                $docs[$i][] = str_pad($objDocumentoDTO->getDblIdDocumento(), 6, 0, STR_PAD_LEFT).'.html';
-
-                $objAssinaturaFixture = new AssinaturaFixture();
-                $objAssinaturaFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                    'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-                ]);
-            }
-            $protocolo[$i]['formatado'] = $objProtocoloDTO->getStrProtocoloFormatado();
-            $protocolo[$i]['id'] = $objProtocoloDTO->getDblIdProtocolo();
-            $i++;
-        }
-
-        // Preencher variaveis que serão usadas posteriormente nos testes
-        self::$documentoTeste1['ARQUIVO'] = $docs[0][0];
-        self::$documentoTeste2['ARQUIVO'] = $docs[0][1];
-        self::$documentoTeste3['ARQUIVO'] = $docs[1][0];
-        self::$documentoTeste4['ARQUIVO'] = $docs[1][1];
-        self::$protocoloTestePrincipal = $protocolo[0]['formatado'];
-        self::$protocoloTestePrincipalId = $protocolo[0]['id'];
-        self::$protocoloTesteAnexado = $protocolo[1]['formatado'];
-        self::$protocoloTesteAnexadoId = $protocolo[1]['id'];
-
-        // Realizar a anexação de processos
-        $objAnexoProcessoFixture = new AnexoProcessoFixture();
-        $objAnexoProcessoFixture->carregar([
-            'IdProtocolo' => self::$protocoloTestePrincipalId,
-            'IdDocumento' => self::$protocoloTesteAnexadoId,
-        ]);
-        
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+
+        // Cadastrar novo processo de teste anexado e incluir documentos relacionados
+        self::$protocoloTesteAnexado = $this->cadastrarProcesso(self::$processoTesteAnexado);
+        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
+        $this->cadastrarDocumentoExterno(self::$documentoTeste4);
+
+        // Cadastrar novo processo de teste principal e incluir documentos relacionados
+        $this->paginaBase->navegarParaControleProcesso();
+        self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
+        $this->cadastrarDocumentoExterno(self::$documentoTeste1);
+
+        // Realizar a anexação de processos
+        $this->anexarProcesso(self::$protocoloTesteAnexado);
+
+        $this->cadastrarDocumentoExterno(self::$documentoTeste2);
+
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -148,14 +65,13 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
             false
         );
-        
     }
-    
+
+
     /**
      * Teste de verificação do correto envio do processo anexado no sistema remetente
      *
      * @group verificacao_envio
-     * @large
      *
      * @depends test_tramitar_processo_anexado_da_origem
      *
@@ -171,7 +87,6 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
             $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
@@ -186,12 +101,11 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
-    
+
     /**
      * Teste de verificação do correto recebimento do processo anexado no destinatário
      *
      * @group verificacao_recebimento
-     * @large
      *
      * @depends test_verificar_origem_processo_anexado
      *
@@ -220,7 +134,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
         $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
-        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[2], self::$documentoTeste2, self::$destinatario);
 
         $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
         $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());

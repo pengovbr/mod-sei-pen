@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoProcessoFixture};
+
 /**
  * Testes de trâmite de processos anexado
  */
@@ -54,11 +56,9 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
             ]
         ];
 
-        $objProtocoloFixture1 = new ProtocoloFixture();
-        $objProtocoloFixture2 = new ProtocoloFixture();
-        $objProtocolosDTO[] = $objProtocoloFixture1->carregar($parametros[0]);
-        $objProtocolosDTO[] = $objProtocoloFixture2->carregar($parametros[1]);
-
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocolosDTO = $objProtocoloFixture->carregarVariados($parametros);
+        
         // Cadastrar novo processo de teste principal e incluir documentos relacionados
         $i = 0;
         foreach($objProtocolosDTO as $objProtocoloDTO) {
@@ -105,6 +105,8 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
                     'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
                     'Descricao' => $documento['DESCRICAO'],
                 ]);
+                
+                // Armazenar nome que o arquivo receberá no org destinatário
                 $docs[$i][] = str_pad($objDocumentoDTO->getDblIdDocumento(), 6, 0, STR_PAD_LEFT).'.html';
 
                 $objAssinaturaFixture = new AssinaturaFixture();
@@ -118,6 +120,7 @@ class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
             $i++;
         }
 
+        // Preencher variaveis que serão usadas posteriormente nos testes
         self::$documentoTeste1['ARQUIVO'] = $docs[0][0];
         self::$documentoTeste2['ARQUIVO'] = $docs[0][1];
         self::$documentoTeste3['ARQUIVO'] = $docs[1][0];
