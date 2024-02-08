@@ -250,6 +250,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $objPenProtocolo = new PenProtocoloDTO();
       $objPenProtocolo->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo,'IdProtocolo'), InfraDTO::$OPER_IN);
       $objPenProtocolo->setStrSinObteveRecusa('S');
+      $objPenProtocolo->setNumMaxRegistrosRetorno(1);
       $objPenProtocolo->retDblIdProtocolo();
     
       $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());

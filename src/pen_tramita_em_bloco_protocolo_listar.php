@@ -15,6 +15,7 @@ try {
   switch ($_GET['acao']) {
     case 'pen_tramita_em_bloco_protocolo_excluir':
       try {
+        
         $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
         $arrObjTramiteBlocoProtocoloDTO = array();
         if (count($arrStrIds) > 0) {
@@ -34,8 +35,43 @@ try {
           $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($arrStrIdComposto[2]);
           $arrObjTramiteBlocoProtocoloDTO[] = $objTramiteEmBlocoProtocoloDTO;
         }
+        $foo = $arrObjTramiteBlocoProtocoloDTO[0]->getNumIdTramitaEmBloco();
         $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
         $objTramitaEmBlocoProtocoloRN->excluir($arrObjTramiteBlocoProtocoloDTO);
+
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setNumId($foo);
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+        $objTramiteEmBlocoDTO->retNumId();
+        $objTramiteEmBlocoDTO->retStrStaEstado();
+   
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+        if ($blocoResultado != null) {
+          // atualizar bloco de tramite externo
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($foo);
+          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
+          // $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+        
+          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+
+          if ($tramiteEmBlocoProtocoloDTO == null) {
+            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+            $objTramiteEmBlocoDTO->setNumId($foo);
+            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        
+            $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+          } else {
+            $tramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
+          }
+      
+        } 
+        
         PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);

@@ -105,6 +105,7 @@ try {
       throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
+
   $objFiltroDTO = new TramiteEmBlocoDTO();
   $objFiltroDTO->retNumId();
   $objFiltroDTO->retStrStaEstado();
@@ -210,7 +211,7 @@ try {
     $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
     $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
 
-    if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
+    if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO) || $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE)) {
       $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
     }
 
@@ -346,10 +347,6 @@ $objPaginaSEI->montarStyle();
   function inicializar() {
 
     infraEfeitoTabelas();
-    // var strMensagens = '<?php print str_replace("\n", '\n', $objPaginaSEI->getStrMensagens()); ?>';
-    // if (strMensagens) {
-    //   alert(strMensagens);
-    // }
   }
 
   function onClickBtnPesquisar() {
@@ -508,6 +505,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
       </div>
     </div>
   </div>
+
   <input type="hidden" id="hdnMeusBlocos" name="hdnMeusBlocos" value="<?= $strTipoAtribuicao ?>" />
   <input type="hidden" id="hdnFlagBlocos" name="hdnFlagBlocos" value="1" />
   <?php
