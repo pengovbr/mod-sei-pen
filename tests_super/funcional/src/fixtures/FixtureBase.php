@@ -23,11 +23,11 @@ abstract class FixtureBase extends \InfraRN
     }
 
     public function carregarVarios($dados = null, $quantidade = 1){
-        $resultado = array();
+        $resultado = [];
         for ($i=0; $i < $quantidade; $i++) {
             $resultado[] = $this->carregar($dados);
         }
-                
+
         return $resultado;
     }
 
@@ -35,8 +35,27 @@ abstract class FixtureBase extends \InfraRN
         $resultado = [];
         foreach ($dados as $dado) {
             $resultado[] = $this->carregar($dado);
-        }
+        }  
 
         return $resultado;
     }
+
+    protected function listarInternoControlado($parametros){
+        $dto = $this->listar($parametros["dados"]);
+
+        if (isset($parametros["callback"])) {
+            $parametros["callback"]($dto);
+        }
+
+        return $dto;
+    }
+
+    public function buscar($dados = null, $callback = null){
+        $dados = $dados ?: [];
+        return $this->listarInterno([
+            'dados' => $dados,
+            'callback' => $callback
+        ]);
+    }
+
 }

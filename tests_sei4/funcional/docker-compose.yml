@@ -55,10 +55,12 @@ services:
       - ${SEI_PATH}/../tests:/tests/sei
       - ${SEI_PATH}/../src:/tests/sei/src
       - ./src/fixtures:/tests/sei/modpen/fixtures
-      - ../../src/bd:/tests/sei/modpen/bd
       - ../../src/dto:/tests/sei/modpen/dto
+      - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
       - /tmp:/tmp
+      - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
+      - /tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -71,6 +73,7 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+      - DATABASE_IMAGE=${ORG1_DATABASE_IMAGE}
       - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
       - DATABASE_HOST=${ORG1_DATABASE_HOST}
       - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT}
@@ -80,6 +83,7 @@ services:
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
       - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
+      - TEST_FILES_PATH=${TEST_FILES_PATH}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
