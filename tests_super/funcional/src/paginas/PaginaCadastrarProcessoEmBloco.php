@@ -81,29 +81,17 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         return $this->unidadeInput->value();
     }
 
-    /**
-     * Seleciona botão novo da página
-     * 
-     * @return void
-     */
     public function novoBlocoDeTramite()
     {
         $this->test->byId("bntNovo")->click();
     }
 
-     /**
-     * @return void
-     */
+
     public function criarNovoBloco()
     {
         $this->test->byId('txtDescricao')->value('Bloco para teste automatizado');
     }
 
-    /**
-     * Seleciona botão editar da primeira linha de tabela
-     * 
-     * @return void
-     */
     public function editarBlocoDeTramite($descricao = null)
     {
         $this->test->byXPath("(//img[@title='Alterar Bloco'])[1]")->click();
@@ -114,13 +102,6 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         }
     }
 
-    /**
-     * Selecionar primeira checkbox de exclusão
-     * Seleciona botão excluir
-     * Seleciona botão de confirmação
-     *  
-     * @return void
-     */
     public function selecionarExcluirBloco()
     {
         $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
@@ -128,21 +109,12 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         $this->test->acceptAlert();
     }
 
-    /**
-     * Buscar mensagem de alerta da página
-     *
-     * @return string
-     */
     public function buscarMensagemAlerta()
     {
         $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
         return !empty($alerta->text()) ? $alerta->text() : "";
     }
 
-    /**
-     * Tramitar Bloco Externamente
-     *
-     */
     public function tramitarProcessoExternamente($repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
         // Preencher parâmetros do trâmite
@@ -201,25 +173,49 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         sleep(1);
     }
 
+    public function retornarTextoColunaDaTabelaDeBlocos() 
+    {
+       $tabela = $this->test->byXPath('//tr[@class="infraTrClara odd"]');
+       $terceiraColuna = $tabela->byXPath('./td[3]');
+
+       return $terceiraColuna->text();
+    }
+
+    public function retornarQuantidadeDeProcessosNoBloco() 
+    {
+
+    //     $linhasDaTabela = $this->test->elements($this->test->using('xpath')->value('//table[@id="tblBlocos"]//tr[@class="infraTrClara odd"]'));
+    // //    $tabela = $this->test->byXPath('//tr[@class="infraTrClara odd"]');
+    //    $count = $linhasDaTabela[0]->byXPath('./td');
+    //    $numeroDeLinhas = count($count);
+
+    //    return $linhasDaTabela[0];
+
+
+        // Localiza todas as linhas da tabela com o XPath
+        $linhasDaTabela = $this->test->elements($this->test->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+
+        // Obtém o número de linhas
+        return count($linhasDaTabela);
+    }
+
+    
     public function bntTramitarBloco()
     {
         $this->test->byXPath("(//img[@title='Tramitar Bloco'])[1]")->click();
     }
 
-    /**
-     * Selecionar Botão de salvar
-     * @return void
-     */
+    public function bntVisualizarProcessos()
+    {
+        $this->test->byXPath("(//img[@title='Visualizar Processos'])[1]")->click();
+    }
+
     public function btnSalvar()
     {
         $buttonElement = $this->test->byXPath("//button[@type='submit' and @value='Salvar']");
         $buttonElement->click();
     }
 
-    /**
-     * Selecionar Botão de enviar
-     * @return void
-     */
     public function btnEnviar()
     {
         $buttonElement = $this->test->byXPath("//button[@type='button' and @value='Enviar']");

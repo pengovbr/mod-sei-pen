@@ -1,13 +1,14 @@
 <?php
 
-class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
+class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 {
     protected static $numQtyProcessos = 3; // max: 99
     protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
     public static $destinatario;
-    public static $penOrgaoExternoId;
+    public static $documentoTeste1;
+    public static $documentoTeste2;
     public static $protocoloTestePrincipal;
 
     function setUp(): void 
@@ -25,8 +26,20 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 
     }
 
-    public function teste_tramite_bloco_externo()
+    /**
+     * Teste inicial de trâmite de um processo contendo outro anexado
+     *
+     * @group envio
+     * @large
+     * 
+     * @return void
+     */
+    public function test_tramitar_processo_anexado_da_origem()
     {
+        
+        // Definição de dados de teste do processo principal
+        self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
+        self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
 
         $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
@@ -61,18 +74,30 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
                 'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
             ]);
 
+            //Incluir novos documentos relacionados
             $objDocumentoFixture = new \DocumentoFixture();
             $objDocumentoDTO = $objDocumentoFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
+                'Descricao' => self::$documentoTeste1['DESCRICAO'],
+                'StaProtocolo' => \ProtocoloRN::$TP_DOCUMENTO_RECEBIDO,
+                'StaDocumento' => \DocumentoRN::$TD_EXTERNO,
+                'IdConjuntoEstilos' => NULL,
             ]);
 
-            $objAssinaturaFixture = new \AssinaturaFixture();
-            $objAssinaturaFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-                'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
-            ]);
+            //Adicionar anexo ao documento
+            $objAnexoFixture = new \AnexoFixture();
+            $objAnexoFixture->carregar([
+                'IdProtocolo' => $objDocumentoDTO->getDblIdDocumento(),
+                'Nome' => basename(self::$documentoTeste1['ARQUIVO']),
+            ]);   
+
+            // $objAssinaturaFixture = new \AssinaturaFixture();
+            // $objAssinaturaFixture->carregar([
+            //     'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+            //     'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
+            //     'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
+            // ]);
 
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
@@ -92,7 +117,6 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         );
 
         $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
-
         if (self::$tramitar == true) {
             $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
             $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
@@ -108,17 +132,12 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         }
     }
 
-    /**
-     * Verificar se o bloco foi enviado
-     *
-     *
-     * @return void
-     */
     public function test_verificar_envio_tramite_em_bloco()
     {
-        
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
         $this->acessarSistema(
             self::$remetente['URL'],
@@ -135,4 +154,5 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
             $this->assertEquals('Aberto', $novoStatus);
         }  
     }
+    
 }

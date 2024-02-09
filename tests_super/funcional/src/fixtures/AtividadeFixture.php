@@ -26,7 +26,7 @@ class AtividadeFixture extends \FixtureBase
         $this->objAtividadeDTO->setNumIdUsuarioOrigem($dados['IdUsuarioOrigem'] ?: 100000001);
         $this->objAtividadeDTO->setDthAbertura($dados['Abertura'] ?: InfraData::getStrDataHoraAtual());
         $this->objAtividadeDTO->setDthConclusao($dados['Conclusao'] ?: null);
-        $this->objAtividadeDTO->setNumIdTarefa($dados['IdTarefa'] ?: 1);
+        $this->objAtividadeDTO->setNumIdTarefa($dados['IdTarefa'] ?: null);
         $this->objAtividadeDTO->setNumIdUsuarioAtribuicao($dados['IdUsuarioAtribuicao'] ?: null);
         $this->objAtividadeDTO->setNumIdUsuarioConclusao($dados['IdUsuarioConclusao'] ?: null);
         $this->objAtividadeDTO->setStrSinInicial($dados['SinInicial'] ?: 'S');

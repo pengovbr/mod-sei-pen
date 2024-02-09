@@ -359,4 +359,5 @@ class TramiteEmBlocoRN extends InfraRN {
             throw new InfraException('Erro cancelando Bloco.', $e);
         }
     }
+    
 }

@@ -39,4 +39,22 @@ abstract class FixtureBase extends \InfraRN
 
         return $resultado;
     }
+
+    protected function listarInternoControlado($parametros){
+        $dto = $this->listar($parametros["dados"]);
+
+        if (isset($parametros["callback"])) {
+            $parametros["callback"]($dto);
+        }
+
+        return $dto;
+    }
+
+    public function buscar($dados = null, $callback = null){
+        $dados = $dados ?: [];
+        return $this->listarInterno([
+            'dados' => $dados,
+            'callback' => $callback
+        ]);
+    }
 }

@@ -4,7 +4,8 @@ class DocumentoFixture extends \FixtureBase
 {
     protected $objDocumentoDTO;
     
-    const MODELO_ACORDAO = 43;
+    const MODELO_ACORDAO = 8;
+    const MODELO_AVISO = 121;
 
     public function __construct()
     {
@@ -23,8 +24,9 @@ class DocumentoFixture extends \FixtureBase
         
         $protocoloFixture = new \ProtocoloFixture();
         $protocoloDTO = $protocoloFixture->cadastrar(
-            [
-                'StaProtocolo' => \ProtocoloRN::$TP_DOCUMENTO_GERADO,
+          [
+                'StaProtocolo' => $dados['StaProtocolo'] ?: \ProtocoloRN::$TP_DOCUMENTO_GERADO,
+                'Descricao' => $dados['Descricao'],
                 'documento' => true,
             ]
         );
@@ -32,7 +34,7 @@ class DocumentoFixture extends \FixtureBase
         $this->objDocumentoDTO->setDblIdDocumento($protocoloDTO->getDblIdProtocolo());
         $this->objDocumentoDTO->setDblIdDocumentoEdoc($dados['IdDocumentoEdoc'] ?: null); 
         $this->objDocumentoDTO->setDblIdProcedimento($dados['IdProcedimento']);
-        $this->objDocumentoDTO->setNumIdSerie($dados['IdSerie'] ?: 8);
+        $this->objDocumentoDTO->setNumIdSerie($dados['IdSerie'] ?: self::MODELO_ACORDAO);
         $this->objDocumentoDTO->setNumIdUnidadeResponsavel($dados['IdUnidadeResponsavel'] ?: 110000001);
         $this->objDocumentoDTO->setNumIdConjuntoEstilos($dados['IdConjuntoEstilos'] ?: 81);
         $this->objDocumentoDTO->setNumIdTipoConferencia($dados['IdTipoConferencia'] ?: null);
