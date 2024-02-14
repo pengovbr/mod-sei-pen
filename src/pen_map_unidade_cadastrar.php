@@ -145,6 +145,7 @@ try {
         $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
     }
 
+      $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
       exit(0);
   }
