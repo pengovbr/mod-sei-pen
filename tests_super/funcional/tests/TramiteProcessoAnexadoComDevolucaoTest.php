@@ -1,6 +1,6 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
 
 /**
  * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
