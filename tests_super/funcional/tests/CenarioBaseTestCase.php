@@ -42,7 +42,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaMoverDocumento = null;
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoDocumento = null;
+    protected $paginaTipoProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaUnidades = null;
+
     protected $paginaCadastroOrgaoExterno = null;
 
     public function setUpPage(): void
@@ -65,8 +69,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
+        $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
+        $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaUnidades = new PaginaUnidades($this);
+
         $this->currentWindow()->maximize();
     }
 
@@ -600,12 +608,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoInternoTeste($contextoProducao)
+    public function gerarDadosDocumentoInternoTeste($contextoProducao,$tipoDocumento = null)
     {
         return array(
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
-            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
+            "TIPO_DOCUMENTO" => $tipoDocumento ?: $contextoProducao['TIPO_DOCUMENTO'],
             "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),

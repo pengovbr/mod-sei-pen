@@ -42,7 +42,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastroOrgaoExterno = null;
     protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoDocumento = null;
+    protected $paginaTipoProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaUnidades = null;
 
     public function setUpPage(): void
     {
@@ -65,6 +68,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
+        $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
+        $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
+        $this->paginaUnidades = new PaginaUnidades($this);
         $this->currentWindow()->maximize();
     }
 
@@ -550,12 +556,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoInternoTeste($contextoProducao)
+    public function gerarDadosDocumentoInternoTeste($contextoProducao,$tipoDocumento = null)
     {
         return array(
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
-            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
+            "TIPO_DOCUMENTO" => $tipoDocumento ?: $contextoProducao['TIPO_DOCUMENTO'],
             "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
