@@ -45,6 +45,19 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
                     $dto->setStrSinObteveRecusa('N');
                 }
 
+                $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+                $objTramiteEmBlocoDTO->setNumId($parObjTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+                $objTramiteEmBlocoDTO->retNumId();
+                $objTramiteEmBlocoDTO->retStrStaEstado();
+           
+                $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+                $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+                if (!empty($blocoResultado)) {
+                  $dto->setStrStaEstadoBloco($blocoResultado->getStrStaEstado());
+                } else {
+                  $dto->setStrStaEstadoBloco('A');
+                }
                 $objTramiteDTO = new TramiteDTO();
                 $objTramiteDTO->setNumIdProcedimento($dto->getDblIdProtocolo());
                 $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
@@ -114,7 +127,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     {
         try {
             //Valida Permissão
-          //  SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $objDTO);
+           SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $objDTO);
 
             $objTramitaEmBlocoProtocoloBD = new TramitaEmBlocoProtocoloBD($this->getObjInfraIBanco());
             $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloBD->listar($objDTO);
@@ -138,9 +151,36 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
             SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_excluir', __METHOD__, $arrayObjDTO);
 
             $arrayExcluido = array();
+
             foreach ($arrayObjDTO as $objDTO) {
                 $objBD = new TramitaEmBlocoProtocoloBD(BancoSEI::getInstance());
-                $arrayExcluido[] = $objBD->excluir($objDTO);
+
+                $objPenProtocoloDTO = new PenProtocoloDTO();
+                $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+                $objPenProtocoloDTO->retStrSinObteveRecusa();
+                // $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+                
+                $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+                $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+
+                if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() != 'S') {
+                  $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+                  $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdTramitaEmBloco());
+                  $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+                  $tramiteEmBlocoDTO->retStrStaEstado();
+                  $tramiteEmBlocoDTO->retNumId();
+              
+                  $tramiteEmBlocoRN = new TramiteEmBlocoRN();
+                  $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
+                  
+                  if ($tramiteEmBloco != null) {
+                    $arrayExcluido[] = $objBD->excluir($objDTO);
+                  } else {
+                    return null;
+                  }
+                } else {
+                  $arrayExcluido[] = $objBD->excluir($objDTO);
+                }
             }
             return $arrayExcluido;
         } catch (Exception $e) {
@@ -161,8 +201,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       }
 
       $objTramitaEmBlocoProtocoloDTOIdx = new TramitaEmBlocoProtocoloDTO();
-      $objInfraException = new InfraException();
-      $objTramitaEmBlocoProtocoloBD = new TramiteEmBlocoBD($this->getObjInfraIBanco());
 
       $arrObjTramitaEmBlocoProtocoloDTO = $this->listar($dto);
 
@@ -207,13 +245,29 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
     $tramitaEmBlocoProtocoloDTO->retNumId();
     $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo());
-    $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    
-    $arrTramitaEmBloco = $this->listar($tramitaEmBlocoProtocoloDTO);
+    $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();  
 
-    if ($arrTramitaEmBloco!= null) {
-      return "O processo atual já consta no bloco {$arrTramitaEmBloco[0]->getNumIdTramitaEmBloco()}";
+    $arrTramitaEmBloco = $this->listar($tramitaEmBlocoProtocoloDTO);
+    
+    foreach ($arrTramitaEmBloco as $tramitaEmBloco) {
+      $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdTramitaEmBloco());
+      $tramiteEmBlocoDTO->setStrStaEstado([
+        TramiteEmBlocoRN::$TE_ABERTO,
+        TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
+      ], InfraDTO::$OPER_IN);
+      $tramiteEmBlocoDTO->retStrStaEstado();
+      $tramiteEmBlocoDTO->retNumId();
+  
+      $tramiteEmBlocoRN = new TramiteEmBlocoRN();
+      $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);  
+
+      if (!empty($tramiteEmBloco)) {
+        return "Prezado(a) usuário(a), o processo atual encontra-se inserido no bloco de número {$tramiteEmBloco->getNumId()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+      }
     }
+
+
 
     $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
     $tramitaEmBlocoProtocoloDTO->retNumId();
