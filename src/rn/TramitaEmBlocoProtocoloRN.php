@@ -188,7 +188,8 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         }
     }
 
-  protected function montarIndexacaoControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO){
+  protected function montarIndexacaoControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO)
+  {
     try{
 
       $dto = new TramitaEmBlocoProtocoloDTO();
@@ -215,7 +216,8 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     }
   }
 
-  protected function cadastrarControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO) {
+  protected function cadastrarControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO)
+  {
     try {
 
       //Valida Permissao
@@ -236,16 +238,13 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     }
   }
 
-  protected function validarBlocoDeTramiteControlado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO) {
-
-    if (empty($objTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco())) {
-      return 'Nenhum bloco foi selecionado! Por favor, selecione um bloco.';
-    }
-
+  protected function validarBlocoDeTramiteControlado($IdProtocolo)
+  {
     $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
     $tramitaEmBlocoProtocoloDTO->retNumId();
-    $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo());
+    $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($IdProtocolo);
     $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();  
+    $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
 
     $arrTramitaEmBloco = $this->listar($tramitaEmBlocoProtocoloDTO);
     
@@ -263,23 +262,8 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);  
 
       if (!empty($tramiteEmBloco)) {
-        return "Prezado(a) usuário(a), o processo atual encontra-se inserido no bloco de número {$tramiteEmBloco->getNumId()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco de número {$tramiteEmBloco->getNumId()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
-    }
-
-
-
-    $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-    $tramitaEmBlocoProtocoloDTO->retNumId();
-    $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($objTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
-
-    $arrTramitaEmBloco = $this->listar($tramitaEmBlocoProtocoloDTO);
-
-    $numMaximoDeProcessos = 100;
-    $numRegistro = count($arrTramitaEmBloco);
-    if (!empty($numRegistro) && $numRegistro >= $numMaximoDeProcessos) {
-      return "O Bloco já contém o número máximo de {$numMaximoDeProcessos} processos.";
     }
 
     return false;
@@ -290,7 +274,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
    */
   public function atualizarEstadoDoBloco(TramitaEmBlocoProtocoloDTO $tramiteEmBlocoProtocoloDTO, $novoEstadoDoBloco)
   {
-
        // Verificar se tem existe processo recusado dentro de um bloco
       $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
       $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());

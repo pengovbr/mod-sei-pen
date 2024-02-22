@@ -8,7 +8,10 @@ try {
   $objPaginaSEI = PaginaSEI::getInstance();
 
   $objSessaoSEI->validarLink();
-  $objSessaoSEI->validarPermissao($_GET['acao']);
+
+  $objPaginaSEI->salvarCamposPost(array('hdnIdProtocolo', 'selBlocos'));
+  $strIdItensSelecionados = $objPaginaSEI->recuperarCampo('hdnIdProtocolo');
+  $idBlocoExterno = $objPaginaSEI->recuperarCampo('selBlocos');
 
   //////////////////////////////////////////////////////////////////////////////
   // InfraDebug::getInstance()->setBolLigado(false);
@@ -26,36 +29,46 @@ try {
     $strParametros .= "&id_procedimento=".$_GET['id_procedimento'];
   }
 
-  if (isset($_GET['id_documento'])) {
-    $strParametros .= "&id_documento=".$_GET['id_documento'];
+  if (isset($strIdItensSelecionados)) {
+    $strParametros .= "&processos=".$strIdItensSelecionados;
   }
 
-  $arrComandos = array();
+  if (isset($_GET['processos']) && !empty($_GET['processos'])) {
+    $strParametros .= "&processos=".$_GET['processos'];
+  }
+
+  $arrComandos = [];
+  $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarProcessoEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
+  $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $strParametros) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
   switch($_GET['acao']) {
     case 'pen_incluir_processo_em_bloco_tramite':
+      $objSessaoSEI->validarPermissao($_GET['acao']);
 
       $strTitulo = 'Incluir Processo no Bloco de Trâmite';
-      $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarProcessoEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
-      $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . $strParametros) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
-
+      
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
       $objProcedimentoDTO->setDblIdProcedimento($_GET['id_procedimento']);
     
       $objProcedimentoRN = new ProcedimentoRN();
       $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-    
-      $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-
-      $objTramiteEmBlocoProtocoloDTO->setNumId(null);
-      $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($_GET['id_procedimento']);
-      $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_POST['id_tramita_bloco']);
-      $objTramiteEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
 
       if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
         try{
+          if ($_POST['selBlocos'] == null) {
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);   
+          }
+              
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+
+          $objTramiteEmBlocoProtocoloDTO->setNumId(null);
+          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($_GET['id_procedimento']);
+          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_POST['selBlocos']);
+          $objTramiteEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
+          
           $objTramiteEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $objTramiteEmBlocoProtocoloRN->validarBlocoDeTramite($objTramiteEmBlocoProtocoloDTO);
+          $validar = $objTramiteEmBlocoProtocoloRN->validarBlocoDeTramite($_GET['id_procedimento']);
 
           if ($validar) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_AVISO);
@@ -73,7 +86,63 @@ try {
         exit(0);
       }
       break;
+      case 'pen_tramita_em_bloco_adicionar':
+        $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'));
+        $strIdItensSelecionados = $strIdItensSelecionados ?: $_GET['processos'];
+        // print_r($arrProtocolosOrigem); die('aqui');
+        $strTitulo = 'Incluir Processo(s) no Bloco de Trâmite';
+        
+        if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
+         
+          try{
+            $erros = [];
+            $sucesso = false;
+            $arrProtocolosOrigemProtocolo = explode(',', $strIdItensSelecionados);
+            
+            foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
 
+              $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();   
+              $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($idItensSelecionados);
+              $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoExterno); 
+              $tramitaEmBlocoProtocoloDTO->retNumId();
+              $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco(); 
+              $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+          
+              $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+              $validar = $tramitaEmBlocoProtocoloRN->validarBlocoDeTramite($idItensSelecionados);
+
+              if ($validar == false) {
+                $sucesso = true;
+                $objProcedimentoDTO = new ProcedimentoDTO();
+                $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+                $objProcedimentoDTO->setDblIdProcedimento($idItensSelecionados);
+              
+                $objProcedimentoRN = new ProcedimentoRN();
+                $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
+                $tramitaEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
+                $objTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->cadastrar($tramitaEmBlocoProtocoloDTO);
+              } else {
+                $erros = true;
+                $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+              }
+          }
+
+          if ($sucesso) {
+            $mensagemSucesso = "Processo(s) incluído(s) com sucesso no bloco {$idBlocoExterno}";
+          }
+          
+          if ($sucesso && $erros) {
+            $mensagemSucesso = "Os demais processos selecionados foram incluídos com sucesso no bloco {$idBlocoExterno}";
+          }
+
+          $objPaginaSEI->adicionarMensagem($mensagemSucesso, 5);
+
+      }catch(Exception $e) {
+        PaginaSEI::getInstance()->processarExcecao($e);
+      }
+    }
+      break;
     default:
       throw new InfraException("Ação '".$_GET['acao']."' não reconhecida.");
   }
@@ -86,6 +155,7 @@ try {
   $objTramiteEmBlocoDTO->retNumId();
   $objTramiteEmBlocoDTO->retNumIdUnidade();
   $objTramiteEmBlocoDTO->retStrDescricao();
+  PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
 
   $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
   foreach ($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO) as $dados) {
@@ -121,7 +191,7 @@ function inicializar(){
 
 if ('<?=$_GET['acao']?>'=='pen_incluir_processo_em_bloco_tramite') {
   document.getElementById('divIdentificacao').style.display = 'none';
-  document.getElementById('id_tramita_bloco').focus();
+  document.getElementById('selBlocos').focus();
 } else {
   document.getElementById('divIdentificacao').style.display = 'block';
   document.getElementById('btnCancelar').focus();
@@ -138,17 +208,16 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 
   <?php
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
-  $objPaginaSEI->montarAreaValidacao();
   $objPaginaSEI->abrirAreaDados('15em');
   ?>
 
-  <label id="lblBlocos" for="lblIdBloco" class="infraLabelObrigatorio">Blocos :</label>
-  <select id="selBlocos" name="id_tramita_bloco" class="infraSelect" >
-    <?php print InfraINT::montarSelectArray('', 'Selecione', $objTramiteEmBlocoProtocoloDTO->getNumId(), array_filter($arrMapIdBloco)); ?>
+  <label id="lblBlocos" for="lblIdBloco" class="infraLabelObrigatorio">Blocos que estão em aberto:</label>
+  <select id="selBlocos" name="selBlocos" class="infraSelect" >
+    <?php print InfraINT::montarSelectArray(null, 'Selecione', '', array_filter($arrMapIdBloco)); ?>
   </select>
 
-  <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="<?=$objTramiteEmBlocoProtocoloDTO->getNumId();?>" />
-  <input type="hidden" id="hdnIdProtocolo" name="hdnIdProtocolo" value="<?=$objTramiteEmBlocoProtocoloDTO->getNumIdProtocolo();?>" />
+  <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="" />
+  <input type="hidden" id="hdnIdProtocolo" name="hdnIdProtocolo" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="<?= implode(',', $arrProtocolosOrigem);?>" />
 
   <?php
   $objPaginaSEI->fecharAreaDados();
