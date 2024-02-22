@@ -24,24 +24,24 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
 
         $penMapUnidadesFixture = new PenMapUnidades2Fixture();
         $penMapUnidadesFixture->carregar([
-            'idUnidadeRH' => self::$remetente['ID_ESTRUTURA'],
-            'siglaUnidadeRH' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nomeUnidadeRH' => self::$remetente['NOME_UNIDADE']
+            'IdUnidadeRH' => self::$remetente['ID_ESTRUTURA'],
+            'SiglaUnidadeRH' => self::$remetente['SIGLA_ESTRUTURA'],
+            'NomeUnidadeRH' => self::$remetente['NOME_UNIDADE']
         ]);
 
         $penOrgaoExternoFixture = new PenOrgaoExterno2Fixture();
         $penOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
-            'idEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'estrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
-            'idOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
-            'orgaoDestino' => self::$remetente['NOME_UNIDADE'],
-            'idOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'orgaoOrigem' => self::$destinatario['NOME_UNIDADE']
+            'IdEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'EstrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
+            'IdOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
+            'OrgaoDestino' => self::$remetente['NOME_UNIDADE'],
+            'IdOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'OrgaoOrigem' => self::$destinatario['NOME_UNIDADE']
         ]);
 
         $penMapTipoProcessoFixture = new PenMapTipoProcessoFixture();
         $penMapTipoProcessoFixture->carregar([
-            'idMapOrgao' => $penOrgaoExternoDTO->getDblId()
+            'IdMapOrgao' => $penOrgaoExternoDTO->getDblId()
         ]);
 
         $this->acessarSistema(

@@ -596,10 +596,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
     }
 
-    public function gerarDadosProcessoTeste($contextoProducao)
+    public function gerarDadosProcessoTeste($contextoProducao,$tipoProcesso = null)
     {
         return array(
-            "TIPO_PROCESSO" => $contextoProducao['TIPO_PROCESSO'],
+            "TIPO_PROCESSO" => $tipoProcesso ?: $contextoProducao['TIPO_PROCESSO'],
             "DESCRICAO" => util::random_string(100),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),

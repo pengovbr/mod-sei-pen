@@ -48,10 +48,10 @@ class PenMapUnidades2Fixture extends FixtureBase
     public function gravar($dados = [])
     {
         $objPenUnidadeDTO = new \PenUnidadeDTO();
-        $objPenUnidadeDTO->setNumIdUnidade($dados['idUnidade'] ?: 110000001);
-        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['idUnidadeRH'] ?: null);
-        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['nomeUnidadeRH'] ?: null);
-        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['siglaUnidadeRH'] ?: null);
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH'] ?: null);
+        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['NomeUnidadeRH'] ?: null);
+        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['SiglaUnidadeRH'] ?: null);
         $objPenUnidadeDB = new \PenUnidadeBD(\BancoSEI::getInstance());
         $arrPenUnidadeDTO = $objPenUnidadeDB->cadastrar($objPenUnidadeDTO);
         return $arrPenUnidadeDTO;
@@ -64,10 +64,10 @@ class PenMapUnidades2Fixture extends FixtureBase
     public function atualizar($dados = [])
     {
         $objPenUnidadeDTO = new \PenUnidadeDTO();
-        $objPenUnidadeDTO->setNumIdUnidade($dados['idUnidade'] ?: 110000001);
-        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['idUnidadeRH']);
-        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['nomeUnidadeRH']);
-        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['siglaUnidadeRH']);
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH']);
+        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['NomeUnidadeRH']);
+        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['SiglaUnidadeRH']);
         $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
         $arrPenUnidadeDTO = $objPenUnidadeBD->alterar($objPenUnidadeDTO);
         return $arrPenUnidadeDTO;
@@ -81,8 +81,8 @@ class PenMapUnidades2Fixture extends FixtureBase
     public function deletar($dados = [])
     {
         $objPenUnidadeDTO = new \PenUnidadeDTO();
-        $objPenUnidadeDTO->setNumIdUnidade($dados['idUnidade'] ?: 110000001);
-        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['idUnidadeRH']);
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH']);
         $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
         $arrPenUnidadeDTO = $objPenUnidadeBD->excluir($objPenUnidadeDTO);
         return $arrPenUnidadeDTO;

@@ -15,10 +15,10 @@ class PenMapTipoProcessoFixture extends FixtureBase
     {
 
         $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
-        $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['idMapOrgao']);
-        $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['idTipoProcessoOrigem'] ?: 100000261);
-        $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoDestino($dados['idTipoProcessoDestino'] ?: 100000261);
-        $objPenMapTipoProcedimentoDTO->setStrNomeTipoProcesso($dados['nomeTipoProcesso'] ?: "Arrecadação: Receita");
+        $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapOrgao']);
+        $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdTipoProcessoOrigem'] ?: 100000261);
+        $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoDestino($dados['IdTipoProcessoDestino'] ?: 100000261);
+        $objPenMapTipoProcedimentoDTO->setStrNomeTipoProcesso($dados['NomeTipoProcesso'] ?: "Arrecadação: Receita");
         $objPenMapTipoProcedimentoDTO->setStrAtivo($dados['Ativo'] ?: 'S');
         $objPenMapTipoProcedimentoDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
         $objPenMapTipoProcedimentoDTO->setDthRegistro($dados['Registro'] ?: \InfraData::getStrDataAtual());

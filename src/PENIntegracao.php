@@ -87,7 +87,7 @@ class PENIntegracao extends SeiIntegracao
     $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI);
   }
 
-  public function validarExcluirDesativarTipoDocumento($arrObjSerieAPI)
+  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI)
   {
     $excecao = new InfraException();
     foreach ($arrObjSerieAPI as $objSerieAPI) {
@@ -97,9 +97,6 @@ class PENIntegracao extends SeiIntegracao
 
       $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
       $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->contar($objPenRelTipoDocMapEnviadoDTO);
-      if ($objPenRelTipoDocMapEnviadoDTO > 0) {
-        $excecao->lancarValidacao('Não é permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"');
-      }
 
       $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
       $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
@@ -107,7 +104,8 @@ class PENIntegracao extends SeiIntegracao
 
       $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
       $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO);
-      if ($objPenRelTipoDocMapRecebidoDTO > 0) {
+      
+      if ($objPenRelTipoDocMapRecebidoDTO > 0 || $objPenRelTipoDocMapEnviadoDTO > 0) {
           $excecao->lancarValidacao('Não é permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"');
       }
     }
@@ -121,7 +119,7 @@ class PENIntegracao extends SeiIntegracao
     $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
   }
 
-  public function validarExcluirDesativarUnidade($arrObjUnidadeAPI)
+  protected function validarExcluirDesativarUnidade($arrObjUnidadeAPI)
   {
     $excecao = new InfraException();
     foreach ($arrObjUnidadeAPI as $objUnidadeAPI) {
@@ -131,39 +129,57 @@ class PENIntegracao extends SeiIntegracao
 
       $objPenUnidadeRN = new PenUnidadeRN();
       $objPenUnidadeDTO = $objPenUnidadeRN->contar($objPenUnidadeDTO);
-      if ($objPenUnidadeDTO >= 1) {
+      if ($objPenUnidadeDTO > 0) {
         $excecao->lancarValidacao('Não é permitido excluir ou desativar a unidade "' . $objUnidadeAPI->getSigla() . '"');
       }
     }
   }
 
-  // public function excluirTipoProcesso($arrObjTipoProcedimentoDTO) {
-  //   $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO);
-  // }
+  public function excluirTipoProcesso($arrObjTipoProcedimentoDTO) {
+    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'excluir');
+  }
 
-  // public function desativarTipoProcesso($arrObjTipoProcedimentoDTO) {
-  //   $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO);
-  // }
+  public function desativarTipoProcesso($arrObjTipoProcedimentoDTO) {
+    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'desativar');
+  }
 
-  // public function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO) {
-  //   $exception = new InfraException();
-  //   foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
-  //       $objPenParametroDTO = new PenParametroDTO();
-  //       $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
-  //       $objPenParametroDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
-  //       $objProcedimentoRN = new PenParametroRN();
-  //       $objPenParametroDTO = $objProcedimentoRN->contar($objPenParametroDTO);
+  protected function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,$strDesativarExcluir) {
+    
+    $mensagem = "Prezado(a) usuário(a), você está tentando ".$strDesativarExcluir." um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
+    ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
+    ."mencionados o Tipo de Processo: \"%s\".";
 
-  //       $objProcedimentoDTO = new ProcedimentoDTO();
-  //       $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
-  //       $objProcedimentoRN = new ProcedimentoRN();
-  //       $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
-  //       if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
-  //           $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
-  //       }
-  //   }
+    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
 
-  // }
+    $mensagem = 'Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' o Tipo de Processo "%s" '
+      . 'que se encontra mapeado para o Tipo de Processo Padrão. '
+      . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
+      . 'O Tipo de Processo padrão se encontra disponível em: '
+      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
+
+    $objPenParametroRN = new PenParametroRN();
+    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
+
+    $exception = new InfraException();
+    foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
+        $objPenParametroDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
+        $objPenParametroRN = new PenParametroRN();
+        $objPenParametroDTO = $objPenParametroRN->contar($objPenParametroDTO);
+
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
+        $objProcedimentoRN = new ProcedimentoRN();
+        $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
+
+        if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
+            $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
+        }
+    }
+
+  }
   public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
   {
     $objProcedimentoDTO = new ProcedimentoDTO();
@@ -610,51 +626,6 @@ class PENIntegracao extends SeiIntegracao
     return $arrIcones;
   }
 
-  /**
-   * @param array $arrObjTipoProcedimentoDTO
-   * @return void
-   */
-  public function desativarTipoProcesso($arrObjTipoProcedimentoDTO)
-  {
-    $mensagem = "Prezado(a) usuário(a), você está tentando desativar um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
-          ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
-          ."mencionados o Tipo de Processo: \"%s\".";
-
-    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
-
-    $mensagem = 'Prezado(a) usuário(a), você está tentando desativar o Tipo de Processo "%s" '
-      . 'que se encontra mapeado para o Tipo de Processo Padrão. '
-      . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
-      . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
-
-    $objPenParametroRN = new PenParametroRN();
-    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
-  }
-
-  /**
-   * @param array $arrObjTipoProcedimentoDTO
-   * @return void
-   */
-  public function excluirTipoProcesso($arrObjTipoProcedimentoDTO)
-  {
-    $mensagem = "Prezado(a) usuário(a), você está tentando excluir um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
-      ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
-      ."mencionados o Tipo de Processo: \"%s\".";
-
-    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
-
-    $mensagem = 'Prezado(a) usuário(a), você está tentando excluir o Tipo de Processo "%s" '
-      . 'que se encontra mapeado para o Tipo de Processo Padrão. '
-      . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
-      . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
-
-    $objPenParametroRN = new PenParametroRN();
-    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
-  }
 
   /**
    * Método responsável de criar listagem de item para XML
