@@ -35,5 +35,8 @@ require_once __DIR__ . '/src/paginas/PaginaAnexarProcesso.php';
 require_once __DIR__ . '/src/paginas/PaginaCancelarDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaMoverDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaTramitarProcessoEmLote.php';
+require_once __DIR__ . '/src/paginas/PaginaUnidades.php';
+require_once __DIR__ . '/src/paginas/PaginaTipoDocumento.php';
+require_once __DIR__ . '/src/paginas/PaginaTipoProcesso.php';
 
 require_once __DIR__ . '/tests/CenarioBaseTestCase.php';
