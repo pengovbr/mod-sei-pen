@@ -58,19 +58,40 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
                 } else {
                   $dto->setStrStaEstadoBloco('A');
                 }
-                $objTramiteDTO = new TramiteDTO();
-                $objTramiteDTO->setNumIdProcedimento($dto->getDblIdProtocolo());
-                $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
-                $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-                $objTramiteDTO->retNumIdTramite();
-                $objTramiteDTO->retDthRegistro();
-                $objTramiteDTO->retNumIdEstruturaDestino();
-                $objTramiteDTO->retStrNomeUsuario();
+               
+                $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
+                $objPenLoteProcedimentoDTO->setDblIdProcedimento($dto->getDblIdProtocolo());
+                $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
-                $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-                $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+                $objPenLoteProcedimentoDTO->retNumIdLote();
+                $objPenLoteProcedimentoDTO->retDblIdProcedimento();
+                $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
+                $objPenLoteProcedimentoDTO->retNumIdAndamento();
+                $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
+                $objPenLoteProcedimentoDTO->retStrNomeUsuario();
+                $objPenLoteProcedimentoDTO->retDthRegistro();
+                $objPenLoteProcedimentoDTO->setOrdNumIdLote(InfraDTO::$TIPO_ORDENACAO_DESC);
+            
+                $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
+                // $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+                $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
 
-                $dto->setObjTramiteDTO($objTramiteDTO);
+                $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoRN);
+
+                // $objTramiteDTO = new TramiteDTO();
+                // $objTramiteDTO->setNumIdProcedimento($dto->getDblIdProtocolo());
+                // $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
+                // $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+                // $objTramiteDTO->retNumIdTramite();
+                // $objTramiteDTO->retDthRegistro();
+                // $objTramiteDTO->retNumIdEstruturaDestino();
+                // $objTramiteDTO->retStrNomeUsuario();
+
+                // $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+                // $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+
+                // $dto->setObjTramiteDTO($arrObjPenLoteProcedimentoRN);
+
 
                 $objAtividadeDTO = new AtividadeDTO();
                 $objAtividadeDTO->setDblIdProtocolo($dto->getDblIdProtocolo());

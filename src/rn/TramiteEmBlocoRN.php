@@ -17,9 +17,6 @@ class TramiteEmBlocoRN extends InfraRN {
     public static $TE_CONCLUIDO = 'C';
     public static $TE_CONCLUIDO_PARCIALMENTE = 'P';
 
-    public static $TA_TODAS = 'T';
-    public static $TA_MINHAS = 'M';
-
     /**
      * Inicializa o obj do banco da Infra
      * @return obj

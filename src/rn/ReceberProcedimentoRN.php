@@ -529,22 +529,21 @@ class ReceberProcedimentoRN extends InfraRN
           // Atualizar Bloco para concluido parcialmente
           $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
           $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
 
           $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-          if ($tramiteEmBlocoProtocolo == null) {
-            return null;
+          if ($tramiteEmBlocoProtocolo != null) {
+            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+            $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco());
+            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+
+            $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
           }
-
-          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-          $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo->getNumIdTramitaEmBloco());
-          $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-
-          $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-          $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
 
       }
 

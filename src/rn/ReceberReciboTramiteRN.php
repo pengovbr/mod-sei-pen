@@ -144,9 +144,11 @@ class ReceberReciboTramiteRN extends InfraRN
             // atualizar bloco de tramite externo
             $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
             $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+            $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
             $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-            $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-          
+            $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();        
+
             $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
             $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
           
@@ -154,7 +156,6 @@ class ReceberReciboTramiteRN extends InfraRN
               $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
             }
           
-
             $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S'));
             // Registra o recbimento do recibo no histórico e realiza a conclusão do processo
