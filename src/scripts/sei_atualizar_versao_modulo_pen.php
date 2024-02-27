@@ -2669,7 +2669,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
       $objMetaBD->criarTabela(array(
-        'tabela' => 'md_pen_tramita_em_bloco_protocolo',
+        'tabela' => 'md_pen_tramita_bl_protocolo',
         'cols' => array(
             'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
             'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
@@ -2681,17 +2681,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         'pk' => array('cols' => array('id')),
         'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
         'fks' => array(
-          'protocolo' => array('nome' => 'fk_tramita_em_bloco_protocolo_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
+          'protocolo' => array('nome' => 'fk_tramita_bl_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
           //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
         )
       ));
-
-      //Sequência: md_pen_tramita_em_bloco_protocolo
-      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco_protocolo');
+ 
+      //Sequência: md_pen_tramita_bl_protocolo
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_bl_protocolo');
       $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
-
-      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco_protocolo', $numMaxId + 1);
-      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco_protocolo');
+ 
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tr_bl_protocolo', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_bl_protocolo');
       $objInfraSequenciaDTO->retStrNome();
       $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);

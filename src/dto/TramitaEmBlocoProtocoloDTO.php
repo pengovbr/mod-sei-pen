@@ -7,11 +7,11 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class TramitaEmBlocoProtocoloDTO extends InfraDTO {
 
   public function getStrNomeTabela() {
-  	 return 'md_pen_tramita_em_bloco_protocolo';
+  	 return 'md_pen_tramita_bl_protocolo';
   }
 
   public function getStrNomeSequenciaNativa() {
-    return 'md_pen_seq_tramita_em_bloco_protocolo';
+    return 'md_pen_seq_tr_bl_protocolo';
   }
 
   public function montar() {
