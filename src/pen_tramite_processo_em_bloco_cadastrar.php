@@ -217,7 +217,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
   </select>
 
   <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="" />
-  <input type="hidden" id="hdnIdProtocolo" name="hdnIdProtocolo" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="<?= implode(',', $arrProtocolosOrigem);?>" />
+  <input type="hidden" id="hdnIdProtocolo" name="hdnIdProtocolo" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>"  value="<?= $arrProtocolosOrigem ? implode(',', $arrProtocolosOrigem) : '' ?>" />
 
   <?php
   $objPaginaSEI->fecharAreaDados();
