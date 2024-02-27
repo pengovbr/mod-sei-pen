@@ -173,6 +173,25 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         sleep(1);
     }
 
+    public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste)
+    {
+        $strProtocoloTeste = $processoTeste['PROTOCOLO'];
+
+        $this->test->waitUntil(function ($testCase) use ($strProtocoloTeste) {
+            sleep(5);
+            $this->paginaBase->navegarParaControleProcesso();
+            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+        print_r(count($listaDocumentos)); 
+        
+        sleep(5);
+        
+        die('aki');
+    }
+
     public function retornarTextoColunaDaTabelaDeBlocos() 
     {
        $tabela = $this->test->byXPath('//tr[@class="infraTrClara odd"]');
@@ -183,15 +202,6 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
 
     public function retornarQuantidadeDeProcessosNoBloco() 
     {
-
-    //     $linhasDaTabela = $this->test->elements($this->test->using('xpath')->value('//table[@id="tblBlocos"]//tr[@class="infraTrClara odd"]'));
-    // //    $tabela = $this->test->byXPath('//tr[@class="infraTrClara odd"]');
-    //    $count = $linhasDaTabela[0]->byXPath('./td');
-    //    $numeroDeLinhas = count($count);
-
-    //    return $linhasDaTabela[0];
-
-
         // Localiza todas as linhas da tabela com o XPath
         $linhasDaTabela = $this->test->elements($this->test->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
 

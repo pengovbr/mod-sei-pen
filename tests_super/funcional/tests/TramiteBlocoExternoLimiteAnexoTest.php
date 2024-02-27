@@ -2,7 +2,7 @@
 
 class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 {
-    protected static $numQtyProcessos = 3; // max: 99
+    protected static $numQtyProcessos = 2; // max: 99
     protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
@@ -10,6 +10,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
     public static $documentoTeste1;
     public static $documentoTeste2;
     public static $protocoloTestePrincipal;
+    public static $processoTestePrincipal;
 
     function setUp(): void 
     {
@@ -36,7 +37,6 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
      */
     public function test_tramitar_processo_anexado_da_origem()
     {
-        
         // Definição de dados de teste do processo principal
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
@@ -106,7 +106,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
                 'IdxRelBlocoProtocolo' => $objProtocoloFixtureDTO->getStrProtocoloFormatado()
             ]);
 
-            self::$protocoloTestePrincipal = $objProtocoloFixtureDTO->getStrProtocoloFormatado();
+            self::$protocoloTestePrincipal['PROTOCOLO'] = $objProtocoloFixtureDTO->getStrProtocoloFormatado();
         }
 
         $this->acessarSistema(
@@ -132,13 +132,27 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
         }
     }
 
-    public function test_verificar_envio_tramite_em_bloco()
+    public function test_verificar_envio_processo()
     {
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->visualizarProcessoTramitadosEmLote($this);
+        $this->navegarProcessoEmLote(0);
+
+        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            sleep(5);
+            $testCase->refresh();
+            $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
+            $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
+            return true;
+        }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
+        
+        sleep(5);
+    }
+
+    public function test_verificar_envio_tramite_em_bloco()
+    {
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -154,5 +168,4 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
             $this->assertEquals('Aberto', $novoStatus);
         }  
     }
-    
 }

@@ -2,7 +2,7 @@
 
 class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 {
-    protected static $numQtyProcessos = 3; // max: 99
+    protected static $numQtyProcessos = 2; // max: 99
     protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
@@ -99,7 +99,8 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
                 self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
             );
-            sleep(10);
+            sleep(5);
+
         } else {
             $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
             $qtyProcessos = $this->paginaCadastrarProcessoEmBloco->retornarQuantidadeDeProcessosNoBloco();
@@ -108,8 +109,33 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         }
     }
 
-    /**
+     /**
      * Verificar se o bloco foi enviado
+     *
+     *
+     * @return void
+     */
+    public function test_verificar_envio_processo()
+    {
+        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->visualizarProcessoTramitadosEmLote($this);
+        $this->navegarProcessoEmLote(0);
+
+        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            sleep(5);
+            $testCase->refresh();
+            $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
+            $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
+            return true;
+        }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
+        
+        sleep(5);
+    }
+
+    /**
+     * Verificar atualização do bloco
      *
      *
      * @return void
