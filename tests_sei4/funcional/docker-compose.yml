@@ -59,8 +59,6 @@ services:
       - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
       - /tmp:/tmp
-      - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
-      - /tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
