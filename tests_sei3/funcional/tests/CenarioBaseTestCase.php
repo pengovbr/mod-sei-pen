@@ -44,6 +44,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaCadastrarProcessoEmBloco = null;
+    protected $paginaTramiteEmBloco = null;
 
     public function setUpPage(): void
     {
@@ -66,6 +68,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
+        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
         $this->currentWindow()->maximize();
     }
 

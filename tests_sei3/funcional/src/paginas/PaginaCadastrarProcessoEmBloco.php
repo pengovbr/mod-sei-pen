@@ -16,8 +16,11 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
 
     public function navegarListagemBlocoDeTramite()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Blocos de Trâmite Externo'));
-        $this->test->byXPath("//a[@link='md_pen_tramita_em_bloco']")->click();
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=md_pen_tramita_em_bloco')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
     }
 
     /**
@@ -185,6 +188,11 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
         }, PEN_WAIT_TIMEOUT);
 
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+        print_r(count($listaDocumentos)); 
+        
+        sleep(5);
+        
+        die('aki');
     }
 
     public function retornarTextoColunaDaTabelaDeBlocos() 
