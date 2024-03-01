@@ -2007,19 +2007,22 @@ class PenAtualizarSipRN extends InfraRN
     $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Lote', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
 
-    $objItemMenuDTO = new ItemMenuDTO();
-    $objItemMenuDTO->setNumIdItemMenu($idMenuTramita);
-    $objItemMenuDTO->setNumIdSistema($numIdSistema);
-    $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
-    $objItemMenuDTO->retNumIdMenu();
-    $objItemMenuDTO->retNumIdItemMenu();
-    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
-    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
- 
-    if (isset($objItemMenuDTO)) {
-      $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
-      $objItemMenuDTO->setStrIcone('pen_tramite_externo_lote.svg');
-      $objItemMenuBD->alterar($objItemMenuDTO);
+    if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenu($idMenuTramita);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+          $objItemMenuDTO->setStrIcone('pen_tramite_externo_lote.svg');
+          $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+          $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+
     }
 
     $this->atualizarNumeroVersao("3.6.0");
