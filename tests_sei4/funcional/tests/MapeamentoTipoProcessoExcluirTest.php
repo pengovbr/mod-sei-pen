@@ -4,8 +4,8 @@
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Excluir mapeamento entre orgãos
  *
- * grupos de execucao
- * @group rodar_sozinho
+ * Execution Groups
+ * @group execute_alone
  */
 class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
 {

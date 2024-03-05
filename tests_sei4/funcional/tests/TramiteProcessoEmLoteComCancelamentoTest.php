@@ -1,8 +1,7 @@
 <?php
 /**
- * grupos de execucao
- * @group rodar_sozinho
- * verificar pra rodar sem servico de recebimento
+ * Execution Groups
+ * @group execute_parallel_without_monitoring
  * @group rodarseparado
  * @group rodarseparado3
  */
