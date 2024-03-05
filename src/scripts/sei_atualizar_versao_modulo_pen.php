@@ -948,9 +948,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-            }
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1218,9 +1218,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-            }
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1902,9 +1902,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-            }
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }

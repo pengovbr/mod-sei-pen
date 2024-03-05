@@ -2427,25 +2427,25 @@ class ReceberProcedimentoRN extends InfraRN
       $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
       $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
 
-      if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-        $objEnviarProcessoDTO->setDtaPrazoRetornoProgramado(null);
-        $objEnviarProcessoDTO->setNumDiasRetornoProgramado(null);
-        $objEnviarProcessoDTO->setStrSinDiasUteisRetornoProgramado('N');
-      }else{
-        $objEnviarProcessoDTO->setDtaPrazo(null);
-        $objEnviarProcessoDTO->setNumDias(null);
-        $objEnviarProcessoDTO->setStrSinDiasUteis('N');
-      }
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+      $objEnviarProcessoDTO->setDtaPrazoRetornoProgramado(null);
+      $objEnviarProcessoDTO->setNumDiasRetornoProgramado(null);
+      $objEnviarProcessoDTO->setStrSinDiasUteisRetornoProgramado('N');
+    }else{
+      $objEnviarProcessoDTO->setDtaPrazo(null);
+      $objEnviarProcessoDTO->setNumDias(null);
+      $objEnviarProcessoDTO->setStrSinDiasUteis('N');
+    }
 
       $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
 
-      if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-        $objConcluirProcessoDTO = new ConcluirProcessoDTO();
-        $objConcluirProcessoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-        $objProcedimentoRN->concluir($objConcluirProcessoDTO);
-      }else{
-        $objProcedimentoRN->concluir(array($objProcedimentoDTO));
-      }
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+      $objConcluirProcessoDTO = new ConcluirProcessoDTO();
+      $objConcluirProcessoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      $objProcedimentoRN->concluir($objConcluirProcessoDTO);
+    }else{
+      $objProcedimentoRN->concluir(array($objProcedimentoDTO));
+    }
   }
 
 
