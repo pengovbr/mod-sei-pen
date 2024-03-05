@@ -53,7 +53,7 @@ $objPaginaSEI->abrirBody();
 <?php //$objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
 <script type="text/javascript">
     alert('<?php echo $strMensagem ?>');
-    parent.location.reload();
+    parent.parent.location.reload();
 </script>
 <?php
 $objPaginaSEI->montarAreaDebug();
