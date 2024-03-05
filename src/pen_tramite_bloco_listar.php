@@ -119,11 +119,6 @@ try {
 
   PaginaSEI::getInstance()->prepararOrdenacao($objFiltroDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
 
-  // Verificar no DTO sobre funções de agragação para clausula DISTINCT
-  if (get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
-    $objFiltroDTO->retDthConclusaoAtividade();
-  }
-
   $objTramiteEmBloco = new TramiteEmBlocoRN();
   $arrObjBlocosListar = $objTramiteEmBloco->listar($objFiltroDTO);
 
