@@ -2,7 +2,7 @@
 /**
  * @group rodarseparado
  * @group rodarseparado2
- * @group rodar_sozinho
+ * @group execute_alone
  */
 
 class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBaseTestCase

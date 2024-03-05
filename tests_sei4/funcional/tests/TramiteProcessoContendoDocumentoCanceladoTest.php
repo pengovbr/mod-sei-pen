@@ -6,8 +6,8 @@
  * Este mesmo documento deve ser recebido e assinalado com cancelado no destinatário e
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
  *
- * grupos de execucao
- * @group rodar_sozinho
+ * Execution Groups
+ * @group execute_alone
  */
 class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
 {

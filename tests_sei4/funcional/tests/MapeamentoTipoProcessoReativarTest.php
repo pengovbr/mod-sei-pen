@@ -4,8 +4,8 @@
  * Testes de mapeamento de tipos de processo reativar
  * Reativar tipos de processos
  *
- * grupos de execucao
- * @group rodar_sozinho
+ * Execution Groups
+ * @group execute_alone
  */
 class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
 {

@@ -3,8 +3,8 @@
 use \utilphp\util;
 
 /*
- * grupos de execucao
- * @group rodar_sozinho
+ * Execution Groups
+ * @group execute_alone
 */
 
 class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase

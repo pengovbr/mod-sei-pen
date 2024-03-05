@@ -29,8 +29,8 @@ Escopo do caso de teste:
 
 /**
  *
- * grupos de execucao
- * @group rodar_paralelo_grupo1
+ * Execution Groups
+ * @group execute_parallel
  */
 class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestCase
 {

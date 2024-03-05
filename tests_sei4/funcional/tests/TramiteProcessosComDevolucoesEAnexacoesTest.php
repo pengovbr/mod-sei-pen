@@ -12,8 +12,8 @@
  *  - Adição de novos documentos ao processo Y e devolução para o órgão A
  *  - Adição de novos documentos e devolução para órgão B
  *
- * grupos de execucao
- * @group rodar_paralelo_grupo1
+ * Execution Groups
+ * @group execute_parallel
  */
 class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
 {

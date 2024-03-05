@@ -6,8 +6,8 @@
  * O resultado esperado é que o processo seja desbloqueado na origem, e o processo anexado seja criado e adicionado
  * na posição correta dentro do processo.
  *
- * grupos de execucao
- * @group rodar_paralelo_grupo1
+ * Execution Groups
+ * @group execute_parallel
  */
 class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTestCase
 {

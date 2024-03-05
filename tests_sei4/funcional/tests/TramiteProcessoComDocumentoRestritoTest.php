@@ -1,8 +1,8 @@
 <?php
 
 /*
- * grupos de execucao
- * @group rodar_paralelo_grupo1
+ * Execution Groups
+ * @group execute_parallel
 */
 
 class TramiteProcessoComDocumentoRestritoTest extends CenarioBaseTestCase
