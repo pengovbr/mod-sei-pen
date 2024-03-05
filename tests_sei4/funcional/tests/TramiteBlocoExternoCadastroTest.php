@@ -16,13 +16,6 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        $penMapUnidadesFixture = new \PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE']
-        ]);
-        $penMapUnidadesFixture->cadastrar();
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -41,6 +34,8 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
             utf8_encode('Bloco de Trâmite externo criado com sucesso!'),
             $mensagem
         );
+
+        $this->sairSistema();
     }
 
     /**
@@ -68,11 +63,15 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
             utf8_encode('Bloco de trâmite externo alterado com sucesso!'),
             $mensagem
         );
+
+        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void
     {
         // $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         // $objBlocoDeTramiteFixture->excluir(1);
+
+        parent::tearDownAfterClass();
     }
 }

@@ -86,7 +86,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         // Configuração do mapeamento de unidades
-        $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000001', CONTEXTO_ORGAO_A_ID_ESTRUTURA));
+        $penMapUnidadesFixture = new \PenMapUnidadesFixture();
+        $penMapUnidadesFixture->carregar([
+            'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA,
+            'Sigla' => CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA,
+            'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE,
+        ]);
         $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000002', CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA));
         // Configuração do prefíxo de processos
         $bancoOrgaoA->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_A_NUMERO_SEI, CONTEXTO_ORGAO_A_SIGLA_ORGAO));
@@ -116,7 +121,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
-        $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
+        $bancoOrgaoB->execute(
+            "insert into md_pen_unidade(id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) values ('110000001', ?, ?, ?)",
+            array(
+                CONTEXTO_ORGAO_B_ID_ESTRUTURA,
+                CONTEXTO_ORGAO_B_SIGLA_UNIDADE,
+                CONTEXTO_ORGAO_B_NOME_UNIDADE
+            )
+        );
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000002', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA));
 
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));

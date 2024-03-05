@@ -17,13 +17,6 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        $penMapUnidadesFixture = new \PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE']
-        ]);
-        $penMapUnidadesFixture->cadastrar();
-
         $parametros = [];
         $this->objProtocoloFixture = new \ProtocoloFixture();
         $this->objProtocoloFixture->carregar($parametros, function($objProtocoloDTO) {
@@ -99,5 +92,7 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
         );
         sleep(10);
+
+        $this->sairSistema();
     }
 }

@@ -57,4 +57,22 @@ abstract class FixtureBase extends \InfraRN
             'callback' => $callback
         ]);
     }
+
+    protected function removerInternoControlado($parametros){
+        $dto = $this->excluir($parametros["dados"]);
+
+        if (isset($parametros["callback"])) {
+            $parametros["callback"]($dto);
+        }
+
+        return $dto;
+    }
+
+    public function remover($dados = null, $callback = null){
+        $dados = $dados ?: [];
+        return $this->removerInterno([
+            'dados' => $dados,
+            'callback' => $callback
+        ]);
+    }
 }
