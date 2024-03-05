@@ -4,6 +4,9 @@
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Exportar tipos de processos
  * Pesquisar tipos de processos
+ *
+ * grupos de execucao
+ * @group rodar_sozinho
  */
 class MapeamentoTipoProcessoExportarTest extends CenarioBaseTestCase
 {

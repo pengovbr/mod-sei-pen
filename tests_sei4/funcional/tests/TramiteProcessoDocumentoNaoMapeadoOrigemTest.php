@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * grupos de execucao
+ * @group rodar_sozinho
+*/
+
 class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
 {
     public static $remetente;

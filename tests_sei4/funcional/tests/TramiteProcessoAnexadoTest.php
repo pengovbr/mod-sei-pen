@@ -2,6 +2,9 @@
 
 /**
  * Testes de trâmite de processos anexado
+ *
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
  */
 class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
 {

@@ -1,7 +1,9 @@
 <?php
 /**
- * @group rodarseparado
- * @group rodarseparado1
+  * grupos de execucao
+  * @group rodar_sozinho
+  * @group rodarseparado
+  * @group rodarseparado1
  */
 
 class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase

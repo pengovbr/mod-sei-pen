@@ -2,6 +2,11 @@
 
 use \utilphp\util;
 
+/*
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
+*/
+
 class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
 {
 

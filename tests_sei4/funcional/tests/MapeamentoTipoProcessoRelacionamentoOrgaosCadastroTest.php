@@ -3,6 +3,9 @@
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Cadastro mapeamento de orgãos
+ *
+ * grupos de execucao
+ * @group rodar_sozinho 
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBaseTestCase
 {

@@ -3,6 +3,9 @@
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Desativar e reativar mapeamento entre orgãos
+ * 
+ * grupos de execucao
+ * @group rodar_sozinho
  */
 class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
 {

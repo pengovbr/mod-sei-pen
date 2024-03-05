@@ -1,5 +1,8 @@
 <?php
 /**
+ * grupos de execucao
+ * @group rodar_sozinho
+ * verificar pra rodar sem servico de recebimento
  * @group rodarseparado
  * @group rodarseparado3
  */

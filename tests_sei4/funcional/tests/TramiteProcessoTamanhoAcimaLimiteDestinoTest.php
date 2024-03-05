@@ -1,6 +1,9 @@
 <?php
 
 /**
+ * 
+ * grupos de execucao
+ * @group rodar_sozinho
  * @group rodarseparado
  * @group rodarseparado4
  */

@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
+ * @group sem_rotina_recebimento
+ */
 class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
 {
     public static $remetente;

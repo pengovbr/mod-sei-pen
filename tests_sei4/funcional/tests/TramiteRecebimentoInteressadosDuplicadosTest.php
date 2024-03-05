@@ -2,6 +2,11 @@
 
 use \utilphp\util;
 
+/*
+ * grupos de execucao
+ * @group rodar_sozinho
+*/
+
 class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';

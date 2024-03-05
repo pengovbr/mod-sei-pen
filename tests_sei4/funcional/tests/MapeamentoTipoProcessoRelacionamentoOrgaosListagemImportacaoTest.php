@@ -4,6 +4,9 @@
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Listar mapeamento entre orgãos 
  * Importar tipos de processo para relacionamento
+ *
+ * grupos de execucao
+ * @group rodar_sozinho
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends CenarioBaseTestCase
 {

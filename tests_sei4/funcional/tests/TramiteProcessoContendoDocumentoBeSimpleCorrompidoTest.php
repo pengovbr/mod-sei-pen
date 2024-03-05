@@ -1,5 +1,10 @@
 <?php
 
+/**
+ *
+ * grupos de execucao
+ * @group rodar_sozinho 
+ */
 class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBaseTestCase
 {
     public static $remetente;

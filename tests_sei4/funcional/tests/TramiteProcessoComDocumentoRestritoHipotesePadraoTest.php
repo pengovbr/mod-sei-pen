@@ -1,5 +1,10 @@
 <?php
 
+/*
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
+*/
+
 class TramiteProcessoComDocumentoRestritoHipotesePadraoTest extends CenarioBaseTestCase
 {
     public static $remetente;

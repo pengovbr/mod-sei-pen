@@ -6,6 +6,9 @@
  *
  * O resultado esperado é que o novo processo recebido seja criado no remetente e o processo tramitado anteriormente
  * seja reaberto, atualizado e anexado ao novo processo recem criado
+ *
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
  */
 class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
 {

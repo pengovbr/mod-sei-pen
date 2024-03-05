@@ -27,7 +27,12 @@ Escopo do caso de teste:
         19-verificar correto recebimento do processo no destino (Órgão 1)
 */
 
-class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
+/**
+ *
+ * grupos de execucao
+ * @group rodar_paralelo_grupo1
+ */
+class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
