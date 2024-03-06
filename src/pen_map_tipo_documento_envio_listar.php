@@ -110,7 +110,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento SEI</th>'."\n";        
-      $strResultado .= '<th class="infraTh" width="35%">Espécie Tramita GOV.BR</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="35%">Espécie Documental Tramita GOV.BR</th>'."\n";
       $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
       $strResultado .= '</tr>'."\n";
       $strCssTr = '';

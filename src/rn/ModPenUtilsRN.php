@@ -30,7 +30,7 @@ class ModPenUtilsRN extends InfraRN
 
     if(empty($numUnidadeRecebimentoProcessos)) {
         $strMensagem = "Configuração da unidade para representação de trâmites em órgãos externos não pode ser localizada.\n";
-        $strMensagem .= "Necessário atribuição de uma unidade válida nos parâmetros do Módulo de Integração Tramita GOV.BR (mod-sei-pen)";
+        $strMensagem .= "Necessário atribuição de uma unidade válida nos parâmetros do Módulo Tramita GOV.BR (mod-sei-pen)";
         throw new InfraException($strMensagem);
     }
 

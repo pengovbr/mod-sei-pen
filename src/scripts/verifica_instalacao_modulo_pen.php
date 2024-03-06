@@ -46,7 +46,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
       sleep(1);
     if($objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN()){
-        $fnPrint("- Conexão com o Barramento de Serviços do Tramita GOV.BR realizada com sucesso", 1);
+        $fnPrint("- Conexão com o Tramita GOV.BR realizada com sucesso", 1);
     }
 
       sleep(1);

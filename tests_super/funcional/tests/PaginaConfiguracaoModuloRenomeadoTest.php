@@ -25,7 +25,7 @@ class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
 
         $value = $this->paginaConfiguracaoModuloRenomeado->getTituloPaginaConfiguracao();
 
-        $menssagemValidacao = utf8_encode('Parâmetros de Configuração do Módulo de Tramitações Tramita GOV.BR');
+        $menssagemValidacao = utf8_encode('Parâmetros de Configuração do Módulo Tramita GOV.BR');
  
         $this->assertStringContainsString(
             $menssagemValidacao,
@@ -71,7 +71,7 @@ class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
 
         $value = $this->paginaConfiguracaoModuloRenomeado->getTituloPaginaHipoteseRestricaoPadrao();
 
-        $menssagemValidacao = utf8_encode('Hipótese de Restrição Padrão - Tramitação Tramita GOV.BR');
+        $menssagemValidacao = utf8_encode('Hipótese de Restrição Padrão - Tramita GOV.BR');
  
         $this->assertStringContainsString(
             $menssagemValidacao,
