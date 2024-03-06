@@ -7,6 +7,7 @@
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
  * Execution Groups
  * @group execute_parallel
+ * @goup grupo1
  */
 class TramiteProcessoEmLoteTest extends CenarioBaseTestCase
 {

@@ -9,6 +9,7 @@
  *
  * Execution Groups
  * @group execute_parallel
+ * @group grupo2
  */
 class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
 {

@@ -5,6 +5,7 @@
  *
  * Execution Groups
  * @group execute_parallel
+ * @group grupo2
  */
 class TramiteProcessoAnexadoTest extends CenarioBaseTestCase
 {

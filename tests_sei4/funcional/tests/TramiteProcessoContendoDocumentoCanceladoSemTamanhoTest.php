@@ -8,6 +8,7 @@
  *
  * Execution Groups
  * @group execute_parallel
+ * @goup grupo1
  */
 class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBaseTestCase
 {
