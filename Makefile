@@ -52,25 +52,25 @@ all: help
 check-isalive: ## Target de apoio. Acessa os Sistemas e verifica se estao respondendo a tela de login
 	@echo ""
 	@echo "Testando se a pagina de login responde para o org1..."
-	# @for i in `seq 1 15`; do \
-	#     echo "Tentativa $$i/15";  \
-	# 	if $(CMD_CURL_LOGIN_ORG1); then \
-	# 			echo 'Página de login encontrada!' ; \
-	# 			break ; \
-	# 	fi; \
-	# 	sleep 5; \
-	# done; \
-	# if ! $(CMD_CURL_LOGIN_ORG1); then echo 'Pagina de login do org1 nao encontrada. Verifique...'; exit 1 ; fi;
-	# @echo "Testando se a pagina de login responde para o org2..."
-	# @for i in `seq 1 15`; do \
-	#     echo "Tentativa $$i/15";  \
-	# 	if $(CMD_CURL_LOGIN_ORG2); then \
-	# 			echo 'Página de login encontrada!' ; \
-	# 			break ; \
-	# 	fi; \
-	# 	sleep 5; \
-	# done; \
-	# if ! $(CMD_CURL_LOGIN_ORG2); then echo 'Pagina de login do org2 nao encontrada. Verifique...'; exit 1 ; fi;
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_LOGIN_ORG1); then \
+				echo 'Página de login encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_LOGIN_ORG1); then echo 'Pagina de login do org1 nao encontrada. Verifique...'; exit 1 ; fi;
+	@echo "Testando se a pagina de login responde para o org2..."
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_LOGIN_ORG2); then \
+				echo 'Página de login encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_LOGIN_ORG2); then echo 'Pagina de login do org2 nao encontrada. Verifique...'; exit 1 ; fi;
 
 
 install-phpunit-vendor: ## instala os pacotes composer referentes aos testes via phpunit
