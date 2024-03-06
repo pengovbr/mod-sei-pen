@@ -5,7 +5,7 @@
  * Cadastro mapeamento de orgãos
  *
  * Execution Groups
- * @group execute_alone
+ * @group exxecute_alone
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBaseTestCase
 {
