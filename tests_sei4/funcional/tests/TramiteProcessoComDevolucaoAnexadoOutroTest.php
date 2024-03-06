@@ -8,8 +8,7 @@
  * seja reaberto, atualizado e anexado ao novo processo recem criado
  *
  * Execution Groups
- * @group execute_parallel
- * @group grupo2
+ * @group execute_parallel_grupo2
  */
 class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
 {

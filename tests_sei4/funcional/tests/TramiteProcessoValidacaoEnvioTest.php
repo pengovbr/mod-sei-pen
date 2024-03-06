@@ -3,8 +3,7 @@
 /**
  *
  * Execution Groups
- * @group execute_parallel
- * @goup grupo1
+ * @group execute_parallel_grupo1
  */
 class TramiteProcessoValidacaoEnvioTest extends CenarioBaseTestCase
 {
