@@ -125,7 +125,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "insert into md_pen_unidade(id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) values ('110000001', ?, ?, ?)",
             array(
                 CONTEXTO_ORGAO_B_ID_ESTRUTURA,
-                CONTEXTO_ORGAO_B_SIGLA_UNIDADE,
+                CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA,
                 CONTEXTO_ORGAO_B_NOME_UNIDADE
             )
         );
