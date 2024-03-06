@@ -19,13 +19,6 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
-        $penMapUnidadesFixture = new \PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE']
-        ]);
-        $penMapUnidadesFixture->cadastrar();
-
         $this->cadastrarBlocoDeTramite();
         $this->cadastrarProcessos();
     }
