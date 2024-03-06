@@ -26,8 +26,8 @@ class PenMapUnidadesFixture extends \FixtureBase
 
         $this->objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?? 110000001);
         $this->objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
-        $this->objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Sigla']);
-        $this->objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Nome']);
+        $this->objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
+        $this->objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
 
         $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
         return $objPenUnidadeBD->cadastrar($this->objPenUnidadeDTO);
