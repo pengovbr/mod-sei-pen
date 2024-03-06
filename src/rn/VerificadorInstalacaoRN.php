@@ -213,7 +213,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do Tramita GOV.BR não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
+          throw new InfraException("Chave privada do certificado digital de autenticação no Tramita GOV.BR não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
