@@ -38,7 +38,7 @@ class PenMetaBD extends InfraMetaBD {
 
       case 'InfraPostgreSql':
         $strQuery = sprintf("ALTER TABLE %s ALTER COLUMN %s SET DEFAULT '%s'", $strNomeTabela, $strNomeColuna, $strValorPadrao);
-        break;
+          break;
     }
 
     if($bolRetornarQuery === false) {
