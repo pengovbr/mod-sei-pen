@@ -1,0 +1,55 @@
+name: Testes funcionais para MySQL
+
+on: [push, pull_request]
+env: # Or as an environment variable
+  CERTIFICADO_ORG1: ${{ secrets.CERTIFICADO_ORG1 }}
+  CERTIFICADO_ORG2: ${{ secrets.CERTIFICADO_ORG2 }}
+  GIT_ACTION_SENHA_ORG1: ${{ secrets.GIT_ACTION_SENHA_ORG1 }}
+  GIT_ACTION_SENHA_ORG2: ${{ secrets.GIT_ACTION_SENHA_ORG2 }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch Pull Request branch
+        uses: actions/checkout@v3
+        with:
+            repository: pengovbr/sei
+            token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+            path: sei
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+            path: sei/src/sei/web/modulos/mod-sei-pen
+
+      - name: Configura e sobe o ambiente
+        run: | 
+             cd sei/src/sei/web/modulos/mod-sei-pen
+             make config
+             sed -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\]/155275/' tests_super/funcional/phpunit.xml
+             sed -i 's/\[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1\]/GIT\_ACTION\_ORG1/' tests_super/funcional/phpunit.xml
+             sed -z -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\.1\]/155277/' tests_super/funcional/phpunit.xml
+             sed -z -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1\.1\]/GIT\_ACTION\_FILHA/' tests_super/funcional/phpunit.xml
+             sed -i 's/\[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2\]/155276/' tests_super/funcional/phpunit.xml
+             sed -i 's/\[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2\]/GIT\_ACTION\_ORG2/' tests_super/funcional/phpunit.xml
+             sed -e '/ORG1_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_super/funcional/.env
+             sed -e '/ORG2_CERTIFICADO_SENHA/ s/^#*/#/' -i tests_super/funcional/.env
+             echo "ORG1_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG1" >> tests_super/funcional/.env
+             echo "ORG2_CERTIFICADO_SENHA=$GIT_ACTION_SENHA_ORG2" >> tests_super/funcional/.env
+             echo $CERTIFICADO_ORG1 | base64 --decode > tests_super/funcional/assets/config/certificado_org1.pem
+             echo $CERTIFICADO_ORG2 | base64 --decode > tests_super/funcional/assets/config/certificado_org2.pem
+             sed -i 's/exec/exec \-T/' Makefile
+             make up
+
+      - name: Executa update, install e tramita silent
+        run: |
+             cd sei/src/sei/web/modulos/mod-sei-pen
+             make update
+             make install
+             make tramitar-pendencias-silent &
+
+      - name: Testes funcionais
+        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional

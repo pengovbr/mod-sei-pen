@@ -625,10 +625,10 @@ class ProcessoEletronicoRN extends InfraRN
         $rootNamespace = $dom->lookupNamespaceUri($dom->namespaceURI);
         $xpath->registerNamespace('x', $rootNamespace);
         $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
-        if (count($entries) == 0){
-          $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
-          throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
-        }
+      if (count($entries) == 0){
+        $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
+        throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
+      }
         $resultado = array();
       foreach ($entries as $entry) {
         $valor = $entry->getAttribute('value');
@@ -652,7 +652,12 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\SoapFault $e) {
+      $naoRespEstruturaOrg = 'Transação não autorizada, pois o sistema não é responsável pela estrutura organizacional remetente';
+      if (InfraString::formatarJavaScript(utf8_decode($e->faultstring)) == $naoRespEstruturaOrg) {
+        $strMensagem = "Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Processo Eletrônico Nacional e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.";
+      } else {
         $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
+      }
       if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
           $$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
       }
@@ -668,23 +673,23 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-    private function validarTramitaEmAndamento($parametros, $strMensagem)
+  private function validarTramitaEmAndamento($parametros, $strMensagem)
     {
-        if (strpos($strMensagem, 'já possui trâmite em andamento')) {
-            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-            $objProcessoEletronicoDTO->setDblIdProcedimento($parametros->dblIdProcedimento);
+    if (strpos($strMensagem, 'já possui trâmite em andamento')) {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($parametros->dblIdProcedimento);
 
-            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-            $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
-            $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+        $numIdTramite = $objUltimoTramiteDTO->getNumIdTramite();
 
-            if (!is_null($numIdTramite) && $numIdTramite > 0) {
-                $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $parametros->novoTramiteDeProcesso->processo->protocolo . ".";
-            }
-        }
-        return $strMensagem;
-
+      if (!is_null($numIdTramite) && $numIdTramite > 0) {
+        $strMensagem = "O trâmite ainda não foi concluído. Acompanhe no Painel de Controle o andamento da tramitação, antes de realizar uma nova tentativa. NRE: " . $objUltimoTramiteDTO->getStrNumeroRegistro() . ". Processo: " . $parametros->novoTramiteDeProcesso->processo->protocolo . ".";
+      }
     }
+      return $strMensagem;
+
+  }
 
   public function listarPendencias($bolTodasPendencias)
     {
@@ -1167,25 +1172,25 @@ class ProcessoEletronicoRN extends InfraRN
     * @param object $objMeta tem que ser o componenteDigital->hash
     * @return string
     */
-    public static function getHashFromMetaDados($objMeta)
+  public static function getHashFromMetaDados($objMeta)
     {
-        $strHashConteudo = '';
+      $strHashConteudo = '';
 
-        if (isset($objMeta)) {
-            if(is_string($objMeta)){
-                $strHashConteudo = $objMeta;
-            } else {
-                $matches = array();
-                $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
+    if (isset($objMeta)) {
+      if(is_string($objMeta)){
+        $strHashConteudo = $objMeta;
+      } else {
+          $matches = array();
+          $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->_;
 
-                if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
-                    $strHashConteudo = $matches[1][0];
-                }
-            }
+        if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
+          $strHashConteudo = $matches[1][0];
         }
+      }
+    }
 
       return $strHashConteudo;
-    }
+  }
 
   private function montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados)
     {
@@ -1653,6 +1658,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function converterOperacaoDTO($objOperacaoPEN)
     {
     if(!isset($objOperacaoPEN)) {
@@ -2300,35 +2306,35 @@ class ProcessoEletronicoRN extends InfraRN
       return $strTexto;
   }
 
-    public static function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
+  public static function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
 
-        if(!is_readable($strCaminhoAnexoCompactado)) {
-            throw new InfraException("Anexo de documento não pode ser localizado");
-        }
-
-        $objAnexoRN = new AnexoRN();
-        $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
-
-        $arrStrNomeArquivos = array();
-        $zipArchive = new ZipArchive();
-        if($zipArchive->open($strCaminhoAnexoCompactado)){
-            try {
-                for($i = 0; $i < $zipArchive->numFiles; $i++){
-                    $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
-                }
-
-                $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
-                $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
-                copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
-            } finally {
-                $zipArchive->close();
-            }
-        } else {
-            throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
-        }
-
-        return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
+    if(!is_readable($strCaminhoAnexoCompactado)) {
+        throw new InfraException("Anexo de documento não pode ser localizado");
     }
+
+      $objAnexoRN = new AnexoRN();
+      $strNomeArquivoTemporario = DIR_SEI_TEMP . '/' . $objAnexoRN->gerarNomeArquivoTemporario();
+
+      $arrStrNomeArquivos = array();
+      $zipArchive = new ZipArchive();
+    if($zipArchive->open($strCaminhoAnexoCompactado)){
+      try {
+        for($i = 0; $i < $zipArchive->numFiles; $i++){
+          $arrStrNomeArquivos[] = $zipArchive->getNameIndex($i);
+        }
+
+          $strNomeComponenteDigital = $arrStrNomeArquivos[$numOrdemComponenteDigital - 1];
+          $strPathArquivoNoZip = "zip://".$strCaminhoAnexoCompactado."#".$strNomeComponenteDigital;
+          copy($strPathArquivoNoZip, $strNomeArquivoTemporario);
+      } finally {
+          $zipArchive->close();
+      }
+    } else {
+        throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
+    }
+
+      return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
+  }
 
 
     /**

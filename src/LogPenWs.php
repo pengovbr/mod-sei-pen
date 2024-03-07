@@ -22,6 +22,7 @@ class LogPenWs {
     /**
      * Construtor
      */
+  // phpcs:ignore PEAR.Functions.ValidDefaultValue.NotAtEnd
   public function __construct($config = array(), $wsdl, $options)
     {
       $this->arrListaMetodos = is_array($config) ? $config : array();

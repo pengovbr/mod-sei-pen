@@ -181,7 +181,7 @@ function abrirProcesso(link){
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmProcedimentoExpedido" method="post" action="<?= $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'])) ?>">
+<form id="frmProcedimentoExpedido" method="post" action="<?= $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . htmlspecialchars($_GET['acao']). '&acao_origem=' . htmlspecialchars($_GET['acao']))) ?>">
 <?php
     $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros, true);

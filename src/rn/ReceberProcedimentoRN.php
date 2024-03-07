@@ -95,7 +95,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-
+  
   protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
     try {
@@ -258,6 +258,7 @@ class ReceberProcedimentoRN extends InfraRN
         //os hash descritos nos metadados do último trâmite mas não presentes no processo atual (último trâmite)
         $nrTamanhoBytesArquivo = $this->obterTamanhoComponenteDigitalPendente($objProtocolo, $strHashComponentePendente);
         $nrTamanhoArquivoKB = round($nrTamanhoBytesArquivo / 1024, 2);
+        $nrTamanhMegaByte = $nrTamanhoBytesArquivo / (1024 * 1024);
         $nrTamanhoBytesMaximo  = $numParamTamMaxDocumentoMb * pow(1024, 2);
 
         $arrObjComponenteDigitalIndexado = self::indexarComponenteDigitaisDoProtocolo($objProtocolo);
@@ -270,6 +271,9 @@ class ReceberProcedimentoRN extends InfraRN
             $strHashComponentePendente, $nrTamanhoBytesMaximo, $nrTamanhoBytesArquivo, $numParamTamMaxDocumentoMb,
             $numOrdemComponente, $numIdTramite, $parObjTramite, $arrObjComponenteDigitalIndexado
           );
+
+          ReceberProcedimentoRN::validaTamanhoMaximoAnexo($objAnexoDTO->getStrNome(), $nrTamanhMegaByte);
+ 
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
@@ -691,7 +695,7 @@ class ReceberProcedimentoRN extends InfraRN
 
         // Não achou, ou seja, não esta cadastrado na tabela, então não é aceito nesta unidade como válido
         if($numContador <= 0) {
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('Documento do tipo %s não está mapeado', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
             throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
         }
       }
@@ -733,6 +737,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoDTO = $this->atualizarProcedimento($dblIdProcedimento, $parObjMetadadosProcedimento, $parObjProtocolo);
     }
     else {
+        $this->consultarProtocoloExistente($parObjProtocolo);
         $objProcedimentoDTO = $this->gerarProcedimento($parObjMetadadosProcedimento, $parObjProtocolo);
     }
 
@@ -1057,7 +1062,15 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
       $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
-      $this->atribuirTipoProcedimento($objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio);
+      $remetente = $objMetadadosProcedimento->metadados->remetente;
+      $destinatario = $objMetadadosProcedimento->metadados->destinatario;
+      $this->atribuirTipoProcedimento(
+        $objProcedimentoDTO,
+        $remetente,
+        $destinatario,
+        $numIdTipoProcedimento,
+        $strProcessoNegocio
+      );
 
       // Obtém código da unidade através de mapeamento entre SEI e Barramento
       $objUnidadeDTO = $this->atribuirDadosUnidade($objProcedimentoDTO, $objDestinatario);
@@ -1103,6 +1116,31 @@ class ReceberProcedimentoRN extends InfraRN
       $parObjProtocolo->idProcedimentoSEI = $objProcedimentoDTO->getDblIdProcedimento();
 
       return $objProcedimentoDTO;
+  }
+
+  /**
+   * Consultar protocolo existente
+   *
+   * @param \stdClass $parObjProtocolo
+   * @return void
+   * @throws InfraException
+   */
+  public function consultarProtocoloExistente($parObjProtocolo)
+  {
+    $objProtocoloDTO = new ProtocoloDTO();
+    $objProtocoloDTO->retDblIdProtocolo();
+    $objProtocoloDTO->setStrProtocoloFormatado($parObjProtocolo->protocolo);
+
+    $objProcedimentoBD = new ProcedimentoBD($this->getObjInfraIBanco());
+    $arrayObjProtocoloDTO = $objProcedimentoBD->contar($objProtocoloDTO);
+    if ($arrayObjProtocoloDTO > 0) {
+      $strDescricao  = sprintf(
+        'Um processo com o número de protocolo %s já existe no sistema de destino. '
+        . 'OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.',
+        utf8_decode($parObjProtocolo->protocolo)
+      ).PHP_EOL;
+      throw new InfraException($strDescricao);
+    }
   }
 
     /**
@@ -1399,18 +1437,39 @@ class ReceberProcedimentoRN extends InfraRN
     return $objTipoProcedimentoDTO;
   }
 
-  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $numIdTipoProcedimento, $strProcessoNegocio)
-    {
+  /**
+   * Atribuir tipo de procedimento
+   * Procura tipo de procedimento
+   * Procura tipo de procedimento no mapeamento entre orgão
+   * Procura tipo de procedimento padrão
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $numIdTipoProcedimento
+   * @param string|int $strProcessoNegocio
+   * @return ProcedimentoDTO
+   * @throws InfraException
+   */
+  private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $remetente, $destinatario, $numIdTipoProcedimento, $strProcessoNegocio)
+  {
     if(!empty(trim($strProcessoNegocio))){
+      // Verifica se existe relacionamento entre orgãos
+      $objTipoProcedimentoDTO = $this->obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio);
+
+      if(is_null($objTipoProcedimentoDTO)){
+        // Verifica se existe tipo de processo igual cadastrado
         $objTipoProcedimentoDTO = $this->obterTipoProcessoPeloNomeOrgaoUnidade(
           $strProcessoNegocio,
           SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(),
           SessaoSEI::getInstance()->getNumIdUnidadeAtual()
         );
+      }
     }
 
     if(is_null($objTipoProcedimentoDTO)){
-        $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
+      // Verifica tipo de processo padrão cadastrado
+      $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
     }
 
     if (is_null($objTipoProcedimentoDTO)){
@@ -1440,6 +1499,48 @@ class ReceberProcedimentoRN extends InfraRN
       $objProcedimentoDTO->getObjProtocoloDTO()->setArrObjRelProtocoloAssuntoDTO($arrObjAssuntoDTO);
   }
 
+  /**
+   * Verificar se tem mapeamento entre orgão
+   *
+   * @param \stdClass $remetente
+   * @param \stdClass $destinatario
+   * @param string|int $strProcessoNegocio
+   * @return TipoProcedimentoDTO
+   */
+  public function obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio)
+  {
+    $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+
+    $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+    $objPenOrgaoExternoDTO->setStrAtivo('S');
+
+    $objPenOrgaoExternoDTO->retDblId();
+
+    $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+    $objPenOrgaoExternoDTO = $objPenOrgaoExternoRN->consultar($objPenOrgaoExternoDTO);
+
+    if (!is_null($objPenOrgaoExternoDTO)) {
+      $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+      $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
+      $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso($strProcessoNegocio);
+      $objMapeamentoTipoProcedimentoDTO->setStrAtivo('S');
+
+      $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
+
+      $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+      $objMapeamentoTipoProcedimentoDTO = $objMapeamentoTipoProcedimentoRN->consultar($objMapeamentoTipoProcedimentoDTO);
+
+      if (!is_null($objMapeamentoTipoProcedimentoDTO) && !is_null($objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino())) {
+        $idTipoProcessoDestino = $objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino();
+
+        return $this->obterTipoProcessoPadrao($idTipoProcessoDestino);
+      }
+    }
+
+    return null;
+  }
+
   private function atribuirDadosUnidade(ProcedimentoDTO $objProcedimentoDTO, $objDestinatario)
     {
 
@@ -1460,7 +1561,8 @@ class ReceberProcedimentoRN extends InfraRN
 
       return $objUnidadeDTOEnvio;
   }
-
+  
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function atribuirDocumentos($parObjProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $parObjMetadadosProcedimento, $parStrNumeroRegistro, $parDblIdProcedimentoAnexado = null)
     {
     if(!isset($parObjProtocolo)) {
@@ -1777,17 +1879,17 @@ class ReceberProcedimentoRN extends InfraRN
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
         $bolComponenteDigitalExistente = array_key_exists($strHashComponenteDigital, $arrDocumentosExistentesPorHash);
-        if(!$bolComponenteDigitalBaixado && $bolComponenteDigitalExistente){
-            $arrDocumentoExistente = $arrDocumentosExistentesPorHash[$strHashComponenteDigital];
-            $arr = $this->clonarComponentesJaExistentesNoProcesso(
-                $objDocumentoDTO,
-                $arrDocumentoExistente["IdDocumento"],
-                $arrDocumentoExistente["ComponenteDigitalDTO"],
-                $arrDocumentoExistente["MultiplosComponentes"]
-            );
+      if(!$bolComponenteDigitalBaixado && $bolComponenteDigitalExistente){
+          $arrDocumentoExistente = $arrDocumentosExistentesPorHash[$strHashComponenteDigital];
+          $arr = $this->clonarComponentesJaExistentesNoProcesso(
+              $objDocumentoDTO,
+              $arrDocumentoExistente["IdDocumento"],
+              $arrDocumentoExistente["ComponenteDigitalDTO"],
+              $arrDocumentoExistente["MultiplosComponentes"]
+          );
 
-            $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
-        }
+          $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
+      }
     }
     $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
   }
@@ -1805,24 +1907,24 @@ class ReceberProcedimentoRN extends InfraRN
     $objAnexoRN = new AnexoRN();
     $arrObjAnexoDTO = $objAnexoRN->listarRN0218($objAnexoDTO);
     if(!empty($arrObjAnexoDTO)){
-        foreach($arrObjAnexoDTO as $objAnexoDTO){
-            $strSinDuplicado = 'S';
-            $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
-            if($bolMultiplosComponentes){
-                $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
-                list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
-                $strCaminhoAnexo = $strCaminhoAnexoTemporario;
-                $strSinDuplicado = 'N';
-            }
-
-            $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
-            $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
-            copy($strCaminhoAnexo, $strNomeUploadCompleto);
-            $objAnexoDTO->setNumIdAnexo($strNomeUpload);
-            $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
-            $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
-            $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
+      foreach($arrObjAnexoDTO as $objAnexoDTO){
+          $strSinDuplicado = 'S';
+          $strCaminhoAnexo = $objAnexoRN->obterLocalizacao($objAnexoDTO);
+        if($bolMultiplosComponentes){
+            $numOrdemComponente = $objComponenteDigitalDTO->getNumOrdem();
+            list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexo, $numOrdemComponente);
+            $strCaminhoAnexo = $strCaminhoAnexoTemporario;
+            $strSinDuplicado = 'N';
         }
+
+          $strNomeUpload = $objAnexoRN->gerarNomeArquivoTemporario();
+          $strNomeUploadCompleto = DIR_SEI_TEMP.'/'.$strNomeUpload;
+          copy($strCaminhoAnexo, $strNomeUploadCompleto);
+          $objAnexoDTO->setNumIdAnexo($strNomeUpload);
+          $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
+          $objAnexoDTO->setStrNome($objComponenteDigitalDTO->getStrNome());
+          $objAnexoDTO->setStrSinDuplicando($strSinDuplicado);
+      }
     }
 
     return $arrObjAnexoDTO;
@@ -1835,31 +1937,75 @@ class ReceberProcedimentoRN extends InfraRN
      * @param array $parArrIdDocumentosCancelamento Lista de documentos que ser<E3>o cancelados
      * @return void
      */
-  private function cancelarDocumentosProcesso($parDblIdProcedimento, $parArrIdDocumentosCancelamento)
-    {
-    foreach($parArrIdDocumentosCancelamento as $numIdDocumento){
-        $objProtocoloDTO = new ProtocoloDTO();
-        $objProtocoloDTO->setDblIdProtocolo($numIdDocumento);
-        $objProtocoloDTO->retStrStaEstado();
-        $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+  private function cancelarDocumentosProcesso($parDblIdProcedimento, $parArrIdDocumentosCancelamento){
 
-        // Verifica se documento está atualmente associado ao processo e não foi movido para outro
-        $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-        $objRelProtocoloProtocoloDTO->retNumSequencia();
-        $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parDblIdProcedimento);
-        $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($numIdDocumento);
-        $bolDocumentoMovidoProcesso = $this->objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+    try{
+      $numIdUnidadeAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
 
-      if(!$bolDocumentoMovidoProcesso && ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)){
-        $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
-        $objEntradaCancelarDocumentoAPI->setIdDocumento($numIdDocumento);
-        $objEntradaCancelarDocumentoAPI->setMotivo('Documento retirado do processo pelo remetente');
-        $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+      foreach($parArrIdDocumentosCancelamento as $numIdDocumento){
+          $objProtocoloDTO = new ProtocoloDTO();
+          $objProtocoloDTO->setDblIdProtocolo($numIdDocumento);
+          $objProtocoloDTO->retStrStaEstado();
+          $objProtocoloDTO = $this->objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+          // Verifica se documento está atualmente associado ao processo e não foi movido para outro
+          $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+          $objRelProtocoloProtocoloDTO->retNumSequencia();
+          $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+          $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($parDblIdProcedimento);
+          $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($numIdDocumento);
+          $bolDocumentoMovidoProcesso = $this->objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+
+        if(!$bolDocumentoMovidoProcesso && ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)){
+          $objEntradaCancelarDocumentoAPI = new EntradaCancelarDocumentoAPI();
+          $objEntradaCancelarDocumentoAPI->setIdDocumento($numIdDocumento);
+          $objEntradaCancelarDocumentoAPI->setMotivo('Documento retirado do processo pelo remetente');
+
+          $objDocumentoDTO = new DocumentoDTO();
+          $objDocumentoDTO->retNumIdUnidadeGeradoraProtocolo();
+          $objDocumentoDTO->setDblIdDocumento($numIdDocumento);
+          $objDocumentoRN = new DocumentoRN();
+          $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo());
+          //Para cancelar o documento é preciso que esteja aberto o processo na unidade que ele foi gerado.
+          $this->abrirProcessoSeNaoAberto($parDblIdProcedimento);
+ 
+          $this->objSeiRN->cancelarDocumento($objEntradaCancelarDocumentoAPI);
+
+          $objEntradaConcluirProcessoAPI = new EntradaConcluirProcessoAPI();
+          $objEntradaConcluirProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+          $this->objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
+        }
       }
+    } catch(Exception $e) {
+      $mensagemErro = InfraException::inspecionar($e);
+      $this->gravarLogDebug($mensagemErro);
+      LogSEI::getInstance()->gravar($mensagemErro);
+      throw $e;
+    }finally{
+      SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeAtual);
     }
   }
 
+  //Cópia de parte do SeiRN. Esse método deveria estar lá e não aqui no módulo.
+  private function abrirProcessoSeNaoAberto($parDblIdProcedimento){
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->setDblIdProtocolo($parDblIdProcedimento);
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeRN = new AtividadeRN();
+
+    if ($objAtividadeRN->consultarRN0033($objAtividadeDTO)==null){
+      $objReabrirProcessoDTO = new ReabrirProcessoDTO();
+      $objReabrirProcessoDTO->setDblIdProcedimento($parDblIdProcedimento);
+      $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+    }
+  }
 
   private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
     {
@@ -2007,6 +2153,9 @@ class ReceberProcedimentoRN extends InfraRN
         $numeroDeIdentificacaoDaEstrutura = $objDestinatario->numeroDeIdentificacaoDaEstrutura;
     }
 
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $objRepositorio = $objProcessoEletronicoRN->consultarEstrutura($numIdRepositorioDestinoProcesso, $numeroDeIdentificacaoDaEstrutura);
+
       //Validação do repositório de destino do processo
     if($numIdRepositorioDestinoProcesso != $numIdRepositorioOrigem){
         $objInfraException->adicionarValidacao("Identificação do repositório de origem do processo [$numIdRepositorioDestinoProcesso] não reconhecida.");
@@ -2022,7 +2171,10 @@ class ReceberProcedimentoRN extends InfraRN
       $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
     if(!isset($objUnidadeDTO)){
-        $objInfraException->adicionarValidacao("Unidade [Estrutura: {$numeroDeIdentificacaoDaEstrutura}] não configurada para receber processos externos no sistema de destino.");
+      $strMsg = "A Unidade \"%s\" não está configurada para receber "
+        . "processos/documentos avulsos por meio da plataforma. "
+        . "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+      $objInfraException->adicionarValidacao(sprintf($strMsg, $objRepositorio->getStrNome()));
     }
 
       $objInfraException->lancarValidacoes();
@@ -2324,8 +2476,8 @@ class ReceberProcedimentoRN extends InfraRN
             $arquivoExtensaoDTO->setStrExtensao($extDocumento);
             $arquivoExtensaoDTO->retStrExtensao();
 
-          if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0){
-                $strMensagem = "Processo recusado devido a existência de documento em formato {$extDocumento} não permitido pelo sistema.";
+          if($arquivoExtensaoBD->contar($arquivoExtensaoDTO) == 0) {
+                $strMensagem = "O formato {$extDocumento} não é permitido pelo sistema de destino. Lembre-se que cada órgão/entidade tem autonomia na definição de quantos e quais formatos de arquivo são aceitos pelo seu sistema. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
                 $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_FORMATO);
                 throw new InfraException($strMensagem);
           }
@@ -2662,6 +2814,43 @@ class ReceberProcedimentoRN extends InfraRN
             }
           }
         }
+      }
+    }
+  }
+
+  private static function validaTamanhoMaximoAnexo($nomeArquivo, $nrTamanhMegaByte){
+    // Obtenha a extensão do nome do arquivo
+    $extensaoArquivo = pathinfo($nomeArquivo, PATHINFO_EXTENSION);
+    $extensaoArquivo = str_replace(' ', '', InfraString::transformarCaixaBaixa($extensaoArquivo));
+
+    $objArquivoExtensaoDTO = new ArquivoExtensaoDTO();
+    $objArquivoExtensaoDTO->retStrExtensao();
+    $objArquivoExtensaoDTO->retNumTamanhoMaximo();
+    $objArquivoExtensaoDTO->setStrExtensao($extensaoArquivo);
+    $objArquivoExtensaoDTO->setNumTamanhoMaximo(null, InfraDTO::$OPER_DIFERENTE);
+    $objArquivoExtensaoDTO->setNumMaxRegistrosRetorno(1);
+
+    $objArquivoExtensaoRN = new ArquivoExtensaoRN();
+    $objArquivoExtensaoDTO = $objArquivoExtensaoRN->consultar($objArquivoExtensaoDTO);
+
+    // Verificar o tamanho máximo permitido
+    if ($objArquivoExtensaoDTO != null) {
+      $tamanhoMaximoMB = $objArquivoExtensaoDTO->getNumTamanhoMaximo();
+
+      if ($nrTamanhMegaByte > $tamanhoMaximoMB) {
+        $extensaoUpper = InfraString::transformarCaixaAlta($objArquivoExtensaoDTO->getStrExtensao());
+        $mensagemErro  = "O tamanho máximo permitido para arquivos {$extensaoUpper} é {$tamanhoMaximoMB} Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
+      }
+    } else {
+      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $numTamDocExterno = $objInfraParametro->getValor('SEI_TAM_MB_DOC_EXTERNO');
+
+      if (!empty($numTamDocExterno) && $numTamDocExterno < $nrTamanhMegaByte) {
+        $mensagemErro  = "O tamanho máximo geral permitido para documentos externos é $numTamDocExterno Mb. ";
+        $mensagemErro .= "OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.";
+        throw new InfraException($mensagemErro);
       }
     }
   }

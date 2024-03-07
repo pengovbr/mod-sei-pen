@@ -37,7 +37,7 @@ class VerificadorInstalacaoRN extends InfraRN
         '4.0.8', '4.0.9', '4.0.10', '4.0.11', '4.0.12',
         // Versões SUPER
         '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.4.6', '4.0.5.7',
-        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13', '4.0.9.14'
+        '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13', '4.0.9.14', '4.0.12.15'
     );
 
     public function __construct() {
@@ -249,12 +249,12 @@ class VerificadorInstalacaoRN extends InfraRN
 
           $strOutput = curl_exec($curl);
 
-          if (curl_errno($curl)) {
-             $strErrorMsg = curl_error($curl);
-          }
-          if (isset($strErrorMsg)) {
-              throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
-          }
+        if (curl_errno($curl)) {
+           $strErrorMsg = curl_error($curl);
+        }
+        if (isset($strErrorMsg)) {
+            throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
+        }
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){

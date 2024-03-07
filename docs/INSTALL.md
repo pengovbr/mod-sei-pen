@@ -753,7 +753,10 @@ Caso o órgão tenha alterado o atributo "Sigla do Órgão" será necessário ad
 
 Em situações expecíficas, podem ocorrer erros de validação de hash em documentos de processo enviado em versões antigas do módulo. Isto ocorre devido o reenvio de documentos que já estão em posse do órgão destinatário e que sofreram mudanças no texto de tarjas de validação de assinatura. 
 
-Para tratar esse problema, o parâmetro "EnviarApenasComponentesDigitaisPendentes" (descrito abaixo) poderá ser utilizado para enviar apenas os documentos faltantes no órgão destinatário. **Atenção!** Esse parâmetro somente poderá ser ativado para os órgãos que já possuem o módulo **mod-sei-pen** na versão 3.3.0 ou superior.
+Para tratar esse problema, o parâmetro "EnviarApenasComponentesDigitaisPendentes" (descrito abaixo) poderá ser utilizado para enviar apenas os documentos faltantes no órgão destinatário.
+
+> [!IMPORTANT]  
+> **Atenção!** Esse parâmetro somente poderá ser ativado para os órgãos que já possuem o módulo **mod-sei-pen** na versão 3.3.0 ou superior. O destino também deve ter que estar compatível para receber o trâmite parcial. Para o SEI o destino e o envio deve ter o módulo com versão 3.3.0 ou superior. Para outros sistemas entrar em contato com o gestor do sistema.
 
 
 **EnviarApenasComponentesDigitaisPendentes** _(opcional)_  

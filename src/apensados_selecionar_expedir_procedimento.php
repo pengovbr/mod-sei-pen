@@ -134,7 +134,7 @@ PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
 PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmApensadosLista" method="post" action="<?=PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_procedimento='.$_GET['id_procedimento']))?>">
+<form id="frmApensadosLista" method="post" action="<?=PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_procedimento='.htmlspecialchars($_GET['id_procedimento'])))?>">
   <?
   //PaginaSEI::getInstance()->montarBarraLocalizacao($strTitulo);
   PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);

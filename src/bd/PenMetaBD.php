@@ -79,16 +79,16 @@ class PenMetaBD extends InfraMetaBD {
       $strTableDrive = get_parent_class($this->getObjInfraIBanco());
 
     switch($strTableDrive) {
-
-      case 'InfraMySqli':
-        // Fix para bug de MySQL versão inferior ao 5.5 o default engine
-        // é MyISAM e não tem suporte a FOREING KEYS
+     
+      case 'InfraMySqli': // Fix para bug de MySQL versão inferior ao 5.5 o default engine
+         // é MyISAM e não tem suporte a FOREING KEYS
         $version = $this->getObjInfraIBanco()->consultarSql('SELECT VERSION() as versao');
         $version = $version[0]['versao'];
         $arrVersion = explode('.', $version);
         if($arrVersion[0].$arrVersion[1] < 56){
             $this->getObjInfraIBanco()->executarSql('@SET STORAGE_ENGINE=InnoDB');
         }
+          break;
       case 'InfraSqlServer':
       case 'InfraOracle':
       case 'InfraPostgreSql':

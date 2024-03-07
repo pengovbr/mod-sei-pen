@@ -34,11 +34,12 @@ class VersaoSei4RN extends InfraScriptVersao
       return $objInfraParametroDTO->getStrNome();
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   public function versao_0_0_0($strVersaoAtual)
     {
   }
 
-  function atualizarVersaoCompatibilidade($strVersaoAtual)
+  public function atualizarVersaoCompatibilidade($strVersaoAtual)
     {
       $objAtualizarRN = new PenAtualizarSeiRN();
       $objAtualizarRN->atualizarVersao();
@@ -63,6 +64,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       return BancoSEI::getInstance();
   }
 
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function atualizarVersaoConectado()
     {
     try {
@@ -99,8 +101,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         // Aplicação de scripts de atualização de forma incremental
         $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
+      // phpcs:disable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
       switch ($strVersaoModuloPen) {
-        case '':
+        case '': // Não há nenhuma versão instalada
         case '0.0.0':
             $this->instalarV100(); // Nenhuma versão instalada
         case '1.0.0':
@@ -168,10 +171,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV1502();
         case '1.5.2':
             $this->instalarV1503();
-        case '1.5.3'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.4'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.5'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
-        case '1.5.6'; // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.3': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.4': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.5': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
+        case '1.5.6': // Faixa de possíveis versões da release 1.5.x de retrocompatibilidade
         case '1.5.7':
             $this->instalarV2000_beta1();
         case '2.0.0-beta1':
@@ -268,13 +271,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3031();
         case '3.3.1':
             $this->instalarV3032();
-
+        case '3.3.2':
+            $this->instalarV3040();
+        case '3.4.0':
+            $this->instalarV3050();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
       }
+      // phpcs:enable PSR2.ControlStructures.SwitchDeclaration.TerminatingComment
 
         $this->finalizar('FIM');
     } catch (Exception $e) {
@@ -429,6 +436,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
     /* Contêm atualizações da versao 1.0.0 do modulo */
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   protected function instalarV100()
     {
 
@@ -1270,10 +1278,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraSequencia->criarSequencia('md_pen_recibo_tramite_hash', '1', '1', '9999999999');
     }
 
-        if (InfraUtil::compararVersoes(SEI_VERSAO, '<=', '4.0.0')) {
-            $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-            $objInfraParametro->setValor('PEN_VERSAO_MODULO_SEI', '0.0.0');
-        }
+    if (InfraUtil::compararVersoes(SEI_VERSAO, '<=', '4.0.0')) {
+        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $objInfraParametro->setValor('PEN_VERSAO_MODULO_SEI', '0.0.0');
+    }
 
       $this->atualizarNumeroVersao("1.0.0");
 
@@ -2009,6 +2017,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("1.5.3");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta1()
     {
       $objMetaBD = $this->objMeta;
@@ -2193,21 +2202,25 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("2.0.0-beta1");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta2()
     {
       $this->atualizarNumeroVersao("2.0.0-beta2");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta3()
     {
       $this->atualizarNumeroVersao("2.0.0-beta3");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta4()
     {
       $this->atualizarNumeroVersao("2.0.0-beta4");
   }
 
+  // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
   protected function instalarV2000_beta5()
     {
       $this->atualizarNumeroVersao("2.0.0-beta5");
@@ -2530,9 +2543,90 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.3.1");
   }
 
-protected function instalarV3032() {
-  $this->atualizarNumeroVersao("3.3.2");
-}
+  protected function instalarV3032() {
+    $this->atualizarNumeroVersao("3.3.2");
+  }
+
+  protected function instalarV3040() {
+    $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
+    $objInfraMetaBD->adicionarColuna('md_pen_unidade', 'sigla_unidade_rh', $objInfraMetaBD->tipoTextoVariavel(20), 'null');
+    $objInfraMetaBD->adicionarColuna('md_pen_unidade', 'nome_unidade_rh', $objInfraMetaBD->tipoTextoVariavel(250), 'null');
+    $this->atualizarNumeroVersao("3.4.0");
+  }
+
+  protected function instalarV3050()
+  {
+    $objMetaBD = $this->objMeta;
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_orgao_externo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_orgao_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_orgao_origem' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'id_estrutura_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_estrutura_origem' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'id_orgao_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_orgao_destino' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::NNULLO),
+          'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+        ),
+        'pk' => array('cols' => array('id')),
+        'fks' => array(
+          'unidade' => array('nome' => 'fk_md_pen_orgao_externo', 'cols' => array('id_unidade', 'id_unidade')),
+        )
+    ));
+
+    # Criar sequencia para tramite em bloco
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_tramita_em_bloco
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_orgao_externo', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_orgao_externo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_map_tipo_processo',
+      'cols' => array(
+          'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_map_orgao' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_tipo_processo_origem' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_tipo_processo_destino' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+          'nome_tipo_processo' => array($objMetaBD->tipoTextoVariavel(250), PenMetaBD::SNULLO),
+          'sin_ativo' => array($objMetaBD->tipoTextoFixo(1), 'S'),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'dth_criacao' => array($objMetaBD->tipoDataHora(), PenMetaBD::NNULLO)
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+          'unidade' => array('nome' => 'fk_md_pen_map_tipo_processo', 'cols' => array('id_unidade', 'id_unidade')),
+          'md_pen_orgao_externo' => array('nome' => 'fk_md_pen_mapeamento_orgao', 'cols' => array('id', 'id_map_orgao')),
+      )
+    ));
+
+    # Criar sequencia
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_orgao_externo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_map_tp_procedimento', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_map_tipo_processo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+    $this->atualizarNumeroVersao("3.5.0");
+  }
 }
 
 

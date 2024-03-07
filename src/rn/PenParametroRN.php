@@ -161,10 +161,10 @@ class PenParametroRN extends InfraRN {
         $objRelTipoProcedimentoAssuntoRN = new RelTipoProcedimentoAssuntoRN();
         $arrObjTipoProcedimentoAssunto=InfraArray::converterArrInfraDTO($objRelTipoProcedimentoAssuntoRN->listarRN0192($objRelTipoProcedimentoAssuntoDTO), "IdTipoProcedimento");
 
-        if (empty($arrObjTipoProcedimentoAssunto)) {
-            $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
-            $objInfraException->adicionarValidacao($strMensagemErro);
-        }
+      if (empty($arrObjTipoProcedimentoAssunto)) {
+          $strMensagemErro = "Tipo de processo externo não possui sugestão de assuntos atribuída.";
+          $objInfraException->adicionarValidacao($strMensagemErro);
+      }
     }
   }
 
@@ -181,12 +181,45 @@ class PenParametroRN extends InfraRN {
         $objUnidadeBD = new UnidadeBD($this->inicializarObjInfraIBanco());
         $objUnidadeDTO = $objUnidadeBD->consultar($objUnidadeDTO);
 
-        if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
-            $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
-            $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
-            $objInfraException->adicionarValidacao($strMensagemErro);
-        }
+      if(!is_null($objUnidadeDTO) && $objUnidadeDTO->getStrSinEnvioProcesso() == "N"){
+          $strMensagemErro = "Não é permitido a configuração de uma \"Unidade SEI para Representação de Órgãos Externos\" que não esteja disponível para envio de processo, ";
+          $strMensagemErro .= "opção \"Disponível para envio de processos\" desmarcado no cadastro da unidade.";
+          $objInfraException->adicionarValidacao($strMensagemErro);
+      }
     }
   }
 
+  /**
+   * @param array $arrObjTipoProcedimentoDTO
+   * @param string $mensagem
+   * @return void
+   * @throws InfraException
+   */
+  public function validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem)
+  {
+    $mapeamentos = array();
+    foreach ($arrObjTipoProcedimentoDTO as $objTipoProcedimentoDTO) {
+      $objPenParametroDTO = new PenParametroDTO();
+      $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
+      $objPenParametroDTO->retStrNome();
+      $objPenParametroDTO->retStrValor();
+      $objPenParametroDTO = $this->consultarConectado($objPenParametroDTO);
+      if (
+        !is_null($objPenParametroDTO) 
+        && !is_null($objPenParametroDTO->getStrValor())
+        && $objPenParametroDTO->getStrValor() == $objTipoProcedimentoDTO->getIdTipoProcedimento()
+      ) {
+        $mapeamentos[$objTipoProcedimentoDTO->getIdTipoProcedimento()] =
+          $objTipoProcedimentoDTO->getIdTipoProcedimento() . '-' .  $objTipoProcedimentoDTO->getNome();
+      }
+    }
+    
+    if (count($mapeamentos) > 0) {
+      $mensagem = sprintf($mensagem, implode('", "', $mapeamentos));
+      LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
+      $objInfraException = new InfraException();
+      $objInfraException->adicionarValidacao($mensagem);
+      $objInfraException->lancarValidacoes();
+    }
+  }
 }

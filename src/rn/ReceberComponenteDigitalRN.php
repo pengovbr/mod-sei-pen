@@ -84,13 +84,13 @@ class ReceberComponenteDigitalRN extends InfraRN
       // Caso possua, será necessário compactar todos os arquivos em ZIP para vinculação ao documento no SEI que
       // permite apenas um arquivo por documento
       $objAnexoDTODocumento = null;
-      if(count($arrObjAnexoDTOParaCompactacao) == 1){
-          $objAnexoDTODocumento = $arrObjAnexoDTOParaCompactacao[0];
-      }elseif (count($arrObjAnexoDTOParaCompactacao) > 1){
-          $objAnexoDTODocumento = self::compactarAnexosDoDocumento($parNumIdDocumento, $arrObjAnexoDTOParaCompactacao);
-      }else{
-          throw new InfraException("Anexo do documento $parNumIdDocumento não pode ser localizado.");
-      }
+    if(count($arrObjAnexoDTOParaCompactacao) == 1){
+        $objAnexoDTODocumento = $arrObjAnexoDTOParaCompactacao[0];
+    }elseif (count($arrObjAnexoDTOParaCompactacao) > 1){
+        $objAnexoDTODocumento = self::compactarAnexosDoDocumento($parNumIdDocumento, $arrObjAnexoDTOParaCompactacao);
+    }else{
+        throw new InfraException("Anexo do documento $parNumIdDocumento não pode ser localizado.");
+    }
 
       //Transferir documentos validados para o repositório final de arquivos
       $objAnexoDTODocumento->setDblIdProtocolo($parNumIdDocumento);
