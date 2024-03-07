@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_alone
+ * @group execute_parallel_grupo4
  */
 class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
 {
