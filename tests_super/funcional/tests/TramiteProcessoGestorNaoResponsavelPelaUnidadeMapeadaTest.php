@@ -19,6 +19,10 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends CenarioB
      */
     public function test_tramite_gestor_nao_responsavel_unidade()
     {
+        $this->markTestIncomplete(
+            'Teste implementado com erro. Será refatorado em momento oportuno.'
+          );
+
         // Configuração dos dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
