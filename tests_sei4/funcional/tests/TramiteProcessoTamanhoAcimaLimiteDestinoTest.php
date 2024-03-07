@@ -7,7 +7,6 @@
  * @group rodarseparado
  * @group rodarseparado4
  */
-
 class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
 {
     public static $remetente;

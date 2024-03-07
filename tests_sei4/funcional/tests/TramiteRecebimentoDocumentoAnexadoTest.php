@@ -2,10 +2,10 @@
 
 use \utilphp\util;
 
-/*
+/**
  * Execution Groups
- * @group execute_alone
-*/
+ * @group execute_parallel_grupo3
+ */
 class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';

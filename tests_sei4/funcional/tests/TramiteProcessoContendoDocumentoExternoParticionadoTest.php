@@ -1,10 +1,10 @@
 <?php
+
 /**
  * @group rodarseparado
  * @group rodarseparado2
  * @group execute_alone
  */
-
 class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBaseTestCase
 {
     public static $remetente;

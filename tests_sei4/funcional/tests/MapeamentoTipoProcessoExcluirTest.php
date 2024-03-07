@@ -5,7 +5,7 @@
  * Excluir mapeamento entre orgãos
  *
  * Execution Groups
- * @group execute_alone
+ * @group exxecute_alone
  */
 class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
 {

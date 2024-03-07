@@ -1,10 +1,9 @@
 <?php
 
-/*
+/**
  * Execution Groups
  * @group execute_parallel_grupo1
-*/
-
+ */
 class TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest extends CenarioBaseTestCase
 {
     public static $remetente;

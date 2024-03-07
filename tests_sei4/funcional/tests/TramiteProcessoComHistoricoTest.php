@@ -1,10 +1,9 @@
 <?php
 
-/*
+/**
  * Execution Groups
- * @group execute_alone
-*/
-
+ * @group execute_parallel_grupo3
+ */
 class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
 {
     public static $remetente;

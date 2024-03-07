@@ -5,7 +5,6 @@
  * Execution Groups
  * @group execute_parallel_grupo1
  */
-
 class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
 {
     public static $remetente;

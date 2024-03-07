@@ -6,7 +6,7 @@
  * Pesquisar tipos de processos
  *
  * Execution Groups
- * @group execute_alone
+ * @group exxecute_alone
  */
 class MapeamentoTipoProcessoExportarTest extends CenarioBaseTestCase
 {
