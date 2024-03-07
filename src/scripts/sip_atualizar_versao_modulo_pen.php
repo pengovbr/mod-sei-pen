@@ -94,7 +94,7 @@ class PenAtualizarSipRN extends InfraRN
             !(BancoSip::getInstance() instanceof InfraMySql) &&
             !(BancoSip::getInstance() instanceof InfraSqlServer) &&
             !(BancoSip::getInstance() instanceof InfraOracle) &&
-            !(BancoSEI::getInstance() instanceof InfraPostgreSql)
+            !(BancoSip::getInstance() instanceof InfraPostgreSql)
         ) {
 
         $this->finalizar('BANCO DE DADOS NAO SUPORTADO: ' . get_parent_class(BancoSip::getInstance()), true);
