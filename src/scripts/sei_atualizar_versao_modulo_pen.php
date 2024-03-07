@@ -1747,7 +1747,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objTarefaDTO->setStrSinLancarAndamentoFechado($objTarefaDTOAntigo->getStrSinLancarAndamentoFechado());
             $objTarefaDTO->setStrSinPermiteProcessoFechado($objTarefaDTOAntigo->getStrSinPermiteProcessoFechado());
             if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
-              $objTarefaDTO->setStrSinConsultaProcessual($objTarefaDTOAntigo->getStrSinConsultaProcessual());
+            $objTarefaDTO->setStrSinConsultaProcessual($objTarefaDTOAntigo->getStrSinConsultaProcessual());
             }
             $objTarefaDTO->setStrIdTarefaModulo(null);
             $objTarefaBD->cadastrar($objTarefaDTO);
@@ -1905,6 +1905,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+
           if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
             $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
           }
