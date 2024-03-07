@@ -1,6 +1,6 @@
 name: Testes funcionais para MySQL
 
-on: [push, pull_request]
+on: [pull_request]
 env: # Or as an environment variable
   CERTIFICADO_ORG1: ${{ secrets.CERTIFICADO_ORG1 }}
   CERTIFICADO_ORG2: ${{ secrets.CERTIFICADO_ORG2 }}
@@ -8,7 +8,7 @@ env: # Or as an environment variable
   GIT_ACTION_SENHA_ORG2: ${{ secrets.GIT_ACTION_SENHA_ORG2 }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}
 
 jobs:
   test:
