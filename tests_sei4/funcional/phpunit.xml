@@ -32,18 +32,13 @@
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="1" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="Poder Executivo Federal" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
-      value="307" />
-    <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA"
-      value="STF" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="307" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA" value="STF" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="STF / PJ" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
-      value="Supremo Tribunal Federal" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Supremo Tribunal Federal" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
-      value="318" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA"
-      value="Edital" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="318" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Edital" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="ED" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
@@ -74,13 +69,10 @@
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="1" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="Poder Executivo Federal" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
-      value="79116" />
-    <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA"
-      value="Prodasen - PRODASEN" />
+    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="79116" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA" value="Prodasen - PRODASEN" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="PRODASEN" />
-    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
-      value="Prodasen" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Prodasen" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />
