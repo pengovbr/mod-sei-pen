@@ -2,9 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_parallel_without_monitoring
- * @group rodarseparado
- * @group rodarseparado3
+ * @group execute_without_receiving
  */
 class TramiteProcessoEmLoteComCancelamentoTest extends CenarioBaseTestCase
 {

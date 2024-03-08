@@ -7,7 +7,7 @@
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
  *
  * Execution Groups
- * @group execute_parallel_grupo4
+ * @group execute_parallel_with_two_group1
  */
 class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
 {

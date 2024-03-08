@@ -3,7 +3,7 @@
 /**
  *
  * Execution Groups
- * @group execute_parallel_grupo1
+ * @group execute_parallel_group1
  */
 class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
 {

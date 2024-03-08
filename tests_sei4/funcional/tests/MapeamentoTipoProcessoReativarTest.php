@@ -5,7 +5,7 @@
  * Reativar tipos de processos
  *
  * Execution Groups
- * @group exxecute_alone
+ * @group execute_alone_group1
  */
 class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
 {

@@ -3,9 +3,7 @@
 /**
  * 
  * Execution Groups
- * @group exxecute_alone
- * @group rodarseparado
- * @group rodarseparado4
+ * @group execute_alone_group2
  */
 class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
 {

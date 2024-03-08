@@ -3,7 +3,7 @@
 /**
  * 
  * Execution Groups
- * @group execute_alone
+ * @group execute_alone_group1
  */
 class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCase
 {

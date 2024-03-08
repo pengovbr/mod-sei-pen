@@ -4,7 +4,7 @@
  * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
  *
  * Execution Groups
- * @group execute_parallel_without_monitoring
+ * @group execute_without_receiving
  */
 class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
 {
