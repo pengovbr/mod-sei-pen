@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
+
 class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 {
     protected static $numQtyProcessos = 2; // max: 99
@@ -15,14 +17,6 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        // $penMapUnidadesFixture = new \PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-        //     'id' => self::$remetente['ID_ESTRUTURA'],
-        //     'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-        //     'nome' => self::$remetente['NOME_UNIDADE']
-        // ]);
-        // $penMapUnidadesFixture->cadastrar();
-
     }
 
     public function teste_tramite_bloco_externo()
@@ -32,42 +26,46 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
 
         for ($i = 0; $i < self::$numQtyProcessos; $i++) {
-            $objProtocoloFixture = new \ProtocoloFixture();
-            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar();
+            $objProtocoloFixture = new ProtocoloFixture();
+            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar([
+                'Descricao' => 'teste'
+            ]);
 
-            $objProcedimentoFixture = new \ProcedimentoFixture();
+            $objProcedimentoFixture = new ProcedimentoFixture();
             $objProcedimentoDTO = $objProcedimentoFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
             ]);
 
-            $objAtividadeFixture = new \AtividadeFixture();
+            $objAtividadeFixture = new AtividadeFixture();
             $objAtividadeDTO = $objAtividadeFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdTarefa' => TarefaRN::$TI_GERACAO_PROCEDIMENTO,
             ]);
 
-            $objParticipanteFixture = new \ParticipanteFixture();
+            $objParticipanteFixture = new ParticipanteFixture();
             $objParticipanteFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+                'IdContato' => 100000006,
+
             ]);
 
-            $objProtocoloAssuntoFixture = new \RelProtocoloAssuntoFixture();
+            $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
             $objProtocoloAssuntoFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
             ]);
 
-            $objAtributoAndamentoFixture = new \AtributoAndamentoFixture();
+            $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
             $objAtributoAndamentoFixture->carregar([
                 'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
             ]);
 
-            $objDocumentoFixture = new \DocumentoFixture();
+            $objDocumentoFixture = new DocumentoFixture();
             $objDocumentoDTO = $objDocumentoFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
             ]);
 
-            $objAssinaturaFixture = new \AssinaturaFixture();
+            $objAssinaturaFixture = new AssinaturaFixture();
             $objAssinaturaFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
                 'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
@@ -107,6 +105,8 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
             
             $this->assertEquals($qtyProcessos, self::$numQtyProcessos);
         }
+
+        $this->sairSistema();
     }
 
      /**
@@ -132,6 +132,8 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
         
         sleep(5);
+
+        $this->sairSistema();
     }
 
     /**
@@ -160,5 +162,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         } else {
             $this->assertEquals('Aberto', $novoStatus);
         }  
+
+        $this->sairSistema();
     }
 }

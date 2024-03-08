@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
+
 /**
  * Teste de inclusão de processo em bloco
  * @group group
@@ -57,7 +59,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
      */
     public function teste_mesmo_processo_em_bloco()
     {
-        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocoloFixture = new BlocoDeTramiteProtocoloFixture();
         $objBlocoDeTramiteProtocoloFixture->carregar([
             'IdProtocolo' => $this->objProtocoloDTO->getDblIdProtocolo(),
             'IdTramitaEmBloco' => $this->objBlocoDeTramiteDTO->getNumId(),
@@ -107,42 +109,43 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
     private function cadastrarProcessos()
     {
         $parametros = [];
-        $objProtocoloFixture = new \ProtocoloFixture();
+        $objProtocoloFixture = new ProtocoloFixture();
         $this->objProtocoloDTO = $objProtocoloFixture->carregar(
             $parametros,
             function($objProtocoloDTO) {
-                $objProcedimentoFixture = new \ProcedimentoFixture();
+                $objProcedimentoFixture = new ProcedimentoFixture();
                 $objProcedimentoDTO = $objProcedimentoFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
                 ]);
 
-                $objAtividadeFixture = new \AtividadeFixture();
+                $objAtividadeFixture = new AtividadeFixture();
                 $objAtividadeDTO = $objAtividadeFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
                 ]);
 
-                $objParticipanteFixture = new \ParticipanteFixture();
+                $objParticipanteFixture = new ParticipanteFixture();
                 $objParticipanteFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                    'IdContato' => 100000006,
                 ]);
 
-                $objProtocoloAssuntoFixture = new \RelProtocoloAssuntoFixture();
+                $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
                 $objProtocoloAssuntoFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
                 ]);
 
-                $objAtributoAndamentoFixture = new \AtributoAndamentoFixture();
+                $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
                 $objAtributoAndamentoFixture->carregar([
                     'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
                 ]);
 
-                $objDocumentoFixture = new \DocumentoFixture();
+                $objDocumentoFixture = new DocumentoFixture();
                 $objDocumentoDTO = $objDocumentoFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
                     'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
                 ]);
 
-                $objAssinaturaFixture = new \AssinaturaFixture();
+                $objAssinaturaFixture = new AssinaturaFixture();
                 $objAssinaturaFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
                     'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),

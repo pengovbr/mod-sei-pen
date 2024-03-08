@@ -71,7 +71,5 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
     {
         // $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         // $objBlocoDeTramiteFixture->excluir(1);
-
-        parent::tearDownAfterClass();
     }
 }
