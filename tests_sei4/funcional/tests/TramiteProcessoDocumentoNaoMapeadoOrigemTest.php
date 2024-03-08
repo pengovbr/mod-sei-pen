@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_alone_group1
+ * @group execute_alone_group2
  */
 class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
 {
@@ -14,6 +14,7 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
 
     public static function setUpBeforeClass() :void {
 
+        parent::setUpBeforeClass();
         $parametrosOrgaoA = new ParameterUtils(CONTEXTO_ORGAO_A);
         $parametrosOrgaoA->setParameter('PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO', null);
 

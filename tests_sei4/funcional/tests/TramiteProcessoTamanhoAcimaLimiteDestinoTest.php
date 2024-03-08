@@ -22,6 +22,7 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
      */
     public static function setUpBeforeClass() :void {
 
+        parent::setUpBeforeClass();
         // Redução de limite máximo de tamanho de documento externo
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
