@@ -5,7 +5,7 @@
  * Desativar e reativar mapeamento entre orgãos
  * 
  * Execution Groups
- * @group execute_alone_group1
+ * @group execute_alone_group2
  */
 class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
 {

@@ -6,7 +6,7 @@
  * Importar tipos de processo para relacionamento
  *
  * Execution Groups
- * @group execute_alone_group1
+ * @group execute_alone_group2
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends CenarioBaseTestCase
 {
