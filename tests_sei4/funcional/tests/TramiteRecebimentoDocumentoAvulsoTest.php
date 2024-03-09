@@ -187,10 +187,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
-            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
             , 'connection_timeout' => $connectionTimeout
-            //, CURLOPT_TIMEOUT => $connectionTimeout
-            //, CURLOPT_CONNECTTIMEOUT => $connectionTimeout
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
@@ -198,7 +195,21 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
             ),
         );
 
-        return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+        $r=null;
+        $trys = 10;
+        do {
+            try {
+                $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+
+                break;
+            }
+            catch(Exception $e) {
+                $trys--;
+                if ($trys == 0){ throw  $e; }
+            }
+        } while($trys > 0);
+
+        return $r;
 
     }
 
