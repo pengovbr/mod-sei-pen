@@ -2624,7 +2624,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-    $this->atualizarNumeroVersao("3.5.0"); $a=1/0;
+    $this->atualizarNumeroVersao("3.5.0");
   }
 }
 
