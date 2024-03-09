@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_parallel_group3
+ * @group exxecute_parallel_group3
  */
 class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
 {

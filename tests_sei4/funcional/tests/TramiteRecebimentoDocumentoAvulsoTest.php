@@ -27,7 +27,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -195,8 +195,13 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -207,6 +212,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;

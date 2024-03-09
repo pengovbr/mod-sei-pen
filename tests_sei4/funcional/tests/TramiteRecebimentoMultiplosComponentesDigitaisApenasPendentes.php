@@ -216,8 +216,13 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -228,6 +233,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;

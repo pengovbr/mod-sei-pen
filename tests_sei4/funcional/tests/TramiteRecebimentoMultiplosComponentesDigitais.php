@@ -22,7 +22,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento dedocumento avulso com 2 componentes digitais
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -43,7 +43,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento processo contendo documento com 3 componentes digitais
-     * 
+     *
      * @return void
      */
     public function test_recebimento_processo_com_3_componentes_digitais()
@@ -61,7 +61,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C, self::CONTEUDO_DOCUMENTO_A,
             self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C,
         ));
-        
+
         // Simular um trâmite chamando a API do Barramento diretamente
         $metadadosProcessoTeste = $this->construirMetadadosProcessoTeste(self::$processoTeste, array(self::$documentoZip));
         $novoTramite = $this->enviarMetadadosProcesso(self::$servicoPEN, $remetente, $destinatario, $metadadosProcessoTeste);
@@ -135,7 +135,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros->IDT = $dadosTramite->tramite->IDT;
         return $servicoPEN->receberReciboDeEnvio($parametros);
     }
-    
+
     private function receberReciboEnvioProcesso($servicoPEN, $novoTramite)
     {
         $dadosTramite = $novoTramite->dadosTramiteDeProcessoCriado;
@@ -150,7 +150,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros = new StdClass();
         $parametros->IDT = $dadosTramite->IDT;
         return $servicoPEN->receberReciboDeTramite($parametros);
-    }   
+    }
 
     private function enviarMetadadosProcesso($servicoPEN, $remetente, $destinatario, $processoTeste)
     {
@@ -220,8 +220,13 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -232,6 +237,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;

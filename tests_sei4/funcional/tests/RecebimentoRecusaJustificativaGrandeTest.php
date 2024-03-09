@@ -4,7 +4,7 @@ use \utilphp\util;
 
 /**
  * Execution Groups
- * @group execute_alone_group1
+ * @group execute_alone_group2
  */
 class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
 {
@@ -119,8 +119,13 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -131,6 +136,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;

@@ -23,9 +23,9 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
      * Teste de envio de metadados do processo contendo interessados duplicados
      *
      * Inicialmente são enviados 2 interessados com o mesmo nome
-     * 
+     *
      * @group envio
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -81,8 +81,13 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -93,6 +98,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;
@@ -186,7 +192,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 
         $arrInteressados = array_map(function($item) {
             return array('nome' => utf8_encode($item));
-        }, 
+        },
         $processoTeste['INTERESSADOS']);
 
         return array(

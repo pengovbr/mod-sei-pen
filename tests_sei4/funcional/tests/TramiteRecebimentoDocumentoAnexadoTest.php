@@ -29,10 +29,10 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
      * Teste de envio de metadados do processo contendo documentos anexados
      *
      * Inicialmente são enviados 3 documentos, sendo um deles referênciado pelos outros dois documentos
-     * 
+     *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -124,8 +124,13 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
             ),
         );
 
+        /*
+        Barramento de homolog por vezes recusa essa simples chamada.
+        Nao eh justo parar o teste de horas por conta disso.
+        Vamos tentar varias vezes antes de dar erro
+        */
         $r=null;
-        $trys = 10;
+        $trys = 20;
         do {
             try {
                 $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
@@ -136,6 +141,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
+            sleep(1);
         } while($trys > 0);
 
         return $r;
