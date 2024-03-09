@@ -237,7 +237,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
-            sleep(1);
+            sleep(5);
         } while($trys > 0);
 
         return $r;

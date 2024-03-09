@@ -4,7 +4,7 @@ use \utilphp\util;
 
 /**
  * Execution Groups
- * @group execute_parallel_group3
+ * @group execute_parallel_group2
  */
 class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 {
@@ -98,7 +98,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
                 $trys--;
                 if ($trys == 0){ throw  $e; }
             }
-            sleep(1);
+            sleep(5);
         } while($trys > 0);
 
         return $r;
