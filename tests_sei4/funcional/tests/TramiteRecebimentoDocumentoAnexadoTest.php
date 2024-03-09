@@ -117,8 +117,8 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
             , 'connection_timeout' => $connectionTimeout
-            , CURLOPT_TIMEOUT => $connectionTimeout
-            , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
+            //, CURLOPT_TIMEOUT => $connectionTimeout
+            //, CURLOPT_CONNECTTIMEOUT => $connectionTimeout
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
