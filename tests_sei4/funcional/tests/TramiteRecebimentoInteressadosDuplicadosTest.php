@@ -4,7 +4,7 @@ use \utilphp\util;
 
 /**
  * Execution Groups
- * @group execute_parallel_group2
+ * @group exxecute_parallel_group3
  */
 class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 {
