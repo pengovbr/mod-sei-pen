@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  * Execution Groups
  * @group execute_alone_group2
  */

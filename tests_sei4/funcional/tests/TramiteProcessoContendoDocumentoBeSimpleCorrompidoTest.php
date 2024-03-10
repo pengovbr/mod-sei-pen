@@ -3,7 +3,7 @@
 /**
  *
  * Execution Groups
- * @group execute_parallel_with_two_group1 
+ * @group execute_parallel_with_two_group1
  */
 class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBaseTestCase
 {

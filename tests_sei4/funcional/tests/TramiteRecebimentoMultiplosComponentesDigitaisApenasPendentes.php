@@ -208,7 +208,10 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
+            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
             , 'connection_timeout' => $connectionTimeout
+            , CURLOPT_TIMEOUT => $connectionTimeout
+            , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
             , 'encoding' => 'UTF-8'
             , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
             , 'ssl' => array(
@@ -216,27 +219,8 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             ),
         );
 
-        /*
-        Barramento de homolog por vezes recusa essa simples chamada.
-        Nao eh justo parar o teste de horas por conta disso.
-        Vamos tentar varias vezes antes de dar erro
-        */
-        $r=null;
-        $trys = 20;
-        do {
-            try {
-                $r = new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+        return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
 
-                break;
-            }
-            catch(Exception $e) {
-                $trys--;
-                if ($trys == 0){ throw  $e; }
-            }
-            sleep(5);
-        } while($trys > 0);
-
-        return $r;
     }
 
     private function construirCabecalhoTeste($remetente, $destinatario)
