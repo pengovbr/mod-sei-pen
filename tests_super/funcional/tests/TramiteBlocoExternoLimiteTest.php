@@ -27,7 +27,9 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 
         for ($i = 0; $i < self::$numQtyProcessos; $i++) {
             $objProtocoloFixture = new ProtocoloFixture();
-            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar();
+            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar([
+                'Descricao' => 'teste'
+            ]);
 
             $objProcedimentoFixture = new ProcedimentoFixture();
             $objProcedimentoDTO = $objProcedimentoFixture->carregar([
