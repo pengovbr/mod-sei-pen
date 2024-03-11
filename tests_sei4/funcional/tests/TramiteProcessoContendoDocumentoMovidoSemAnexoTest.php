@@ -7,7 +7,7 @@
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * @group execute_alone_group6
  */
 class TramiteProcessoContendoDocumentoMovidoSemAnexoTest extends CenarioBaseTestCase
 {

@@ -4,7 +4,7 @@
  * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
  *
  * Execution Groups
- * @group execute_parallel_group2
+ * @group execute_alone_group6
  */
 class TramiteProcessosComDevolucaoAmbosAnexadosTest extends CenarioBaseTestCase
 {

@@ -7,7 +7,7 @@
  * na posição correta dentro do processo.
  *
  * Execution Groups
- * @group execute_parallel_group2
+ * @group execute_alone_group5
  */
 class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTestCase
 {

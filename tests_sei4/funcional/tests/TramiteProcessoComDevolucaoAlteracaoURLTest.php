@@ -2,7 +2,7 @@
 
 /**
   * Execution Groups
-  * @group execute_alone_group2
+  * @group execute_alone_group3
  */
 class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
 {
