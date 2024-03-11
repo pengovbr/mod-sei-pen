@@ -1,6 +1,6 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
 
 class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 {
@@ -41,7 +41,9 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 
         for ($i = 0; $i < self::$numQtyProcessos; $i++) {
             $objProtocoloFixture = new ProtocoloFixture();
-            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar();
+            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar([
+                'Descricao' => 'teste'
+            ]);
 
             $objProcedimentoFixture = new ProcedimentoFixture();
             $objProcedimentoDTO = $objProcedimentoFixture->carregar([
@@ -57,6 +59,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
             $objParticipanteFixture = new ParticipanteFixture();
             $objParticipanteFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+                'IdContato' => 100000006,
             ]);
 
             $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();

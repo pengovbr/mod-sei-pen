@@ -38,6 +38,7 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
             $objParticipanteFixture = new ParticipanteFixture();
             $objParticipanteFixture->carregar([
                 'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdContato' => 100000006,
             ]);
 
             $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
