@@ -4,7 +4,8 @@ use \utilphp\util;
 
 /**
  * Execution Groups
- * @group execute_alone_group2
+ * @group exxecute_alone_group2
+ * com falha no interessados(0).nnome
  */
 class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 {
