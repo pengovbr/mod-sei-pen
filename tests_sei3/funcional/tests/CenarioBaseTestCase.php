@@ -44,10 +44,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
-    protected $paginaCadastrarProcessoEmBloco = null;
-    protected $paginaTramiteEmBloco = null;
-    protected $PaginaEnvioParcialListar = null;
-    protected $paginaCadastroMapEnvioCompDigitais = null;
+    protected $paginaEnvioParcialListar = null;
 
     public function setUpPage(): void
     {
@@ -66,15 +63,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
-        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
-        $this->PaginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new paginaCadastroMapEnvioCompDigitais($this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->currentWindow()->maximize();
     }
 
@@ -211,7 +205,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
-            'NOME_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_NOME_UNIDADE'),
             'SIGLA_ESTRUTURA' => constant($nomeContexto . '_SIGLA_ESTRUTURA'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
@@ -242,18 +235,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
-        $this->url($url);
-    }
-
-    protected function navegarPara($acao) 
-    {
-        $this->frame(null);
-        $acao = "acao={$acao}";
-        $xpath = "//a[contains(@href, '$acao')]";
-        $link = $this->byXPath($xpath);
-        $url = $link->attribute('href');
-
-        $this->url($url);
         $this->url($url);
     }
 
@@ -549,11 +530,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->paginaBase->navegarParaControleProcesso();
-        $xpath = "//a[contains(@href, 'acao=pen_procedimento_expedido_listar')]";
-        $link = $this->byXPath($xpath);
-        $url = $link->attribute('href');
-        $this->url($url);
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
+        $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 

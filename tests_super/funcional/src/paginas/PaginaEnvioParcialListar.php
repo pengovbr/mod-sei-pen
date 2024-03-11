@@ -17,7 +17,6 @@ class PaginaEnvioParcialListar extends PaginaTeste
     public function navegarEnvioParcialListar()
     {
         $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Mapeamento de Envio Parcial'));
-        // $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Administração'));
         $this->test->byXPath("//a[@link='pen_map_envio_parcial_listar']")->click();
     }
 

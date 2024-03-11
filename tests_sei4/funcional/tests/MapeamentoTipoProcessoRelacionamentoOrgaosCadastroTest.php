@@ -3,6 +3,9 @@
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Cadastro mapeamento de orgãos
+ *
+ * Execution Groups
+ * @group execute_alone_group1
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBaseTestCase
 {
@@ -17,6 +20,13 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
     {
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+
+        $penMapUnidadesFixture = new PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
+            'id' => self::$remetente['ID_ESTRUTURA'],
+            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'nome' => self::$remetente['NOME_UNIDADE']
+        ]);
+        $penMapUnidadesFixture->gravar();
     }
 
     /**
@@ -55,8 +65,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
             utf8_encode('Relacionamento entre Unidades cadastrado com sucesso.'),
             $mensagem
         );
-        
-        $this->sairSistema();
     }
 
     /**
@@ -91,8 +99,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
             utf8_encode('Cadastro de relacionamento entre unidades já existente.'),
             $mensagem
         );
-        
-        $this->sairSistema();
     }
 
     /**
@@ -133,8 +139,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
             utf8_encode('Relacionamento entre Unidades atualizado com sucesso.'),
             $mensagem
         );
-        
-        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void

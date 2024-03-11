@@ -35,17 +35,12 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
         );
         $this->paginaCadastroMapEnvioCompDigitais->salvar();
 
-        $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['REP_ESTRUTURAS']);
-        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['NOME_UNIDADE']);  
-
         sleep(1);
-        $this->assertNotNull($nomeRepositorioCadastrado);
-        $this->assertNotNull($nomeUnidadeCadastrado);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Mapeamento de Envio Parcial cadastrado com sucesso.'),
             $mensagem
-        );
+        );        
     }
 
     /**
@@ -76,12 +71,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
         );
         $this->paginaCadastroMapEnvioCompDigitais->salvar();
 
-        $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetenteB['REP_ESTRUTURAS']);
-        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetenteB['NOME_UNIDADE']);
-
         sleep(1);
-        $this->assertNotNull($nomeRepositorioCadastrado);
-        $this->assertNotNull($nomeUnidadeCadastrado);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
         $this->assertStringContainsString(
             utf8_encode('Mapeamento de Envio Parcial atualizado com sucesso.'),

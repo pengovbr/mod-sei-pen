@@ -52,16 +52,9 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-- .:/tests
-      - ${SEI_PATH}/../tests:/tests/sei
-      - ${SEI_PATH}/../src:/tests/sei/src
-      - ./src/fixtures:/tests/sei/modpen/fixtures
-      - ../../src/dto:/tests/sei/modpen/dto
-      - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
-      - /tmp:/tmp/
-      - /tmp/sei_arquivos_1:/var/sei/arquivos/org1-database
-      - /tmp/sei_arquivos_2:/var/sei/arquivos/org2-database
+      - .:/tests
+      - /tmp:/tmp
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9000 start_with_request=0
       - XDEBUG_SESSION=default
@@ -74,20 +67,11 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
-      - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
-      - DATABASE_HOST=org1-database
-      - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT}
-      - SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
-      - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
-      - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
-      - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
-      - SIP_DATABASE_USER=${SIP_DATABASE_USER}
-      - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     links:
-      - org1-database:org1-database
-      - org2-database:org2-database
+      - org1-database:${ORG1_DATABASE_NAME}
+      - org2-database:${ORG1_DATABASE_NAME}
       - selenium:selenium
     command: "true"
 
@@ -140,7 +124,6 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - /tmp/sei_arquivos_1:/var/sei/arquivos
     environment:
       - SEI_HOST_URL=http://${ORG1_HOSTNAME}
       - CERTIFICADO=${ORG1_CERTIFICADO}
@@ -176,7 +159,6 @@ services:
       - ./assets/cron.d:/etc/cron.d
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - /tmp/sei_arquivos_2:/var/sei/arquivos
     environment:
       - SEI_HOST_URL=http://${ORG2_HOSTNAME}
       - CERTIFICADO=${ORG2_CERTIFICADO}

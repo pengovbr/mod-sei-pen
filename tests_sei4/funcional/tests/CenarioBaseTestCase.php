@@ -38,19 +38,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
-    protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaMoverDocumento = null;
     protected $paginaCadastroOrgaoExterno = null;
-    protected $paginaTramiteMapeamentoOrgaoExterno = null;
-    protected $paginaExportarTiposProcesso = null;
-    protected $paginaTipoDocumento = null;
-    protected $paginaTipoProcesso = null;
-    protected $paginaTipoProcessoReativar = null;
-    protected $paginaCadastrarProcessoEmBloco = null;
-    protected $paginaTramiteEmBloco = null;
-    protected $paginaUnidades = null;
-    protected $PaginaEnvioParcialListar = null;
     protected $paginaCadastroMapEnvioCompDigitais = null;
+    protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoProcessoReativar = null;
+    protected $paginaEnvioParcialListar = null;
 
     public function setUpPage(): void
     {
@@ -74,13 +67,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
-        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
-        $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
-        $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
-        $this->paginaUnidades = new PaginaUnidades($this);
-        $this->PaginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new paginaCadastroMapEnvioCompDigitais($this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->currentWindow()->maximize();
     }
 
@@ -98,12 +85,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         // Configuração do mapeamento de unidades
-        $penMapUnidadesFixture = new \PenMapUnidadesFixture();
-        $penMapUnidadesFixture->carregar([
-            'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA,
-            'Sigla' => CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA,
-            'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE,
-        ]);
+        $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000001', CONTEXTO_ORGAO_A_ID_ESTRUTURA));
         $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000002', CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA));
         // Configuração do prefíxo de processos
         $bancoOrgaoA->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_A_NUMERO_SEI, CONTEXTO_ORGAO_A_SIGLA_ORGAO));
@@ -133,14 +115,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
-        $bancoOrgaoB->execute(
-            "insert into md_pen_unidade(id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) values ('110000001', ?, ?, ?)",
-            array(
-                CONTEXTO_ORGAO_B_ID_ESTRUTURA,
-                CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA,
-                CONTEXTO_ORGAO_B_NOME_UNIDADE
-            )
-        );
+        $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000002', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA));
 
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
@@ -229,7 +204,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
-            'NOME_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_NOME_UNIDADE'),
             'SIGLA_ESTRUTURA' => constant($nomeContexto . '_SIGLA_ESTRUTURA'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
@@ -260,18 +234,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
-        $this->url($url);
-    }
-
-    protected function navegarPara($acao) 
-    {
-        $this->frame(null);
-        $acao = "acao={$acao}";
-        $xpath = "//a[contains(@href, '$acao')]";
-        $link = $this->byXPath($xpath);
-        $url = $link->attribute('href');
-
-        $this->url($url);
         $this->url($url);
     }
 
@@ -567,8 +529,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
         $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
@@ -592,12 +553,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoInternoTeste($contextoProducao,$tipoDocumento = null)
+    public function gerarDadosDocumentoInternoTeste($contextoProducao)
     {
         return array(
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
-            "TIPO_DOCUMENTO" => $tipoDocumento ?: $contextoProducao['TIPO_DOCUMENTO'],
+            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
             "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
@@ -816,7 +777,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function visualizarProcessoTramitadosEmLote($test)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados em Lote'));
         $test->byLinkText("Processos Tramitados em Lote")->click();
     }
 

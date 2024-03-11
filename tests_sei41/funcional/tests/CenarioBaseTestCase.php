@@ -43,8 +43,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
-    protected $PaginaEnvioParcialListar = null;
-    protected $paginaCadastroMapEnvioCompDigitais = null;
+    protected $paginaEnvioParcialListar = null;
 
     public function setUpPage(): void
     {
@@ -67,8 +66,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
-        $this->PaginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new paginaCadastroMapEnvioCompDigitais($this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->currentWindow()->maximize();
     }
 
