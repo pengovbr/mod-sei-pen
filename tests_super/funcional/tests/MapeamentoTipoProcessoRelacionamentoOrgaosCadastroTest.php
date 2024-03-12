@@ -8,23 +8,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
 {
     public static $remetente;
     public static $destinatario;
-
-    /**
-     * @inheritdoc
-     * @return void
-     */
-    function setUp(): void
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-
-        $penMapUnidadesFixture = new PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE']
-        ]);
-        $penMapUnidadesFixture->cadastrar();
-    }
+public static $penOrgaoExternoId;
 
     /**
      * Teste de cadastro de novo mapeamento entre ogrãos
@@ -36,6 +20,14 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $penMapUnidadesFixture = new PenMapUnidades2Fixture();
+        $penMapUnidadesFixture->carregar([
+            'IdUnidadeRH' => self::$remetente['ID_ESTRUTURA'],
+            'SiglaUnidadeRH' => self::$remetente['SIGLA_ESTRUTURA'],
+            'NomeUnidadeRH' => self::$remetente['NOME_UNIDADE']
+        ]);
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -140,6 +132,12 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
 
     public static function tearDownAfterClass(): void
     {
+        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
+        $arrPenOrgaoExternoDTO = $penOrgaoExternoFixture->consultar();
+        $numRegistros = count($arrPenOrgaoExternoDTO);
+        for ($i = 0; $i < $numRegistros; $i++) {
+            $penOrgaoExternoFixture->deletar($arrPenOrgaoExternoDTO[$i]->getDblId());
+        }
         parent::tearDownAfterClass();
     }
 }

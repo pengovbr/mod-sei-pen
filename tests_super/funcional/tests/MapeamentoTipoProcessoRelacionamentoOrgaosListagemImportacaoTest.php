@@ -12,28 +12,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends C
     public static $penOrgaoExternoId;
 
     /**
-     * @inheritdoc
-     * @return void
-     */
-    function setUp(): void
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        self::$penOrgaoExternoId = $penOrgaoExternoFixture->cadastrar([
-            'idRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'repositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE'],
-            'idOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'nomeOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
-    }
-
-    /**
      * Teste para pesquisar mapeamento entre orgãos
      *
      * @Depends test_desativacao_mapeamento_orgao_externo
@@ -42,6 +20,21 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends C
      */
     public function test_pesquisar_mapeamento_orgao_externo()
     {
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $penOrgaoExternoFixture = new PenOrgaoExterno2Fixture();
+        $penOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'EstrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
+            'IdOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
+            'OrgaoDestino' => self::$remetente['NOME_UNIDADE'],
+            'IdOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'OrgaoOrigem' => self::$destinatario['NOME_UNIDADE']
+        ]);
+
+        self::$penOrgaoExternoId = $penOrgaoExternoDTO->getDblId();
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],

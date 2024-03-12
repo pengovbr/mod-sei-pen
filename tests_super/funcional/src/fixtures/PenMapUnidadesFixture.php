@@ -3,20 +3,13 @@
 /**
  * Responsável por cadastrar novo mapeamento de unidades caso não exista
  */
-class PenMapUnidadesFixture
+class PenMapUnidadesFixture extends FixtureBase
 {
-    private static $bancoOrgaoA;
-    private static $dados;
 
-    /**
-     * @param string $contexto
-     * @param array $dados
-     */
-    public function __construct(string $contexto, array $dados)
+    protected function inicializarObjInfraIBanco()
     {
-        self::$bancoOrgaoA = new DatabaseUtils($contexto);
-        self::$dados = $dados;
-    }
+        return \BancoSEI::getInstance();
+            }
 
     /**
      * Consulta mapeamento de unidade
@@ -25,14 +18,15 @@ class PenMapUnidadesFixture
      *
      * @return void
      */
-    public function gravar(): void
+    protected function cadastrar($dados = [])
     {
-        $penUnidade = $this->consultar();
+        $penUnidade = $this->consultar($dados);
         if (!empty($penUnidade)) {
-            $this->atualizar();
+            $penUnidade = $this->atualizar($dados);
         } else {
-            $this->cadastrar();
+            $penUnidade = $this->gravar($dados);
         }
+        return $penUnidade;
     }
 
     /**
@@ -42,38 +36,41 @@ class PenMapUnidadesFixture
      */
     public function consultar()
     {
-        return self::$bancoOrgaoA->query(
-            'select id_unidade, id_unidade_rh from md_pen_unidade where id_unidade = ? and id_unidade_rh = ?',
-            array(110000001, self::$dados['id'])
-        );
+        $objPenUnidadeDTO = new \PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade(110000001);
+        $objPenUnidadeDTO->retTodos();
+        $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
+        $arrPenUnidadeDTO = $objPenUnidadeBD->listar($objPenUnidadeDTO);
+        return $arrPenUnidadeDTO;
     }
 
-    /**
-     * Cadastrar mapeamento de unidade
-     * 
-     * @return void
-     */
-    public function cadastrar(): void
+
+    public function gravar($dados = [])
     {
-        self::$bancoOrgaoA->execute(
-            "INSERT INTO md_pen_unidade (id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) ".
-            "VALUES(?, ?, ?, ?)",
-            array(110000001, self::$dados['id'], self::$dados['sigla'], self::$dados['nome'])
-        );
+        $objPenUnidadeDTO = new \PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH'] ?: null);
+        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['NomeUnidadeRH'] ?: null);
+        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['SiglaUnidadeRH'] ?: null);
+        $objPenUnidadeDB = new \PenUnidadeBD(\BancoSEI::getInstance());
+        $arrPenUnidadeDTO = $objPenUnidadeDB->cadastrar($objPenUnidadeDTO);
+        return $arrPenUnidadeDTO;
     }
-
     /**
      * Atualizar mapeamento de unidade
      * 
      * @return void
      */
-    public function atualizar(): void
+    public function atualizar($dados = [])
     {
-        self::$bancoOrgaoA->execute(
-            "UPDATE md_pen_unidade SET sigla_unidade_rh = ?, nome_unidade_rh = ? ".
-            "WHERE id_unidade = ?  AND id_unidade_rh = ?",
-            array(self::$dados['sigla'], self::$dados['nome'], 110000001, self::$dados['id'])
-        );
+        $objPenUnidadeDTO = new \PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH']);
+        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['NomeUnidadeRH']);
+        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['SiglaUnidadeRH']);
+        $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
+        $arrPenUnidadeDTO = $objPenUnidadeBD->alterar($objPenUnidadeDTO);
+        return $arrPenUnidadeDTO;
     }
 
     /**
@@ -81,11 +78,13 @@ class PenMapUnidadesFixture
      * 
      * @return void
      */
-    public function deletar(): void
+    public function deletar($dados = [])
     {
-        self::$bancoOrgaoA->execute(
-            "DELETE FROM md_pen_unidade WHERE id_unidade = ? and id_unidade_rh = ?",
-            array(110000001, self::$dados['id'])
-        );
+        $objPenUnidadeDTO = new \PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['IdUnidadeRH']);
+        $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
+        $arrPenUnidadeDTO = $objPenUnidadeBD->excluir($objPenUnidadeDTO);
+        return $arrPenUnidadeDTO;
     }
 }

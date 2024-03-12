@@ -38,11 +38,15 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaMapeamentoUnidade = null;
     protected $paginaMoverDocumento = null;
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
+    protected $paginaTipoDocumento = null;
+    protected $paginaTipoProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaUnidades = null;
     protected $paginaCadastroOrgaoExterno = null;
 
     public function setUpPage(): void
@@ -62,11 +66,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
+        $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
+        $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaUnidades = new PaginaUnidades($this);
+        
         $this->currentWindow()->maximize();
     }
 
@@ -203,6 +212,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'HIPOTESE_RESTRICAO_PADRAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_PADRAO'),
             'ID_REP_ESTRUTURAS' => constant($nomeContexto . '_ID_REP_ESTRUTURAS'),
             'ID_ESTRUTURA' => constant($nomeContexto . '_ID_ESTRUTURA'),
+            'NOME_UNIDADE_ESTRUTURA' => constant($nomeContexto . '_NOME_UNIDADE'),
             'SIGLA_ESTRUTURA' => constant($nomeContexto . '_SIGLA_ESTRUTURA'),
             'HIPOTESE_RESTRICAO_INATIVA' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_INATIVA'),
             'TIPO_PROCESSO_SIGILOSO' => constant($nomeContexto . '_TIPO_PROCESSO_SIGILOSO'),
@@ -233,6 +243,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->url($url);
         PaginaLogin::executarAutenticacao($this, $login, $senha);
         PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->url($url);
+    }
+
+    protected function navegarPara($acao) 
+    {
+        $this->frame(null);
+        $acao = "acao={$acao}";
+        $xpath = "//a[contains(@href, '$acao')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+
+        $this->url($url);
         $this->url($url);
     }
 
@@ -588,10 +610,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
     }
 
-    public function gerarDadosProcessoTeste($contextoProducao)
+    public function gerarDadosProcessoTeste($contextoProducao,$tipoProcesso = null)
     {
         return array(
-            "TIPO_PROCESSO" => $contextoProducao['TIPO_PROCESSO'],
+            "TIPO_PROCESSO" => $tipoProcesso ?: $contextoProducao['TIPO_PROCESSO'],
             "DESCRICAO" => util::random_string(100),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
@@ -600,12 +622,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    public function gerarDadosDocumentoInternoTeste($contextoProducao)
+    public function gerarDadosDocumentoInternoTeste($contextoProducao,$tipoDocumento = null)
     {
         return array(
             'TIPO' => 'G', // Documento do tipo Gerado pelo sistema
             "NUMERO" => null, //Gerado automaticamente no cadastramento do documento
-            "TIPO_DOCUMENTO" => $contextoProducao['TIPO_DOCUMENTO'],
+            "TIPO_DOCUMENTO" => $tipoDocumento ?: $contextoProducao['TIPO_DOCUMENTO'],
             "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),

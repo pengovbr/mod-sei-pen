@@ -4,6 +4,14 @@ vendor/
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
 **/.tmp/
+tests_super/funcional/evidencias
+tests_sei41/funcional/evidencias
+tests_sei4/funcional/evidencias
+tests_sei3/funcional/evidencias
+tests_super/funcional/tests_funcional_falsos_positivos_temp
+tests_sei41/funcional/tests_funcional_falsos_positivos_temp
+tests_sei4/funcional/tests_funcional_falsos_positivos_temp
+tests_sei3/funcional/tests_funcional_falsos_positivos_temp
 
 .vscode
 

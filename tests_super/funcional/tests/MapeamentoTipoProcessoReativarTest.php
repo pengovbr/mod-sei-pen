@@ -11,34 +11,6 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
     public static $penOrgaoExternoId;
 
     /**
-     * @inheritdoc
-     * @return void
-     */
-    function setUp(): void
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        self::$penOrgaoExternoId = $penOrgaoExternoFixture->cadastrar([
-            'idRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'repositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE'],
-            'idOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'nomeOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
-
-        $importacaoTiposProcessoFixture = new ImportacaoTiposProcessoFixture(CONTEXTO_ORGAO_A);
-        $importacaoTiposProcessoFixture->cadastrar([
-            'idMapeamento' => self::$penOrgaoExternoId,
-            'sinAtivo' => 'N'
-        ]);
-    }
-
-    /**
      * Teste de reativação de um Relacionamento entre Órgãos
      * 
      * @large
@@ -47,6 +19,27 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
      */
     public function test_reativacao_mapeamento_orgao_externo()
     {
+                self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $penOrgaoExternoFixture = new PenOrgaoExterno2Fixture();
+        $penOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'EstrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
+            'IdOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
+            'OrgaoDestino' => self::$remetente['NOME_UNIDADE'],
+            'IdOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'OrgaoOrigem' => self::$destinatario['NOME_UNIDADE']
+        ]);
+
+        self::$penOrgaoExternoId = $penOrgaoExternoDTO->getDblId();
+
+        $importacaoTiposProcessoFixture = new ImportacaoTiposProcessoFixture(CONTEXTO_ORGAO_A);
+        $importacaoTiposProcessoFixture->cadastrar([
+            'idMapeamento' => self::$penOrgaoExternoId,
+            'sinAtivo' => 'N'
+        ]);
+    
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],

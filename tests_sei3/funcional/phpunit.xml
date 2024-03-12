@@ -5,8 +5,10 @@
   backupGlobals="true"
   colors="true"
   verbose="true"
-  cacheResult="false">
-
+  cacheResult="false"
+  stopOnError="false"
+  stopOnFailure="false"
+  >
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
     <const name="PHPUNIT_PORT" value="4444" />
@@ -29,6 +31,8 @@
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_A_UNIDADE_ESTRUTURAS"
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
@@ -71,6 +75,8 @@
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_B_UNIDADE_ESTRUTURAS" 
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG2]" />
@@ -137,5 +143,9 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
+    <testsuite name="falsos_positivos">
+      <directory>tests_funcional_falsos_positivos_temp</directory>
+    </testsuite>
   </testsuites>
+
 </phpunit>

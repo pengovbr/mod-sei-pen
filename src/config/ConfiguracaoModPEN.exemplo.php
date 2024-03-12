@@ -91,6 +91,10 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
               // de unidades de destino.
               // Atenção: Este parâmetro somente poderá ser ativado para os órgão que já possuem do mod-sei-pen 3.3.0 ou superior
               //
+              //
+              // Configuração padrão:
+              "EnviarApenasComponentesDigitaisPendentes" => false
+              //
               // Exemplo:
               // "EnviarApenasComponentesDigitaisPendentes" => array(
               //     "1" => array(   // 1 = Poder Executivo Federal

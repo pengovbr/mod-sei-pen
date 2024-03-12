@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.5.0");
+define("VERSAO_MODULO_PEN", "3.6.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -71,14 +71,115 @@ class PENIntegracao extends SeiIntegracao
       //Apresenta o botÃ£o de expedir processo
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-        $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em Lote" />';
+        $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Incluir Processos no Bloco de Trâmite" title="Incluir Processos no Bloco de Trâmite" />';
       }
     }
 
     return array($strAcoesProcedimento);
   }
 
+  public function desativarTipoDocumento($arrObjSerieAPI) {
+    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI);
+  }
+
+  public function excluirTipoDocumento($arrObjSerieAPI) {
+    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI);
+  }
+
+  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI)
+  {
+    $excecao = new InfraException();
+    foreach ($arrObjSerieAPI as $objSerieAPI) {
+      $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
+      $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
+      $objPenRelTipoDocMapEnviadoDTO->retNumIdSerie();
+
+      $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
+      $objPenRelTipoDocMapEnviadoDTO = $objPenRelTipoDocMapEnviadoRN->contar($objPenRelTipoDocMapEnviadoDTO);
+
+      $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+      $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie($objSerieAPI->getIdSerie());
+      $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
+
+      $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+      $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO);
+      
+      if ($objPenRelTipoDocMapRecebidoDTO > 0 || $objPenRelTipoDocMapEnviadoDTO > 0) {
+          $excecao->lancarValidacao('Não é permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"');
+      }
+    }
+  }
+
+  public function desativarUnidade($arrObjUnidadeAPI) {
+    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
+  }
+
+  public function excluirUnidade($arrObjUnidadeAPI) {
+    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
+  }
+
+  protected function validarExcluirDesativarUnidade($arrObjUnidadeAPI)
+  {
+    $excecao = new InfraException();
+    foreach ($arrObjUnidadeAPI as $objUnidadeAPI) {
+      $objPenUnidadeDTO = new PenUnidadeDTO();
+      $objPenUnidadeDTO->setNumIdUnidade($objUnidadeAPI->getIdUnidade());
+      $objPenUnidadeDTO->retNumIdUnidade();
+
+      $objPenUnidadeRN = new PenUnidadeRN();
+      $objPenUnidadeDTO = $objPenUnidadeRN->contar($objPenUnidadeDTO);
+      if ($objPenUnidadeDTO > 0) {
+        $excecao->lancarValidacao('Não é permitido excluir ou desativar a unidade "' . $objUnidadeAPI->getSigla() . '"');
+      }
+    }
+  }
+
+  // public function excluirTipoProcesso($arrObjTipoProcedimentoDTO) {
+  //   $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'excluir');
+  // }
+
+  // public function desativarTipoProcesso($arrObjTipoProcedimentoDTO) {
+  //   $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'desativar');
+  // }
+
+  protected function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,$strDesativarExcluir) {
+    
+    $mensagem = "Prezado(a) usuário(a), você está tentando ".$strDesativarExcluir." um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
+    ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
+    ."mencionados o Tipo de Processo: \"%s\".";
+
+    $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+    $objMapeamentoTipoProcedimentoRN->validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem);
+
+    $mensagem = 'Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' o Tipo de Processo "%s" '
+      . 'que se encontra mapeado para o Tipo de Processo Padrão. '
+      . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
+      . 'O Tipo de Processo padrão se encontra disponível em: '
+      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
+
+    $objPenParametroRN = new PenParametroRN();
+    $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
+
+    $exception = new InfraException();
+    foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
+        $objPenParametroDTO = new PenParametroDTO();
+        $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
+        $objPenParametroDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
+        $objPenParametroRN = new PenParametroRN();
+        $objPenParametroDTO = $objPenParametroRN->contar($objPenParametroDTO);
+
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
+        $objProcedimentoRN = new ProcedimentoRN();
+        $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
+
+        if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
+            $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
+        }
+    }
+
+  }
   public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
   {
     $objProcedimentoDTO = new ProcedimentoDTO();
@@ -157,6 +258,11 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
         $strAcoesProcedimento .= '</a>';
     }
+
+    //Apresenta o botão de incluir processo no bloco de trâmite
+    $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+    $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
+
 
     return array($strAcoesProcedimento);
   }
@@ -610,7 +716,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * MÃ©todo de formataÃ§Ã£o para caracteres especiais XML
+   * Método de formataÃ§Ã£o para caracteres especiais XML
    */
   private static function formatarXMLAjax($str)
   {
@@ -641,6 +747,29 @@ class PENIntegracao extends SeiIntegracao
     switch ($strAcao) {
       case 'pen_procedimento_expedir':
         require_once dirname(__FILE__) . '/pen_procedimento_expedir.php';
+          break;
+
+      case 'pen_tramite_bloco_listar':
+      case 'md_pen_tramita_em_bloco':
+      case 'md_pen_tramita_em_bloco_excluir':
+      case 'pen_tramite_em_bloco_cancelar':
+        require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
+        break;
+
+      case 'pen_tramite_em_bloco_cadastrar':
+      case 'pen_tramite_em_bloco_alterar':
+        require_once dirname(__FILE__) . '/pen_tramite_em_bloco_cadastrar.php';
+        break;
+     
+      case 'pen_tramita_em_bloco_protocolo_excluir':
+      case 'pen_tramita_em_bloco_protocolo_listar':
+      case 'pen_tramita_em_bloco_protocolo_cancelar':
+          require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
+          break;
+
+      case 'pen_incluir_processo_em_bloco_tramite':
+      case 'pen_tramita_em_bloco_adicionar':
+        require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
           break;
 
       case 'pen_unidade_sel_expedir_procedimento':
@@ -795,6 +924,17 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_expedir_lote_listar':
         require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+          break;
+
+      case 'pen_map_envio_parcial_listar':
+        case 'pen_map_envio_parcial_excluir':
+            require_once dirname(__FILE__) . '/pen_map_envio_parcial_listar.php';
+            break;
+  
+      case 'pen_map_envio_parcial_salvar':
+      case 'pen_map_envio_parcial_cadastrar':
+      case 'pen_map_envio_parcial_visualizar':
+          require_once dirname(__FILE__) . '/pen_map_envio_parcial_cadastrar.php';
           break;
 
       default:
@@ -993,7 +1133,7 @@ class PENIntegracao extends SeiIntegracao
       LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
     }
 
-    // Desativado verificaÃ§Ãµes de compatibilidade do banco de dados por nÃ£o ser todas as versÃµes
+    // Desativado verificaÃ§Ãµes de compatibilidade do banco de dados por nÃ£o ser todas as versões
     // que necessitam mudanÃ§as no banco de dados
     // try {
     //     $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
@@ -1003,12 +1143,12 @@ class PENIntegracao extends SeiIntegracao
   }
 
   /**
-   * Compara duas diferentes versÃµes do sistem para avaliar a precedÃªncia de ambas
+   * Compara duas diferentes versões do sistem para avaliar a precedÃªncia de ambas
    *
-   * Normaliza o formato de nÃºmero de versÃ£o considerando dois caracteres para cada item (3.0.15 -> 030015)
-   * - Se resultado for IGUAL a 0, versÃµes iguais
-   * - Se resultado for MAIOR que 0, versÃ£o 1 Ã© posterior a versÃ£o 2
-   * - Se resultado for MENOR que 0, versÃ£o 1 Ã© anterior a versÃ£o 2
+   * Normaliza o formato de nÃºmero de versão considerando dois caracteres para cada item (3.0.15 -> 030015)
+   * - Se resultado for IGUAL a 0, versões iguais
+   * - Se resultado for MAIOR que 0, versão 1 é posterior a versão 2
+   * - Se resultado for MENOR que 0, versão 1 é anterior a versão 2
    */
   public static function compararVersoes($strVersao1, $strVersao2){
     $numVersao1 = explode('.', $strVersao1);

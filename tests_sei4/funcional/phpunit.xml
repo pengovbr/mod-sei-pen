@@ -6,6 +6,8 @@
   colors="true"
   verbose="true"
   cacheResult="false"
+  stopOnError="false"
+  stopOnFailure="false"
 >
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
@@ -21,7 +23,6 @@
     <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800000" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
-    <const name="ENVIO_PARCIAL" value="true" />
 
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de
     Serviços do PEN -->
@@ -32,6 +33,8 @@
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="951" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_A_UNIDADE_ESTRUTURAS"
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
@@ -74,6 +77,8 @@
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_B_UNIDADE_ESTRUTURAS" 
+      value="[INFORME O NOME DA UNIDADE DA ESTRUTURA UTILIZADO PARA RE CGPRO]" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
       value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
@@ -140,8 +145,9 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
-
-    <!-- novasuiteaqui -->
+    <testsuite name="falsos_positivos">
+      <directory>tests_funcional_falsos_positivos_temp</directory>
+    </testsuite>
   </testsuites>
 
 </phpunit>

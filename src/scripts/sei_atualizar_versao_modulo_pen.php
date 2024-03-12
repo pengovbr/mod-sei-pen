@@ -274,6 +274,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3040();
         case '3.4.0':
             $this->instalarV3050();
+        case '3.5.0':
+            $this->instalarV3060();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2636,8 +2638,154 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $this->atualizarNumeroVersao("3.5.0");
   }
-}
+    // novo tramite em bloco
+    protected function instalarV3060() {
+      $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
 
+      $objMetaBD = $this->objMeta;
+      $objMetaBD->criarTabela(array(
+        'tabela' => 'md_pen_tramita_em_bloco',
+        'cols' => array(
+            'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'descricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+            'idx_bloco' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+            'sta_tipo' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+            'sta_estado' => array($objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO),
+        ),
+        'pk' => array('cols' => array('id')),
+        'uk' => array(),
+        'fks' => array(
+          'unidade' => array('nome' => 'fk_tramite_bloco_unidade', 'cols' => array('id_unidade', 'id_unidade')),
+          'usuario' => array('nome' => 'fk_tramite_bloco_usuario', 'cols' => array('id_usuario', 'id_usuario')),
+        )
+      ));
+
+      # Criar sequencia para tramite em bloco
+
+      $objInfraSequenciaRN = new InfraSequenciaRN();
+      $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+      //Sequência: md_pen_seq_tramita_em_bloco
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_em_bloco');
+      $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tramita_em_bloco', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_em_bloco');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+      $objMetaBD->criarTabela(array(
+        'tabela' => 'md_pen_tramita_bl_protocolo',
+        'cols' => array(
+            'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+            'id_tramita_em_bloco' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+            'anotacao' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
+            'sequencia' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
+            'idx_rel_bloco_protocolo' => array($objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO),
+        ),
+        'pk' => array('cols' => array('id')),
+        'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
+        'fks' => array(
+          'protocolo' => array('nome' => 'fk_tramita_bl_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
+          //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
+        )
+      ));
+ 
+      //Sequência: md_pen_tramita_bl_protocolo
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_tramita_bl_protocolo');
+      $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+ 
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_tr_bl_protocolo', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_tramita_bl_protocolo');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+
+      //Instalação do Envio Parcial
+      $objInfraBanco = BancoSEI::getInstance();
+      $objMetaBD = $this->objMeta;
+
+      $objMetaBD->criarTabela(array(
+        'tabela' => 'md_pen_envio_comp_digitais',
+        'cols' => array(
+          'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+          'id_estrutura' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_estrutura' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
+          'id_unidade_rh' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'str_unidade_rh' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
+          'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+          'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO)
+        ),
+        'pk' => array('cols' => array('id')),
+        'uk' => array('id_estrutura', 'id_unidade_rh', 'id_unidade'),
+        // 'fks' => array(
+        //   'usuario' => array('id_usuario', 'id_usuario'),
+        //   'unidade' => array('id_unidade', 'id_unidade'),
+        // )
+      ));
+
+      # Criar sequencia para tramite em bloco
+
+      $objInfraSequenciaRN = new InfraSequenciaRN();
+      $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+      //Sequência: md_pen_seq_tramita_em_bloco
+      $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_envio_comp_digitais');
+      $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+
+      BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_envio_comp_digitais', $numMaxId + 1);
+      $objInfraSequenciaDTO->setStrNome('md_pen_envio_comp_digitais');
+      $objInfraSequenciaDTO->retStrNome();
+      $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+      $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+
+      //Inserir Componentes Digitais no Banco de acordo com os parâmetros do ConfiguracaoModPEN.php
+      $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes");
+      $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
+      $objSessaoSEI = SessaoSEI::getInstance();
+      $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      $objRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+
+      if (is_array($objParamEnviarDocumentosPendentes)) {  
+        foreach($arrObjEnviarDocumentosPendentes as $arrKeyIdUnidade_rh => $arrIdUnidade_rh){
+          foreach($arrIdUnidade_rh as $IdUnidade_rh){
+            try {
+              $objRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($arrKeyIdUnidade_rh);
+              $objProcessoEletronico = new ProcessoEletronicoRN();
+              $objProcessoEletronicoDTO = $objProcessoEletronico->consultarRepositoriosDeEstruturas($arrKeyIdUnidade_rh);
+                if (!is_null($objProcessoEletronicoDTO->getStrNome())) {
+                  $objRestricaoEnvioComponentesDigitaisDTO->setStrStrEstrutura($objProcessoEletronicoDTO->getStrNome());
+                  $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidadeRh($IdUnidade_rh);
+                  $objProcessoEletronicoDTO = $objProcessoEletronico->listarEstruturas($arrKeyIdUnidade_rh, $IdUnidade_rh);
+                  if (count($objProcessoEletronicoDTO) > 0) {
+                    if ((!is_null($objProcessoEletronicoDTO[0]->getStrSigla())) && ($objProcessoEletronicoDTO[0]->getStrSigla() <> "")) {
+                      $objRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadeRh($objProcessoEletronicoDTO[0]->getStrSigla());
+                      $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+                      $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+                      $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objRestricaoEnvioComponentesDigitaisDTO);
+                    }
+                  }
+                }
+            } catch (Exception $e) {  
+                throw new InfraException("Erro na parametrização EnviarApenasComponentesDigitaisPendentes em ConfiguraçãoModPEN.php");
+              try {
+                LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
+              } catch (Exception $e) {
+              }
+            }
+          }
+        }
+      }
+
+      $this->atualizarNumeroVersao("3.6.0");
+    }
+
+}
 
 try {
     session_start();
