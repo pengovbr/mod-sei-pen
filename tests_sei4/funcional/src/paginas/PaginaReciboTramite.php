@@ -26,17 +26,19 @@ class PaginaReciboTramite extends PaginaTeste
                     //Verifica se recibo de envio do processo foi localizado
                     if($result && $verificaReciboEnvio) {
                         try{
+                            $this->test->timeouts()->implicitWait(300);
                             $colunas[1]->element($this->test->using('css selector')->value(utf8_encode('a > img[title=\'Recibo de Confirmação de Envio\']')));
                         }
-                        catch(Exception $e){ $result = false; }
+                        catch(Exception $e){ $result = false; }finally{$this->test->timeouts()->implicitWait(10000);}
                     }
 
                     //Verifica se recibo de conclusão do trâmite processo foi localizado
                     if($result && $verificaReciboConclusao) {
                         try{
+                            $this->test->timeouts()->implicitWait(10000);
                             $colunas[1]->element($this->test->using('css selector')->value(utf8_encode('a > img[title=\'Recibo de Conclusão de Trâmite\']')));
                         }
-                        catch(Exception $e){ $result = false; }
+                        catch(Exception $e){ $result = false; }finally{$this->test->timeouts()->implicitWait(10000);}
                     }
 
                     if($result) {
