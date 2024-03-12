@@ -16,9 +16,9 @@
       value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/?wsdl" />
 
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
-    <const name="PEN_WAIT_TIMEOUT" value="360000" />
-    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
-    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="360000" />
+    <const name="PEN_WAIT_TIMEOUT" value="90000" />
+    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="180000" />
+    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="180000" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
 
