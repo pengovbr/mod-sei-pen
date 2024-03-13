@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Execution Groups
+ * @group execute_parallel_with_two_group1
+ */
 class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
 {
     public static $remetente;

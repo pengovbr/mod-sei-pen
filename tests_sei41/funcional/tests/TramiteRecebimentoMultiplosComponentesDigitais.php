@@ -2,6 +2,10 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_alone_group1
+ */
 class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
