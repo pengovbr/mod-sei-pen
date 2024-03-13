@@ -1,4 +1,4 @@
-/*
+\/*
 
 Usuario jenkins precisa ter permissao de sudo
 Jenkins minimo em 2.332
@@ -363,6 +363,17 @@ pipeline {
                     sed -i "s|.*CONTEXTO_ORGAO_B_ID_ESTRUTURA\\".*|<const name=\\"CONTEXTO_ORGAO_B_ID_ESTRUTURA\\" value=\\"${CONTEXTO_ORGAO_B_ID_ESTRUTURA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA\\".*|<const name=\\"CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA\\" value=\\"${CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_NOME_UNIDADE\\".*|<const name=\\"CONTEXTO_ORGAO_B_NOME_UNIDADE\\" value=\\"${CONTEXTO_ORGAO_B_NOME_UNIDADE}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
+
+                    sed -i "s/\\[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG1\\]//g" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "s/\\[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG2\\]//g" ${FOLDER_FUNCIONAIS}/phpunit.xml
+
+                    sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG1/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.11/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1.1/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
+
 
                     cp ${FOLDER_FUNCIONAIS}/phpunit.xml phpunitoriginal.xml
 
