@@ -40,7 +40,7 @@ pipeline {
 
                     if ( env.BUILD_NUMBER == '1' ){
                         currentBuild.result = 'ABORTED'
-                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faça login novamente')
+                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faï¿½a login novamente')
                     }
 
                     QTDTENTATIVAS=0

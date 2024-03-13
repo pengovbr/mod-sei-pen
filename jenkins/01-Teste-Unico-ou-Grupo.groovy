@@ -36,7 +36,7 @@ pipeline {
         string(
               name: 'urlGitSpe',
               defaultValue:"github.com:supergovbr/super.git",
-              description: "Url do git onde encontra-se o Sistema de Processo Eletrônico a instalar o modulo")
+              description: "Url do git onde encontra-se o Sistema de Processo Eletrï¿½nico a instalar o modulo")
         string(
             name: 'credentialGitSpe',
             defaultValue:"gitcredsuper",
@@ -52,7 +52,7 @@ pipeline {
         choice(
             name: 'sistema',
             choices: "sei4\nsei41\nsei3\nsuper",
-            description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
+            description: 'Qual o Sistema de Processo Eletrï¿½nico serï¿½ utilizado nos testes?' )
         string(
             name: 'folderModulo',
             defaultValue:"/home/jenkins/modulomodseipen",
@@ -60,7 +60,7 @@ pipeline {
         booleanParam(
             defaultValue: false,
             name: 'bolFolderModuloDelete',
-            description: 'Deleta a pasta do módulo anterior. Limpa o cache do phpunit vendor e os arquivos temporarios. Aumenta o tempo de execucao')
+            description: 'Deleta a pasta do mï¿½dulo anterior. Limpa o cache do phpunit vendor e os arquivos temporarios. Aumenta o tempo de execucao')
         string(
             name: 'org1CertSecret',
             defaultValue:"credModSeiPenOrg1Cert",
@@ -196,7 +196,7 @@ pipeline {
 
                     if ( env.BUILD_NUMBER == '1' ){
                         currentBuild.result = 'ABORTED'
-                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faça login novamente')
+                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faï¿½a login novamente')
                     }
                 }
 
@@ -246,7 +246,6 @@ pipeline {
                         rm -rf sei sip infra
                         mv src/sei src/sip src/infra .
                     fi
-
                     """
 
                 }
@@ -387,7 +386,7 @@ pipeline {
                     make destroy
                     make up
 
-                    if [ "$DATABASE" = "oracle" ] || [ "$DATABASE" = "sqlserver" ]; then
+                         || [ "$DATABASE" = "sqlserver" ]; then
                         sleep 30
                     fi
 
@@ -673,7 +672,7 @@ pipeline {
                             do
                                 while [ ! -f monitoramento_liberado.ok ]
                                 do
-                                    echo "Aguardando liberação para monitoramento"
+                                    echo "Aguardando liberaï¿½ï¿½o para monitoramento"
                                     sleep 10
 
                                     if [ -f testesfinalizados.ok ]; then
