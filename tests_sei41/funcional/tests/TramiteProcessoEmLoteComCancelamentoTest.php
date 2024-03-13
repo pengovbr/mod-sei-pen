@@ -1,9 +1,9 @@
 <?php
-/**
- * @group rodarseparado
- * @group rodarseparado3
- */
 
+/**
+ * Execution Groups
+ * @group execute_without_receiving
+ */
 class TramiteProcessoEmLoteComCancelamentoTest extends CenarioBaseTestCase
 {
     public static $remetente;

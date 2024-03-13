@@ -1,5 +1,10 @@
 <?php
 
+/**
+ *
+ * Execution Groups
+ * @group execute_parallel_group1
+ */
 class TramiteProcessoValidacaoEnvioTest extends CenarioBaseTestCase
 {
     public static $remetente;
