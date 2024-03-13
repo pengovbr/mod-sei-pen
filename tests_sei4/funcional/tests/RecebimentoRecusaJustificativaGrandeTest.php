@@ -2,13 +2,17 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_alone_group4
+ */
 class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
 {
 
     protected $destinatarioWs;
     protected $servicoPEN;
     public static $remetente;
-    public static $destinatario;    
+    public static $destinatario;
     public static $processoTeste;
     public static $documentoTeste;
     public static $protocoloTeste;
@@ -54,7 +58,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
         }else{
             $id_tramite=$id_tramite[0]["ID_TRAMITE"];
         }
-        $this->recusarTramite($this->servicoPEN, $id_tramite);        
+        $this->recusarTramite($this->servicoPEN, $id_tramite);
     }
 
     /**
@@ -85,7 +89,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
         $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
     }
 
-    
+
     private function recusarTramite($servicoPEN, $id_tramite)
     {
         $justificativa = "An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82dc-6f451f51825e', 1333864526, null, null, null, null, 3534979787, null, null]: ORA-00001: restrição exclusiva (SAPIENS.UNIQ_867686DHDKJ97876) violada";

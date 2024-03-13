@@ -1,10 +1,10 @@
 <?php
 
 /**
- * @group rodarseparado
- * @group rodarseparado4
+ * 
+ * Execution Groups
+ * @group execute_alone_group3
  */
-
 class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
 {
     public static $remetente;
