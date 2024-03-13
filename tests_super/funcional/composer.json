@@ -7,10 +7,15 @@
 
     "autoload": {
         "classmap": [
-            "src/"
+            "src/",
+            "sei/modpen/"
         ]
     },
-
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "sei/"
+        }
+    },
     "require-dev": {
         "phpunit/phpunit": "8.*",
         "phpunit/php-code-coverage": "*",

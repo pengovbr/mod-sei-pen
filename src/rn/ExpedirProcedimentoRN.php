@@ -290,6 +290,29 @@ class ExpedirProcedimentoRN extends InfraRN {
               $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
               $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
               $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+
+              // Atualizar Bloco para concluido
+              $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+              $objTramitaEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+
+              if ($objTramitaEmBlocoProtocoloDTO != null) {
+
+                $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+                $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+                $objTramitaEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
+                $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+                $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+                $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
+
+                $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+                $objTramiteEmBlocoDTO->setNumId($idTramiteEmBloco);
+                $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+
+                $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+                $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+
+              }
             }
 
                   $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));

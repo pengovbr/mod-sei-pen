@@ -5,6 +5,11 @@
       "php": "7.3.12"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "sei/"
+  }
+  },
   "require-dev": {
     "php": "7.3.12",
     "phpunit/phpunit": "*",

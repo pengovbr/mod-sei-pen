@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Responsável por cadastrar novo mapeamento de unidades caso não exista
+ * ResponsÃ¡vel por cadastrar novo mapeamento de unidades caso nÃ£o exista
  */
 class PenMapUnidadesFixture
 {
@@ -21,7 +21,7 @@ class PenMapUnidadesFixture
     /**
      * Consulta mapeamento de unidade
      * Se existe atualiza sigla e nome
-     * Se não existe cadastra um novo
+     * Se nÃ£o existe cadastra um novo
      *
      * @return void
      */
