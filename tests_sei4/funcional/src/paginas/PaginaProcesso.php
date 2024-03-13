@@ -174,6 +174,7 @@ class PaginaProcesso extends PaginaTeste
     {
     	try
     	{
+            $to = $this->test->timeouts()->getLastImplicitWaitValue();
             $this->test->timeouts()->implicitWait(300);
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
@@ -184,7 +185,7 @@ class PaginaProcesso extends PaginaTeste
     	{
 			return false;
         }finally{
-            $this->test->timeouts()->implicitWait(10000);
+            $this->test->timeouts()->implicitWait($to);
         }
     }
 
@@ -192,6 +193,7 @@ class PaginaProcesso extends PaginaTeste
     {
     	try
     	{
+            $to = $this->test->timeouts()->getLastImplicitWaitValue();
             $this->test->timeouts()->implicitWait(300);
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
@@ -202,7 +204,7 @@ class PaginaProcesso extends PaginaTeste
     	{
 			return false;
         }finally{
-            $this->test->timeouts()->implicitWait(10000);
+            $this->test->timeouts()->implicitWait($to);
         }
     }
 

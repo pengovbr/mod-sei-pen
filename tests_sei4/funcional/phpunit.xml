@@ -18,7 +18,7 @@
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
-    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="360000" />
+    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800000" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
 
@@ -29,17 +29,22 @@
     <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="951" />
-    <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="1" />
-    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="Poder Executivo Federal" />
+    <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
+    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="307" />
-    <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA" value="STF" />
-    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="STF / PJ" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE" value="Supremo Tribunal Federal" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA"
+      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG1]" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
-    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA" value="318" />
-    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA" value="Edital" />
-    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="ED" />
+    <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.11]" />
+    <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1.1]" />
+    <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_A_TIPO_PROCESSO" value="Arrecadação: Cobrança" />
@@ -66,13 +71,16 @@
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />
-    <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="1" />
-    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="Poder Executivo Federal" />
+    <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
+    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
-    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="79116" />
-    <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA" value="Prodasen - PRODASEN" />
-    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="PRODASEN" />
-    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE" value="Prodasen" />
+    <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
+      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA"
+      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG2]" />
+    <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
+    <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
+      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />
