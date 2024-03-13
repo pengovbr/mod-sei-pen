@@ -2,6 +2,10 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_alone_group4
+ */
 class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
 {
 
