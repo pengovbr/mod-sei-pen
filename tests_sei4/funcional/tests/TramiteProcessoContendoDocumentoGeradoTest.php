@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_alone_group6
+ * @group execute_alone_group1
  */
 class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
 {
