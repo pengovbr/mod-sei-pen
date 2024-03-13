@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_parallel_group1
+ * @group execute_alone_group2
  */
 class TramiteProcessoComDocumentoRestritoTest extends CenarioBaseTestCase
 {
