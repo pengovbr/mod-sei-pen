@@ -11,6 +11,9 @@
  *  - Trâmite do processo Y para órgão B
  *  - Adição de novos documentos ao processo Y e devolução para o órgão A
  *  - Adição de novos documentos e devolução para órgão B
+ *
+ * Execution Groups
+ * @group execute_alone_group2
  */
 class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
 {
