@@ -78,8 +78,10 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                     )
                 ),
 
+                // Configuração padrão do Envio Parcial
+                "EnviarApenasComponentesDigitaisPendentes" => false
                 // "EnviarApenasComponentesDigitaisPendentes" => array(
-                    //     "1" => array(  // 1 = Poder Executivo Federal
+                //     "1" => array(  // 1 = Poder Executivo Federal
                 //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
                 //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
                 //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
@@ -90,7 +92,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
                 //     )
                 // )
-                
+
             )
         );
     }

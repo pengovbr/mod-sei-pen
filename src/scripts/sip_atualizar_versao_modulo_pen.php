@@ -462,6 +462,27 @@ class PenAtualizarSipRN extends InfraRN
       return $objRecursoDTO->getNumIdRecurso();
   }
 
+  protected function consultarItemMenu($numIdSistema, $strNomeRecurso)
+  {
+    $numIdRecurso = $this->consultarRecurso($numIdSistema, $strNomeRecurso);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setBolExclusaoLogica(false);
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+    $objItemMenuDTO->retNumIdMenu();
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuRN = new ItemMenuRN();
+    $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
+
+    if ($objItemMenuDTO == null){
+      throw new InfraException("Item de menu não pode ser localizado.");
+    }
+
+    return array($objItemMenuDTO->getNumIdItemMenu(), $objItemMenuDTO->getNumIdMenu(), $numIdRecurso);
+  }
+
     /**
      * Cria um novo menu lateral para o sistema SEI
      *
@@ -1921,48 +1942,130 @@ class PenAtualizarSipRN extends InfraRN
     $this->atualizarNumeroVersao("3.5.0");
   }
 
-  public function instalarV3060()
+  protected function instalarV3060()
   {
-      /* Corrige nome de menu de trâmite de documentos */
-      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
-      $numIdSistema = $this->getNumIdSistema('SEI');
-      $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    // adicionar permissÃ£o
+    $idPerfilAdm = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+
+    // Adicionar menu
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    try {
+      // Remove item de menu anterior e seus submenus configurados de forma errada
+      $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados Externamente');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
+
+      $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Lote');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
+    } catch (\Exception $e) {
+      $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
+    }
+
+    //----------------------------------------------------------------------
+    // Tramita.GOV.BR
+    //----------------------------------------------------------------------
+    $numIdRecurso1 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita.GOV.BR', $numIdSistema);
+    $numIdRecurso2 = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    $numIdRecurso3 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Tramitados Externamente', $numIdSistema);
+    $numIdRecurso4 = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Lote', $numIdSistema);
+    
+    $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_cancelar', 'Cancelar processos do bloco de Tramite Externo', $numIdSistema);
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'pen_procedimento_expedido_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'md_pen_tramita_em_bloco');
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'pen_expedir_lote_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_alterar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_consultar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_incluir_processo_em_bloco_tramite');
+
+    $idMenuTramita = $this->criarMenu('Tramita.GOV.BR', 55, null, $numIdMenu, $numIdRecurso1, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso1, $numIdMenu, $idMenuTramita);
+
+    $idMenuBlocoTramiteExterno = $this->criarMenu('Blocos de Trâmite Externo', 56, $idMenuTramita, $numIdMenu, $numIdRecurso2, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
+
+    $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos Tramitados Externamente', 57, $idMenuTramita, $numIdMenu, $numIdRecurso3, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
+    
+    $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Lote', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
+
+    if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
       $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenu($idMenuTramita);
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
-      $objItemMenuDTO->setNumIdMenu($numIdMenu);
-      $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
-      $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->retNumIdMenu();
       $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
-      if (empty($objItemMenuDTO)) { 
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+      if (isset($objItemMenuDTO)) {
+          $objItemMenuDTO->setStrIcone('pen_tramite_externo_lote.svg');
+          $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+          $objItemMenuBD->alterar($objItemMenuDTO);
       }
 
-      // Adicionar item de menu Mapeamento de Envio Parcial
-      $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+    }
 
-      $this->criarMenu('Mapeamento de Envio Parcial', 90, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
-      $numIdRecurso = $this->criarRecurso('pen_map_envio_parcial_listar', 'Mapeamento de Envio Parcial', $numIdSistema);
+    /* Corrige nome de menu de trÃ¢mite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
-      $this->criarRecurso('pen_map_envio_parcial_salvar', 'Salvar Mapeamento de Envio Parcial', $numIdSistema);
-      $this->criarRecurso('pen_map_envio_parcial_excluir', 'Excluir Mapeamento de Envio Parcial', $numIdSistema);
-      $this->criarRecurso('pen_map_envio_parcial_cadastrar', 'Cadastro de Mapeamento de Envio Parcial', $numIdSistema);
-      $this->criarRecurso('pen_map_envio_parcial_atualizar', 'Atualizar Mapeamento de Envio Parcial', $numIdSistema);
-      $this->criarRecurso('pen_map_envio_parcial_visualizar', 'Visualizar Mapeamento de Envio Parcial', $numIdSistema);
+    if (empty($objItemMenuDTO)) { 
+      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+    }
 
-      $numIdSistemaSei = $this->getNumIdSistema('SEI');
-      $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_listar');
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_salvar');
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_cadastrar');
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_atualizar');
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_visualizar');
-      ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_excluir');
-      ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenu, $objItemMenuDTO->getNumIdItemMenu(), $numIdRecurso, "Mapeamento de Envio Parcial", 90);
-      
-      // Nova versão
-      $this->atualizarNumeroVersao("3.6.0");
+    // Adicionar item de menu Mapeamento de Envio Parcial
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    $this->criarMenu('Mapeamento de Envio Parcial', 90, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_envio_parcial_listar', 'Mapeamento de Envio Parcial', $numIdSistema);
+
+    $this->criarRecurso('pen_map_envio_parcial_salvar', 'Salvar Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_excluir', 'Excluir Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_cadastrar', 'Cadastro de Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_atualizar', 'Atualizar Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_visualizar', 'Visualizar Mapeamento de Envio Parcial', $numIdSistema);
+
+    $numIdSistemaSei = $this->getNumIdSistema('SEI');
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_salvar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_atualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_visualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_excluir');
+    ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenu, $objItemMenuDTO->getNumIdItemMenu(), $numIdRecurso, "Mapeamento de Envio Parcial", 90);
+    
+    // Nova versÃ£o
+    $this->atualizarNumeroVersao("3.6.0");
   }
 
   /**

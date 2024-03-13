@@ -147,6 +147,8 @@ try {
             $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
         }
 
+        }
+
           // Muda situação da barra de progresso para Concluído
           echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
         } catch(\Exception $e) {

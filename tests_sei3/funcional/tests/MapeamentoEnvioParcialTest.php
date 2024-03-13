@@ -8,7 +8,6 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
     public static $remetente;
     public static $remetenteB;
 
-
     /**
      * Teste inicial de cadastro de mapeamento de envio parcial
      *
@@ -28,16 +27,16 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
             self::$remetente['SENHA']
         );
 
-        $this->navegarPara('pen_map_envio_parcial_listar');
+        $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->novo();
         $this->paginaCadastroMapEnvioCompDigitais->setarParametros(
             self::$remetente['REP_ESTRUTURAS'],
-            self::$remetente['NOME_UNIDADE_ESTRUTURA']
+            self::$remetente['NOME_UNIDADE']
         );
         $this->paginaCadastroMapEnvioCompDigitais->salvar();
 
         $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['REP_ESTRUTURAS']);
-        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['NOME_UNIDADE_ESTRUTURA']);  
+        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['NOME_UNIDADE']);  
 
         sleep(1);
         $this->assertNotNull($nomeRepositorioCadastrado);
@@ -69,16 +68,16 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
             self::$remetente['SENHA']
         );
 
-        $this->navegarPara('pen_map_envio_parcial_listar');
+        $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->editar();
         $this->paginaCadastroMapEnvioCompDigitais->setarParametros(
             self::$remetenteB['REP_ESTRUTURAS'],
-            self::$remetenteB['NOME_UNIDADE_ESTRUTURA']
+            self::$remetenteB['NOME_UNIDADE']
         );
         $this->paginaCadastroMapEnvioCompDigitais->salvar();
 
         $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetenteB['REP_ESTRUTURAS']);
-        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetenteB['NOME_UNIDADE_ESTRUTURA']);
+        $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetenteB['NOME_UNIDADE']);
 
         sleep(1);
         $this->assertNotNull($nomeRepositorioCadastrado);
@@ -109,7 +108,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
             self::$remetente['SENHA']
         );
 
-        $this->navegarPara('pen_map_envio_parcial_listar');
+        $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
 
         // Buscar pesquisa vazia
         $this->paginaCadastroMapEnvioCompDigitais->selecionarPesquisa(self::$remetente['REP_ESTRUTURAS'] . 'B');
@@ -141,7 +140,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
             self::$remetente['SENHA']
         );
 
-        $this->navegarPara('pen_map_envio_parcial_listar');
+        $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
 
         // Buscar pesquisa vazia
         $this->paginaCadastroMapEnvioCompDigitais->selecionarImprimir();
@@ -167,7 +166,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
             self::$remetente['SENHA']
         );
 
-        $this->navegarPara('pen_map_envio_parcial_listar');
+        $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->selecionarExcluir();
 
         sleep(1);

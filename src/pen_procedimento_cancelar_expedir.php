@@ -17,17 +17,16 @@ try {
     $objPaginaSEI = PaginaSEI::getInstance();
 
     $strParametros = '';
-  if (isset($_GET['arvore'])) {
-      $objPaginaSEI->setBolArvore($_GET['arvore']);
-      $strParametros .= '&arvore=' . $_GET['arvore'];
-  }
+    if (isset($_GET['arvore'])) {
+        $objPaginaSEI->setBolArvore($_GET['arvore']);
+        $strParametros .= '&arvore=' . $_GET['arvore'];
+    }
 
-  if (isset($_GET['id_procedimento'])) {
-      $strParametros .= '&id_procedimento=' . $_GET['id_procedimento'];
-  }
+    if (isset($_GET['id_procedimento'])) {
+        $strParametros .= '&id_procedimento=' . $_GET['id_procedimento'];
+    }
 
     $idProcedimento = filter_var( $_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
-    
    
 // verificar se o processo está em algum bloco
     $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();

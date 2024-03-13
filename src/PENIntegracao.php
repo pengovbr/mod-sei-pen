@@ -68,7 +68,6 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objPenUnidadeRN = new PenUnidadeRN();
 
-      //Apresenta o botão de expedir processo
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
@@ -770,7 +769,7 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_incluir_processo_em_bloco_tramite':
       case 'pen_tramita_em_bloco_adicionar':
         require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
-          break;
+        break;
 
       case 'pen_unidade_sel_expedir_procedimento':
         require_once dirname(__FILE__) . '/pen_unidade_sel_expedir_procedimento.php';
@@ -1171,5 +1170,4 @@ class PENIntegracao extends SeiIntegracao
     ProcessarPendenciasRN::getInstance()->processarPendencias();
   }
 }
-
 class ModuloIncompativelException extends InfraException { }

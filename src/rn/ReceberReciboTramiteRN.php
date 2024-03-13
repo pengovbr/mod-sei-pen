@@ -25,39 +25,39 @@ class ReceberReciboTramiteRN extends InfraRN
 
   public function receberReciboDeTramite($parNumIdTramite)
     {
-    try{
-      if (!isset($parNumIdTramite)) {
-        throw new InfraException('Parâmetro $parNumIdTramite não informado.');
-      }
-
-        $this->objPenDebug->gravar("Solicitando recibo de conclusão do trâmite $parNumIdTramite");
-        $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
-
-      if (!$objReciboTramite) {
-          throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
-      }
-
-        $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
-
-        // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
-        // evitando processamento simultâneo de cadastramento do mesmo processo
-        $arrChavesSincronizacao = array(
-            "NumeroRegistro" => $objReciboTramite->recibo->NRE,
-            "IdTramite" => $objReciboTramite->recibo->IDT,
-            "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
-        );
-
-        if($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)){
-            $this->receberReciboDeTramiteInterno($objReciboTramite);
+      try{
+        if (!isset($parNumIdTramite)) {
+          throw new InfraException('Parâmetro $parNumIdTramite não informado.');
         }
 
-    } catch(Exception $e) {
-        $mensagemErro = InfraException::inspecionar($e);
-        $this->objPenDebug->gravar($mensagemErro);
-        LogSEI::getInstance()->gravar($mensagemErro);
-        throw $e;
+          $this->objPenDebug->gravar("Solicitando recibo de conclusão do trâmite $parNumIdTramite");
+          $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
+
+        if (!$objReciboTramite) {
+            throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
+        }
+
+          $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
+
+          // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
+          // evitando processamento simultâneo de cadastramento do mesmo processo
+          $arrChavesSincronizacao = array(
+              "NumeroRegistro" => $objReciboTramite->recibo->NRE,
+              "IdTramite" => $objReciboTramite->recibo->IDT,
+              "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
+          );
+
+          if($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)){
+              $this->receberReciboDeTramiteInterno($objReciboTramite);
+          }
+
+      } catch(Exception $e) {
+          $mensagemErro = InfraException::inspecionar($e);
+          $this->objPenDebug->gravar($mensagemErro);
+          LogSEI::getInstance()->gravar($mensagemErro);
+          throw $e;
+      }
     }
-  }
 
 
   protected function receberReciboDeTramiteInternoControlado($objReciboTramite)

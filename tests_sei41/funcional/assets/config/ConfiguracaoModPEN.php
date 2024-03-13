@@ -77,7 +77,10 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                         "[servidor_php2]",
                     )
                 ),
-                
+
+                // Configuração padrão do Envio Parcial
+                "EnviarApenasComponentesDigitaisPendentes" => false
+
             )
         );
     }

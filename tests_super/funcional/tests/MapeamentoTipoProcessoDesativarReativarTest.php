@@ -11,6 +11,30 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
     public static $penOrgaoExternoId;
 
     /**
+     * @inheritdoc
+     * @return void
+     */
+    function setUp(): void
+    {
+        parent::setUp();
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+            'Id' => self::$remetente['ID_ESTRUTURA'],
+            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'Nome' => self::$remetente['NOME_UNIDADE'],
+            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
+        ]);
+    
+        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
+    }
+
+    /**
      * Teste de desativação de um Relacionamento entre Órgãos
      *
      * @large
@@ -19,21 +43,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_desativacao_mapeamento_orgao_externo()
     {
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture();
-        $penOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
-            'IdEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'EstrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
-            'IdOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
-            'OrgaoDestino' => self::$remetente['NOME_UNIDADE'],
-            'IdOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'OrgaoOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
-
-        self::$penOrgaoExternoId = $penOrgaoExternoDTO->getDblId();
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -50,6 +59,8 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+
+        $this->sairSistema();
     }
 
     /**
@@ -77,6 +88,8 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
     }
 
     /**
@@ -104,6 +117,8 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
     }
 
     /**
@@ -131,12 +146,27 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void
     {
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        $penOrgaoExternoFixture->deletar(self::$penOrgaoExternoId);
+        $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
+        $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->buscar([
+            'IdMapeamento' => self::$penOrgaoExternoId
+        ]);
+
+        foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
+            $importacaoTiposProcessoFixture->remover([
+                'Id' => $objPenMapTipoProcedimentoDTO->getDblId()
+            ]);
+        }
+
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $penOrgaoExternoFixture->remover([
+            'Id' => self::$penOrgaoExternoId,
+        ]);
 
         parent::tearDownAfterClass();
     }

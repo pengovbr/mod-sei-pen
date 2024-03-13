@@ -12,7 +12,7 @@
         ]
     },
 
-"autoload-dev": {
+    "autoload-dev": {
         "psr-4": {
             "Tests\\": "sei/"        }
     },

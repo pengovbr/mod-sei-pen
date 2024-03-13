@@ -11,6 +11,30 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
     public static $penOrgaoExternoId;
 
     /**
+     * @inheritdoc
+     * @return void
+     */
+    function setUp(): void
+    {
+        parent::setUp();
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+            'Id' => self::$remetente['ID_ESTRUTURA'],
+            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'Nome' => self::$remetente['NOME_UNIDADE'],
+            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
+        ]);
+    
+        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
+    }
+
+    /**
      * Teste para excluir de mapeamento de orgão exteno
      *
      * @group MapeamentoOrgaoExterno
@@ -19,20 +43,8 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
      */
     public function test_excluir_mapeamento_orgao_externo()
     {
+        // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penOrgaoExternoFixture = new PenOrgaoExterno2Fixture();
-        $penOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
-            'IdEstrutaOrganizacionalOrigem' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'EstrutaOrganizacionalOrigem' => self::$remetente['REP_ESTRUTURAS'],
-            'IdOrgaoDestino' => self::$remetente['ID_ESTRUTURA'],
-            'OrgaoDestino' => self::$remetente['NOME_UNIDADE'],
-            'IdOrgaoOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'OrgaoOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
-
-        self::$penOrgaoExternoId = $penOrgaoExternoDTO->getDblId();
 
         $this->acessarSistema(
             self::$remetente['URL'],
@@ -50,16 +62,12 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
             utf8_encode('Relacionamento entre unidades foi excluído com sucesso.'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void
     {
-        $importacaoTiposProcessoFixture = new ImportacaoTiposProcessoFixture(CONTEXTO_ORGAO_A);
-        $importacaoTiposProcessoFixture->deletar(['idMapeamento' => self::$penOrgaoExternoId]);
-
-        // $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        // $penOrgaoExternoFixture->deletar(self::$penOrgaoExternoId);
-
         parent::tearDownAfterClass();
     }
 }

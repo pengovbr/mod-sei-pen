@@ -14,7 +14,8 @@
 
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "sei/"        }
+            "Tests\\": "sei/"
+        }
     },
 
     "require-dev": {

@@ -8,7 +8,16 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
 {
     public static $remetente;
     public static $destinatario;
-public static $penOrgaoExternoId;
+
+    /**
+     * @inheritdoc
+     * @return void
+     */
+    function setUp(): void
+    {
+        parent::setUp();
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+    }
 
     /**
      * Teste de cadastro de novo mapeamento entre ogrãos
@@ -20,14 +29,6 @@ public static $penOrgaoExternoId;
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penMapUnidadesFixture = new PenMapUnidades2Fixture();
-        $penMapUnidadesFixture->carregar([
-            'IdUnidadeRH' => self::$remetente['ID_ESTRUTURA'],
-            'SiglaUnidadeRH' => self::$remetente['SIGLA_ESTRUTURA'],
-            'NomeUnidadeRH' => self::$remetente['NOME_UNIDADE']
-        ]);
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -54,6 +55,8 @@ public static $penOrgaoExternoId;
             utf8_encode('Relacionamento entre Unidades cadastrado com sucesso.'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     /**
@@ -88,6 +91,8 @@ public static $penOrgaoExternoId;
             utf8_encode('Cadastro de relacionamento entre unidades já existente.'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     /**
@@ -128,16 +133,12 @@ public static $penOrgaoExternoId;
             utf8_encode('Relacionamento entre Unidades atualizado com sucesso.'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void
     {
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        $arrPenOrgaoExternoDTO = $penOrgaoExternoFixture->consultar();
-        $numRegistros = count($arrPenOrgaoExternoDTO);
-        for ($i = 0; $i < $numRegistros; $i++) {
-            $penOrgaoExternoFixture->deletar($arrPenOrgaoExternoDTO[$i]->getDblId());
-        }
         parent::tearDownAfterClass();
     }
 }

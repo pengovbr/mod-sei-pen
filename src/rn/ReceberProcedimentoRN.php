@@ -2416,27 +2416,27 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
     }
 
-      //$objPenAtividadeRN = new PenAtividadeRN();
-      $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+    //$objPenAtividadeRN = new PenAtividadeRN();
+    $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
 
-      $objInfraException->lancarValidacoes();
+    $objInfraException->lancarValidacoes();
 
-      $objEnviarProcessoDTO = new EnviarProcessoDTO();
-      $objEnviarProcessoDTO->setArrAtividadesOrigem($arrObjProcedimentoDTO[0]->getArrObjAtividadeDTO());
+    $objEnviarProcessoDTO = new EnviarProcessoDTO();
+    $objEnviarProcessoDTO->setArrAtividadesOrigem($arrObjProcedimentoDTO[0]->getArrObjAtividadeDTO());
 
-      $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-      $objAtividadeDTO->setNumIdUsuario(null);
-      $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objAtividadeDTO->setNumIdUnidade($numIdUnidade);
-      $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdUsuario(null);
+    $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTO->setNumIdUnidade($numIdUnidade);
+    $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objEnviarProcessoDTO->setArrAtividades(array($objAtividadeDTO));
 
-      $objEnviarProcessoDTO->setStrSinManterAberto('S');
-      $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
-      $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
+    $objEnviarProcessoDTO->setStrSinManterAberto('S');
+    $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
+    $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
 
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
       $objEnviarProcessoDTO->setDtaPrazoRetornoProgramado(null);
       $objEnviarProcessoDTO->setNumDiasRetornoProgramado(null);
       $objEnviarProcessoDTO->setStrSinDiasUteisRetornoProgramado('N');
@@ -2446,9 +2446,9 @@ class ReceberProcedimentoRN extends InfraRN
       $objEnviarProcessoDTO->setStrSinDiasUteis('N');
     }
 
-      $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
+    $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
 
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
       $objConcluirProcessoDTO = new ConcluirProcessoDTO();
       $objConcluirProcessoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
       $objProcedimentoRN->concluir($objConcluirProcessoDTO);

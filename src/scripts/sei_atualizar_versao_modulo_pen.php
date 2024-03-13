@@ -950,9 +950,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-          }
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+            }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1220,9 +1220,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-          }
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+            }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1745,7 +1745,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objTarefaDTO->setStrSinFecharAndamentosAbertos($objTarefaDTOAntigo->getStrSinFecharAndamentosAbertos());
             $objTarefaDTO->setStrSinLancarAndamentoFechado($objTarefaDTOAntigo->getStrSinLancarAndamentoFechado());
             $objTarefaDTO->setStrSinPermiteProcessoFechado($objTarefaDTOAntigo->getStrSinPermiteProcessoFechado());
-            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
               $objTarefaDTO->setStrSinConsultaProcessual($objTarefaDTOAntigo->getStrSinConsultaProcessual());
             }
             $objTarefaDTO->setStrIdTarefaModulo(null);
@@ -1904,9 +1904,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
-            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-          }
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+              $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+            }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -2638,6 +2638,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $this->atualizarNumeroVersao("3.5.0");
   }
+
     // novo tramite em bloco
     protected function instalarV3060() {
       $objInfraMetaBD = new InfraMetaBD(BancoSEI::getInstance());
@@ -2705,8 +2706,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
       $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-
-      //Instalação do Envio Parcial
+      //Envio parcial
       $objInfraBanco = BancoSEI::getInstance();
       $objMetaBD = $this->objMeta;
 
@@ -2806,7 +2806,6 @@ try {
           $strVersaoModuloPen => 'atualizarVersaoCompatibilidade',
           PENIntegracao::VERSAO_MODULO => 'atualizarVersaoCompatibilidade',
       ));
-
 
       $objVersaoSeiRN->setStrVersaoInfra("1.583.4");
       $objVersaoSeiRN->setBolMySql(true);

@@ -57,6 +57,12 @@ services:
       - ./src/fixtures:/tests/sei/modpen/fixtures
       - ../../src/dto:/tests/sei/modpen/dto
       - ../../src/bd:/tests/sei/modpen/bd
+      - .:/tests
+      - ${SEI_PATH}/../tests:/tests/sei
+      - ${SEI_PATH}/../src:/tests/sei/src
+      - ./src/fixtures:/tests/sei/modpen/fixtures
+      - ../../src/dto:/tests/sei/modpen/dto
+      - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
       - /tmp:/tmp
       - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
