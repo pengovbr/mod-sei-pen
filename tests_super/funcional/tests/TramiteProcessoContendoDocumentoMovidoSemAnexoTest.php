@@ -5,6 +5,9 @@
  *
  * Este mesmo documento deve ser recebido e assinalado como cancelado no destinatário e
  * a devolução do mesmo processo não deve ser impactado pela inserção de outros documentos
+ *
+ * Execution Groups
+ * @group execute_alone_group6
  */
 class TramiteProcessoContendoDocumentoMovidoSemAnexoTest extends CenarioBaseTestCase
 {
