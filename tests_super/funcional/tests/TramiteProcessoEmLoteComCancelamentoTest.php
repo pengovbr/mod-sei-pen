@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Execution Groups
+ * @group execute_without_receiving
+ */
 class TramiteProcessoEmLoteComCancelamentoTest extends CenarioBaseTestCase
 {
     public static $remetente;

@@ -1,4 +1,4 @@
-\/*
+/*
 
 Usuario jenkins precisa ter permissao de sudo
 Jenkins minimo em 2.332
@@ -380,6 +380,20 @@ pipeline {
 
                     make destroy
                     make up
+                    make check-isalive
+                    set +e
+                    echo ""
+                    echo "Vamos rodar o make update. A saida n sera mostrada aqui. Apenas se houver erro..."
+                    make update 2>&1 > tempinstall.txt
+                    es=\$?
+                    set -e
+                    if [ "\$es" = "0" ]; then
+                        echo "Make update sem erro"
+                    else
+                        cat tempinstall.txt
+                        exit 1
+                    fi
+                    rm -rf tempinstall.txt
 
                     # apenas teste, lembrar de retirar ao final
                     sleep 5
@@ -402,6 +416,8 @@ pipeline {
                     # apenas teste, lembrar de retirar ao final
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "> /etc/cron.d/sei; > /etc/cron.d/sip"
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "> /etc/cron.d/sei; > /etc/cron.d/sip"
+                    docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "mkdir -p /opt/sei/temp; chown apache /opt/sei/temp"
+                    docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "mkdir -p /opt/sip/temp; chown apache /opt/sip/temp"
 
                     pwd
                     """, label: "Configura sobe ambiente e instala modulo"
