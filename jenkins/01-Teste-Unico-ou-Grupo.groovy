@@ -385,6 +385,20 @@ pipeline {
 
                     make destroy
                     make up
+                    make check-isalive
+                    set +e
+                    echo ""
+                    echo "Vamos rodar o make update. A saida n sera mostrada aqui. Apenas se houver erro..."
+                    make update 2>&1 > tempinstall.txt
+                    es=\$?
+                    set -e
+                    if [ "\$es" = "0" ]; then
+                        echo "Make update sem erro"
+                    else
+                        cat tempinstall.txt
+                        exit 1
+                    fi
+                    rm -rf tempinstall.txt
 
                          || [ "$DATABASE" = "sqlserver" ]; then
                         sleep 30
