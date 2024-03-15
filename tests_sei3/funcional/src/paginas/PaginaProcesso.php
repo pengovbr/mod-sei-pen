@@ -177,7 +177,7 @@ class PaginaProcesso extends PaginaTeste
     	catch(Exception $e)
     	{
 			return false;
-    	}finally{
+        }finally{
             $this->test->timeouts()->implicitWait($to);
         }
     }
@@ -196,7 +196,7 @@ class PaginaProcesso extends PaginaTeste
     	catch(Exception $e)
     	{
 			return false;
-    	}finally{
+        }finally{
             $this->test->timeouts()->implicitWait($to);
         }
     }
