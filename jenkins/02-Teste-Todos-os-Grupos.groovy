@@ -33,7 +33,7 @@ pipeline {
             description: "Branch/Tag do git onde encontra-se o Sistema")
         choice(
             name: 'sistema',
-            choices: "sei4\nsei3\nsuper",
+            choices: "sei4\nsei41\nsei3\nsuper",
             description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
         choice(
             name: 'database',
