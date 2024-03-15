@@ -136,6 +136,21 @@ class PenLoteProcedimentoRN extends InfraRN {
 
           $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
           $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+
+
+          // Atualizar Bloco para concluido parcialmente
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+
+          if ($tramiteEmBlocoProtocolo != null) {
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+          }
       }
 
         //Desbloqueia o processo

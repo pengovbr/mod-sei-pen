@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.5.0");
+define("VERSAO_MODULO_PEN", "3.6.0");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -292,6 +292,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3040();
         case '3.4.0':
             $this->instalarV3050();
+        case '3.5.0':
+            $this->instalarV3060();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -461,6 +463,26 @@ class PenAtualizarSipRN extends InfraRN
       return $objRecursoDTO->getNumIdRecurso();
   }
 
+  protected function consultarItemMenu($numIdSistema, $strNomeRecurso)
+  {
+    $numIdRecurso = $this->consultarRecurso($numIdSistema, $strNomeRecurso);
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setBolExclusaoLogica(false);
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
+    $objItemMenuDTO->retNumIdMenu();
+    $objItemMenuDTO->retNumIdItemMenu();
+
+    $objItemMenuRN = new ItemMenuRN();
+    $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
+
+    if ($objItemMenuDTO == null){
+      throw new InfraException("Item de menu não pode ser localizado.");
+    }
+
+    return array($objItemMenuDTO->getNumIdItemMenu(), $objItemMenuDTO->getNumIdMenu(), $numIdRecurso);
+  }
     /**
      * Cria um novo menu lateral para o sistema SEI
      *
@@ -1918,6 +1940,93 @@ class PenAtualizarSipRN extends InfraRN
 
     // Nova versão
     $this->atualizarNumeroVersao("3.5.0");
+  }
+
+  protected function instalarV3060()
+  {
+    
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    // adicionar permissão
+    $idPerfilAdm = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+
+    // Adicionar menu
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    try {
+      // Remove item de menu anterior e seus submenus configurados de forma errada
+      $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados Externamente');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
+
+      $numIdItemMenuMapTipDoc = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Lote');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenuMapTipDoc);
+    } catch (\Exception $e) {
+      $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
+    }
+
+    //----------------------------------------------------------------------
+    // Tramita.GOV.BR
+    //----------------------------------------------------------------------
+    $numIdRecurso1 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita.GOV.BR', $numIdSistema);
+    $numIdRecurso2 = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
+    $numIdRecurso3 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Tramitados Externamente', $numIdSistema);
+    $numIdRecurso4 = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Lote', $numIdSistema);
+    
+    $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('md_pen_tramita_em_bloco_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramite_em_bloco_consultar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_listar', 'Listar Processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_excluir', 'Excluir processos do bloco de Tramite Externo', $numIdSistema);
+    $this->criarRecurso('pen_tramita_em_bloco_protocolo_cancelar', 'Cancelar processos do bloco de Tramite Externo', $numIdSistema);
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'pen_procedimento_expedido_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'md_pen_tramita_em_bloco');
+
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilAdm, 'pen_expedir_lote_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_alterar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_consultar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramite_em_bloco_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_excluir');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_tramita_em_bloco_protocolo_cancelar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_incluir_processo_em_bloco_tramite');
+
+    $idMenuTramita = $this->criarMenu('Tramita.GOV.BR', 55, null, $numIdMenu, $numIdRecurso1, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso1, $numIdMenu, $idMenuTramita);
+
+    $idMenuBlocoTramiteExterno = $this->criarMenu('Blocos de Trâmite Externo', 56, $idMenuTramita, $numIdMenu, $numIdRecurso2, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
+
+    $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos Tramitados Externamente', 57, $idMenuTramita, $numIdMenu, $numIdRecurso3, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
+    
+    $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Lote', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
+
+    if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
+      $objItemMenuDTO = new ItemMenuDTO();
+      $objItemMenuDTO->setNumIdItemMenu($idMenuTramita);
+      $objItemMenuDTO->setNumIdSistema($numIdSistema);
+      $objItemMenuDTO->setStrRotulo('Tramita.GOV.BR');
+      $objItemMenuDTO->retNumIdMenu();
+      $objItemMenuDTO->retNumIdItemMenu();
+      $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+      $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+      if (isset($objItemMenuDTO)) {
+          $objItemMenuDTO->setStrIcone('pen_tramite_externo_lote.svg');
+          $objItemMenuDTO->setStrDescricao('Blocos de Trâmite Externo');
+          $objItemMenuBD->alterar($objItemMenuDTO);
+      }
+
+    }
+
+    $this->atualizarNumeroVersao("3.6.0");
   }
 
   /**

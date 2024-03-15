@@ -1248,8 +1248,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigital->assinaturaDigital = array();
       foreach ($resAssinatura as $keyOrder => $assinatura) {
           $objAtividadeDTO = new AtividadeDTO();
-          $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade());
-          $objAtividadeDTO->setNumIdTarefa(array(TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO), InfraDTO::$OPER_IN);
+          $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade()); //7
+          $objAtividadeDTO->setNumIdTarefa(array(TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO), InfraDTO::$OPER_IN); // 5, 115
           $objAtividadeDTO->retDthAbertura();
           $objAtividadeDTO->retNumIdAtividade();
           $objAtividadeRN = new AtividadeRN();

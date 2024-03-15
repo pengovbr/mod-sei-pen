@@ -51,9 +51,16 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
-      - ./assets/config:/opt/sei/config/mod-pen
       - .:/tests
+      - ${SEI_PATH}/../tests:/tests/sei
+      - ${SEI_PATH}/../src:/tests/sei/src
+      - ./src/fixtures:/tests/sei/modpen/fixtures
+      - ../../src/dto:/tests/sei/modpen/dto
+      - ../../src/bd:/tests/sei/modpen/bd
+      - ./assets/config:/opt/sei/config/mod-pen
       - /tmp:/tmp
+      - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
+      - /tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -66,6 +73,16 @@ services:
       - ORG1_CERTIFICADO_SENHA=${ORG1_CERTIFICADO_SENHA}
       - ORG2_CERTIFICADO=${ORG2_CERTIFICADO}
       - ORG2_CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
+      - DATABASE_IMAGE=${ORG1_DATABASE_IMAGE}
+      - DATABASE_TYPE=${ORG1_DATABASE_TYPE}
+      - DATABASE_HOST=${ORG1_DATABASE_HOST}
+      - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT}
+      - SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
+      - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
+      - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
+      - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
+      - SIP_DATABASE_USER=${SIP_DATABASE_USER}
+      - SIP_DATABASE_PASSWORD=${SIP_DATABASE_PASSWORD}
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -130,6 +147,7 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
+      - /tmp/sei_arquivos_1:/var/sei/arquivos
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -188,6 +206,7 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
+      - /tmp/sei_arquivos_2:/var/sei/arquivos
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
