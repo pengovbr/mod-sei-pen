@@ -2,6 +2,9 @@
 
 /**
  * Testes de mapeamento de envio de envio parcial
+ * 
+ * Execution Groups
+ * @group execute_alone_group1
  */
 class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
 {
