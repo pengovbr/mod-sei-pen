@@ -25,47 +25,45 @@ class ReceberReciboTramiteRN extends InfraRN
 
   public function receberReciboDeTramite($parNumIdTramite)
     {
-      try{
-        if (!isset($parNumIdTramite)) {
-          throw new InfraException('Parâmetro $parNumIdTramite não informado.');
-        }
-
-          $this->objPenDebug->gravar("Solicitando recibo de conclusão do trâmite $parNumIdTramite");
-          $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
-
-        if (!$objReciboTramite) {
-            throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
-        }
-
-          $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
-
-          // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
-          // evitando processamento simultâneo de cadastramento do mesmo processo
-          $arrChavesSincronizacao = array(
-              "NumeroRegistro" => $objReciboTramite->recibo->NRE,
-              "IdTramite" => $objReciboTramite->recibo->IDT,
-              "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
-          );
-
-          if($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)){
-              $this->receberReciboDeTramiteInterno($objReciboTramite);
-          }
-
-      } catch(Exception $e) {
-          $mensagemErro = InfraException::inspecionar($e);
-          $this->objPenDebug->gravar($mensagemErro);
-          LogSEI::getInstance()->gravar($mensagemErro);
-          throw $e;
+    try{
+      if (!isset($parNumIdTramite)) {
+        throw new InfraException('Parâmetro $parNumIdTramite não informado.');
       }
+
+        $this->objPenDebug->gravar("Solicitando recibo de conclusão do trâmite $parNumIdTramite");
+        $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
+
+      if (!$objReciboTramite) {
+          throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
+      }
+
+        $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
+
+        // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
+        // evitando processamento simultâneo de cadastramento do mesmo processo
+        $arrChavesSincronizacao = array(
+            "NumeroRegistro" => $objReciboTramite->recibo->NRE,
+            "IdTramite" => $objReciboTramite->recibo->IDT,
+            "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
+        );
+
+        if($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)){
+            $this->receberReciboDeTramiteInterno($objReciboTramite);
+        }
+
+    } catch(Exception $e) {
+        $mensagemErro = InfraException::inspecionar($e);
+        $this->objPenDebug->gravar($mensagemErro);
+        LogSEI::getInstance()->gravar($mensagemErro);
+        throw $e;
     }
+  }
 
 
   protected function receberReciboDeTramiteInternoControlado($objReciboTramite)
     {
       //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
       ModPenUtilsRN::simularLoginUnidadeRecebimento();
-
-      $this->objPenDebug->gravar("Recebimento ORG1");
 
       $strNumeroRegistro = $objReciboTramite->recibo->NRE;
       $numIdTramite = $objReciboTramite->recibo->IDT;
@@ -141,21 +139,6 @@ class ReceberReciboTramiteRN extends InfraRN
             $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
             $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-            // atualizar bloco de tramite externo
-            $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-            $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-            $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-            $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
-            $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-            $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();        
-
-            $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-            $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
-          
-            if ($tramiteEmBlocoProtocoloDTO != null) {
-              $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
-            }
-          
             $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S'));
             // Registra o recbimento do recibo no histórico e realiza a conclusão do processo

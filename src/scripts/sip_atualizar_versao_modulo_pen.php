@@ -463,27 +463,6 @@ class PenAtualizarSipRN extends InfraRN
       return $objRecursoDTO->getNumIdRecurso();
   }
 
-  protected function consultarItemMenu($numIdSistema, $strNomeRecurso)
-  {
-    $numIdRecurso = $this->consultarRecurso($numIdSistema, $strNomeRecurso);
-
-    $objItemMenuDTO = new ItemMenuDTO();
-    $objItemMenuDTO->setBolExclusaoLogica(false);
-    $objItemMenuDTO->setNumIdSistema($numIdSistema);
-    $objItemMenuDTO->setNumIdRecurso($numIdRecurso);
-    $objItemMenuDTO->retNumIdMenu();
-    $objItemMenuDTO->retNumIdItemMenu();
-
-    $objItemMenuRN = new ItemMenuRN();
-    $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
-
-    if ($objItemMenuDTO == null){
-      throw new InfraException("Item de menu não pode ser localizado.");
-    }
-
-    return array($objItemMenuDTO->getNumIdItemMenu(), $objItemMenuDTO->getNumIdMenu(), $numIdRecurso);
-  }
-
     /**
      * Cria um novo menu lateral para o sistema SEI
      *
