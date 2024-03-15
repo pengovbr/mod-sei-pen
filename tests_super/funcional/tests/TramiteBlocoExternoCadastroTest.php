@@ -1,5 +1,10 @@
 <?php
-
+/**
+ * Cadastrar e editrar bloco
+ *
+ * Execution Groups
+ * @group execute_alone_group1
+ */
 class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
 {
     public static $remetente;
@@ -65,11 +70,5 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
         );
 
         $this->sairSistema();
-    }
-
-    public static function tearDownAfterClass(): void
-    {
-        // $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
-        // $objBlocoDeTramiteFixture->excluir(1);
     }
 }

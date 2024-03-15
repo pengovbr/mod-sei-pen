@@ -1,8 +1,10 @@
 <?php
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
 /**
- * EnviarProcessoTest
- * @group group
+ * Enviar bloco simples
+ *
+ * Execution Groups
+ * @group execute_alone_group1
  */
 class TramiteBlocoExternoTest extends CenarioBaseTestCase
 {

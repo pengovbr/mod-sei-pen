@@ -2,6 +2,12 @@
 
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
 
+/**
+ * Teste de tramite de processos em bloco
+ *
+ * Execution Groups
+ * @group execute_alone_group1
+ */
 class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 {
     protected static $numQtyProcessos = 4; // max: 99
