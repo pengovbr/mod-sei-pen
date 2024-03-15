@@ -139,5 +139,7 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
+
+    <!-- novasuiteaqui -->
   </testsuites>
 </phpunit>

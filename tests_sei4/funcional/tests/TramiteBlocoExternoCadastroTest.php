@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * teste de cadastro e editar bloco
+ *
+ * Execution Groups
+ * @group execute_alone_group1
+ */
 class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
 {
     public static $remetente;

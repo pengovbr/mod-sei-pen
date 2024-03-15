@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Execution Groups
+ * @group execute_alone_group4
+ */
 class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
 {
     public static $remetente;

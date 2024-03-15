@@ -5,6 +5,9 @@
  *
  * O resultado esperado é que o processo seja desbloqueado na origem, e o processo anexado seja criado e adicionado
  * na posição correta dentro do processo.
+ *
+ * Execution Groups
+ * @group execute_alone_group5
  */
 class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTestCase
 {

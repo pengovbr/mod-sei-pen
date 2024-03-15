@@ -3,8 +3,10 @@
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
 
 /**
- * Teste de inclusão de processo em bloco
- * @group group
+ * Teste de inclusao de processos no bloco
+ *
+ * Execution Groups
+ * @group execute_alone_group1
  */
 class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCase
 {
