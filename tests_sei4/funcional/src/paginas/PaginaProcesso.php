@@ -174,6 +174,8 @@ class PaginaProcesso extends PaginaTeste
     {
     	try
     	{
+            $to = $this->test->timeouts()->getLastImplicitWaitValue();
+            $this->test->timeouts()->implicitWait(300);
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
             $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_cancelado.svg?')]");
@@ -182,13 +184,17 @@ class PaginaProcesso extends PaginaTeste
     	catch(Exception $e)
     	{
 			return false;
-    	}
+        }finally{
+            $this->test->timeouts()->implicitWait($to);
+        }
     }
 
     public function ehDocumentoMovido($nomeDocumentoArvore)
     {
     	try
     	{
+            $to = $this->test->timeouts()->getLastImplicitWaitValue();
+            $this->test->timeouts()->implicitWait(300);
             $this->test->frame(null);
             $this->test->frame("ifrArvore");
             $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_movido.svg?')]");
@@ -197,7 +203,9 @@ class PaginaProcesso extends PaginaTeste
     	catch(Exception $e)
     	{
 			return false;
-    	}
+        }finally{
+            $this->test->timeouts()->implicitWait($to);
+        }
     }
 
     private function selecionarItemArvore($nomeArvore)

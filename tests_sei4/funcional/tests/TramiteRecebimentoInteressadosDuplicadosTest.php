@@ -2,6 +2,10 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_parallel_group3
+ */
 class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
@@ -19,9 +23,9 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
      * Teste de envio de metadados do processo contendo interessados duplicados
      *
      * Inicialmente são enviados 2 interessados com o mesmo nome
-     * 
+     *
      * @group envio
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -69,6 +73,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
+            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
             , 'connection_timeout' => $connectionTimeout
             , CURLOPT_TIMEOUT => $connectionTimeout
             , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
@@ -80,6 +85,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         );
 
         return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+
     }
 
 
@@ -170,7 +176,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 
         $arrInteressados = array_map(function($item) {
             return array('nome' => utf8_encode($item));
-        }, 
+        },
         $processoTeste['INTERESSADOS']);
 
         return array(

@@ -2,6 +2,10 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_parallel_group3
+ */
 class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
@@ -25,10 +29,10 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
      * Teste de envio de metadados do processo contendo documentos anexados
      *
      * Inicialmente são enviados 3 documentos, sendo um deles referênciado pelos outros dois documentos
-     * 
+     *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -112,6 +116,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
+            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
             , 'connection_timeout' => $connectionTimeout
             , CURLOPT_TIMEOUT => $connectionTimeout
             , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
@@ -123,6 +128,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
         );
 
         return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+
     }
 
 

@@ -2441,7 +2441,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
       $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
 
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
       $objEnviarProcessoDTO->setDtaPrazoRetornoProgramado(null);
       $objEnviarProcessoDTO->setNumDiasRetornoProgramado(null);
       $objEnviarProcessoDTO->setStrSinDiasUteisRetornoProgramado('N');
@@ -2453,7 +2453,7 @@ class ReceberProcedimentoRN extends InfraRN
 
       $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
 
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.0")) {
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
       $objConcluirProcessoDTO = new ConcluirProcessoDTO();
       $objConcluirProcessoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
       $objProcedimentoRN->concluir($objConcluirProcessoDTO);
