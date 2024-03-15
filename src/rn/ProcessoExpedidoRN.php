@@ -36,7 +36,7 @@ class ProcessoExpedidoRN extends InfraRN {
                INNER JOIN md_pen_tramite ptra ON ptra.numero_registro = pe.numero_registro
                INNER JOIN usuario us ON ptra.id_usuario = us.id_usuario
                WHERE
-                 p.sta_estado = " . $objProtocoloDTO->getStrStaEstado() . "
+                    p.sta_estado = '" . $objProtocoloDTO->getStrStaEstado() . "'
                AND
                     a.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO) ."
                AND
@@ -61,7 +61,7 @@ class ProcessoExpedidoRN extends InfraRN {
                INNER JOIN md_pen_tramite ptra ON ptra.numero_registro = pe.numero_registro
                INNER JOIN usuario us ON ptra.id_usuario = us.id_usuario
                WHERE
-                 p.sta_estado = " . $objProtocoloDTO->getStrStaEstado() . "
+                       p.sta_estado = '" . $objProtocoloDTO->getStrStaEstado() . "'
                AND
                        a.id_tarefa = ". ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO) ."
                AND
