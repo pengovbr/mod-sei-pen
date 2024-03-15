@@ -591,6 +591,9 @@ pipeline {
 
 
                                     done
+                                    
+                                    docker system prune -a -f
+                                    docker volume prune -f
 
                                     if [ -f "rodarnovamente.txt" ]; then
                                         exit 1
