@@ -59,7 +59,7 @@ try {
 
     $strBotaoEspeciePadrao = "";
   if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_consultar')){
-      $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do PEN" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
+      $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do Tramita GOV.BR" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
   }
         
   if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_atribuir')){
@@ -110,7 +110,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPaginaSEI->getThCheck().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="35%">Tipo de Documento SEI</th>'."\n";        
-      $strResultado .= '<th class="infraTh" width="35%">Espécie Documental PEN</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="35%">Espécie Documental Tramita GOV.BR</th>'."\n";
       $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
       $strResultado .= '</tr>'."\n";
       $strCssTr = '';
@@ -254,7 +254,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
         <label for="nome_serie" class="infraLabelOpcional input-label-first">Tipo de Documento SEI:</label>
         <input type="text" name="nome_serie"  class="infraText input-field-first" onkeyup="return tratarEnter(event)" value="<?php print htmlspecialchars($_POST['nome_serie']); ?>"/>
         
-        <label for="nome_especie" class="infraLabelOpcional input-label-second">Espécie Documental PEN:</label>
+        <label for="nome_especie" class="infraLabelOpcional input-label-second">Espécie Documental Tramita GOV.BR:</label>
         <input type="text" name="nome_especie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print htmlspecialchars($_POST['nome_especie']); ?>"/>
 
     <?php $objPaginaSEI->fecharAreaDados(); ?>

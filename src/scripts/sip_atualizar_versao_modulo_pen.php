@@ -51,7 +51,7 @@ class VersaoSip4RN extends InfraScriptVersao
 
 class PenAtualizarSipRN extends InfraRN
 {
-    const NOME_MODULO = 'Integração Processo Eletrônico Nacional - PEN';
+    const NOME_MODULO = 'Integração Tramita GOV.BR';
     const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SIP';
     const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
 
@@ -89,7 +89,7 @@ class PenAtualizarSipRN extends InfraRN
   protected function atualizarVersaoConectado()
     {
     try {
-        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SIP VERSAO');
+        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO TRAMITA GOV.BR NO SIP VERSAO');
 
         //testando se esta usando BDs suportados
       if (
@@ -759,7 +759,7 @@ class PenAtualizarSipRN extends InfraRN
         $arrObjDTO = $objBD->listar($objDTO);
 
       if (!empty($arrObjDTO)) {
-          $numIdItemMenuPai = $this->criarMenu('Processo Eletrônico Nacional', 0, $numIdItemMenuRoot, $numIdMenu, null, $numIdSistema);
+          $numIdItemMenuPai = $this->criarMenu('Tramita GOV.BR', 0, $numIdItemMenuRoot, $numIdMenu, null, $numIdSistema);
           $numIdItemMenuPai = $this->criarMenu('Mapeamento de Tipos de Documento', 10, $numIdItemMenuPai, $numIdMenu, null, $numIdSistema);
 
         foreach ($arrObjDTO as $objDTO) {
@@ -788,14 +788,14 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdSistema($numIdSistema);
       $objItemMenuDTO->setNumIdMenu($numIdMenu);
-      $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+      $objItemMenuDTO->setStrRotulo('Tramita GOV.BR');
       $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
       $objItemMenuDTO->retNumIdItemMenu();
 
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio
@@ -837,7 +837,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
@@ -872,7 +872,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
     }
 
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
@@ -900,14 +900,14 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = new ItemMenuDTO();
       $objDTO->setNumIdSistema($numIdSistema);
       $objDTO->setNumIdMenu($numIdMenu);
-      $objDTO->setStrRotulo('Processo Eletrônico Nacional');
+      $objDTO->setStrRotulo('Tramita GOV.BR');
       $objDTO->setNumMaxRegistrosRetorno(1);
       $objDTO->retNumIdItemMenu();
 
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
@@ -1059,7 +1059,7 @@ class PenAtualizarSipRN extends InfraRN
     }
 
       //Cadastrar recurso de alteração dos parâmetros
-      $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo PEN', $numIdSistema);
+      $this->criarRecurso('pen_parametros_configuracao_alterar', 'Alteração de parametros de configuração do módulo Tramita GOV.BR', $numIdSistema);
 
       $this->atualizarNumeroVersao('1.0.3');
   }
@@ -1448,7 +1448,7 @@ class PenAtualizarSipRN extends InfraRN
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_atribuir');
       ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_tipo_doc_recebimento_padrao_consultar');
 
-      $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO PEN');
+      $this->logar('RECONFIGURAÇÃO DE MENUS DE FUNCIONALIDADES DE MAPEAMENTO DE ESPÉCIES DOCUMENTAIS DO TRAMITA GOV.BR');
       $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistemaSei, "Administrador");
       $numIdMenuSEI = ScriptSip::obterIdMenu($numIdSistemaSei, 'Principal');
 
@@ -1461,7 +1461,7 @@ class PenAtualizarSipRN extends InfraRN
     }
 
       // Recriar item de menu agrupador de mapeamento de tipos de documento
-      $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Processo Eletrônico Nacional");
+      $numIdItemMenuPEN = ScriptSip::obterIdItemMenu($numIdSistemaSei, $numIdMenuSEI, "Tramita GOV.BR");
       $objItemMenuMapeamentoDTO = ScriptSip::adicionarItemMenu(
           $numIdSistemaSei,
           $numIdPerfilSeiAdministrador,
@@ -1485,10 +1485,10 @@ class PenAtualizarSipRN extends InfraRN
 
       // Redefinir ordem de apresentação dos menus de administração do módulo
       $arrOrdemMenusAdministracaoPEN = array(
-          array("rotulo" => "Parâmetros de Configuração",        "sequencia" => 10, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Unidades",            "sequencia" => 30, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
-          array("rotulo" => "Mapeamento de Hipóteses Legais",    "sequencia" => 40, "rotuloMenuSuperior" => "Processo Eletrônico Nacional"),
+          array("rotulo" => "Parâmetros de Configuração",        "sequencia" => 10, "rotuloMenuSuperior" => "Tramita GOV.BR"),
+          array("rotulo" => "Mapeamento de Tipos de Documentos", "sequencia" => 20, "rotuloMenuSuperior" => "Tramita GOV.BR"),
+          array("rotulo" => "Mapeamento de Unidades",            "sequencia" => 30, "rotuloMenuSuperior" => "Tramita GOV.BR"),
+          array("rotulo" => "Mapeamento de Hipóteses Legais",    "sequencia" => 40, "rotuloMenuSuperior" => "Tramita GOV.BR"),
       );
 
       array_map(function ($item) use ($numIdSistemaSei, $numIdMenuSEI) {
@@ -1876,14 +1876,14 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = new ItemMenuDTO();
     $objItemMenuDTO->setNumIdSistema($numIdSistema);
     $objItemMenuDTO->setNumIdMenu($numIdMenu);
-    $objItemMenuDTO->setStrRotulo('Processo Eletrônico Nacional');
+    $objItemMenuDTO->setStrRotulo('Tramita GOV.BR');
     $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
     $objItemMenuDTO->retNumIdItemMenu();
 
     $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+      throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
     }
 
     // Adicionar submenu

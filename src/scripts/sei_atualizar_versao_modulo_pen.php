@@ -73,7 +73,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         InfraDebug::getInstance()->setBolEcho(true);
         InfraDebug::getInstance()->limpar();
 
-        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO PEN NO SEI ' . SEI_VERSAO);
+        $this->inicializar('INICIANDO ATUALIZACAO DO MODULO TRAMITA GOV.BR NO SEI ' . SEI_VERSAO);
 
         //testando se esta usando BDs suportados
       if (
@@ -1292,7 +1292,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $this->atualizarNumeroVersao("1.0.0");
 
-      $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO PEN NO SEI COM SUCESSO');
+      $this->logar(' EXECUTADA A INSTALACAO DA VERSAO 0.0.1 DO MODULO TRAMITA GOV.BR NO SEI COM SUCESSO');
   }
 
     /* Contêm atualizações da versao 1.0.1 do modulo */
@@ -2056,7 +2056,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objPenParametroBD = new PenParametroBD(BancoSEI::getInstance());
       $objPenParametroBD->alterar($objPenParametroDTO);
 
-      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");
+      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO TRAMITA GOV.BR PARA ATUALIZAÇÃO DE HIPÓTESES LEGAIS E ESPÉCIES DOCUMENTAIS");
       // Remove agendamento de tarefas de atualização de hipóteses legais
       $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
       $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
@@ -2083,7 +2083,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objInfraAgendamentoTarefaBD->cadastrar($objAgendamentoInformacoesPEN);
     }
 
-      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO PEN PARA RECEBIMENTO DE PROCESSOS DO BARRAMENTO DO SERVIÇOS DO PEN");
+      $this->logar("CADASTRAMENTO DE AGENDAMENTO DE TAREFAS DO MÓDULO TRAMITA GOV.BR PARA RECEBIMENTO DE PROCESSOS DO TRAMITA GOV.BR");
       // Adicionar agendamento de atualização de informações
       $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
@@ -2109,7 +2109,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaDTO->setBolExclusaoLogica(false);
       $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaBD->consultar($objInfraAgendamentoTarefaDTO);
     if (isset($objInfraAgendamentoTarefaDTO)) {
-        $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento PEN');
+        $this->logar('Removendo agendamento de verificação de serviços de integração do Barramento Tramita GOV.BR');
         $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
     }
 
@@ -2185,11 +2185,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->removerParametro("PEN_NUMERO_TENTATIVAS_TRAMITE_RECEBIMENTO");
 
     try {
-        $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS PEN");
+        $this->logar("ATUALIZANDO LISTA DE HIPÓTESES LEGAIS DO BARRAMENTO DE SERVIÇOS TRAMITA GOV.BR");
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarHipotesesLegais();
     } catch (\Exception $th) {
-        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do PEN pois serviço encontra-se inacessível\n";
+        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das hipóteses legais do TRAMITA GOV.BR pois serviço encontra-se inacessível\n";
         $strMensagemErroMapeamentoAutomatico .= "A atualização poderá ser realizada posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
     }
@@ -2198,16 +2198,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPENAgendamentoRN = new PENAgendamentoRN();
         $objPENAgendamentoRN->atualizarEspeciesDocumentais();
     } catch (\Exception $th) {
-        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do PEN pois serviço encontra-se inacessível\n";
+        $strMensagemErroMapeamentoAutomatico = "Aviso: Não foi possível realizar a atualização automático das espécies documentais do TRAMITA GOV.BR pois serviço encontra-se inacessível\n";
         $strMensagemErroMapeamentoAutomatico .= "Mapeamento poderá ser realizado posteriormente de forma automática pelo agendamento da tarefa PENAgendamentoRN::atualizarInformacoesPEN";
         $this->logar($strMensagemErroMapeamentoAutomatico);
     }
 
-      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO PEN PARA ENVIO");
+      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DOS TIPOS DE DOCUMENTOS DO SEI COM AS ESPÉCIES DOCUMENTAIS DO TRAMITA GOV.BR PARA ENVIO");
       $objPenRelTipoDocMapEnviadoRN = new PenRelTipoDocMapEnviadoRN();
       $objPenRelTipoDocMapEnviadoRN->mapearEspeciesDocumentaisEnvio();
 
-      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO PEN COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
+      $this->logar("INICIANDO O MAPEAMENTO AUTOMÁTICO DAS ESPÉCIES DOCUMENTAIS DO TRAMITA GOV.BR COM OS TIPOS DE DOCUMENTOS DO SEI PARA RECEBIMENTO");
       $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
       $objPenRelTipoDocMapRecebidoRN->mapearEspeciesDocumentaisRecebimento();
 
@@ -2721,7 +2721,7 @@ try {
       $objVersaoSeiRN = new VersaoSei4RN();
       $strNomeParametro = $objVersaoSeiRN->verificarVersaoInstalada();
       $strVersaoModuloPen = $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO, false) ?: $objInfraParametro->getValor(PENIntegracao::PARAMETRO_VERSAO_MODULO_ANTIGO, false);
-      $objVersaoSeiRN->setStrNome('Integração Processo Eletrônico Nacional - PEN');
+      $objVersaoSeiRN->setStrNome('Integração Tramita GOV.BR');
       $objVersaoSeiRN->setStrVersaoAtual(PENIntegracao::VERSAO_MODULO);
       $objVersaoSeiRN->setStrParametroVersao($strNomeParametro);
       $objVersaoSeiRN->setArrVersoes(array(

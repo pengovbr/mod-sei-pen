@@ -167,7 +167,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('12em'); ?>
 
-    <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental PEN:</label>
+    <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental Tramita GOV.BR:</label>
     <select name="codigo_especie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumCodigoEspecie(), $arrEspecieDocumental); ?>
     </select>
