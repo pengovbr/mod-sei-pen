@@ -44,6 +44,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaCadastrarProcessoEmBloco = null;
+    protected $paginaTramiteEmBloco = null;
 
     public function setUpPage(): void
     {
@@ -66,6 +68,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
+        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
         $this->currentWindow()->maximize();
     }
 
@@ -527,8 +531,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
-        $this->byLinkText("Processos Tramitados Externamente")->click();
+        $this->paginaBase->navegarParaControleProcesso();
+        $xpath = "//a[contains(@href, 'acao=pen_procedimento_expedido_listar')]";
+        $link = $this->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->url($url);
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 
