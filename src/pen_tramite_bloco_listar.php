@@ -179,7 +179,6 @@ try {
   foreach ($tabelaLinhas as $cont => $linha) {
     $strResultado .= "<tr class='infraTrClara'>";
     $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']).'</td>';
-      // $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($i,$idBlocoTramite,$idBlocoTramite).'</td>';
     $idBlocoTramite = '';
     foreach ($colunas as $key => $coluna) {
       $idBlocoTramite = $linha['id']; 
@@ -210,10 +209,6 @@ try {
       $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
     }
 
-    // Cancelar tramite
-    // if ($linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_DISPONIBILIZADO)) {
-    //   $strResultado .= '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite.'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite do Bloco" alt="Cancelar Tramite do Bloco" class="infraImg iconTramita" /></a>&nbsp;';
-    // }
     $strResultado .= "</td>";
     $strResultado .= "</tr>";
     }

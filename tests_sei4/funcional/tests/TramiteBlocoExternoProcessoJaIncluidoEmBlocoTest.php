@@ -149,7 +149,6 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
                 $objAssinaturaFixture->carregar([
                     'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
                     'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-                    'IdAtividade' => $objProtocoloDTO->getDblIdProtocolo()
                 ]);
             }
         );

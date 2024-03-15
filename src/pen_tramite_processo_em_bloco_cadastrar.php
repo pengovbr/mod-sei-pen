@@ -13,12 +13,6 @@ try {
   $strIdItensSelecionados = $objPaginaSEI->recuperarCampo('hdnIdProtocolo');
   $idBlocoExterno = $objPaginaSEI->recuperarCampo('selBlocos');
 
-  //////////////////////////////////////////////////////////////////////////////
-  // InfraDebug::getInstance()->setBolLigado(false);
-  // InfraDebug::getInstance()->setBolDebugInfra(true);
-  // InfraDebug::getInstance()->limpar();
-  //////////////////////////////////////////////////////////////////////////////
-
   $strParametros = '';
   if(isset($_GET['arvore'])) {
     PaginaSEI::getInstance()->setBolArvore($_GET['arvore']);
@@ -89,7 +83,6 @@ try {
       case 'pen_tramita_em_bloco_adicionar':
         $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'));
         $strIdItensSelecionados = $strIdItensSelecionados ?: $_GET['processos'];
-        // print_r($arrProtocolosOrigem); die('aqui');
         $strTitulo = 'Incluir Processo(s) no Bloco de Trâmite';
         
         if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {

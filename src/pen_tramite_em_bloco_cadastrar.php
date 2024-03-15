@@ -5,11 +5,6 @@ try {
 
   session_start();
 
-  //////////////////////////////////////////////////////////////////////////////
-  // InfraDebug::getInstance()->setBolLigado(false);
-  // InfraDebug::getInstance()->setBolDebugInfra(true);
-  // InfraDebug::getInstance()->limpar();
-  //////////////////////////////////////////////////////////////////////////////
   $objSessaoSEI = SessaoSEI::getInstance();
   $objPaginaSEI = PaginaSEI::getInstance();
   $objDebug = InfraDebug::getInstance();
@@ -52,7 +47,6 @@ try {
       $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
       if (isset($_POST['sbmCadastrarTramiteEmBloco'])) {
         try{
-          //
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
           $objPaginaSEI->adicionarMensagem('Bloco de Trâmite externo criado com sucesso!', 5);
@@ -130,7 +124,6 @@ PaginaSEI::getInstance()->abrirJavaScript();
 
 function inicializar(){
 
-
   if ('<?=$_GET['acao']?>'=='pen_tramite_em_bloco_consultar') {
     document.getElementById('divIdentificacao').style.display = 'block';
     infraDesabilitarCamposAreaDados();
@@ -146,15 +139,6 @@ function inicializar(){
 
   infraEfeitoTabelas();
 }
-
-function validarCadastroRI1284() {
-  return true;
-}
-
-function OnSubmitForm() {
-  return validarCadastroRI1284();
-}
-
 
 <?
 PaginaSEI::getInstance()->fecharJavaScript();

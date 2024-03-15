@@ -19,32 +19,28 @@ try {
 
     $arrProtocolosOrigem = array();
     $tramiteEmBloco = isset($_GET['tramite_em_bloco']) ? $_GET['tramite_em_bloco'] : null;
-    if ($tramiteEmBloco == 1) {
-        if (isset($_GET['id_tramita_em_bloco'])) {
-            $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-            $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_tramita_em_bloco']);
-            $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-            $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-        } else {
-            $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
-            $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-            $objTramitaEmBlocoProtocoloDTO->setNumId($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
-            $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-            $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-        }
 
-        $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-        $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
-        $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
-        $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
-        foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
-            $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();    
-        }
+    if (isset($_GET['id_tramita_em_bloco'])) {
+        $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+        $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_tramita_em_bloco']);
+        $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+        $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
     } else {
-        $idTramiteEmBloco = null;
-        $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
+        $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
+        $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+        $objTramitaEmBlocoProtocoloDTO->setNumId($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
+        $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+        $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
     }
-    
+
+    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+    $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
+    $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
+    foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
+        $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();    
+    }
+
 
   if (count($arrProtocolosOrigem)==0){
       $arrProtocolosOrigem = explode(',', $_POST['hdnIdProcedimento']);

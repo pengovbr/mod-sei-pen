@@ -326,4 +326,17 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
 
   }
+
+      /**
+   * Atualizar Bloco  de tramite externo para concluído parcialmente
+   */
+  public function atualizarEstadoDoBlocoConcluidoParcialmente($arrTramiteEmBlocoProtocoloDTO)
+  {
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setNumId($arrTramiteEmBlocoProtocoloDTO[0]->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+  }
 }

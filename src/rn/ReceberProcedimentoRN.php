@@ -537,14 +537,8 @@ class ReceberProcedimentoRN extends InfraRN
           $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
           if ($tramiteEmBlocoProtocolo != null) {
-            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-            $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco());
-            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-
-            $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
           }
-
       }
 
         $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $numIdTramite, 2);

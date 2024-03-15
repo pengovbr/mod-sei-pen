@@ -19,7 +19,6 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
 
         $this->objBlocoDeTramiteProtocoloDTO->setDblIdProtocolo($dados['IdProtocolo'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setNumIdTramitaEmBloco($dados['IdTramitaEmBloco'] ?: null);
-        $this->objBlocoDeTramiteProtocoloDTO->setStrAnotacao($dados['Anotacao'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setNumSequencia($dados['Sequencia'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setStrIdxRelBlocoProtocolo($dados['IdxRelBlocoProtocolo'] ?: null);
 

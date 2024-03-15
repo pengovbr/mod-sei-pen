@@ -19,7 +19,6 @@ class TramitaEmBlocoProtocoloDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Id', 'id');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProtocolo', 'id_protocolo');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTramitaEmBloco', 'id_tramita_em_bloco');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Anotacao', 'anotacao');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Sequencia', 'sequencia');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'IdxRelBlocoProtocolo', 'idx_rel_bloco_protocolo');
 

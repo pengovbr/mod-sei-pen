@@ -160,9 +160,6 @@ class ReceberReciboTramiteRN extends InfraRN
             $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento(sprintf('Trâmite do processo %s foi concluído', $objProtocoloDTO->getStrProtocoloFormatado()), 'S'));
             // Registra o recbimento do recibo no histórico e realiza a conclusão do processo
             $this->registrarRecebimentoRecibo($objProtocoloDTO->getDblIdProtocolo(), $objProtocoloDTO->getStrProtocoloFormatado(), $numIdTramite);
-            // $this->objPenDebug->gravar("ID: Protocolo: {$objProtocoloDTO->getDblIdProtocolo()}");
-            LogSEI::getInstance()->gravar("ID: Protocolo: {$objProtocoloDTO->getDblIdProtocolo()}");
-
 
         } catch (Exception $e) {
             $strMessage = 'Falha ao modificar o estado do procedimento para bloqueado.';

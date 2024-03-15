@@ -52,7 +52,6 @@ try {
         $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
 
         if ($blocoResultado != null) {
-          // atualizar bloco de tramite externo
           $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
           $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($dblIdBloco);
           $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
@@ -83,30 +82,6 @@ try {
     case 'pen_tramita_em_bloco_protocolo_listar':
       $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
       break;
-    case 'pen_tramita_em_bloco_protocolo_cancelar': {
-      try{
-        $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
-        $arrObjTramiteBlocoProtocoloDTO = array();
-        var_dump($arrStrIds);
-        if (count($arrStrIds) > 0) {
-          foreach ($arrStrIds as $arrStrId) {
-              $arrStrIdComposto = explode('-', $arrStrId);
-              $expedirProcedimentoRN = new ExpedirProcedimentoRN();
-              $expedirProcedimentoRN->cancelarTramite($arrStrIdComposto[1]);
-          }
-        } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
-            $arrStrIdComposto = explode('-', $_GET['hdnInfraItensSelecionados']);
-            $expedirProcedimentoRN = new ExpedirProcedimentoRN();
-            $expedirProcedimentoRN->cancelarTramite($arrStrIdComposto[1]);
-        }
-        PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
-      } catch (Exception $e) {
-        PaginaSEI::getInstance()->processarExcecao($e);
-      }
-      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']));
-      //die;
-    }
-    break;
     default:
       throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
@@ -146,7 +121,6 @@ try {
   $numRegistros = count($arrTramitaEmBlocoProtocoloDTO);
   if ($numRegistros > 0) {
 
-    // $arrComandos[] = '<button type="button" value="Cancelar" onclick="onClickBtnCancelarTramites()" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar Trâmites</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
 
     $strResultado = '';
@@ -175,7 +149,6 @@ try {
     $strResultado .= '</div>';
 
     $strResultado .= '</th>' . "\n";
-   // $strResultado .= '<th class="infraTh">' . $objPaginaSEI->getThOrdenacao($objTramitaEmBlocoProtocoloDTO, 'Anotações', 'Anotacoes', $arrTramitaEmBlocoProtocoloDTO) . '</th>' . "\n";
     $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
     $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
     $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
@@ -188,8 +161,8 @@ try {
       $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
       $strResultado .= $strCssTr;
 
-      $id = $objTramitaEmBlocoProtocoloDTO->getNumId().'-'.$objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo().'-'.$_GET['id_bloco'];
-      $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $id, $id) . '</td>';
+      $numIdBlocoProtocolo = $objTramitaEmBlocoProtocoloDTO->getNumId().'-'.$objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo().'-'.$_GET['id_bloco'];
+      $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $numIdBlocoProtocolo, $numIdBlocoProtocolo) . '</td>';
       $strResultado .= '<td align="center">' . ($i + 1) . '</td>';
 
       $strResultado .= '<td align="center">';
@@ -215,11 +188,11 @@ try {
         $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
       } else {
 
-        $PROCESSO_CONCLUIDO_RECEBIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO); // 1002
-        $PROCESSO_CONCLUIDO_AVULSO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO); // 1007
-        $PROCESSO_TRAMITE_EXPEDIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO); // 1005
-        $PROCESSO_TRAMITE_CANCELADO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); // 1004
-        $PROCESSO_TRAMITE_PROCESSAMENTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO); // 1001
+        $PROCESSO_CONCLUIDO_RECEBIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO); 
+        $PROCESSO_CONCLUIDO_AVULSO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO); 
+        $PROCESSO_TRAMITE_EXPEDIDO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO); 
+        $PROCESSO_TRAMITE_CANCELADO_ID = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); 
+        $PROCESSO_TRAMITE_PROCESSAMENTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
         $PROCESSO_TRAMITE_ABERTO = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
        
         switch ($objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa()) {
@@ -256,10 +229,8 @@ try {
             $objTramitaEmBlocoProtocoloDTO->getStrSinObteveRecusa() == 'S' ||
             $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO
             ) {
-          $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
+          $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
         }
-
-       //  $strResultado .= $objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() == $PROCESSO_EXPEDIDO_ID ? '<a onclick="onClickBtnCancelarTramite(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$id.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_envio.png", $this->getDiretorioImagens()) . '" title="Cancelar Tramite" alt="Cancelar Tramite" class="infraImg iconTramita" /></a>&nbsp;' : '';
       }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";

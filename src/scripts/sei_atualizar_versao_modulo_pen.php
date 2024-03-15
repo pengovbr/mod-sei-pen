@@ -2684,7 +2684,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
             'id_protocolo' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
             'id_tramita_em_bloco' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-            'anotacao' => array($objMetaBD->tipoTextoVariavel(500), PenMetaBD::SNULLO),
             'sequencia' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO),
             'idx_rel_bloco_protocolo' => array($objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO),
         ),
@@ -2692,7 +2691,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         'uk' => array('id_protocolo', 'id_tramita_em_bloco', 'sequencia'),
         'fks' => array(
           'protocolo' => array('nome' => 'fk_tramita_bl_protocolo', 'cols' => array('id_protocolo', 'id_protocolo')),
-          //'md_pen_tramita_em_bloco' => array('nome' => 'fk_tramita_em_bloco_protocolo', 'cols' => array('id', 'id_tramita_em_bloco')),
         )
       ));
  
