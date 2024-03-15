@@ -1,5 +1,9 @@
 <?php
 
+/**
+  * Execution Groups
+  * @group execute_alone_group3
+ */
 class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
 {
     public static $remetente;
