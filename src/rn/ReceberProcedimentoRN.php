@@ -1797,14 +1797,13 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objDocumentoDTO->setStrSinBloqueado('N');
 
-        // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
-        $this->atribuirComponentesJaExistentesNoProcesso(
-            $objDocumentoDTO,
+        //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
+        $this->atribuirComponentesDigitais(
+            $objDocumentoDTO, 
             $objDocumento->componenteDigital,
             $arrDocumentosExistentesPorHash,
-            $parObjMetadadosProcedimento->arrHashComponenteBaixados
-        );
-
+            $parObjMetadadosProcedimento->arrHashComponenteBaixados);
+        
         $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
         $objAtividadeDTOVisualizacao = new AtividadeDTO();
@@ -1875,6 +1874,7 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function atribuirComponentesJaExistentesNoProcesso($objDocumentoDTO, $objComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados){
     $arrObjAnexosDTO = array();
+    $arrObjAnexoDTO = array();
     foreach ($objComponentesDigitais as $objComponenteDigital) {
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
@@ -1891,7 +1891,8 @@ class ReceberProcedimentoRN extends InfraRN
           $arrObjAnexoDTO = array_merge($arrObjAnexosDTO, $arr);
       }
     }
-    $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
+    return $arrObjAnexoDTO;
+    // $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
   }
 
 
@@ -2007,22 +2008,32 @@ class ReceberProcedimentoRN extends InfraRN
     }
   }
 
-  private function atribuirComponentesDigitais(DocumentoDTO $parObjDocumentoDTO, $parArrObjComponentesDigitais)
+  private function atribuirComponentesDigitais(DocumentoDTO $objDocumentoDTO, $parArrObjComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
     {
     if(!isset($parArrObjComponentesDigitais)) {
         throw new InfraException('Componentes digitais do documento não informado.');
     }
 
-      $arrObjAnexoDTO = array();
-    if($parObjDocumentoDTO->getObjProtocoloDTO()->isSetArrObjAnexoDTO()) {
-        $arrObjAnexoDTO = $parObjDocumentoDTO->getObjProtocoloDTO()->getArrObjAnexoDTO();
+    // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
+    $arrAnexo = array();
+    $arrAnexo = $this->atribuirComponentesJaExistentesNoProcesso(
+                  $parObjDocumentoDTO,
+                  $parArrObjComponentesDigitais,
+                  $arrDocumentosExistentesPorHash,
+                  $arrHashComponenteBaixados
+                );
+
+    $arrAnexoDTO = array();
+    if($objDocumentoDTO->getObjProtocoloDTO()->isSetArrObjAnexoDTO()) {
+        $arrAnexoDTO = $objDocumentoDTO->getObjProtocoloDTO()->getArrObjAnexoDTO();
     }
 
     if (!is_array($parArrObjComponentesDigitais)) {
         $parArrObjComponentesDigitais = array($parArrObjComponentesDigitais);
     }
 
-      $parObjDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
+    $arrObjAnexoDTO = array_merge($arrAnexoDTO, $arrAnexo);
+    $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
   }
 
 
@@ -2415,13 +2426,26 @@ class ReceberProcedimentoRN extends InfraRN
       $objEnviarProcessoDTO->setStrSinManterAberto('S');
       $objEnviarProcessoDTO->setStrSinEnviarEmailNotificacao($strEnviaEmailNotificacao);
       $objEnviarProcessoDTO->setStrSinRemoverAnotacoes('S');
+
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+      $objEnviarProcessoDTO->setDtaPrazoRetornoProgramado(null);
+      $objEnviarProcessoDTO->setNumDiasRetornoProgramado(null);
+      $objEnviarProcessoDTO->setStrSinDiasUteisRetornoProgramado('N');
+    }else{
       $objEnviarProcessoDTO->setDtaPrazo(null);
       $objEnviarProcessoDTO->setNumDias(null);
       $objEnviarProcessoDTO->setStrSinDiasUteis('N');
+    }
 
       $objAtividadeRN->enviarRN0023($objEnviarProcessoDTO);
 
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+      $objConcluirProcessoDTO = new ConcluirProcessoDTO();
+      $objConcluirProcessoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      $objProcedimentoRN->concluir($objConcluirProcessoDTO);
+    }else{
       $objProcedimentoRN->concluir(array($objProcedimentoDTO));
+    }
   }
 
 

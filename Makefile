@@ -1,7 +1,7 @@
 .PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # Parâmetros de execução do comando MAKE
-# Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, super
+# Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
 sistema=super
 base=mysql
 teste=
@@ -42,8 +42,8 @@ CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSW
 CMD_COMPOSE_UNIT = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_UNIT)/docker-compose.yml --env-file $(PEN_TEST_UNIT)/.env
 CMD_COMPOSE_FUNC = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env
 CMD_COMPOSE_FUNC_EXEC = $(CMD_COMPOSE_FUNC) exec -T
-CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
-CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "<input.*txtUsuario.*>"'
+CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "input.*txtUsuario.*"'
+CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "input.*txtUsuario.*"'
 FILE_VENDOR_FUNCIONAL = $(PEN_TEST_FUNC)/vendor/bin/phpunit
 FILE_VENDOR_UNITARIO = $(PEN_TEST_UNIT)/vendor/bin/phpunit
 

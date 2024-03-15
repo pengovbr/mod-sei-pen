@@ -2,6 +2,10 @@
 
 use \utilphp\util;
 
+/**
+ * Execution Groups
+ * @group execute_alone_group4
+ */
 class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
@@ -23,7 +27,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void

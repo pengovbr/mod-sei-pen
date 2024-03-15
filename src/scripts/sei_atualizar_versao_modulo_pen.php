@@ -929,7 +929,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       //----------------------------------------------------------------------
       $objDTO = new TarefaDTO();
 
-      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use ($objDTO, $objBD) {
+      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
 
           $objDTO->unSetTodos();
           $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
@@ -949,6 +949,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1197,8 +1200,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objBD = new TarefaBD(BancoSEI::getInstance());
       $objDTO = new TarefaDTO();
 
-      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use ($objDTO, $objBD) {
-
+      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
           $objDTO->unSetTodos();
           $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
 
@@ -1217,6 +1219,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }
@@ -1739,6 +1744,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objTarefaDTO->setStrSinFecharAndamentosAbertos($objTarefaDTOAntigo->getStrSinFecharAndamentosAbertos());
             $objTarefaDTO->setStrSinLancarAndamentoFechado($objTarefaDTOAntigo->getStrSinLancarAndamentoFechado());
             $objTarefaDTO->setStrSinPermiteProcessoFechado($objTarefaDTOAntigo->getStrSinPermiteProcessoFechado());
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+              $objTarefaDTO->setStrSinConsultaProcessual($objTarefaDTOAntigo->getStrSinConsultaProcessual());
+            }
             $objTarefaDTO->setStrIdTarefaModulo(null);
             $objTarefaBD->cadastrar($objTarefaDTO);
 
@@ -1877,8 +1885,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objBD = new TarefaBD(BancoSEI::getInstance());
       $objDTO = new TarefaDTO();
 
-      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '') use ($objDTO, $objBD) {
-
+      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
           $objDTO->unSetTodos();
           $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
 
@@ -1896,6 +1903,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
             $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
             $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
             $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
             $objBD->cadastrar($objDTO);
         }

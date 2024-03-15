@@ -78,7 +78,9 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                     )
                 ),
 
-                "EnviarApenasComponentesDigitaisPendentes" => false,
+                "EnviarApenasComponentesDigitaisPendentes" => array(
+                    5 => array(2000, 4000),
+                )
             )
         );
     }
