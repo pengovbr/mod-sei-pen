@@ -210,6 +210,7 @@ pipeline {
                 buildDescription s
 
                 sh """
+                docker volume prune -f
                 ifconfig || true
                 if [ -f ${FOLDERMODULO}/Makefile ]; then
                     make destroy || true
@@ -592,7 +593,7 @@ pipeline {
 
                                     done
                                     
-                                    docker system prune -a -f
+                                    #docker system prune -a -f
                                     docker volume prune -f
 
                                     if [ -f "rodarnovamente.txt" ]; then
