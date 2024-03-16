@@ -31,7 +31,7 @@ class ConfiguracaoSip extends InfraConfiguracao  {
 			'SessaoSip' => array(
 				'SiglaOrgaoSistema' => 'ABC',
 				'SiglaSistema' => 'SIP',
-				'PaginaLogin' => getenv('SEI_HOST_URL') . '/sip/login.php',
+				'PaginaLogin' => getenv('HOST_URL') . '/sip/login.php',
 				'SipWsdl' => getenv('HOST_URL') . '/sip/controlador_ws.php?servico=wsdl',
 				'https' => false
 			),
