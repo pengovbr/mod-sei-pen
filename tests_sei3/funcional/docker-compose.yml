@@ -179,7 +179,7 @@ services:
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php
     environment:
       #- LANG=pt_BR.ISO-8859-1
-      - SEI_HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
+      - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
       - CERTIFICADO=${ORG2_CERTIFICADO}
       - CERTIFICADO_SENHA=${ORG2_CERTIFICADO_SENHA}
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9000 start_with_request=0
