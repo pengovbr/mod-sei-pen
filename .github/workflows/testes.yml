@@ -49,7 +49,6 @@ jobs:
              cd sei/src/sei/web/modulos/mod-sei-pen
              make update
              make install
-             make tramitar-pendencias-silent &
 
       - name: Testes funcionais
-        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-functional
+        run: cd sei/src/sei/web/modulos/mod-sei-pen; make test-parallel-otimizado
