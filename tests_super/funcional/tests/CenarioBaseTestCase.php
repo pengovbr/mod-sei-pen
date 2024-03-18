@@ -46,10 +46,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastroOrgaoExterno = null;
     protected $paginaConfiguracaoModuloRenomeado = null;
     protected $paginaCadastrarProcessoEmBloco = null;
-    protected $paginaTramiteEmBloco = null;
-    protected $paginaConfiguracaoModuloRenomeado = null;
-    protected $paginaCadastrarProcessoEmBloco = null;
-    protected $paginaTramiteEmBloco = null;
+    protected $paginaTramiteEmBloco = null;    
 
     public function setUpPage(): void
     {
