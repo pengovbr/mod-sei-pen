@@ -210,6 +210,7 @@ pipeline {
                 buildDescription s
 
                 sh """
+                docker volume prune -f
                 ifconfig || true
                 if [ -f ${FOLDERMODULO}/Makefile ]; then
                     make destroy || true
@@ -245,7 +246,7 @@ pipeline {
                         rm -rf sei sip infra
                         mv src/sei src/sip src/infra .
                     fi
-                    
+
                     """
 
                 }
@@ -314,11 +315,6 @@ pipeline {
                     sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
                     sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php*
                     sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php*
-                    
-                    if [ "${SISTEMA}" = "sei3" ]; then
-                        cp ${FOLDER_FUNCIONAIS}/assets/config/ConfiguracaoSEI.php ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php~
-                        cp ${FOLDER_FUNCIONAIS}/assets/config/ConfiguracaoSip.php ${FOLDERSPE}/sip/config/ConfiguracaoSip.php~
-                    fi
 
                     """, label: "Destroi ambiente e Remove Antigos"
 
@@ -338,7 +334,7 @@ pipeline {
                     sed -i "s|sistema=.*|sistema=${SISTEMA}|g" Makefile
                     sed -i "s|PARALLEL_TEST_NODES =.*|PARALLEL_TEST_NODES = ${TESTE_PARALLEL}|g" Makefile
                     sed -i "s|^base=.*|base=${DATABASE}|g" Makefile
-                    
+
                     make config
                     sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}|g" ${FOLDER_FUNCIONAIS}/.env
                     sed -i "s|ORG1_CERTIFICADO_SENHA=.*|ORG1_CERTIFICADO_SENHA=$ORG1_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
@@ -384,12 +380,17 @@ pipeline {
                     sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.1/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
-                    
+
                     cp ${FOLDER_FUNCIONAIS}/phpunit.xml phpunitoriginal.xml
 
 
                     make destroy
                     make up
+
+                    if [ "$DATABASE" = "oracle" ] || [ "$DATABASE" = "sqlserver" ]; then
+                        sleep 30
+                    fi
+
                     make check-isalive
                     set +e
                     echo ""
@@ -455,7 +456,7 @@ pipeline {
             steps{
                 dir("${FOLDERMODULO}"){
                     sh script: """
-                    
+
                     if [ "${SISTEMA}" = "sei3" ]; then
                         make test-unit || true
                     else
@@ -591,6 +592,9 @@ pipeline {
 
 
                                     done
+
+                                    #docker system prune -a -f
+                                    docker volume prune -f
 
                                     if [ -f "rodarnovamente.txt" ]; then
                                         exit 1
