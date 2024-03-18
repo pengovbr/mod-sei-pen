@@ -72,10 +72,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
-        $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
-        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);               
+        
         $this->currentWindow()->maximize();
     }
 
