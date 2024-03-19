@@ -148,9 +148,9 @@ class PenLoteProcedimentoRN extends InfraRN {
           $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
           $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-          if ($tramiteEmBlocoProtocolo != null) {
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
-          }
+        if ($tramiteEmBlocoProtocolo != null) {
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        }
       }
 
         //Desbloqueia o processo

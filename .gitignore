@@ -4,6 +4,8 @@ vendor/
 src/config/ConfiguracaoModPEN.php
 src/config/supervisor.ini
 **/.tmp/
+**/evidencias/
+**/tests_funcional_falsos_positivos_temp/
 
 .vscode
 

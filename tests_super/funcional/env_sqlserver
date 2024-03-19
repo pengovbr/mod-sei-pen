@@ -29,7 +29,7 @@ ORG1_DATABASE_TYPE=SqlServer
 ORG1_DATABASE_GUEST_PORT=1433
 ORG1_DATABASE_HOST_PORT=14331
 ORG1_DATABASE_DATA_DIR=/var/opt/mssql 
-CONTEXTO_ORGAO_A_DB_SEI_DSN=sqlsrv:server=org1-database,1433; Database=sei
+CONTEXTO_ORGAO_A_DB_SEI_DSN="sqlsrv:server=org1-database,1433; Database=sei"
 
 
 
@@ -52,7 +52,7 @@ ORG2_DATABASE_TYPE=SqlServer
 ORG2_DATABASE_GUEST_PORT=1433
 ORG2_DATABASE_HOST_PORT=14332
 ORG2_DATABASE_DATA_DIR=/var/opt/mssql 
-CONTEXTO_ORGAO_B_DB_SEI_DSN=sqlsrv:server=org2-database,1433; Database=sei
+CONTEXTO_ORGAO_B_DB_SEI_DSN="sqlsrv:server=org2-database,1433; Database=sei"
 
 
 

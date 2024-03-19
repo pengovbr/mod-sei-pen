@@ -68,7 +68,10 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
               "Gearman" => array(
                   "Servidor" => "",
                   "Porta" => "", //Padrão: 4730
-              )                                
+              ),
+
+              // Configuração padrão do Envio Parcial
+              "EnviarApenasComponentesDigitaisPendentes" => false
           )
       );
   }               

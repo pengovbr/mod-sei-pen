@@ -78,12 +78,12 @@ try {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']));
-      die;
+        die;
     case 'pen_tramita_em_bloco_protocolo_listar':
       $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
-      break;
+        break;
     default:
-      throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
   $arrComandos = array();
@@ -207,13 +207,13 @@ try {
             } else {
               $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
             }
-            break;
+              break;
           case $PROCESSO_TRAMITE_CANCELADO_ID:
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
-            break;   
+              break;   
           default:
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
-            break;
+              break;
         }
       }
       $strResultado .= '</td>' . "\n";
@@ -284,7 +284,10 @@ input.infraText {
 </style>
 
 <?php
-$objPaginaSEI->montarJavaScript(); ?>
+$objPaginaSEI->montarJavaScript();
+$acaoOrigem=$_GET['acao_origem'];
+$acao=$_GET['acao'];
+$idBloco=$_GET['id_bloco']; ?>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
 
@@ -299,7 +302,7 @@ $objPaginaSEI->montarJavaScript(); ?>
 
   function onClickBtnPesquisar() {
     var form = jQuery('#frmProcessosListar');
-    form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+    form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem='.$acaoOrigem.'&acao_retorno='.$acao.'&id_bloco='.$idBloco); ?>');
     form.submit();
   }
 
@@ -329,7 +332,7 @@ $objPaginaSEI->montarJavaScript(); ?>
       if (len > 0) {
         if (confirm('Confirma retirada de ' + len + ' protocolo(s) selecionado(s) do bloco de trâmite externo?')) {
           var form = jQuery('#frmProcessosListar');
-          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$acaoOrigem.'&acao_retorno='.$acao.'&id_bloco='.$idBloco); ?>');
           form.submit();
         }
       } else {
@@ -347,7 +350,7 @@ $objPaginaSEI->montarJavaScript(); ?>
         if (len > 0) {
           if (confirm('Confirma a exclusão de ' + len + ' mapeamento(s) ?')) {
             var form = jQuery('#frmProcessosListar');
-              form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$_GET['id_bloco']); ?>');
+              form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_cancelar&acao_origem='.$acaoOrigem.'&acao_retorno='.$acao.'&id_bloco='.$idBloco); ?>');
               form.submit();
           }
         } else {
@@ -407,7 +410,7 @@ $objPaginaSEI->montarJavaScript(); ?>
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmProcessosListar" method="post" action="<?= $objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']) ?>">
+<form id="frmProcessosListar" method="post" action="<?= $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_origem=' . $acao.'&id_bloco='.$idBloco) ?>">
   <?
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   $objPaginaSEI->abrirAreaDados('4.5em');
