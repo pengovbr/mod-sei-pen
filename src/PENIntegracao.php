@@ -172,16 +172,16 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
   {
-      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
-        return false;
-      }
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
 
       $arrStrIcone = array();
       $arrDblIdProcedimento = array();
 
-      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-      }
+    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+        $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+    }
 
       $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
       $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
@@ -1041,7 +1041,7 @@ class PENIntegracao extends SeiIntegracao
     }
 
     return true;
-    }
+  }
 
   /**
    * Compara duas diferentes versões do sistem para avaliar a precedência de ambas
