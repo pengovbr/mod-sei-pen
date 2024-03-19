@@ -39,6 +39,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
     protected $paginaMapeamentoUnidade = null;
+    protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaMoverDocumento = null;
     protected $paginaTramiteMapeamentoOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
@@ -46,7 +47,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastroOrgaoExterno = null;
     protected $paginaConfiguracaoModuloRenomeado = null;
     protected $paginaCadastrarProcessoEmBloco = null;
-    protected $paginaTramiteEmBloco = null;    
+    protected $paginaTramiteEmBloco = null;
+    protected $paginaEnvioParcialListar = null;
 
     public function setUpPage(): void
     {
@@ -66,14 +68,15 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
         $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
+        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);               
-        
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->currentWindow()->maximize();
     }
 

@@ -536,9 +536,9 @@ class ReceberProcedimentoRN extends InfraRN
           $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
           $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-          if ($tramiteEmBlocoProtocolo != null) {
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
-          }
+        if ($tramiteEmBlocoProtocolo != null) {
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        }
       }
 
         $this->gravarLogDebug("Notificando serviços do Tramita GOV.BR sobre ciência da recusa do trâmite " . $numIdTramite, 2);

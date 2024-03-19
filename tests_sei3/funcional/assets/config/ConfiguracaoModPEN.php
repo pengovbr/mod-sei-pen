@@ -78,10 +78,8 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                     )
                 ),
 
-                // "EnviarApenasComponentesDigitaisPendentes" => true,
-                "EnviarApenasComponentesDigitaisPendentes" => array(
-                    5 => array(2000, 4000),
-                )
+                // Configuração padrão do Envio Parcial
+                "EnviarApenasComponentesDigitaisPendentes" => false
             )
         );
     }

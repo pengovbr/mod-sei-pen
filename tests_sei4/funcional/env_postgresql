@@ -31,7 +31,7 @@ ORG1_DATABASE_TYPE=PostgreSql
 ORG1_DATABASE_GUEST_PORT=5432
 ORG1_DATABASE_HOST_PORT=54321
 ORG1_DATABASE_DATA_DIR=/var/lib/postgresql/data
-CONTEXTO_ORGAO_A_DB_SEI_DSN=pgsql:host=org1-database;port=5432;dbname=sei
+CONTEXTO_ORGAO_A_DB_SEI_DSN="pgsql:host=org1-database;port=5432;dbname=sei"
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############
@@ -51,4 +51,4 @@ ORG2_DATABASE_TYPE=PostgreSql
 ORG2_DATABASE_GUEST_PORT=5432
 ORG2_DATABASE_HOST_PORT=54322
 ORG2_DATABASE_DATA_DIR=/var/lib/postgresql/data
-CONTEXTO_ORGAO_B_DB_SEI_DSN=pgsql:host=org2-database;port=5432;dbname=sei
+CONTEXTO_ORGAO_B_DB_SEI_DSN="pgsql:host=org2-database;port=5432;dbname=sei"

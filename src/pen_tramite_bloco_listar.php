@@ -11,7 +11,7 @@ try {
 
   // $objSessaoSEI->validarLink();
 
-  $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao'].'&id_documento='.$_GET['id_documento']);
+  $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . '&id_documento=' . $_GET['id_documento']);
   PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
 
 
@@ -58,30 +58,28 @@ try {
         $tramitaEmBlocoProtocoloRN->excluir($arrtramitaEmBlocoProtocoloRN);
 
         $objPaginaSEI->adicionarMensagem('Bloco excluído com sucesso!', 5);
-
       } catch (Exception $e) {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
-      exit(0);
+        exit(0);
     case 'md_pen_tramita_em_bloco':
       $arrEstadosSelecionados = [];
       $checkboxesEstados = [
-          'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
-          'chkSinEstadoDisponibilizado' => TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
-          'chkSinEstadoConcluidoParcialmente' => TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
-          'chkSinEstadoConcluido' => TramiteEmBlocoRN::$TE_CONCLUIDO
+        'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
+        'chkSinEstadoDisponibilizado' => TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
+        'chkSinEstadoConcluidoParcialmente' => TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
+        'chkSinEstadoConcluido' => TramiteEmBlocoRN::$TE_CONCLUIDO
       ];
 
       foreach ($checkboxesEstados as $checkbox => $strEstado) {
-          if (isset($_POST[$checkbox])) {
-              $arrEstadosSelecionados[] = $strEstado;
-          }
+        if (isset($_POST[$checkbox])) {
+          $arrEstadosSelecionados[] = $strEstado;
+        }
       }
       $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisa');
       $setStrPalavrasPesquisa = $strPalavrasPesquisa != '' ? $objBlocoDTOPesquisa->setStrPalavrasPesquisa($strPalavrasPesquisa) : '';
-
-      break;
+        break;
     case 'pen_tramite_em_bloco_cancelar':
       $arrEstadosSelecionados = [];
       $arrStrIds = isset($_GET['id_tramita_em_bloco']) ? [$_GET['id_tramita_em_bloco']] : PaginaSEI::getInstance()->getArrStrItensSelecionados();
@@ -99,10 +97,9 @@ try {
 
       PaginaSEI::getInstance()->setStrMensagem('Operação realizada com sucesso.');
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
-
-      break;
+        break;
     default:
-      throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
 
@@ -164,8 +161,8 @@ try {
 
     $strResultado .= '<div class="infraDivOrdenacao">';
     $strResultado .= "<div class='infraDivRotuloOrdenacao'>{$coluna}</div>";
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' .PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima(). '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' .PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo(). '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() . '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
+    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() . '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
     $strResultado .= '</div>';
 
     $strResultado .= '</th>' . "\n";
@@ -178,24 +175,24 @@ try {
 
   foreach ($tabelaLinhas as $cont => $linha) {
     $strResultado .= "<tr class='infraTrClara'>";
-    $strResultado .= '<td>'.PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']).'</td>';
+    $strResultado .= '<td>' . PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']) . '</td>';
     $idBlocoTramite = '';
     foreach ($colunas as $key => $coluna) {
-      $idBlocoTramite = $linha['id']; 
+      $idBlocoTramite = $linha['id'];
 
       if ($linha[$key]) {
         $strResultado .= "<td align='center'> {$linha[$key]} </td>";
       }
     }
-    
+
     $strResultado .= "<td align=''>";
     // visualizar
     $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_bloco=' . $idBlocoTramite) . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . PaginaSEI::getInstance()->getIconeConsultar()  . '" title="Visualizar Processos" alt="Visualizar Processos" class="infraImg" /></a>&nbsp;';
     // alterar
-    $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramite_em_bloco_alterar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_bloco='.$idBlocoTramite).'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeAlterar().'" title="Alterar Bloco" alt="Alterar Bloco" class="infraImg" /></a>&nbsp;';
+    $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramite_em_bloco_alterar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_bloco=' . $idBlocoTramite) . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . PaginaSEI::getInstance()->getIconeAlterar() . '" title="Alterar Bloco" alt="Alterar Bloco" class="infraImg" /></a>&nbsp;';
     if ($linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
-    // Excluir
-      $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$idBlocoTramite).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
+      // Excluir
+      $strResultado .= '<a onclick="onCLickLinkDelete(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco_excluir&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&hdnInfraItensSelecionados=' . $idBlocoTramite) . '\', this)" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . PaginaSEI::getInstance()->getIconeExcluir() . '" title="Excluir Bloco" alt="Excluir Bloco" class="infraImg" /></a>&nbsp;';
     }
     // Tramitar bloco
     $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
@@ -206,12 +203,12 @@ try {
     $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
 
     if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
-      $strResultado .= '<a href="'.SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao'].'&id_tramita_em_bloco='.$idBlocoTramite.'&tramite_em_bloco=1').'" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' .$cont.'" class="infraImg iconTramita" /></a>&nbsp;';
+      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
     }
 
     $strResultado .= "</td>";
     $strResultado .= "</tr>";
-    }
+  }
 
   // Fim da tabela
   $strResultado .= "</table>";
@@ -304,34 +301,34 @@ $objPaginaSEI->montarStyle();
     max-width: 1.5rem;
   }
 
-   /* Personalize o estilo da paginação */
+  /* Personalize o estilo da paginação */
   .dataTables_paginate {
     margin: 10px;
     text-align: end;
   }
 
-.dataTables_paginate .paginate_button {
-  padding: 5px 10px;
-  margin-right: 5px;
-  border: 1px solid #ccc;
-  background-color: #f2f2f2;
-  color: #333;
-  cursor: pointer;
-}
+  .dataTables_paginate .paginate_button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+    color: #333;
+    cursor: pointer;
+  }
 
-.dataTables_paginate .paginate_button.current {
-  background-color: var(--color-primary-default);
-  color: #fff;
-}
+  .dataTables_paginate .paginate_button.current {
+    background-color: var(--color-primary-default);
+    color: #fff;
+  }
 
 
-#tblBlocos_filter {
-  position: absolute;
-  opacity: 0;
-}
-
+  #tblBlocos_filter {
+    position: absolute;
+    opacity: 0;
+  }
 </style>
-<?php $objPaginaSEI->montarJavaScript(); ?>
+<?php $objPaginaSEI->montarJavaScript();
+$acaoOrigem=$_GET['acao_origem']; ?>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
   function inicializar() {
@@ -359,41 +356,41 @@ $objPaginaSEI->montarStyle();
     var strEspecieDocumental = row.find('td:eq(1)').text();
     var strTipoDocumento = row.find('td:eq(2)').text();
 
-    if (confirm('Confirma a exclusão do bloco de trâmite externo: "' +strEspecieDocumental + '"?')) {
+    if (confirm('Confirma a exclusão do bloco de trâmite externo: "' + strEspecieDocumental + '"?')) {
       window.location = url;
     }
   }
 
   function onClickBtnCancelarTramite(url, link) {
-      var row = jQuery(link).parents('tr:first');
-      var strEspecieDocumental = row.find('td:eq(1)').text();
-      var strTipoDocumento = row.find('td:eq(2)').text();
-      console.log(link)
-      if (confirm('Confirma o cancelamento dos trâmites do Bloco "' + strEspecieDocumental + '"?')) {
-          window.location = url;
-      }
+    var row = jQuery(link).parents('tr:first');
+    var strEspecieDocumental = row.find('td:eq(1)').text();
+    var strTipoDocumento = row.find('td:eq(2)').text();
+    console.log(link)
+    if (confirm('Confirma o cancelamento dos trâmites do Bloco "' + strEspecieDocumental + '"?')) {
+      window.location = url;
+    }
   }
 
-  function onClickBtnNovo(){
-      window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao_origem']); ?>';
+  function onClickBtnNovo() {
+    window.location = '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cadastrar&acao_origem=' . $acaoOrigem . '&acao_retorno=' . $acaoOrigem); ?>';
   }
 
   function onClickBtnCancelar() {
-      try {
-          var len = jQuery('input[name*=chkInfraItem]:checked').length;
+    try {
+      var len = jQuery('input[name*=chkInfraItem]:checked').length;
 
-          if (len > 0) {
-              if (confirm('Confirma o cancelamento ' + len + ' mapeamento(s) ?')) {
-                  var form = jQuery('#frmBlocoLista');
-                  form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem=md_pen_tramita_em_bloco&acao_retorno=md_pen_tramita_em_bloco'); ?>');
-                  form.submit();
-              }
-          } else {
-              alert('Selecione pelo menos um mapeamento para Cancelar');
-          }
-      } catch (e) {
-          alert('Erro : ' + e.message);
+      if (len > 0) {
+        if (confirm('Confirma o cancelamento ' + len + ' mapeamento(s) ?')) {
+          var form = jQuery('#frmBlocoLista');
+          form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramite_em_bloco_cancelar&acao_origem=md_pen_tramita_em_bloco&acao_retorno=md_pen_tramita_em_bloco'); ?>');
+          form.submit();
+        }
+      } else {
+        alert('Selecione pelo menos um mapeamento para Cancelar');
       }
+    } catch (e) {
+      alert('Erro : ' + e.message);
+    }
   }
 
   function onClickBtnExcluir() {
@@ -416,9 +413,10 @@ $objPaginaSEI->montarStyle();
   $(document).ready(function() {
     $('#tblBlocos').dataTable({
       "searching": true,
-      "columnDefs": [
-          { targets: [0, 4], orderable: false } 
-        ],
+      "columnDefs": [{
+        targets: [0, 4],
+        orderable: false
+      }],
       "language": {
         "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
         "lengthMenu": "Mostrar _MENU_ registros por página",
@@ -429,14 +427,14 @@ $objPaginaSEI->montarStyle();
           "next": "Próximo"
         },
       }
-    } );
+    });
 
     let campoDePesquisa = $("#txtPalavrasPesquisaBloco");
     let BuscaNaTabela = $("input[type='search']");
 
     $("#txtPalavrasPesquisaBloco").on("click", function() {
       BuscaNaTabela.focus();
-      $(this).css("background-color", "#dfdfdf");  
+      $(this).css("background-color", "#dfdfdf");
     });
 
     campoDePesquisa.on("input", function() {
@@ -449,7 +447,6 @@ $objPaginaSEI->montarStyle();
       input2.focus();
     });
   });
-
 </script>
 
 <?php
@@ -471,8 +468,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
           <legend class="infraLegend">Estado</legend>
 
           <div id="divSinEstadoGerado" class="infraDivCheckbox">
-            <input type="checkbox"
-             <?php echo in_array(TramiteEmBlocoRN::$TE_ABERTO, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoGerado" name="chkSinEstadoGerado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoGerado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+            <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_ABERTO, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoGerado" name="chkSinEstadoGerado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoGerado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
             <label id="lblSinEstadoGerado" for="chkSinEstadoGerado" accesskey="" class="infraLabelCheckbox">Aberto</label>
           </div>
 
