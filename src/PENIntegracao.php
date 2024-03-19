@@ -46,6 +46,10 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarBotaoControleProcessos() {
 
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $objSessaoSEI = SessaoSEI::getInstance();
     $strAcoesProcedimento = "";
 
@@ -81,6 +85,10 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarBotaoProcesso(ProcedimentoAPI $objSeiIntegracaoDTO)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $objProcedimentoDTO = new ProcedimentoDTO();
     $objProcedimentoDTO->setDblIdProcedimento($objSeiIntegracaoDTO->getIdProcedimento());
     $objProcedimentoDTO->retTodos();
@@ -164,12 +172,16 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
   {
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+        return false;
+      }
+
       $arrStrIcone = array();
       $arrDblIdProcedimento = array();
 
-    foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
-        $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
-    }
+      foreach ($arrObjProcedimentoAPI as $ObjProcedimentoAPI) {
+          $arrDblIdProcedimento[] = $ObjProcedimentoAPI->getIdProcedimento();
+      }
 
       $arrStrIcone = $this->montarIconeRecusa($arrDblIdProcedimento, $arrStrIcone);
       $arrStrIcone = $this->montarIconeTramite($arrDblIdProcedimento, $arrStrIcone);
@@ -286,6 +298,10 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeProcesso(ProcedimentoAPI $objProcedimentoAP)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $dblIdProcedimento = $objProcedimentoAP->getIdProcedimento();
 
     $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
@@ -432,7 +448,9 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeAcompanhamentoEspecial($arrObjProcedimentoDTO)
   {
-
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
   }
 
   public function getDiretorioImagens()
@@ -443,6 +461,10 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarMensagemProcesso(ProcedimentoAPI $objProcedimentoAPI)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objProcedimentoAPI->getIdProcedimento());
 
@@ -463,6 +485,10 @@ class PENIntegracao extends SeiIntegracao
 
   public function montarIconeDocumento(ProcedimentoAPI $objProcedimentoAPI, $arrObjDocumentoAPI)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $arrIcones = array();
 
     if ($objProcedimentoAPI->getCodigoAcesso() > 0) {
@@ -531,6 +557,10 @@ class PENIntegracao extends SeiIntegracao
    */
   public function desativarTipoProcesso($arrObjTipoProcedimentoDTO)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+
     $mensagem = "Prezado(a) usuário(a), você está tentando desativar um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
           ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
           ."mencionados o Tipo de Processo: \"%s\".";
@@ -554,6 +584,10 @@ class PENIntegracao extends SeiIntegracao
    */
   public function excluirTipoProcesso($arrObjTipoProcedimentoDTO)
   {
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
+    
     $mensagem = "Prezado(a) usuário(a), você está tentando excluir um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
       ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
       ."mencionados o Tipo de Processo: \"%s\".";
@@ -636,7 +670,9 @@ class PENIntegracao extends SeiIntegracao
       return false;
     }
 
-    PENIntegracao::verificarCompatibilidadeConfiguracoes();
+    if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      return false;
+    }
 
     switch ($strAcao) {
       case 'pen_procedimento_expedir':
@@ -984,23 +1020,28 @@ class PENIntegracao extends SeiIntegracao
     try {
       $objVerificadorInstalacaoRN->verificarArquivoConfiguracao();
     } catch (\Exception $e) {
-      throw $e;
+      LogSEI::getInstance()->gravar($e, LogSEI::$ERRO);
+      return false;
     }
 
     try {
       $objVerificadorInstalacaoRN->verificarCompatibilidadeModulo();
     } catch (\Exception $e) {
       LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
+      return false;
     }
 
     // Desativado verificaÃ§Ãµes de compatibilidade do banco de dados por nÃ£o ser todas as versÃµes
     // que necessitam mudanÃ§as no banco de dados
-    // try {
-    //     $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
-    // } catch (\Exception $e) {
-    //     LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
-    // }
-  }
+    try {
+        $objVerificadorInstalacaoRN->verificarCompatibilidadeBanco();
+    } catch (\Exception $e) {
+        LogSEI::getInstance()->gravar($e, LogSEI::$AVISO);
+        return false;
+    }
+
+    return true;
+    }
 
   /**
    * Compara duas diferentes versÃµes do sistem para avaliar a precedÃªncia de ambas

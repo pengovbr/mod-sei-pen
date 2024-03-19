@@ -150,7 +150,9 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->limpar();
 
     try {
-        PENIntegracao::verificarCompatibilidadeConfiguracoes();
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+        return false;
+      }
 
         $this->atualizarHipotesesLegais();
         $this->atualizarEspeciesDocumentais();
@@ -185,7 +187,9 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->limpar();
 
     try {
-        PENIntegracao::verificarCompatibilidadeConfiguracoes();
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+        return false;
+      }
 
         $bolDebugAtivo = array_key_exists('debug', $arrParametros) && $arrParametros['debug'][0] != false;
         $bolMonitoramentoAtivado = array_key_exists('monitorar', $arrParametros) && $arrParametros['monitorar'][0] != false;
