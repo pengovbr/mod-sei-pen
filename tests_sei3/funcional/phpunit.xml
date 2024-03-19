@@ -24,7 +24,7 @@
     Serviços do PEN -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
     <const name="CONTEXTO_ORGAO_A" value="CONTEXTO_ORGAO_A" />
-    <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http/sei" />
+    <const name="CONTEXTO_ORGAO_A_URL" value="http://org1-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
@@ -66,7 +66,7 @@
 
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
-    <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http/sei" />
+    <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
@@ -137,5 +137,7 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
+
+    <!-- novasuiteaqui -->
   </testsuites>
 </phpunit>

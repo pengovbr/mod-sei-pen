@@ -1,9 +1,10 @@
 <?php
+
 /**
  * @group rodarseparado
  * @group rodarseparado2
+ * @group execute_alone_group1
  */
-
 class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBaseTestCase
 {
     public static $remetente;
@@ -14,6 +15,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
 
     public static function setUpBeforeClass() :void {
 
+        parent::setUpBeforeClass();
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
         $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
 
