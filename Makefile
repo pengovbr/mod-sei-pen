@@ -165,15 +165,16 @@ update: ## Atualiza banco de dados através dos scripts de atualização do sist
 
 
 destroy: .env
+	@$(CMD_COMPOSE_FUNC) exec org1-http bash -c "rm -rf /var/sei/arquivos/*"
+	@$(CMD_COMPOSE_FUNC) exec org2-http bash -c "rm -rf /var/sei/arquivos/*"
 	$(CMD_COMPOSE_FUNC) down --volumes
-
 
 down: .env
 	$(CMD_COMPOSE_FUNC) stop
 
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
-test-functional: .env $(FILE_VENDOR_FUNCIONAL) up
+test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
@@ -237,5 +238,8 @@ tramitar-pendencias-silent:
 #deve ser rodado em outro terminal
 stop-test-container:
 	docker stop $$(docker ps -a -q --filter="name=php-test")
+
+vendor: composer.json
+	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
 
 
