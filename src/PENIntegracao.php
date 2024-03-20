@@ -136,14 +136,14 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function excluirTipoProcesso($arrObjTipoProcedimentoDTO) {
-    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'excluir');
+    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO, 'excluir');
   }
 
   public function desativarTipoProcesso($arrObjTipoProcedimentoDTO) {
-    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,'desativar');
+    $this->validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO, 'desativar');
   }
 
-  protected function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO,$strDesativarExcluir) {
+  protected function validarDesativarExcluirTipoProcesso($arrObjTipoProcedimentoDTO, $strDesativarExcluir) {
     
     $mensagem = "Prezado(a) usuário(a), você está tentando ".$strDesativarExcluir." um Tipo de Processo que se encontra mapeado para o(s) relacionamento(s) "
     ."\"%s\". Para continuar com essa ação é necessário remover do(s) mapeamentos "
@@ -174,9 +174,9 @@ class PENIntegracao extends SeiIntegracao
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
 
-        if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
-            $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
-        }
+      if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
+          $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
+      }
     }
 
   }
