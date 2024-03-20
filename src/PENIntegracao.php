@@ -652,12 +652,12 @@ class PENIntegracao extends SeiIntegracao
       case 'md_pen_tramita_em_bloco_excluir':
       case 'pen_tramite_em_bloco_cancelar':
         require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
-        break;
+          break;
 
       case 'pen_tramite_em_bloco_cadastrar':
       case 'pen_tramite_em_bloco_alterar':
         require_once dirname(__FILE__) . '/pen_tramite_em_bloco_cadastrar.php';
-        break;
+          break;
      
       case 'pen_tramita_em_bloco_protocolo_excluir':
       case 'pen_tramita_em_bloco_protocolo_listar':
@@ -667,7 +667,7 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_incluir_processo_em_bloco_tramite':
       case 'pen_tramita_em_bloco_adicionar':
         require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
-        break;
+          break;
 
       case 'pen_unidade_sel_expedir_procedimento':
         require_once dirname(__FILE__) . '/pen_unidade_sel_expedir_procedimento.php';
@@ -821,6 +821,17 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_expedir_lote_listar':
         require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+          break;
+
+      case 'pen_map_envio_parcial_listar':
+      case 'pen_map_envio_parcial_excluir':
+          require_once dirname(__FILE__) . '/pen_map_envio_parcial_listar.php';
+          break;
+
+      case 'pen_map_envio_parcial_salvar':
+      case 'pen_map_envio_parcial_cadastrar':
+      case 'pen_map_envio_parcial_visualizar':
+          require_once dirname(__FILE__) . '/pen_map_envio_parcial_cadastrar.php';
           break;
 
       default:

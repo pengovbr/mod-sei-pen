@@ -34,7 +34,7 @@ pipeline {
         choice(
             name: 'sistema',
             choices: "sei4\nsei41\nsei3\nsuper",
-            description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
+            description: 'Qual o Sistema de Processo Eletrï¿½nico serï¿½ utilizado nos testes?' )
         choice(
             name: 'database',
             choices: "mysql\noracle\nsqlserver",
@@ -56,7 +56,7 @@ pipeline {
 
                     if ( env.BUILD_NUMBER == '1' ){
                         currentBuild.result = 'ABORTED'
-                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faça login novamente')
+                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faï¿½a login novamente')
                     }
 
                     BRANCHGITSPE = params.branchGitSpe

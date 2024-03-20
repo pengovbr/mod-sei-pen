@@ -31,7 +31,7 @@ ORG1_DATABASE_TYPE=MySql
 ORG1_DATABASE_GUEST_PORT=3306
 ORG1_DATABASE_HOST_PORT=33061
 ORG1_DATABASE_DATA_DIR=/var/lib/mysql
-CONTEXTO_ORGAO_A_DB_SEI_DSN =mysql:host=org1-database;port=3306;dbname=sei
+CONTEXTO_ORGAO_A_DB_SEI_DSN="mysql:host=org1-database;port=3306;dbname=sei"
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############
@@ -51,6 +51,5 @@ ORG2_DATABASE_TYPE=MySql
 ORG2_DATABASE_GUEST_PORT=3306
 ORG2_DATABASE_HOST_PORT=33062
 ORG2_DATABASE_DATA_DIR=/var/lib/mysql
-CONTEXTO_ORGAO_B_DB_SEI_DSN =mysql:host=org2-database;port=3306;dbname=sei
-
+CONTEXTO_ORGAO_B_DB_SEI_DSN="mysql:host=org2-database;port=3306;dbname=sei"
 

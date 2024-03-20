@@ -36,7 +36,7 @@ pipeline {
         string(
               name: 'urlGitSpe',
               defaultValue:"github.com:supergovbr/super.git",
-              description: "Url do git onde encontra-se o Sistema de Processo Eletrônico a instalar o modulo")
+              description: "Url do git onde encontra-se o Sistema de Processo Eletrï¿½nico a instalar o modulo")
         string(
             name: 'credentialGitSpe',
             defaultValue:"gitcredsuper",
@@ -52,7 +52,7 @@ pipeline {
         choice(
             name: 'sistema',
             choices: "sei4\nsei41\nsei3\nsuper",
-            description: 'Qual o Sistema de Processo Eletrônico será utilizado nos testes?' )
+            description: 'Qual o Sistema de Processo Eletrï¿½nico serï¿½ utilizado nos testes?' )
         string(
             name: 'folderModulo',
             defaultValue:"/home/jenkins/modulomodseipen",
@@ -60,7 +60,7 @@ pipeline {
         booleanParam(
             defaultValue: false,
             name: 'bolFolderModuloDelete',
-            description: 'Deleta a pasta do módulo anterior. Limpa o cache do phpunit vendor e os arquivos temporarios. Aumenta o tempo de execucao')
+            description: 'Deleta a pasta do mï¿½dulo anterior. Limpa o cache do phpunit vendor e os arquivos temporarios. Aumenta o tempo de execucao')
         string(
             name: 'org1CertSecret',
             defaultValue:"credModSeiPenOrg1Cert",
@@ -196,7 +196,7 @@ pipeline {
 
                     if ( env.BUILD_NUMBER == '1' ){
                         currentBuild.result = 'ABORTED'
-                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faça login novamente')
+                        warning('Informe os valores de parametro iniciais. Caso eles n tenham aparecido faï¿½a login novamente')
                     }
                 }
 
@@ -210,6 +210,7 @@ pipeline {
                 buildDescription s
 
                 sh """
+                docker volume prune -f
                 ifconfig || true
                 if [ -f ${FOLDERMODULO}/Makefile ]; then
                     make destroy || true
@@ -338,7 +339,7 @@ pipeline {
                     sed -i "s|sistema=.*|sistema=${SISTEMA}|g" Makefile
                     sed -i "s|PARALLEL_TEST_NODES =.*|PARALLEL_TEST_NODES = ${TESTE_PARALLEL}|g" Makefile
                     sed -i "s|^base=.*|base=${DATABASE}|g" Makefile
-                    
+
                     make config
                     sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}|g" ${FOLDER_FUNCIONAIS}/.env
                     sed -i "s|ORG1_CERTIFICADO_SENHA=.*|ORG1_CERTIFICADO_SENHA=$ORG1_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
@@ -384,12 +385,31 @@ pipeline {
                     sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.1/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "/INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "/INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG2/d" ${FOLDER_FUNCIONAIS}/phpunit.xml
-                    
+
                     cp ${FOLDER_FUNCIONAIS}/phpunit.xml phpunitoriginal.xml
 
 
                     make destroy
                     make up
+                    make check-isalive
+                    set +e
+                    echo ""
+                    echo "Vamos rodar o make update. A saida n sera mostrada aqui. Apenas se houver erro..."
+                    make update 2>&1 > tempinstall.txt
+                    es=\$?
+                    set -e
+                    if [ "\$es" = "0" ]; then
+                        echo "Make update sem erro"
+                    else
+                        cat tempinstall.txt
+                        exit 1
+                    fi
+                    rm -rf tempinstall.txt
+
+                         || [ "$DATABASE" = "sqlserver" ]; then
+                        sleep 30
+                    fi
+
                     make check-isalive
                     set +e
                     echo ""
@@ -455,7 +475,7 @@ pipeline {
             steps{
                 dir("${FOLDERMODULO}"){
                     sh script: """
-                    
+
                     if [ "${SISTEMA}" = "sei3" ]; then
                         make test-unit || true
                     else
@@ -592,6 +612,9 @@ pipeline {
 
                                     done
 
+                                    #docker system prune -a -f
+                                    docker volume prune -f
+
                                     if [ -f "rodarnovamente.txt" ]; then
                                         exit 1
 
@@ -669,7 +692,7 @@ pipeline {
                             do
                                 while [ ! -f monitoramento_liberado.ok ]
                                 do
-                                    echo "Aguardando liberação para monitoramento"
+                                    echo "Aguardando liberaï¿½ï¿½o para monitoramento"
                                     sleep 10
 
                                     if [ -f testesfinalizados.ok ]; then

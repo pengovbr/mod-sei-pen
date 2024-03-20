@@ -91,15 +91,19 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
               // de unidades de destino.
               // Atenção: Este parâmetro somente poderá ser ativado para os órgão que já possuem do mod-sei-pen 3.3.0 ou superior
               //
-              // Exemplo:
+              // Configuração padrão do Envio Parcial
+              "EnviarApenasComponentesDigitaisPendentes" => false
+              //
               // "EnviarApenasComponentesDigitaisPendentes" => array(
-              //     "1" => array(   // 1 = Poder Executivo Federal
-              //         "1500330",  // Id de estrutura de unidade X do Poder Executivo Federal
-              //         "1500440"   // Id de estrutura de unidade Y do Poder Executivo Federal
+              //     "1" => array(  // 1 = Poder Executivo Federal
+              //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+              //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+              //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
               //     ),
-              //     "21" => array(   // 21 = Poder Legislativo Federal
-              //         "4600330",   // Id de estrutura de unidade X do Poder Legislativo Federal
-              //         "4600440"    // Id de estrutura de unidade Y do Poder Legislativo Federal
+              //     "21" => array(  // 2 = Poder Legislativo Federal
+              //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+              //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+              //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
               //     )
               // )
           )

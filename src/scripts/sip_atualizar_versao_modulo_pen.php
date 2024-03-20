@@ -1923,18 +1923,18 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_tipo_processo_padrao_salvar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $numIdPerfilSeiAdministrador, 'pen_map_tipo_processo_reativar');
 
-    // Administrao > Processo Eletrônico Nacional > Mapeamento de Tipos de Processo
+    // Administrao > Tramita GOV.BR > Mapeamento de Tipos de Processo
     $numIdItemMenu = $this->criarMenu('Mapeamento de Tipos de Processo', 40, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, null, $numIdSistema);
 
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
+    // Administrao > Tramita GOV.BR > Órgãos Externos > Listar
     $numIdItemMenuRecuso = $this->criarMenu('Relacionamento entre Unidades', 20, $numIdItemMenu, $numIdMenu, $numIdRecursoListar, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoListar, $numIdMenu, $numIdItemMenuRecuso);
 
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Exportar Tipo de Processo
+    // Administrao > Tramita GOV.BR > Órgãos Externos > Exportar Tipo de Processo
     $numIdItemMenuRecuso = $this->criarMenu('Exportação de Tipos de Processo', 21, $numIdItemMenu, $numIdMenu, $numIdRecursoExportar, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoExportar, $numIdMenu, $numIdItemMenuRecuso);
 
-    // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Reativar Tipo de Processo
+    // Administrao > Tramita GOV.BR > Órgãos Externos > Reativar Tipo de Processo
     $numIdItemMenuRecuso = $this->criarMenu('Reativar Mapeamento de Tipos de Processo', 22, $numIdItemMenu, $numIdMenu, $numIdRecursoReativar, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoReativar, $numIdMenu, $numIdItemMenuRecuso);
 
@@ -2025,6 +2025,44 @@ class PenAtualizarSipRN extends InfraRN
       }
 
     }
+
+    /* Corrige nome de menu de trÃ¢mite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setStrRotulo('Tramita GOV.BR');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+    if (empty($objItemMenuDTO)) { 
+      throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
+    }
+
+    // Adicionar item de menu Mapeamento de Envio Parcial
+    $this->logar('Atribuição de permissões do módulo ao perfil do SEI');
+
+    $this->criarMenu('Mapeamento de Envio Parcial', 90, $objItemMenuDTO->getNumIdItemMenu(), $numIdMenu, $numIdRecurso, $numIdSistema);
+    $numIdRecurso = $this->criarRecurso('pen_map_envio_parcial_listar', 'Mapeamento de Envio Parcial', $numIdSistema);
+
+    $this->criarRecurso('pen_map_envio_parcial_salvar', 'Salvar Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_excluir', 'Excluir Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_cadastrar', 'Cadastro de Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_atualizar', 'Atualizar Mapeamento de Envio Parcial', $numIdSistema);
+    $this->criarRecurso('pen_map_envio_parcial_visualizar', 'Visualizar Mapeamento de Envio Parcial', $numIdSistema);
+
+    $numIdSistemaSei = $this->getNumIdSistema('SEI');
+    $numIdPerfilSeiAdministrador = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_salvar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_cadastrar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_atualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_visualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $numIdPerfilSeiAdministrador, 'pen_map_envio_parcial_excluir');
+    ScriptSip::adicionarItemMenu($numIdSistemaSei, $numIdPerfilSeiAdministrador, $numIdMenu, $objItemMenuDTO->getNumIdItemMenu(), $numIdRecurso, "Mapeamento de Envio Parcial", 90);
 
     $this->atualizarNumeroVersao("3.6.0");
   }
