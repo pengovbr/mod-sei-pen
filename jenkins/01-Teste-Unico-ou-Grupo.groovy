@@ -246,7 +246,7 @@ pipeline {
                         rm -rf sei sip infra
                         mv src/sei src/sip src/infra .
                     fi
-                    
+
                     """
 
                 }
@@ -315,11 +315,6 @@ pipeline {
                     sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
                     sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php*
                     sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php*
-                    
-                    if [ "${SISTEMA}" = "sei3" ]; then
-                        cp ${FOLDER_FUNCIONAIS}/assets/config/ConfiguracaoSEI.php ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php~
-                        cp ${FOLDER_FUNCIONAIS}/assets/config/ConfiguracaoSip.php ${FOLDERSPE}/sip/config/ConfiguracaoSip.php~
-                    fi
 
                     """, label: "Destroi ambiente e Remove Antigos"
 
@@ -391,6 +386,11 @@ pipeline {
 
                     make destroy
                     make up
+
+                    if [ "$DATABASE" = "oracle" ] || [ "$DATABASE" = "sqlserver" ]; then
+                        sleep 30
+                    fi
+
                     make check-isalive
                     set +e
                     echo ""
