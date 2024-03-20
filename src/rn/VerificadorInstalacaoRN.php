@@ -108,7 +108,7 @@ class VerificadorInstalacaoRN extends InfraRN
       if (file_exists($strArquivoConfiguracao) && is_readable($strArquivoConfiguracao)) {
           require_once DIR_SEI_CONFIG . '/mod-pen/ConfiguracaoModPEN.php';
       } else {
-          $strMensagem = "Arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizado";
+          $strMensagem = "Arquivo de configuração do módulo de integração do SEI com o Tramita GOV.BR não pode ser localizado";
           $strDetalhes = "As configurações do módulo mod-sei-pen não foram encontradas em $strArquivoConfiguracao \n";
           $strDetalhes .= "Verifique se a instalação foi feita corretamente seguindo os procedimentos do manual de instalação.";
           throw new InfraException($strMensagem, null, $strDetalhes);
@@ -116,7 +116,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
         // Valida se arquivo de configuração está íntegro e se a classe de configuração está presente
       if(!class_exists("ConfiguracaoModPEN")){
-          $strMensagem = "Definição de configurações do módulo de integração do SEI com o Barramento PEN (mod-sei-pen) não pode ser localizada";
+          $strMensagem = "Definição de configurações do módulo de integração do SEI com o Tramita GOV.BR não pode ser localizada";
           $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
           throw new InfraException($strMensagem, null, $strDetalhes);
       }
@@ -124,7 +124,7 @@ class VerificadorInstalacaoRN extends InfraRN
         // Valida se todos os parâmetros de configuração estão presentes no arquivo de configuração
         $arrStrChavesConfiguracao = ConfiguracaoModPEN::getInstance()->getArrConfiguracoes();
       if(!array_key_exists("PEN", $arrStrChavesConfiguracao)){
-          $strMensagem = "Grupo de parametrização 'PEN' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+          $strMensagem = "Grupo de parametrização 'Tramita GOV.BR' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Tramita GOV.BR";
           $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
           throw new InfraException($strMensagem, null, $strDetalhes);
       }
@@ -135,7 +135,7 @@ class VerificadorInstalacaoRN extends InfraRN
         $arrStrParametrosExperados = array("WebService", "LocalizacaoCertificado", "SenhaCertificado");
       foreach ($arrStrParametrosExperados as $strChaveConfiguracao) {
         if(!array_key_exists($strChaveConfiguracao, $arrStrChavesConfiguracao)){
-            $strMensagem = "Parâmetro 'PEN > $strChaveConfiguracao' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Barramento PEN (mod-sei-pen)";
+            $strMensagem = "Parâmetro 'PEN > $strChaveConfiguracao' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Tramita GOV.BR";
             $strDetalhes = "Verifique se o arquivo de configuração localizado em $strArquivoConfiguracao encontra-se íntegro.";
             throw new InfraException($strMensagem, null, $strDetalhes);
         }
@@ -208,12 +208,12 @@ class VerificadorInstalacaoRN extends InfraRN
         $strLocalizacaoAjustada = 'file://' . $strLocalizacaoCertificadoDigital;
         $strPublicKey = openssl_pkey_get_public($strLocalizacaoAjustada);
       if(empty($strPublicKey)){
-          throw new InfraException("Chave pública do certificado digital de autenticação no Barramento do PEN não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
+          throw new InfraException("Chave pública do certificado digital de autenticação no Tramita GOV.BR não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticação no Barramento do PEN não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
+          throw new InfraException("Chave privada do certificado digital de autenticação no Tramita GOV.BR não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
@@ -258,7 +258,7 @@ class VerificadorInstalacaoRN extends InfraRN
           $objXML = simplexml_load_string($strOutput);
 
         if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new Exception("Falha na validação do WSDL do webservice de integração com o Barramento de Serviços do PEN localizado em $strEnderecoWSDL");
+            throw new Exception("Falha na validação do WSDL do webservice de integração com o Tramita GOV.BR localizado em $strEnderecoWSDL");
         }
 
       } finally{
@@ -283,7 +283,7 @@ class VerificadorInstalacaoRN extends InfraRN
           $objProcessoEletronicoRN->listarPendencias(false);
           return true;
       } catch(Exception $e){
-          throw new InfraException("Falha no acesso aos serviços de integração do Barramento de Serviços do PEN: $e");
+          throw new InfraException("Falha no acesso aos serviços de integração do Tramita GOV.BR: $e");
       }
     }
 

@@ -2,6 +2,16 @@
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+require_once __DIR__ . '/sei/src/sei/web/SEI.php';
+
+define("DIR_SEI_WEB", __DIR__ . '/sei/src/sei/web/');
+define("DIR_TEST", __DIR__ );
+define("DIR_PROJECT", __DIR__ . '/..' );
+define("DIR_INFRA", __DIR__ . '/../src/infra/infra_php' );
+
+error_reporting(E_ERROR);
+restore_error_handler();
+
 //Classes utilitárias para manipulação dos dados do SEI
 require_once __DIR__ . '/src/utils/DatabaseUtils.php';
 require_once __DIR__ . '/src/utils/ParameterUtils.php';
@@ -25,5 +35,7 @@ require_once __DIR__ . '/src/paginas/PaginaAnexarProcesso.php';
 require_once __DIR__ . '/src/paginas/PaginaCancelarDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaMoverDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaTramitarProcessoEmLote.php';
+require_once __DIR__ . '/src/paginas/PaginaCadastroMapEnvioCompDigitais.php';
+require_once __DIR__ . '/src/paginas/PaginaEnvioParcialListar.php';
 
 require_once __DIR__ . '/tests/CenarioBaseTestCase.php';

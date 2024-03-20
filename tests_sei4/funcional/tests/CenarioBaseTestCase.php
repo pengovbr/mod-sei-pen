@@ -43,6 +43,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaCadastrarProcessoEmBloco = null;
+    protected $paginaTramiteEmBloco = null;
+    protected $paginaEnvioParcialListar = null;
 
     public function setUpPage(): void
     {
@@ -61,10 +64,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
+        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->currentWindow()->maximize();
     }
 
@@ -82,7 +89,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
         // Configuração do mapeamento de unidades
-        $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000001', CONTEXTO_ORGAO_A_ID_ESTRUTURA));
+        $penMapUnidadesFixture = new \PenMapUnidadesFixture();
+        $penMapUnidadesFixture->carregar([
+            'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA,
+            'Sigla' => CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA,
+            'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE,
+        ]);
         $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000002', CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA));
         // Configuração do prefíxo de processos
         $bancoOrgaoA->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_A_NUMERO_SEI, CONTEXTO_ORGAO_A_SIGLA_ORGAO));
@@ -92,6 +104,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
+        $serieNaoMapeadaOrigem[0] = array_change_key_case($serieNaoMapeadaOrigem[0], CASE_UPPER);
+        
         $bancoOrgaoA->execute("delete from md_pen_rel_doc_map_enviado where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(1, 3, 3, 'E', 'S'));
         $bancoOrgaoA->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?)", array(2, 4, 4, 'E', 'S'));
@@ -112,7 +126,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update unidade set sin_envio_processo=? where sigla=?", array('S', 'TESTE_1_2'));
 
-        $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000001', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA));
+        $bancoOrgaoB->execute(
+            "insert into md_pen_unidade(id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) values ('110000001', ?, ?, ?)",
+            array(
+                CONTEXTO_ORGAO_B_ID_ESTRUTURA,
+                CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA,
+                CONTEXTO_ORGAO_B_NOME_UNIDADE
+            )
+        );
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000002', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA));
 
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
@@ -123,6 +144,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
         $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
+        $serieNaoMapeadaOrigem[0] = array_change_key_case($serieNaoMapeadaOrigem[0], CASE_UPPER);
+
         $bancoOrgaoB->execute("delete from md_pen_rel_doc_map_recebido where id_serie = ?", array($serieNaoMapeadaOrigem[0]["ID_SERIE"]));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(4, 3, 3, 'E', 'S'));
         $bancoOrgaoB->execute("insert into md_pen_rel_hipotese_legal(id_mapeamento, id_hipotese_legal, id_hipotese_legal_pen, tipo, sin_ativo) values (?, ?, ?, ?, ?);", array(5, 3, 3, 'R', 'S'));
@@ -526,7 +549,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
+        $this->paginaBase->navegarParaControleProcesso();
+        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
         $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
@@ -774,6 +798,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function visualizarProcessoTramitadosEmLote($test)
     {
         $this->paginaBase->navegarParaControleProcesso();
+        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados em Lote'));
         $test->byLinkText("Processos Tramitados em Lote")->click();
     }
 

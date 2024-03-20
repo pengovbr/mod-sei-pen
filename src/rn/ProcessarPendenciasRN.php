@@ -116,10 +116,10 @@ class ProcessarPendenciasRN extends InfraRN
       }
 
         $numProcID = getmygid();
-        $this->gravarLogDebug("Finalização do processamento de tarefas do Barramento do PEN (pid=$numProcID)", 0);
+        $this->gravarLogDebug("Finalização do processamento de tarefas do Barramento do Tramita GOV.BR (pid=$numProcID)", 0);
     }
     catch(Exception $e) {
-        $strAssunto = 'Falha no processamento de pendências de trâmite do PEN';
+        $strAssunto = 'Falha no processamento de pendências de trâmite do Tramita GOV.BR';
         $strErro = 'Erro: '. InfraException::inspecionar($e);
         LogSEI::getInstance()->gravar($strAssunto."\n\n".$strErro);
         throw new InfraException($strAssunto."\n\n".$strErro, $e);
@@ -387,7 +387,7 @@ class ProcessarPendenciasRN extends InfraRN
         return $objGearmanClient->ping("health");
 
     } catch (\Exception $e) {
-        $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento PEN via Gearman";
+        $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento Tramita GOV.BR via Gearman";
         $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
         $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
         LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$AVISO);
@@ -441,7 +441,7 @@ class ProcessarPendenciasRN extends InfraRN
         $bolInicializado = $numCodigoRespostaAtivacao == 0;
 
       } catch (\Exception $e) {
-          $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento PEN via Gearman";
+          $strMensagem = "Alerta: Não foi possível ativar processamento assíncrono de tarefas do Barramento Tramita GOV.BR via Gearman";
           $strDetalhes = "Devido ao impedimento, o processamento das tarefas será realizado diretamente pelo agendamento de tarefas";
           $objInfraException = new InfraException($strMensagem, $e, $strDetalhes);
           LogSEI::getInstance()->gravar(InfraException::inspecionar($objInfraException), LogSEI::$ERRO);

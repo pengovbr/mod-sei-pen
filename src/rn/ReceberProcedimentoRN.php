@@ -360,7 +360,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->gravarLogDebug("Solicitando dados do trâmite " . $parNumIdentificacaoTramite, 1);
       $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
     if(!isset($arrObjTramite) || !array_key_exists(0, $arrObjTramite)){
-        throw new InfraException("Não foi encontrado no PEN o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        throw new InfraException("Não foi encontrado no Tramita GOV.BR o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
     }
 
       $objTramite = $arrObjTramite[0];
@@ -525,9 +525,23 @@ class ReceberProcedimentoRN extends InfraRN
           $objPenProtocolo->setStrSinObteveRecusa('S');
           $objPenProtocoloBD = new ProtocoloBD($this->getObjInfraIBanco());
           $objPenProtocoloBD->alterar($objPenProtocolo);
+
+          // Atualizar Bloco para concluido parcialmente
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+
+        if ($tramiteEmBlocoProtocolo != null) {
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        }
       }
 
-        $this->gravarLogDebug("Notificando serviços do PEN sobre ciência da recusa do trâmite " . $numIdTramite, 2);
+        $this->gravarLogDebug("Notificando serviços do Tramita GOV.BR sobre ciência da recusa do trâmite " . $numIdTramite, 2);
         $this->objProcessoEletronicoRN->cienciaRecusa($numIdTramite);
 
     } catch (Exception $e) {
@@ -821,7 +835,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           $strProtocoloFormatado = $arrObjProcessoEletronicoDTOIndexado[$dblIdProcedimento]->getStrProtocoloProcedimentoFormatado();
         if($strProtocoloFormatado !== $parStrProtocolo){
-          throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo PEN: $parStrProtocolo)"));
+          throw new InfraException(("Número do protocolo obtido não confere com o original. (protocolo SEI: $strProtocoloFormatado, protocolo Tramita GOV.BR: $parStrProtocolo)"));
         }
       }
     }
@@ -2549,7 +2563,7 @@ class ReceberProcedimentoRN extends InfraRN
         left join md_pen_componente_digital comp on (comp.id_documento = doc.id_documento)
         where comp.id_procedimento = $parNumIdProcedimento
         and prot_doc.sta_protocolo = 'R'
-        and prot_doc.sta_estado <> " . ProtocoloRN::$TE_DOCUMENTO_CANCELADO . "
+        and prot_doc.sta_estado <> '" . ProtocoloRN::$TE_DOCUMENTO_CANCELADO . "'
         and not exists (select 1 from anexo where anexo.id_protocolo = prot_doc.id_protocolo) ";
 
       //Adiciona filtro adicional para verificar pelo identificador do documento, caso parâmetro tenha sido informado

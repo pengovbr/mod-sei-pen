@@ -83,7 +83,7 @@ class PendenciasTramiteRN extends InfraRN
 
       do{
         try {
-          $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
+          $this->gravarLogDebug('Recuperando lista de pendências do Tramita GOV.BR', 1);
           $arrObjPendenciasDTO = $this->obterPendenciasTramite($parBolMonitorarPendencias);
 
 
@@ -289,7 +289,7 @@ class PendenciasTramiteRN extends InfraRN
               } elseif(in_array($strChavePendencia, $arrObjPendenciasDTONovas)) {
               // Sleep adicionado para minimizar problema do serviço de pendência que retorna o mesmo código e status
               // inúmeras vezes por causa de erro ainda não tratado
-                $mensagemErro = sprintf("Pendência de trâmite (IDT: %d / status: %s) enviado em duplicidade pelo serviço de monitoramento de pendências do PEN",
+                $mensagemErro = sprintf("Pendência de trâmite (IDT: %d / status: %s) enviado em duplicidade pelo serviço de monitoramento de pendências do Tramita GOV.BR",
                   $numUltimoIdTramiteRecebido, $strUltimoStatusRecebido);
                 $this->gravarLogDebug($mensagemErro, 2);
                 throw new InfraException($mensagemErro);
@@ -562,7 +562,7 @@ class PendenciasTramiteRN extends InfraRN
         $bolInicializado = $numCodigoRespostaAtivacao == 0;
 
     } catch (\Exception $e) {
-        $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
+        $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento Tramita GOV.BR";
         $objInfraException = new InfraException($strMensagem, $e);
         throw $objInfraException;
     }

@@ -129,7 +129,7 @@ PaginaSEI::getInstance()->abrirAreaDados('30em');
   </p>  
 </fieldset>
 
-<label id="lblEspeciePadraoEnvio" for="selEspeciePadraoEnvio" accesskey="P" class="infraLabelObrigatorio"><span class="infraTeclaAtalho">E</span>spécie Documental PEN padrão para envio:</label>
+<label id="lblEspeciePadraoEnvio" for="selEspeciePadraoEnvio" accesskey="P" class="infraLabelObrigatorio"><span class="infraTeclaAtalho">E</span>spécie Documental Tramita GOV.BR padrão para envio:</label>
 <select id="selEspeciePadraoEnvio" name="selEspeciePadraoEnvio" class="infraSelect" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>">
 <?=$strItensSelEspeciesDocumentais?>
 </select>  

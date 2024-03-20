@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.5.0");
+define("VERSAO_MODULO_PEN", "3.6.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -21,7 +21,7 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function getNome() {
-    return 'Integração Processo Eletrônico Nacional - PEN';
+    return 'Integração Tramita GOV.BR';
   }
 
 
@@ -72,11 +72,10 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objPenUnidadeRN = new PenUnidadeRN();
 
-      //Apresenta o botÃ£o de expedir processo
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-        $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Envio Externo de Processo em Lote" title="Envio Externo de Processo em Lote" />';
+        $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Incluir Processos no Bloco de Trâmite" title="Incluir Processos no Bloco de Trâmite" />';
       }
     }
 
@@ -165,6 +164,11 @@ class PENIntegracao extends SeiIntegracao
         $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
         $strAcoesProcedimento .= '</a>';
     }
+
+    //Apresenta o botão de incluir processo no bloco de trâmite
+    $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+    $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
+
 
     return array($strAcoesProcedimento);
   }
@@ -572,7 +576,7 @@ class PENIntegracao extends SeiIntegracao
       . 'que se encontra mapeado para o Tipo de Processo Padrão. '
       . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
       . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
+      . 'Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
 
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
@@ -599,7 +603,7 @@ class PENIntegracao extends SeiIntegracao
       . 'que se encontra mapeado para o Tipo de Processo Padrão. '
       . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
       . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
+      . 'Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
 
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
@@ -677,6 +681,28 @@ class PENIntegracao extends SeiIntegracao
     switch ($strAcao) {
       case 'pen_procedimento_expedir':
         require_once dirname(__FILE__) . '/pen_procedimento_expedir.php';
+          break;
+
+      case 'pen_tramite_bloco_listar':
+      case 'md_pen_tramita_em_bloco':
+      case 'md_pen_tramita_em_bloco_excluir':
+      case 'pen_tramite_em_bloco_cancelar':
+        require_once dirname(__FILE__) . '/pen_tramite_bloco_listar.php';
+          break;
+
+      case 'pen_tramite_em_bloco_cadastrar':
+      case 'pen_tramite_em_bloco_alterar':
+        require_once dirname(__FILE__) . '/pen_tramite_em_bloco_cadastrar.php';
+          break;
+     
+      case 'pen_tramita_em_bloco_protocolo_excluir':
+      case 'pen_tramita_em_bloco_protocolo_listar':
+          require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
+          break;
+
+      case 'pen_incluir_processo_em_bloco_tramite':
+      case 'pen_tramita_em_bloco_adicionar':
+        require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
           break;
 
       case 'pen_unidade_sel_expedir_procedimento':
@@ -831,6 +857,17 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_expedir_lote_listar':
         require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+          break;
+
+      case 'pen_map_envio_parcial_listar':
+      case 'pen_map_envio_parcial_excluir':
+          require_once dirname(__FILE__) . '/pen_map_envio_parcial_listar.php';
+          break;
+
+      case 'pen_map_envio_parcial_salvar':
+      case 'pen_map_envio_parcial_cadastrar':
+      case 'pen_map_envio_parcial_visualizar':
+          require_once dirname(__FILE__) . '/pen_map_envio_parcial_cadastrar.php';
           break;
 
       default:
@@ -1072,5 +1109,4 @@ class PENIntegracao extends SeiIntegracao
     ProcessarPendenciasRN::getInstance()->processarPendencias();
   }
 }
-
 class ModuloIncompativelException extends InfraException { }
