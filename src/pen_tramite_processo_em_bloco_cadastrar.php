@@ -200,11 +200,16 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
   <?php
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   $objPaginaSEI->abrirAreaDados('15em');
+  $padrao = null;
+  if (isset($arrMapIdBloco[$idBlocoExterno])) {
+    $padrao = $idBlocoExterno;
+  }
   ?>
+  
 
   <label id="lblBlocos" for="lblIdBloco" class="infraLabelObrigatorio">Blocos que estão em aberto:</label>
   <select id="selBlocos" name="selBlocos" class="infraSelect">
-    <?php print InfraINT::montarSelectArray(null, 'Selecione', '', array_filter($arrMapIdBloco)); ?>
+    <?php print InfraINT::montarSelectArray(null, $padrao, $padrao, array_filter($arrMapIdBloco)); ?>
   </select>
 
   <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="" />

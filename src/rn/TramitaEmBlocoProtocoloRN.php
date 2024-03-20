@@ -273,7 +273,9 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $tramiteEmBlocoDTO->setStrStaEstado([
         TramiteEmBlocoRN::$TE_ABERTO,
         TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
+        TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
       ], InfraDTO::$OPER_IN);
+      $tramiteEmBlocoDTO->retStrDescricao();
       $tramiteEmBlocoDTO->retStrStaEstado();
       $tramiteEmBlocoDTO->retNumId();
 
@@ -281,7 +283,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
       if (!empty($tramiteEmBloco)) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco de número {$tramiteEmBloco->getNumId()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
     }
 
