@@ -56,7 +56,7 @@ try {
         $objPenParametroRN = new PenParametroRN();
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
-        try {
+      try {
             $objUnidadeDTO = new PenUnidadeDTO();
             $objUnidadeDTO->retNumIdUnidadeRH();
             $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -73,17 +73,17 @@ try {
             $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
             $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
             //Preparação dos dados para montagem da tela de expedição de processos
-            if ($arrIdUnidadeRestricao != null) {
-                $repositorios = array();
-                foreach ($arrIdUnidadeRestricao as $value) {
-                    $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
-                }
-            } else {
-                $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
-            }
-        } catch (Exception $e) {
-            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        if ($arrIdUnidadeRestricao != null) {
+          $repositorios = array();
+          foreach ($arrIdUnidadeRestricao as $value) {
+            $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+          }
+        } else {
+          $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
         }
+      } catch (Exception $e) {
+        $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+      }
 
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 

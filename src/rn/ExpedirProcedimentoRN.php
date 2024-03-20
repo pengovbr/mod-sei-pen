@@ -2090,7 +2090,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objDocumentoDTO = null;
             $strStaAssociacao = null;
             $bolMultiplosComponentesCount = 0;
-            foreach ($arrObjDocumentoDTOAssociacao as  $objDocumentoDTOAssociacao) {
+            foreach ($arrObjDocumentoDTOAssociacao as $objDocumentoDTOAssociacao) {
               $strStaAssociacao = $objDocumentoDTOAssociacao['StaAssociacao'];
               if($strStaAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
                 $objDocumentoDTO = $objDocumentoDTOAssociacao['Documento'];

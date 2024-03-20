@@ -116,9 +116,9 @@ class ProcessoEletronicoINT extends InfraINT {
     $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
     $arrayRepositorioEstruturas = array();
     foreach ($arrObjRepositorioDTO as $value) {
-        if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
-          $arrayRepositorioEstruturas[] = $value;
-        }
+      if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
+        $arrayRepositorioEstruturas[] = $value;
+      }
     }
     return $arrayRepositorioEstruturas;
   }
@@ -254,8 +254,7 @@ class ProcessoEletronicoINT extends InfraINT {
       return $arquivo;
   }
 
-  public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
-	{
+  public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar) {
     try {
       $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
       $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
@@ -435,35 +434,29 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' 	trocarRepoEstruturasRestricao();'
         . ' };';
 
-
-      $strHtml = ''
-			. ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
-			. ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>'
-			. ' <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />'
-			. ' <input type="hidden" id="hdnIdRepoEstruturas" name="hdnIdRepoEstruturas" class="infraText" value="" />'
-			. ' <select id="selRepoEstruturas" name="selRepoEstruturas" size="6" multiple="multiple" class="infraSelect" onchange="trocarRepoEstruturasRestricao()" >'
-			. ' ' . $strItensSelRepoEstruturasRestricao . ''
-			. ' </select>'
-			. ' <div id="divOpcoesRepoEstruturas">'
-			// . ' <img id="imgLupaOrgaos" onclick="objLupaRepositoriosEstruturas.selecionar(700,500);" src="' . PaginaSEI::getInstance()->getIconePesquisar() . '" alt="Selecionar Órgãos" title="Selecionar Órgãos" class="infraImgNormal"  />'
-			// . ' <br />'
-			. ' <img id="imgExcluirRepoEstruturas" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Estruturas Selecionados" title="Remover Estruturas Selecionadas" class="infraImgNormal"  />'
-			. ' </div>'
-			. ' <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="'.$arrRepoEstruturasSelecionados.'" />'
-			. ' <label id="lblUnidades" for="selUnidades" class="infraLabelOpcional">Restringir às Unidades:</label>'
-			. ' <input type="text" id="txtUnidade" name="txtUnidade" class="infraText" />'
-			. ' <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="" />'
-			. ' <select id="selUnidades" name="selUnidades" size="6" multiple="multiple" class="infraSelect" >'
-      . ' ' . $strItensSelUnidadesRestricao . ''
-			. ' </select>'
-			. ' <div id="divOpcoesUnidades">'
-			// . ' <img id="imgLupaUnidades" onclick="objLupaUnidades.selecionar(700,500);" src="' . PaginaSEI::getInstance()->getIconePesquisar() . '" alt="Selecionar Unidades" title="Selecionar Unidades" class="infraImg"  />'
-			// . ' <br />'
-			. ' <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />'
-			. ' </div>'
-			. ' <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />'
-			. ' ' . $strHtmlRepoEstruturasUnidades . ''
-			. ' </div>';
+      $strHtml = ' <div id=\'divRestricao\' class=\'infraAreaDados\' style=\'height:16em;\'>
+			  <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>
+			  <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />
+			  <input type="hidden" id="hdnIdRepoEstruturas" name="hdnIdRepoEstruturas" class="infraText" value="" />
+			  <select id="selRepoEstruturas" name="selRepoEstruturas" size="6" multiple="multiple" class="infraSelect" onchange="trocarRepoEstruturasRestricao()" >
+			  ' . $strItensSelRepoEstruturasRestricao . '
+			  </select>
+			  <div id="divOpcoesRepoEstruturas">
+			  <img id="imgExcluirRepoEstruturas" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Estruturas Selecionados" title="Remover Estruturas Selecionadas" class="infraImgNormal"  />
+			  </div>
+			  <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="'.$arrRepoEstruturasSelecionados.'" />
+			  <label id="lblUnidades" for="selUnidades" class="infraLabelOpcional">Restringir às Unidades:</label>
+			  <input type="text" id="txtUnidade" name="txtUnidade" class="infraText" />
+			  <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="" />
+			  <select id="selUnidades" name="selUnidades" size="6" multiple="multiple" class="infraSelect" >
+        ' . $strItensSelUnidadesRestricao . '
+			  </select>
+			  <div id="divOpcoesUnidades">
+			  <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />
+			  </div>
+			  <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />
+			  ' . $strHtmlRepoEstruturasUnidades . '
+			  </div>';
 
     } catch (Exception $e) {
       // não grava nada e não retorna objeto restrição mapeamento de unidades

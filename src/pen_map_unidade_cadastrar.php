@@ -96,9 +96,9 @@ try {
         $penUnidadeRN = new PenUnidadeRN();
         $dados = $penUnidadeRN->listar($unidadeDTO);
    
-        foreach ($penUnidadeRN->listar($unidadeDTO) as $dados) {
-            $mapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla();
-        }
+      foreach ($penUnidadeRN->listar($unidadeDTO) as $dados) {
+        $mapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla();
+      }
 
         $objInfraException = new InfraException();
         $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' do Portal de Administração.');     }
@@ -126,23 +126,20 @@ try {
     }
 
     $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+    
+    $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+    $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+    $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+    $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+
     $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->prepararRepoEstruturas(
-        $_POST['id_unidade'],
-        $_POST['id_unidade_rh'],
-        $_POST['hdnRepoEstruturas'] ?? ""
+      $_POST['id_unidade'],
+      $_POST['id_unidade_rh'],
+      !empty($_POST['hdnRepoEstruturas']) ? $_POST['hdnRepoEstruturas'] : ""
     );
 
     if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
-        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
-
-        $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
-    } else {
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
-        $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+      $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
     }
 
       $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
@@ -205,7 +202,10 @@ try {
     $objPenUnidadeDTO->setNumIdUnidadeRH($_GET['id_unidade_rh']);
   }
 
-  $strCssRestricao = ""; $strHtmlRestricao = ""; $strJsGlobalRestricao = ""; $strJsInicializarRestricao = "";
+  $strCssRestricao = "";
+  $strHtmlRestricao = "";
+  $strJsGlobalRestricao = "";
+  $strJsInicializarRestricao = "";
   ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
