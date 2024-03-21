@@ -16,10 +16,10 @@ try {
     case 'pen_tramita_em_bloco_protocolo_excluir':
       try {
         
-        $arrStrIds = PaginaSEI::getInstance()->getArrStrItensSelecionados();
+        $arrStrIds = $objPaginaSEI->getArrStrItensSelecionados();
         $arrObjTramiteBlocoProtocoloDTO = array();
         if (count($arrStrIds) > 0) {
-          for ($i = 0; $i < count($arrStrIds); $i++) {
+          for ($i = 0; $i < count($arrStrIds); $i++) {     
             $arrStrIdComposto = explode('-', $arrStrIds[$i]);
             $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
             $objTramiteEmBlocoProtocoloDTO->setNumId($arrStrIdComposto[0]);

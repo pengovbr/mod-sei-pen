@@ -196,8 +196,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
           if ($tramiteEmBloco != null) {
             $arrayExcluido[] = $objBD->excluir($objDTO);
-          } else {
-            return null;
           }
         } else {
           $arrayExcluido[] = $objBD->excluir($objDTO);
@@ -285,6 +283,30 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       if (!empty($tramiteEmBloco)) {
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
+    }
+
+    return false;
+  }
+
+  public function validarQuantidadeDeItensNoBloco($dblIdbloco, $arrProtocolosOrigem)
+  {
+    $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+    $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($dblIdbloco);
+    $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+    $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+
+    $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+    $arrTramitaEmBlocoProtocolo = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
+    $numRegistroBloco = count($arrTramitaEmBlocoProtocolo);
+    $numRegistroItens = count($arrProtocolosOrigem);
+
+    $numMaximoDeProcessos = 100;
+    if (!empty($numRegistroBloco) && $numRegistroBloco >= $numMaximoDeProcessos) {
+      return "Não é possível incluir mais que {$numMaximoDeProcessos} processos em um único bloco. O bloco selecionado já atingiu sua capacidade máxima.";
+    }
+
+    if ($numRegistroBloco+$numRegistroItens > $numMaximoDeProcessos) {
+      return "Não é possível incluir mais que {$numMaximoDeProcessos} processos em um único bloco. Por favor, reduza a quantidade de processos selecionados antes de prosseguir.";
     }
 
     return false;
