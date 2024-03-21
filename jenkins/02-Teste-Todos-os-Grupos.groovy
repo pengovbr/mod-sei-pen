@@ -37,7 +37,7 @@ pipeline {
             description: 'Qual o Sistema de Processo Eletr�nico ser� utilizado nos testes?' )
         choice(
             name: 'database',
-            choices: "mysql\noracle\nsqlserver",
+            choices: "mysql\noracle\nsqlserver\npostgresql",
             description: 'Qual o banco de dados' )
 
 
@@ -112,6 +112,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -121,6 +122,7 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
@@ -134,11 +136,13 @@ pipeline {
                                 string(name: 'passCertOrg2', value: passCertOrg2),
                                 string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
                                 string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
                                 string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
                                 string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
                                 string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
                                 string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
                                 string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
                                 string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
                                 string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
                                 string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
@@ -174,6 +178,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -183,35 +188,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_parallel_group1+execute_parallel_group3"),
                             ], wait: true
                     }}
@@ -233,6 +241,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -242,35 +251,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_parallel_group2+execute_alone_group1"),
                             ], wait: true
                     }}
@@ -292,6 +304,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -301,35 +314,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_alone_group2"),
                             ], wait: true
                     }}
@@ -351,6 +367,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -360,35 +377,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_alone_group3"),
                             ], wait: true
                     }}
@@ -410,6 +430,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -419,35 +440,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_alone_group4"),
                             ], wait: true
                     }}
@@ -469,6 +493,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -478,35 +503,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_alone_group5"),
                             ], wait: true
                     }}
@@ -528,6 +556,7 @@ pipeline {
                     CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_A_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_A_NOME_UNIDADE = props['CONTEXTO_ORGAO_A_NOME_UNIDADE']
                     CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA = props['CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA']
@@ -537,35 +566,38 @@ pipeline {
                     CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_REP_ESTRUTURAS = props['CONTEXTO_ORGAO_B_REP_ESTRUTURAS']
                     CONTEXTO_ORGAO_B_ID_ESTRUTURA = props['CONTEXTO_ORGAO_B_ID_ESTRUTURA']
+                    CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA = props['CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA']
                     CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA = props['CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA']
                     CONTEXTO_ORGAO_B_NOME_UNIDADE = props['CONTEXTO_ORGAO_B_NOME_UNIDADE']
 
                     build job: '01-Teste-Unico-ou-Grupo.groovy',
                         parameters:
                             [
-                                string(name: 'database', value: database),
-                                string(name: 'org1CertSecret', value: org1CertSecret),
-                                string(name: 'passCertOrg1', value: passCertOrg1),
-                                string(name: 'org2CertSecret', value: org2CertSecret),
-                                string(name: 'passCertOrg2', value: passCertOrg2),
-                                string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
-                                string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
-                                string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
-                                string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
-                                string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
-                                string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
-                                string(name: 'branchGitSpe', value: BRANCHGITSPE),
-                                string(name: 'sistema', value: SISTEMA),
-                                string(name: 'versaoModulo', value: VERSAOMODULO),
+                            string(name: 'database', value: database),
+                            string(name: 'org1CertSecret', value: org1CertSecret),
+                            string(name: 'passCertOrg1', value: passCertOrg1),
+                            string(name: 'org2CertSecret', value: org2CertSecret),
+                            string(name: 'passCertOrg2', value: passCertOrg2),
+                            string(name: 'CONTEXTO_ORGAO_A_NUMERO_SEI', value: CONTEXTO_ORGAO_A_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_A_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE', value: CONTEXTO_ORGAO_A_NOME_UNIDADE),
+                            string(name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA', value: CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA', value: CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA', value: CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA),
+                            string(name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA', value: CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NUMERO_SEI', value: CONTEXTO_ORGAO_B_NUMERO_SEI),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_REP_ESTRUTURAS', value: CONTEXTO_ORGAO_B_REP_ESTRUTURAS),
+                            string(name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA', value: CONTEXTO_ORGAO_B_ID_ESTRUTURA),
+                            string(name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA', value: CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA),
+                            string(name: 'CONTEXTO_ORGAO_B_NOME_UNIDADE', value: CONTEXTO_ORGAO_B_NOME_UNIDADE),
+                            string(name: 'branchGitSpe', value: BRANCHGITSPE),
+                            string(name: 'sistema', value: SISTEMA),
+                            string(name: 'versaoModulo', value: VERSAOMODULO),
                                 string(name: 'grupos_executar', value: "execute_alone_group6"),
                             ], wait: true
                     }}
