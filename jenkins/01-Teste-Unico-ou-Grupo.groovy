@@ -230,15 +230,15 @@ pipeline {
                     rm -rf ${FOLDERMODULO}
                     mkdir -p ${FOLDERMODULO}
                 fi
-                
+
                 rm -rf ${FOLDERSPE}_tmp
                 mkdir -p ${FOLDERSPE}_tmp
                 """
-                
+
                 dir("${FOLDERSPE}_tmp"){
 
                     sh """
-                    
+
                     git config --global http.sslVerify false
                     """
 
@@ -250,18 +250,18 @@ pipeline {
                     mkdir -p ${FOLDERSPE}
                     sudo rm -rf ${FOLDERSPE}/* || true
                     \\cp -R * ${FOLDERSPE}
-                    
+
                     git checkout ${GITBRANCH}
                     ls -l
-                    
+
                     sudo rm -rf ${FOLDERSPE}/src/* || true
                     if [ -f src/sei/web/SEI.php ]; then
                         \\cp -R src/* ${FOLDERSPE}/src
-                        
+
                     else
                         \\cp -R * ${FOLDERSPE}/src
                     fi
-                    
+
                     if [ ! "${SISTEMA}" = "sei3" ]; then
                         docker stop seitmp || true
                         docker rm seitmp || true
@@ -276,14 +276,14 @@ pipeline {
                     """
 
                 }
-                
+
                 sh """
-                
+
                 rm -rf ${FOLDERSPE}_tmp
                 """
-                
 
-                
+
+
             }
         }
 
@@ -348,7 +348,7 @@ pipeline {
                     sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen || true
                     #sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php* || true
                     #sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php* || true
-                    
+
                     sudo rm -rf ${FOLDERSPE}/src/sei/config/mod-pen || true
                     sudo rm -rf ${FOLDERSPE}/src/sei/scripts/mod-pen || true
                     sudo rm -rf ${FOLDERSPE}/src/sei/web/modulos/pen || true
@@ -450,7 +450,7 @@ pipeline {
                         exit 1
                     fi
                     rm -rf tempinstall.txt
-                    
+
                     # apenas teste, lembrar de retirar ao final
                     sleep 5
                     make check-isalive
@@ -628,10 +628,10 @@ pipeline {
                                                 cp phpunitsubstituir.xml ${FOLDER_FUNCIONAIS}/phpunit.xml
 
                                                 SUITE_ATUAL="TEST_SUIT=rodarnovamente"
-                                                
-                                                
-                                                
-                                                
+
+
+
+
 
 
                                             fi
