@@ -49,7 +49,17 @@ try {
 
       if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
         try {
-          if ($_POST['selBlocos'] == null) {
+          if ($idBlocoExterno == null) {
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);
+          }
+
+          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, [$_GET['id_procedimento']]);
+
+          if ($validar !== false) {
+            $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+
             header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
             exit(0);
           }
@@ -58,7 +68,7 @@ try {
 
           $objTramiteEmBlocoProtocoloDTO->setNumId(null);
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($_GET['id_procedimento']);
-          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_POST['selBlocos']);
+          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoExterno);
           $objTramiteEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
 
           $objTramiteEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
@@ -90,6 +100,16 @@ try {
           $erros = [];
           $sucesso = false;
           $arrProtocolosOrigemProtocolo = explode(',', $strIdItensSelecionados);
+
+          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, $arrProtocolosOrigemProtocolo);
+
+          if ($validar !== false) {
+            $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao']));
+            exit(0);
+          }
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
 
@@ -200,14 +220,16 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
   <?php
   $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   $objPaginaSEI->abrirAreaDados('15em');
+  $padrao = null;
+  if (isset($arrMapIdBloco[$idBlocoExterno])) {
+    $padrao = $idBlocoExterno;
+  }
   ?>
-
+  
   <label id="lblBlocos" for="lblIdBloco" class="infraLabelObrigatorio">Blocos que estão em aberto:</label>
   <select id="selBlocos" name="selBlocos" class="infraSelect">
-    <?php print InfraINT::montarSelectArray(null, 'Selecione', '', array_filter($arrMapIdBloco)); ?>
+    <?php print InfraINT::montarSelectArray(null, $padrao, $padrao, array_filter($arrMapIdBloco)); ?>
   </select>
-
-  <input type="hidden" id="hdnIdBloco" name="hdnIdBloco" value="" />
   <input type="hidden" id="hdnIdProtocolo" name="hdnIdProtocolo" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" value="<?= $arrProtocolosOrigem ? implode(',', $arrProtocolosOrigem) : '' ?>" />
 
   <?php

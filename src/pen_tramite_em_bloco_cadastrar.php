@@ -7,8 +7,8 @@ try {
 
   $objSessaoSEI = SessaoSEI::getInstance();
   $objPaginaSEI = PaginaSEI::getInstance();
-  $objDebug = InfraDebug::getInstance();
-  $objInfraException = new InfraException();
+
+  $objPaginaSEI->salvarCamposPost(array('txtDescricao', 'hdnIdBloco'));
 
   $strParametros = '';
   if (isset($_GET['arvore'])) {
@@ -27,10 +27,8 @@ try {
   $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
 
   $strDesabilitar = '';
-
   $arrComandos = array();
-  $bolCadastroOk = false;
-
+  
   switch ($_GET['acao']) {
     case 'pen_tramite_em_bloco_cadastrar':
       $strTitulo = 'Novo Trâmite em Bloco';
@@ -41,10 +39,18 @@ try {
       $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
       $objTramiteEmBlocoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objTramiteEmBlocoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objTramiteEmBlocoDTO->setStrDescricao($_POST['txtDescricao']);
+      $objTramiteEmBlocoDTO->setStrDescricao(null);
       $objTramiteEmBlocoDTO->setStrIdxBloco(null);
       $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+
       if (isset($_POST['sbmCadastrarTramiteEmBloco'])) {
+        $strNovaDescricao = 'Novo Bloco';
+        $strDescricao = $objPaginaSEI->recuperarCampo('txtDescricao');
+        if ($strDescricao) {
+          $strNovaDescricao = $strDescricao;
+        }
+        $objTramiteEmBlocoDTO->setStrDescricao($strNovaDescricao);
+       
         try {
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
@@ -62,23 +68,26 @@ try {
       $arrComandos[] = '<button type="submit" accesskey="S" name="sbmAlterarBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
       $strDesabilitar = 'disabled="disabled"';
 
-      if (isset($_GET['id_bloco'])) {
-        $objTramiteEmBlocoDTO->setNumId($_GET['id_bloco']);
-        $objTramiteEmBlocoDTO->retTodos();
-        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
-        if ($objTramiteEmBlocoDTO == null) {
-          throw new InfraException("Registro não encontrado.");
-        }
-      } else {
-        $objTramiteEmBlocoDTO->setNumId($_POST['hdnIdBloco']);
-        $objTramiteEmBlocoDTO->setStrDescricao($_POST['txtDescricao']);
+      $hdnIdBloco = $objPaginaSEI->recuperarCampo('hdnIdBloco');
+      $objTramiteEmBlocoDTO->setNumId($_GET['id_bloco'] ?: $hdnIdBloco);
+      $objTramiteEmBlocoDTO->retNumId();
+      $objTramiteEmBlocoDTO->retStrDescricao();
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+      if ($objTramiteEmBlocoDTO == null) {
+        throw new InfraException("Registro não encontrado.");
       }
 
       $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoDTO->getNumId())) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
       if (isset($_POST['sbmAlterarBloco'])) {
         try {
+          $strDescricao = $objPaginaSEI->recuperarCampo('txtDescricao');
+          if ($strDescricao) {
+            $objTramiteEmBlocoDTO->setStrDescricao($strDescricao);
+          }
+
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
           PaginaSEI::getInstance()->setStrMensagem('Trâmite em Bloco "' . $objTramiteEmBlocoDTO->getNumId() . '" alterado com sucesso.');
@@ -149,11 +158,11 @@ PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
   <p style="font-size: 1.0rem;">Atenção!! Cada bloco permite incluir e tramitar no máximo 100 processos.
   <p>
   <div id="divIdentificacao" class="infraAreaDados" style="height:5em;">
-    <label id="lblIdBloco" for="txtIdBloco" accesskey="" class="infraLabelObrigatorio">Número:</label>
+    <label id="lblIdBloco" for="txtIdBloco" class="infraLabelObrigatorio">Número:</label>
     <input type="text" id="txtIdBloco" name="txtIdBloco" class="infraText" disabled="true" value="<?= $objTramiteEmBlocoDTO->getNumId(); ?>" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>" />
   </div>
   <div id="divDescricao" class="infraAreaDados" style="height:10em;">
-    <label id="lblDescricao" for="txtDescricao" accesskey="" class="infraLabelOpcional">Descrição:</label>
+    <label id="lblDescricao" for="txtDescricao" class="infraLabelOpcional">Descrição:</label>
     <textarea id="txtDescricao" name="txtDescricao" rows="<?= PaginaSEI::getInstance()->isBolNavegadorFirefox() ? '3' : '4' ?>" class="infraTextarea" onkeypress="return infraLimitarTexto(this,event,250);" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>"><?= PaginaSEI::tratarHTML($objTramiteEmBlocoDTO->getStrDescricao()) ?></textarea>
   </div>
 
