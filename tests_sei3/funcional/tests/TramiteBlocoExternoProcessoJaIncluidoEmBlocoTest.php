@@ -86,7 +86,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
 
         $this->assertStringContainsString(
             utf8_encode('Prezado(a) usuário(a), o processo ' . self::$protocoloTeste
-           . ' encontra-se inserido no bloco de número '),
+           . ' encontra-se inserido no bloco '),
             $mensagem
         );
 
