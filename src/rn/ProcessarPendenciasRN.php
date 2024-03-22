@@ -77,7 +77,9 @@ class ProcessarPendenciasRN extends InfraRN
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
 
-        PENIntegracao::verificarCompatibilidadeConfiguracoes();
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+        return false;
+      }
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
 
         $numProcID = getmygid();
