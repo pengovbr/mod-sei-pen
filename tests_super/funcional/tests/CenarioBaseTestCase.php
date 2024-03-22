@@ -51,6 +51,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaPenHipoteseLegalListar = null;
     protected $paginaMapUnidades = null;
     protected $paginaAgendamentos = null;
+    protected $paginaTipoDocumento = null;
+    protected $paginaTipoProcesso = null;
+    protected $paginaUnidades = null;
 
     public function setUpPage(): void
     {
@@ -82,6 +85,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
         $this->paginaMapUnidades = new PaginaMapUnidades($this);
         $this->paginaAgendamentos = new PaginaAgendamentos($this);
+        $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
+        $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
+        $this->paginaUnidades = new PaginaUnidades($this);
         $this->currentWindow()->maximize();
     }
 
