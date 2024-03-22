@@ -474,6 +474,11 @@ pipeline {
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "> /etc/cron.d/sei; > /etc/cron.d/sip"
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "mkdir -p /opt/sei/temp; chown apache /opt/sei/temp"
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "mkdir -p /opt/sip/temp; chown apache /opt/sip/temp"
+                    
+                    #lembrar de retirar
+                    if [ "${SISTEMA}" = "super" ]; then
+                        docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "/entrypoint.sh" || true
+                    fi
 
                     pwd
                     """, label: "Configura sobe ambiente e instala modulo"
