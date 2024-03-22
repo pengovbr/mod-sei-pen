@@ -31,7 +31,7 @@ pipeline {
             description: "branch/versao do modulo a executar os testes")
         choice(
             name: 'database',
-            choices: "mysql\noracle\nsqlserver",
+            choices: "mysql\noracle\nsqlserver\npostgresql",
             description: 'Qual o banco de dados' )
         string(
               name: 'urlGitSpe',
@@ -98,6 +98,9 @@ pipeline {
             name: 'CONTEXTO_ORGAO_A_ID_ESTRUTURA',
             defaultValue:"307")
         string(
+            name: 'CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA',
+            defaultValue:"STF")
+        string(
             name: 'CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA',
             defaultValue:"STF / PJ")
         string(
@@ -124,6 +127,9 @@ pipeline {
         string(
             name: 'CONTEXTO_ORGAO_B_ID_ESTRUTURA',
             defaultValue:"79116")
+        string(
+            name: 'CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA',
+            defaultValue:"Prodasen - PRODASEN")
         string(
             name: 'CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA',
             defaultValue:"PRODASEN")
@@ -224,12 +230,14 @@ pipeline {
                     rm -rf ${FOLDERMODULO}
                     mkdir -p ${FOLDERMODULO}
                 fi
+
+                rm -rf ${FOLDERSPE}_tmp
+                mkdir -p ${FOLDERSPE}_tmp
                 """
 
-                dir("${FOLDERSPE}"){
+                dir("${FOLDERSPE}_tmp"){
 
                     sh """
-                    sudo rm -rf ${FOLDERSPE}/* || true
 
                     git config --global http.sslVerify false
                     """
@@ -239,17 +247,42 @@ pipeline {
                         url: GITURL
 
                     sh """
+                    mkdir -p ${FOLDERSPE}
+                    sudo rm -rf ${FOLDERSPE}/* || true
+                    \\cp -R * ${FOLDERSPE}
+
                     git checkout ${GITBRANCH}
                     ls -l
 
-                    if [ -f ${FOLDERSPE}/src/sei/web/SEI.php ]; then
-                        rm -rf sei sip infra
-                        mv src/sei src/sip src/infra .
+                    sudo rm -rf ${FOLDERSPE}/src/* || true
+                    if [ -f src/sei/web/SEI.php ]; then
+                        \\cp -R src/* ${FOLDERSPE}/src
+
+                    else
+                        \\cp -R * ${FOLDERSPE}/src
+                    fi
+
+                    if [ ! "${SISTEMA}" = "sei3" ]; then
+                        docker stop seitmp || true
+                        docker rm seitmp || true
+                        ls -lh ${FOLDERSPE}/src/sei/config/
+                        docker run -d --rm --name seitmp --entrypoint="" processoeletronico/vagrant_super4_httpd:10.0 bash -c "tail -f /dev/null"
+                        docker cp seitmp:/ConfiguracaoSEI.php ${FOLDERSPE}/src/sei/config/ConfiguracaoSEI.php
+                        ls -lh ${FOLDERSPE}/src/sei/config/
+                        docker stop seitmp || true
+                        docker rm seitmp || true
                     fi
 
                     """
 
                 }
+
+                sh """
+
+                rm -rf ${FOLDERSPE}_tmp
+                """
+
+
 
             }
         }
@@ -308,13 +341,21 @@ pipeline {
 
                     sudo chmod +r ${FOLDER_FUNCIONAIS}/assets/config/certificado_org1.pem
                     sudo chmod +r ${FOLDER_FUNCIONAIS}/assets/config/certificado_org2.pem
-                    sudo rm -rf ${FOLDERSPE}/sei/config/mod-pen
-                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
-                    sudo rm -rf ${FOLDERSPE}/sei/web/modulos/pen
-                    sudo rm -rf ${FOLDERSPE}/sip/config/mod-pen
-                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
-                    sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php*
-                    sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php*
+                    sudo rm -rf ${FOLDERSPE}/sei/config/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/sei/web/modulos/pen || true
+                    sudo rm -rf ${FOLDERSPE}/sip/config/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen || true
+                    #sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php* || true
+                    #sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php* || true
+
+                    sudo rm -rf ${FOLDERSPE}/src/sei/config/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/src/sei/scripts/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/src/sei/web/modulos/pen || true
+                    sudo rm -rf ${FOLDERSPE}/src/sip/config/mod-pen || true
+                    sudo rm -rf ${FOLDERSPE}/src/sei/scripts/mod-pen || true
+                    #sudo rm -rf ${FOLDERSPE}/src/sei/config/ConfiguracaoSEI.php* || true
+                    #sudo rm -rf ${FOLDERSPE}/src/sip/config/ConfiguracaoSip.php* || true
 
                     """, label: "Destroi ambiente e Remove Antigos"
 
@@ -336,11 +377,13 @@ pipeline {
                     sed -i "s|^base=.*|base=${DATABASE}|g" Makefile
 
                     make config
-                    sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}|g" ${FOLDER_FUNCIONAIS}/.env
+                    if [ "${SISTEMA}" = "sei3" ]; then
+                        sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}|g" ${FOLDER_FUNCIONAIS}/.env
+                    else
+                        sed -i "s|SEI_PATH=.*|SEI_PATH=${FOLDERSPE}/src|g" ${FOLDER_FUNCIONAIS}/.env
+                    fi
                     sed -i "s|ORG1_CERTIFICADO_SENHA=.*|ORG1_CERTIFICADO_SENHA=$ORG1_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
                     sed -i "s|ORG2_CERTIFICADO_SENHA=.*|ORG2_CERTIFICADO_SENHA=$ORG2_CERT_PASS|g" ${FOLDER_FUNCIONAIS}/.env
-
-                    \\cp ${FOLDER_FUNCIONAIS}/phpunit.xml ${FOLDER_FUNCIONAIS}/phpunit.xml || true
 
                     #sed -i "s|.*PEN_WAIT_TIMEOUT\\".*|<const name=\\"PEN_WAIT_TIMEOUT\\" value=\\"40000\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES\\".*|<const name=\\"PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES\\" value=\\"180000\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
@@ -351,6 +394,7 @@ pipeline {
                     sed -i "s|.*CONTEXTO_ORGAO_A_SIGLA_UNIDADE\\".*|<const name=\\"CONTEXTO_ORGAO_A_SIGLA_UNIDADE\\" value=\\"TESTE\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_A_REP_ESTRUTURAS\\".*|<const name=\\"CONTEXTO_ORGAO_A_REP_ESTRUTURAS\\" value=\\"${CONTEXTO_ORGAO_A_REP_ESTRUTURAS}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_A_ID_ESTRUTURA\\".*|<const name=\\"CONTEXTO_ORGAO_A_ID_ESTRUTURA\\" value=\\"${CONTEXTO_ORGAO_A_ID_ESTRUTURA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "s|.*CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA\\".*|<const name=\\"CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA\\" value=\\"${CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA\\".*|<const name=\\"CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA\\" value=\\"${CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_A_NOME_UNIDADE\\".*|<const name=\\"CONTEXTO_ORGAO_A_NOME_UNIDADE\\" value=\\"${CONTEXTO_ORGAO_A_NOME_UNIDADE}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
 
@@ -364,6 +408,7 @@ pipeline {
                     sed -i "s|.*CONTEXTO_ORGAO_B_REP_ESTRUTURAS\\".*|<const name=\\"CONTEXTO_ORGAO_B_REP_ESTRUTURAS\\" value=\\"${CONTEXTO_ORGAO_B_REP_ESTRUTURAS}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_SIGLA_UNIDADE\\".*|<const name=\\"CONTEXTO_ORGAO_B_SIGLA_UNIDADE\\" value=\\"TESTE\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_ID_ESTRUTURA\\".*|<const name=\\"CONTEXTO_ORGAO_B_ID_ESTRUTURA\\" value=\\"${CONTEXTO_ORGAO_B_ID_ESTRUTURA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
+                    sed -i "s|.*CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA\\".*|<const name=\\"CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA\\" value=\\"${CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA\\".*|<const name=\\"CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA\\" value=\\"${CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
                     sed -i "s|.*CONTEXTO_ORGAO_B_NOME_UNIDADE\\".*|<const name=\\"CONTEXTO_ORGAO_B_NOME_UNIDADE\\" value=\\"${CONTEXTO_ORGAO_B_NOME_UNIDADE}\\" />|g" ${FOLDER_FUNCIONAIS}/phpunit.xml
 
@@ -406,25 +451,6 @@ pipeline {
                     fi
                     rm -rf tempinstall.txt
 
-                         || [ "$DATABASE" = "sqlserver" ]; then
-                        sleep 30
-                    fi
-
-                    make check-isalive
-                    set +e
-                    echo ""
-                    echo "Vamos rodar o make update. A saida n sera mostrada aqui. Apenas se houver erro..."
-                    make update 2>&1 > tempinstall.txt
-                    es=\$?
-                    set -e
-                    if [ "\$es" = "0" ]; then
-                        echo "Make update sem erro"
-                    else
-                        cat tempinstall.txt
-                        exit 1
-                    fi
-                    rm -rf tempinstall.txt
-
                     # apenas teste, lembrar de retirar ao final
                     sleep 5
                     make check-isalive
@@ -448,6 +474,11 @@ pipeline {
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "> /etc/cron.d/sei; > /etc/cron.d/sip"
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "mkdir -p /opt/sei/temp; chown apache /opt/sei/temp"
                     docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org2-http bash -c "mkdir -p /opt/sip/temp; chown apache /opt/sip/temp"
+                    
+                    #lembrar de retirar
+                    if [ "${SISTEMA}" = "super" ]; then
+                        docker-compose -f tests_${SISTEMA}/funcional/docker-compose.yml --env-file tests_${SISTEMA}/funcional/.env exec org1-http bash -c "/entrypoint.sh" || true
+                    fi
 
                     pwd
                     """, label: "Configura sobe ambiente e instala modulo"
@@ -604,6 +635,10 @@ pipeline {
                                                 SUITE_ATUAL="TEST_SUIT=rodarnovamente"
 
 
+
+
+
+
                                             fi
                                         else
                                             rm -rf rodarnovamente.txt
@@ -692,7 +727,7 @@ pipeline {
                             do
                                 while [ ! -f monitoramento_liberado.ok ]
                                 do
-                                    echo "Aguardando libera��o para monitoramento"
+                                    echo "Aguardando liberacao para monitoramento"
                                     sleep 10
 
                                     if [ -f testesfinalizados.ok ]; then
