@@ -530,7 +530,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
         $this->frame(null);
-        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
+        $this->paginaBase->navegarParaControleProcesso();
+        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
         $this->byLinkText("Processos Tramitados Externamente")->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
@@ -778,7 +779,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function visualizarProcessoTramitadosEmLote($test)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $test->byLinkText("Processos Tramitados em Lote")->click();
+        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados em Lote'));
+        $this->byLinkText("Processos Tramitados em Lote")->click();
     }
 
     protected function navegarProcessoEmLote($selAndamento, $numProtocolo=null)

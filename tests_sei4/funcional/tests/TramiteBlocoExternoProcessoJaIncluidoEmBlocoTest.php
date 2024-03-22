@@ -85,8 +85,9 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         $this->assertStringContainsString(
             utf8_encode(
                 'Prezado(a) usuário(a), o processo ' . $this->objProtocoloDTO->getStrProtocoloFormatado()
-                . ' encontra-se inserido no bloco de número ' . $this->objBlocoDeTramiteDTO->getNumId() . '.'
-                . ' Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'
+                . ' encontra-se inserido no bloco ' . $this->objBlocoDeTramiteDTO->getNumId() . ' - '
+                .  $this->objBlocoDeTramiteDTO->getStrDescricao() 
+                . '. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'
             ),
             $mensagem
         );

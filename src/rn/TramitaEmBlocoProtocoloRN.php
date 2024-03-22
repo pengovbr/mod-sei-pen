@@ -306,7 +306,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     }
 
     if ($numRegistroBloco+$numRegistroItens > $numMaximoDeProcessos) {
-      return "Não é possível incluir mais que {$numMaximoDeProcessos} processos em um único bloco. Por favor, reduza a quantidade de processos selecionados antes de prosseguir.";
+      return "Não é possível incluir mais que {$numMaximoDeProcessos} processos em um único bloco. Por favor, selecione outro bloco ou selecione uma quantidade menor de processos.";
     }
 
     return false;
