@@ -258,10 +258,14 @@ pipeline {
                     sudo rm -rf ${FOLDERSPE}/src/* || true
                     if [ -f src/sei/web/SEI.php ]; then
                         \\cp -R src/* ${FOLDERSPE}/src
+                        
 
                     else
                         \\cp -R * ${FOLDERSPE}/src
+                        
                     fi
+                    mkdir -p ${FOLDERSPE}/src/sei/temp
+                    mkdir -p ${FOLDERSPE}/src/sip/temp
 
                     if [ ! "${SISTEMA}" = "sei3" ]; then
                         docker stop seitmp || true
