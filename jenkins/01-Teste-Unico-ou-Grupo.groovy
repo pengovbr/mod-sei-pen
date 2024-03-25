@@ -223,6 +223,7 @@ pipeline {
                 fi
 
                 mkdir -p ${FOLDERMODULO}
+                sudo rm -rf ${FOLDERMODULO}/*
                 sudo chown -R jenkins ${FOLDERMODULO} || true
                 sudo chmod +w -R ${FOLDERMODULO} || true
 
