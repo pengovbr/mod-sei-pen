@@ -187,17 +187,17 @@ try {
 
     $strResultado .= "<td align=''>";
      // Tramitar bloco
-    $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-    $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoTramite);
-    $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-    $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
-
-    if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
-      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
-    }
-
+     $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+     $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoTramite);
+     $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+     $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+     $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+     $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+ 
+     if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
+       $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
+     }
+ 
 
     // visualizar
     $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_listar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_bloco=' . $idBlocoTramite) . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . PaginaSEI::getInstance()->getIconeConsultar()  . '" title="Visualizar Processos" alt="Visualizar Processos" class="infraImg" /></a>&nbsp;';
