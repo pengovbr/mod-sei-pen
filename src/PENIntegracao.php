@@ -7,7 +7,7 @@ class PENIntegracao extends SeiIntegracao
 {
   const VERSAO_MODULO = VERSAO_MODULO_PEN;
   const PARAMETRO_VERSAO_MODULO_ANTIGO = 'PEN_VERSAO_MODULO_SEI';
-  const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_PEN';
+  const PARAMETRO_VERSAO_MODULO = 'VERSAO_MODULO_INTEGRACAO_TRAMITA';
 
   private static $instance = null;
 
