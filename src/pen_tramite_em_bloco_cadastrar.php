@@ -31,7 +31,7 @@ try {
   
   switch ($_GET['acao']) {
     case 'pen_tramite_em_bloco_cadastrar':
-      $strTitulo = 'Novo Trâmite em Bloco';
+      $strTitulo = 'Novo Bloco de Trâmite Externo';
       $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarTramiteEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
       $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=md_pen_tramita_em_bloco&acao_origem=' . $_GET['acao'] . $strParametros) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
