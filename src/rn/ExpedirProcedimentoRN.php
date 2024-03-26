@@ -509,44 +509,25 @@ class ExpedirProcedimentoRN extends InfraRN {
         );
     }
 
-
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino)
     {
-      $bolResultado = false;
       $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes", false);
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
-      $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
+      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
+      $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
 
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
-      if(is_array($objParamEnviarDocumentosPendentes)){
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
-        if(array_key_exists($numIdRepositorioDestino, $objParamEnviarDocumentosPendentes)){
-          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadeRh();
-          $arrIdUnidadesParaEnvioPendentes = $objParamEnviarDocumentosPendentes[$numIdRepositorioDestino];
-          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUsuario();
-            $bolResultado = (is_array($arrIdUnidadesParaEnvioPendentes) && in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes));
-          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidade();
-        }
-        $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
-      } elseif(is_bool($objParamEnviarDocumentosPendentes)) {
-        $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $bolResultado = $objParamEnviarDocumentosPendentes;
-
-      }
       $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      $arrObjPenRestricaoEnvioComponentesDigitaisDTO = 
+        $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
 
-      $arrObjPenRestricaoEnvioComponentesDigitaisDTO =
-              $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
       if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
         $arrIdUnidadesParaEnvioPendentes = array();
         foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
-          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadeRh();
+          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
         }
 
         return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
       }
+
       return false;
     }
 

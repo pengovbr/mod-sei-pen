@@ -91,7 +91,7 @@ try {
   }
 
   if (array_key_exists('nome_unidade', $_POST) && ((!empty($_POST['nome_unidade']) && $_POST['nome_unidade'] !== 'null') || $_POST['nome_unidade'] == "0")) {
-    $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadeRh('%' . $_POST['nome_unidade'] . '%', InfraDTO::$OPER_LIKE);
+    $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadePen('%' . $_POST['nome_unidade'] . '%', InfraDTO::$OPER_LIKE);
   }
 
   $objPaginaSEI->prepararOrdenacao(
@@ -146,10 +146,10 @@ try {
         . '</td>';
 
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadeRh()
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
         . '</td>';
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadeRh()
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
         . '</td>';
       $strResultado .= '<td align="center">';
 
