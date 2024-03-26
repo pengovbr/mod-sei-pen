@@ -518,10 +518,9 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
       $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
       $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
-
+      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
       $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
-      if(is_array($objParamEnviarDocumentosPendentes)){
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
+      if(is_array($objParamEnviarDocumentosPendentes)){        
         if(array_key_exists($numIdRepositorioDestino, $objParamEnviarDocumentosPendentes)){
           $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadeRh();
           $arrIdUnidadesParaEnvioPendentes = $objParamEnviarDocumentosPendentes[$numIdRepositorioDestino];
