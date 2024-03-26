@@ -51,15 +51,15 @@ try {
         exit(0);
       }
 
-      $numIdUnidadeRh = $_POST['hdnIdUnidade'];
-      $strUnidadeRh = $_POST['txtUnidade'];
+      $numIdUnidadePen = $_POST['hdnIdUnidade'];
+      $strUnidadePen = $_POST['txtUnidade'];
       $numIdRepositorio = $_POST['selRepositorioEstruturas'];
       $txtRepositorioEstruturas = $_POST['txtRepositorioEstruturas'];
 
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
       $objDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
       $objDTO->setNumIdEstrutura($numIdRepositorio);
-      $objDTO->setNumIdUnidadeRh($numIdUnidadeRh);
+      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
       if (!empty($id)) {
         $objDTO->setDblId(array($id), InfraDTO::$OPER_NOT_IN);
       }
@@ -78,12 +78,10 @@ try {
       }
 
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
       $objDTO->setNumIdEstrutura($numIdRepositorio);
       $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
-      $objDTO->setNumIdUnidadeRh($numIdUnidadeRh);
-      $objDTO->setStrStrUnidadeRh($strUnidadeRh);
+      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+      $objDTO->setStrStrUnidadePen($strUnidadePen);
 
       $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
       if (!empty($_GET['Id'])) {
@@ -142,10 +140,8 @@ try {
         $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
         $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
         $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadeRh();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUsuario();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidade();
+        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
+        $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadePen();
         $objPenRestricaoEnvioComponentesDigitaisDTO->setDblId($_GET['Id']);
 
         $objPenRestricaoEnvioComponentesDigitaisDTO =
@@ -153,8 +149,8 @@ try {
 
         if (!is_null($objPenRestricaoEnvioComponentesDigitaisDTO)) {
           $numIdRepositorio = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura();
-          $hdnIdUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadeRh();
-          $strNomeUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadeRh();
+          $hdnIdUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen();
+          $strNomeUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen();
         }
       }
 

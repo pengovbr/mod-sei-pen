@@ -2721,16 +2721,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->criarTabela(array(
       'tabela' => 'md_pen_envio_comp_digitais',
       'cols' => array(
-        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_comp_digitais' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
         'id_estrutura' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
         'str_estrutura' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
-        'id_unidade_rh' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-        'str_unidade_rh' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
-        'id_usuario' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO)
+        'id_unidade_pen' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'str_unidade_pen' => array($objMetaBD->tipoTextoGrande(), PenMetaBD::NNULLO),
       ),
-      'pk' => array('cols' => array('id')),
-      'uk' => array('id_estrutura', 'id_unidade_rh', 'id_unidade'),
+      'pk' => array('cols' => array('id_comp_digitais')),
+      'uk' => array('id_estrutura', 'id_unidade_pen'),
     ));
 
     # Criar sequencia para tramite em bloco
@@ -2739,7 +2737,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
     //Sequência: md_pen_seq_tramita_em_bloco
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_envio_comp_digitais');
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id_comp_digitais) as total from md_pen_envio_comp_digitais');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
 
     BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_envio_comp_digitais', $numMaxId + 1);
@@ -2756,21 +2754,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
 
     if (is_array($objParamEnviarDocumentosPendentes)) {
-      foreach ($arrObjEnviarDocumentosPendentes as $arrKeyIdUnidade_rh => $arrIdUnidade_rh) {
-        foreach ($arrIdUnidade_rh as $IdUnidade_rh) {
+      foreach ($arrObjEnviarDocumentosPendentes as $arrKeyIdUnidade_pen => $arrIdUnidade_pen) {
+        foreach ($arrIdUnidade_pen as $IdUnidade_pen) {
           try {
-            $objRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($arrKeyIdUnidade_rh);
+            $objRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($arrKeyIdUnidade_pen);
             $objProcessoEletronico = new ProcessoEletronicoRN();
-            $objProcessoEletronicoDTO = $objProcessoEletronico->consultarRepositoriosDeEstruturas($arrKeyIdUnidade_rh);
+            $objProcessoEletronicoDTO = $objProcessoEletronico->consultarRepositoriosDeEstruturas($arrKeyIdUnidade_pen);
             if (!is_null($objProcessoEletronicoDTO->getStrNome())) {
               $objRestricaoEnvioComponentesDigitaisDTO->setStrStrEstrutura($objProcessoEletronicoDTO->getStrNome());
-              $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidadeRh($IdUnidade_rh);
-              $objProcessoEletronicoDTO = $objProcessoEletronico->listarEstruturas($arrKeyIdUnidade_rh, $IdUnidade_rh);
+              $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidadePen($IdUnidade_pen);
+              $objProcessoEletronicoDTO = $objProcessoEletronico->listarEstruturas($arrKeyIdUnidade_pen, $IdUnidade_pen);
               if (count($objProcessoEletronicoDTO) > 0) {
                 if ((!is_null($objProcessoEletronicoDTO[0]->getStrSigla())) && ($objProcessoEletronicoDTO[0]->getStrSigla() <> "")) {
-                  $objRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadeRh($objProcessoEletronicoDTO[0]->getStrSigla());
-                  $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
-                  $objRestricaoEnvioComponentesDigitaisDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+                  $objRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadePen($objProcessoEletronicoDTO[0]->getStrSigla());
                   $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objRestricaoEnvioComponentesDigitaisDTO);
                 }
               }

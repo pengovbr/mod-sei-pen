@@ -512,7 +512,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino)
     {
       $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadeRh();
+      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
       $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
 
       $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
@@ -522,7 +522,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
         $arrIdUnidadesParaEnvioPendentes = array();
         foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
-          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadeRh();
+          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
         }
 
         return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);

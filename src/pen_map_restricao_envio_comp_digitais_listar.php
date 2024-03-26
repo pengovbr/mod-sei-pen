@@ -148,10 +148,10 @@ try {
         . '</td>';
 
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadeRh()
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
         . '</td>';
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadeRh()
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
         . '</td>';
       $strResultado .= '<td align="center">';
 

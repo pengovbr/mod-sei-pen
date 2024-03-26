@@ -17,18 +17,12 @@ class PenRestricaoEnvioComponentesDigitaisDTO extends InfraDTO
 
   public function montar()
   {
-
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'id');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'Id', 'id_comp_digitais');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdEstrutura', 'id_estrutura');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StrEstrutura', 'str_estrutura');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRh', 'id_unidade_rh');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StrUnidadeRh', 'str_unidade_rh');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUsuario', 'id_usuario');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
-
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadePen', 'id_unidade_pen');
+    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'StrUnidadePen', 'str_unidade_pen');
+  
     $this->configurarPK('Id', InfraDTO::$TIPO_PK_NATIVA);
-
-    $this->configurarFK('IdUsuario', 'usuario', 'id_usuario');
-    $this->configurarFK('IdUnidade', 'unidade', 'id_unidade');
   }
 }
