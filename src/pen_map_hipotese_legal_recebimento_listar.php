@@ -188,7 +188,7 @@ try {
 
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal PEN</th>'."\n";        
+      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal Tramita GOV.BR</th>'."\n";        
       $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal SEI - '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
       $strResultado .= '</tr>'."\n";

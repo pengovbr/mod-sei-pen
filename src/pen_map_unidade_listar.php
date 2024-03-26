@@ -152,7 +152,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh"></th>';
       $strResultado .= '<th class="infraTh" colspan="3">SEI</th>';
-      $strResultado .= '<th class="infraTh" colspan="3">Tramita.GOV.BR</th>';
+      $strResultado .= '<th class="infraTh" colspan="3">Tramita GOV.BR</th>';
       $strResultado .= '<th class="infraTh"></th>';
       $strResultado .= '</tr>';
 
