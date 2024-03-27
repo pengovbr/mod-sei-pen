@@ -520,12 +520,18 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
 
       if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
-        $arrIdUnidadesParaEnvioPendentes = array();
-        foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
-          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
+        if (count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 1) {
+          $arrIdUnidadesParaEnvioPendentes = array();
+          foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
+            $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
+          }
+  
+          return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+        } elseif (!empty($arrObjPenRestricaoEnvioComponentesDigitaisDTO[0]->getNumIdUnidadePen())) {
+          return $arrObjPenRestricaoEnvioComponentesDigitaisDTO[0]->getNumIdUnidadePen() == $numIdUnidadeDestino;
         }
-
-        return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+        
+        return true;
       }
 
       return false;
