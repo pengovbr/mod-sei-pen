@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+
 /**
  * Testes de trâmite de um processo tendo a sua devolução através de sua anexação à outro processo
  * criado no órgão de destino.
@@ -48,7 +50,8 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
+
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTesteAnexado = self::$processoTesteAnexado["PROTOCOLO"];
     }
 
@@ -84,15 +87,18 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        // Selecionar banco do org2 para fazer inserção dos documentos
+        putenv("DATABASE_HOST=org2-database");
 
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        // Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // Incluir novos documentos relacionados no processo anexado
-        $this->abrirProcesso(self::$protocoloTesteAnexado);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
+         // Busca ID que Protocolo principal recebeu no org2
+         $parametros = [
+            'ProtocoloFormatado' => self::$protocoloTesteAnexado,
+        ];
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloAnexadoDTO = $objProtocoloFixture->buscar($parametros)[0];
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
         // Gerar dados de testes para representar o processo principal
         self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -100,14 +106,28 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         // Cadastra processo principal, seus documentos e anexa processo recebido anteriormente
-        self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste4);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+        // $objProtocoloPrincipalDTO = $DTOs['Protocolo'];
+        // $objProcedimentoPrincipalDTO = $DTOs['Procedimento'];
+        self::$protocoloTestePrincipal = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
 
-        $this->anexarProcesso(self::$protocoloTesteAnexado);
+        // Cadastra e assina
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4,$objProtocoloPrincipalDTO->getDblIdProtocolo());
 
-        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
+        // $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
 
+        $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
+
+        // $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloPrincipalDTO->getDblIdProtocolo());
+        
+        putenv("DATABASE_HOST=org1-database");
+
+        // Acessar sistema do this->REMETENTE do processo
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        // Abre processo principal para tramitar
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
