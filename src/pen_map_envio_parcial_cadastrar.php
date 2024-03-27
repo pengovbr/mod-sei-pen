@@ -45,11 +45,6 @@ try {
         header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
         exit(0);
       }
-      if (empty($_POST['hdnIdUnidade']) || empty($_POST['txtUnidade']) || $_POST['txtUnidade'] == "0") {
-        $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_ERRO);
-        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
-        exit(0);
-      }
 
       $numIdUnidadePen = $_POST['hdnIdUnidade'];
       $strUnidadePen = $_POST['txtUnidade'];
@@ -79,8 +74,10 @@ try {
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
       $objDTO->setNumIdEstrutura($numIdRepositorio);
       $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
-      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
-      $objDTO->setStrStrUnidadePen($strUnidadePen);
+      if (!empty($numIdUnidadePen)) {
+        $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+        $objDTO->setStrStrUnidadePen($strUnidadePen);
+      }
 
       $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
       if (!empty($_GET['Id'])) {
@@ -88,6 +85,11 @@ try {
         $objPenRestricaoEnvioComponentesDigitaisRN->alterar($objDTO);
         $messagem = TITULO_PAGINA . " atualizado com sucesso.";
       } else {
+        if ($objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO) > 0) {
+          $objPaginaSEI->adicionarMensagem( 'Já existe um registro cadastrado para a estrutura selecionada.', InfraPagina::$TIPO_MSG_ERRO);
+          header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
+          exit(0);
+        }
         $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objDTO);
       }
       $objPaginaSEI->adicionarMensagem($messagem, InfraPagina::$TIPO_MSG_AVISO);

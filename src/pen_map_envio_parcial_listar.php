@@ -146,10 +146,14 @@ try {
         . '</td>';
 
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
+        . (!empty($objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen())
+          ? $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
+          : '--')
         . '</td>';
       $strResultado .= '<td style="text-align: center;">'
-        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
+        . (!empty($objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen())
+          ? $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
+          : '--')
         . '</td>';
       $strResultado .= '<td align="center">';
 
