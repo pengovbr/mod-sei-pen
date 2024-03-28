@@ -476,7 +476,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 
           <div id="divSinEstadoDisponibilizado" class="infraDivCheckbox">
             <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_DISPONIBILIZADO, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoDisponibilizado" name="chkSinEstadoDisponibilizado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoDisponibilizado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-            <label id="lblSinEstadoDisponibilizado" for="chkSinEstadoDisponibilizado" accesskey="" class="infraLabelCheckbox">Em Processamento</label>
+            <label id="lblSinEstadoDisponibilizado" for="chkSinEstadoDisponibilizado" accesskey="" class="infraLabelCheckbox">Aguardando Processamento</label>
           </div>
 
           <div id="divSinEstadoConcluidoParcialmente" class="infraDivCheckbox">

@@ -255,11 +255,11 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     }
   }
 
-  protected function validarBlocoDeTramiteControlado($IdProtocolo)
+  protected function validarBlocoDeTramiteControlado($idProtocolo)
   {
     $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
     $tramitaEmBlocoProtocoloDTO->retNumId();
-    $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($IdProtocolo);
+    $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($idProtocolo);
     $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
     $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
 
@@ -271,7 +271,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $tramiteEmBlocoDTO->setStrStaEstado([
         TramiteEmBlocoRN::$TE_ABERTO,
         TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
-        TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
       ], InfraDTO::$OPER_IN);
       $tramiteEmBlocoDTO->retStrDescricao();
       $tramiteEmBlocoDTO->retStrStaEstado();
@@ -282,6 +281,43 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
       if (!empty($tramiteEmBloco)) {
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+      }
+
+      $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdTramitaEmBloco(), $idProtocolo);
+      if ($processoRecusadoNoBlocoParcial !== false) {
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+      }
+    }
+
+    return false;
+  }
+
+  public function validarBlocoEstadoConcluidoParcial($dblIdbloco, $idProtocolo)
+  {
+    $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $tramiteEmBlocoDTO->setNumId($dblIdbloco);
+    $tramiteEmBlocoDTO->setStrStaEstado([
+      TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
+    ], InfraDTO::$OPER_IN);
+    $tramiteEmBlocoDTO->retStrDescricao();
+    $tramiteEmBlocoDTO->retStrStaEstado();
+    $tramiteEmBlocoDTO->retNumId();
+
+    $tramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
+
+    if (!empty($tramiteEmBloco)) {
+      $objPenProtocolo = new PenProtocoloDTO();
+      $objPenProtocolo->setDblIdProtocolo($idProtocolo);
+      $objPenProtocolo->setStrSinObteveRecusa('S');
+      $objPenProtocolo->setNumMaxRegistrosRetorno(1);
+      $objPenProtocolo->retDblIdProtocolo();
+
+      $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+
+      if ($ObjPenProtocoloDTO != null) {
+        return $tramiteEmBloco;
       }
     }
 

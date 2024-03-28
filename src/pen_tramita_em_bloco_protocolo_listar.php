@@ -205,7 +205,7 @@ try {
             if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_CONCLUIDO) {
               $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
             } else {
-              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Em processamento" style="width:16px; alt="Em processamento" />';
+              $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
             }
               break;
           case $PROCESSO_TRAMITE_CANCELADO_ID:
@@ -225,7 +225,7 @@ try {
         $strProtocoloId = $objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo();
         $strDescricao = PaginaSEI::getInstance()->formatarParametrosJavaScript($objTramitaEmBlocoProtocoloDTO->getStrIdxRelBlocoProtocolo());
 
-        if ($objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() != $PROCESSO_TRAMITE_EXPEDIDO &&
+        if ($objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() == $PROCESSO_TRAMITE_CANCELADO_ID ||
             $objTramitaEmBlocoProtocoloDTO->getStrSinObteveRecusa() == 'S' ||
             $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO
             ) {
