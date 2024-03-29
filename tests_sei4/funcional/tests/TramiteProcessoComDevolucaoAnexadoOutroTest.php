@@ -1,6 +1,6 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
 
 /**
  * Testes de trâmite de um processo tendo a sua devolução através de sua anexação à outro processo
@@ -107,18 +107,13 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends CenarioBaseTestCase
 
         // Cadastra processo principal, seus documentos e anexa processo recebido anteriormente
         $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
-        // $objProtocoloPrincipalDTO = $DTOs['Protocolo'];
-        // $objProcedimentoPrincipalDTO = $DTOs['Procedimento'];
         self::$protocoloTestePrincipal = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
 
         // Cadastra e assina
         $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4,$objProtocoloPrincipalDTO->getDblIdProtocolo());
 
-        // $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
         $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
-        // $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5);
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloPrincipalDTO->getDblIdProtocolo());
         
         putenv("DATABASE_HOST=org1-database");
