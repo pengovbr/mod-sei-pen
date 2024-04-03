@@ -11,9 +11,11 @@ class PaginaTipoProcesso extends PaginaTeste
 
     public function navegarTipoProcesso()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value("Tipos de Processo");
-        $this->test->byXPath("//span[text()='Tipos de Processo']")->click();
-        $this->test->byXPath("//a[@link='tipo_procedimento_listar']")->click();
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=tipo_procedimento_listar')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
     }
 
     public function pesquisarTipoProcesso($tipoProcesso)

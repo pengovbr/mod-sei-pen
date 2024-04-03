@@ -11,9 +11,11 @@ class PaginaTipoDocumento extends PaginaTeste
 
     public function navegarTipoDocumento()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value("Tipos de Documento");
-        $this->test->byXPath("//span[text()='Tipos de Documento']")->click();
-        $this->test->byXPath("//a[@link='serie_listar']")->click();
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=serie_listar')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
     }
 
     public function pesquisarTipoDocumento($tipoDocumento)

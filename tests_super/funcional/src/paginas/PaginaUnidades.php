@@ -11,9 +11,11 @@ class PaginaUnidades extends PaginaTeste
 
     public function navegarUnidades()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value("Unidades");
-        $this->test->byXPath("//span[text()='Unidades']")->click();
-        $this->test->byXPath("//a[@link='unidade_listar']")->click();
+        $this->test->frame(null);
+        $xpath = "//a[contains(@href, 'acao=unidade_listar')]";
+        $link = $this->test->byXPath($xpath);
+        $url = $link->attribute('href');
+        $this->test->url($url);
     }
 
     public function desativarUnidades()
