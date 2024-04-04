@@ -387,14 +387,11 @@ class PendenciasTramiteRN extends InfraRN
         $numStatus = strval($objPendencia->getStrStatus());
         $objProcessarPendenciaRN = new ProcessarPendenciasRN();
 
-      switch ($numStatus) {
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
-            $objProcessarPendenciaRN->expedirLote($numIDT);
-            break;
-
+      switch ($numStatus) {        
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+            $objProcessarPendenciaRN->expedirLote($numIDT);
             $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
-            break;
+            break;        
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
@@ -435,13 +432,9 @@ class PendenciasTramiteRN extends InfraRN
 
       switch ($numStatus) {
 
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
-            $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
-            break;
-
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-            $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);
-            break;
+            $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
+            break;        
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:

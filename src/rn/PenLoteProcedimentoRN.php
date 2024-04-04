@@ -85,11 +85,18 @@ class PenLoteProcedimentoRN extends InfraRN {
         //Obter todos os processos pendentes antes de iniciar o monitoramento
         $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();
 
+
+
         shuffle($arrObjPendenciasLoteDTO);
 
+      $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
       foreach ($arrObjPendenciasLoteDTO as $objPendenciasLoteDTO) {
         //Captura todas as pendências e status retornadas para impedir duplicidade
         $arrPendenciasLoteRetornadas[] = sprintf("%d-%s", $objPendenciasLoteDTO->getDblIdProcedimento(), $objPendenciasLoteDTO->getNumIdAndamento());
+        
+        $objPendenciasLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+        $objPenLoteProcedimentoBD->alterar($objPendenciasLoteDTO);
+
         yield $objPendenciasLoteDTO;
       }
     } catch (\Exception $e) {

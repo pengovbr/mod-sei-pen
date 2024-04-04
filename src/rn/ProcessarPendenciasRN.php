@@ -265,7 +265,7 @@ class ProcessarPendenciasRN extends InfraRN
         $objPenLoteProcedimentoDTO->retNumIdUnidade();
         $objPenLoteProcedimentoDTO->retNumTentativas();
         $objPenLoteProcedimentoDTO->setDblIdProcedimento(intval($idProcedimento));
-        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
 
         $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);

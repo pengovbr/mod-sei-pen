@@ -4,8 +4,8 @@ use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,Atividade
 
 class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 {
-    protected static $numQtyProcessos = 2; // max: 99
-    protected static $tramitar = false; // mude para false, caso queira rodar o script sem o tramite final
+    protected static $numQtyProcessos = 5; // max: 100
+    protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
     public static $destinatario;
