@@ -134,6 +134,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'Sigla' => CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA,
             'Nome' => CONTEXTO_ORGAO_B_NOME_UNIDADE,
         ]);
+        putenv("DATABASE_HOST=org1-database");
         
         $bancoOrgaoB->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values ('110000002', ?)", array(CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA));
 
