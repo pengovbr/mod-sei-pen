@@ -56,7 +56,7 @@ class ImportacaoTiposProcessoFixture
     {
         $tiposProcessos = array();
 
-        $tiposProcessos[] = [9997, $idMapeamento, 100000347, utf8_encode('Acompanhamento Legislativo: Câmara dos Deputados'), $sinAtivo, 110000001, date('Y-m-d H:i:s')];
+        $tiposProcessos[] = [9997, $idMapeamento, 100000347, utf8_encode('Acompanhamento Legislativo: CÃ¢mara dos Deputados'), $sinAtivo, 110000001, date('Y-m-d H:i:s')];
         $tiposProcessos[] = [9998, $idMapeamento, 100000348, utf8_encode('Acompanhamento Legislativo: Congresso Nacional'), $sinAtivo, 110000001, date('Y-m-d H:i:s')];
         $tiposProcessos[] = [9999, $idMapeamento, 100000425, utf8_encode('mauro teste'), $sinAtivo, 110000001, date('Y-m-d H:i:s')];
 

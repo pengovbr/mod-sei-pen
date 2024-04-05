@@ -37,7 +37,7 @@ class PenOrgaoExternoFixture
 
     public function deletar(int $id): void
     {
-        $bancoOrgaoA = new DatabaseUtils(self::$contexto);
+        $bancoOrgaoA = new \DatabaseUtils(self::$contexto);
         $bancoOrgaoA->execute("delete from md_pen_orgao_externo where id = ?", array($id));
     }
 }
