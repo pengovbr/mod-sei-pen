@@ -31,13 +31,13 @@ try {
         } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
           $arrIds[] = intval($_GET['hdnInfraItensSelecionados']);
         }
-        $ramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $ramiteEmBlocoDTO->setNumId($arrIds, InfraDTO::$OPER_IN);
-        $ramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $ramiteEmBlocoDTO->retNumId();
+        $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $tramiteEmBlocoDTO->setNumId($arrIds, InfraDTO::$OPER_IN);
+        $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $tramiteEmBlocoDTO->retNumId();
 
         $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($ramiteEmBlocoDTO);
+        $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($tramiteEmBlocoDTO);
 
         if ($arrTramiteEmBloco == null) {
           $objPaginaSEI->adicionarMensagem('Blocos que não estão no estado "aberto" não podem ser excluídos.', InfraPagina::$TIPO_MSG_ERRO);
