@@ -26,31 +26,9 @@ A partir dessa versão, o módulo é compatível com o banco de dados PostgreSQL
 
 O Mapeamento de Envio Parcial a partir dessa versão é realizado pela própria interface da aplicação, sem necessidade de que a área técnica de tecnologia da informação realize a configuração em um arquivo no servidor do sistema e com isso os gestores de Negócio tem maior autonomia para realizar as configurações necessárias para o envio parcial. 
 
-#### Blocos de Trâmite Externo
+#### Blocos de Trâmite Externo (#245, #246,#248, #306, #247, #249)
 
-##### Tela de Listagem de Blocos de Trâmite Externo (#245)
-
-O usuário pode listar blocos de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo'.
-
-##### Cadastrar/Alterar Bloco de Trâmite Externo (#246)
-
-O usuário para cadastrar e alterar blocos de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo'.
-
-##### Visualizar processos do bloco de trâmite externo (#248)
-
-O usuário pode listar os processos do bloco de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo' clicando no ícone 'Visualizar Processos'.
-
-##### Adicionar o processo no bloco (#306)
-
-O usuário pode listar os processos do bloco de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo'.
-
-##### Excluir Bloco de Trâmite Externo (#247)
-
-O usuário pode listar os processos do bloco de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo' clicando no ícone 'Excluir bloco'.
-
-##### Tramitar bloco externamente (#249)
-
-O usuário pode enviar um bloco de processos para o tramita no item 'Tramita GOV.BR -> Blocos de Trâmite Externo'.
+O Bloco de Envio Externo é a evolução natural da funcionalidade Envio em lote, a qual foi descontinuada a partir da versão 3.6.0.  O novo tipo de bloco utiliza a mesma lógica estabelecida pelos outros tipos de blocos, claro respeitando a respeitando a particularidades de cada um.  Com a nova funcionalidade, o usuário pode criar blocos de até 100 processos para envio a outro órgão, resultando em ganho de produtividade na tramitação de processos por meio do Tramita GOV.BR. 
 
 #### Agrupar funcionalidades do Tramita.gov.br em um único item de menu (#289)
 
