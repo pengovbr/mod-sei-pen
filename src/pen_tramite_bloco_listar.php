@@ -67,7 +67,7 @@ try {
         $objTramiteEmBlocoRN->excluir($arrObjTramiteEmBloco);
 
         if ($excluir == false) {
-          $objPaginaSEI->adicionarMensagem('Prezado(a) usuário(a), Existe(m) Bloco(s) de Trâmite Externo com processos . Realize a exclusão desses processos, antes de realizar a exclusão do bloco.', InfraPagina::$TIPO_MSG_ERRO);
+          $objPaginaSEI->adicionarMensagem('Prezado(a) usuário(a), existe(m) Bloco(s) de Trâmite Externo com processos. Realize a exclusão desses processos, antes de realizar a exclusão do bloco.', InfraPagina::$TIPO_MSG_ERRO);
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
           exit(0);
         }
