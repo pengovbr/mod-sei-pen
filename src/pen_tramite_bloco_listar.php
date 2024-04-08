@@ -31,31 +31,46 @@ try {
         } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
           $arrIds[] = intval($_GET['hdnInfraItensSelecionados']);
         }
-        $dto = new TramiteEmBlocoDTO();
-        $dto->setNumId($arrIds, InfraDTO::$OPER_IN);
-        $dto->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $dto->retNumId();
+        $ramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $ramiteEmBlocoDTO->setNumId($arrIds, InfraDTO::$OPER_IN);
+        $ramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $ramiteEmBlocoDTO->retNumId();
 
         $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($dto);
+        $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($ramiteEmBlocoDTO);
 
         if ($arrTramiteEmBloco == null) {
           $objPaginaSEI->adicionarMensagem('Blocos que não estão no estado "aberto" não podem ser excluídos.', InfraPagina::$TIPO_MSG_ERRO);
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
           exit(0);
         }
+        
+        $arrObjTramiteEmBloco = [];
+        $excluir = true;
+        foreach ($arrTramiteEmBloco as $objTramiteEmBloco) {
+          $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($objTramiteEmBloco->getNumId());
+          $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $tramitaEmBlocoProtocoloDTO->retNumId();
+          $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+  
+          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $arrTramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
+  
+          if ($arrTramitaEmBlocoProtocoloRN == null) {
+            $arrObjTramiteEmBloco[] = $objTramiteEmBloco;
+          } else {
+            $excluir = false;
+          }
+        }
 
-        $objTramiteEmBlocoRN->excluir($arrTramiteEmBloco);
+        $objTramiteEmBlocoRN->excluir($arrObjTramiteEmBloco);
 
-        $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-        $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($arrIds, InfraDTO::$OPER_IN);
-        $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-        $tramitaEmBlocoProtocoloDTO->retNumId();
-        $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-
-        $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-        $arrtramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
-        $tramitaEmBlocoProtocoloRN->excluir($arrtramitaEmBlocoProtocoloRN);
+        if ($excluir == false) {
+          $objPaginaSEI->adicionarMensagem('Prezado(a) usuário(a), Existe(m) Bloco(s) de Trâmite Externo com processos . Realize a exclusão desses processos, antes de realizar a exclusão do bloco.', InfraPagina::$TIPO_MSG_ERRO);
+          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+          exit(0);
+        }
 
         $objPaginaSEI->adicionarMensagem('Bloco excluído com sucesso!', 5);
       } catch (Exception $e) {
