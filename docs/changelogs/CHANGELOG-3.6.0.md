@@ -30,7 +30,7 @@ O Mapeamento de Envio Parcial a partir dessa versão é realizado pela própria 
 
 O Bloco de Envio Externo é a evolução natural da funcionalidade Envio em lote, a qual foi descontinuada a partir da versão 3.6.0.  O novo tipo de bloco utiliza a mesma lógica estabelecida pelos outros tipos de blocos, claro respeitando a respeitando a particularidades de cada um.  Com a nova funcionalidade, o usuário pode criar blocos de até 100 processos para envio a outro órgão, resultando em ganho de produtividade na tramitação de processos por meio do Tramita GOV.BR. 
 
-#### Agrupar funcionalidades do Tramita.gov.br em um único item de menu (#289)
+#### Agrupar funcionalidades do Tramita GOV.BR em um único item de menu (#289)
 
 No menu principal foi criado o item 'Tramita GOV.BR' para agrupar as seguintes funcionalidades: 
 
