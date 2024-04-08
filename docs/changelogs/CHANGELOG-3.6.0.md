@@ -36,7 +36,7 @@ No menu principal foi criado o item 'Tramita GOV.BR' para agrupar as seguintes f
 
 'Blocos de Trâmite Externo'; 
 'Processos tramitados Externamente'; 
-'Processos tramitados em Lote'. 
+'Processos tramitados em Bloco'. 
 
 #### Alterar o nome do Menu Processo Eletrônico Nacional para Tramita GOV.BR (#237)
 
