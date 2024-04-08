@@ -205,7 +205,7 @@ try {
               break;
           case $processoTramiteProcessamento:
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
-            break;
+              break;
           case $processoTramiteCancelado:
             $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
               break;   
@@ -223,9 +223,9 @@ try {
             $objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() == $processoTramiteCancelado ||
             $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO ) {
 
-            if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO) {
-              $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
-            } 
+          if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO) {
+            $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
+          } 
         }
       }
       $strResultado .= '</td>' . "\n";

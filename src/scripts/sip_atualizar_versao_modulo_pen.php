@@ -1971,7 +1971,7 @@ class PenAtualizarSipRN extends InfraRN
     $numIdRecurso1 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita GOV.BR', $numIdSistema);
     $numIdRecurso2 = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     $numIdRecurso3 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos Tramitados Externamente', $numIdSistema);
-    $numIdRecurso4 = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Lote', $numIdSistema);
+    $numIdRecurso4 = $this->criarRecurso('pen_expedir_lote_listar', 'Processos Tramitados em Bloco', $numIdSistema);
     
     $this->criarRecurso('md_pen_tramita_em_bloco_cadastrar', 'Cadastrar Bloco de Tramite Externo', $numIdSistema);
     $this->criarRecurso('md_pen_tramita_em_bloco_alterar', 'Alterar Descrição do bloco de Tramite Externo', $numIdSistema);
@@ -2005,7 +2005,7 @@ class PenAtualizarSipRN extends InfraRN
     $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos Tramitados Externamente', 57, $idMenuTramita, $numIdMenu, $numIdRecurso3, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
     
-    $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Lote', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
+    $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Bloco', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
 
     if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
