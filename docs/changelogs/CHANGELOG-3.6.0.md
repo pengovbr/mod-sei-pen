@@ -42,7 +42,7 @@ No menu principal foi criado o item 'Tramita GOV.BR' para agrupar as seguintes f
 
 Alterado o nome do menu 'Administração -> Processo Eletrônico Nacional' para 'Administração -> Tramita GOV.BR'.
 
-#### Processo enviado duplicado em uma fila de processamento, através de um bloco externo (lote). (#473)
+#### Processo enviado duplicado em uma fila de processamento, através de um Bloco Externo. (#473)
 
 Corrige bug que ao rodar o script de monitoramento (agendamento), pode ocorrer de um processo ser processado mais de uma vez na fila e, com isso, favorecer o surgimento de erros de tramitação, erros de recusa (por duplicidade), ou um processo ficar aberto em dois locais ao mesmo tempo.
 
