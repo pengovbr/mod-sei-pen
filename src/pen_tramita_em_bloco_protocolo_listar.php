@@ -69,7 +69,58 @@ try {
             $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
             $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
           } else {
-            $tramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
+            $recusa = false;
+            $cancelado = false;
+            // Verificar se tem existe processo recusado dentro de um bloco
+            $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
+            $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+            $objTramiteEmBlocoProtocoloDTO2->retNumIdTramitaEmBloco();
+            $objTramiteEmBlocoProtocoloDTO2->retDblIdProtocolo();
+
+            $objTramiteEmBlocoProtocoloDTORN = new TramitaEmBlocoProtocoloRN($objTramiteEmBlocoProtocoloDTO2);
+
+            $arrTramiteEmBlocoProtocolo = $objTramiteEmBlocoProtocoloDTORN->listar($objTramiteEmBlocoProtocoloDTO2);
+
+            $objPenProtocolo = new PenProtocoloDTO();
+            $objPenProtocolo->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo, 'IdProtocolo'), InfraDTO::$OPER_IN);
+            $objPenProtocolo->setStrSinObteveRecusa('S');
+            $objPenProtocolo->setNumMaxRegistrosRetorno(1);
+            $objPenProtocolo->retDblIdProtocolo();
+
+            $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+            $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+
+            if ($ObjPenProtocoloDTO != null) {
+              $recusa = true;
+            }
+
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo, 'IdProtocolo'), InfraDTO::$OPER_IN);
+            $objAtividadeDTO->setNumIdTarefa([
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
+            ], InfraDTO::$OPER_IN);
+            $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+            $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+            $objAtividadeDTO->retNumIdAtividade();
+            $objAtividadeDTO->retNumIdTarefa();
+            $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+    
+            if ($objAtividadeDTO != null) {
+              $cancelado = true;
+            }
+
+            if ($recusado == false && $cancelado == false) {
+              $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+              $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+              $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+  
+              $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+              $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+            }
           }
         } 
         
@@ -224,7 +275,8 @@ try {
             $objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() == $processoTramiteCancelado ||
             $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO ) {
 
-          if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO) {
+          if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
+          $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_CONCLUIDO) {
             $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
           } 
         }

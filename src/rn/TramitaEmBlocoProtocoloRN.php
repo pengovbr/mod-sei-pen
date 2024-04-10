@@ -428,13 +428,23 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     if ($ObjPenProtocoloDTO != null) {
       return null;
     }
-
+    // não atualizar para concluido quando o bloco estiver em concluido parcialmente
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado($novoEstadoDoBloco);
-
+    $objTramiteEmBlocoDTO->setStrStaEstado([
+      TramiteEmBlocoRN::$TE_ABERTO,
+      TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
+    ], InfraDTO::$OPER_IN);
+    $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retStrStaEstado();
+    
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+    $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+    
+    if ($objTramiteEmBlocoDTO != null) {
+      $objTramiteEmBlocoDTO->setStrStaEstado($novoEstadoDoBloco);
+      $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+    }
   }
 
   /**
