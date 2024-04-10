@@ -172,20 +172,21 @@ try {
       $objPenLoteProcedimento = $objTramitaEmBlocoProtocoloDTO->getObjPenLoteProcedimentoDTO();
 
       if ($objPenLoteProcedimento && $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_ABERTO) {
-          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento->getStrNomeUsuario()) . '</td>';
-          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento->getDthRegistro()) . '</td>';
-          $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento->getStrUnidadeDestino()) . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getStrNomeUsuario()) . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getDthRegistro()) . '</td>';
+        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getStrUnidadeDestino()) . '</td>';
          
       } else {
-          $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
+        $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
 
       $strResultado .= '<td align="center">' . "\n";
-
       if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO) {
         $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';   
       } elseif ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_DISPONIBILIZADO) {
         $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
+      } elseif ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_CONCLUIDO && count($objPenLoteProcedimento) > 1) {
+        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
       } elseif ($objTramitaEmBlocoProtocoloDTO->getStrSinObteveRecusa() == 'S') {
         $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
       } else {
@@ -196,7 +197,7 @@ try {
         $processoTramiteCancelado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); 
         $processoTramiteProcessamento = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
         $processoTramiteAberto = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-       
+
         switch ($objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa()) {
           case $processoConcluidoAvulso:
           case $processoTramiteExpedido:

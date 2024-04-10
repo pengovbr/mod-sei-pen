@@ -61,7 +61,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
         $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
         $objPenLoteProcedimentoDTO->setDblIdProcedimento($dto->getDblIdProtocolo());
-        $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
+        // $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
         $objPenLoteProcedimentoDTO->retNumIdLote();
         $objPenLoteProcedimentoDTO->retDblIdProcedimento();
@@ -74,7 +74,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
         $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
         // $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
-        $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+        $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarLoteProcedimento($objPenLoteProcedimentoDTO);
 
         $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoRN);
 
@@ -123,6 +123,42 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       return $ret;
     } catch (Exception $e) {
       throw new InfraException('Erro listando protocolos do bloco.', $e);
+    }
+  }
+
+  protected function consultarProtocolosBlocoConectado(TramitaEmBlocoProtocoloDTO $objTramitaEmBlocoProtocoloDTO)
+  {
+    $ret = array();
+
+    $parObjTramitaEmBlocoProtocoloDTO = $this->listar($objTramitaEmBlocoProtocoloDTO);
+
+    foreach ($parObjTramitaEmBlocoProtocoloDTO as $objTramitaEmBlocoProtocoloDTO) {
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDblIdProtocolo($objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo());
+      $objAtividadeDTO->setNumIdTarefa([
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
+      ], InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+      $objAtividadeRN = new AtividadeRN();
+      $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+      if (!empty($arrObjAtividadeDTO) && $arrObjAtividadeDTO[0]->getNumIdTarefa() != null) {
+        $objTramitaEmBlocoProtocoloDTO->setNumStaIdTarefa($arrObjAtividadeDTO[0]->getNumIdTarefa());
+      } else {
+        $objTramitaEmBlocoProtocoloDTO->setNumStaIdTarefa(0);
+      }
+
+      return $objTramitaEmBlocoProtocoloDTO;
     }
   }
 
@@ -184,22 +220,39 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
-        if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() != 'S') {
-          $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-          $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdTramitaEmBloco());
-          $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-          $tramiteEmBlocoDTO->retStrStaEstado();
-          $tramiteEmBlocoDTO->retNumId();
+        $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdTramitaEmBloco());
+        $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $tramiteEmBlocoDTO->retStrStaEstado();
+        $tramiteEmBlocoDTO->retNumId();
 
-          $tramiteEmBlocoRN = new TramiteEmBlocoRN();
-          $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
+        $tramiteEmBlocoRN = new TramiteEmBlocoRN();
+        $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
-          if ($tramiteEmBloco != null) {
-            $arrayExcluido[] = $objBD->excluir($objDTO);
-          }
-        } else {
+        if ($tramiteEmBloco != null) {
+          $arrayExcluido[] = $objBD->excluir($objDTO);
+          return $arrayExcluido;
+        }
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+        $objAtividadeDTO->setNumIdTarefa([
+          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
+        ], InfraDTO::$OPER_IN);
+        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->retNumIdAtividade();
+        $objAtividadeDTO->retNumIdTarefa();
+        $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+        if ($objAtividadeDTO != null) {
           $arrayExcluido[] = $objBD->excluir($objDTO);
         }
+
       }
       return $arrayExcluido;
     } catch (Exception $e) {
