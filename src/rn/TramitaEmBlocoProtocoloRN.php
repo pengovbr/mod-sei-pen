@@ -231,7 +231,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
         if ($tramiteEmBloco != null) {
           $arrayExcluido[] = $objBD->excluir($objDTO);
-          return $arrayExcluido;
+          continue;
         }
 
         $objAtividadeDTO = new AtividadeDTO();
