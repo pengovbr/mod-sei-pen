@@ -79,15 +79,12 @@ class PenLoteProcedimentoRN extends InfraRN {
     {
     try {
 
-        //Valida PermissãoTipo
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+      //Valida PermissãoTipo
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
 
-        //Obter todos os processos pendentes antes de iniciar o monitoramento
-        $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();
-
-
-
-        shuffle($arrObjPendenciasLoteDTO);
+      //Obter todos os processos pendentes antes de iniciar o monitoramento
+      $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();
+      shuffle($arrObjPendenciasLoteDTO);
 
       $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
       foreach ($arrObjPendenciasLoteDTO as $objPendenciasLoteDTO) {
