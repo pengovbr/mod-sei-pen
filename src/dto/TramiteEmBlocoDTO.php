@@ -7,12 +7,12 @@ class TramiteEmBlocoDTO extends InfraDTO
 
   public function getStrNomeTabela()
   {
-    return 'md_pen_tramita_em_bloco';
+    return 'md_pen_bloco';
   }
 
   public function getStrNomeSequenciaNativa()
   {
-    return 'md_pen_seq_tramita_em_bloco';
+    return 'md_pen_seq_bloco';
   }
 
   public function montar()

@@ -27,16 +27,17 @@ try {
 
   $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
 
-  // verificar se o processo está em algum bloco
   $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
   $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
+  $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
   $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
 
   $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultarProtocolosBloco($objTramiteEmBlocoProtocoloDTO);
 
   if ($tramiteEmBlocoProtocoloDTO != null) {
+    // TODO: tratar atualização a partir de um metodo
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
     $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);

@@ -128,7 +128,7 @@ class TramiteEmBlocoRN extends InfraRN
     try {
       $arrEstadoBloco = [
         self::$TE_ABERTO => 'Aberto',
-        self::$TE_DISPONIBILIZADO => 'Em processamento',
+        self::$TE_DISPONIBILIZADO => 'Aguardando Processamento',
         self::$TE_CONCLUIDO => 'Concluído',
         self::$TE_CONCLUIDO_PARCIALMENTE => 'Concluído Parcialmente',
         self::$TE_RETORNADO => 'Retornado',

@@ -785,7 +785,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function visualizarProcessoTramitadosEmLote($test)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $test->byLinkText("Processos Tramitados em Lote")->click();
+        $test->byLinkText("Processos Tramitados em Bloco")->click();
     }
 
     protected function navegarProcessoEmLote($selAndamento, $numProtocolo=null)

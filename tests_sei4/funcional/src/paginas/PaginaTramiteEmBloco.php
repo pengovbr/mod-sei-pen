@@ -7,7 +7,7 @@ use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
  */
 class PaginaTramiteEmBloco extends PaginaTeste
 {
-    const STA_ANDAMENTO_PROCESSAMENTO = "Em Processamento";
+    const STA_ANDAMENTO_PROCESSAMENTO = "Aguardando Processamento";
     const STA_ANDAMENTO_CANCELADO = "Cancelado";
     const STA_ANDAMENTO_CONCLUIDO = "Concluído";
 

@@ -112,6 +112,48 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
     }
 
     /**
+     * Exluir mapeamentos existentes
+     *  
+     * @return void
+     */
+    public function excluirMapeamentosExistentes()
+    {
+        try{
+            $lnkInfraCheck=$this->test->byXPath('//*[@id="lnkInfraCheck"]');
+            $lnkInfraCheck->click();
+            $this->excluirSelecionados();
+            sleep(1);
+            $mensagem = $this->buscarMensagemAlerta();
+            $this->test->assertStringContainsString(
+                utf8_encode('Mapeamento excluído com sucesso.'),
+                $mensagem
+            );
+        } catch (Exception $e) {
+        }
+    }
+
+    /**
+     * Selecionar todos os resultados
+     *  
+     * @return void
+     */
+    public function selecionarTodos()
+    {
+        $this->test->byXPath('//*[@id="lnkInfraCheck"]')->click();
+    }
+
+    /**
+     * Excluir selecionados
+     *  
+     * @return void
+     */
+    public function excluirSelecionados()
+    {
+        $this->test->byId("btnExcluir")->click();
+        $this->test->acceptAlert();
+    }
+
+    /**
      * Selecionar primeira checkbox de exclusão
      * Seleciona botão excluir
      * Seleciona botão de confirmação
@@ -120,7 +162,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      */
     public function selecionarExcluir()
     {
-        $this->test->byXPath("(//input[@id='chkInfraItem0'])[1]")->click();
+        $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
         $this->test->byId("btnExcluir")->click();
         $this->test->acceptAlert();
     }
@@ -168,7 +210,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
             return null;
         }
     }
-
+    
     /**
      * Buscar mensagem de alerta da página
      *
@@ -176,7 +218,9 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      */
     public function buscarMensagemAlerta()
     {
-        $alerta = $this->test->alertText();
-        return !empty($alerta) ? $alerta : "";
+        $bolExisteAlerta = $this->alertTextAndClose();
+        $bolExisteAlerta != null ? $this->test->keys(Keys::ENTER) : null;
+
+        return $bolExisteAlerta;
     }
 }

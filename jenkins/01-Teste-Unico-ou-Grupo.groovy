@@ -262,17 +262,6 @@ pipeline {
                         \\cp -R * ${FOLDERSPE}/src
                     fi
 
-                    if [ ! "${SISTEMA}" = "sei3" ]; then
-                        docker stop seitmp || true
-                        docker rm seitmp || true
-                        ls -lh ${FOLDERSPE}/src/sei/config/
-                        docker run -d --rm --name seitmp --entrypoint="" processoeletronico/vagrant_super4_httpd:10.0 bash -c "tail -f /dev/null"
-                        docker cp seitmp:/ConfiguracaoSEI.php ${FOLDERSPE}/src/sei/config/ConfiguracaoSEI.php
-                        ls -lh ${FOLDERSPE}/src/sei/config/
-                        docker stop seitmp || true
-                        docker rm seitmp || true
-                    fi
-
                     """
 
                 }
@@ -341,21 +330,13 @@ pipeline {
 
                     sudo chmod +r ${FOLDER_FUNCIONAIS}/assets/config/certificado_org1.pem
                     sudo chmod +r ${FOLDER_FUNCIONAIS}/assets/config/certificado_org2.pem
-                    sudo rm -rf ${FOLDERSPE}/sei/config/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/sei/web/modulos/pen || true
-                    sudo rm -rf ${FOLDERSPE}/sip/config/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen || true
-                    #sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php* || true
-                    #sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php* || true
-
-                    sudo rm -rf ${FOLDERSPE}/src/sei/config/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/src/sei/scripts/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/src/sei/web/modulos/pen || true
-                    sudo rm -rf ${FOLDERSPE}/src/sip/config/mod-pen || true
-                    sudo rm -rf ${FOLDERSPE}/src/sei/scripts/mod-pen || true
-                    #sudo rm -rf ${FOLDERSPE}/src/sei/config/ConfiguracaoSEI.php* || true
-                    #sudo rm -rf ${FOLDERSPE}/src/sip/config/ConfiguracaoSip.php* || true
+                    sudo rm -rf ${FOLDERSPE}/sei/config/mod-pen
+                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
+                    sudo rm -rf ${FOLDERSPE}/sei/web/modulos/pen
+                    sudo rm -rf ${FOLDERSPE}/sip/config/mod-pen
+                    sudo rm -rf ${FOLDERSPE}/sei/scripts/mod-pen
+                    sudo rm -rf ${FOLDERSPE}/sei/config/ConfiguracaoSEI.php*
+                    sudo rm -rf ${FOLDERSPE}/sip/config/ConfiguracaoSip.php*
 
                     """, label: "Destroi ambiente e Remove Antigos"
 
