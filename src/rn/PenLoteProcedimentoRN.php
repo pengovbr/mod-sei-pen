@@ -79,17 +79,21 @@ class PenLoteProcedimentoRN extends InfraRN {
     {
     try {
 
-        //Valida PermissãoTipo
-        SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+      //Valida PermissãoTipo
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
 
-        //Obter todos os processos pendentes antes de iniciar o monitoramento
-        $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();
+      //Obter todos os processos pendentes antes de iniciar o monitoramento
+      $arrObjPendenciasLoteDTO = $this->listarLoteProcedimento($objPenLoteProcedimentoDTO) ?: array();
+      shuffle($arrObjPendenciasLoteDTO);
 
-        shuffle($arrObjPendenciasLoteDTO);
-
+      $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
       foreach ($arrObjPendenciasLoteDTO as $objPendenciasLoteDTO) {
         //Captura todas as pendências e status retornadas para impedir duplicidade
         $arrPendenciasLoteRetornadas[] = sprintf("%d-%s", $objPendenciasLoteDTO->getDblIdProcedimento(), $objPendenciasLoteDTO->getNumIdAndamento());
+        
+        $objPendenciasLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+        $objPenLoteProcedimentoBD->alterar($objPendenciasLoteDTO);
+
         yield $objPendenciasLoteDTO;
       }
     } catch (\Exception $e) {
@@ -136,6 +140,21 @@ class PenLoteProcedimentoRN extends InfraRN {
 
           $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
           $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+
+
+          // Atualizar Bloco para concluido parcialmente
+          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+
+          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+
+        if ($tramiteEmBlocoProtocolo != null) {
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        }
       }
 
         //Desbloqueia o processo

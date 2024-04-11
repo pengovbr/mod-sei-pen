@@ -284,7 +284,7 @@ function onSubmit() {
     field = jQuery('#hdnUnidadeRh', form);
 
     if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
-        alert('Nenhum "ID da Unidade - PEN" foi selecionada');
+        alert('Nenhum "ID da Unidade - Tramita GOV.BR" foi selecionada');
         field.focus();
         return false;
     }
@@ -304,7 +304,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
     </select>
 
-    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do PEN (Estruturas Organizacionais):</label>
+    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do Tramita GOV.BR (Estruturas Organizacionais):</label>
     <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
     <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
     <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />

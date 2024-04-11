@@ -69,7 +69,9 @@ class PendenciasTramiteRN extends InfraRN
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
 
-        PENIntegracao::verificarCompatibilidadeConfiguracoes();
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+        return false;
+      }
 
       if(empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)){
         throw new InfraException("Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
@@ -81,7 +83,7 @@ class PendenciasTramiteRN extends InfraRN
 
       do{
         try {
-          $this->gravarLogDebug('Recuperando lista de pendências do PEN', 1);
+          $this->gravarLogDebug('Recuperando lista de pendências do Tramita GOV.BR', 1);
           $arrObjPendenciasDTO = $this->obterPendenciasTramite($parBolMonitorarPendencias);
 
 
@@ -287,7 +289,7 @@ class PendenciasTramiteRN extends InfraRN
               } elseif(in_array($strChavePendencia, $arrObjPendenciasDTONovas)) {
               // Sleep adicionado para minimizar problema do serviço de pendência que retorna o mesmo código e status
               // inúmeras vezes por causa de erro ainda não tratado
-                $mensagemErro = sprintf("Pendência de trâmite (IDT: %d / status: %s) enviado em duplicidade pelo serviço de monitoramento de pendências do PEN",
+                $mensagemErro = sprintf("Pendência de trâmite (IDT: %d / status: %s) enviado em duplicidade pelo serviço de monitoramento de pendências do Tramita GOV.BR",
                   $numUltimoIdTramiteRecebido, $strUltimoStatusRecebido);
                 $this->gravarLogDebug($mensagemErro, 2);
                 throw new InfraException($mensagemErro);
@@ -385,14 +387,11 @@ class PendenciasTramiteRN extends InfraRN
         $numStatus = strval($objPendencia->getStrStatus());
         $objProcessarPendenciaRN = new ProcessarPendenciasRN();
 
-      switch ($numStatus) {
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
-            $objProcessarPendenciaRN->expedirLote($numIDT);
-            break;
-
+      switch ($numStatus) {        
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+            $objProcessarPendenciaRN->expedirLote($numIDT);
             $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
-            break;
+            break;        
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
@@ -433,13 +432,9 @@ class PendenciasTramiteRN extends InfraRN
 
       switch ($numStatus) {
 
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
-            $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
-            break;
-
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-            $client->addTaskBackground('enviarComponenteDigital', $numIDT, null, $numIDT);
-            break;
+            $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
+            break;        
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
@@ -560,7 +555,7 @@ class PendenciasTramiteRN extends InfraRN
         $bolInicializado = $numCodigoRespostaAtivacao == 0;
 
     } catch (\Exception $e) {
-        $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento PEN";
+        $strMensagem = "Falha: Não foi possível iniciar o monitoramento de tarefas Barramento Tramita GOV.BR";
         $objInfraException = new InfraException($strMensagem, $e);
         throw $objInfraException;
     }

@@ -157,7 +157,7 @@ try {
       $strResultado .= '<tr>';
       $strResultado .= '<th class="infraTh" width="1%">'.$objPagina->getThCheck().'</th>'."\n";
       $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal SEI - '.$objSessao->getStrSiglaOrgaoUnidadeAtual().'</th>'."\n";
-      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal PEN</th>'."\n";
+      $strResultado .= '<th class="infraTh" width="35%">Hipótese Legal Tramita GOV.BR</th>'."\n";
       $strResultado .= '<th class="infraTh" width="14%">Ações</th>'."\n";
       $strResultado .= '</tr>'."\n";
       $strCssTr = '';
@@ -330,7 +330,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
         </select>
         
-        <label for="id_barramento" class="infraLabelObrigatorio input-label-second">Hipótese Legal PEN:</label>
+        <label for="id_barramento" class="infraLabelObrigatorio input-label-second">Hipótese Legal Tramita GOV.BR:</label>
         <select name="id_barramento" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
         </select> 

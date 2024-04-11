@@ -292,7 +292,7 @@ class ReceberComponenteDigitalRN extends InfraRN
 
         $strHashInformadoBase64 = base64_encode($strHashInformado);
         $strHashDoArquivoBase64 = base64_encode($strHashDoArquivo);
-        $strDetalhes = "Hash do componente digital informado pelo PEN: $strHashInformadoBase64 \n";
+        $strDetalhes = "Hash do componente digital informado pelo Tramita GOV.BR: $strHashInformadoBase64 \n";
         $strDetalhes .= "Hash do componente digital calculado pelo SEI: $strHashDoArquivoBase64 \n";
         throw new InfraException($strMensagem, null, $strDetalhes);
     }

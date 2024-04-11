@@ -6,6 +6,8 @@
   colors="true"
   verbose="true"
   cacheResult="false"
+  stopOnError="false"
+  stopOnFailure="false"
 >
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
@@ -33,17 +35,17 @@
     <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
-      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA"
-      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
+      value="INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
-      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 1]" />
+      value="INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
-      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.1]" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA"
-      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 1.1]" />
+      value="INFORME_O_NOME_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
@@ -75,12 +77,12 @@
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
-      value="[INFORME O ID DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA"
-      value="[INFORME A SIGLA DE ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
+      value="INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
-      value="[INFORME O NOME DA ESTRUTURA UTILIZADO PARA TESTE ORG 2]" />
+      value="INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />
@@ -139,7 +141,9 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
-
+    <testsuite name="falsos_positivos">
+      <directory>tests_funcional_falsos_positivos_temp</directory>
+    </testsuite>
     <!-- novasuiteaqui -->
   </testsuites>
 </phpunit>

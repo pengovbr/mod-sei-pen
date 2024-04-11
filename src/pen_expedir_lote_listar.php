@@ -19,7 +19,7 @@
       switch ($_GET['acao']) {
 
         case 'pen_expedir_lote_listar':
-            $strTitulo = 'Processos Tramitados em Lote';
+            $strTitulo = 'Processos Tramitados em Bloco';
             break;
 
         default:

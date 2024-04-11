@@ -41,6 +41,8 @@ class MapeamentoTipoProcessoExportarTest extends CenarioBaseTestCase
         );
         $this->paginaExportarTiposProcesso->verificarQuantidadeDeLinhasSelecionadas();
         $this->paginaExportarTiposProcesso->btnExportar();
+
+        $this->sairSistema();
     }
 
     /**
@@ -62,5 +64,7 @@ class MapeamentoTipoProcessoExportarTest extends CenarioBaseTestCase
         $this->paginaExportarTiposProcesso->selecionarPesquisa();
         sleep(1);
         $this->assertTrue($this->paginaExportarTiposProcesso->buscarPesquisa());
+
+        $this->sairSistema();
     }
 }

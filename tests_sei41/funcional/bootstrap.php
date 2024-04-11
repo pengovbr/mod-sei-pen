@@ -25,5 +25,6 @@ require_once __DIR__ . '/src/paginas/PaginaAnexarProcesso.php';
 require_once __DIR__ . '/src/paginas/PaginaCancelarDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaMoverDocumento.php';
 require_once __DIR__ . '/src/paginas/PaginaTramitarProcessoEmLote.php';
+require_once __DIR__ . '/src/paginas/PaginaEnvioParcialListar.php';
 
 require_once __DIR__ . '/tests/CenarioBaseTestCase.php';

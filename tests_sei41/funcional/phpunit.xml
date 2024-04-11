@@ -6,6 +6,8 @@
   colors="true"
   verbose="true"
   cacheResult="false"
+  stopOnError="false"
+  stopOnFailure="false"
 >
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
@@ -140,7 +142,9 @@
     <testsuite name="funcional">
       <directory>tests</directory>
     </testsuite>
-
+    <testsuite name="falsos_positivos">
+      <directory>tests_funcional_falsos_positivos_temp</directory>
+    </testsuite>
     <!-- novasuiteaqui -->
   </testsuites>
 
