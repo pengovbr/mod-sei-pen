@@ -10,7 +10,7 @@ class ProcessoEletronicoINT extends InfraINT {
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
     const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizado com sucesso!';
-    const TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trámite Externo\'';
+    const TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'';
 
     /**
      * Concate as siglas das hierarquias no nome da unidade
