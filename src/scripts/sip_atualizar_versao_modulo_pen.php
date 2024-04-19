@@ -296,6 +296,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3060();
         case '3.6.0':
             $this->instalarV3070();
+        case '3.7.0':
+            $this->instalarV3071();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2072,6 +2074,11 @@ class PenAtualizarSipRN extends InfraRN
   protected function instalarV3070()
   {
     $this->atualizarNumeroVersao("3.7.0");
+  }
+
+  protected function instalarV3071()
+  {
+    $this->atualizarNumeroVersao("3.7.1");
   }
 
   /**
