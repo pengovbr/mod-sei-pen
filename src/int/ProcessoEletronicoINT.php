@@ -4,12 +4,12 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class ProcessoEletronicoINT extends InfraINT {
 
-    //Situa√ß√£o de cada uma das etapas da envio externo de processos
+    //SituaÁ„o de cada uma das etapas da envio externo de processos
     const NEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 1;
-    const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informa√ß√µes do processo...';
+    const TEE_EXPEDICAO_ETAPA_VALIDACAO = 'Validando informaÁıes do processo...';
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
-    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Tr√¢mite externo do processo finalizado com sucesso!';
+    const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Tr‚mite externo do processo finalizado com sucesso!';
     const TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramita√ß√£o por meio do bloco, na funcionalidade \'Blocos de Tr√¢mite Externo\'';
 
     /**
