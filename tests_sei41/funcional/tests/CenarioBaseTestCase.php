@@ -44,6 +44,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
     protected $paginaEnvioParcialListar = null;
+    protected $paginaPenHipoteseLegalListar = null;
 
     public function setUpPage(): void
     {
@@ -68,6 +69,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
+        $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
         $this->currentWindow()->maximize();
     }
 
