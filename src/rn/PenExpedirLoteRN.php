@@ -116,7 +116,7 @@ class PenExpedirLoteRN extends InfraRN
             $objPenLoteProcedimentoRN->cadastrarLoteProcedimento($objPenLoteProcedimentoDTO);
 
             $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO);
           } catch (\Exception $e) {
                 //Realiza o desbloqueio do processo
             try {
