@@ -427,7 +427,7 @@ class ProcessoEletronicoRN extends InfraRN
 
           if(!empty($estrutura->hierarquia->nivel)) {
             $array = array();
-            foreach($estrutura->hierarquia->nivel as $nivel) {
+            foreach($estrutura->hierarquia as $nivel) {
               $array[] = utf8_decode($nivel->sigla);
             }
             $item->setArrHierarquia($array);
@@ -525,7 +525,7 @@ class ProcessoEletronicoRN extends InfraRN
 
           if (!empty($estrutura->hierarquia->nivel)) {
             $array = array();
-            foreach ($estrutura->hierarquia->nivel as $nivel) {
+            foreach ($estrutura->hierarquia as $nivel) {
               $array[] = utf8_decode($nivel->sigla);
             }
             $item->setArrHierarquia($array);
@@ -2211,7 +2211,7 @@ class ProcessoEletronicoRN extends InfraRN
       return (
           isset($parObjDocumento->protocoloDoProcessoAnexado) &&
           !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-          $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
+          $parObjProtocolo?->protocolo != $parObjDocumento?->protocoloDoProcessoAnexado
       );
   }
 

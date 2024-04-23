@@ -655,7 +655,7 @@ class ReceberProcedimentoRN extends InfraRN
 
       $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
     foreach($arrObjDocumento as $objDocumento){
-        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componenteDigital->hash);
+        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componenteDigital[0]->hash);
         $objMapDTO = new PenRelTipoDocMapRecebidoDTO(true);
         $objMapDTO->setNumMaxRegistrosRetorno(1);
         $objMapDTO->setNumCodigoEspecie($objDocumento->especie->codigo);
@@ -941,7 +941,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento);
 
       //Cadastro das atividades para quando o destinatário é desviado pelo receptor (!3!)
-    if ($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura) {
+    if ($this->destinatarioReal?->numeroDeIdentificacaoDaEstrutura) {
         $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
     }
 
@@ -1300,7 +1300,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
           $objAtributoAndamentoDTO->setStrNome('ENTIDADE_ORIGEM_HIRARQUIA');
           $objAtributoAndamentoDTO->setStrValor($nome);
-          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel?->numeroDeIdentificacaoDaEstrutura);
           $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
 
