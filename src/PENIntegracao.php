@@ -1109,5 +1109,34 @@ class PENIntegracao extends SeiIntegracao
     SessaoSEI::getInstance(false);
     ProcessarPendenciasRN::getInstance()->processarPendencias();
   }
+
+  public function assinarDocumento($arrObjDocumentoAPI = array()){
+
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+    foreach($arrObjDocumentoAPI as $objDocumentoAPI){
+      //Pode ser assinado documentos de mais de um processo
+      $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objDocumentoAPI->getIdProcedimento());
+      $objUltimoTramiteRecebidoDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
+
+      //Se não tiver trâmite não há o que se checar
+      if(!is_null($objUltimoTramiteRecebidoDTO)){
+        $arrObjComponentesDigitais = $objProcessoEletronicoRN->listarComponentesDigitais($objUltimoTramiteRecebidoDTO);
+        if(!is_null($arrObjComponentesDigitais)){
+          foreach($arrObjComponentesDigitais as $objComponentesDigitais){
+            if ($objComponentesDigitais->getDblIdDocumento() == $objDocumentoAPI->getIdDocumento()){
+              $nomeModulo = $this->getNome();
+              $mensagem = "$nomeModulo: Prezado(a) usuário(a) esse documento já foi tramitado externamente via Tramita GOV.BR. Por esse motivo, este documento não pode receber uma nova assinatura.";
+              LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
+              $objInfraException = new InfraException();
+              $objInfraException->adicionarValidacao($mensagem);
+              $objInfraException->lancarValidacoes();
+            }
+          }
+        }
+      }
+    }
+  }
 }
 class ModuloIncompativelException extends InfraException { }
