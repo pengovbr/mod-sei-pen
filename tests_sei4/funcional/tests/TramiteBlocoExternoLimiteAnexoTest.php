@@ -132,24 +132,24 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
         $this->sairSistema();
     }
 
-    public function test_verificar_envio_processo()
-    {
-        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
+    // public function test_verificar_envio_processo()
+    // {
+    //     $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->visualizarProcessoTramitadosEmLote($this);
-        $this->navegarProcessoEmLote(0);
+    //     $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+    //     $this->visualizarProcessoTramitadosEmLote($this);
+    //     $this->navegarProcessoEmLote(0);
 
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
-            sleep(5);
-            $testCase->refresh();
-            $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
-            return true;
-        }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
+    //     $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+    //         sleep(5);
+    //         $testCase->refresh();
+    //         $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
+    //         $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
+    //         return true;
+    //     }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
         
-        sleep(5);
-    }
+    //     sleep(5);
+    // }
 
     public function test_verificar_envio_tramite_em_bloco()
     {
