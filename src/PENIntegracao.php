@@ -188,14 +188,24 @@ class PENIntegracao extends SeiIntegracao
   {
     $excecao = new InfraException();
     foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
-      $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
+      $objPenHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
       $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
       $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
-      $objPenHipoteseLegalDTO->retStrNome();
 
-      $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
-      $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
-      if (!is_null($objPenHipoteseLegalDTO)) {
+      $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+      $objPenRelHipoteseLegalEnvioDTO = $objPenRelHipoteseLegalEnvioRN->consultar($objPenHipoteseLegalDTO);
+
+      $objPenRelHipoteseLegalRecebidoRN = new PenRelHipoteseLegalRecebidoRN();
+      $objPenRelHipoteseLegalRecebidoDTO = $objPenRelHipoteseLegalRecebidoRN->consultar($objPenHipoteseLegalDTO);
+      
+      if (!is_null($objPenRelHipoteseLegalEnvioDTO) || !is_null($objPenRelHipoteseLegalRecebidoDTO)) {
+
+        $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
+        $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+        $objPenHipoteseLegalDTO->retStrNome();
+
+        $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
+        $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
         $excecao->lancarValidacao('Não é permitido excluir ou desativar a hipotese legal "' . $objPenHipoteseLegalDTO->getStrNome() . '"');
       }
     }
