@@ -3,89 +3,46 @@
 /**
  * Responsável por cadastrar novo mapeamento de unidades caso não exista
  */
-class PenMapUnidadesFixture
+class PenMapUnidadesFixture extends \FixtureBase
 {
-    private static $bancoOrgaoA;
-    private static $dados;
+    protected $objPenUnidadeDTO;
 
-    /**
-     * @param string $contexto
-     * @param array $dados
-     */
-    public function __construct(string $contexto, array $dados)
+    public function __construct()
     {
-        self::$bancoOrgaoA = new DatabaseUtils($contexto);
-        self::$dados = $dados;
+        $this->objPenUnidadeDTO = new \PenUnidadeDTO();
     }
 
-    /**
-     * Consulta mapeamento de unidade
-     * Se existe atualiza sigla e nome
-     * Se não existe cadastra um novo
-     *
-     * @return void
-     */
-    public function gravar(): void
+    protected function inicializarObjInfraIBanco()
     {
-        $penUnidade = $this->consultar();
-        if (!empty($penUnidade)) {
-            $this->atualizar();
-        } else {
-            $this->cadastrar();
+        return \BancoSEI::getInstance();
+    }
+
+    public function cadastrar($dados = [])
+    {
+        $objPenUnidadeDTO = $this->consultar($dados);
+        if ($objPenUnidadeDTO) {
+            return $objPenUnidadeDTO;
         }
-    }
 
-    /**
-     * Consultar mapeamento de unidade
-     *
-     * @return array|null
-     */
-    public function consultar()
-    {
-        return self::$bancoOrgaoA->query(
-            'select id_unidade, id_unidade_rh from md_pen_unidade where id_unidade = ? and id_unidade_rh = ?',
-            array(110000001, self::$dados['id'])
-        );
-    }
+        $this->objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?? 110000001);
+        $this->objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
+        $this->objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
+        $this->objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
 
-    /**
-     * Cadastrar mapeamento de unidade
-     * 
-     * @return void
-     */
-    public function cadastrar(): void
-    {
-        self::$bancoOrgaoA->execute(
-            "INSERT INTO md_pen_unidade (id_unidade, id_unidade_rh, sigla_unidade_rh, nome_unidade_rh) ".
-            "VALUES(?, ?, ?, ?)",
-            array(110000001, self::$dados['id'], self::$dados['sigla'], self::$dados['nome'])
-        );
+        $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
+        return $objPenUnidadeBD->cadastrar($this->objPenUnidadeDTO);
     }
-
-    /**
-     * Atualizar mapeamento de unidade
-     * 
-     * @return void
-     */
-    public function atualizar(): void
+    
+    public function consultar($dados = [])
     {
-        self::$bancoOrgaoA->execute(
-            "UPDATE md_pen_unidade SET sigla_unidade_rh = ?, nome_unidade_rh = ? ".
-            "WHERE id_unidade = ?  AND id_unidade_rh = ?",
-            array(self::$dados['sigla'], self::$dados['nome'], 110000001, self::$dados['id'])
-        );
-    }
+        $objPenUnidadeDTO = new \PenUnidadeDTO();
+        $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?? 110000001);
+        $objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
+        $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
+        $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
+        $objPenUnidadeDTO->retTodos();
 
-    /**
-     * Deletear mapeamento de unidade
-     * 
-     * @return void
-     */
-    public function deletar(): void
-    {
-        self::$bancoOrgaoA->execute(
-            "DELETE FROM md_pen_unidade WHERE id_unidade = ? and id_unidade_rh = ?",
-            array(110000001, self::$dados['id'])
-        );
+        $objPenUnidadeBD = new \PenUnidadeBD(\BancoSEI::getInstance());
+        return $objPenUnidadeBD->consultar($objPenUnidadeDTO);
     }
 }
