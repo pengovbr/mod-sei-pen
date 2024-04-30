@@ -27,7 +27,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
 
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
