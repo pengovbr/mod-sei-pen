@@ -30,7 +30,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
     }
 
     /**
-     * Teste inicial de trâmite de um processo contendo outro anexado
+     * Teste inicial de trÃ¢mite de um processo contendo outro anexado
      *
      * @group envio
      * @large
@@ -39,7 +39,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
      */
     public function test_tramitar_processo_anexado_da_origem()
     {
-        // Definição de dados de teste do processo principal
+        // DefiniÃ§Ã£o de dados de teste do processo principal
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
 
@@ -142,7 +142,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
     public function test_verificar_envio_processo()
     {
         $this->markTestIncomplete(
-          'Tela de confirmação de envio suprimida. Aguardando refatoração da funcionalidade do bloco para refatorar este teste.'
+          'Tela de confirmaÃ§Ã£o de envio suprimida. Aguardando refatoraÃ§Ã£o da funcionalidade do bloco para refatorar este teste.'
         );
         
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];

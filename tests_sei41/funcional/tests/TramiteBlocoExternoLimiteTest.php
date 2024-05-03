@@ -116,7 +116,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
     public function test_verificar_envio_processo()
     {
         $this->markTestIncomplete(
-            'Tela de confirmação de envio suprimida. Aguardando refatoração da funcionalidade do bloco para refatorar este teste.'
+            'Tela de confirmaÃ§Ã£o de envio suprimida. Aguardando refatoraÃ§Ã£o da funcionalidade do bloco para refatorar este teste.'
         );
 
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
@@ -139,7 +139,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
     }
 
     /**
-     * Verificar atualização do bloco
+     * Verificar atualizaÃ§Ã£o do bloco
      *
      *
      * @return void
