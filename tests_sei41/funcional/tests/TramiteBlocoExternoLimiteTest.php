@@ -139,7 +139,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
     }
 
     /**
-     * Verificar atualizaÃ§Ã£o do bloco
+     * Verificar atualização do bloco
      *
      *
      * @return void

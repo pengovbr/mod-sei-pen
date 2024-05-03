@@ -30,7 +30,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
     }
 
     /**
-     * Teste inicial de trÃ¢mite de um processo contendo outro anexado
+     * Teste inicial de trâmite de um processo contendo outro anexado
      *
      * @group envio
      * @large
@@ -39,7 +39,7 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
      */
     public function test_tramitar_processo_anexado_da_origem()
     {
-        // DefiniÃ§Ã£o de dados de teste do processo principal
+        // Definição de dados de teste do processo principal
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_pequeno_A.pdf');
 
