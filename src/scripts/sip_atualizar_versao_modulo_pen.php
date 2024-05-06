@@ -2105,6 +2105,52 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $idPerfilBasico, 'pen_map_envio_parcial_listar');
     $this->atualizarNumeroVersao("3.6.2");  
   }
+  
+  protected function instalarV3070()
+  {
+    $numIdSistema = $this->getNumIdSistema('SEI');
+    $numIdMenu = $this->getNumIdMenu('Principal', $numIdSistema);
+    $idPerfilAdm = ScriptSip::obterIdPerfil($numIdSistema, "Administrador");
+
+    try {
+      // Remove item de menu anterior e seus submenus configurados de forma errada
+      $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados Externamente');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenu);
+
+      $numIdItemMenu = ScriptSip::obterIdItemMenu($numIdSistema, $numIdMenu, 'Processos Tramitados em Bloco');
+      ScriptSip::removerItemMenu($numIdSistema, $numIdMenu, $numIdItemMenu);
+    } catch (\Exception $e) {
+      $this->logar("Item de menu 'Processos Tramitados em Bloco'e/ou Processos Tramitados em Externamento não localizado(s)");
+    }
+
+    /* Corrige nome de menu de trâmite de documentos */
+    $objItemMenuBD = new ItemMenuBD(BancoSip::getInstance());
+
+    $objItemMenuDTO = new ItemMenuDTO();
+    $objItemMenuDTO->setNumIdSistema($numIdSistema);
+    $objItemMenuDTO->setNumIdMenu($numIdMenu);
+    $objItemMenuDTO->setNumIdItemMenuPai(null);
+    $objItemMenuDTO->setStrRotulo('Tramita GOV.BR');
+    $objItemMenuDTO->setNumMaxRegistrosRetorno(1);
+    $objItemMenuDTO->retNumIdItemMenu();
+    $objItemMenuDTO->retNumIdMenu();
+
+
+    $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
+
+    if (empty($objItemMenuDTO)) {
+      throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
+    }
+
+    $idMenuTramita = $objItemMenuDTO->getNumIdItemMenu();
+    $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos em Tramitação Externa', $numIdSistema);
+
+    $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos em Tramitação Externa', 57, $idMenuTramita, $numIdMenu, $numIdRecurso, $numIdSistema);
+    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
+    
+
+    $this->atualizarNumeroVersao("3.7.0");
+  }
 
   /**
    * Cadastrar item do menu em um perfil expecifico

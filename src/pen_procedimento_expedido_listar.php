@@ -15,7 +15,7 @@ try {
     $objSessaoSEI->validarPermissao($_GET['acao']);
     $arrComandos = array();
 
-    $strTitulo = 'Processos Tramitados Externamente';
+    $strTitulo = 'Processos em Tramitação Externa';
 
     $objFiltroDTO = new ProtocoloDTO();
     $objFiltroDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
@@ -44,21 +44,48 @@ try {
 
        $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
-       $strSumarioTabela = 'Tabela de Processos.';
+       $strSumarioTabela = 'Tabela de Processos';
        $strCaptionTabela = 'Processos';
 
-       $strResultado .= '<table width="99%" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
+       $strResultado .= "<table width='99%' id='tblBlocos' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
        $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
+      
+       $strResultado .= "<thead>";
        $strResultado .= '<tr>';
+
        $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
        $strResultado .= '<th class="infraTh">Processo</th>' . "\n";
-       $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
-       $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
-       $strResultado .= '<th class="infraTh">Unidade Destino</th>' . "\n";
+
+       $strResultado .= '<th class="infraTh">';
+       $strResultado .= '<div class="infraDivOrdenacao">';
+       $strResultado .= '<div class="infraDivRotuloOrdenacao">Usuário</div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAcima() .'" title="Ordenar Usuário Ascendente" alt="Ordenar Usuário Ascendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAbaixo() .'" title="Ordenar Usuário Descendente" alt="Ordenar Usuário Descendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '</div>';
+       $strResultado .= '</th>' . "\n";
+
+       $strResultado .= '<th class="infraTh">';
+       $strResultado .= '<div class="infraDivOrdenacao">';
+       $strResultado .= '<div class="infraDivRotuloOrdenacao">Data do Envio</div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAcima() .'" title="Ordenar Data do Envio Ascendente" alt="Ordenar Data do Envio Ascendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAbaixo() .'" title="Ordenar Data do Envio Descendente" alt="Ordenar Data do Envio Descendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '</div>';
+       $strResultado .= '</th>' . "\n";
+
+       $strResultado .= '<th class="infraTh">';
+       $strResultado .= '<div class="infraDivOrdenacao">';
+       $strResultado .= '<div class="infraDivRotuloOrdenacao">Unidade Destino</div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAcima() .'" title="Ordenar Unidade Destino Ascendente" alt="Ordenar Unidade Destino Ascendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . $objPaginaSEI->getIconeOrdenacaoColunaAbaixo() .'" title="Ordenar Unidade Destino Descendente" alt="Ordenar Unidade Destino Descendente" class="infraImgOrdenacao"></a></div>';
+       $strResultado .= '</div>';
+       $strResultado .= '</th>' . "\n";
+
        $strResultado .= '</tr>' . "\n";
+       $strResultado .= "</thead>";
+
        $strCssTr = '';
 
-       $numIndice = 1;
+       $numIndice = 0;
 
     foreach($arrObjProcessoExpedidoDTO as $objProcessoExpedidoDTO) {
 
@@ -69,7 +96,7 @@ try {
       $strResultado .= '<td width="17%" align="center"><a onclick="abrirProcesso(\'' .$objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objProcessoExpedidoDTO->getDblIdProtocolo())).'\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '" title="" class="protocoloNormal" style="font-size:1em !important;">'.$objProcessoExpedidoDTO->getStrProtocoloFormatado().'</a></td>' . "\n";
       $strResultado .= '<td align="center"><a alt="Teste" title="Teste" class="ancoraSigla">' . $objProcessoExpedidoDTO->getStrNomeUsuario() . '</a></td>';
       $strResultado .= '<td width="17%" align="center">' . $objProcessoExpedidoDTO->getDthExpedido() . '</td>';
-      $strResultado .= '<td align="left">' . $objProcessoExpedidoDTO->getStrDestino();
+      $strResultado .= '<td align="center">' . $objProcessoExpedidoDTO->getStrDestino();
 
       if ($bolAcaoRemoverSobrestamento) {
           $strResultado .= '<a href="' . $objPaginaSEI->montarAncora($objProcessoExpedidoDTO->getDblIdProtocolo()) . '" onclick="acaoRemoverSobrestamento(\'' . $objProcessoExpedidoDTO->getDblIdProtocolo() . '\',\'' . $objProcessoExpedidoDTO->getStrProtocoloFormatado() . '\');" tabindex="' . $objPaginaSEI->getProxTabTabela() . '"><img src="imagens/sei_remover_sobrestamento_processo_pequeno.gif" title="Remover Sobrestamento" alt="Remover Sobrestamento" class="infraImg" /></a>&nbsp;';
@@ -160,8 +187,37 @@ a.processoNaoVisualizado{
 #divTabelaGerado table{
     width:100%;
 }
+
+
+  /* Personalize o estilo da paginação */
+  .dataTables_paginate {
+    margin: 10px;
+    text-align: end;
+  }
+
+  .dataTables_paginate .paginate_button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    background-color: #f2f2f2;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .dataTables_paginate .paginate_button.current {
+    background-color: var(--color-primary-default);
+    color: #fff;
+  }
+
+
+  #tblBlocos_filter {
+    position: absolute;
+    opacity: 0;
+  }
+  
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
 <script type="text/javascript">
 
 function inicializar(){
@@ -176,6 +232,26 @@ function abrirProcesso(link){
     document.getElementById('frmProcedimentoExpedido').action = link;
     document.getElementById('frmProcedimentoExpedido').submit();
 }
+
+$(document).ready(function() {
+    $('#tblBlocos').dataTable({
+      "searching": false,
+      "columnDefs": [{
+        targets: [0, 4],
+        orderable: true
+      }],
+      "language": {
+        "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+        "lengthMenu": "Mostrar _MENU_ registros por página",
+        "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+        "zeroRecords": "Nenhum registro encontrado",
+        "paginate": {
+          "previous": "Anterior",
+          "next": "Próximo"
+        },
+      }
+    });
+});
 </script>
 <?php
 $objPaginaSEI->fecharHead();
