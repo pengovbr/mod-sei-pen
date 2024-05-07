@@ -2,7 +2,7 @@
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
-sistema=super
+sistema=sei5
 base=mysql
 teste=
 

@@ -296,6 +296,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3060();
         case '3.6.0':
             $this->instalarV3061();
+        case '3.6.1':
+            $this->instalarV4000();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2094,6 +2096,10 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
     $this->atualizarNumeroVersao("3.6.1");
+  }
+
+  protected function instalarV4000(){
+    $this->atualizarNumeroVersao("4.0.0");
   }
 
   /**
