@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "3.6.1");
+define("VERSAO_MODULO_PEN", "3.6.2");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
@@ -296,6 +296,8 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3060();
         case '3.6.0':
             $this->instalarV3061();
+        case '3.6.1':
+          $this->instalarV3062();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2094,6 +2096,14 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
     $this->atualizarNumeroVersao("3.6.1");
+  }
+
+  protected function instalarV3062()
+  {
+    $numIdSistemaSei = $this->getNumIdSistema('SEI');
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");    
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $idPerfilBasico, 'pen_map_envio_parcial_listar');
+    $this->atualizarNumeroVersao("3.6.2");  
   }
 
   /**

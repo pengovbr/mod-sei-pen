@@ -279,6 +279,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV3060();
         case '3.6.0':
           $this->instalarV3061();
+        case '3.6.1':
+          $this->instalarV3062();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2789,6 +2791,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3061(){
     $this->atualizarNumeroVersao("3.6.1");
+  }
+
+  protected function instalarV3062(){
+    $this->atualizarNumeroVersao("3.6.2");
   }
 }
 
