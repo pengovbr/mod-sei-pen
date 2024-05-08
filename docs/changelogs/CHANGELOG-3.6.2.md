@@ -18,9 +18,10 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
-#### Atribuição do recurso pen_map_envio_parcial_listar para o perfil básico de usuário.
+#### Atribuição do recurso pen_map_envio_parcial_listar para o perfil básico de usuário (https://github.com/pengovbr/mod-sei-pen/issues/504).
 
 Automatização da atribuição do recurso pen_map_envio_parcial_listar para o perfil básico de usuário, no ato da instalação.
+Correção do seguinte erro:"Acesso negado a este recurso nesta unidade (pen_map_envio_parcial_listar / GAB-ZZZ).".
 
 ### Atualização de Versão
 
