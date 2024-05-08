@@ -839,7 +839,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
 
-          $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()), 10000)):"NA";
+          $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
@@ -859,7 +859,7 @@ class ProcessoEletronicoRN extends InfraRN
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
-          $valorInput=$infoAssunto->getStrObservacao()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao()), 10000)):"NA";
+          $valorInput=$infoAssunto->getStrObservacao()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
