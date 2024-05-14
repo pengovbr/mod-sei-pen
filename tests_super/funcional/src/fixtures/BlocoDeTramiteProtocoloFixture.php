@@ -6,7 +6,7 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
 
     public function __construct()
     {
-        $this->objBlocoDeTramiteProtocoloDTO = new \TramitaEmBlocoProtocoloDTO();
+        $this->objBlocoDeTramiteProtocoloDTO = new \PenBlocoProcessoDTO();
     }
  
     protected function inicializarObjInfraIBanco()
@@ -18,12 +18,14 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
     {
 
         $this->objBlocoDeTramiteProtocoloDTO->setDblIdProtocolo($dados['IdProtocolo'] ?: null);
-        $this->objBlocoDeTramiteProtocoloDTO->setNumIdTramitaEmBloco($dados['IdTramitaEmBloco'] ?: null);
+        $this->objBlocoDeTramiteProtocoloDTO->setNumIdBloco($dados['IdBloco'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setNumSequencia($dados['Sequencia'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setStrIdxRelBlocoProtocolo($dados['IdxRelBlocoProtocolo'] ?: null);
+        $dthRegistro = date('d/m/Y H:i:s');
+        $this->objBlocoDeTramiteProtocoloDTO->setDthRegistro($dados['DthRegistro'] ?: $dthRegistro);
+        $this->objBlocoDeTramiteProtocoloDTO->setDthAtualizado($dados['DthAtualizado'] ?: $dthRegistro);
 
-        
-        $objBlocoDeTramiteProtocoloBD = new \TramitaEmBlocoProtocoloBD(\BancoSEI::getInstance());
+        $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
         $objBlocoDeTramiteProtocoloBD->cadastrar($this->objBlocoDeTramiteProtocoloDTO);
 
         return $this->objBlocoDeTramiteProtocoloDTO;

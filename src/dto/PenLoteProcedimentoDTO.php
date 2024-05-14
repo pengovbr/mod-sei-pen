@@ -23,16 +23,16 @@ class PenLoteProcedimentoDTO extends InfraDTO
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdAtividade', 'id_atividade_expedicao');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Tentativas', 'tentativas');
 
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdLote', 'id_lote', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioDestino', 'id_repositorio_destino', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'RepositorioDestino', 'str_repositorio_destino', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioOrigem', 'id_repositorio_origem', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidadeDestino', 'id_unidade_destino', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'UnidadeDestino', 'str_unidade_destino', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidadeOrigem', 'id_unidade_origem', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUsuario', 'id_usuario', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade', 'md_pen_expedir_lote');
-      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_registro', 'md_pen_expedir_lote');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdLote', 'id_lote', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioDestino', 'id_repositorio_destino', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'RepositorioDestino', 'str_repositorio_destino', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdRepositorioOrigem', 'id_repositorio_origem', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidadeDestino', 'id_unidade_destino', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'UnidadeDestino', 'str_unidade_destino', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidadeOrigem', 'id_unidade_origem', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUsuario', 'id_usuario', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade', 'md_pen_bloco_processo');
+      $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_DTH, 'Registro', 'dth_registro', 'md_pen_bloco_processo');
 
       $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'ProcedimentoFormatado', 'protocolo_formatado', 'protocolo');
       $this->adicionarAtributoTabelaRelacionada(InfraDTO::$PREFIXO_STR, 'NomeUsuario', 'nome', 'usuario');
@@ -40,7 +40,7 @@ class PenLoteProcedimentoDTO extends InfraDTO
       $this->configurarPK('IdLote', InfraDTO::$TIPO_PK_INFORMADO);
       $this->configurarPK('IdProcedimento', InfraDTO::$TIPO_PK_INFORMADO);
 
-      $this->configurarFK('IdLote', 'md_pen_expedir_lote', 'id_lote');
+      $this->configurarFK('IdLote', 'md_pen_bloco_processo', 'id_lote');
       $this->configurarFK('IdProcedimento', 'procedimento', 'id_procedimento');
       $this->configurarFK('IdProcedimento', 'protocolo', 'id_protocolo');
       $this->configurarFK('IdUsuario', 'usuario', 'id_usuario');

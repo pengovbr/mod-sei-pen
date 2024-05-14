@@ -20,22 +20,20 @@ try {
   $arrProtocolosOrigem = array();
   $tramiteEmBloco = isset($_GET['tramite_em_bloco']) ? $_GET['tramite_em_bloco'] : null;
   if ($tramiteEmBloco == 1) {
+    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+    $objPenBlocoProcessoDTO->retDblIdProtocolo();
+    $objPenBlocoProcessoDTO->retNumIdBloco();
+
     if (isset($_GET['id_tramita_em_bloco'])) {
-      $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-      $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_tramita_em_bloco']);
-      $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-      $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+      $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_tramita_em_bloco']);
     } else {
       $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
-      $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-      $objTramitaEmBlocoProtocoloDTO->setNumId($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
-      $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-      $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+      $objPenBlocoProcessoDTO->setNumIdBloco($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
     }
 
-    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
-    $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdTramitaEmBloco();
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+    $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdBloco();
     $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
     foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
       $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();
@@ -106,7 +104,6 @@ try {
       $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
       $strNomeUnidadeDestino = $_POST['txtUnidade'];
       $numIdUsuario = $objSessaoSEI->getNumIdUsuario();
-      $dthRegistro = date('d/m/Y H:i:s');
 
       if (isset($_POST['sbmExpedir'])) {
         $numVersao = $objPaginaSEI->getNumVersao();
@@ -117,22 +114,35 @@ try {
         $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
 
         try {
+          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $objPenBlocoProcessoDTO->retDblIdProtocolo();
+          $objPenBlocoProcessoDTO->retNumIdBloco();
+          $objPenBlocoProcessoDTO->retDthRegistro();
+          $objPenBlocoProcessoDTO->retNumIdLote();
+          $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
 
-          $objPenExpedirLoteDTO = new PenExpedirLoteDTO();
-          $objPenExpedirLoteDTO->setNumIdLote(null);
-          $objPenExpedirLoteDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
-          $objPenExpedirLoteDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
-          $objPenExpedirLoteDTO->setNumIdRepositorioDestino($numIdRepositorio);
-          $objPenExpedirLoteDTO->setStrRepositorioDestino($strRepositorio);
-          $objPenExpedirLoteDTO->setNumIdUnidadeDestino($numIdUnidadeDestino);
-          $objPenExpedirLoteDTO->setStrUnidadeDestino($strNomeUnidadeDestino);
-          $objPenExpedirLoteDTO->setNumIdUsuario($numIdUsuario);
-          $objPenExpedirLoteDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-          $objPenExpedirLoteDTO->setDthRegistro($dthRegistro);
-          $objPenExpedirLoteDTO->setArrIdProcedimento($arrProtocolosOrigem);
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+          foreach ($arrTramiteEmBlocoProtocolo as $objDTO) {
+            $objDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
+            $objDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
+            $objDTO->setNumIdRepositorioDestino($numIdRepositorio);
+            $objDTO->setStrRepositorioDestino($strRepositorio);
+            $objDTO->setNumIdUnidadeDestino($numIdUnidadeDestino);
+            $objDTO->setStrUnidadeDestino($strNomeUnidadeDestino);
+            $objDTO->setNumIdUsuario($numIdUsuario);
+            $objDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+            $dthAtualizado = date('d/m/Y H:i:s');
+            $objDTO->setDthAtualizado($dthAtualizado);
+            $objDTO->setArrListaProcedimento($arrProtocolosOrigem);
+            $objDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
+
+            $objPenBlocoProcessoRN->alterar($objDTO);
+          }
 
           $objPenExpedirLoteRN = new PenExpedirLoteRN();
-          $ret = $objPenExpedirLoteRN->cadastrarLote($objPenExpedirLoteDTO);
+          $ret = $objPenExpedirLoteRN->cadastrarLote($arrTramiteEmBlocoProtocolo[0]);
+          
           $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 
           // Atualiza estado do bloco em tramite para em processamento
