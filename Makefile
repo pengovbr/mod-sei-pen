@@ -112,6 +112,16 @@ check-isalive: ## Target de apoio. Acessa os Sistemas e verifica se estao respon
 install-phpunit-vendor: ## instala os pacotes composer referentes aos testes via phpunit
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-functional bash -c './composer.phar install'
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c './composer.phar install'
+	@if [ "$(sistema)" = "sei5" ]; then \
+	grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+	    if [ -z "$(grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php)" ]; then \
+		    echo "Vamos agora alterar um arquivo do besimple para compatibilizar com o php8"; \
+			echo "O arquivo a ser alterado serah: $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php"; \
+			echo "Caso necessario digite sua senha de root abaixo: "; \
+		    sudo sed -i "s|relative{0}|relative[0]|" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+			echo "Arquivo alterado. Procedendo..."; \
+		fi; \
+	fi
 
 
 $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
@@ -576,13 +586,3 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
-	@if [ "$(sistema)" = "sei5" ]; then \
-	grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
-	    if [ -z "$(grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php)" ]; then \
-		    echo "Vamos agora alterar um arquivo do besimple para compatibilizar com o php8"; \
-			echo "O arquivo a ser alterado serah: $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php"; \
-			echo "Caso necessario digite sua senha de root abaixo: "; \
-		    sudo sed -i "s|relative{0}|relative[0]|" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
-			echo "Arquivo alterado. Procedendo..."; \
-		fi; \
-	fi
