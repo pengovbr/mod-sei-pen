@@ -576,3 +576,13 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+	@if [ "$(sistema)" = "sei5" ]; then \
+	grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+	    if [ -z "$(grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php)" ]; then \
+		    echo "Vamos agora alterar um arquivo do besimple para compatibilizar com o php8"; \
+			echo "O arquivo a ser alterado serah: $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php"; \
+			echo "Caso necessario digite sua senha de root abaixo: "; \
+		    sudo sed -i "s|relative{0}|relative[0]|" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+			echo "Arquivo alterado. Procedendo..."; \
+		fi; \
+	fi
