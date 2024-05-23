@@ -15,7 +15,13 @@ class DatabaseUtils
 
 	public function execute($sql, $params){
 		$statement = $this->connection->prepare($sql);
-        $result = $statement->execute($params);
+        try{
+            $result = $statement->execute($params);
+        }catch(Exception $e){
+            print_r($e->getMessage());
+            $result ="";
+        }
+
         return $result;
 	}
 

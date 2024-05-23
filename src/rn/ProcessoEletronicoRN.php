@@ -526,7 +526,7 @@ class ProcessoEletronicoRN extends InfraRN
           if (!empty($estrutura->hierarquia->nivel)) {
             $array = array();
             foreach ($estrutura->hierarquia as $nivel) {
-              $array[] = utf8_decode($nivel->sigla);
+              $array[] = utf8_decode($nivel->sigla ?? "");
             }
             $item->setArrHierarquia($array);
           }

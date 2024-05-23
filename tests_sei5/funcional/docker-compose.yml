@@ -4,17 +4,17 @@ services:
 
   ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
   smtp:
-    image: processoeletronico/vagrant_sei4_mailcatcher:${ENVIRONMENT_VERSION}
+    image: processoeletronico/mailcatcher:${ENVIRONMENT_VERSION}
     ports:
       - "1080:1080"
 
   org1-memcached:
-    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
   org2-memcached:
-    image: processoeletronico/vagrant_sei4_memcached:${ENVIRONMENT_VERSION}
+    image: processoeletronico/memcached:${ENVIRONMENT_VERSION}
     ports:
       - "11211"
 
@@ -42,7 +42,7 @@ services:
       - /tmp:/tmp
 
   php-test-functional:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/app-dev-php8:${ENVIRONMENT_VERSION}
     depends_on:
       - org1-database
       - org2-database
@@ -76,7 +76,7 @@ services:
     command: "true"
 
   php-test-unit:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/app-dev-php8:${ENVIRONMENT_VERSION}
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -114,7 +114,7 @@ services:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
 
   org1-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/app-dev-php8:${ENVIRONMENT_VERSION}
     restart: always
     depends_on:
       - org1-database
@@ -172,7 +172,7 @@ services:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
   org2-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/app-dev-php8:${ENVIRONMENT_VERSION}
     restart: always
     depends_on:
       - org2-database
