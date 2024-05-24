@@ -260,8 +260,17 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function abrirProcesso($protocolo)
     {
+        // verifica primeiro na tela de controle de processos
+        // caso ja tenha sido tramitado vamos verificar tb na tela de Processos Tramitados Externamente
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaControleProcesso->abrirProcesso($protocolo);
+        try {
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+        }catch(Exception $e){
+            $this->paginaBase->navegarParaControleProcesso();
+            $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
+            $this->byLinkText("Processos Tramitados Externamente")->click();
+            $this->byLinkText($protocolo)->click();
+        }
     }
 
     protected function abrirProcessoPelaDescricao($descricao)
