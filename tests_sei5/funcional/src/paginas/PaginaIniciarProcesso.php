@@ -161,8 +161,16 @@ class PaginaIniciarProcesso extends PaginaTeste
 
         $paginaIniciarProcesso->salvarProcesso();
 
-        $test->frame(null);
-        $test->frame("ifrArvore");
+        $test->waitUntil(function($testCase) {
+            try{
+                $testCase->frame("ifrArvore");
+                $testCase->frame(null);
+            }catch(Exception $e){
+                sleep(2);
+            }
+            return true;
+        }, 10000);
+
         $protocoloProcesso = trim($test->byXPath("//a[@title='". $dadosProcesso["TIPO_PROCESSO"] ."'] | //span[@title='". $dadosProcesso["TIPO_PROCESSO"] ."']")->text());
 
         return $protocoloProcesso;
