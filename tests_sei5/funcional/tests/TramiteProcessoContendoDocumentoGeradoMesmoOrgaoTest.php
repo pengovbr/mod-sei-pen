@@ -2,7 +2,7 @@
 
 /**
  * Execution Groups
- * @group execute_parallel_group1
+ * @group SuspendereVerificar
  */
 class TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest extends CenarioBaseTestCase
 {
