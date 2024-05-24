@@ -547,11 +547,27 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
-        $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
+
+        $this->waitUntil(function($testCase) {
+            try{
+                $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
+
+            }catch(Exception $e){
+                $this->byXPath('//*[@id="divInfraBarraSistemaPadrao"]//*[@id="lnkInfraMenuSistema"]')->click();
+                sleep(2);
+                $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
+            }
+            return true;
+        }, 10000);
+
         $this->byLinkText("Processos Tramitados Externamente")->click();
-        $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
+        $this->waitUntil(function($testCase) use ($deveExistir, $protocolo) {
+            $testCase->assertEquals($deveExistir, $testCase->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
+            sleep(2);
+            return true;
+        }, 10000);
+
     }
 
     protected function validarProcessoRejeitado()
