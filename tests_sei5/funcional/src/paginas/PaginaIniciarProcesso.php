@@ -163,8 +163,8 @@ class PaginaIniciarProcesso extends PaginaTeste
 
         $test->waitUntil(function($testCase) {
             try{
-                $testCase->frame("ifrArvore");
                 $testCase->frame(null);
+                $testCase->frame("ifrArvore");
             }catch(Exception $e){
                 sleep(2);
             }
