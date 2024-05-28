@@ -13,7 +13,7 @@
  *  - Adição de novos documentos e devolução para órgão B
  *
  * Execution Groups
- * @group execute_alone_group2
+ * @group execute_alone_group9
  */
 class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
 {
