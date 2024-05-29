@@ -14,7 +14,7 @@ class TramiteProcessoContendoDocumentoGeradoMesmoOrgaoTest extends CenarioBaseTe
 
     /**
      * Test tramitar processo contendo documento gerado
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      * @large
      *

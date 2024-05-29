@@ -50,7 +50,7 @@ class PenMapUnidadesFixture
 
     /**
      * Cadastrar mapeamento de unidade
-     * 
+     *
      * @return void
      */
     public function cadastrar(): void
@@ -64,7 +64,7 @@ class PenMapUnidadesFixture
 
     /**
      * Atualizar mapeamento de unidade
-     * 
+     *
      * @return void
      */
     public function atualizar(): void
@@ -78,7 +78,7 @@ class PenMapUnidadesFixture
 
     /**
      * Deletear mapeamento de unidade
-     * 
+     *
      * @return void
      */
     public function deletar(): void

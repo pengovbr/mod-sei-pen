@@ -11,24 +11,24 @@ class PaginaEnviarProcesso extends PaginaTeste
         $this->enviarNotificacaoCheck = $test->byId('chkSinEnviarEmailNotificacao');
         $this->dataCertaOption = $test->byId('optDataCerta');
         $this->prazoInput = $test->byId('txtPrazo');
-		$this->diasOption = $test->byId('optDias');
-		$this->diasInput = $test->byId('txtDias');
-		$this->diasUteisInput = $test->byId('chkSinDiasUteis');
-		$this->enviarButton = $test->byId('sbmEnviar');
+        $this->diasOption = $test->byId('optDias');
+        $this->diasInput = $test->byId('txtDias');
+        $this->diasUteisInput = $test->byId('chkSinDiasUteis');
+        $this->enviarButton = $test->byId('sbmEnviar');
     }
 
     public function adicionarUnidade($nomeUnidade)
     {
-		$this->unidadeInput->value($nomeUnidade);
-		$this->test->waitUntil(function($testCase) {
-	    	$nomeUnidade = $testCase->byId('txtUnidade')->value();
-	        $testCase->byLinkText($nomeUnidade)->click();
-	        return true;
+        $this->unidadeInput->value($nomeUnidade);
+        $this->test->waitUntil(function($testCase) {
+            $nomeUnidade = $testCase->byId('txtUnidade')->value();
+            $testCase->byLinkText($nomeUnidade)->click();
+            return true;
         }, 8000);
-	}
+    }
 
-	public function salvar()
-	{
-		$this->enviarButton->click();
-	}
+    public function salvar()
+    {
+        $this->enviarButton->click();
+    }
 }

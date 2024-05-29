@@ -6,7 +6,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 {
     /**
      * Método contrutor
-     * 
+     *
      * @return void
      */
     public function __construct($test)
@@ -22,7 +22,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Setar parametro para novo mapeamento de orgãos externos
-     * 
+     *
      * @return void
      */
     public function setarParametros($estrutura, $origem, $destino)
@@ -34,7 +34,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Seleciona repositório por sigla
-     * 
+     *
      * @param string $siglaRepositorio
      * @param string $origemDestino
      * @return string
@@ -52,7 +52,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Seleciona unidade por nome
-     * 
+     *
      * @param string $nomeUnidade
      * @param string $origemDestino
      * @param ?string $hierarquia
@@ -85,7 +85,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Seleciona unidade por nome
-     * 
+     *
      * @param string $nomeUnidade
      * @param string $origemDestino
      * @param ?string $hierarquia
@@ -118,7 +118,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Seleciona botão novo da página
-     * 
+     *
      * @return void
      */
     public function novoMapOrgao()
@@ -128,7 +128,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Seleciona botão editar da primeira linha de tabela
-     * 
+     *
      * @return void
      */
     public function editarMapOrgao()
@@ -140,7 +140,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * Selecionar primeira checkbox de exclusão
      * Seleciona botão excluir
      * Seleciona botão de confirmação
-     *  
+     *
      * @return void
      */
     public function selecionarExcluirMapOrgao()
@@ -152,7 +152,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
 
     /**
      * Selcionar botão salvar da página
-     * 
+     *
      * @return void
      */
     public function salvar()
@@ -173,7 +173,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         $this->test->waitUntil(function($testCase) {
             return true;
         });
-    }  
+    }
 
     /**
      * Buscar orgão de origem por nome
@@ -186,7 +186,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         try {
             $orgaoOrigem = $this->test->byXPath("//td[contains(.,'" . $origem . "')]")->text();
             return !empty($orgaoOrigem) && !is_null($orgaoOrigem) ?
-                $orgaoOrigem : 
+                $orgaoOrigem :
                 null;
         } catch (Exception $ex) {
             return null;
@@ -204,7 +204,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         try {
             $orgaoDestino = $this->test->byXPath("//td[contains(.,'" . $destino . "')]")->text();
             return !empty($orgaoDestino) && !is_null($orgaoDestino) ?
-                $orgaoDestino : 
+                $orgaoDestino :
                 null;
         } catch (Exception $ex) {
             return null;
@@ -248,7 +248,7 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
         try {
             $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
             return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
-                $nomeSelecionado : 
+                $nomeSelecionado :
                 null;
         } catch (Exception $ex) {
             return null;

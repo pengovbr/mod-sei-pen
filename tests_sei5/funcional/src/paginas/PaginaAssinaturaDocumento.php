@@ -14,17 +14,17 @@ class PaginaAssinaturaDocumento extends PaginaTeste
     public function assinante($strAssinante)
     {
         $this->test->frame(null);
-		$this->test->frame("modal-frame");
-    	$input = $this->test->byId("txtUsuario");
+        $this->test->frame("modal-frame");
+        $input = $this->test->byId("txtUsuario");
 
-    	if(isset($strAssinante)){
+        if(isset($strAssinante)){
 			$input->value($strAssinante);
 			$this->test->waitUntil(function($testCase) {
-		    	$nomeAssinante = $testCase->byId("txtUsuario")->value();
+                $nomeAssinante = $testCase->byId("txtUsuario")->value();
 		        $testCase->byLinkText($nomeAssinante)->click();
 		        return true;
 	        }, 8000);
-    	}
+        }
 
         return $input->value();
     }
@@ -33,16 +33,16 @@ class PaginaAssinaturaDocumento extends PaginaTeste
     {
         $this->test->frame(null);
 		$this->test->frame("modal-frame");
-    	$input = $this->test->byId("pwdSenha");
-    	return $input->value($value);
+        $input = $this->test->byId("pwdSenha");
+        return $input->value($value);
     }
 
     public function selecionarOrgaoAssinante($strOrgaoAssinante)
     {
         $this->test->frame(null);
 		$this->test->frame("modal-frame");
-    	$input = $this->test->byId("selOrgao");
-    	$this->test->select($input)->selectOptionByLabel($strOrgaoAssinante);
+        $input = $this->test->byId("selOrgao");
+        $this->test->select($input)->selectOptionByLabel($strOrgaoAssinante);
 		return $this->test->select($input)->selectedLabel();
     }
 
@@ -50,8 +50,8 @@ class PaginaAssinaturaDocumento extends PaginaTeste
     {
         $this->test->frame(null);
 		$this->test->frame("modal-frame");
-    	$input = $this->test->byId("selCargoFuncao");
-    	$this->test->select($input)->selectOptionByLabel($strCargoAssinante);
+        $input = $this->test->byId("selCargoFuncao");
+        $this->test->select($input)->selectOptionByLabel($strCargoAssinante);
 		return $this->test->select($input)->selectedLabel();
     }
 

@@ -52,7 +52,7 @@ class ImportacaoTiposProcessoFixture
 
     }
 
-    public function getTiposProcessos(int $idMapeamento, string $sinAtivo = 'S') 
+    public function getTiposProcessos(int $idMapeamento, string $sinAtivo = 'S')
     {
         $tiposProcessos = array();
 

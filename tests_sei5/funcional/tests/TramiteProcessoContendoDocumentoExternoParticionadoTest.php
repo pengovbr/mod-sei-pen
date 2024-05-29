@@ -15,14 +15,14 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
 
     public static function setUpBeforeClass() :void {
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
 
-    }      
-        
+    }
+
     public static function tearDownAfterClass() :void {
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
     }
@@ -33,7 +33,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void

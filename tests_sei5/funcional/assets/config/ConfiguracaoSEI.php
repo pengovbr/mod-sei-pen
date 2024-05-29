@@ -42,7 +42,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
 				'SiglaSistema' => 'SEI',
 				'PaginaLogin' => getenv('HOST_URL') . '/sip/login.php',
 				'SipWsdl' => getenv('HOST_URL') . '/sip/controlador_ws.php?servico=sip',
-                'ChaveAcesso' => getenv('SEI_CHAVE_ACESSO'), //ATENÇAO: gerar uma nova chave para o SEI ap?s a instação (ver documento de instação)
+                'ChaveAcesso' => getenv('SEI_CHAVE_ACESSO'), //ATENÇAO: gerar uma nova chave para o SEI após a instalação (ver documento de instalação)
                 'https' => false,
 			),
 

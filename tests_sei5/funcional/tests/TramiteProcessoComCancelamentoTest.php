@@ -19,7 +19,7 @@ class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -82,7 +82,7 @@ class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
      *
      * @group envio
      * @large
-     * 
+     *
      * @depends test_verificar_nao_recebimento_processo_destinatario_documento_interno
      *
      * @return void

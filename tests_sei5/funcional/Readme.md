@@ -10,14 +10,14 @@ Todos os componentes abaixo precisam ser instalados antes de iniciar os testes a
 ´´´bash
 sudo apt install php-dom php-mbstring php-curl php-soap php-mysql
 
-´´´ 
+´´´
 
 ### 1.2 Instalação do gerenciador de pacotes Composer
 
 ´´´bash
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
 sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer
-´´´ 
+´´´
 
 
 ## 2. Atualização das dependências do projeto
@@ -48,5 +48,4 @@ Antes de executar os testes, a aplicação deverá ser revisada para verificar s
 
 ```bash
 $ ./vendor/bin/phpunit --testsuite funcional
-``` 
-
+```

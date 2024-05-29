@@ -18,7 +18,7 @@ class TramiteProcessoContendoDocumentoInternoExternoTest extends CenarioBaseTest
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void

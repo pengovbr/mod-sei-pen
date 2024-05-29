@@ -3,7 +3,7 @@
 use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 /**
- * Classe responsável por teste funcional de 
+ * Classe responsável por teste funcional de
  * mapeamento de envio parcial de componentes digitais
  */
 class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
@@ -103,7 +103,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 
     /**
      * Seleciona botão editar da primeira linha de tabela
-     * 
+     *
      * @return void
      */
     public function editar()
@@ -113,7 +113,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 
     /**
      * Exluir mapeamentos existentes
-     *  
+     *
      * @return void
      */
     public function excluirMapeamentosExistentes()
@@ -134,7 +134,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 
     /**
      * Selecionar todos os resultados
-     *  
+     *
      * @return void
      */
     public function selecionarTodos()
@@ -144,7 +144,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 
     /**
      * Excluir selecionados
-     *  
+     *
      * @return void
      */
     public function excluirSelecionados()
@@ -157,7 +157,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      * Selecionar primeira checkbox de exclusão
      * Seleciona botão excluir
      * Seleciona botão de confirmação
-     *  
+     *
      * @return void
      */
     public function selecionarExcluir()
@@ -184,7 +184,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 
     /**
      * Selecionar todos os intens para impressão
-     *  
+     *
      * @return void
      */
     public function selecionarImprimir()
@@ -204,7 +204,7 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
         try {
             $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
             return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
-                $nomeSelecionado : 
+                $nomeSelecionado :
                 null;
         } catch (Exception $ex) {
             return null;

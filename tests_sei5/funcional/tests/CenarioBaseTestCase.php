@@ -521,7 +521,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
             $this->paginaProcesso->selecionarDocumento($nomeDocArvore);
             $this->paginaDocumento->navegarParaConsultarDocumento();
-                        
+
             $mesmoOrgao = $dadosDocumento['ORIGEM'] == $destinatario['URL'];
 
             if ($mesmoOrgao && $dadosDocumento['TIPO'] == 'G') {

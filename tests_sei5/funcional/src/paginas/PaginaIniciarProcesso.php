@@ -10,7 +10,7 @@ class PaginaIniciarProcesso extends PaginaTeste
     const STA_NIVEL_ACESSO_RESTRITO = 1;
     const STA_NIVEL_ACESSO_SIGILOSO = 2;
 
-	public function __construct($test)
+    public function __construct($test)
     {
         parent::__construct($test);
     }
@@ -32,33 +32,33 @@ class PaginaIniciarProcesso extends PaginaTeste
 
     public function descricao($value = null)
     {
-    	$input = $this->test->byId("txtDescricao");
+        $input = $this->test->byId("txtDescricao");
         if(isset($value)) $input->value($value);
         return $input->value();
     }
 
     public function observacoes($value = null)
     {
-    	$input = $this->test->byId("txaObservacoes");
+        $input = $this->test->byId("txaObservacoes");
         if(isset($value)) $input->value($value);
         return $input->value();
     }
 
     public function selecionarProtocoloManual()
     {
-    	$this->test->byId("optProtocoloManual")->click();
+        $this->test->byId("optProtocoloManual")->click();
     }
 
     public function protocoloInformado($value = null)
     {
-    	$input = $this->test->byId("txtProtocoloInformar");
+        $input = $this->test->byId("txtProtocoloInformar");
         if(isset($value)) $input->value($value);
         return $input->value();
     }
 
     public function dataGeracaoProtocolo($value = null)
     {
-    	$input = $this->test->byId("txtDtaGeracaoInformar");
+        $input = $this->test->byId("txtDtaGeracaoInformar");
         if(isset($value)) $input->value($value);
         return $input->value();
     }
@@ -109,35 +109,35 @@ class PaginaIniciarProcesso extends PaginaTeste
 
     public function salvarProcesso()
     {
-		$this->test->byId("btnSalvar")->click();
+        $this->test->byId("btnSalvar")->click();
     }
 
     public function selecionarRestricao($staNivelRestricao, $strHipoteseLegal = '', $strGrauSigilo = '')
     {
-    	if(isset($staNivelRestricao))
-    	{
+        if(isset($staNivelRestricao))
+        {
             $this->restricao($staNivelRestricao);
 
             if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO)
-	    	{
-				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
-				$select->selectOptionByLabel($strHipoteseLegal);
-	    	}
-	    	else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO)
-	    	{
-				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
-				$select->selectOptionByLabel($strHipoteseLegal);
+            {
+                $select = $this->test->select($this->test->byId('selHipoteseLegal'));
+                $select->selectOptionByLabel($strHipoteseLegal);
+            }
+            else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO)
+            {
+                $select = $this->test->select($this->test->byId('selHipoteseLegal'));
+                $select->selectOptionByLabel($strHipoteseLegal);
 
-				$select = $this->test->select($this->test->byId('selGrauSigilo'));
-				$select->selectOptionByLabel($strGrauSigilo);
-	    	}
-    	}
+                $select = $this->test->select($this->test->byId('selGrauSigilo'));
+                $select->selectOptionByLabel($strGrauSigilo);
+            }
+        }
     }
 
     public function gerarProtocolo()
     {
-    	$strSequencia = str_pad(rand(1, 999999), 6, "0", STR_PAD_LEFT);
-		return '999990.' . $strSequencia . '/2015-00';
+        $strSequencia = str_pad(rand(1, 999999), 6, "0", STR_PAD_LEFT);
+        return '999990.' . $strSequencia . '/2015-00';
     }
 
     public static function gerarProcessoTeste($test, array $dadosProcesso = null)

@@ -23,7 +23,7 @@ class PaginaTipoProcessoReativar extends PaginaTeste
         if($bolExisteAlerta!=null)$this->test->keys(Keys::ENTER);
     }
 
-    public function reativarMapeamentoCheckbox() 
+    public function reativarMapeamentoCheckbox()
     {
         $this->test->byXPath("//div[contains(@class, 'infraCheckboxDiv')]")->click();
         $this->test->byId("btnReativar")->click();

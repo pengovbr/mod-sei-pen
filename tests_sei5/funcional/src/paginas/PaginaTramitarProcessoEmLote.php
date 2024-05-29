@@ -31,9 +31,9 @@ class PaginaTramitarProcessoEmLote extends PaginaTeste
            $chkProtocolo = $this->test->byXPath('//tr[contains(.,"'.$numProtocolo.'")]/td/div/label');
            $chkProtocolo->click();
         }
-     
-    }  
-    
+
+    }
+
     public function navegarControleProcessos()
     {
         $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Envio Externo de Processo em Lote']");
@@ -43,13 +43,13 @@ class PaginaTramitarProcessoEmLote extends PaginaTeste
     public function informacaoLote()
     {
         return $this->test->byId('divInfraAreaTelaD')->text();
-    }     
+    }
 
     public function navegarProcessoEmLote($selAndamento, $numProtocolo=null)
     {
         if(!is_null($selAndamento)){
             $select = $this->test->select($this->test->byId('selAndamento'));
-            $select->selectOptionByLabel($selAndamento); 
+            $select->selectOptionByLabel($selAndamento);
         }
 
         if(!is_null($numProtocolo)){
@@ -59,6 +59,6 @@ class PaginaTramitarProcessoEmLote extends PaginaTeste
 
         $this->presquisarProcessoButton = $this->test->byXPath("//*[@id='sbmPesquisar']");
         $this->presquisarProcessoButton->click();
-       
+
     }
 }

@@ -6,7 +6,7 @@ class PaginaExportarTiposProcesso extends PaginaTeste
 {
     /**
      * Método contrutor
-     * 
+     *
      * @return void
      */
     public function __construct($test)
@@ -22,7 +22,7 @@ class PaginaExportarTiposProcesso extends PaginaTeste
 
     /**
      * Seleciona botão editar da primeira linha de tabela
-     * 
+     *
      * @return void
      */
     public function selecionarParaExportar()

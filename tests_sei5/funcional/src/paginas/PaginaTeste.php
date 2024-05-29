@@ -42,7 +42,7 @@ class PaginaTeste
     {
         $this->test->frame(null);
         $this->test->byXPath("//img[@title='Controle de Processos']")->click();
- 
+
     }
 
     public function sairSistema()

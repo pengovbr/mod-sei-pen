@@ -2,7 +2,7 @@
 
 /**
  * Teste de trâmite com envio parcial habilitado
- * 
+ *
  * Execution Groups
  * @group execute_alone_group1
  */
@@ -28,9 +28,9 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
 
     /**
      * Mapeamento do Envio Parcial no Remetente (Orgão 1) e Destinatário (Orgão 2)
-     * 
+     *
      * @group mapeamento
-     * 
+     *
      * @return void
      */
     public function test_novo_mapeamento_envio_parcial_test()
@@ -62,7 +62,7 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
             utf8_encode('Mapeamento de Envio Parcial cadastrado com sucesso.'),
             $mensagem
         );
-        
+
         // valida se o mapeamento foi realizado no Órgão 1
         $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$destinatario['REP_ESTRUTURAS']);
         $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$destinatario['NOME_UNIDADE']);
@@ -95,7 +95,7 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
             utf8_encode('Mapeamento de Envio Parcial cadastrado com sucesso.'),
             $mensagem
         );
-        
+
         // valida se o mapeamento foi realizado no Órgão 2
         $nomeRepositorioCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['REP_ESTRUTURAS']);
         $nomeUnidadeCadastrado = $this->paginaCadastroMapEnvioCompDigitais->buscarNome(self::$remetente['NOME_UNIDADE']);
@@ -148,7 +148,7 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
      * @return void
      */
     public function test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial()
-    {        
+    {
         $this->acessarSistema(
             self::$destinatario['URL'],
             self::$destinatario['SIGLA_UNIDADE'],
@@ -196,7 +196,7 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
 
         $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->excluirMapeamentosExistentes();
-        
+
         // Excluir mapeamento de envio parcial no destinatário
         $this->acessarSistema(
             self::$destinatario['URL'],
@@ -207,7 +207,7 @@ class TramiteEnvioParcialTest extends CenarioBaseTestCase
 
         $this->paginaEnvioParcialListar->navegarEnvioParcialListar();
         $this->paginaCadastroMapEnvioCompDigitais->excluirMapeamentosExistentes();
-    
+
         $this->sairSistema();
     }
 

@@ -105,7 +105,7 @@ class PaginaTramitarProcesso extends PaginaTeste
     {
         $tramitarButton = $this->test->byXPath("//button[@value='Enviar']");
         $tramitarButton->click();
-    }   
+    }
 
     public function alertTextAndClose($confirm=true)
     {
@@ -118,5 +118,5 @@ class PaginaTramitarProcesso extends PaginaTeste
         else
             $this->dismissAlert();
         return $result;
-    } 
+    }
 }

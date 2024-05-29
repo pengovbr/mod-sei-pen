@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ *
  * Execution Groups
  * @group execute_alone_group3
  */
@@ -15,7 +15,7 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
 
 
     /**
-     * 
+     *
      * @Depends TramiteProcessoGrandeTest::tearDownAfterClass
      *
      * @return void
@@ -26,22 +26,22 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
 
-    }      
-        
+    }
+
     public static function tearDownAfterClass() :void {
 
         // Ajuste do tamanho máximo de arquivo externo permitido para padrão
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
-    }   
+    }
 
     /**
      * Teste de trâmite externo de processo contendo documento com tamanho acima do limite no destinatario
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void

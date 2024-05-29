@@ -25,7 +25,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
             "novo"=>"servidor.gov.br"
         ];
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
         if ($bancoOrgaoA->getBdType()!="oci") {
             $strTarja=$result[0]["texto"];
@@ -34,7 +34,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
         }
         $strTarja = str_replace($arrControleURL['novo'],$arrControleURL['antigo'], $strTarja);
         $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
-        
+
     }
 
 
@@ -45,7 +45,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
      * @large
      *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
-     * 
+     *
      * @return void
      */
     public function test_tramitar_processo_da_origem()
@@ -124,20 +124,20 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
      *
      * @group envio
      * @large
-     * 
+     *
      * @depends test_verificar_processo_apos_devolucao
      *
      * @return void
      */
     public function test_tramitar_processo_da_origem_novo_url()
     {
-        
+
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
         if ($bancoOrgaoA->getBdType()!="oci") {
             $strTarja=$result[0]["texto"];

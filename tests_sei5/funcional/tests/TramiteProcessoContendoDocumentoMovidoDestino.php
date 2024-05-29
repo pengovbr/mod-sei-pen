@@ -20,7 +20,7 @@ Escopo do caso de teste:
         14-criar documento interno (documentoTeste6) no Processo Principal
         15-tramitar Processo Principal para o Órgão 2 com validação no remetente
     Órgão 2:
-        16-verificar correto recebimento do processo no destino (Órgão 2)   
+        16-verificar correto recebimento do processo no destino (Órgão 2)
         17-criar documento interno (documentoTeste7) no Processo Principal
         18-tramitar Processo Principal para o Órgão 1 com validação no remetente
     Órgão 1:
@@ -47,8 +47,8 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
     public static $documentoTeste5;
     public static $documentoTeste6;
     public static $documentoTeste7;
-    
-    /*  
+
+    /*
     Escopo da função:
         Órgão 1:
             1-criar Processo Principal ($processoTestePrincipal) (Órgão 1)
@@ -119,7 +119,7 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
-    /*   
+    /*
     Escopo da função:
         Órgão 2:
             6-verificar correto recebimento do processo e seus documentos no destino (Órgão 2)
@@ -129,14 +129,14 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
             10-criar documento externo (documentoTeste4) no Processo Principal
             11-criar documento interno (documentoTeste5) no Processo Principal
             12-tramitar Processo Principal para o Órgão 1 com validação no remetente
-    
+
     @group TramiteProcessoContendoDocumentoMovidoDestino
     @large
     @depends test_criar_processo_contendo_documentos_tramitar_remetente
     @return void
     */
     public function test_criar_mover_incluir_documentos_devolver_processo_remetente()
-    {   
+    {
         // 6-verificar correto recebimento do processo e seus documentos no destino (Órgão 2)
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTestePrincipal, $documentos, self::$destinatario);
@@ -148,14 +148,14 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
         // 7-criar Processo Secundário ($processoTesteSecundario) (Órgão 2)
         self::$processoTesteSecundario = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$protocoloTesteSecundario = $this->cadastrarProcesso(self::$processoTesteSecundario);
-    
+
         // abrir Processo Principal
         $this->abrirProcesso(self::$protocoloTestePrincipal);
-        
+
         // listar documentos do Processo Principal
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
-        
+
         // 8-mover documento externo (documentoTeste1) do Processo Principal para o Processo Secundário
         $this->paginaProcesso->selecionarDocumento($listaDocumentosProcessoPrincipal[0]);
         $this->paginaDocumento->navegarParaMoverDocumento();
@@ -210,7 +210,7 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
             13-verificar correto recebimento do processo no destino (Órgão 1)
             14-criar documento interno (documentoTeste6) no Processo Principal
             15-tramitar Processo Principal para o Órgão 2 com validação no remetente
-        
+
     @group TramiteProcessoContendoDocumentoMovidoDestino
     @large
     @depends test_criar_mover_incluir_documentos_devolver_processo_remetente
@@ -266,10 +266,10 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
     /*
     Escopo da função:
         Órgão 2:
-            16-verificar correto recebimento do processo no destino (Órgão 2)   
+            16-verificar correto recebimento do processo no destino (Órgão 2)
             17-criar documento interno (documentoTeste7) no Processo Principal
             18-tramitar Processo Principal para o Órgão 1 com validação no remetente
-        
+
     @group TramiteProcessoContendoDocumentoMovidoDestino
     @large
     @depends test_incluir_documento_tramitar_destinatario
@@ -277,7 +277,7 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
     */
     public function test_incluir_documento_tramitar_remetente()
     {
-        // 16-verificar correto recebimento do processo no destino (Órgão 2)   
+        // 16-verificar correto recebimento do processo no destino (Órgão 2)
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4, self::$documentoTeste5, self::$documentoTeste6);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTestePrincipal, $documentos, self::$destinatario);
 
@@ -318,12 +318,12 @@ class TramiteProcessoContendoDocumentoMovidoDestino extends CenarioBaseTestCase
         $deveExistir = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
-    
+
     /*
     Escopo da função:
         Órgão 1:
             19-verificar correto recebimento do processo no destino (Órgão 1)
-        
+
     @group TramiteProcessoContendoDocumentoMovidoDestino
     @large
     @depends test_incluir_documento_tramitar_remetente

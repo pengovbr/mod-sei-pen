@@ -6,7 +6,7 @@ class PaginaLogin extends PaginaTeste
 {
     public function __construct($test)
     {
-        
+
         parent::__construct($test);
         $this->usuarioInput = $test->byId('txtUsuario');
         $this->passwordInput = $test->byId('pwdSenha');

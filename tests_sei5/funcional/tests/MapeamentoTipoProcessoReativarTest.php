@@ -43,7 +43,7 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
 
     /**
      * Teste de reativação de um Relacionamento entre Órgãos
-     * 
+     *
      * @large
      *
      * @return void
@@ -84,7 +84,7 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
         $this->markTestIncomplete(
             'Teste refatorado a partir da entrega 3.7.0.'
         );
-        
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],

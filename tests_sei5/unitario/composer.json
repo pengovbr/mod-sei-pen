@@ -2,8 +2,8 @@
     "config": {
         "platform": {
           "php": "7.3.12"
-        } 
-    },    
+        }
+    },
 
     "autoload-dev": {
         "files": [
@@ -11,7 +11,7 @@
             "/opt/sip/web/Sip.php"
         ]
     },
-    
+
     "include-path": [
         "/opt/infra/infra_php"
     ],

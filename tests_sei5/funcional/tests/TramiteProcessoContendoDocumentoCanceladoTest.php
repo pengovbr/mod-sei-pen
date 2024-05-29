@@ -24,7 +24,7 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -45,7 +45,7 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
         // Cadastrar novo processo de teste e incluir documentos relacionados
         $this->paginaBase->navegarParaControleProcesso();
         self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);     
+        $this->cadastrarDocumentoExterno(self::$documentoTeste1);
 
         // Realiza o cancelamento de um documento interno do processo
         $this->cadastrarDocumentoInterno(self::$documentoTeste2);

@@ -22,7 +22,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -34,7 +34,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
 
         // Definição de dados de teste do processo principal
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        
+
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         // Acessar sistema do this->REMETENTE do processo
@@ -49,9 +49,9 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], self::$processoTeste);
 
         $processo=self::$processoTeste;
-        
+
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        
+
         $idAnexo=$bancoOrgaoA->query("SELECT an.id_anexo FROM rel_protocolo_protocolo pp
         inner join protocolo p on pp.id_protocolo_1=p.id_protocolo
         inner join anexo an on an.id_protocolo=pp.id_protocolo_2

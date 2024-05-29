@@ -1913,7 +1913,7 @@ class ProcessoEletronicoRN extends InfraRN
         $parametros = new stdClass();
         $parametros->filtroDeHipotesesLegais = new stdClass();
         $parametros->filtroDeHipotesesLegais->ativos = true;
-        
+
         $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
             return $objPenWs->consultarHipotesesLegais($parametros);
         });

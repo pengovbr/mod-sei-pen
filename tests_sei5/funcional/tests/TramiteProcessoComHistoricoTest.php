@@ -22,7 +22,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
      */
     public function test_tramitar_processo_da_origem()
     {
- 
+
 
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -57,7 +57,7 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
 
         // Captura o IDT do processo
-        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM protocolo p 
+        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM protocolo p
         inner join md_pen_processo_eletronico pen on p.id_protocolo=pen.id_procedimento
         inner join md_pen_tramite tra on pen.numero_registro=tra.numero_registro
         where protocolo_formatado=?",array(self::$protocoloTeste));
@@ -81,41 +81,41 @@ class TramiteProcessoComHistoricoTest extends CenarioBaseTestCase
 
 
         foreach($saida->propriedadesAdicionais as $propriedades){
-        
+
             switch($propriedades->chave){
- 
+
                 case "CLASSIFICACAO_PrazoIntermediario_1":
                      $this->assertEquals('15', $propriedades->valor );
                      break;
-                   
+
                 case "CLASSIFICACAO_PrazoCorrente_1":
                      $this->assertEquals('5', $propriedades->valor );
                      break;
- 
+
                 case "MODULO_PEN_VERSAO":
                      $this->assertTrue(isset($propriedades->valor));
                      break;
- 
+
                 case "CLASSIFICACAO_CodigoEstruturado_1":
                     $this->assertEquals('052.211', $propriedades->valor );
                      break;
- 
+
                 case "CLASSIFICACAO_Destinacao_1":
                      $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
                      break;
- 
+
                 case "CLASSIFICACAO_Observacao_1":
                     $this->assertEquals('Quanto ao estabelecimento', substr($propriedades->valor,0,25) );
                      break;
- 
+
                 case "CLASSIFICACAO_Descricao_1":
                      $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
                      break;
-                     
-                     
+
+
             }
         }
- 
+
      //    usort($saida->processo->itensHistorico,function($a,$b){
      //      return ($a->dataHoraOperacao < $b->dataHoraOperacao? -1: 1);
      //     });

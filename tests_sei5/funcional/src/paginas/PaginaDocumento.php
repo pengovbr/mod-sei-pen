@@ -15,7 +15,7 @@ class PaginaDocumento extends PaginaTeste
     {
         $this->test->frame(null);
         $this->test->frame("ifrConteudoVisualizacao");
-    	$this->test->byXPath("//img[@alt='Assinar Documento']")->click();
+        $this->test->byXPath("//img[@alt='Assinar Documento']")->click();
     }
 
     public function navegarParaConsultarDocumento()

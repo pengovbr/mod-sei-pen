@@ -23,9 +23,9 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
      * Teste de envio de metadados do processo contendo interessados duplicados
      *
      * Inicialmente são enviados 2 interessados com o mesmo nome
-     * 
+     *
      * @group envio
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -174,7 +174,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
 
         $arrInteressados = array_map(function($item) {
             return array('nome' => utf8_encode($item));
-        }, 
+        },
         $processoTeste['INTERESSADOS']);
 
         return array(

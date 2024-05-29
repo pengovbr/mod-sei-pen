@@ -29,7 +29,7 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -118,7 +118,7 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
      *
      * @group verificacao_envio
      * @large
-     * 
+     *
      * @depends test_devolucao_processo_contendo_outro_anexado_para_origem
      *
      * @return void

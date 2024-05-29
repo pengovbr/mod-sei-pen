@@ -2,7 +2,7 @@
     "config": {
         "platform": {
             "php": "7.3.12"
-        } 
+        }
     },
 
     "autoload": {
@@ -15,7 +15,7 @@
         "phpunit/phpunit": "8.*",
         "phpunit/php-code-coverage": "*",
         "phpunit/phpunit-selenium": "*",
-        "besimple/soap": "*", 
+        "besimple/soap": "*",
         "brandonwamboldt/utilphp": "1.1.*",
         "brianium/paratest": "4.*"
     }

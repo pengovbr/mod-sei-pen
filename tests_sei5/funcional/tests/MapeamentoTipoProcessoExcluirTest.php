@@ -47,7 +47,7 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
         $this->markTestIncomplete(
             'Teste refatorado a partir da entrega 3.7.0.'
         );
-        
+
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 

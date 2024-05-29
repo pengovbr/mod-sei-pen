@@ -11,7 +11,7 @@ class PaginaIncluirDocumento extends PaginaTeste
 
     const STA_FORMATO_NATO_DIGITAL = 1;
 
-	public function __construct($test)
+    public function __construct($test)
     {
         parent::__construct($test);
     }
@@ -42,7 +42,7 @@ class PaginaIncluirDocumento extends PaginaTeste
 
     public function descricao($value)
     {
-    	$input = $this->test->byId("txtDescricao");
+        $input = $this->test->byId("txtDescricao");
         return $input->value($value);
     }
 
@@ -84,38 +84,38 @@ class PaginaIncluirDocumento extends PaginaTeste
 
     public function adicionarInteressado($nomeInteressado)
     {
-		$input = $this->test->byId("txtInteressado");
-		$input->value($nomeInteressado);
-		$this->test->keys(Keys::ENTER);
-		$this->test->acceptAlert();
+        $input = $this->test->byId("txtInteressado");
+        $input->value($nomeInteressado);
+        $this->test->keys(Keys::ENTER);
+        $this->test->acceptAlert();
 
-		sleep(2);
+        sleep(2);
     }
 
     public function salvarDocumento()
     {
-		$this->test->byId("btnSalvar")->click();
+        $this->test->byId("btnSalvar")->click();
     }
 
     public function selecionarRestricao($staNivelRestricao, $strHipoteseLegal = '', $strGrauSigilo = '')
     {
-    	if(isset($staNivelRestricao)) {
-	    	if($staNivelRestricao === self::STA_NIVEL_ACESSO_PUBLICO) {
-				$input = $this->test->byId("lblPublico")->click();
-	    	}
-	    	else if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO) {
-				$input = $this->test->byId("lblRestrito")->click();
-				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
-				$select->selectOptionByLabel($strHipoteseLegal);
-	    	}
-	    	else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO) {
-				$input = $this->test->byId("lblSigiloso")->click();
-				$select = $this->test->select($this->test->byId('selHipoteseLegal'));
-				$select->selectOptionByLabel($strHipoteseLegal);
-				$select = $this->test->select($this->test->byId('selGrauSigilo'));
-				$select->selectOptionByLabel($strGrauSigilo);
-	    	}
-    	}
+        if(isset($staNivelRestricao)) {
+            if($staNivelRestricao === self::STA_NIVEL_ACESSO_PUBLICO) {
+                $input = $this->test->byId("lblPublico")->click();
+            }
+            else if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO) {
+                $input = $this->test->byId("lblRestrito")->click();
+                $select = $this->test->select($this->test->byId('selHipoteseLegal'));
+                $select->selectOptionByLabel($strHipoteseLegal);
+            }
+            else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO) {
+                $input = $this->test->byId("lblSigiloso")->click();
+                $select = $this->test->select($this->test->byId('selHipoteseLegal'));
+                $select->selectOptionByLabel($strHipoteseLegal);
+                $select = $this->test->select($this->test->byId('selGrauSigilo'));
+                $select->selectOptionByLabel($strGrauSigilo);
+            }
+        }
     }
 
     public function gerarDocumentoTeste(array $dadosDocumento = null)
@@ -139,7 +139,7 @@ class PaginaIncluirDocumento extends PaginaTeste
         $this->observacoes($dadosDocumento["OBSERVACOES"]);
         $this->selecionarRestricao($dadosDocumento["RESTRICAO"], $dadosDocumento["HIPOTESE_LEGAL"]);
         $this->salvarDocumento();
-        
+
         $this->test->frame(null);
         $this->test->frame("ifrConteudoVisualizacao");
         sleep(10);
