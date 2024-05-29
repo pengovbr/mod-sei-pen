@@ -140,19 +140,21 @@ class ReceberReciboTramiteRN extends InfraRN
           $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
           $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-          // atualizar bloco de tramite externo
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          // Atualizar Bloco para concluido parcialmente
+          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
-          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retTodos();
 
-          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+          $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+          $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-          if ($tramiteEmBlocoProtocoloDTO != null) {
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
+          if ($arrTramiteEmBlocoProtocolo != null) {
+            foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
+              $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE);
+              $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+            }
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($arrTramiteEmBlocoProtocolo[0], TramiteEmBlocoRN::$TE_CONCLUIDO);
           }
 
           $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());

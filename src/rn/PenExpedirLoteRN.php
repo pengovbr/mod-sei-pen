@@ -96,8 +96,7 @@ class PenExpedirLoteRN extends InfraRN
 
       if ($objPenBlocoProcessoDTO->isSetArrListaProcedimento()) {
 
-        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-        $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
 
         foreach ($objPenBlocoProcessoDTO->getArrListaProcedimento() as $dblIdProcedimento) {
           try {
@@ -108,12 +107,17 @@ class PenExpedirLoteRN extends InfraRN
             //Bloquea o processo para atualização
             $idAtividadeExpedicao = $this->objExpedirProcedimentoRN->bloquearProcedimentoExpedicao($objPenBlocoProcessoDTO, $dblIdProcedimento);
 
-            $objPenLoteProcedimentoDTO->setNumIdLote($objPenBlocoProcessoDTO->getNumIdLote());
-            $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-            $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-            $objPenLoteProcedimentoDTO->setNumIdAtividade($idAtividadeExpedicao);
-            $objPenLoteProcedimentoRN->cadastrarLoteProcedimento($objPenLoteProcedimentoDTO);
+            $objDto = new PenBlocoProcessoDTO();
+            $objDto->setNumIdBloco($objPenBlocoProcessoDTO->getNumIdBloco());
+            $objDto->setDblIdProtocolo($dblIdProcedimento);
+            $objDto->retTodos();
+            
+            $objTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->consultar($objDto);
 
+            $objTramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+            $objTramiteEmBlocoProtocolo->setNumIdAtividade($idAtividadeExpedicao);
+            $objPenBlocoProcessoRN->alterar($objTramiteEmBlocoProtocolo);
+            
             $this->barraProgresso->mover($this->barraProgresso->getNumMax());
             $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
           } catch (\Exception $e) {

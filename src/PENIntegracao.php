@@ -855,10 +855,6 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_expedir_lote.php';
           break;
 
-      case 'pen_expedir_lote_listar':
-        require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
-          break;
-
       case 'pen_map_envio_parcial_listar':
       case 'pen_map_envio_parcial_excluir':
           require_once dirname(__FILE__) . '/pen_map_envio_parcial_listar.php';

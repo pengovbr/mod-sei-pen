@@ -54,8 +54,8 @@ try {
             exit(0);
           }
 
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, [$_GET['id_procedimento']]);
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $validar = $objPenBlocoProcessoRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, [$_GET['id_procedimento']]);
 
           if ($validar !== false) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
@@ -66,17 +66,16 @@ try {
 
           // Esse quem vai ficar
           $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-          $objPenBlocoProcessoDTO->setNumIdLote(null);
+          $objPenBlocoProcessoDTO->setNumIdBlocoProcesso(null);
           $objPenBlocoProcessoDTO->setDblIdProtocolo($_GET['id_procedimento']);
           $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
           $dthRegistro = date('d/m/Y H:i:s');
           $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
           $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
           $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
-          $objPenBlocoProcessoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-          $objPenBlocoProcessoDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
+          $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+          $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
           $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($_GET['id_procedimento']);
           if ($validar) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_AVISO);
@@ -106,8 +105,8 @@ try {
           $arrProtocolosOrigemProtocolo = explode(',', $strIdItensSelecionados);
 
           // Refatorar validarQuantidadeDeItensNoBloco
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, $arrProtocolosOrigemProtocolo);
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $validar = $objPenBlocoProcessoRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, $arrProtocolosOrigemProtocolo);
 
           if ($validar !== false) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
@@ -120,27 +119,17 @@ try {
             $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
             $objPenBlocoProcessoDTO->setDblIdProtocolo($idItensSelecionados);
             $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
-            $objPenBlocoProcessoDTO->retNumIdLote();
+            $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
             $objPenBlocoProcessoDTO->retNumIdBloco();
-            $objPenBlocoProcessoDTO->retStrIdxRelBlocoProtocolo();
             $dtRegistro = date('d/m/Y H:i:s');
             $objPenBlocoProcessoDTO->setDthRegistro($dtRegistro);
             $objPenBlocoProcessoDTO->setDthAtualizado($dtRegistro);
-            $objPenBlocoProcessoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+            $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
-            $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
             $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
 
             if ($validar == false) {
               $sucesso = true;
-              $objProcedimentoDTO = new ProcedimentoDTO();
-              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
-              $objProcedimentoDTO->setDblIdProcedimento($idItensSelecionados);
-
-              $objProcedimentoRN = new ProcedimentoRN();
-              $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-
-              $objPenBlocoProcessoDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
               $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
             } else {
               $erros = true;

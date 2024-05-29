@@ -118,11 +118,12 @@ try {
           $objPenBlocoProcessoDTO->retDblIdProtocolo();
           $objPenBlocoProcessoDTO->retNumIdBloco();
           $objPenBlocoProcessoDTO->retDthRegistro();
-          $objPenBlocoProcessoDTO->retNumIdLote();
+          $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
           $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
 
           $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
           $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+          $arrProcedimentos = array();
           foreach ($arrTramiteEmBlocoProtocolo as $objDTO) {
             $objDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
             $objDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
@@ -134,12 +135,16 @@ try {
             $objDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
             $dthAtualizado = date('d/m/Y H:i:s');
             $objDTO->setDthAtualizado($dthAtualizado);
+            $objDTO->setDthEnvio($dthAtualizado);
             $objDTO->setArrListaProcedimento($arrProtocolosOrigem);
-            $objDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
+            $objDTO->setNumIdAtividade(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
             $objPenBlocoProcessoRN->alterar($objDTO);
+
+            $arrProcedimentos[] = $objDTO->getDblIdProtocolo();
           }
 
+          $arrTramiteEmBlocoProtocolo[0]->setArrListaProcedimento($arrProcedimentos);
           $objPenExpedirLoteRN = new PenExpedirLoteRN();
           $ret = $objPenExpedirLoteRN->cadastrarLote($arrTramiteEmBlocoProtocolo[0]);
           

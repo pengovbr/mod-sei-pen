@@ -61,37 +61,20 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
         $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO(true);
         $objPenLoteProcedimentoDTO->setDblIdProcedimento($dto->getDblIdProtocolo());
-        // $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
-        $objPenLoteProcedimentoDTO->retNumIdLote();
+        $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
         $objPenLoteProcedimentoDTO->retDblIdProcedimento();
         $objPenLoteProcedimentoDTO->retStrProcedimentoFormatado();
         $objPenLoteProcedimentoDTO->retNumIdAndamento();
         $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
         $objPenLoteProcedimentoDTO->retStrNomeUsuario();
         $objPenLoteProcedimentoDTO->retDthRegistro();
-        $objPenLoteProcedimentoDTO->setOrdNumIdLote(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objPenLoteProcedimentoDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
 
         $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-        // $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
         $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarLoteProcedimento($objPenLoteProcedimentoDTO);
 
         $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoRN);
-
-        // $objTramiteDTO = new TramiteDTO();
-        // $objTramiteDTO->setNumIdProcedimento($dto->getDblIdProtocolo());
-        // $objTramiteDTO->setOrd('IdTramite', InfraDTO::$TIPO_ORDENACAO_DESC);
-        // $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-        // $objTramiteDTO->retNumIdTramite();
-        // $objTramiteDTO->retDthRegistro();
-        // $objTramiteDTO->retNumIdEstruturaDestino();
-        // $objTramiteDTO->retStrNomeUsuario();
-
-        // $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        // $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-
-        // $dto->setObjTramiteDTO($arrObjPenLoteProcedimentoRN);
-
 
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setDblIdProtocolo($dto->getDblIdProtocolo());

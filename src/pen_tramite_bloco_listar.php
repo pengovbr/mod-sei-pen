@@ -48,13 +48,13 @@ try {
         $arrObjTramiteEmBloco = [];
         $excluir = true;
         foreach ($arrTramiteEmBloco as $objTramiteEmBloco) {
-          $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($objTramiteEmBloco->getNumId());
-          $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-          $tramitaEmBlocoProtocoloDTO->retNumId();
+          $tramitaEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+          $tramitaEmBlocoProtocoloDTO->setNumIdBloco($objTramiteEmBloco->getNumId());
+          $tramitaEmBlocoProtocoloDTO->retNumIdBloco();
+          $tramitaEmBlocoProtocoloDTO->retNumIdBlocoProcesso();
           $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
   
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
           $arrTramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
   
           if ($arrTramitaEmBlocoProtocoloRN == null) {

@@ -2807,17 +2807,136 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_usuario', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
 
+    // Alterar id da tabela    
+    $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
+    $this->excluirChavePrimariaComIndice("md_pen_expedir_lote", "id_lote", true);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_bloco_processo', $objMetaBD->tipoNumero(), PenMetaBD::NNULLO);
+    $objMetaBD->excluirColuna('md_pen_expedir_lote', 'id_lote');
+    $objMetaBD->adicionarChavePrimaria('md_pen_expedir_lote', 'pk_id_bloco_processo', array('id_bloco_processo'));
+
     // Adicionar coluna de atualização do registro
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), PenMetaBD::NNULLO);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), PenMetaBD::SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_envio', $objMetaBD->tipoDataHora(), PenMetaBD::SNULLO);
     
-    // Modificação de tipo de dados para a coluna ticket_envio_componentes na tabela md_pen_tramite
+    // Adicionar campos extrar para a tabela md_pen_expedir_lote
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_protocolo', $objMetaBD->tipoNumeroGrande(10), PenMetaBD::SNULLO);
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::SNULLO);
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'sequencia', $objMetaBD->tipoNumero(10), PenMetaBD::SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'sta_estado', $objMetaBD->tipoTextoFixo(1), PenMetaBD::SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'idx_rel_bloco_protocolo', $objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_andamento', $objMetaBD->tipoNumero(11), PenMetaBD::SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_atividade_expedicao', $objMetaBD->tipoTextoVariavel(4000), PenMetaBD::SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'tentativas', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
 
-    $objMetaBD->renomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
+    $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_bloco_protocolo", true);
+    $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_md_pen_expedir_lote_usuario", true);
+    $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_md_pen_expedir_lote_unidade", true);
+    $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
+    $this->excluirChaveEstrangeira("md_pen_bloco_protocolo", "fk_bloco_protocolo", true);
+
+    $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
+
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_procedimento", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bloco", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_usuario", "md_pen_bloco_processo", array('id_usuario'), "usuario", array('id_usuario'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_unidade", "md_pen_bloco_processo", array('id_unidade'), "unidade", array('id_unidade'), false);
+
+    $objInfraBanco = BancoSEI::getInstance();
+
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_lote
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id_bloco_processo) as total from md_pen_bloco_processo');
+    $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
+    $objInfraBanco->criarSequencialNativa('md_pen_seq_bloco_processo', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_seq_bloco_processo');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+    
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
+    $objTramiteEmBlocoDTO->setNumIdUnidade(NULL);
+    $objTramiteEmBlocoDTO->setNumIdUsuario(NULL);
+    $objTramiteEmBlocoDTO->setStrDescricao('Generico');
+    $objTramiteEmBlocoDTO->setStrIdxBloco(null);
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
+
+    $idBloco = $objTramiteEmBlocoDTO->getNumId();
+    // Atualizar que não tem bloco relacionado par abloco genérico
+    $objInfraBanco->executarSql('update md_pen_bloco_processo set id_bloco = '.$idBloco.' where id_bloco is NULL');
+
+    // Atualizar id_bloco para not null
+    $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
+
+    $dthRegistro = date('d/m/Y H:i:s');
+
+    $sql = "SELECT 
+        bp.id_protocolo, rel.id_andamento, rel.id_atividade_expedicao, rel.tentativas
+      FROM md_pen_bloco_protocolo bp
+      inner join md_pen_rel_expedir_lote rel on rel.id_procedimento = bp.id_protocolo";
+
+    $blocosTramite = $objInfraBanco->consultarSql($sql);
+    if (!empty($blocosTramite)) {
+      foreach ($blocosTramite as $blocoTramite) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
+        $objPenBlocoProcessoDTO->setNumIdAndamento($blocoTramite['id_andamento']);
+        $objPenBlocoProcessoDTO->setNumIdAtividadeExpedicao($blocoTramite['id_atividade_expedicao']);
+        $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas']);
+        $objPenBlocoProcessoDTO->setNumIdBloco($idBloco);
+        $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
+        $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+      }
+    }
+
+    $objMetaBD->removerTabela('md_pen_bloco_protocolo');
+    $objMetaBD->removerTabela('md_pen_seq_bloco_protocolo');
+    $objMetaBD->removerTabela('md_pen_rel_expedir_lote');
+    $objMetaBD->removerTabela('md_pen_seq_expedir_lote');
+
+    // Adicionar agendamento de atualização de informações de envio
+    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+    $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
+    $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasEnvioPEN");
+    if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0) {
+      $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
+      $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
+      $strDesc .= " - debug: Indica se o log de debug gerado no processamento será registrado nos logs do sistema (valores: true,false | padrão: false)\n";
+      $strDesc .= " - workers: Quantidade de processos paralelos que serão abertos para processamento de tarefas (valores: 0-9 | padrão: 4)\n";
+      $objReceberProcessosPEN->setStrDescricao($strDesc);
+      $objReceberProcessosPEN->setStrStaPeriodicidadeExecucao("N");
+      $objReceberProcessosPEN->setStrPeriodicidadeComplemento("0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58");
+      $objReceberProcessosPEN->setStrSinAtivo("S");
+      $objReceberProcessosPEN->setStrSinSucesso("S");
+      $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
+    }
+
+    $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
+    $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
+    if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) > 0) {
+      $objReceberProcessosPEN->retTodos();
+      $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
+      $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
+      $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
+    } else {      
+      $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
+      $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
+      $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
+      $strDesc .= " - debug: Indica se o log de debug gerado no processamento será registrado nos logs do sistema (valores: true,false | padrão: false)\n";
+      $strDesc .= " - workers: Quantidade de processos paralelos que serão abertos para processamento de tarefas (valores: 0-9 | padrão: 4)\n";
+      $objReceberProcessosPEN->setStrDescricao($strDesc);
+      $objReceberProcessosPEN->setStrStaPeriodicidadeExecucao("N");
+      $objReceberProcessosPEN->setStrPeriodicidadeComplemento("0,2,4,6,8,10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58");
+      $objReceberProcessosPEN->setStrSinAtivo("S");
+      $objReceberProcessosPEN->setStrSinSucesso("S");
+      $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
+    }
     
     $this->atualizarNumeroVersao("3.7.0");
   }

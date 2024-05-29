@@ -123,7 +123,7 @@ class PenLoteProcedimentoRN extends InfraRN {
     try{
 
         $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-        $objPenLoteProcedimentoDTO->retNumIdLote();
+        $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
         $objPenLoteProcedimentoDTO->retNumIdUsuario();
         $objPenLoteProcedimentoDTO->retNumIdUnidade();
         $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
@@ -133,27 +133,21 @@ class PenLoteProcedimentoRN extends InfraRN {
         $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
 
       if(!is_null($objPenLoteProcedimentoDTO)){
-          $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
-          $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
-          $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
-          $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
+        // Atualizar Bloco para concluido parcialmente
+        $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+        $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $objTramiteEmBlocoProtocoloDTO->retTodos();
 
-          $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-          $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+        $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+        $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-
-          // Atualizar Bloco para concluido parcialmente
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-
-          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
-
-        if ($tramiteEmBlocoProtocolo != null) {
-          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        if ($arrTramiteEmBlocoProtocolo != null) {
+          foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
+            $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
+            $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+          }
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($arrTramiteEmBlocoProtocolo);
         }
       }
 
