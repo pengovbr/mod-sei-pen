@@ -278,9 +278,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         case '3.5.0':
           $this->instalarV3060();
         case '3.6.0':
+          $this->instalarV3061();
+        case '3.6.1':
+          $this->instalarV3062();
+        case '3.6.2':
           $this->instalarV3070();
-        case '3.7.0':
-          $this->instalarV3071();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2789,20 +2791,27 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.6.0");
   }
 
-  protected function instalarV3070(){
-    $this->atualizarNumeroVersao("3.7.0");
+  protected function instalarV3061(){
+    $this->atualizarNumeroVersao("3.6.1");
   }
 
-  protected function instalarV3071() 
+  protected function instalarV3062(){
+    $this->atualizarNumeroVersao("3.6.2");
+  }
+
+  protected function instalarV3070() 
   {
     $hipoteseLegalDTO = new HipoteseLegalDTO();
     $hipoteseLegalDTO->setStrSinAtivo('S');
     $hipoteseLegalDTO->retStrNome();
     $hipoteseLegalDTO->retNumIdHipoteseLegal();
+
     $hipoteseLegalRN = new HipoteseLegalRN();
     $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
+    
+    $penHipoteseLegalRN = new PenHipoteseLegalRN();
+
     foreach ($arrHipoteseLegal as $hipoteseLegal) {
-      $penHipoteseLegalRN = new PenHipoteseLegalRN();
       $penHipoteseLegal = new PenHipoteseLegalDTO();
       $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
       $penHipoteseLegal->setStrAtivo('S');
@@ -2830,7 +2839,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       }
     }
-    $this->atualizarNumeroVersao('3.7.1');
+    $this->atualizarNumeroVersao('3.7.0');
   }
 }
 

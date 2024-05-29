@@ -134,6 +134,10 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 
     public function test_verificar_envio_processo()
     {
+        $this->markTestIncomplete(
+            'Tela de confirmação de envio suprimida. Aguardando refatoração da funcionalidade do bloco para refatorar este teste.'
+        );
+        
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);

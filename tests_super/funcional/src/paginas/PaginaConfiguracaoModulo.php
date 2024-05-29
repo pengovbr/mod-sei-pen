@@ -27,7 +27,6 @@ class PaginaConfiguracaoModulo extends PaginaTeste
     public function navegarPaginaNovoMapeamentoUnidade()
     {
         $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Tramita GOV.BR'));
-        $this->test->byXPath("//a[@href='#submenu114']")->click();
         $this->test->byXPath("//a[@link='pen_map_unidade_cadastrar']")->click();
     }
 

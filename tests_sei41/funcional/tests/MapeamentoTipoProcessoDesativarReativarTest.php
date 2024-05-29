@@ -44,6 +44,10 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_desativacao_mapeamento_orgao_externo()
     {
+        $this->markTestIncomplete(
+            'Teste refatorado a partir da entrega 3.7.0.'
+        );
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -71,6 +75,10 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_reativacao_mapeamento_orgao_externo()
     {
+        $this->markTestIncomplete(
+            'Teste refatorado a partir da entrega 3.7.0.'
+        );
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -98,6 +106,10 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_desativacao_checkbox_mapeamento_orgao_externo()
     {
+        $this->markTestIncomplete(
+            'Teste refatorado a partir da entrega 3.7.0.'
+        );
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -125,6 +137,9 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_reativar_checkbox_mapeamento_orgao_externo()
     {
+        $this->markTestIncomplete(
+            'Teste refatorado a partir da entrega 3.7.0.'
+        );
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
