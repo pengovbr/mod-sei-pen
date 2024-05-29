@@ -297,6 +297,8 @@ class PenAtualizarSipRN extends InfraRN
         case '3.6.0':
             $this->instalarV3061();
         case '3.6.1':
+            $this->instalarV3062();
+        case '3.6.2':
             $this->instalarV3070();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2096,6 +2098,14 @@ class PenAtualizarSipRN extends InfraRN
       $this->logar("Item de menu de mapeamento de tipos de documentos não pode ser localizado");
     }
     $this->atualizarNumeroVersao("3.6.1");
+  }
+
+  protected function instalarV3062()
+  {
+    $numIdSistemaSei = $this->getNumIdSistema('SEI');
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");    
+    ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $idPerfilBasico, 'pen_map_envio_parcial_listar');
+    $this->atualizarNumeroVersao("3.6.2");  
   }
 
   protected function instalarV3070()

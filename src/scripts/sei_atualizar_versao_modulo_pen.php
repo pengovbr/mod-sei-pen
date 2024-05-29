@@ -280,6 +280,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         case '3.6.0':
           $this->instalarV3061();
         case '3.6.1':
+          $this->instalarV3062();
+        case '3.6.2':
           $this->instalarV3070();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
@@ -2793,6 +2795,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.6.1");
   }
 
+  protected function instalarV3062(){
+    $this->atualizarNumeroVersao("3.6.2");
+  }
+
   protected function instalarV3070()
   {
     $objMetaBD = $this->objMeta;
@@ -2855,8 +2861,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
-    $objTramiteEmBlocoDTO->setNumIdUnidade(NULL);
-    $objTramiteEmBlocoDTO->setNumIdUsuario(NULL);
+    $objTramiteEmBlocoDTO->setNumIdUnidade(null);
+    $objTramiteEmBlocoDTO->setNumIdUsuario(null);
     $objTramiteEmBlocoDTO->setStrDescricao('Generico');
     $objTramiteEmBlocoDTO->setStrIdxBloco(null);
     $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
@@ -2940,6 +2946,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     
     $this->atualizarNumeroVersao("3.7.0");
   }
+  
 }
 
 try {
