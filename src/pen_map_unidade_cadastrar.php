@@ -115,15 +115,15 @@ try {
       $objPenUnidadeDTO->setStrSiglaUnidadeRH($siglaUnidadeRH);
 
       $numIdUnidade = '';
-      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
-          $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
-          $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
-          $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
-      }
-      else {
-          $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
-          $numIdUnidade = $unidade->getNumIdUnidade();
-      }
+    if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+      $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
+      $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
+      $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
+    }
+    else {
+      $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
+      $numIdUnidade = $unidade->getNumIdUnidade();
+    }
 
       $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
 
@@ -138,9 +138,9 @@ try {
         !empty($_POST['hdnRepoEstruturas']) ? $_POST['hdnRepoEstruturas'] : ""
       );
 
-      if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
-        $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
-      }
+    if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
+      $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
+    }
 
       $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
