@@ -72,6 +72,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
         $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
         $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
+        $this->paginaMapUnidades = new PaginaMapUnidades($this);
         $this->currentWindow()->maximize();
     }
 

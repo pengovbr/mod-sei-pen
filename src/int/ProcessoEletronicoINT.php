@@ -110,6 +110,25 @@ class ProcessoEletronicoINT extends InfraINT {
     return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
   }
 
+  /**
+   * Auto completar repositorio de estruturas
+   *
+   * @param string $strPalavrasPesquisa
+   * @return array
+   */
+  public static function autoCompletarRepositorioEstruturas($strPalavrasPesquisa)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
+    $arrayRepositorioEstruturas = array();
+    foreach ($arrObjRepositorioDTO as $value) {
+      if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
+        $arrayRepositorioEstruturas[] = $value;
+      }
+    }
+    return $arrayRepositorioEstruturas;
+  }
+
   public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       return $objExpedirProcedimentoRN->listarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa);
@@ -239,5 +258,224 @@ class ProcessoEletronicoINT extends InfraINT {
     }
 
       return $arquivo;
+  }
+
+  /**
+   * Monta a regra de negocio para o tramite.gov.br
+   *
+   * @param string $idUnidade
+   * @param string $strCss
+   * @param string $strHtml
+   * @param string $strJsGlobal
+   * @param string $strJsicializar
+   * @return string
+   */
+  public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar) {
+    try {
+      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+      $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
+      $objPenUnidadeRestricaoDTO->retTodos();
+
+      $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+      $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+      $items = array();
+      $arrayKeys = array();
+      $arrObjPenUnidadeDTO = array();
+      $itemsUnidades = array();
+      $hdnRepoEstruturas = array();
+      $strHtmlRepoEstruturasUnidades = "";
+      foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
+        if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
+          //IdUnidadeRestricao NomeUnidadeRestricao
+          $arrayKeys[] = $item->getNumIdUnidadeRestricao();
+          $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
+          //$strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" name="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" value="" />' . "\n";
+          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+        }
+        if ($item->getNumIdUnidadeRHRestricao() != null) {
+          $arrObjPenUnidadeDTO[] = $item;
+          $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
+          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
+        }
+      }
+      foreach ($hdnRepoEstruturas as $key => $unidades) {
+        $value = implode('¥', $unidades);
+        $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key 
+          . '" name="hdnRepoEstruturas' . $key . '" value="' . $value . '" />' . "\n";
+      }
+      $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
+      $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
+      $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+      $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+
+      $strCss = ''
+        . ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
+        . ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
+        . ' #selRepoEstruturas {position:absolute;left:0%;top:29%;width:20%;}'
+        . ' #divOpcoesRepoEstruturas {position:absolute;left:21%;top:29%;}'
+        . ' '
+        . ' #lblUnidades {position:absolute;left:25%;top:0%;}'
+        . ' #txtUnidade {position:absolute;left:25%;top:13%;width:54.5%;}'
+        . ' #selUnidades {position:absolute;left:25%;top:29%;width:55%;}'
+        . ' #divOpcoesUnidades {position:absolute;left:81%;top:29%;}';
+
+      $strJsGlobal = ''
+        . ' var objLupaRepositoriosEstruturas = null;'
+        . ' var objAutoCompletarOrgao = null;'
+        . ' var objLupaUnidades = null;'
+        . ' var objAutoCompletarUnidade = null;'
+        . ' '
+        . ' function trocarOrgaoRestricao(){'
+        . ' document.getElementById(\'hdnUnidades\').value = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . ' objLupaUnidades.montar();'
+        . ' };';
+
+      $strJsInicializar = ''
+        . ' objLupaRepositoriosEstruturas	= new infraLupaSelect(\'selRepoEstruturas\',\'hdnRepoEstruturas\',\'' . /*SessaoSEI::getInstance()->assinarLink('controlador.php?acao=orgao_selecionar&tipo_selecao=2&id_object=objLupaRepositoriosEstruturas') .*/ '\');'
+        . ' objLupaRepositoriosEstruturas.processarRemocao = function(itens){'
+        . '   let hdnRepoEstruturaAux = "";'
+        . '   let hdnRepoEstruturaArr = "";'
+        . '   let hdnRepoEstruturaOptValue = [];'
+        . ' 	for(var i=0;i < itens.length;i++){'
+        . '     hdnRepoEstruturaAux = document.getElementById(\'hdnRepoEstruturas\' + itens[i].value).value.split("¥");'
+        . '     for (var x = 0; x < hdnRepoEstruturaAux.length; x++) {'
+        . '       hdnRepoEstruturaArr = hdnRepoEstruturaAux[x].split("±");'
+        . '       hdnRepoEstruturaOptValue.push(hdnRepoEstruturaArr[0]);'
+        . '     }'
+        . ' 	  document.getElementById(\'hdnRepoEstruturas\' + itens[i].value).value = \'\';'
+        . ' 	}'
+        . '   var selectUnidades = document.getElementById("selUnidades");'
+        . '   for (var x = 0; x < hdnRepoEstruturaOptValue.length; x++){'
+        . '     for (var i = 0; i < selectUnidades.options.length; i++) {'
+        . '       if (selectUnidades.options[i].value === hdnRepoEstruturaOptValue[x]) {'
+        . '         selectUnidades.remove(i);'
+        .'        }'
+        . '     }'
+        . '   }'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaRepositoriosEstruturas.finalizarSelecao = function(){'
+        . ' 	objLupaUnidades.limpar();'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarRepoEstruturas = new infraAjaxAutoCompletar(\'hdnIdRepoEstruturas\',\'txtRepoEstruturas\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_listar_repositorios_estruturas_auto_completar') . '\');'
+        . ' objAutoCompletarRepoEstruturas.limparCampo = true;'
+        . ' objAutoCompletarRepoEstruturas.mostrarAviso = true;'
+        . ' objAutoCompletarRepoEstruturas.tempoAviso = 10000000;'
+        . ' objAutoCompletarRepoEstruturas.prepararExecucao = function(){'
+        . ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtRepoEstruturas\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarRepoEstruturas.processarResultado = function(id,descricao,complemento){'
+        . '   window.infraAvisoCancelar();'
+        . ' 	if (id!=\'\'){ '
+        . ' 	  objLupaRepositoriosEstruturas.adicionar(id,descricao,document.getElementById(\'txtRepoEstruturas\'));'
+        . '     hdnRepoEst = document.getElementById("hdnRepoEstruturas" + id); '
+        . '     if (hdnRepoEst == null) { '
+        . '       html = document.createElement(\'input\'); '
+        . '       html.type = \'hidden\'; '
+        . '       html.id=\'hdnRepoEstruturas\' + id;'
+        . '       html.name= \'hdnRepoEstruturas\'+ id;'
+        . '       divRestricao = document.getElementById(\'divRestricao\');'
+        . '       divRestricao.appendChild(html);'
+        . '     };'
+        . ' 	};'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades = new infraLupaSelect(\'selUnidades\',\'hdnUnidades\',\'\');'
+        . ' objLupaUnidades.validarSelecionar = function(){'
+        . ' 	if (document.getElementById(\'selOrgaos\').selectedIndex==-1){'
+        . ' 	alert(\'Nenhum Repositório de Estruturas selecionado.\');'
+        . ' 	return false;'
+        . ' 	}'
+        . ' 	objLupaUnidades.url = document.getElementById(\'lnkRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades.finalizarRemocao = function(options){'
+        . '   let auxText = "";'
+        . '   if (options.length > 1) {'
+        . '     for (var i = 0; i < options.length; i++) {'
+        . '       auxText +=  options[i].value + "±" + options[i].text + "¥";'
+        . '     }'
+        . '     auxText = auxText.slice(0, -1);'
+        . '   } else if (options.length == 1){'
+        . '     auxText =  options[0].value + "±" + options[0].text;'
+        . '   }'
+        . '   let hdnRepoEstruturasAux = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . '   if (!hdnRepoEstruturasAux.includes(auxText)) {'
+        . '     alert("A(s) unidade(s) selecionada(s) não pertence(m) à(s) estrutura(s) selecionada(s)");'
+        . '     for (var i = 0; i < options.length; i++) {'
+        . '       var option = document.createElement("option");'
+        . '       option.text = options[i].text;'
+        . '       option.value = options[i].value;'
+        . '       document.getElementById("selUnidades").appendChild(option);'
+        . '     }'
+        . '   }'
+        . '   hdnRepoEstruturasAux = hdnRepoEstruturasAux.replace(auxText, "");'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = hdnRepoEstruturasAux;'
+        . ' 	return true;'
+        . ' };'
+        . ' '
+        . ' objLupaUnidades.finalizarSelecao = function(){'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento') . '\');'
+        . ' objAutoCompletarUnidade.limparCampo = true;'
+        . ' objAutoCompletarUnidade.mostrarAviso = true;'
+        . ' objAutoCompletarUnidade.tempoAviso = 10000000;'
+        . ' objAutoCompletarUnidade.prepararExecucao = function(){'
+        . ' 	if (document.getElementById(\'selRepoEstruturas\').selectedIndex==-1){'
+        . ' 	alert(\'Nenhum Repositório de Estruturas selecionado.\');'
+        . ' 	return false;'
+        . ' 	}'
+        . ' 	return \'palavras_pesquisa=\'+document.getElementById(\'txtUnidade\').value+\'&id_repositorio=\'+document.getElementById(\'selRepoEstruturas\').value;'
+        . ' };'
+        . ' '
+        . ' objAutoCompletarUnidade.processarResultado = function(id,descricao,complemento){'
+        . '   window.infraAvisoCancelar();'
+        . ' 	if (id!=\'\'){ '
+        . ' 	objLupaUnidades.adicionar(id,descricao,document.getElementById(\'txtUnidade\'));'
+        . '   repo = document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value;'
+        . '   repo += (repo != \'\' ? "¥" : "") + id + "±" + descricao;'
+        . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = repo;'
+        . ' 	}'
+        . ' };'
+        . ' '
+        . ' if (document.getElementById(\'selRepoEstruturas\').options.length){'
+        . ' 	document.getElementById(\'selRepoEstruturas\').disabled = false;'
+        . ' 	document.getElementById(\'selRepoEstruturas\').options[0].selected = true;'
+        . ' 	trocarRepoEstruturasRestricao();'
+        . ' };';
+
+      $strHtml = ' <div id=\'divRestricao\' class=\'infraAreaDados\' style=\'height:16em;\'>
+			  <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>
+			  <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />
+			  <input type="hidden" id="hdnIdRepoEstruturas" name="hdnIdRepoEstruturas" class="infraText" value="" />
+			  <select id="selRepoEstruturas" name="selRepoEstruturas" size="6" multiple="multiple" class="infraSelect" onchange="trocarRepoEstruturasRestricao()" >
+			  ' . $strItensSelRepoEstruturasRestricao . '
+			  </select>
+			  <div id="divOpcoesRepoEstruturas">
+			  <img id="imgExcluirRepoEstruturas" onclick="objLupaRepositoriosEstruturas.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Estruturas Selecionados" title="Remover Estruturas Selecionadas" class="infraImgNormal"  />
+			  </div>
+			  <input type="hidden" id="hdnRepoEstruturas" name="hdnRepoEstruturas" value="'.$arrRepoEstruturasSelecionados.'" />
+			  <label id="lblUnidades" for="selUnidades" class="infraLabelOpcional">Restringir às Unidades:</label>
+			  <input type="text" id="txtUnidade" name="txtUnidade" class="infraText" />
+			  <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="" />
+			  <select id="selUnidades" name="selUnidades" size="6" multiple="multiple" class="infraSelect" >
+        ' . $strItensSelUnidadesRestricao . '
+			  </select>
+			  <div id="divOpcoesUnidades">
+			  <img id="imgExcluirUnidades" onclick="objLupaUnidades.remover();" src="' . PaginaSEI::getInstance()->getIconeRemover() . '" alt="Remover Unidades Selecionadas" title="Remover Unidades Selecionadas" class="infraImg"  />
+			  </div>
+			  <input type="hidden" id="hdnUnidades" name="hdnUnidades" value="'.$arrUnidadesSelecionadas.'" />
+			  ' . $strHtmlRepoEstruturasUnidades . '
+			  </div>';
+
+    } catch (Exception $e) {
+      // não grava nada e não retorna objeto restrição mapeamento de unidades
+    }
   }
 }
