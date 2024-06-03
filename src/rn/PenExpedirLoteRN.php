@@ -119,7 +119,7 @@ class PenExpedirLoteRN extends InfraRN
             $objPenBlocoProcessoRN->alterar($objTramiteEmBlocoProtocolo);
             
             $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO);
           } catch (\Exception $e) {
                 //Realiza o desbloqueio do processo
             try {

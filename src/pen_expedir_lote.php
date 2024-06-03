@@ -110,7 +110,7 @@ try {
         echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
         echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
-        $strTituloPagina = "Cadastro de processos em Lote";
+        $strTituloPagina = "Cadastro de processos em Bloco";
         $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
 
         try {
