@@ -70,8 +70,7 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
                 'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdBloco' => $objBlocoDeTramiteDTO->getNumId(),
-                'IdxRelBlocoProtocolo' => $objProtocoloDTO->getStrProtocoloFormatado()
+                'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
             ]);
 
         });
