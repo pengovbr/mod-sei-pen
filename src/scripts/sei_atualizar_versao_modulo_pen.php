@@ -281,8 +281,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV3061();
         case '3.6.1':
           $this->instalarV3062();
+        case '3.6.2':
+          $this->instalarV4000();
 
-            break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
+          break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
           $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
@@ -506,7 +508,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       'tabela' => 'md_pen_tramite_pendente',
       'cols' => array(
         'id' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-        'numero_tramite' => array($objMetaBD->tipoTextoVariavel(255)),
+        'numero_tramite' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
         'id_atividade_expedicao' => array($objMetaBD->tipoNumero(), PenMetaBD::SNULLO)
       ),
       'pk' => array('cols' => array('id')),
@@ -1007,7 +1009,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $objDTO = new InfraAgendamentoTarefaDTO();
 
-    $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD, $objRN) {
+    $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD) {
 
       $objDTO->unSetTodos();
       $objDTO->setStrComando($strComando);
@@ -1376,7 +1378,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     //Agendamento
     $objDTO = new InfraAgendamentoTarefaDTO();
 
-    $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD, $objRN) {
+    $fnCadastrar = function ($strComando, $strDesc) use ($objDTO, $objBD) {
 
       $objDTO->unSetTodos();
       $objDTO->setStrComando($strComando);
@@ -2795,6 +2797,36 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3062(){
     $this->atualizarNumeroVersao("3.6.2");
+  }
+
+  protected function instalarV4000(){
+
+    // Remove agendamento de tarefas de atualização de hipóteses legais
+    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+    $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
+    $objInfraAgendamentoTarefaDTO->setStrComando("PENAgendamentoRN::atualizarInformacoesPEN");
+    $objInfraAgendamentoTarefaDTO->retNumIdInfraAgendamentoTarefa();
+    $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaBD->consultar($objInfraAgendamentoTarefaDTO);
+    if (isset($objInfraAgendamentoTarefaDTO)) {
+      $objInfraAgendamentoTarefaBD->excluir($objInfraAgendamentoTarefaDTO);
+    }
+
+    // Adicionar agendamento de atualização de informações
+    $objAgendamentoInformacoesPEN = new InfraAgendamentoTarefaDTO();
+    $objAgendamentoInformacoesPEN->setStrComando("PENAgendamentoRN::atualizarInformacoesPEN");
+    if ($objInfraAgendamentoTarefaBD->contar($objAgendamentoInformacoesPEN) == 0) {
+      $strDesc = "Atualização de Informações gerais do Barramento para o correto funcionamento do módulo \n\n";
+      $strDesc .= "- Atualização de Hipóteses Legais\n";
+      $strDesc .= "- Atualização de Espécies Documentais\n";
+      $strDesc .= "- Mapeamento de Espécies Documentais com Tipos de Documentos do SEI\n";
+      $objAgendamentoInformacoesPEN->setStrDescricao($strDesc);
+      $objAgendamentoInformacoesPEN->setStrStaPeriodicidadeExecucao("S");
+      $objAgendamentoInformacoesPEN->setStrPeriodicidadeComplemento("1/0,2/0,3/0,4/0,5/0,6/0,7/0");
+      $objAgendamentoInformacoesPEN->setStrSinAtivo("S");
+      $objAgendamentoInformacoesPEN->setStrSinSucesso("S");
+      $objInfraAgendamentoTarefaBD->cadastrar($objAgendamentoInformacoesPEN);
+    }
+    $this->atualizarNumeroVersao("4.0.0");
   }
 }
 

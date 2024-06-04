@@ -427,7 +427,7 @@ class ProcessoEletronicoRN extends InfraRN
 
           if(!empty($estrutura->hierarquia->nivel)) {
             $array = array();
-            foreach($estrutura->hierarquia->nivel as $nivel) {
+            foreach($estrutura->hierarquia as $nivel) {
               $array[] = utf8_decode($nivel->sigla);
             }
             $item->setArrHierarquia($array);
@@ -525,8 +525,8 @@ class ProcessoEletronicoRN extends InfraRN
 
           if (!empty($estrutura->hierarquia->nivel)) {
             $array = array();
-            foreach ($estrutura->hierarquia->nivel as $nivel) {
-              $array[] = utf8_decode($nivel->sigla);
+            foreach ($estrutura->hierarquia as $nivel) {
+              $array[] = utf8_decode($nivel->sigla ?? "");
             }
             $item->setArrHierarquia($array);
           }
@@ -1910,8 +1910,12 @@ class ProcessoEletronicoRN extends InfraRN
 
   public function consultarHipotesesLegais() {
     try{
-        $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) {
-            return $objPenWs->consultarHipotesesLegais();
+        $parametros = new stdClass();
+        $parametros->filtroDeHipotesesLegais = new stdClass();
+        $parametros->filtroDeHipotesesLegais->ativos = true;
+
+        $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
+            return $objPenWs->consultarHipotesesLegais($parametros);
         });
 
       if (empty($hipoteses)) {
@@ -2211,7 +2215,7 @@ class ProcessoEletronicoRN extends InfraRN
       return (
           isset($parObjDocumento->protocoloDoProcessoAnexado) &&
           !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-          $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
+          $parObjProtocolo?->protocolo != $parObjDocumento?->protocoloDoProcessoAnexado
       );
   }
 

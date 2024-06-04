@@ -2,7 +2,7 @@
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
-sistema=super
+sistema=sei5
 base=mysql
 teste=
 
@@ -51,12 +51,39 @@ CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSW
 CMD_COMPOSE_UNIT = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_UNIT)/docker-compose.yml --env-file $(PEN_TEST_UNIT)/.env
 CMD_COMPOSE_FUNC = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env
 CMD_COMPOSE_FUNC_EXEC = $(CMD_COMPOSE_FUNC) exec -T
-CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "input.*txtUsuario.*"'
-CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $${HOST_URL:-$$SEI_HOST_URL}/sei | grep -q "input.*txtUsuario.*"'
+CMD_CURL_APACHE_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $(ORG1_HOSTNAME):$(ORG1_PORT)/sei | grep -q "Sistema"'
+CMD_CURL_APACHE_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $(ORG2_HOSTNAME):$(ORG2_PORT)/sei | grep -q "Sistema"'
+CMD_CURL_LOGIN_ORG1 = $(CMD_COMPOSE_FUNC_EXEC) org1-http bash -c 'curl -s -L $(ORG1_HOSTNAME):$(ORG1_PORT)/sei | grep -q "input.*txtUsuario.*"'
+CMD_CURL_LOGIN_ORG2 = $(CMD_COMPOSE_FUNC_EXEC) org2-http bash -c 'curl -s -L $(ORG1_HOSTNAME):$(ORG1_PORT)/sei | grep -q "input.*txtUsuario.*"'
 FILE_VENDOR_FUNCIONAL = $(PEN_TEST_FUNC)/vendor/bin/phpunit
 FILE_VENDOR_UNITARIO = $(PEN_TEST_UNIT)/vendor/bin/phpunit
 
 all: help
+
+# acessa o SEI e verifica se esta aparecendo alguma pagina, mesmo q erro. Necessario para saber se podemos rodar update
+check-apache-ispinging: ## Target de apoio. Verifica se algo apareceu na tela de login mesmo q erro
+	@echo ""
+	@echo "Testando se a pagina inicial responde para o org1..."
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_APACHE_ORG1); then \
+				echo 'Pagina encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_APACHE_ORG1); then echo 'Pagina inicial org1 nao encontrada. Verifique...'; exit 1 ; fi;
+	@echo "Testando se a pagina inicial responde para o org2..."
+	@for i in `seq 1 15`; do \
+	    echo "Tentativa $$i/15";  \
+		if $(CMD_CURL_APACHE_ORG2); then \
+				echo 'Página encontrada!' ; \
+				break ; \
+		fi; \
+		sleep 5; \
+	done; \
+	if ! $(CMD_CURL_APACHE_ORG2); then echo 'Pagina inicial org2 nao encontrada. Verifique...'; exit 1 ; fi;
+
 
 check-isalive: ## Target de apoio. Acessa os Sistemas e verifica se estao respondendo a tela de login
 	@echo ""
@@ -85,6 +112,16 @@ check-isalive: ## Target de apoio. Acessa os Sistemas e verifica se estao respon
 install-phpunit-vendor: ## instala os pacotes composer referentes aos testes via phpunit
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-functional bash -c './composer.phar install'
 	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c './composer.phar install'
+	@if [ "$(sistema)" = "sei5" ]; then \
+	grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+	    if [ -z "$(grep "relative{0}" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php)" ]; then \
+		    echo "Vamos agora alterar um arquivo do besimple para compatibilizar com o php8"; \
+			echo "O arquivo a ser alterado serah: $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php"; \
+			echo "Caso necessario digite sua senha de root abaixo: "; \
+		    sudo sed -i "s|relative{0}|relative[0]|" $(PEN_TEST_FUNC)/vendor/besimple/soap/src/BeSimple/SoapClient/WsdlDownloader.php; \
+			echo "Arquivo alterado. Procedendo..."; \
+		fi; \
+	fi
 
 
 $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista

@@ -120,6 +120,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
     }
 
+    //phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
     protected function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
         $numIdTramite = 0;
@@ -186,10 +187,10 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
           $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
-        if(isset($objMetadadosProcessoTramiteAnterior->documento)){
+        if(isset($objMetadadosProcessoTramiteAnterior?->documento)){
           $strNumeroRegistro = null;
         }else{
-          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
         }
 
           $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
@@ -699,7 +700,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
           $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO_HIRARQUIA');
           $objAtributoAndamentoDTO->setStrValor($nome);
-          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel?->numeroDeIdentificacaoDaEstrutura);
           $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
 

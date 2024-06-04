@@ -298,8 +298,10 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3061();
         case '3.6.1':
           $this->instalarV3062();
+        case '3.6.2':
+          $this->instalarV4000();
         
-            break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
+          break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
             $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
             return;
@@ -2098,12 +2100,17 @@ class PenAtualizarSipRN extends InfraRN
     $this->atualizarNumeroVersao("3.6.1");
   }
 
+
   protected function instalarV3062()
   {
     $numIdSistemaSei = $this->getNumIdSistema('SEI');
     $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistemaSei, "Básico");    
     ScriptSip::adicionarRecursoPerfil($numIdSistemaSei, $idPerfilBasico, 'pen_map_envio_parcial_listar');
-    $this->atualizarNumeroVersao("3.6.2");  
+    $this->atualizarNumeroVersao("3.6.2");
+  }
+
+  protected function instalarV4000(){
+    $this->atualizarNumeroVersao("4.0.0");
   }
 
   /**

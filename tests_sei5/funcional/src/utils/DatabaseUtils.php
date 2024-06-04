@@ -1,0 +1,39 @@
+<?php
+
+class DatabaseUtils
+{
+    private $connection;
+
+    function __construct($nomeContexto)
+    {
+        $dns = getenv($nomeContexto . '_DB_SEI_DSN');
+        $user = getenv("SEI_DATABASE_USER");
+        $password = getenv("SEI_DATABASE_PASSWORD");
+        $this->connection = new PDO($dns, $user, $password);
+    }
+
+
+	public function execute($sql, $params){
+		$statement = $this->connection->prepare($sql);
+        try{
+            $result = $statement->execute($params);
+        }catch(Exception $e){
+            print_r($e->getMessage());
+            $result ="";
+        }
+
+        return $result;
+	}
+
+
+	public function query($sql, $params){
+		$statement = $this->connection->prepare($sql);
+		$statement->execute($params);
+		return $statement->fetchAll();
+	}
+
+
+    public function getBdType(){
+		return $this->connection->getAttribute(PDO::ATTR_DRIVER_NAME);
+	}
+}
