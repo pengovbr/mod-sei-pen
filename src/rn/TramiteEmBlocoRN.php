@@ -218,7 +218,6 @@ class TramiteEmBlocoRN extends InfraRN
 
 
       $this->validarStrStaTipo($objTramiteEmBlocoDTO, $objInfraException);
-      $this->validarNumIdUsuario($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrDescricao($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrIdxBloco($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrStaEstado($objTramiteEmBlocoDTO, $objInfraException);
@@ -348,11 +347,11 @@ class TramiteEmBlocoRN extends InfraRN
   protected function cancelarControlado(array $blocoIds)
   {
     try {
-      $objBloco = new TramitaEmBlocoProtocoloDTO();
+      $objBloco = new PenBlocoProcessoDTO();
       foreach ($blocoIds as $blocoId) {
-        $objBloco->setNumIdTramitaEmBloco($blocoId);
+        $objBloco->setNumIdBloco($blocoId);
         $objBloco->retDblIdProtocolo();
-        $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
+        $tramiteEmBlocoProtocoloRn = new PenBlocoProcessoRN();
         $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
         $protocoloRn = new ExpedirProcedimentoRN();
         foreach ($protocoloIds as $protocoloId) {
