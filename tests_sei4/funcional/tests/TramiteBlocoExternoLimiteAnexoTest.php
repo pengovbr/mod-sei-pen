@@ -88,20 +88,12 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
             $objAnexoFixture->carregar([
                 'IdProtocolo' => $objDocumentoDTO->getDblIdDocumento(),
                 'Nome' => basename(self::$documentoTeste1['ARQUIVO']),
-            ]);   
-
-            // $objAssinaturaFixture = new AssinaturaFixture();
-            // $objAssinaturaFixture->carregar([
-            //     'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-            //     'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-            //     'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
-            // ]);
+            ]);
 
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdTramitaEmBloco' => $objBlocoDeTramiteDTO->getNumId(),
-                'IdxRelBlocoProtocolo' => $objProtocoloFixtureDTO->getStrProtocoloFormatado()
+              'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+              'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
             ]);
 
             self::$protocoloTestePrincipal['PROTOCOLO'] = $objProtocoloFixtureDTO->getStrProtocoloFormatado();

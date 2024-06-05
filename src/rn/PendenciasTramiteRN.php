@@ -14,16 +14,21 @@ class PendenciasTramiteRN extends InfraRN
     const NUMERO_PROCESSOS_MONITORAMENTO = 10;
     const MAXIMO_PROCESSOS_MONITORAMENTO = 20;
     const COMANDO_EXECUCAO_WORKER = '%s %s %s %s %s %s %s %s > %s 2>&1 &';
-    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoTarefasPEN.php";
-    const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
-    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
+    // Envio
+    const LOCALIZACAO_SCRIPT_WORKER_ENVIO = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php";
+    const COMANDO_IDENTIFICACAO_WORKER_ENVIO = "ps -c ax | grep 'MonitoramentoEnvioTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_IDENTIFICACAO_WORKER_ID_ENVIO = "ps -c ax | grep 'MonitoramentoEnvioTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
+    // Recebimento
+    const LOCALIZACAO_SCRIPT_WORKER = DIR_SEI_WEB . "/../scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php";
+    const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
+    const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
 
-    private $objPenDebug = null;
-    private $strEnderecoServico = null;
-    private $strEnderecoServicoPendencias = null;
-    private $strLocalizacaoCertificadoDigital = null;
-    private $strSenhaCertificadoDigital = null;
-    private $arrStrUltimasMensagensErro = array();
+    protected $objPenDebug = null;
+    protected $strEnderecoServico = null;
+    protected $strEnderecoServicoPendencias = null;
+    protected $strLocalizacaoCertificadoDigital = null;
+    protected $strSenhaCertificadoDigital = null;
+    protected $arrStrUltimasMensagensErro = array();
 
   public function __construct($parStrLogTag = null)
     {

@@ -64,8 +64,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         $objBlocoDeTramiteProtocoloFixture = new BlocoDeTramiteProtocoloFixture();
         $objBlocoDeTramiteProtocoloFixture->carregar([
             'IdProtocolo' => $this->objProtocoloDTO->getDblIdProtocolo(),
-            'IdTramitaEmBloco' => $this->objBlocoDeTramiteDTO->getNumId(),
-            'IdxRelBlocoProtocolo' => $this->objProtocoloDTO->getStrProtocoloFormatado()
+            'IdBloco' => $this->objBlocoDeTramiteDTO->getNumId()
         ]);
 
         $this->acessarSistema(
@@ -82,9 +81,10 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         $this->paginaTramiteEmBloco->clicarSalvar();
         sleep(2);
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+        
         $this->assertStringContainsString(
             utf8_encode(
-                'Prezado(a) usuário(a), o processo ' . $this->objProtocoloDTO->getStrProtocoloFormatado()
+                'Prezado(a) usuário(a), o processo ' . $this->objProtocoloDTO->getDblIdProtocolo()
                 . ' encontra-se inserido no bloco ' . $this->objBlocoDeTramiteDTO->getNumId() . ' - '
                 .  $this->objBlocoDeTramiteDTO->getStrDescricao() 
                 . '. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'

@@ -53,7 +53,7 @@ class PENIntegracao extends SeiIntegracao
     $objSessaoSEI = SessaoSEI::getInstance();
     $strAcoesProcedimento = "";
 
-    $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
+    $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_bloco');
 
     if ($bolAcaoGerarPendencia) {
       $objPaginaSEI = PaginaSEI::getInstance();
@@ -852,12 +852,8 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
           break;
 
-      case 'pen_expedir_lote':
-        require_once dirname(__FILE__) . '/pen_expedir_lote.php';
-          break;
-
-      case 'pen_expedir_lote_listar':
-        require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+      case 'pen_expedir_bloco':
+        require_once dirname(__FILE__) . '/pen_expedir_bloco.php';
           break;
 
       case 'pen_map_envio_parcial_listar':

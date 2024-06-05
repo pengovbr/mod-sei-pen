@@ -48,13 +48,13 @@ try {
         $arrObjTramiteEmBloco = [];
         $excluir = true;
         foreach ($arrTramiteEmBloco as $objTramiteEmBloco) {
-          $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($objTramiteEmBloco->getNumId());
-          $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-          $tramitaEmBlocoProtocoloDTO->retNumId();
+          $tramitaEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+          $tramitaEmBlocoProtocoloDTO->setNumIdBloco($objTramiteEmBloco->getNumId());
+          $tramitaEmBlocoProtocoloDTO->retNumIdBloco();
+          $tramitaEmBlocoProtocoloDTO->retNumIdBlocoProcesso();
           $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-  
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+
+          $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
           $arrTramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
   
           if ($arrTramitaEmBlocoProtocoloRN == null) {
@@ -202,15 +202,16 @@ try {
 
     $strResultado .= "<td align=''>";
      // Tramitar bloco
-    $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-    $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoTramite);
-    $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-    $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+     $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoTramite);
+     $objPenBlocoProcessoDTO->retDblIdProtocolo();
+     $objPenBlocoProcessoDTO->retNumIdBloco();
+ 
+     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+     $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
     if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
-      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
+      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_bloco&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
     }
 
 

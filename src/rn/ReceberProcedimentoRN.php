@@ -527,17 +527,20 @@ class ReceberProcedimentoRN extends InfraRN
           $objPenProtocoloBD->alterar($objPenProtocolo);
 
           // Atualizar Bloco para concluido parcialmente
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retTodos();
 
-          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+          $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+          $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-        if ($tramiteEmBlocoProtocolo != null) {
-          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($tramiteEmBlocoProtocolo);
+        if ($arrTramiteEmBlocoProtocolo != null) {
+          foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
+            $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA);
+            $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+          }
+          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBlocoConcluidoParcialmente($arrTramiteEmBlocoProtocolo);
         }
       }
 

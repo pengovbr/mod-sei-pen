@@ -128,7 +128,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
           $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
-          $objLoteProcedimentoRN = new PenLoteProcedimentoRN();
+          $objLoteProcedimentoRN = new PenBlocoProcessoRN();
           $bolSinProcessamentoEmLote = $objExpedirProcedimentoDTO->getBolSinProcessamentoEmLote();
           $numIdLote = $objExpedirProcedimentoDTO->getNumIdLote();
           $numIdAtividade = $objExpedirProcedimentoDTO->getNumIdAtividade();
@@ -142,9 +142,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             $numTempoInicialRecebimento = microtime(true);
 
             $this->gravarLogDebug(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO, 2);
-            $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-            $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-            $objPenLoteProcedimentoDTO->setNumIdLote($numIdLote);
+            $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
+            $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objPenLoteProcedimentoDTO->setNumIdBlocoProcesso($numIdLote);
+            $objPenLoteProcedimentoDTO->retTodos();
+
+            $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+            $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);
         }
 
           $objInfraException = new InfraException();
@@ -239,7 +243,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             if($bolSinProcessamentoEmLote){
               $this->gravarLogDebug(sprintf('Envio do metadados do processo %s', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
               $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
-              $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+              $objLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
               $idAtividadeExpedicao = $numIdAtividade;
             }else{
                 $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
@@ -289,7 +293,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }else{
               $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
               $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
-              $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+              $objLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
             }
 
                   $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
@@ -3007,13 +3011,14 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
 
-      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+      // Atualizar aqui PenBlocoProcessoDTO PenBlocoProcessoRN
+      $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
       $objPenLoteProcedimentoDTO->retTodos();
-      $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-      $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+      $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
 
-      $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+      $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);
       $cancelarLote=false;
 
       if(!is_null($objPenLoteProcedimentoDTO)){
@@ -3090,14 +3095,12 @@ class ExpedirProcedimentoRN extends InfraRN {
       ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
 
       if(is_object($objPenLoteProcedimentoDTO)){
+        // Atualizar aqui PenBlocoProcessoDTO PenBlocoProcessoRN
+        $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
 
-        $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
-        $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
-        $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
-        $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
-
-        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-        $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+        $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+        $objPenLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
       }
 
       if(!$cancelarLote){

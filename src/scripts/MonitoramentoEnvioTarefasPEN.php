@@ -26,8 +26,8 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
         ini_set('soap.wsdl_cache_dir', $parStrWsdlCacheDir);
     }
 
-      $objPendenciasTramiteRN = new PendenciasTramiteRN("MONITORAMENTO");
-      $resultado = $objPendenciasTramiteRN->encaminharPendencias($bolMonitorar, $parBolSegundoPlano, $parBoldebug);
+      $objPendenciasTramiteRN = new PendenciasEnvioTramiteRN("MONITORAMENTO");
+      $resultado = $objPendenciasTramiteRN->expedirPendencias($bolMonitorar, $parBolSegundoPlano, $parBoldebug);
       exit($resultado);
 
   } finally {

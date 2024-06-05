@@ -27,19 +27,19 @@ try {
 
   $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
 
-  $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+  $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
   $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
-  $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+  $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-  $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+  $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
 
-  $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultarProtocolosBloco($objTramiteEmBlocoProtocoloDTO);
+  $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
 
   if ($tramiteEmBlocoProtocoloDTO != null) {
     // TODO: tratar atualização a partir de um metodo
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
     $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
 
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();

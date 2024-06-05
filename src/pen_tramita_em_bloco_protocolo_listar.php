@@ -1,16 +1,13 @@
 <?php
 try {
   require_once DIR_SEI_WEB . '/SEI.php';
-
   session_start();
-
   $objSessaoSEI = SessaoSEI::getInstance();
   $objPaginaSEI = PaginaSEI::getInstance();
-
   $objSessaoSEI->validarLink();
   $objSessaoSEI->validarPermissao($_GET['acao']);
 
-  $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado')); 
+  $objPaginaSEI->salvarCamposPost(array('txtProcedimentoFormatado'));
 
   switch ($_GET['acao']) {
     case 'pen_tramita_em_bloco_protocolo_excluir':
@@ -21,27 +18,26 @@ try {
         if (count($arrStrIds) > 0) {
           for ($i = 0; $i < count($arrStrIds); $i++) {     
             $arrStrIdComposto = explode('-', $arrStrIds[$i]);
-            $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-            $objTramiteEmBlocoProtocoloDTO->setNumId($arrStrIdComposto[0]);
+            $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+            $objTramiteEmBlocoProtocoloDTO->setNumIdBlocoProcesso($arrStrIdComposto[0]);
             $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($arrStrIdComposto[1]);
-            $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($arrStrIdComposto[2]);
-            $objTramiteEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
-            $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+            $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($arrStrIdComposto[2]);
+            $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
             $arrObjTramiteBlocoProtocoloDTO[] = $objTramiteEmBlocoProtocoloDTO;
           }
         } elseif (isset($_GET['hdnInfraItensSelecionados'])) {
           $arrStrIdComposto = explode('-', $_GET['hdnInfraItensSelecionados']);
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $objTramiteEmBlocoProtocoloDTO->setNumId($arrStrIdComposto[0]);
+          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+          $objTramiteEmBlocoProtocoloDTO->setNumIdBlocoProcesso($arrStrIdComposto[0]);
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($arrStrIdComposto[1]);
-          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($arrStrIdComposto[2]);       
+          $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($arrStrIdComposto[2]);
           $arrObjTramiteBlocoProtocoloDTO[] = $objTramiteEmBlocoProtocoloDTO;
         }
-        
-        $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+
+        $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
         $objTramitaEmBlocoProtocoloRN->excluir($arrObjTramiteBlocoProtocoloDTO);
 
-        $dblIdBloco = $arrObjTramiteBlocoProtocoloDTO[0]->getNumIdTramitaEmBloco();
+        $dblIdBloco = $arrObjTramiteBlocoProtocoloDTO[0]->getNumIdBloco();
         $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
         $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
         $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
@@ -52,13 +48,13 @@ try {
         $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
 
         if ($blocoResultado != null) {
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($dblIdBloco);
-          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+          $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($dblIdBloco);
+          $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
           $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-        
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
+
+          $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
           $tramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
 
           if ($tramiteEmBlocoProtocoloDTO == null) {
@@ -72,12 +68,12 @@ try {
             $recusa = false;
             $cancelado = false;
             // Verificar se tem existe processo recusado dentro de um bloco
-            $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
-            $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
-            $objTramiteEmBlocoProtocoloDTO2->retNumIdTramitaEmBloco();
+            $objTramiteEmBlocoProtocoloDTO2 = new PenBlocoProcessoDTO();
+            $objTramiteEmBlocoProtocoloDTO2->setNumIdBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
+            $objTramiteEmBlocoProtocoloDTO2->retNumIdBloco();
             $objTramiteEmBlocoProtocoloDTO2->retDblIdProtocolo();
 
-            $objTramiteEmBlocoProtocoloDTORN = new TramitaEmBlocoProtocoloRN($objTramiteEmBlocoProtocoloDTO2);
+            $objTramiteEmBlocoProtocoloDTORN = new PenBlocoProcessoRN($objTramiteEmBlocoProtocoloDTO2);
 
             $arrTramiteEmBlocoProtocolo = $objTramiteEmBlocoProtocoloDTORN->listar($objTramiteEmBlocoProtocoloDTO2);
 
@@ -86,14 +82,11 @@ try {
             $objPenProtocolo->setStrSinObteveRecusa('S');
             $objPenProtocolo->setNumMaxRegistrosRetorno(1);
             $objPenProtocolo->retDblIdProtocolo();
-
             $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
             $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
-
             if ($ObjPenProtocoloDTO != null) {
               $recusa = true;
             }
-
             $objAtividadeDTO = new AtividadeDTO();
             $objAtividadeDTO->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo, 'IdProtocolo'), InfraDTO::$OPER_IN);
             $objAtividadeDTO->setNumIdTarefa([
@@ -112,7 +105,6 @@ try {
             if ($objAtividadeDTO != null) {
               $cancelado = true;
             }
-
             if ($recusado == false && $cancelado == false) {
               $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
               $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
@@ -136,29 +128,32 @@ try {
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
-
   $arrComandos = array();
   $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
-  $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-  $objTramitaEmBlocoProtocoloDTO->retNumId();
+  $objTramitaEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+  $objTramitaEmBlocoProtocoloDTO->setNumIdBloco($_GET['id_bloco']);
   $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdBloco();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdBlocoProcesso();
   $objTramitaEmBlocoProtocoloDTO->retNumSequencia();
-  $objTramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+  $objTramitaEmBlocoProtocoloDTO->retStrNomeUsuario();
+  $objTramitaEmBlocoProtocoloDTO->retDthEnvio();
+  $objTramitaEmBlocoProtocoloDTO->retStrUnidadeDestino();
   $objTramitaEmBlocoProtocoloDTO->retNumIdUsuario();
   $objTramitaEmBlocoProtocoloDTO->retNumIdUnidadeBloco();
   $objTramitaEmBlocoProtocoloDTO->retStrStaEstadoProtocolo();
-  $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($_GET['id_bloco']);
+  $objTramitaEmBlocoProtocoloDTO->retStrStaEstadoBloco();
+  $objTramitaEmBlocoProtocoloDTO->retNumIdAndamento();
 
   $strPalavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtProcedimentoFormatado');
   if ($strPalavrasPesquisa!=''){
     $objTramitaEmBlocoProtocoloDTO->setStrPalavrasPesquisa($strPalavrasPesquisa);
   }
 
-  $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
+  $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
   $arrTramitaEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->listarProtocolosBloco($objTramitaEmBlocoProtocoloDTO);
-
 
   $arrComandos = array();
 
@@ -167,38 +162,31 @@ try {
 
   $objPaginaSEI->prepararPaginacao($objTramitaEmBlocoProtocoloDTO);
   $objPaginaSEI->processarPaginacao($objTramitaEmBlocoProtocoloDTO);
-  $objPaginaSEI->prepararOrdenacao($objTramitaEmBlocoProtocoloDTO, 'IdxRelBlocoProtocolo', InfraDTO::$TIPO_ORDENACAO_DESC);
+  $objPaginaSEI->prepararOrdenacao($objTramitaEmBlocoProtocoloDTO, 'IdProtocolo', InfraDTO::$TIPO_ORDENACAO_DESC);
 
   $numRegistros = count($arrTramitaEmBlocoProtocoloDTO);
   if ($numRegistros > 0) {
-
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-
     $strResultado = '';
     $strSumarioTabela = 'Tabela de Processo em Lote.';
     $strCaptionTabela = 'Processo em Lote';
-
     $strResultado .= '<table width="99%" id="tblBlocos" class="infraTable" summary="' . $strSumarioTabela . '">' . "\n";
     $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
     $strResultado .= '<thead>';
     $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
     $strResultado .= '<th class="infraTh" width="10%">';
-
     $strResultado .= '<div class="infraDivOrdenacao">';
     $strResultado .= '<div class="infraDivRotuloOrdenacao">Seq</div>';
     $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() .'" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
     $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() .'" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
     $strResultado .= '</div>';
-
     $strResultado .= '</th>' . "\n";
     $strResultado .= '<th class="infraTh">';
-
     $strResultado .= '<div class="infraDivOrdenacao">';
     $strResultado .= '<div class="infraDivRotuloOrdenacao">Processo</div>';
     $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() .'" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
     $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() .'" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
     $strResultado .= '</div>';
-
     $strResultado .= '</th>' . "\n";
     $strResultado .= '<th class="infraTh">Usuário</th>' . "\n";
     $strResultado .= '<th class="infraTh">Data do Envio</th>' . "\n";
@@ -208,78 +196,75 @@ try {
     $strResultado .= '</thead>' . "\n";
     $strCssTr = '';
     foreach ($arrTramitaEmBlocoProtocoloDTO as $i => $objTramitaEmBlocoProtocoloDTO) {
-
       $strCssTr = ($strCssTr == '<tr class="infraTrClara">') ? '<tr class="infraTrEscura">' : '<tr class="infraTrClara">';
       $strResultado .= $strCssTr;
 
-      $numIdBlocoProtocolo = $objTramitaEmBlocoProtocoloDTO->getNumId().'-'.$objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo().'-'.$_GET['id_bloco'];
+      $numIdBlocoProtocolo = $objTramitaEmBlocoProtocoloDTO->getNumIdBlocoProcesso().'-'.$objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo().'-'.$_GET['id_bloco'];
       $strResultado .= '<td valign="top">' . $objPaginaSEI->getTrCheck($i, $numIdBlocoProtocolo, $numIdBlocoProtocolo) . '</td>';
       $strResultado .= '<td align="center">' . ($i + 1) . '</td>';
 
       $strResultado .= '<td align="center">';
-      $strResultado .= '<a onclick="infraLimparFormatarTrAcessada(this.parentNode.parentNode);" href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo()) . '" target="_blank" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '" class="' . $strClassProtocolo . '" alt="" title="">' . $objTramitaEmBlocoProtocoloDTO->getStrIdxRelBlocoProtocolo() . '</a>';
+      $objProcedimentoDTO = new ProcedimentoDTO();
+      $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+      $objProcedimentoDTO->setDblIdProcedimento($objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo());
+
+      $objProcedimentoRN = new ProcedimentoRN();
+      $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
+      $strResultado .= '<a onclick="infraLimparFormatarTrAcessada(this.parentNode.parentNode);" href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_procedimento=' . $objTramitaEmBlocoProtocoloDTO->getDblIdProtocolo()) . '" target="_blank" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '" class="' . $strClassProtocolo . '" alt="" title="">' . $procedimento->getStrProtocoloProcedimentoFormatado() . '</a>';
       $strResultado .= '</td>';
 
-      $objPenLoteProcedimento = $objTramitaEmBlocoProtocoloDTO->getObjPenLoteProcedimentoDTO();
-
-      if ($objPenLoteProcedimento && $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_ABERTO) {
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getStrNomeUsuario()) . '</td>';
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getDthRegistro()) . '</td>';
-        $strResultado .= '<td align="center">' . PaginaSEI::tratarHTML($objPenLoteProcedimento[0]->getStrUnidadeDestino()) . '</td>';
-         
+      if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_ABERTO) {
+        $strResultado .= '<td align="center">'. PaginaSEI::tratarHTML($objTramitaEmBlocoProtocoloDTO->getStrNomeUsuario()) . '</td>';
+        $strResultado .= '<td align="center">'. PaginaSEI::tratarHTML($objTramitaEmBlocoProtocoloDTO->getDthEnvio()) . '</td>';
+        $strResultado .= '<td align="center">'. PaginaSEI::tratarHTML($objTramitaEmBlocoProtocoloDTO->getStrUnidadeDestino()) . '</td>';
       } else {
         $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
 
       $strResultado .= '<td align="center">' . "\n";
-      if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';   
-      } elseif ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_DISPONIBILIZADO) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
-      } elseif ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_CONCLUIDO && count($objPenLoteProcedimento) > 1) {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
-      } elseif ($objTramitaEmBlocoProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-        $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Um trâmite para esse processo foi recusado" style="width:16px;" alt="Um trâmite para esse processo foi recusado" />';
-      } else {
-
-        $processoConcluidoRecebido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO); 
-        $processoConcluidoAvulso = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO); 
-        $processoTramiteExpedido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO); 
-        $processoTramiteCancelado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); 
-        $processoTramiteProcessamento = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
-        $processoTramiteAberto = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-
-        switch ($objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa()) {
-          case $processoConcluidoAvulso:
-          case $processoTramiteExpedido:
-          case $processoConcluidoRecebido:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
-              break;
-          case $processoTramiteProcessamento:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
-              break;
-          case $processoTramiteCancelado:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
-              break;   
-          default:
-            $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
-              break;
-        }
+      switch ($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento()) {
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
+            break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
+            break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/pen_tramite_recusado.png" title="Recusado" style="width:16px; alt="Recusado" />';
+            break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
+            break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
+        default:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
+            break;
       }
       $strResultado .= '</td>' . "\n";
 
-      $strResultado .= '<td align="center">' . "\n";
+      $strResultado .= '<td align="center">'. "\n";
 
-      if ($objTramitaEmBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
-        if ($objTramitaEmBlocoProtocoloDTO->getStrSinObteveRecusa() == 'S' ||
-            $objTramitaEmBlocoProtocoloDTO->getNumStaIdTarefa() == $processoTramiteCancelado ||
-            $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() == TramiteEmBlocoRN::$TE_ABERTO ) {
-
-          if ($objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_DISPONIBILIZADO &&
-          $objTramitaEmBlocoProtocoloDTO->getStrStaEstadoBloco() != TramiteEmBlocoRN::$TE_CONCLUIDO) {
-            $strResultado .= '<a onclick="onCLickLinkDelete(\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
-          } 
-        }
+      $estadosBloqueados = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+      );
+      if (
+        $objTramitaEmBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()
+        && !in_array($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento(), $estadosBloqueados)
+      ) {
+        $strResultado .= '<a onclick="onCLickLinkDelete(\''
+          .$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
       }
       $strResultado .= '</td>' . "\n";
       $strResultado .= '</tr>' . "\n";
@@ -424,7 +409,7 @@ $idBloco=$_GET['id_bloco']; ?>
       var len = jQuery('input[name*=chkInfraItem]:checked').length;
       if (len > 0) {
         var form = jQuery('#frmLoteListar');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=pen_tramita_em_bloco_protocolo_listar&acao_retorno=pen_tramita_em_bloco_protocolo_listar&tramite_em_bloco=1'); ?>');
+        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_bloco&acao_origem=pen_tramita_em_bloco_protocolo_listar&acao_retorno=pen_tramita_em_bloco_protocolo_listar&tramite_em_bloco=1'); ?>');
         form.submit();
       } else {
         alert('Selecione pelo menos um processo');
