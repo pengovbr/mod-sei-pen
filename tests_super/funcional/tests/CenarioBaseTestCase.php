@@ -49,6 +49,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastrarProcessoEmBloco = null;
     protected $paginaTramiteEmBloco = null;
     protected $paginaEnvioParcialListar = null;
+    protected $paginaPenHipoteseLegalListar = null;
 
     public function setUpPage(): void
     {
@@ -77,6 +78,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
         $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
         $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
+        $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
+        
         $this->currentWindow()->maximize();
     }
 
