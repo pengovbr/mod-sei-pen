@@ -111,6 +111,25 @@ class ProcessoEletronicoINT extends InfraINT {
     return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
   }
 
+  /**
+   * Auto completar repositorio de estruturas
+   *
+   * @param string $strPalavrasPesquisa
+   * @return array
+   */
+  public static function autoCompletarRepositorioEstruturas($strPalavrasPesquisa)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
+    $arrayRepositorioEstruturas = array();
+    foreach ($arrObjRepositorioDTO as $value) {
+      if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
+        $arrayRepositorioEstruturas[] = $value;
+      }
+    }
+    return $arrayRepositorioEstruturas;
+  }
+  
   public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       return $objExpedirProcedimentoRN->listarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa);

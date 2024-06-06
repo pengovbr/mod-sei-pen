@@ -62,11 +62,17 @@ try {
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
     if(!array_key_exists('id_unidade', $_POST) || empty($_POST['id_unidade'])) {
-        throw new InfraException('Nenhuma "Unidade" foi selecionada');
+      $params = http_build_query($_POST);
+      $objPagina->adicionarMensagem('Nenhuma "Unidade" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+      exit(0);
     }
 
     if(!array_key_exists('id_unidade_rh', $_POST) || $_POST['id_unidade_rh'] === '' || $_POST['id_unidade_rh'] === null) {
-        throw new InfraException('Nenhuma "Unidade RH" foi selecionada');
+      $params = http_build_query($_POST);
+      $objPagina->adicionarMensagem('Nenhuma "Unidade RH" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+      exit(0);
     }
 
       $objGenericoBD = new GenericoBD($objBanco);
@@ -110,14 +116,33 @@ try {
 
       $numIdUnidade = '';
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
-        $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
-        $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
-        $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
+      $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
+      $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
+      $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
     }
     else {
-        $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
-        $numIdUnidade = $unidade->getNumIdUnidade();
+      $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
+      $numIdUnidade = $unidade->getNumIdUnidade();
     }
+
+      $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+
+      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+      $objPenUnidadeRestricaoDTO->setNumIdUnidade($_POST['id_unidade']);
+      $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
+      $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
+
+      $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->prepararRepoEstruturas(
+        $_POST['id_unidade'],
+        $_POST['id_unidade_rh'],
+        !empty($_POST['hdnRepoEstruturas']) ? $_POST['hdnRepoEstruturas'] : ""
+      );
+
+    if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
+      $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
+    }
+
+    $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
 
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
       exit(0);
@@ -173,7 +198,16 @@ try {
     }else{
         $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
     }
+  } else if (!empty($_GET['id_unidade_rh']) && !empty($_GET['txtUnidadePen'])){
+    $strNomeUnidadeSelecionada = $_GET['txtUnidadePen'];
+    $objPenUnidadeDTO->setNumIdUnidadeRH($_GET['id_unidade_rh']);
   }
+
+  $strCssRestricao = "";
+  $strHtmlRestricao = "";
+  $strJsGlobalRestricao = "";
+  $strJsInicializarRestricao = "";
+  ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
 catch (InfraException $e) {
     $objPagina->processarExcecao($e);
@@ -237,60 +271,10 @@ if ($objPenUnidadeDTO!= null)
 #txtUnidadePen{position:absolute;left:0%;top:53%;width:60%;}
 #btnUnidadeRh2{position:absolute;left:61%;top:53%;}
 
+<?=$strCssRestricao?>
+
 </style>
 
-<?php $objPagina->montarJavaScript(); ?>
-<script type="text/javascript">
-
-var objAutoCompletarEstrutura = null;
-var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
-var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
-function inicializar(){
-    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
-    objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
-    objAutoCompletarEstrutura.mostrarAviso = true;
-    objAutoCompletarEstrutura.limparCampo = false;
-    objAutoCompletarEstrutura.tempoAviso = 10000000;
-
-    objAutoCompletarEstrutura.prepararExecucao = function(){
-        var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidadePen').value;
-        parametros += '&id_repositorio=' + numIdRepositorioOrigem
-        return parametros;
-    };
-
-    objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
-        window.infraAvisoCancelar();
-    };
-
-    $('#btnUnidadeRh2').click(function() {
-        $('#hdnUnidadeRh').val('');
-        objAutoCompletarEstrutura.executar();
-        objAutoCompletarEstrutura.procurar();
-    });
-}
-
-
-function onSubmit() {
-
-    var form = jQuery('#<?php print PEN_RECURSO_BASE; ?>_form');
-    var field = jQuery('select[name=id_unidade]', form);
-
-    if(field.val() === 'null' || field.val() == ''){
-        alert('Nenhuma "Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>" foi selecionada');
-        field.focus();
-        return false;
-    }
-
-    field = jQuery('#hdnUnidadeRh', form);
-
-    if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
-        alert('Nenhum "ID da Unidade - Tramita GOV.BR" foi selecionada');
-        field.focus();
-        return false;
-    }
-}
-
-</script>
 <?php
 $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
@@ -304,12 +288,66 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenUnidadeDTO->getNumIdUnidade(), $arrMapIdUnidade); ?>
     </select>
 
-    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do Tramita GOV.BR (Estruturas Organizacionais):</label>
+    <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do PEN (Estruturas Organizacionais):</label>
     <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
     <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
     <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
 
     <?php print $objPagina->fecharAreaDados(); ?>
+
+    <?php $objPagina->abrirAreaDados('15em'); ?>
+    <?=$strHtmlRestricao?>
+    <?php print $objPagina->fecharAreaDados(); ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
+<?php $objPagina->montarJavaScript(); ?>
+<script type="text/javascript">
+
+<?=$strJsGlobalRestricao?>
+
+var objAutoCompletarEstrutura = null;
+var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
+var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
+
+function inicializar(){
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
+    objAutoCompletarEstrutura.mostrarAviso = true;
+    objAutoCompletarEstrutura.limparCampo = false;
+    objAutoCompletarEstrutura.tempoAviso = 10000000;
+    objAutoCompletarEstrutura.prepararExecucao = function(){
+        var parametros = 'palavras_pesquisa=' + document.getElementById('txtUnidadePen').value;
+        parametros += '&id_repositorio=' + numIdRepositorioOrigem
+        return parametros;
+    };
+    objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
+        window.infraAvisoCancelar();
+    };
+    $('#btnUnidadeRh2').click(function() {
+        $('#hdnUnidadeRh').val('');
+        objAutoCompletarEstrutura.executar();
+        objAutoCompletarEstrutura.procurar();
+    });
+}
+
+function onSubmit() {
+
+    var form = jQuery('#<?php print PEN_RECURSO_BASE; ?>_form');
+    var field = jQuery('select[name=id_unidade]', form);
+    if(field.val() === 'null' || field.val() == ''){
+        alert('Nenhuma "Unidades - SEI <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>" foi selecionada');
+        field.focus();
+        return false;
+    }
+    field = jQuery('#hdnUnidadeRh', form);
+    if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
+        alert('Nenhum "ID da Unidade - PEN" foi selecionada');
+        field.focus();
+        return false;
+    }
+}
+
+<?=$strJsInicializarRestricao?>
+
+</script>
 <?php $objPagina->fecharHtml(); ?>
