@@ -1491,7 +1491,7 @@ class ReceberProcedimentoRN extends InfraRN
 
     if(is_null($objTipoProcedimentoDTO)){
       // Verifica tipo de processo padrão cadastrado
-      $alterouTipoProcesso = true;
+      $dblAlterouTipoProcesso = true;
       $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
     }
 
