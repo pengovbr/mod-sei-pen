@@ -2106,6 +2106,41 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
     }
 
+    $objMetaBD = $this->objMeta;
+    // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+    $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
+    $objMetaBD->criarTabela(array(
+      'tabela' => 'md_pen_unidade_restricao',
+      'cols' => array(
+        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+        'unidade' => array('id_unidade', 'id_unidade')
+      )
+    ));
+
+    // Criando nova sequência 
+    $objInfraSequenciaRN = new InfraSequenciaRN();
+    $objInfraSequenciaDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_hipotese_legal
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_unidade_restricao');
+    $numMaxId = $rs[0]['total'];
+    if ($numMaxId == null) {
+      $numMaxId = 0;
+    }
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unidade_restricao', $numMaxId + 1);
+    $objInfraSequenciaDTO->setStrNome('md_pen_unidade_restricao');
+    $objInfraSequenciaDTO->retStrNome();
+    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
     // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
