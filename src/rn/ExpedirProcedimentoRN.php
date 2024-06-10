@@ -513,26 +513,45 @@ class ExpedirProcedimentoRN extends InfraRN {
         );
     }
 
+    /**
+     * Verifica se a unidade tem mapeamento de apenas envio de componentes digitais pendentes
+     *
+     * @param $numIdRepositorioDestino
+     * @param $numIdUnidadeDestino
+     * @return bool
+     */
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino)
     {
-      $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
-      $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
+      $objEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+      $objEnvioParcialDTO->retNumIdEstrutura();
+      $objEnvioParcialDTO->retNumIdUnidadePen();
+      $objEnvioParcialDTO->setNumIdEstrutura($numIdRepositorioDestino);
+      $objEnvioParcialDTO->setNumIdUnidadePen(null);
 
-      $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
-      $arrObjPenRestricaoEnvioComponentesDigitaisDTO = 
-        $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
+      $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      $objEnvioParcialDTO = $objEnvioParcialRN->consultar($objEnvioParcialDTO);
+      if (!is_null($objEnvioParcialDTO)) {
+        return true;
+      }
 
-      if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
-        if (count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 1) {
+      $objEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+      $objEnvioParcialDTO->retNumIdEstrutura();
+      $objEnvioParcialDTO->retNumIdUnidadePen();
+      $objEnvioParcialDTO->setNumIdEstrutura($numIdRepositorioDestino);
+
+      $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      $arrObjEnvioParcialDTO = $objEnvioParcialRN->listar($objEnvioParcialDTO);
+
+      if (!is_null($arrObjEnvioParcialDTO) && count($arrObjEnvioParcialDTO) > 0) {
+        if (count($arrObjEnvioParcialDTO) > 1) {
           $arrIdUnidadesParaEnvioPendentes = array();
-          foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
+          foreach ($arrObjEnvioParcialDTO as $value) {
             $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
           }
 
           return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
-        } elseif (!empty($arrObjPenRestricaoEnvioComponentesDigitaisDTO[0]->getNumIdUnidadePen())) {
-          return $arrObjPenRestricaoEnvioComponentesDigitaisDTO[0]->getNumIdUnidadePen() == $numIdUnidadeDestino;
+        } elseif (!empty($arrObjEnvioParcialDTO[0]->getNumIdUnidadePen())) {
+          return $arrObjEnvioParcialDTO[0]->getNumIdUnidadePen() == $numIdUnidadeDestino;
         }
 
         return true;
@@ -2100,12 +2119,17 @@ class ExpedirProcedimentoRN extends InfraRN {
             $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
 
             $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
-            $arrObjDocumentoDTOAssociacao = array_filter($arrObjDocumentoDTOAssociacao, function($item){
-              return $item["StaAssociacao"] == RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO;
-            });
-            $arrObjDocumentoDTOAssociacao = array_values($arrObjDocumentoDTOAssociacao);
-            $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
-            $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
+            $objDocumentoDTO = null;
+            $strStaAssociacao = null;
+            $bolMultiplosComponentesCount = 0;
+            foreach ($arrObjDocumentoDTOAssociacao as $objDocumentoDTOAssociacao) {
+              $strStaAssociacao = $objDocumentoDTOAssociacao['StaAssociacao'];
+              if($strStaAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
+                $objDocumentoDTO = $objDocumentoDTOAssociacao['Documento'];
+                $bolMultiplosComponentesCount++;
+              }
+            }
+            $bolMultiplosComponentes = $bolMultiplosComponentesCount > 1;
             $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
             //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo

@@ -58,4 +58,21 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
         return null;
     }
   }
+
+  /**
+   * Contar HipoteseLegal
+   *
+   * @param PenRelHipoteseLegalDTO $objDTO
+   * @return int
+   * @throws InfraException
+   */
+  protected function contarConectado(PenRelHipoteseLegalDTO $objDTO) {
+    try {
+        $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        return $objGenericoBD->contar($objDTO);
+    }
+    catch(Exception $e){
+        throw new InfraException('Erro contando HipoteseLegal.', $e);
+    }
+  }
 }

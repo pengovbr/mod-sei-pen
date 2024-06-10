@@ -1081,7 +1081,7 @@ class ReceberProcedimentoRN extends InfraRN
       $numIdTipoProcedimento = $this->objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
       $remetente = $objMetadadosProcedimento->metadados->remetente;
       $destinatario = $objMetadadosProcedimento->metadados->destinatario;
-      $this->atribuirTipoProcedimento(
+      $alterouTipoProcesso = $this->atribuirTipoProcedimento(
         $objProcedimentoDTO,
         $remetente,
         $destinatario,
@@ -1115,6 +1115,10 @@ class ReceberProcedimentoRN extends InfraRN
       $objInfraParametro = new InfraParametro($this->getObjInfraIBanco());
       $objInfraParametro->setValor('SEI_FEDERACAO_NUMERO_PROCESSO', 0);
       $objProcedimentoDTOGerado = $objProcedimentoRN->gerarRN0156($objProcedimentoDTO);
+
+    if ($alterouTipoProcesso) {
+      $this->atribuirTipoProcedimentoRelacinado($objProcedimentoDTO->getNumIdTipoProcedimento(), $objProcedimentoDTOGerado->getDblIdProcedimento(), $strProcessoNegocio);
+    }
 
       $objProcedimentoDTO->setDblIdProcedimento($objProcedimentoDTOGerado->getDblIdProcedimento());
       $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($objProcedimentoDTO->getObjProtocoloDTO()->getStrProtocoloFormatado());
@@ -1465,11 +1469,13 @@ class ReceberProcedimentoRN extends InfraRN
    * @param \stdClass $destinatario
    * @param string|int $numIdTipoProcedimento
    * @param string|int $strProcessoNegocio
-   * @return ProcedimentoDTO
+   * @return bool
    * @throws InfraException
    */
   private function atribuirTipoProcedimento(ProcedimentoDTO $objProcedimentoDTO, $remetente, $destinatario, $numIdTipoProcedimento, $strProcessoNegocio)
   {
+
+    $dblAlterouTipoProcesso = false;
     if(!empty(trim($strProcessoNegocio))){
       // Verifica se existe relacionamento entre orgãos
       $objTipoProcedimentoDTO = $this->obterMapeamentoTipoProcesso($remetente, $destinatario, $strProcessoNegocio);
@@ -1481,11 +1487,14 @@ class ReceberProcedimentoRN extends InfraRN
           SessaoSEI::getInstance()->getNumIdOrgaoUnidadeAtual(),
           SessaoSEI::getInstance()->getNumIdUnidadeAtual()
         );
+      } else {
+        $dblAlterouTipoProcesso = true;
       }
     }
 
     if(is_null($objTipoProcedimentoDTO)){
       // Verifica tipo de processo padrão cadastrado
+      $dblAlterouTipoProcesso = true;
       $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
     }
 
@@ -1514,6 +1523,8 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
       $objProcedimentoDTO->getObjProtocoloDTO()->setArrObjRelProtocoloAssuntoDTO($arrObjAssuntoDTO);
+
+      return $dblAlterouTipoProcesso;
   }
 
   /**
@@ -2894,5 +2905,39 @@ class ReceberProcedimentoRN extends InfraRN
         throw new InfraException($mensagemErro);
       }
     }
+  }
+
+
+  private function atribuirTipoProcedimentoRelacinado($numIdTipoProcedimento, $numIdProcedimento, $strProcessoNegocio) {
+
+    $objAtributoAndamentoDTOAnterior = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTOAnterior->setStrNome('TIPO_PROCESSO_ANTERIOR');
+    $objAtributoAndamentoDTOAnterior->setStrValor($strProcessoNegocio);
+    $objAtributoAndamentoDTOAnterior->setStrIdOrigem($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura);
+    $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTOAnterior;
+
+    $objTipoProcedimentoRN = new TipoProcedimentoRN();
+    $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
+    $objTipoProcedimentoDTO->setBolExclusaoLogica(false);
+    $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
+    $objTipoProcedimentoDTO->retStrNome();
+    $objTipoProcedimentoDTO->setNumIdTipoProcedimento($numIdTipoProcedimento);
+    $objTipoProcedimentoDTO = $objTipoProcedimentoRN->consultarRN0267($objTipoProcedimentoDTO);
+
+    $objAtributoAndamentoDTOAtual = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTOAtual->setStrNome('TIPO_PROCESSO_ATUAL');
+    $objAtributoAndamentoDTOAtual->setStrValor($objTipoProcedimentoDTO->getStrNome());
+    $objAtributoAndamentoDTOAtual->setStrIdOrigem($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
+    $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTOAtual;
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_ALTERACAO_TIPO_PROCESSO);
+    $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+
+    // Gerar a atividade
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
   }
 }
