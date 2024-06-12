@@ -74,9 +74,14 @@ try {
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
       $objDTO->setNumIdEstrutura($numIdRepositorio);
       $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
+
       if (!empty($numIdUnidadePen)) {
         $objDTO->setNumIdUnidadePen($numIdUnidadePen);
         $objDTO->setStrStrUnidadePen($strUnidadePen);
+      } 
+
+      if (empty($numIdUnidadePen)) {
+        $objDTO->setNumIdUnidadePen(null);
       }
 
       $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
@@ -92,7 +97,7 @@ try {
         }
         $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objDTO);
       }
-      $objPaginaSEI->adicionarMensagem($messagem, InfraPagina::$TIPO_MSG_AVISO);
+      $objPaginaSEI->adicionarMensagem($messagem, 5);
       header('Location: ' . $objSessaoSEI->assinarLink(
         'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao_']
       ));

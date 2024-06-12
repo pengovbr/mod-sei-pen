@@ -2965,7 +2965,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
       $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
-    } else {      
+    } else {
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
       $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
       $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
@@ -2979,41 +2979,47 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
     }
 
-    $hipoteseLegalDTO = new HipoteseLegalDTO();
-    $hipoteseLegalDTO->setStrSinAtivo('S');
-    $hipoteseLegalDTO->retStrNome();
-    $hipoteseLegalDTO->retNumIdHipoteseLegal();
+    $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
+    $penRelHipoteseLegal->retDblIdMap();
+    $penRelHipoteseLegalRN = new PenRelHipoteseLegalEnvioRN();
 
-    $hipoteseLegalRN = new HipoteseLegalRN();
-    $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
+    if ($penRelHipoteseLegalRN->contar($penRelHipoteseLegal) == 0) {
+      $hipoteseLegalDTO = new HipoteseLegalDTO();
+      $hipoteseLegalDTO->setStrSinAtivo('S');
+      $hipoteseLegalDTO->retStrNome();
+      $hipoteseLegalDTO->retNumIdHipoteseLegal();
 
-    $penHipoteseLegalRN = new PenHipoteseLegalRN();
+      $hipoteseLegalRN = new HipoteseLegalRN();
+      $arrHipoteseLegal = $hipoteseLegalRN->listar($hipoteseLegalDTO);
 
-    foreach ($arrHipoteseLegal as $hipoteseLegal) {
-      $penHipoteseLegal = new PenHipoteseLegalDTO();
-      $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
-      $penHipoteseLegal->setStrAtivo('S');
-      $penHipoteseLegal->retStrNome();
-      $penHipoteseLegal->retNumIdHipoteseLegal();
+      $penHipoteseLegalRN = new PenHipoteseLegalRN();
 
-      $penHipoteseLegal = $penHipoteseLegalRN->consultar($penHipoteseLegal);
+      foreach ($arrHipoteseLegal as $hipoteseLegal) {
+        $penHipoteseLegal = new PenHipoteseLegalDTO();
+        $penHipoteseLegal->setStrNome($hipoteseLegal->getStrNome());
+        $penHipoteseLegal->setStrAtivo('S');
+        $penHipoteseLegal->retStrNome();
+        $penHipoteseLegal->retNumIdHipoteseLegal();
 
-      if ($penHipoteseLegal) {
-        $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
-        $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
-        $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
-        $penRelHipoteseLegal->retDblIdMap();
-        $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
-        $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
+        $penHipoteseLegal = $penHipoteseLegalRN->consultar($penHipoteseLegal);
 
-        $penRelHipoteseLegal->setStrTipo('R');
-        if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
-          $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
-        }
+        if ($penHipoteseLegal) {
+          $penRelHipoteseLegal = new PenRelHipoteseLegalDTO();
+          $penRelHipoteseLegal->setNumIdHipoteseLegal($hipoteseLegal->getNumIdHipoteseLegal());
+          $penRelHipoteseLegal->setNumIdBarramento($penHipoteseLegal->getNumIdHipoteseLegal());
+          $penRelHipoteseLegal->retDblIdMap();
+          $penRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+          $penRelHipoteseLegalRecebimentoRN = new PenRelHipoteseLegalEnvioRN();
 
-        $penRelHipoteseLegal->setStrTipo('E');
-        if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
-          $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
+          $penRelHipoteseLegal->setStrTipo('R');
+          if (!$penRelHipoteseLegalRecebimentoRN->consultar($penRelHipoteseLegal)) {
+            $penRelHipoteseLegalRecebimentoRN->cadastrar($penRelHipoteseLegal);
+          }
+
+          $penRelHipoteseLegal->setStrTipo('E');
+          if (!$penRelHipoteseLegalEnvioRN->consultar($penRelHipoteseLegal)) {
+            $penRelHipoteseLegalEnvioRN->cadastrar($penRelHipoteseLegal);
+          }
         }
       }
     }
