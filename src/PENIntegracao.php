@@ -191,6 +191,7 @@ class PENIntegracao extends SeiIntegracao
       $objPenHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
       $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
       $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
+      $objPenHipoteseLegalDTO->setNumMaxRegistrosRetorno(1);
 
       $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
       $objPenRelHipoteseLegalEnvioDTO = $objPenRelHipoteseLegalEnvioRN->consultar($objPenHipoteseLegalDTO);
