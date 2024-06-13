@@ -176,15 +176,15 @@ class PENIntegracao extends SeiIntegracao
 
   public function excluirHipoteseLegal($arrObjHipoteseLegalDTO)
   {
-    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO);
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'exclusão');
   }
 
   public function desativarHipoteseLegal($arrObjHipoteseLegalDTO)
   {
-    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO);
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'inativação');
   }
 
-  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI)
+  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI, $strAcao)
   {
     $excecao = new InfraException();
     foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
@@ -206,7 +206,11 @@ class PENIntegracao extends SeiIntegracao
 
         $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
         $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
-        $excecao->lancarValidacao('Não é permitido excluir ou desativar a hipotese legal "' . $objPenHipoteseLegalDTO->getStrNome() . '"');
+        $nome = $objPenHipoteseLegalDTO->getStrNome();
+        $excecao->lancarValidacao($this->getNome().": 
+          A $strAcao da hipótese legal $nome não é permitida. 
+          A referida hipótese legal está relacionada a uma hipótese legal do Tramita."
+        );
       }
     }
   }
