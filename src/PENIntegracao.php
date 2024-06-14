@@ -174,6 +174,47 @@ class PENIntegracao extends SeiIntegracao
     return array($strAcoesProcedimento);
   }
 
+  public function excluirHipoteseLegal($arrObjHipoteseLegalDTO)
+  {
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'exclusão');
+  }
+
+  public function desativarHipoteseLegal($arrObjHipoteseLegalDTO)
+  {
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'inativação');
+  }
+
+  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI, $strAcao)
+  {
+    $excecao = new InfraException();
+    foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
+      $objPenHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+      $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
+      $objPenHipoteseLegalDTO->setNumMaxRegistrosRetorno(1);
+
+      $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+      $objPenRelHipoteseLegalEnvioDTO = $objPenRelHipoteseLegalEnvioRN->consultar($objPenHipoteseLegalDTO);
+
+      $objPenRelHipoteseLegalRecebidoRN = new PenRelHipoteseLegalRecebidoRN();
+      $objPenRelHipoteseLegalRecebidoDTO = $objPenRelHipoteseLegalRecebidoRN->consultar($objPenHipoteseLegalDTO);
+      
+      if (!is_null($objPenRelHipoteseLegalEnvioDTO) || !is_null($objPenRelHipoteseLegalRecebidoDTO)) {
+
+        $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
+        $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+        $objPenHipoteseLegalDTO->retStrNome();
+
+        $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
+        $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
+        $nome = $objPenHipoteseLegalDTO->getStrNome();
+        $excecao->lancarValidacao($this->getNome().": 
+          A $strAcao da hipótese legal $nome não é permitida. 
+          A referida hipótese legal está relacionada a uma hipótese legal do Tramita."
+        );
+      }
+    }
+  }
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
   {
