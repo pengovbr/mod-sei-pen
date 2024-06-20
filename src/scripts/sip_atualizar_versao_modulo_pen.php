@@ -2150,6 +2150,7 @@ class PenAtualizarSipRN extends InfraRN
     $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos em Tramitação Externa', 57, $idMenuTramita, $numIdMenu, $numIdRecurso, $numIdSistema);
     $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
     
+    $this->renomearRecurso($numIdSistema, 'pen_expedir_lote', 'pen_expedir_bloco');
 
     $this->atualizarNumeroVersao("3.7.0");
   }

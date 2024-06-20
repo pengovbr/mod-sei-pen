@@ -92,7 +92,24 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
         $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
         $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
             self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
+            function ($testCase) {
+              try {
+                  $testCase->frame('ifrEnvioProcesso');
+                  $mensagemSucesso = utf8_encode('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'');
+                  $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
+                  $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                  $btnFechar->click();
+              } finally {
+                  try {
+                      $testCase->frame(null);
+                      $testCase->frame("ifrVisualizacao");
+                  } catch (Exception $e) {
+                  }
+              }
+  
+              return true;
+          }
         );
         sleep(10);
 

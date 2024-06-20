@@ -21,7 +21,7 @@ class PenBlocoProcessoRN extends InfraRN
     try {
 
       //Valida PermissãoTipo
-      SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_lote', __METHOD__, $objPenLoteProcedimentoDTO);
+      SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_bloco', __METHOD__, $objPenLoteProcedimentoDTO);
 
       //Obter todos os processos pendentes antes de iniciar o monitoramento
       $arrObjPendenciasLoteDTO = $this->listar($objPenLoteProcedimentoDTO) ?: array();

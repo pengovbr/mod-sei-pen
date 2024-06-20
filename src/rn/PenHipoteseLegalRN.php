@@ -37,23 +37,6 @@ class PenHipoteseLegalRN extends InfraRN
     }
   }
 
-  /**
-   * Consultar hipotese legal
-   *
-   * @param PenHipoteseLegalDTO $objDTO
-   * @return PenHipoteseLegalDTO
-   * @throws InfraException
-   */
-  protected function consultarControlado(PenHipoteseLegalDTO $objDTO)
-  {
-    try {
-      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-      return $objBD->consultar($objDTO);
-    } catch (Exception $e) {
-      throw new InfraException('Erro consultando hipotese legal.', $e);
-    }
-  }
-
   protected function consultarConectado(PenHipoteseLegalDTO $objDTO)
   {
     try {
