@@ -19,13 +19,23 @@ class PENAgendamentoRN extends InfraRN
         $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
         $processoEletronicoRN = new ProcessoEletronicoRN();
         $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
+        $hipotesesPenDesativadas = $processoEletronicoRN->consultarHipotesesLegais(false);
 
-      if(empty($hipotesesPen)){
+      $hipoteses = array();
+      if (!empty($hipotesesPen) && !empty($hipotesesPen->hipotesesLegais) && !empty($hipotesesPen->hipotesesLegais->hipotese)) {
+        $hipoteses = $hipotesesPen->hipotesesLegais->hipotese;
+      }
+
+      if (!empty($hipotesesPenDesativadas) && !empty($hipotesesPenDesativadas->hipotesesLegais) && !empty($hipotesesPenDesativadas->hipotesesLegais->hipotese)) {
+        $hipoteses = array_merge($hipoteses, $hipotesesPenDesativadas->hipotesesLegais->hipotese);
+      }
+
+      if(empty($hipoteses)){
         throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');
       }
 
         //Para cada hipótese vinda do PEN será verificado a existencia.
-      foreach ($hipotesesPen->hipotesesLegais->hipotese as $hipotese) {
+      foreach ($hipoteses as $hipotese) {
 
           $objDTO = new PenHipoteseLegalDTO();
           $objDTO->setNumIdentificacao($hipotese->identificacao);

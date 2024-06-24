@@ -119,6 +119,7 @@ try {
     // Mapeamento da hipotese legal remota
     $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPenHipoteseLegalDTO->setStrAtivo('S');
   if(!empty($arrNumIdHipoteseLegal)) {
       // Remove os que j esto em uso
       $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($arrNumIdHipoteseLegal, InfraDTO::$OPER_NOT_IN);

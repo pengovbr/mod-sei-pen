@@ -154,6 +154,7 @@ try {
     $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
     $objPenHipoteseLegalDTO->setDistinct(true);
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPenHipoteseLegalDTO->setStrAtivo('S');
     $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
     $objPenHipoteseLegalDTO->retStrNome();
    
