@@ -1904,11 +1904,11 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function consultarHipotesesLegais() {
+  public function consultarHipotesesLegais($ativos = true) {
     try{
         $parametros = new stdClass();
         $parametros->filtroDeHipotesesLegais = new stdClass();
-        $parametros->filtroDeHipotesesLegais->ativos = true;
+        $parametros->filtroDeHipotesesLegais->ativos = $ativos;
 
         $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
             return $objPenWs->consultarHipotesesLegais($parametros);
