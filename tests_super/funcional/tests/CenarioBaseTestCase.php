@@ -608,7 +608,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
         $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos em Tramitação Externa'));
-        $this->byLinkText("Processos em Tramitação Externa")->click();
+        $this->byLinkText(utf8_encode("Processos em Tramitação Externa"))->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 
