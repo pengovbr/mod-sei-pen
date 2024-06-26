@@ -127,7 +127,7 @@ class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
             self::$processoTeste['RESTRICAO'],
             self::$processoTeste['OBSERVACOES'],
             array(self::$processoTeste['INTERESSADOS']),
-            self::$destinatario["HIPOTESE_RESTRICAO_PADRAO"]);
+            self::$destinatario["HIPOTESE_RESTRICAO_NAO_MAPEADO"]);
 
         // 13 - Verificar recibos de trâmite
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
