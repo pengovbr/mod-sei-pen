@@ -46,6 +46,12 @@ try {
         exit(0);
       }
 
+      if (empty($_POST['hdnIdUnidade']) || empty($_POST['txtUnidade']) || $_POST['txtUnidade'] == "0") {
+        $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_ERRO);
+        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
+        exit(0);
+      }
+
       $numIdUnidadePen = $_POST['hdnIdUnidade'];
       $strUnidadePen = $_POST['txtUnidade'];
       $numIdRepositorio = $_POST['selRepositorioEstruturas'];
@@ -74,15 +80,8 @@ try {
       $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
       $objDTO->setNumIdEstrutura($numIdRepositorio);
       $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
-
-      if (!empty($numIdUnidadePen)) {
-        $objDTO->setNumIdUnidadePen($numIdUnidadePen);
-        $objDTO->setStrStrUnidadePen($strUnidadePen);
-      } 
-
-      if (empty($numIdUnidadePen)) {
-        $objDTO->setNumIdUnidadePen(null);
-      }
+      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+      $objDTO->setStrStrUnidadePen($strUnidadePen);
 
       $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
       if (!empty($_GET['Id'])) {

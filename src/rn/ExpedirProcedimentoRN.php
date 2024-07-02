@@ -526,18 +526,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objEnvioParcialDTO->retNumIdEstrutura();
       $objEnvioParcialDTO->retNumIdUnidadePen();
       $objEnvioParcialDTO->setNumIdEstrutura($numIdRepositorioDestino);
-      $objEnvioParcialDTO->setNumIdUnidadePen(null);
-
-      $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
-      $objEnvioParcialDTO = $objEnvioParcialRN->consultar($objEnvioParcialDTO);
-      if (!is_null($objEnvioParcialDTO)) {
-        return true;
-      }
-
-      $objEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objEnvioParcialDTO->retNumIdEstrutura();
-      $objEnvioParcialDTO->retNumIdUnidadePen();
-      $objEnvioParcialDTO->setNumIdEstrutura($numIdRepositorioDestino);
 
       $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
       $arrObjEnvioParcialDTO = $objEnvioParcialRN->listar($objEnvioParcialDTO);
