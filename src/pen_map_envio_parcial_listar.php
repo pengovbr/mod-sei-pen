@@ -146,15 +146,13 @@ try {
         . '</td>';
 
       $strResultado .= '<td style="text-align: center;">'
-        . (!empty($objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen())
-        ? $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
-        : '--')
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
         . '</td>';
+      
       $strResultado .= '<td style="text-align: center;">'
-        . (!empty($objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen())
-        ? $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
-        : '--')
+        . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
         . '</td>';
+
       $strResultado .= '<td align="center">';
 
       if ($objSessaoSEI->verificarPermissao('pen_map_envio_parcial_atualizar')) {

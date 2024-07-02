@@ -2137,7 +2137,6 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO->retNumIdItemMenu();
     $objItemMenuDTO->retNumIdMenu();
 
-
     $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
@@ -2151,6 +2150,11 @@ class PenAtualizarSipRN extends InfraRN
     $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
     
     $this->renomearRecurso($numIdSistema, 'pen_expedir_lote', 'pen_expedir_bloco');
+
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_map_envio_parcial_visualizar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_procedimento_expedido_listar');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco');
 
     $this->atualizarNumeroVersao("3.7.0");
   }
