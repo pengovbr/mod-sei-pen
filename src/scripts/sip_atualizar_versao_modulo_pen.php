@@ -2152,6 +2152,9 @@ class PenAtualizarSipRN extends InfraRN
     
     $this->renomearRecurso($numIdSistema, 'pen_expedir_lote', 'pen_expedir_bloco');
 
+    $idPerfilBasico = ScriptSip::obterIdPerfil($numIdSistema, "Básico");
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_map_envio_parcial_visualizar');
+
     $this->atualizarNumeroVersao("3.7.0");
   }
 
