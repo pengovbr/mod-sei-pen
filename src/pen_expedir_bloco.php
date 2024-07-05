@@ -79,7 +79,35 @@ try {
 
       //Preparação dos dados para montagem da tela de expedição de processos
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
-      $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+      try {
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidadeRH();
+        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+
+        $objUnidadeRN = new UnidadeRN();
+        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+
+        //Preparação dos dados para montagem da tela de expedição de processos
+        if ($arrIdUnidadeRestricao != null) {
+          $repositorios = array();
+          foreach ($arrIdUnidadeRestricao as $value) {
+            $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+          }
+        } else {
+          $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+        }
+      } catch (Exception $e) {
+        $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+      }
 
       $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
       $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);

@@ -918,7 +918,7 @@ class PENIntegracao extends SeiIntegracao
 
   public function autoCompletarExpedirProcedimento($xml) {
     $bolPermiteEnvio = false;
-    if ($_GET['acao'] != 'pen_procedimento_expedir') {
+    if ($_GET['acao'] != 'pen_procedimento_expedir' && $_GET['acao_ajax'] != 'pen_unidade_auto_completar_expedir_procedimento') {
       $bolPermiteEnvio = true;
     }
 
@@ -1069,7 +1069,7 @@ class PENIntegracao extends SeiIntegracao
         $offset       = $_POST['offset'] * $registrosPorPagina;
 
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
+        $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturasBuscaTextual($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
 
         $interface = new ProcessoEletronicoINT();
         //Gera a hierarquia de SIGLAS das estruturas
