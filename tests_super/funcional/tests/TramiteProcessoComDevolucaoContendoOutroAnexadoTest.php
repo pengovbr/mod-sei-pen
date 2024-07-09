@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
+
 /**
  * Teste de trâmite de um processo com devolução contendo novos documentos e com outro processo anexado
  *
@@ -9,7 +11,7 @@
  * Execution Groups
  * @group execute_alone_group5
  */
-class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTestCase
+class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -45,7 +47,7 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTestePrincipal, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComvalidacaoNoRemetenteFixture(self::$processoTestePrincipal, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTestePrincipal = self::$processoTestePrincipal["PROTOCOLO"];
     }
 
@@ -81,9 +83,7 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-
-        // Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        putenv("DATABASE_HOST=org2-database");
 
         // Gerar dados de testes para representar o processo principal
         self::$processoTesteAnexado = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -91,18 +91,27 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         // Cadastra processo anexado, seus documentos e anexar ao processo principal recebido anteriormente
-        self::$protocoloTesteAnexado = $this->cadastrarProcesso(self::$processoTesteAnexado);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste4);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
+        $objProtocoloAnexadoDTO = $this->cadastrarProcessoFixture(self::$processoTesteAnexado);
+        self::$protocoloTesteAnexado = $objProtocoloAnexadoDTO->getStrProtocoloFormatado();
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4, $objProtocoloAnexadoDTO->getDblIdProtocolo());
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
         // Incluir novos documentos relacionados no processo anexado
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
-        $this->anexarProcesso(self::$protocoloTesteAnexado);
-        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
+        $parametros = [
+            'ProtocoloFormatado' => self::$protocoloTestePrincipal,
+        ];
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloPrincipalDTO = $objProtocoloFixture->buscar($parametros)[0];
 
-        // Trâmitar Externamento processo para órgão/unidade destinatária
+        $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
+
+        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloPrincipalDTO->getDblIdProtocolo());
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+
         $this->tramitarProcessoExternamente(
             self::$protocoloTestePrincipal,
             self::$destinatario['REP_ESTRUTURAS'],
