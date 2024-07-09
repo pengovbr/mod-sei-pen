@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_parallel_group3
  */
-class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
+class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -88,7 +88,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
         $arrDocumentosSegundoEnvio = array(self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
     }
 
     /**
