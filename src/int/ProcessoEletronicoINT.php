@@ -385,7 +385,7 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' 	document.getElementById(\'hdnRepoEstruturas\' + document.getElementById(\'selRepoEstruturas\').value).value = document.getElementById(\'hdnUnidades\').value;'
         . ' };'
         . ' '
-        . ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento') . '\');'
+        . ' objAutoCompletarUnidade = new infraAjaxAutoCompletar(\'hdnIdUnidade\',\'txtUnidade\',\'' . SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_cadastro') . '\');'
         . ' objAutoCompletarUnidade.limparCampo = true;'
         . ' objAutoCompletarUnidade.prepararExecucao = function(){'
         . ' 	if (document.getElementById(\'selRepoEstruturas\').selectedIndex==-1){'

@@ -27,7 +27,7 @@ try {
     //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
     $objPenParametroRN = new PenParametroRN();
     $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
-    $strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
+    $strLinkAjaxUnidade = $objSessao->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_cadastro');
 
     $bolSomenteLeitura = false;
 
