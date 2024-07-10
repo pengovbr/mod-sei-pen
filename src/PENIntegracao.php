@@ -920,7 +920,7 @@ class PENIntegracao extends SeiIntegracao
   {
     $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
     if (count($arrObjEstruturaDTO['itens']) == 0) {
-      return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
+      return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
     }
 
     return self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
