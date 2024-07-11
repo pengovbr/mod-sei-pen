@@ -98,7 +98,17 @@ try {
     var idRepositorioDeEstuturaSelecionado = null;
 
     $(document).ready(function(){
-        const parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+        parentWindow = null;
+        if (typeof infraObterJanelaOrigemModal === "function") {
+          if ((modalOrigem = infraObterJanelaOrigemModal())!=null){
+            parentWindow = window?.opener ?? modalOrigem;
+          } else{
+            parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+          }
+        } else{
+            parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+        }
+        
         idRepositorioDeEstuturaSelecionado = $("#selRepositorioEstruturas", parentWindow.document).val();
         recuperarEstruturaDeFilhosDeUnidadeExterna(null, 0, nivelEstrutura);
     });
@@ -349,7 +359,17 @@ try {
 
         //verifica se existem itens selecionados
         if(nomeUnidadeSelecionada != null && idUnidadeSelecionada != null){
-            const parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+            parentWindow = null;
+            if (typeof infraObterJanelaOrigemModal === "function") {
+              if ((modalOrigem = infraObterJanelaOrigemModal())!=null){
+                parentWindow = window?.opener ?? modalOrigem;
+              } else{
+                parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+              }
+            } else{
+                parentWindow = window?.opener ?? parent.document.getElementById('ifrVisualizacao').contentWindow;
+            }
+
             $("#txtUnidade", parentWindow.document).val(nomeUnidadeSelecionada);
             $("#hdnIdUnidade", parentWindow.document).val(idUnidadeSelecionada);
         }else{
