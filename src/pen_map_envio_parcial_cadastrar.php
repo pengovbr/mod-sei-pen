@@ -481,7 +481,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
       <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" <?= $disabilitarVisualizar ?> placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= PaginaSEI::tratarHTML($strNomeUnidade); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
       <?php if ($_GET['acao'] != 'pen_map_envio_parcial_visualizar') { ?>
         <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
-        <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
+        <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
       <?php } ?>
     </div>
 
