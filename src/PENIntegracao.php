@@ -916,7 +916,19 @@ class PENIntegracao extends SeiIntegracao
     return true;
   }
 
-  public function autoCompletarExpedirProcedimento($xml) {
+  public function autoCompletarUnidadesCadastrar($bolPermiteEnvio = false)
+  {
+    $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
+    if (count($arrObjEstruturaDTO['itens']) == 0) {
+      return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+    }
+
+    return self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
+  }
+
+  public function autoCompletarExpedirProcedimento()
+  {
+    $xml = null;
     $bolPermiteEnvio = false;
     if ($_GET['acao'] != 'pen_procedimento_expedir' && $_GET['acao_ajax'] != 'pen_unidade_auto_completar_expedir_procedimento') {
       $bolPermiteEnvio = true;
@@ -932,29 +944,31 @@ class PENIntegracao extends SeiIntegracao
       $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
       $arrObjEstruturaDTO = array();
-      try {
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
-        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
-        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
+      if (!is_null($objUnidadeDTO)) {
+        try {
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
+          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
+          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
 
-        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-        $restricaoCadastrada = $objPenUnidadeRestricaoRN->contar($objPenUnidadeRestricaoDTO);
-        $restricaoCadastrada = $restricaoCadastrada > 0;
+          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+          $restricaoCadastrada = $objPenUnidadeRestricaoRN->contar($objPenUnidadeRestricaoDTO);
+          $restricaoCadastrada = $restricaoCadastrada > 0;
 
-        if ($restricaoCadastrada) {
-          $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
-          $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+          if ($restricaoCadastrada) {
+            $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
 
-          foreach ($arrEstruturas as $key => $unidade) {
-            if ($unidade->getNumIdUnidadeRHRestricao() != null) {
-              $arrObjEstruturaDTO[] = $unidade;
+            foreach ($arrEstruturas as $key => $unidade) {
+              if ($unidade->getNumIdUnidadeRHRestricao() != null) {
+                $arrObjEstruturaDTO[] = $unidade;
+              }
             }
           }
+        } catch (Exception $e) {
         }
-      } catch (Exception $e) {
       }
 
       if (count($arrObjEstruturaDTO) > 0) {
@@ -964,16 +978,38 @@ class PENIntegracao extends SeiIntegracao
       }
     }
     if (!$restricaoCadastrada && (is_null($arrObjEstruturaDTO) || count($arrObjEstruturaDTO) == 0)) {
-      $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
-
-      if (count($arrObjEstruturaDTO['itens']) > 0) {
-        $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
-      } else {
-        return '<itens><item grupo="vazio" id="0" descricao="Unidade não Encontrada."></item></itens>';
-      }
+      $xml = $this->autoCompletarUnidadesCadastrar($bolPermiteEnvio);
     }
 
     return $xml;
+  }
+
+  public function penUnidadeAutoCompletarMapeados()
+  {
+    // DTO de paginao
+    $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+    $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
+    $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
+    $objPenUnidadeDTOFiltro->retNumIdUnidade();
+    $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
+
+    // Filtragem
+    if (!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
+      $objPenUnidadeDTOFiltro->setStrNomeUnidadeRH('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+    }
+
+    $objPenUnidadeRN = new PenUnidadeRN();
+    $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
+    if (count($objArrPenUnidadeDTO) == 0) {
+      return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+    }
+
+    foreach ($objArrPenUnidadeDTO as $dto) {
+      $dto->setNumIdUnidadeMap($dto->getNumIdUnidadeRH());
+      $dto->setStrDescricaoMap($dto->getStrNomeUnidadeRH() . '-' . $dto->getStrSiglaUnidadeRH());
+    }
+
+    return InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
   }
 
   public function processarControladorAjax($strAcao) {
@@ -994,34 +1030,15 @@ class PENIntegracao extends SeiIntegracao
           throw new InfraException($mensagem, $e);
         }
           break;
+      case 'pen_unidade_auto_completar_cadastro':
+        $xml = $this->autoCompletarUnidadesCadastrar();
+          break;
       case 'pen_unidade_auto_completar_expedir_procedimento':
-        $xml = $this->autoCompletarExpedirProcedimento($xml);
+        $xml = $this->autoCompletarExpedirProcedimento();
           break;
 
       case 'pen_unidade_auto_completar_mapeados':
-        // DTO de paginao
-        $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
-        $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
-        $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
-        $objPenUnidadeDTOFiltro->retNumIdUnidade();
-        $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
-
-          // Filtragem
-        if(!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
-          $objPenUnidadeDTOFiltro->setStrNomeUnidadeRH('%'.$_POST['palavras_pesquisa'].'%', InfraDTO::$OPER_LIKE);
-        }
-
-        $objPenUnidadeRN = new PenUnidadeRN();
-        $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
-        if (count($objArrPenUnidadeDTO) > 0) {
-          foreach ($objArrPenUnidadeDTO as $dto) {
-            $dto->setNumIdUnidadeMap($dto->getNumIdUnidadeRH());
-            $dto->setStrDescricaoMap($dto->getStrNomeUnidadeRH(). '-' . $dto->getStrSiglaUnidadeRH());
-          }
-          $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
-        } else {
-          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
-        }
+        $xml = $this->penUnidadeAutoCompletarMapeados();
           break;
 
       case 'pen_apensados_auto_completar_expedir_procedimento':
