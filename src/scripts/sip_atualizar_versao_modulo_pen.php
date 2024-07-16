@@ -2157,6 +2157,8 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_map_envio_parcial_visualizar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_procedimento_expedido_listar');
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'md_pen_tramita_em_bloco');
+    ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_expedir_bloco');
+    ScriptSip::removerRecursoPerfil($numIdSistema, 'pen_expedir_bloco', $idPerfilAdm);
     
     $numIdRecurso1 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita GOV.BR', $numIdSistema);
     $idMenuTramita = $this->criarMenu('Tramita GOV.BR', 55, null, $numIdMenu, $numIdRecurso1, $numIdSistema);
