@@ -1934,15 +1934,15 @@ class PenAtualizarSipRN extends InfraRN
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Listar
     $numIdItemMenuRecuso = $this->criarMenu('Relacionamento entre Unidades', 20, $numIdItemMenu, $numIdMenu, $numIdRecursoListar, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoListar, $numIdMenu, $numIdItemMenuRecuso);
+    $this->cadastrarRelPerfilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoListar, $numIdMenu, $numIdItemMenuRecuso);
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Exportar Tipo de Processo
     $numIdItemMenuRecuso = $this->criarMenu('Exportação de Tipos de Processo', 21, $numIdItemMenu, $numIdMenu, $numIdRecursoExportar, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoExportar, $numIdMenu, $numIdItemMenuRecuso);
+    $this->cadastrarRelPerfilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoExportar, $numIdMenu, $numIdItemMenuRecuso);
 
     // Administrao > Processo Eletrônico Nacional > Órgãos Externos > Reativar Tipo de Processo
     $numIdItemMenuRecuso = $this->criarMenu('Reativar Mapeamento de Tipos de Processo', 22, $numIdItemMenu, $numIdMenu, $numIdRecursoReativar, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoReativar, $numIdMenu, $numIdItemMenuRecuso);
+    $this->cadastrarRelPerfilItemMenu($numIdPerfilSeiAdministrador, $numIdRecursoReativar, $numIdMenu, $numIdItemMenuRecuso);
 
     // Nova versão
     $this->atualizarNumeroVersao("3.5.0");
@@ -2016,16 +2016,16 @@ class PenAtualizarSipRN extends InfraRN
     ScriptSip::adicionarRecursoPerfil($numIdSistema, $idPerfilBasico, 'pen_incluir_processo_em_bloco_tramite');
 
     $idMenuTramita = $this->criarMenu('Tramita GOV.BR', 55, null, $numIdMenu, $numIdRecurso1, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso1, $numIdMenu, $idMenuTramita);
+    $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso1, $numIdMenu, $idMenuTramita);
 
     $idMenuBlocoTramiteExterno = $this->criarMenu('Blocos de Trâmite Externo', 56, $idMenuTramita, $numIdMenu, $numIdRecurso2, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
+    $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
 
     $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos Tramitados Externamente', 57, $idMenuTramita, $numIdMenu, $numIdRecurso3, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
+    $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
     
     // $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Bloco', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
-    // $this->cadastrarRelPergilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
+    // $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
 
     if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
       $objItemMenuDTO = new ItemMenuDTO();
@@ -2149,7 +2149,7 @@ class PenAtualizarSipRN extends InfraRN
     $numIdRecurso = $this->criarRecurso('pen_procedimento_expedido_listar', 'Processos em Tramitação Externa', $numIdSistema);
 
     $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos em Tramitação Externa', 57, $idMenuTramita, $numIdMenu, $numIdRecurso, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilBasico, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
+    $this->cadastrarRelPerfilItemMenu($idPerfilBasico, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
     $this->excluirRelPerfilItemMenu($idPerfilAdm, $numIdRecurso, $numIdMenu, $idMenuProcessoTramitadosExterno);
 
     $this->renomearRecurso($numIdSistema, 'pen_expedir_lote', 'pen_expedir_bloco');
@@ -2160,12 +2160,12 @@ class PenAtualizarSipRN extends InfraRN
     
     $numIdRecurso1 = $this->criarRecurso('pen_procedimento_expedido_listar', 'Tramita GOV.BR', $numIdSistema);
     $idMenuTramita = $this->criarMenu('Tramita GOV.BR', 55, null, $numIdMenu, $numIdRecurso1, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilBasico, $numIdRecurso1, $numIdMenu, $idMenuTramita);
+    $this->cadastrarRelPerfilItemMenu($idPerfilBasico, $numIdRecurso1, $numIdMenu, $idMenuTramita);
     $this->excluirRelPerfilItemMenu($idPerfilAdm, $numIdRecurso1, $numIdMenu, $idMenuTramita);
 
     $numIdRecurso2 = $this->criarRecurso('md_pen_tramita_em_bloco', 'Blocos de Trâmite Externo', $numIdSistema);
     $idMenuBlocoTramiteExterno = $this->criarMenu('Blocos de Trâmite Externo', 56, $idMenuTramita, $numIdMenu, $numIdRecurso2, $numIdSistema);
-    $this->cadastrarRelPergilItemMenu($idPerfilBasico, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
+    $this->cadastrarRelPerfilItemMenu($idPerfilBasico, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
     $this->excluirRelPerfilItemMenu($idPerfilAdm, $numIdRecurso2, $numIdMenu, $idMenuBlocoTramiteExterno);
 
 
@@ -2177,7 +2177,7 @@ class PenAtualizarSipRN extends InfraRN
    * 
    * @return void
    */
-  private function cadastrarRelPergilItemMenu($numIdPerfil, $numIdRecurso, $numIdMenu, $numIdItemMenuRecuso)
+  private function cadastrarRelPerfilItemMenu($numIdPerfil, $numIdRecurso, $numIdMenu, $numIdItemMenuRecuso)
   {
     $numIdSistema = $this->getNumIdSistema('SEI');
 
