@@ -2894,24 +2894,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
-    $objTramiteEmBlocoDTO->setNumIdUnidade(null);
-    $objTramiteEmBlocoDTO->setNumIdUsuario(null);
-    $objTramiteEmBlocoDTO->setStrDescricao('Generico');
-    $objTramiteEmBlocoDTO->setStrIdxBloco(null);
-    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
-
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
-
-    $idBloco = $objTramiteEmBlocoDTO->getNumId();
-    // Atualizar que não tem bloco relacionado par abloco genérico
-    $objInfraBanco->executarSql('update md_pen_bloco_processo set id_bloco = '.$idBloco.' where id_bloco is NULL');
-
-    // Atualizar id_bloco para not null
-    $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
-
     $dthRegistro = date('d/m/Y H:i:s');
 
     $sql = "SELECT 
@@ -2921,6 +2903,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $blocosTramite = $objInfraBanco->consultarSql($sql);
     if (!empty($blocosTramite)) {
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
+      $objTramiteEmBlocoDTO->setNumIdUnidade(null);
+      $objTramiteEmBlocoDTO->setNumIdUsuario(null);
+      $objTramiteEmBlocoDTO->setStrDescricao('Processos Tramitados em Lote (Legado)');
+      $objTramiteEmBlocoDTO->setStrIdxBloco(null);
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+  
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
+  
+      $idBloco = $objTramiteEmBlocoDTO->getNumId();
+      // Atualizar que não tem bloco relacionado par abloco Processos Tramitados em Lote (Legado)
+      $objInfraBanco->executarSql('update md_pen_bloco_processo set id_bloco = '.$idBloco.' where id_bloco is NULL');
+  
+      // Atualizar id_bloco para not null
+      $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
+      
       foreach ($blocosTramite as $blocoTramite) {
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
         $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
