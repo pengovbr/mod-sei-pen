@@ -38,39 +38,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
     }
 
     /**
-     * Teste de desativação de um Relacionamento entre Órgãos
-     *
-     * @large
-     *
-     * @return void
-     */
-    public function test_desativacao_mapeamento_orgao_externo()
-    {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
-        $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
-
-        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
-        $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamento();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-
-        $this->sairSistema();
-    }
-
-    /**
      * Teste de reativação de um Relacionamento entre Órgãos
      * 
      * @large
@@ -79,10 +46,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_reativacao_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -110,44 +73,8 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      *
      * @return void
      */
-    public function test_desativacao_checkbox_mapeamento_orgao_externo()
-    {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
-        $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
-
-        $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
-        $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-        
-        $this->sairSistema();
-    }
-
-    /**
-     * Teste de desativação de um Relacionamento entre Órgãos via checkbox
-     *
-     * @large
-     *
-     * @return void
-     */
     public function test_reativar_checkbox_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],

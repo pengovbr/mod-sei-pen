@@ -11,12 +11,13 @@ use function PHPSTORM_META\map;
  * Classe base contendo rotinas comuns utilizadas nos casos de teste do módulo que utiliza fixture
  */
 class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
-{    
+{
     protected function cadastrarProcessoFixture(&$dadosProcesso)
     {
         $parametros = [
-            'Descricao' => $dadosProcesso['DESCRICAO'],
-            'Interessados' => $dadosProcesso['INTERESSADOS'],
+            'Descricao' => $dadosProcesso['DESCRICAO'] ?: util::random_string(20),
+            'Interessados' => $dadosProcesso['INTERESSADOS'] ?: util::random_string(40),
+            'StaNivelAcessoGlobal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO
         ];
         $objProtocoloFixture = new ProtocoloFixture();
         $objProtocoloDTO = $objProtocoloFixture->carregar($parametros);
@@ -67,6 +68,9 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdProtocolo' => $idProtocolo,
             'IdProcedimento' => $idProtocolo,
             'Descricao' => $dadosDocumentoInterno['DESCRICAO'],
+            'IdHipoteseLegal' => $dadosDocumentoInterno["HIPOTESE_LEGAL"] ?: null,
+            'StaNivelAcessoGlobal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
+            'StaNivelAcessoLocal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
         ]);
 
         //Adicionar assinatura ao documento
@@ -96,7 +100,8 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdProtocolo' => $objDocumentoDTO->getDblIdDocumento(),
             'Nome' => basename($dadosDocumentoExterno['ARQUIVO']),
         ]);
-
+      
+        return $objDocumentoDTO;
     }
 
     protected function anexarProcessoFixture($protocoloPrincipalId, $protocoloProcessoAnexadoId)
