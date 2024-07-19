@@ -226,6 +226,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'SIGLA_UNIDADE_SECUNDARIA' => constant($nomeContexto . '_SIGLA_UNIDADE_SECUNDARIA'),
             'SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA' => constant($nomeContexto . '_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'),
             'NOME_UNIDADE_SECUNDARIA' => constant($nomeContexto . '_NOME_UNIDADE_SECUNDARIA'),
+            'HIPOTESE_RESTRICAO_ID' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_ID'),
             'HIPOTESE_RESTRICAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO'),
             'HIPOTESE_RESTRICAO_NAO_MAPEADO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_NAO_MAPEADO'),
             'REP_ESTRUTURAS' => constant($nomeContexto . '_REP_ESTRUTURAS'),
