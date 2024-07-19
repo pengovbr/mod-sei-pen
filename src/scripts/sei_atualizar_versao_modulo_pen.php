@@ -2880,6 +2880,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_usuario", "md_pen_bloco_processo", array('id_usuario'), "usuario", array('id_usuario'), false);
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_unidade", "md_pen_bloco_processo", array('id_unidade'), "unidade", array('id_unidade'), false);
 
+    //Adicionar coluna para ordenar blocos por unidade 
+    $objMetaBD->adicionarColuna('md_pen_bloco', 'ordem', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
     $objInfraBanco = BancoSEI::getInstance();
 
     $objInfraSequenciaRN = new InfraSequenciaRN();
@@ -2908,6 +2910,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objTramiteEmBlocoDTO->setNumIdUnidade(null);
       $objTramiteEmBlocoDTO->setNumIdUsuario(null);
       $objTramiteEmBlocoDTO->setStrDescricao('Processos Tramitados em Lote (Legado)');
+      $objTramiteEmBlocoDTO->setNumOrdem(0);
       $objTramiteEmBlocoDTO->setStrIdxBloco(null);
       $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
   

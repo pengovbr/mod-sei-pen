@@ -60,6 +60,12 @@ class TramiteEmBlocoDTO extends InfraDTO
       'sta_estado'
     );
 
+    $this->adicionarAtributoTabela(
+      InfraDTO::$PREFIXO_NUM,
+      'Ordem',
+      'ordem'
+    );
+
     $this->adicionarAtributoTabelaRelacionada(
       InfraDTO::$PREFIXO_STR,
       'SiglaUnidade',
