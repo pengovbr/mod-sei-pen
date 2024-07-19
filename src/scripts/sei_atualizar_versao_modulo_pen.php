@@ -2939,6 +2939,24 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
     }
 
+    //Atualiza ordenacao dos blocos por unidade
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setNumIdUnidade(null, InfraDTO::$OPER_DIFERENTE);
+    $objTramiteEmBlocoDTO->retTodos();
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $arrobjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
+    
+    $arrUnidadeTramiteBloco = array();
+    foreach($arrObjTramiteEmBloco as $tramiteEmBlocoDTO) {
+      if(!in_array($tramiteEmBlocoDTO->getNumIdUnidade(), array_keys($arrUnidadeTramiteBloco))){
+        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()] = 1; 
+      } else {
+        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]++;
+      }
+      $tramiteEmBlocoDTO->setNumOrdem($arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]);
+      $tramiteEmBlocoDTO = $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
+    }
+
     $objMetaBD->removerTabela('md_pen_bloco_protocolo');
     $objMetaBD->removerTabela('md_pen_seq_bloco_protocolo');
     $objMetaBD->removerTabela('md_pen_rel_expedir_lote');
