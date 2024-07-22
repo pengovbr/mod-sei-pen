@@ -95,13 +95,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
     $objPenLoteProcedimentoDTO->retNumIdBloco();
     $objPenLoteProcedimentoDTO->retNumIdUsuario();
     $objPenLoteProcedimentoDTO->retStrProtocoloFormatadoProtocolo();
-
-    $objPenLoteProcedimentoDTO->setNumIdAndamento(
-      array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE
-      ), InfraDTO::$OPER_IN
-    );
+    $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
     $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
     $arrObjPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->obterPendenciasLote($objPenLoteProcedimentoDTO);

@@ -114,7 +114,6 @@ class PenExpedirLoteRN extends InfraRN
 
             $objTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->consultar($objDto);
 
-            $objTramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
             $objTramiteEmBlocoProtocolo->setNumIdAtividade($idAtividadeExpedicao);
             $objPenBlocoProcessoRN->alterar($objTramiteEmBlocoProtocolo);
 
