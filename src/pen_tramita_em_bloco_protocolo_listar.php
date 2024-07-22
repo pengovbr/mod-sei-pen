@@ -123,7 +123,14 @@ try {
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'].'&id_bloco='.$_GET['id_bloco']));
         die;
     case 'pen_tramita_em_bloco_protocolo_listar':
-      $strTitulo = 'Processos do Bloco: ' . $_GET['id_bloco'];
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setNumId($_GET['id_bloco']);
+      $objTramiteEmBlocoDTO->retNumOrdem();
+ 
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+      $strTitulo = 'Processos do Bloco ' . $blocoResultado->getNumOrdem() . ':';
         break;
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
@@ -229,22 +236,22 @@ try {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
-          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/estado_sucesso.png" title="Concluído" style="width:16px; alt="Concluído" />';
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-concluido.svg" title="Concluído" style="width:16px; alt="Concluído" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
-          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/pen_tramite_recusado.png" title="Recusado" style="width:16px; alt="Recusado" />';
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg" title="Recusado" style="width:16px; alt="Recusado" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
-          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
         default:
-          $strResultado .= '<img src="' . PENIntegracao::getDiretorio() . '/imagens/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
             break;
       }
       $strResultado .= '</td>' . "\n";

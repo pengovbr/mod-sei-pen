@@ -120,8 +120,10 @@ try {
 
   $objFiltroDTO = new TramiteEmBlocoDTO();
   $objFiltroDTO->retNumId();
+  $objFiltroDTO->retNumOrdem();
   $objFiltroDTO->retStrStaEstado();
   $objFiltroDTO->retStrDescricao();
+  $objFiltroDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
   $objFiltroDTO->setStrPalavrasPesquisa($setStrPalavrasPesquisa);
 
 
@@ -136,7 +138,8 @@ try {
 
   // Cabeçalho da tabela
   $colunas = [
-    'id' => 'Número',
+    'id' => 'Id',
+    'ordem' => 'Número',
     'estado' => 'Estado',
     'descricao' => 'Descrição',
   ];
@@ -146,6 +149,7 @@ try {
   foreach ($arrObjBlocosListar as $objFiltro) {
     $tabelaLinhas[] = [
       'id' => $objFiltro->getNumId(),
+      'ordem' => $objFiltro->getNumOrdem(),
       'estado' => $objTramiteEmBloco->retornarEstadoDescricao($objFiltro->getStrStaEstado()),
       'descricao' => $objFiltro->getStrDescricao(),
     ];
@@ -171,33 +175,36 @@ try {
   $strResultado .= '<th class="infraTh" width="1%">' . PaginaSEI::getInstance()->getThCheck() . '</th>' . "\n";
 
   // Adicionar colunas dinamicamente
-  foreach ($colunas as $coluna) {
-    $strResultado .= '<th class="infraTh" width="10%">';
+  foreach ($colunas as $key => $coluna) {
+    if ($key != 'id') {
+      $strResultado .= '<th class="infraTh" width="10%">';
 
-    $strResultado .= '<div class="infraDivOrdenacao">';
-    $strResultado .= "<div class='infraDivRotuloOrdenacao'>{$coluna}</div>";
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() . '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() . '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
-    $strResultado .= '</div>';
+      $strResultado .= '<div class="infraDivOrdenacao">';
+      $strResultado .= "<div class='infraDivRotuloOrdenacao'>{$coluna}</div>";
+      $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() . '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
+      $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() . '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
+      $strResultado .= '</div>';
 
-    $strResultado .= '</th>' . "\n";
+      $strResultado .= '</th>' . "\n";
+    }
   }
   // Adicionar coluna ações
   $strResultado .= '<th class="infraTh" width="10%">';
   $strResultado .= "<div class='infraDivRotuloOrdenacao'>Ações</div>";
   $strResultado .= '</th>' . "\n";
   $strResultado .= "</thead>";
-
   foreach ($tabelaLinhas as $cont => $linha) {
+
     $strResultado .= "<tr class='infraTrClara'>";
     $strResultado .= '<td>' . PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']) . '</td>';
     $idBlocoTramite = '';
     foreach ($colunas as $key => $coluna) {
       $idBlocoTramite = $linha['id'];
 
-      if ($linha[$key]) {
+      if (!is_null($linha[$key]) && $key != 'id') {
         $strResultado .= "<td align='center'> {$linha[$key]} </td>";
       }
+      
     }
 
     $strResultado .= "<td align=''>";

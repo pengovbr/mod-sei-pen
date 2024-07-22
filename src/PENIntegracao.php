@@ -53,9 +53,9 @@ class PENIntegracao extends SeiIntegracao
     $objSessaoSEI = SessaoSEI::getInstance();
     $strAcoesProcedimento = "";
 
-    $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_bloco');
+    $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
 
-    if ($bolAcaoGerarPendencia) {
+    if ($bolAcaoIncluirProcessoEmBloco) {
       $objPaginaSEI = PaginaSEI::getInstance();
 
       $objAtividadeDTO = new AtividadeDTO();
@@ -71,7 +71,7 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeDTO->retNumIdUnidade();
       $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objPenUnidadeRN = new PenUnidadeRN();
-
+      
       if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
@@ -116,6 +116,7 @@ class PENIntegracao extends SeiIntegracao
 
     //Verificação da Restrição de Acesso a Funcionalidade
     $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
+    
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
 
@@ -124,18 +125,43 @@ class PENIntegracao extends SeiIntegracao
       ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
     ));
 
+    $bolBlocoAbertoUnidade = false; 
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+    $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+    $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retNumIdUnidade();
+    $objTramiteEmBlocoDTO->retStrDescricao();
+    PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+  
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+      $bolBlocoAbertoUnidade = true;
+    }
+
+    $bolProcessoEmBloco = false;
+    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+    $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objPenBlocoProcessoDTO->retNumIdBloco();
+
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    if (count($objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO)) > 0){
+      $bolProcessoEmBloco = true;
+    }
+
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->retNumIdUnidade();
+    $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+    $objPenUnidadeRN = new PenUnidadeRN();
+    $bolUnidadeMapeada = false;
+    
+    if($objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+      $bolUnidadeMapeada = true;
+    }
     //Apresenta o botão de expedir processo
-    if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->retNumIdUnidade();
-      $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-      $objPenUnidadeRN = new PenUnidadeRN();
-
-      if($objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+    if ($bolUnidadeMapeada && $bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . ' alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
-      }
     }
 
     //Apresenta o botão da página de recibos
@@ -167,11 +193,18 @@ class PENIntegracao extends SeiIntegracao
      
     //Apresenta o botão de incluir processo no bloco de trâmite
     $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
-    if ($bolFlagAberto && $bolAcaoIncluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+    if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolBlocoAbertoUnidade && $bolFlagAberto && $bolAcaoIncluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
       $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
       $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
     }
 
+    //Apresenta o botão de excluir processo no bloco de trâmite
+    $bolAcaoExcluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_excluir');
+    if ($bolUnidadeMapeada && $bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExcluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+      $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+      $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_excluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco_excluir.svg", $this->getDiretorioImagens()) .'" title="Remover Processo do Bloco de Trâmite" alt="Remover Processo do Bloco de Trâmite"/></a>';
+    }
+    
     return array($strAcoesProcedimento);
   }
 
@@ -743,6 +776,7 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
           break;
 
+      case 'pen_excluir_processo_em_bloco_tramite':
       case 'pen_incluir_processo_em_bloco_tramite':
       case 'pen_tramita_em_bloco_adicionar':
         require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
