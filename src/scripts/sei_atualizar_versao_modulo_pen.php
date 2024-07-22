@@ -2947,7 +2947,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrobjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
     
     $arrUnidadeTramiteBloco = array();
-    foreach($arrObjTramiteEmBloco as $tramiteEmBlocoDTO) {
+    foreach($arrobjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
       if(!in_array($tramiteEmBlocoDTO->getNumIdUnidade(), array_keys($arrUnidadeTramiteBloco))){
         $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()] = 1; 
       } else {
