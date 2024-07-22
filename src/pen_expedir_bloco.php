@@ -165,7 +165,7 @@ try {
             $objDTO->setDthAtualizado($dthAtualizado);
             $objDTO->setDthEnvio($dthAtualizado);
             $objDTO->setArrListaProcedimento($arrProtocolosOrigem);
-            $objDTO->setNumIdAtividade(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+            $objDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
             $objPenBlocoProcessoRN->alterar($objDTO);
 
