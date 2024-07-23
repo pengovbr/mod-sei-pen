@@ -58,7 +58,7 @@ try {
         PaginaSEI::getInstance()->processarExcecao($e);
       }
       header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
-      exit(0);
+        exit(0);
       break;
     case 'pen_incluir_processo_em_bloco_tramite':
       $objSessaoSEI->validarPermissao($_GET['acao']);
