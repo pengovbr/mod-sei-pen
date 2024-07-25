@@ -13,7 +13,7 @@ use Tests\Funcional\Sei\Fixtures\AtividadeFixture;
  * Mapeia as Unidades com limitação de repositórios
  * para tramite de processos entre orgãos
  */
-class MapeamentoDeUnidadesComLimitacaoDeRepositorios extends CenarioBaseTestCase
+class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioBaseTestCase
 {
   public static $remetente;
   public $penMapUnidadesFixture;
