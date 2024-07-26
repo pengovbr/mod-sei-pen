@@ -53,11 +53,17 @@ try {
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
         $arrObjPenBlocoProcessoDTO[] = $objPenBlocoProcessoRN->consultar($objPenBlocoProcessoDTO);
         $objPenBlocoProcessoRN->excluir($arrObjPenBlocoProcessoDTO);
-        $objPaginaSEI->adicionarMensagem('Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" excluido do bloco', InfraPagina::$TIPO_MSG_AVISO);
+        $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {
+        $strMensagem = $e->getMessage();
         PaginaSEI::getInstance()->processarExcecao($e);
       }
-      header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+      ?>
+      <script type="text/javascript">
+        alert('<?= $strMensagem ?>');
+        parent.parent.location.reload();
+      </script>
+      <?php
         exit(0);
       break;
     case 'pen_incluir_processo_em_bloco_tramite':
@@ -109,12 +115,17 @@ try {
           }
 
           $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
-
-          $objPaginaSEI->adicionarMensagem('Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco', InfraPagina::$TIPO_MSG_AVISO);
+          $strMensagem = 'Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco';
         } catch (Exception $e) {
+          $strMensagem = $e->getMessage();
           PaginaSEI::getInstance()->processarExcecao($e);
         }
-        header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+        ?>
+        <script type="text/javascript">
+          alert('<?= $strMensagem ?>');
+          parent.parent.location.reload();
+        </script>
+        <?php
         exit(0);
       }
         break;
