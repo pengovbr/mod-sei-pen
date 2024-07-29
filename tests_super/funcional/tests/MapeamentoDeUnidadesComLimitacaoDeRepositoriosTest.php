@@ -45,6 +45,8 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
    */
   public function test_mapeamento_unidades_com_limitacao_de_repositorios()
   {
+    $this->removerRestricaoUnidade();
+
     $this->acessarSistema(
       self::$remetente['URL'],
       self::$remetente['SIGLA_UNIDADE'],
@@ -92,6 +94,9 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
     $this->paginaProcesso->navegarParaTramitarProcesso();
     $this->paginaMapUnidades->validarRepositorio(self::$remetente['REP_ESTRUTURAS']);
     $this->paginaMapUnidades->selecionarUnidade(self::$remetente['NOME_UNIDADE']);
+
+    $this->removerRestricaoUnidade();
+
     $this->sairSistema();
   }
 
@@ -152,4 +157,19 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
       ]);
     });
   }
+
+  /**
+   * Remover restricao para limpar teste
+   *
+   * @return void
+   */
+  private function removerRestricaoUnidade()
+  {
+    $penUnidadeRestricaoFixture = new \PenUnidadeRestricaoFixture();
+    $penUnidadeRestricaoFixture->remover([
+      'NomeUnidadeRestricao' => self::$remetente['REP_ESTRUTURAS'],
+      'NomeUnidadeRHRestricao' => self::$remetente['NOME_UNIDADE']
+    ]);
+  }
+
 }
