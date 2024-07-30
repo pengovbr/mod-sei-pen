@@ -2850,10 +2850,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // Alterar id da tabela    
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
-    $this->excluirChavePrimariaComIndice("md_pen_expedir_lote", "id_lote", true);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_bloco_processo', $objMetaBD->tipoNumero(), PenMetaBD::NNULLO);
-    $objMetaBD->excluirColuna('md_pen_expedir_lote', 'id_lote');
-    $objMetaBD->adicionarChavePrimaria('md_pen_expedir_lote', 'pk_id_bloco_processo', array('id_bloco_processo'));
+    $objMetaBD->renomearColuna('md_pen_expedir_lote', 'id_lote', 'id_bloco_processo', $objMetaBD->tipoNumero());
 
     // Adicionar coluna de atualização do registro
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), PenMetaBD::SNULLO);
@@ -2868,8 +2865,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'tentativas', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
 
     $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_bloco_protocolo", true);
-    $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_md_pen_expedir_lote_usuario", true);
-    $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_md_pen_expedir_lote_unidade", true);
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
     $this->excluirChaveEstrangeira("md_pen_bloco_protocolo", "fk_bloco_protocolo", true);
 
@@ -2877,8 +2872,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_procedimento", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bloco", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_usuario", "md_pen_bloco_processo", array('id_usuario'), "usuario", array('id_usuario'), false);
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_unidade", "md_pen_bloco_processo", array('id_unidade'), "unidade", array('id_unidade'), false);
 
     //Adicionar coluna para ordenar blocos por unidade 
     $objMetaBD->adicionarColuna('md_pen_bloco', 'ordem', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
@@ -2904,11 +2897,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       inner join md_pen_rel_expedir_lote rel on rel.id_procedimento = bp.id_protocolo";
 
     $blocosTramite = $objInfraBanco->consultarSql($sql);
-    if (!empty($blocosTramite)) {
+
+    $sql = "SELECT 
+          bl.*, rel.id_procedimento, rel.id_andamento
+        FROM md_pen_bloco_processo bl
+        inner join md_pen_rel_expedir_lote rel on rel.id_lote = bl.id_bloco_processo
+        where bl.id_bloco IS NULL";
+
+    $lotesVazios = $objInfraBanco->consultarSql($sql);
+
+    if (!empty($blocosTramite) || !empty($lotesVazios)) {
       $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
       $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade(null);
-      $objTramiteEmBlocoDTO->setNumIdUsuario(null);
+      $objTramiteEmBlocoDTO->setNumIdUnidade($lotesVazios[0]['id_unidade']);
+      $objTramiteEmBlocoDTO->setNumIdUsuario($lotesVazios[0]['id_usuario']);
       $objTramiteEmBlocoDTO->setStrDescricao('Processos Tramitados em Lote (Legado)');
       $objTramiteEmBlocoDTO->setNumOrdem(0);
       $objTramiteEmBlocoDTO->setStrIdxBloco(null);
@@ -2918,24 +2920,38 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
   
       $idBloco = $objTramiteEmBlocoDTO->getNumId();
+      
+      if (!empty($lotesVazios)) {
+        foreach ($lotesVazios as $loteVazio) {
+          $objInfraBanco->executarSql(
+            'update md_pen_bloco_processo' .
+              ' set id_andamento='.$loteVazio['id_andamento'].',' .
+              ' id_protocolo='.$loteVazio['id_procedimento'].
+              ' where id_bloco_processo = '.$loteVazio['id_bloco_processo']
+            );
+        }
+      }
+
       // Atualizar que não tem bloco relacionado par abloco Processos Tramitados em Lote (Legado)
       $objInfraBanco->executarSql('update md_pen_bloco_processo set id_bloco = '.$idBloco.' where id_bloco is NULL');
   
       // Atualizar id_bloco para not null
       $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
       
-      foreach ($blocosTramite as $blocoTramite) {
-        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
-        $objPenBlocoProcessoDTO->setNumIdAndamento($blocoTramite['id_andamento']);
-        $objPenBlocoProcessoDTO->setNumIdAtividadeExpedicao($blocoTramite['id_atividade_expedicao']);
-        $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas']);
-        $objPenBlocoProcessoDTO->setNumIdBloco($idBloco);
-        $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
-        $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
-
-        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+      if (!empty($blocosTramite)) {
+        foreach ($blocosTramite as $blocoTramite) {
+          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
+          $objPenBlocoProcessoDTO->setNumIdAndamento($blocoTramite['id_andamento']);
+          $objPenBlocoProcessoDTO->setNumIdAtividade($blocoTramite['id_atividade_expedicao']);
+          $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas']);
+          $objPenBlocoProcessoDTO->setNumIdBloco($idBloco);
+          $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
+          $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
+  
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+        }
       }
     }
 
