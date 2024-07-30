@@ -1,5 +1,7 @@
 <?php
 
+use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
+
 /**
  * Testes de trâmite de processos contendo um documento cancelado
  *
@@ -9,7 +11,7 @@
  * Execution Groups
  * @group execute_parallel_with_two_group1
  */
-class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoCanceladoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -40,19 +42,17 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         // Acessar sistema do this->REMETENTE do processo
+        $objProtocoloTesteDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloTesteDTO->getStrProtocoloFormatado();
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, $objProtocoloTesteDTO->getDblIdProtocolo());
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, $objProtocoloTesteDTO->getDblIdProtocolo());
+
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste e incluir documentos relacionados
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);     
-
-        // Realiza o cancelamento de um documento interno do processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste2);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->abrirProcesso(self::$protocoloTeste);
 
         //Tramitar internamento para liberação da funcionalidade de cancelar
-        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], self::$processoTeste);
+        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], [ 'PROTOCOLO' => self::$protocoloTeste ]);
 
         $this->navegarParaCancelarDocumento(1);
         $this->paginaCancelarDocumento->cancelar("Motivo de teste");
@@ -154,17 +154,21 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Definição de dados de teste do processo principal
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         // Acessar sistema do this->REMETENTE do processo
+        $parametros = [
+            'ProtocoloFormatado' => self::$protocoloTeste,
+        ];
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloTesteDTO = $objProtocoloFixture->buscar($parametros)[0];
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloTesteDTO->getDblIdProtocolo());
+
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // Incluir novos documentos relacionados
         $this->abrirProcesso(self::$protocoloTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
-
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste,
