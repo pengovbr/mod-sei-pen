@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_parallel_group3
  */
-class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
+class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -39,12 +39,6 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
      */
     public function test_envio_processo_com_documento_anexado()
     {
-        if(ENVIO_PARCIAL){
-            $this->markTestIncomplete(
-                'Teste com erro. Será refatorado em momento oportuno.'
-            );
-        }
-
         // Carregar contexto de testes e dados sobre certificado digital
         $ordemDocumentoReferenciado = 1;
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
@@ -94,7 +88,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends CenarioBaseTestCase
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
         $arrDocumentosSegundoEnvio = array(self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
     }
 
     /**

@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoExternoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -26,24 +26,13 @@ class TramiteProcessoContendoDocumentoExternoTest extends CenarioBaseTestCase
     public function test_tramitar_processo_contendo_documento_externo()
     {
         // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
-
-        // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
-        $this->tramitarProcessoExternamente(
-                self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
 

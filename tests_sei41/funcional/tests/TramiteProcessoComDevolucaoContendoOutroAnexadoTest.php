@@ -36,12 +36,6 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends CenarioBaseTes
      */
     public function test_tramitar_processo_da_origem()
     {
-        if(ENVIO_PARCIAL){
-            $this->markTestIncomplete(
-                'Teste com erro. Será refatorado em momento oportuno.'
-            );
-        }
-
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 

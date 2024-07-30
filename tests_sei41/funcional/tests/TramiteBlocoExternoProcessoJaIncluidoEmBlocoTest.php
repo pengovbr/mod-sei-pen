@@ -48,7 +48,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         sleep(2);
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Processo(s) incluído(s) com sucesso no bloco ' . $this->objBlocoDeTramiteDTO->getNumId()),
+            utf8_encode('Processo(s) incluído(s) com sucesso no bloco ' . $this->objBlocoDeTramiteDTO->getNumOrdem()),
             $mensagem
         );
 
@@ -110,7 +110,6 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
      */
     private function cadastrarProcessos()
     {
-        $parametros = [];
         $objProtocoloFixture = new ProtocoloFixture();
         $this->objProtocoloDTO = $objProtocoloFixture->carregar(
             $parametros,
