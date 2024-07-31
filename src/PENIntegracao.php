@@ -997,6 +997,7 @@ class PENIntegracao extends SeiIntegracao
           $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
           $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
           $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null, InfraDTO::$OPER_DIFERENTE);
           $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
           $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
 

@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_unidade_listar');
 define('PEN_RECURSO_BASE', 'pen_map_unidade');
-define('PEN_PAGINA_TITULO', 'Mapeamento de Unidade');
+define('PEN_PAGINA_TITULO', 'Mapeamento de Unidades');
 define('PEN_PAGINA_GET_ID', 'id_unidade');
 
 
