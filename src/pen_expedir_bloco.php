@@ -174,7 +174,7 @@ try {
 
           $arrTramiteEmBlocoProtocolo[0]->setArrListaProcedimento($arrProcedimentos);
           $objPenExpedirLoteRN = new PenExpedirLoteRN();
-          $ret = $objPenExpedirLoteRN->cadastrarLote($arrTramiteEmBlocoProtocolo[0]);
+          $ret = $objPenExpedirLoteRN->cadastrarBloco($arrTramiteEmBlocoProtocolo[0]);
           
           $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 

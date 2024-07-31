@@ -413,7 +413,7 @@ class ProcessoEletronicoINT extends InfraINT {
 
       $strHtml = ''
         . ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
-        . ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir as Estruturas Organizacionais:</label>'
+        . ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir às Estruturas Organizacionais:</label>'
         . ' <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />'
         . ' <input type="hidden" id="hdnIdRepoEstruturas" name="hdnIdRepoEstruturas" class="infraText" value="" />'
         . ' <select id="selRepoEstruturas" name="selRepoEstruturas" size="6" multiple="multiple" class="infraSelect" onchange="trocarRepoEstruturasRestricao()" >'
