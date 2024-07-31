@@ -349,8 +349,8 @@ class ProcessarPendenciasRN extends InfraRN
           $this->enviarReciboTramiteProcesso($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("expedirLote", function($job) {
-          $this->expedirLote($job->workload());
+      $this->objGearmanWorker->addFunction("expedirBloco", function($job) {
+          $this->expedirBloco($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
   }

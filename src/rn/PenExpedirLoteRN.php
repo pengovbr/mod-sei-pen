@@ -71,7 +71,7 @@ class PenExpedirLoteRN extends InfraRN
 
   }
 
-  protected function cadastrarLoteControlado(PenBlocoProcessoDTO $objPenBlocoProcessoDTO)
+  protected function cadastrarBlocoControlado(PenBlocoProcessoDTO $objPenBlocoProcessoDTO)
     {
     try {
         //Valida Permissão

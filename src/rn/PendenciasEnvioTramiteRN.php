@@ -179,7 +179,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
         $this->gravarLogDebug("Situação do trâmite ($strStatus) não pode ser tratada para expedir pendências.");
       }
 
-      $client->addTaskBackground('expedirLote', $numIDT, null, $numIDT);
+      $client->addTaskBackground('expedirBloco', $numIDT, null, $numIDT);
       $client->runTasks();
     }
   }
