@@ -46,10 +46,6 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
      */
     public function test_excluir_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-        
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
