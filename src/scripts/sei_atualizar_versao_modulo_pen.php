@@ -2892,9 +2892,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $dthRegistro = date('d/m/Y H:i:s');
 
     $sql = "SELECT 
-        bp.id_protocolo, rel.id_andamento, rel.id_atividade_expedicao, rel.tentativas
+        bp.id_protocolo, rel.id_andamento, rel.id_atividade_expedicao, rel.tentativas, p.id_unidade_geradora, p.id_usuario_gerador 
       FROM md_pen_bloco_protocolo bp
-      inner join md_pen_rel_expedir_lote rel on rel.id_procedimento = bp.id_protocolo";
+      inner join md_pen_rel_expedir_lote rel on rel.id_procedimento = bp.id_protocolo
+      inner join protocolo p on p.id_protocolo = bp.id_protocolo ";
 
     $blocosTramite = $objInfraBanco->consultarSql($sql);
 
@@ -2906,46 +2907,35 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $lotesVazios = $objInfraBanco->consultarSql($sql);
 
+    // Atualizar md_pen_bloco_processo->ordem para 1
+    $objInfraBanco->executarSql('update md_pen_bloco set ordem=1');
+
     if (!empty($blocosTramite) || !empty($lotesVazios)) {
-      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade($lotesVazios[0]['id_unidade']);
-      $objTramiteEmBlocoDTO->setNumIdUsuario($lotesVazios[0]['id_usuario']);
-      $objTramiteEmBlocoDTO->setStrDescricao('Processos Tramitados em Lote (Legado)');
-      $objTramiteEmBlocoDTO->setNumOrdem(0);
-      $objTramiteEmBlocoDTO->setStrIdxBloco(null);
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
-  
-      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-      $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
-  
-      $idBloco = $objTramiteEmBlocoDTO->getNumId();
-      
       if (!empty($lotesVazios)) {
         foreach ($lotesVazios as $loteVazio) {
+          $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
+          $idAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+          
           $objInfraBanco->executarSql(
             'update md_pen_bloco_processo' .
-              ' set id_andamento='.$loteVazio['id_andamento'].',' .
-              ' id_protocolo='.$loteVazio['id_procedimento'].
+              ' set id_andamento='.$idAndamento.',' .
+              ' id_protocolo='.$loteVazio['id_procedimento']. ',' .
+              ' id_bloco = '.$objTramiteEmBlocoDTO->getNumId() .
               ' where id_bloco_processo = '.$loteVazio['id_bloco_processo']
             );
         }
       }
-
-      // Atualizar que não tem bloco relacionado par abloco Processos Tramitados em Lote (Legado)
-      $objInfraBanco->executarSql('update md_pen_bloco_processo set id_bloco = '.$idBloco.' where id_bloco is NULL');
-  
-      // Atualizar id_bloco para not null
-      $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
       
       if (!empty($blocosTramite)) {
         foreach ($blocosTramite as $blocoTramite) {
+          $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($blocoTramite['id_unidade_geradora'], $blocoTramite['id_usuario_gerador']);
+
           $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
           $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
           $objPenBlocoProcessoDTO->setNumIdAndamento($blocoTramite['id_andamento']);
           $objPenBlocoProcessoDTO->setNumIdAtividade($blocoTramite['id_atividade_expedicao']);
           $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas']);
-          $objPenBlocoProcessoDTO->setNumIdBloco($idBloco);
+          $objPenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBlocoDTO->getNumId());
           $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
           $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
   
@@ -2953,11 +2943,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
         }
       }
+
+      // Atualizar id_bloco para not null
+      $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
+    }
+
+    //Remover blocos sem nenhum processo vinculado
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->retNumId();
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $arrObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
+    if (!is_null($arrObjTramiteEmBlocoDTO)) {
+      foreach($arrObjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setNumIdBloco($tramiteEmBlocoDTO->getNumId());
+        $objPenBlocoProcessoDTO->retTodos();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        if ($objPenBlocoProcessoDTO == null) {
+          $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
+        }
+      }
     }
 
     //Atualiza ordenacao dos blocos por unidade
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumIdUnidade(null, InfraDTO::$OPER_DIFERENTE);
+    $objTramiteEmBlocoDTO->setNumOrdem(0, InfraDTO::$OPER_DIFERENTE);
     $objTramiteEmBlocoDTO->retTodos();
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
     $arrobjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
@@ -3062,6 +3075,34 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
     
     $this->atualizarNumeroVersao("3.7.0");
+  }
+  
+  /**
+   * Cadastra o bloco de processos em bloco (legado)
+   *
+   * @param $idUnidade
+   * @param $idUsuario
+   * @return TramiteEmBlocoDTO
+   */
+  private function cadastrarBlocoGenerico($idUnidade, $idUsuario)
+  {
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setStrStaTipo(TramiteEmBlocoRN::$TB_INTERNO);
+    $objTramiteEmBlocoDTO->setNumIdUnidade($idUnidade);
+    $objTramiteEmBlocoDTO->setNumIdUsuario($idUsuario);
+    $objTramiteEmBlocoDTO->setStrDescricao('Processos Tramitados em Lote (Legado)');
+    $objTramiteEmBlocoDTO->setNumOrdem(0);
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
+    $objTramiteEmBlocoDTO->retTodos();
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $retObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+    if (is_null($retObjTramiteEmBlocoDTO)) {
+      $objTramiteEmBlocoDTO->setStrIdxBloco(null);
+      return $objTramiteEmBlocoRN->cadastrar($objTramiteEmBlocoDTO);
+    }
+    
+    return $retObjTramiteEmBlocoDTO;
   }
 }
 
