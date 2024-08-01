@@ -2914,9 +2914,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       if (!empty($lotesVazios)) {
         foreach ($lotesVazios as $loteVazio) {
           $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
-          $idAndamento = $loteVazio['id_andamento'] == '2' ? 
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-            : $loteVazio['id_andamento'];
+          $idAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
           
           $objInfraBanco->executarSql(
             'update md_pen_bloco_processo' .
