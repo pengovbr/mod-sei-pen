@@ -2948,6 +2948,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
     }
 
+    //Remover blocos sem nenhum processo vinculado
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->retNumId();
+
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $arrObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
+    if (!is_null($arrObjTramiteEmBlocoDTO)) {
+      foreach($arrObjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setNumIdBloco($tramiteEmBlocoDTO->getNumId());
+        $objPenBlocoProcessoDTO->retTodos();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        if ($objPenBlocoProcessoDTO == null) {
+          $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
+        }
+      }
+    }
+
     //Atualiza ordenacao dos blocos por unidade
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setNumOrdem(0, InfraDTO::$OPER_DIFERENTE);
