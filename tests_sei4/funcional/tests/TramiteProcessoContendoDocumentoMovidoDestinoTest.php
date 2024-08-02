@@ -185,8 +185,7 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         // 11-criar documento interno (documentoTeste5) no Processo Principal
         self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         $this->cadastrarDocumentoInternoFixture(self::$documentoTeste5,self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
-        // $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-        
+                
         putenv("DATABASE_HOST=org1-database");
         // 12-tramitar Processo Principal para o Órgão 1 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
