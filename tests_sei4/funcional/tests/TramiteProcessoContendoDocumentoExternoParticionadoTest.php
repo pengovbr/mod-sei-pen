@@ -5,7 +5,7 @@
  * @group rodarseparado2
  * @group execute_alone_group1
  */
-class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -14,7 +14,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
     public static $protocoloTeste;
 
     public static function setUpBeforeClass() :void {
-
+        
         parent::setUpBeforeClass();
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
         $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
@@ -47,20 +47,27 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends CenarioBas
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
+
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_060.pdf');
-
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
+        
+        $objProtocoloDTO  = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado(); 
 
         // Altera tamanho máximo permitido para permitir o envio de arquivo superior à 50MBs
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         try {
             $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(70, 'SEI_TAM_MB_DOC_EXTERNO'));
-            $this->cadastrarDocumentoExterno(self::$documentoTeste);
+            $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
         } finally {
             $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
         }
+        putenv("DATABASE_HOST=org1-database");
+        
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso(self::$protocoloTeste);
 
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
