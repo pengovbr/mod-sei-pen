@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_alone_group4
  */
-class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
+class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -46,17 +46,15 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste['TIPO_DOCUMENTO'] = self::$remetente['TIPO_DOCUMENTO_NAO_MAPEADO'];
 
+        // Cadastrar novo processo de teste
+        // Incluir Documentos no Processo
+        self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, self::$protocoloTeste->getDblIdProtocolo());
+        self::$protocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-
-        // Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->abrirProcesso(self::$protocoloTeste);;
 
         $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
         $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
@@ -84,14 +82,15 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends CenarioBaseTestCase
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste['TIPO_DOCUMENTO'] = self::$remetente['TIPO_DOCUMENTO_NAO_MAPEADO'];
 
+        // Cadastrar novo processo de teste
+        // Incluir Documentos no Processo
+        self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, self::$protocoloTeste->getDblIdProtocolo());
+        self::$protocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // Incluir Documentos no Processo
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
+        $this->abrirProcesso(self::$protocoloTeste);
 
         $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
         $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
