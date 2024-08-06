@@ -2837,6 +2837,40 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   protected function instalarV3070()
   {
     $objMetaBD = $this->objMeta;
+    $objInfraBanco = BancoSEI::getInstance();
+
+    $sql = "SELECT 
+          mpel.*,
+          mprel.id_procedimento,
+          p.protocolo_formatado,
+          mprel.id_andamento,
+          mprel.id_atividade_expedicao,
+          mprel.tentativas
+        FROM md_pen_expedir_lote mpel
+        inner join md_pen_rel_expedir_lote mprel on mprel.id_lote = mpel.id_lote
+        inner join protocolo p on p.id_protocolo = mprel.id_procedimento
+        LEFT join md_pen_bloco_protocolo mpbp on mpbp.id_protocolo = mprel.id_procedimento
+        WHERE mpbp.id_tramita_em_bloco is NULL ";
+
+    $lotesVazios = $objInfraBanco->consultarSql($sql);
+
+    $sql = "SELECT 
+          mpb.id as id_bloco,
+          mpbp.id_protocolo,
+          p.protocolo_formatado,
+          p.id_unidade_geradora,
+          p.id_usuario_gerador,
+          mpel.*,
+          mprel.id_andamento,
+          mprel.id_atividade_expedicao,
+          mprel.tentativas
+        FROM md_pen_bloco mpb 
+        inner join md_pen_bloco_protocolo mpbp on mpbp.id_tramita_em_bloco = mpb.id 
+        inner join protocolo p on p.id_protocolo = mpbp.id_protocolo 
+        left join md_pen_expedir_lote mpel on mpel.id_lote = mpb.id 
+        LEFT join md_pen_rel_expedir_lote mprel on mprel.id_procedimento = mpbp.id_protocolo";
+
+    $blocosTramite = $objInfraBanco->consultarSql($sql);
 
     // Alterar colunas em md_pen_expedir_lote
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_destino', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
@@ -2875,7 +2909,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     //Adicionar coluna para ordenar blocos por unidade 
     $objMetaBD->adicionarColuna('md_pen_bloco', 'ordem', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
-    $objInfraBanco = BancoSEI::getInstance();
 
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
@@ -2889,64 +2922,88 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
-    $dthRegistro = date('d/m/Y H:i:s');
+    // Atualizar md_pen_bloco_processo->ordem para 1
+    $objInfraBanco->executarSql('delete from md_pen_bloco_processo');
 
-    $sql = "SELECT 
-        bp.id_protocolo, rel.id_andamento, rel.id_atividade_expedicao, rel.tentativas, p.id_unidade_geradora, p.id_usuario_gerador 
-      FROM md_pen_bloco_protocolo bp
-      inner join md_pen_rel_expedir_lote rel on rel.id_procedimento = bp.id_protocolo
-      inner join protocolo p on p.id_protocolo = bp.id_protocolo ";
+    if (!empty($blocosTramite)) {
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      foreach($blocosTramite as $blocoTramite) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
 
-    $blocosTramite = $objInfraBanco->consultarSql($sql);
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
+        $objPenBlocoProcessoDTO->setNumIdBloco($blocoTramite['id_bloco']);
+        $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas'] ?: 0);
+        $objPenBlocoProcessoDTO->setNumIdUsuario($blocoTramite['id_usuario_gerador']);
+        $objPenBlocoProcessoDTO->setNumIdUnidade($blocoTramite['id_unidade_geradora']);
 
-    $sql = "SELECT 
-          bl.*, rel.id_procedimento, rel.id_andamento
-        FROM md_pen_bloco_processo bl
-        inner join md_pen_rel_expedir_lote rel on rel.id_lote = bl.id_bloco_processo
-        where bl.id_bloco IS NULL";
+        $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo']);
+        $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
 
-    $lotesVazios = $objInfraBanco->consultarSql($sql);
+        if (!is_null($blocoTramite['id_atividade_expedicao'])) {
+          $objPenBlocoProcessoDTO->setNumIdAtividade($blocoTramite['id_atividade_expedicao']);
+        }
+        if (!is_null($blocoTramite['id_repositorio_origem'])) {
+          $objPenBlocoProcessoDTO->setNumIdRepositorioOrigem($blocoTramite['id_repositorio_origem']);
+        }
+        if (!is_null($blocoTramite['id_unidade_origem'])) {
+          $objPenBlocoProcessoDTO->setNumIdUnidadeOrigem($blocoTramite['id_unidade_origem']);
+        }
+        if (!is_null($blocoTramite['id_repositorio_destino'])) {
+          $objPenBlocoProcessoDTO->setNumIdRepositorioDestino($blocoTramite['id_repositorio_destino']);
+        }
+        if (!is_null($blocoTramite['str_repositorio_destino'])) {
+          $objPenBlocoProcessoDTO->setStrRepositorioDestino($blocoTramite['str_repositorio_destino']);
+        }
+        if (!is_null($blocoTramite['id_unidade_destino'])) {
+          $objPenBlocoProcessoDTO->setNumIdUnidadeDestino($blocoTramite['id_unidade_destino']);
+        }
+        if (!is_null($blocoTramite['str_unidade_destino'])) {
+          $objPenBlocoProcessoDTO->setStrUnidadeDestino($blocoTramite['str_unidade_destino']);
+        }
+        
+        $dthRegistro = date('d/m/Y H:i:s');
+        $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
+        if (!empty($blocoTramite['dth_registro'])) {
+          $timestamp = strtotime($blocoTramite['dth_registro']);
+          $dthRegistro = date('d/m/Y H:i:s', $timestamp);
+        }
+        $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
+        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+      }
+    }
 
     // Atualizar md_pen_bloco_processo->ordem para 1
     $objInfraBanco->executarSql('update md_pen_bloco set ordem=1');
 
-    if (!empty($blocosTramite) || !empty($lotesVazios)) {
-      if (!empty($lotesVazios)) {
-        foreach ($lotesVazios as $loteVazio) {
-          $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
-          $idAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-          
-          $objInfraBanco->executarSql(
-            'update md_pen_bloco_processo' .
-              ' set id_andamento='.$idAndamento.',' .
-              ' id_protocolo='.$loteVazio['id_procedimento']. ',' .
-              ' id_bloco = '.$objTramiteEmBlocoDTO->getNumId() .
-              ' where id_bloco_processo = '.$loteVazio['id_bloco_processo']
-            );
-        }
-      }
-      
-      if (!empty($blocosTramite)) {
-        foreach ($blocosTramite as $blocoTramite) {
-          $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($blocoTramite['id_unidade_geradora'], $blocoTramite['id_usuario_gerador']);
+    if (!empty($lotesVazios)) {
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $dthRegistro = date('d/m/Y H:i:s');
+      foreach ($lotesVazios as $loteVazio) {
+        $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
+        $numIdAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
 
-          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-          $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
-          $objPenBlocoProcessoDTO->setNumIdAndamento($blocoTramite['id_andamento']);
-          $objPenBlocoProcessoDTO->setNumIdAtividade($blocoTramite['id_atividade_expedicao']);
-          $objPenBlocoProcessoDTO->setNumTentativas($blocoTramite['tentativas']);
-          $objPenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBlocoDTO->getNumId());
-          $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
-          $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
-  
-          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-          $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
-        }
-      }
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setNumIdUsuario($loteVazio['id_usuario']);
+        $objPenBlocoProcessoDTO->setNumIdUnidade($loteVazio['id_unidade']);
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($loteVazio['id_procedimento']);
+        $objPenBlocoProcessoDTO->setNumTentativas($loteVazio['tentativas'] ?: 0);
+        $objPenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBlocoDTO->getNumId());
+        $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
+        $objPenBlocoProcessoDTO->setNumIdAtividade($loteVazio['id_atividade_expedicao']);
+        $objPenBlocoProcessoDTO->setNumIdRepositorioOrigem($loteVazio['id_repositorio_origem']);
+        $objPenBlocoProcessoDTO->setNumIdUnidadeOrigem($loteVazio['id_unidade_origem']);
+        $objPenBlocoProcessoDTO->setNumIdRepositorioDestino($loteVazio['id_repositorio_destino']);
+        $objPenBlocoProcessoDTO->setStrRepositorioDestino($loteVazio['str_repositorio_destino']);
+        $objPenBlocoProcessoDTO->setNumIdUnidadeDestino($loteVazio['id_unidade_destino']);
+        $objPenBlocoProcessoDTO->setStrUnidadeDestino($loteVazio['str_unidade_destino']);
+        $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
+        $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
 
-      // Atualizar id_bloco para not null
-      $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
+        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+      }
     }
+
+    $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
 
     //Remover blocos sem nenhum processo vinculado
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
@@ -3075,6 +3132,65 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
     
     $this->atualizarNumeroVersao("3.7.0");
+  }
+
+  private function buscarIdAndamento($idProtocolo)
+  {
+    $objPenProtocoloDTO = new PenProtocoloDTO();
+    $objPenProtocoloDTO->setDblIdProtocolo($idProtocolo);
+    $objPenProtocoloDTO->retStrSinObteveRecusa();
+    $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
+    $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+    $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+
+    if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
+      return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO;
+    } 
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($idProtocolo);
+    $objAtividadeDTO->setNumIdTarefa([
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
+    ], InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+    $objAtividadeRN = new AtividadeRN();
+    $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+    $numIdAndamento = null;
+    if (!empty($arrObjAtividadeDTO) && $arrObjAtividadeDTO[0]->getNumIdTarefa() != null) {
+      $numIdAndamento = $arrObjAtividadeDTO[0]->getNumIdTarefa();
+    } 
+
+    $processoConcluidoRecebido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO); 
+    $processoConcluidoAvulso = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO); 
+    $processoTramiteExpedido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO); 
+    $processoTramiteCancelado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); 
+    $processoTramiteProcessamento = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+    $processoTramiteAberto = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+
+    switch ($numIdAndamento) {
+      case $processoConcluidoAvulso:
+      case $processoTramiteExpedido:
+      case $processoConcluidoRecebido:
+        return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+      case $processoTramiteProcessamento:
+        return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO;
+      case $processoTramiteCancelado:
+        return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
+      case $processoTramiteAberto:
+      default:
+        return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO;
+    }
   }
   
   /**
