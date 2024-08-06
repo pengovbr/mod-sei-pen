@@ -46,7 +46,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         }
 
         $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setNumId($parObjTramitaEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+        $objTramiteEmBlocoDTO->setNumId($parObjTramitaEmBlocoProtocoloDTO->getNumIdBloco());
         $objTramiteEmBlocoDTO->retNumId();
         $objTramiteEmBlocoDTO->retStrStaEstado();
 
@@ -204,7 +204,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
         $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdTramitaEmBloco());
+        $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdBloco());
         $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
         $tramiteEmBlocoDTO->retStrStaEstado();
         $tramiteEmBlocoDTO->retNumId();
@@ -303,7 +303,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
     foreach ($arrTramitaEmBloco as $tramitaEmBloco) {
       $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdTramitaEmBloco());
+      $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdBloco());
       $tramiteEmBlocoDTO->setStrStaEstado([
         TramiteEmBlocoRN::$TE_ABERTO,
         TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
@@ -319,7 +319,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
 
-      $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdTramitaEmBloco(), $idProtocolo);
+      $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdBloco(), $idProtocolo);
       if ($processoRecusadoNoBlocoParcial !== false) {
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
@@ -391,7 +391,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
   {
     // Verificar se tem existe processo recusado dentro de um bloco
     $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
-    $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
     $objTramiteEmBlocoProtocoloDTO2->retNumIdTramitaEmBloco();
     $objTramiteEmBlocoProtocoloDTO2->retDblIdProtocolo();
 
@@ -413,7 +413,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     }
     // não atualizar para concluido quando o bloco estiver em concluido parcialmente
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
     $objTramiteEmBlocoDTO->setStrStaEstado([
       TramiteEmBlocoRN::$TE_ABERTO,
       TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
@@ -436,7 +436,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
   public function atualizarEstadoDoBlocoConcluidoParcialmente($arrTramiteEmBlocoProtocoloDTO)
   {
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($arrTramiteEmBlocoProtocoloDTO[0]->getNumIdTramitaEmBloco());
+    $objTramiteEmBlocoDTO->setNumId($arrTramiteEmBlocoProtocoloDTO[0]->getNumIdBloco());
     $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
 
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
