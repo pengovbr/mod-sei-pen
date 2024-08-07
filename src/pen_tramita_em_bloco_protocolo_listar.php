@@ -107,7 +107,7 @@ try {
             }
             if ($recusado == false && $cancelado == false) {
               $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-              $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
+              $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
               $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO);
   
               $objTramiteEmBlocoRN = new TramiteEmBlocoRN();

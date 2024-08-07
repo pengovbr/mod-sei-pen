@@ -2839,6 +2839,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD = $this->objMeta;
     $objInfraBanco = BancoSEI::getInstance();
 
+    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+    $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
+    $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
+    if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) > 0) {
+      $objReceberProcessosPEN->retTodos();
+      $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
+      $objReceberProcessosPEN->setStrSinAtivo("N");
+      $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
+    }
+
     $sql = "SELECT 
           mpel.*,
           mprel.id_procedimento,
@@ -3000,6 +3010,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN->retTodos();
       $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
+      $objReceberProcessosPEN->setStrSinAtivo("S");
       $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
     } else {
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
@@ -3132,7 +3143,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $dthRegistro = date('d/m/Y H:i:s');
       foreach ($lotesVazios as $loteVazio) {
         $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
-        $numIdAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+        $numIdAndamento = $this->buscarIdAndamento($loteVazio['id_procedimento']);
 
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
         $objPenBlocoProcessoDTO->setNumIdUsuario($loteVazio['id_usuario']);
@@ -3140,7 +3151,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenBlocoProcessoDTO->setDblIdProtocolo($loteVazio['id_procedimento']);
         $objPenBlocoProcessoDTO->setNumTentativas($loteVazio['tentativas'] ?: 0);
         $objPenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBlocoDTO->getNumId());
-        $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
+        if (!is_null($numIdAndamento)) {
+          $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
+        }
         $objPenBlocoProcessoDTO->setNumIdAtividade($loteVazio['id_atividade_expedicao']);
         $objPenBlocoProcessoDTO->setNumIdRepositorioOrigem($loteVazio['id_repositorio_origem']);
         $objPenBlocoProcessoDTO->setNumIdUnidadeOrigem($loteVazio['id_unidade_origem']);
@@ -3205,7 +3218,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $processoTramiteCancelado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO); 
     $processoTramiteProcessamento = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
     $processoTramiteAberto = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-
+    
     switch ($numIdAndamento) {
       case $processoConcluidoAvulso:
       case $processoTramiteExpedido:
@@ -3217,7 +3230,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
       case $processoTramiteAberto:
       default:
-          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO;
+          return null;
     }
   }
   
