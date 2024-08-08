@@ -2788,7 +2788,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
 
     //Inserir Componentes Digitais no Banco de acordo com os parâmetros do ConfiguracaoModPEN.php
-    $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes");
+    $arrObjEnviarDocumentosPendentes = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnviarApenasComponentesDigitaisPendentes", false);
     $objParamEnviarDocumentosPendentes = !is_null($arrObjEnviarDocumentosPendentes) ? $arrObjEnviarDocumentosPendentes : false;
     $objSessaoSEI = SessaoSEI::getInstance();
     $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
