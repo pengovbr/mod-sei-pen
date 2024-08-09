@@ -69,7 +69,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
         ]);
 
-        $dadosProcesso['PROTOCOLO'] = $protocoloGerado;
+        $dadosProcesso['PROTOCOLO'] = $objProtocoloDTO->getStrProtocoloFormatado();
         
         return $objProtocoloDTO;
     }
@@ -134,7 +134,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'ProtocoloFormatado' => $protocoloFormatado,
             'StaProtocolo' => $staProtocolo ?: \ProtocoloRN::$TP_DOCUMENTO_GERADO,
         ]);
-        return $objProtocoloDTO;
+        return $objProtocoloDTO[0];
     }
 
     protected function realizarTramiteExternoFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite)
