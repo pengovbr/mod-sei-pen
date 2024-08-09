@@ -1,6 +1,6 @@
 <?php
 
-class TramiteProcessoUnidadeSemHierarquiaPaiTest extends CenarioBaseTestCase
+class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -27,7 +27,7 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends CenarioBaseTestCase
         self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1);
-        $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $paginaProcesso = new PaginaProcesso($this);

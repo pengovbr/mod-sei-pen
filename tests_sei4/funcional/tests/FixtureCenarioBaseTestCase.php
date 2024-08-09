@@ -5,6 +5,7 @@ use PHPUnit\Extensions\Selenium2TestCase;
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};
 use Tests\Funcional\Sei\Fixtures\{DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
+use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture};
 
 use function PHPSTORM_META\map;
 /**
@@ -14,9 +15,21 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 {
     protected function cadastrarProcessoFixture(&$dadosProcesso)
     {
+
+        if (!is_null($dadosProcesso['HIPOTESE_LEGAL'])){
+            $param = [
+                'Nome' => trim(explode('(',$dadosProcesso['HIPOTESE_LEGAL'])[0]),
+                'BaseLegal' => explode(')',trim(explode('(',$dadosProcesso['HIPOTESE_LEGAL'])[1]))[0]
+            ];
+            $objHipLegalFixture = new HipoteseLegalFixture();
+            $objHipLegalDTO = $objHipLegalFixture->buscar($param)[0];
+        }
+
         $parametros = [
             'Descricao' => $dadosProcesso['DESCRICAO'] ?: util::random_string(20),
             'Interessados' => $dadosProcesso['INTERESSADOS'] ?: util::random_string(40),
+            'IdHipoteseLegal' => $dadosProcesso['HIPOTESE_LEGAL'] ? $objHipLegalDTO->getNumIdHipoteseLegal() : null,
+            'StaNivelAcessoLocal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             'StaNivelAcessoGlobal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO
         ];
         $objProtocoloFixture = new ProtocoloFixture();
@@ -113,7 +126,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdDocumento' => $protocoloProcessoAnexadoId,
         ]);
     }
-
+    
     protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
     {
         $objProtocoloFixture = new ProtocoloFixture();
@@ -123,7 +136,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         ]);
         return $objProtocoloDTO;
     }
-    
+
     protected function realizarTramiteExternoFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite)
     {
         $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
@@ -170,7 +183,6 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             // 6 - Verificar se situação atual do processo está como bloqueado
             $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
                 sleep(5);
-                $this->atualizarTramitesPEN();
                 $testCase->refresh();
                 $paginaProcesso = new PaginaProcesso($testCase);
                 $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
