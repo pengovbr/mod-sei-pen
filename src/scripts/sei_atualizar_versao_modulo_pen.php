@@ -2849,7 +2849,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
     }
 
-    $sql = "SELECT 
+    $sql = "SELECT DISTINCT
           mpel.*,
           mprel.id_procedimento,
           p.protocolo_formatado,
@@ -2864,7 +2864,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $lotesVazios = $objInfraBanco->consultarSql($sql);
 
-    $sql = "SELECT 
+    $sql = "SELECT DISTINCT
           mpb.id as id_bloco,
           mpbp.id_protocolo,
           p.protocolo_formatado,
@@ -3084,7 +3084,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   {
     if (!empty($blocosTramite)) {
       $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrIdProtocolo = array();
       foreach($blocosTramite as $blocoTramite) {
+        if (in_array($blocoTramite['id_protocolo'], $arrIdProtocolo)) {
+          continue;
+        }
+
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
 
         $objPenBlocoProcessoDTO->setDblIdProtocolo($blocoTramite['id_protocolo']);
@@ -3126,6 +3131,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
         $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
         $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+
+        $arrIdProtocolo[] = $blocoTramite['id_protocolo'];
       }
     }
   }
@@ -3141,7 +3148,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     if (!empty($lotesVazios)) {
       $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
       $dthRegistro = date('d/m/Y H:i:s');
+      $arrIdProcedimento = array();
       foreach ($lotesVazios as $loteVazio) {
+        if (in_array($loteVazio['id_procedimento'], $arrIdProcedimento)) {
+          continue;
+        }
+
         $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
         $numIdAndamento = $this->buscarIdAndamento($loteVazio['id_procedimento']);
 
@@ -3165,6 +3177,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
 
         $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+        
+        $arrIdProcedimento[] = $loteVazio['id_procedimento'];
       }
     }
   }

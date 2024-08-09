@@ -40,10 +40,14 @@ try {
     // TODO: tratar atualização a partir de um metodo
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-
+    $objTramiteEmBlocoDTO->retTodos();
+    // Consultar se o bloco esta como concluído
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+    $retObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+    if ($retObjTramiteEmBlocoDTO != null && $retObjTramiteEmBlocoDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_CONCLUIDO) {
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+      $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+    }
   }
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
