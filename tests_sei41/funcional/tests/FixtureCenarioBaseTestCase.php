@@ -48,7 +48,8 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
         $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
         $objProtocoloAssuntoFixture->carregar([
-            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
+            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+            'IdAssunto' => 377
         ]);
 
         $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
@@ -99,6 +100,20 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $objAnexoFixture->carregar([
             'IdProtocolo' => $objDocumentoDTO->getDblIdDocumento(),
             'Nome' => basename($dadosDocumentoExterno['ARQUIVO']),
+        ]);
+
+        $objAtividadeFixture = new AtividadeFixture();
+        $objAtividadeDTO = $objAtividadeFixture->carregar([
+            'IdProtocolo' => $idProtocolo,
+            'Conclusao' => \InfraData::getStrDataHoraAtual(),
+            'IdTarefa' => \TarefaRN::$TI_ARQUIVO_ANEXADO,
+            'IdUsuarioConclusao' => 100000001
+        ]);
+
+        $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
+        $objAtributoAndamentoFixture->carregar([
+            'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
+            'Nome' => 'ANEXO'
         ]);
       
         return $objDocumentoDTO;
