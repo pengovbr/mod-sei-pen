@@ -16,6 +16,40 @@ class PenBlocoProcessoRN extends InfraRN
     return BancoSEI::getInstance();
   }
 
+  public function verificarExclusaoBloco(array $arrObjDTO)
+  {
+    $podeExcluir = true;
+    $messagem = "Existem protocolos em andamento que não pode ser excluídos.";
+
+    foreach ($arrObjDTO as $objPenLoteProcedimentoDTO) {
+      $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
+      $objPenLoteProcedimentoDTO->retNumIdAndamento();
+      $objPenLoteProcedimentoDTO->retStrProtocoloFormatadoProtocolo();
+
+      $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
+      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoBD->consultar($objPenLoteProcedimentoDTO);
+
+      $situacaoPodeExcluir = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE ,
+      );
+      if (
+        $objPenLoteProcedimentoDTO != null
+        && !is_null($objPenLoteProcedimentoDTO->getNumIdAndamento())
+        && !in_array($objPenLoteProcedimentoDTO->getNumIdAndamento(), $situacaoPodeExcluir)
+      ) {
+        $messagem .= "\n - {$objPenLoteProcedimentoDTO->getStrProtocoloFormatadoProtocolo()}";
+        $podeExcluir = false;
+      }
+    }
+
+    if (!$podeExcluir) {
+      throw new InfraException($messagem);
+    }
+  }
+
   protected function obterPendenciasLoteControlado(PenBlocoProcessoDTO $objPenLoteProcedimentoDTO)
   {
     try {
@@ -399,9 +433,10 @@ class PenBlocoProcessoRN extends InfraRN
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
     $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
+    $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
     $objPenBlocoProcessoDTO->retNumIdBloco();
     $objPenBlocoProcessoDTO->retDblIdProtocolo();
-    // $objPenBlocoProcessoDTO->retStrIdxRelBlocoProtocolo();
+    $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
 
     $arrTramitaEmBloco = $this->listar($objPenBlocoProcessoDTO);
 
@@ -420,12 +455,12 @@ class PenBlocoProcessoRN extends InfraRN
       $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
       if (!empty($tramiteEmBloco)) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getDblIdProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
 
       $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdBloco(), $idProtocolo);
       if ($processoRecusadoNoBlocoParcial !== false) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getDblIdProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
     }
 

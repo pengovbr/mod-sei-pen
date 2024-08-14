@@ -138,7 +138,7 @@ class PENIntegracao extends SeiIntegracao
       ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
     ));
 
-    $bolBlocoAbertoUnidade = false; 
+    $bolBlocoAbertoUnidade = false;
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
     $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -155,11 +155,18 @@ class PENIntegracao extends SeiIntegracao
     $bolProcessoEmBloco = false;
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+    $objPenBlocoProcessoDTO->retNumIdAndamento();
     $objPenBlocoProcessoDTO->retNumIdBloco();
 
     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-    if (count($objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO)) > 0){
-      $bolProcessoEmBloco = true;
+    $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+    if (count($arrObjPenBlocoProcessoDTO) > 0){
+      foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+        if ($objBlocoProcessoDTO->getNumIdAndamento() != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
+          $bolProcessoEmBloco = true;
+        }
+      }
     }
 
     $objPenUnidadeDTO = new PenUnidadeDTO();

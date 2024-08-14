@@ -297,7 +297,7 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
     $tramitaEmBlocoProtocoloDTO->retNumId();
     $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($idProtocolo);
     $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+    $tramitaEmBlocoProtocoloDTO->retStrProtocoloFormatadoProtocolo();
 
     $arrTramitaEmBloco = $this->listar($tramitaEmBlocoProtocoloDTO);
 
@@ -316,12 +316,12 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
       if (!empty($tramiteEmBloco)) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumId()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
 
       $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdBloco(), $idProtocolo);
       if ($processoRecusadoNoBlocoParcial !== false) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrIdxRelBlocoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumId()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
     }
 

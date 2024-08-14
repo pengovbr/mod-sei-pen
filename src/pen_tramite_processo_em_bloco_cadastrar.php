@@ -46,12 +46,13 @@ try {
 
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
         $objPenBlocoProcessoDTO->setDblIdProtocolo($_GET['id_procedimento']);
+        $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objPenBlocoProcessoDTO->retDblIdProtocolo();
         $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
         $objPenBlocoProcessoDTO->retNumIdBloco();
 
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $arrObjPenBlocoProcessoDTO[] = $objPenBlocoProcessoRN->consultar($objPenBlocoProcessoDTO);
+        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
         $objPenBlocoProcessoRN->excluir($arrObjPenBlocoProcessoDTO);
         $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {
@@ -161,7 +162,8 @@ try {
             $dtRegistro = date('d/m/Y H:i:s');
             $objPenBlocoProcessoDTO->setDthRegistro($dtRegistro);
             $objPenBlocoProcessoDTO->setDthAtualizado($dtRegistro);
-            $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+            $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+            $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
             $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
 
