@@ -3027,7 +3027,13 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
       $objPenLoteProcedimentoDTO->retTodos();
       $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
-      $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+      $objPenLoteProcedimentoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objPenLoteProcedimentoDTO->setNumIdAndamento(array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE
+      ), InfraDTO::$OPER_IN);
+      $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
       $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
       $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);

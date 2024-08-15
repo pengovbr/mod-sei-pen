@@ -2842,11 +2842,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
+    $objReceberProcessosPEN->retTodos();
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) > 0) {
       $objReceberProcessosPEN->retTodos();
       $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
-      $objReceberProcessosPEN->setStrSinAtivo("N");
-      $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
+      $objInfraAgendamentoTarefaBD->excluir($objReceberProcessosPEN);
     }
 
     $sql = "SELECT DISTINCT
@@ -3005,14 +3005,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
 
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
-    $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
-    if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) > 0) {
-      $objReceberProcessosPEN->retTodos();
-      $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
-      $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
-      $objReceberProcessosPEN->setStrSinAtivo("S");
-      $objInfraAgendamentoTarefaBD->alterar($objReceberProcessosPEN);
-    } else {
+    $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
+    if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0) {
       $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
       $strDesc = "Recebe as notificações de novos trâmites de processos/documentos, notificações de conclusão de trâmites ou recusas de recebimento de processos por outras instituições. \n\n";
       $strDesc .= "Este agendamento considera os seguintes parâmetros durante sua execução:\n";
