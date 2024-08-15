@@ -243,7 +243,6 @@ try {
 
       $strResultado .= '<td align="center">' . "\n";
       switch ($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento()) {
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
@@ -262,6 +261,13 @@ try {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
             break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:       
+          if(is_null($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento())){
+            $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
+              break;
+          }
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
+            break;
         default:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
             break;
@@ -272,15 +278,19 @@ try {
 
       $estadosBloqueados = array(
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
       );
-      if (
+      if (        
         $objTramitaEmBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()
-        && !in_array($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento(), $estadosBloqueados)
+        && (
+          !in_array($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento(), $estadosBloqueados)
+          || is_null($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento())
+        )
       ) {
         $strResultado .= '<a onclick="onCLickLinkDelete(\''
           .$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';

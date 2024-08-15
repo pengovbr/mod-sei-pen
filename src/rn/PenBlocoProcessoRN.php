@@ -464,6 +464,18 @@ class PenBlocoProcessoRN extends InfraRN
       }
     }
 
+    $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+    $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProtocolo);
+
+    $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), array(
+      ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO,
+      ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
+    ));
+    if (!$bolProcessoEstadoNormal) {
+      return "Prezado(a) usuário(a), o processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} encontra-se bloqueado."
+        . " Dessa forma, não foi possível realizar a sua inserção no bloco selecionado.";
+    }
+
     return false;
   }
 
