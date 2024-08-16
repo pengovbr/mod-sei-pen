@@ -210,7 +210,7 @@ class ReceberReciboTramiteRN extends InfraRN
 
     if (isset($objEstrutura->hierarquia)) {
 
-      $arrObjNivel = $objEstrutura->hierarquia->nivel;
+      $arrObjNivel = $objEstrutura->hierarquia;
 
       $nome = "";
       $siglasUnidades = array();

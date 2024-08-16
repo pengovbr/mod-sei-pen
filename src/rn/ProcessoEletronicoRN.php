@@ -263,65 +263,51 @@ class ProcessoEletronicoRN extends InfraRN
         return $arrObjRepositorioDTO;
     }
 
-    /**
-    * Método responsável por consultar as estruturas das unidades externas no barramento
-    * @param $idRepositorioEstrutura
-    * @param $numeroDeIdentificacaoDaEstrutura
-    * @param bool $bolRetornoRaw
-    * @return EstruturaDTO|mixed
-    * @throws InfraException
-    */
-  public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw = false)
-    {
-    try {
+	/**
+	 * Método responsável por consultar as estruturas das unidades externas no barramento.
+	 *
+	 * @param int $idRepositorioEstrutura
+	 * @param int $numeroDeIdentificacaoDaEstrutura
+	 * @param bool $bolRetornoRaw
+	 * @throws InfraException
+	 * @return EstruturaDTO
+	 */
+	public function consultarEstrutura($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura, $bolRetornoRaw = false)
+	{
+		$endpoint = "/interoperabilidade/rest/v3/repositorios-de-estruturas/{$idRepositorioEstrutura}/estruturas-organizacionais/$numeroDeIdentificacaoDaEstrutura";
+		try {
 
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturas = new stdClass();
-        $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-        $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
-        $parametros->filtroDeEstruturas->apenasAtivas = false;
+			$parametros = [];
+			$arrResultado = $this->get($endpoint, $parametros);
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturas($parametros);
-        });
+			if ($bolRetornoRaw !== false) {
+				$arrResultado['nome'] = mb_convert_encoding($arrResultado['nome'], 'ISO-8859-1', 'UTF-8');
+				$arrResultado['sigla'] = mb_convert_encoding($arrResultado['sigla'], 'ISO-8859-1', 'UTF-8');
 
-      if ($result->estruturasEncontradas->totalDeRegistros == 1) {
-        $arrObjEstrutura = is_array($result->estruturasEncontradas->estrutura) ? $result->estruturasEncontradas->estrutura : array($result->estruturasEncontradas->estrutura);
-        $objEstrutura = current($arrObjEstrutura);
+				if (isset($arrResultado['hierarquia']) && is_array($arrResultado['hierarquia'])) {
+					foreach ($arrResultado['hierarquia'] as &$arrHierarquia) {
+						$arrHierarquia['nome'] = mb_convert_encoding($arrHierarquia['nome'], 'ISO-8859-1', 'UTF-8');
+					}
+				}
 
-        $objEstrutura->nome = utf8_decode($objEstrutura->nome);
-        $objEstrutura->sigla = utf8_decode($objEstrutura->sigla);
+				return self::converterArrayParaObjeto($arrResultado);
+			}
 
-        if ($bolRetornoRaw !== false) {
-          if (isset($objEstrutura->hierarquia) && isset($objEstrutura->hierarquia->nivel)) {
-            if (!is_array($objEstrutura->hierarquia->nivel)) {
-                    $objEstrutura->hierarquia->nivel = array($objEstrutura->hierarquia->nivel);
-            }
+			$objEstruturaDTO = new EstruturaDTO();
+			$objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($arrResultado['numeroDeIdentificacaoDaEstrutura']);
+			$objEstruturaDTO->setStrNome(mb_convert_encoding($arrResultado['nome'], 'ISO-8859-1', 'UTF-8'));
+			$objEstruturaDTO->setStrSigla(mb_convert_encoding($arrResultado['sigla'], 'ISO-8859-1', 'UTF-8'));
+			$objEstruturaDTO->setBolAtivo($arrResultado['ativo']);
+			$objEstruturaDTO->setBolAptoParaReceberTramites($arrResultado['aptoParaReceberTramites']);
+			$objEstruturaDTO->setStrCodigoNoOrgaoEntidade($arrResultado['codigoNoOrgaoEntidade']);
 
-            foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
-                            $objNivel->nome = utf8_decode($objNivel->nome);
-            }
-          }
-            return $objEstrutura;
-        }
-        else {
-                $objEstruturaDTO = new EstruturaDTO();
-                $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($objEstrutura->numeroDeIdentificacaoDaEstrutura);
-                $objEstruturaDTO->setStrNome($objEstrutura->nome);
-                $objEstruturaDTO->setStrSigla($objEstrutura->sigla);
-                $objEstruturaDTO->setBolAtivo($objEstrutura->ativo);
-                $objEstruturaDTO->setBolAptoParaReceberTramites($objEstrutura->aptoParaReceberTramites);
-                $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($objEstrutura->codigoNoOrgaoEntidade);
-                return $objEstruturaDTO;
-        }
-      }
-    }
-    catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
+			return $objEstruturaDTO;
+		} catch (Exception $e) {
+			$mensagem = "Falha na obtenção de unidades externas";
+			$detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+			throw new InfraException($mensagem, $e, $detalhes);
+		}
+	}
 
     /**
     * Método responsável por recuperar pela estutura pai a estrutura de filhos de uma unidade
@@ -2393,6 +2379,22 @@ class ProcessoEletronicoRN extends InfraRN
       }
       return $arrIdDocumentos;
     }
+
+	/**
+  	 * Converter arrays associativo para objetos
+   	*/
+	public static function converterArrayParaObjeto($array) 
+	{
+		if (is_array($array)) {
+			$object = new stdClass();
+			foreach ($array as $key => $value) {
+				$object->$key = self::converterArrayParaObjeto($value);
+			}
+			return $object;
+		}
+
+		return $array;
+	}
 
 	/**
 	 * Consulta as estruturas de um repositório de estruturas.

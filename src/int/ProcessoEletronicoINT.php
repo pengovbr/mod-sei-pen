@@ -122,13 +122,13 @@ class ProcessoEletronicoINT extends InfraINT {
 
     if(isset($ObjEstrutura->hierarquia)) {
 
-        $arrObjNivel = $ObjEstrutura->hierarquia->nivel;
+        $arrObjNivel = $ObjEstrutura->hierarquia;
 
         $siglasUnidades = array();
         $siglasUnidades[] = $ObjEstrutura->sigla;
 
       foreach($arrObjNivel as $key => $objNivel){
-        $siglasUnidades[] = $objNivel->sigla  ;
+        $siglasUnidades[] = $objNivel->sigla;
       }
 
       for($i = 1; $i <= 3; $i++){
