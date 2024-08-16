@@ -10,6 +10,11 @@
       "Tests\\": "sei/"
     }
   },
+
+  "require": {
+    "guzzlehttp/guzzle": "^7.0"
+  },
+
   "require-dev": {
     "php": "7.3.12",
     "phpunit/phpunit": "*",

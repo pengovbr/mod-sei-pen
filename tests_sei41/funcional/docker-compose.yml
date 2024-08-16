@@ -119,6 +119,7 @@ services:
     depends_on:
       - org1-database
     volumes:
+      - ./vendor:/opt/sei/web/modulos/pen/vendor
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
@@ -130,6 +131,8 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
+      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
+      - ./composer.json:/opt/sei/web/modulos/pen/composer.json
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -177,6 +180,7 @@ services:
     depends_on:
       - org2-database
     volumes:
+      - ./vendor:/opt/sei/web/modulos/pen/vendor
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
@@ -188,6 +192,8 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
+      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
+      - ./composer.json:/opt/sei/web/modulos/pen/composer.json
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
