@@ -229,45 +229,39 @@ class ProcessoEletronicoRN extends InfraRN
 		return $objRepositorioDTO;
 	}
 
-    /**
+	/**
      * Lista todo os repositórios de estruturas disponíveis no Barramento de Serviços do PEN
      *
      * @return void
      */
-  public function listarRepositoriosDeEstruturas()
+    public function listarRepositoriosDeEstruturas()
     {
-      $arrObjRepositorioDTO = array();
+        $arrObjRepositorioDTO = [];
+        $endpoint = '/interoperabilidade/rest/v3/repositorios-de-estruturas';
 
-    try{
-        $parametros = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = true;
+        try{
+            $parametros = [
+                'ativos' => true
+            ];
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
-        });
-
-      if(isset($result->repositoriosEncontrados->repositorio)){
-        if(!is_array($result->repositoriosEncontrados->repositorio)) {
-            $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
+            $arrResultado = $this->get($endpoint, $parametros); 
+            if (isset($arrResultado)) {
+                foreach ($arrResultado as $repositorio) {
+                    $objRepositorioDTO = new RepositorioDTO();
+                    $objRepositorioDTO->setNumId($repositorio['id']);
+                    $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio['nome'], 'ISO-8859-1', 'UTF-8'));
+                    $objRepositorioDTO->setBolAtivo($repositorio['ativo']);
+                    $arrObjRepositorioDTO[] = $objRepositorioDTO;
+                }
+            }
+        } catch(Exception $e){
+            $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
 
-        foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
-                $item = new RepositorioDTO();
-                $item->setNumId($repositorio->id);
-                $item->setStrNome(utf8_decode($repositorio->nome));
-                $item->setBolAtivo($repositorio->ativo);
-                $arrObjRepositorioDTO[] = $item;
-        }
-      }
-    } catch(Exception $e){
-        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
+        return $arrObjRepositorioDTO;
     }
-
-      return $arrObjRepositorioDTO;
-  }
 
     /**
     * Método responsável por consultar as estruturas das unidades externas no barramento
