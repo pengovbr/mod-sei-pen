@@ -16,6 +16,12 @@ class PenBlocoProcessoRN extends InfraRN
     return BancoSEI::getInstance();
   }
 
+  /**
+   * Verifica se o bloco pode ser excluído
+   *
+   * @param array $arrObjDTO
+   * @return string|null
+   */
   public function verificarExclusaoBloco(array $arrObjDTO)
   {
     $podeExcluir = true;
@@ -46,8 +52,10 @@ class PenBlocoProcessoRN extends InfraRN
     }
 
     if (!$podeExcluir) {
-      throw new InfraException($messagem);
+      return $messagem;
     }
+
+    return null;
   }
 
   protected function obterPendenciasLoteControlado(PenBlocoProcessoDTO $objPenLoteProcedimentoDTO)
@@ -327,7 +335,6 @@ class PenBlocoProcessoRN extends InfraRN
         $objPenProtocoloDTO = new PenProtocoloDTO();
         $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
         $objPenProtocoloDTO->retStrSinObteveRecusa();
-        // $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
         $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
         $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);

@@ -2614,6 +2614,37 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
+    public function verificarProcessosAbertoNaUnidade(InfraException $objInfraException, array $arrProtocolosOrigem)
+    {
+      $naoAbertoUnidadeAtual = false;
+      foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
+
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDistinct(true);
+        $objAtividadeDTO->retStrSiglaUnidade();
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setOrdStrSiglaUnidade(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setDthConclusao(null);
+
+        $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
+        if(count($arrObjAtividadeDTO) == 0) {
+          if ($naoAbertoUnidadeAtual == false) {
+            $naoAbertoUnidadeAtual = true;
+            $objInfraException->adicionarValidacao("Verifique o(s) seguinte(s) impedimento(s) para a realização do trâmite:");
+          }
+          $objInfraException->adicionarValidacao("O processo {$strProtocoloFormatado} não possui andamento aberto nesta unidade;");
+        }
+      }
+
+      if ($naoAbertoUnidadeAtual == true) {
+        $objInfraException->adicionarValidacao("Esse é um bloco criado em uma versão anterior do módulo. Portanto, é necessário excluir o(s) processo(s) citado(s) do bloco.");
+      }
+    }
 
     private function obterNivelSigiloPEN($strNivelSigilo)
       {
