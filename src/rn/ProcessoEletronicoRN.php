@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../vendor/autoload.php'; 
+
 class ProcessoNaoPodeSerDesbloqueadoException extends Exception {}
 
 /**
@@ -100,41 +102,60 @@ class ProcessoEletronicoRN extends InfraRN
     private $strLocalCert;
     private $strLocalCertPassword;
 
-  public function __construct()
-    {
-      $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
-      $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
-      $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
-      $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-      $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
-      $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
+	private $strClientGuzzle;
+	private $strBaseUri;
+	private $arrheaders;
 
-      $this->strEnderecoWebService = $strEnderecoWebService;
-      $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
-      $this->strLocalCert = $strLocalizacaoCertificadoDigital;
-      $this->strLocalCertPassword = $strSenhaCertificadoDigital;
-      $this->numTentativasErro = $numTentativasErro;
+	public function __construct() 
+	{
+	  $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+	  $strEnderecoWebService = $objConfiguracaoModPEN->getValor("PEN", "WebService");
+	  $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+	  $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
+	  $numTentativasErro = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, self::WS_TENTATIVAS_ERRO);
+	  $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
+  
+	  $this->strEnderecoWebService = $strEnderecoWebService;
+	  $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
+	  $this->strLocalCert = $strLocalizacaoCertificadoDigital;
+	  $this->strLocalCertPassword = $strSenhaCertificadoDigital;
+	  $this->numTentativasErro = $numTentativasErro;
+  
+	  $this->options = array(
+		'soap_version' => SOAP_1_1
+		, 'local_cert' => $this->strLocalCert
+		, 'passphrase' => $this->strLocalCertPassword
+		, 'resolve_wsdl_remote_includes' => true
+		, 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
+		, 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
+		, 'encoding' => 'UTF-8'
+		, 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
+		, 'ssl' => array(
+		  'allow_self_signed' => true,
+		)
+	  );
+  
+  
+	  // TODO: lembrar de pegar url dinamicamente quando SOAP for removido
+	  $this->strBaseUri = 'https://homolog.api.processoeletronico.gov.br';
+	  $this->arrheaders = [
+		'Accept' => '*/*',
+		'Content-Type' => 'application/json',
+	  ];
+	
+	  $this->strClientGuzzle = new GuzzleHttp\Client([
+		'base_uri' => $this->strBaseUri,
+		'timeout'  => 5.0,
+		'headers'  => $this->arrheaders,
+		'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+	  ]);
+	}
 
-      $this->options = array(
-          'soap_version' => SOAP_1_1
-          , 'local_cert' => $this->strLocalCert
-          , 'passphrase' => $this->strLocalCertPassword
-          , 'resolve_wsdl_remote_includes' => true
-          , 'connection_timeout' => self::WS_TIMEOUT_CONEXAO
-          , 'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP
-          , 'encoding' => 'UTF-8'
-          , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
-          , 'ssl' => array(
-              'allow_self_signed' => true,
-          )
-      );
-  }
 
-
-  protected function inicializarObjInfraIBanco()
-    {
-      return BancoSEI::getInstance();
-  }
+	protected function inicializarObjInfraIBanco()
+	{
+	  return BancoSEI::getInstance();
+	}
 
 
     /**
@@ -2381,5 +2402,61 @@ class ProcessoEletronicoRN extends InfraRN
         }
       }
       return $arrIdDocumentos;
-  }
+    }
+
+	/**
+	 * Consulta as estruturas de um repositório de estruturas.
+	 *
+	 * @param int $idRepositorioEstrutura O ID do repositório de estruturas.
+	 * @param array $parametros Parâmetros adicionais para a consulta.
+	 * @throws InfraException Falha na obtenção de unidades externas.
+	 * @return array
+	 */
+	public function consultarEstruturas($idRepositorioEstrutura, $parametros = [])
+	{
+		$endpoint = "/interoperabilidade/rest/v3/repositorios-de-estruturas/{$idRepositorioEstrutura}/estruturas-organizacionais";
+		try {
+			$arrResultado = $this->get($endpoint, $parametros);
+			return $arrResultado;
+		} catch (Exception $e) {
+			$mensagem = "Falha na obtenção de unidades externas";
+			$detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+			throw new InfraException($mensagem, $e, $detalhes);
+	    }
+	}
+
+    /**
+     * Iniciar requisição HTTP utilizado para comunicação Webservice REST
+   	 *
+     */
+	private function getArrPenWsRest($method, $endpoint, $options = []) 
+	{
+		try {
+			$arrResultado = $this->strClientGuzzle->request($method, $endpoint, $options);
+			return json_decode($arrResultado->getBody(), true);
+		} catch (RequestException $e) {
+			$statusCode = $e->hasResponse() ? $e->getResponse()->getStatusCode() : 0;
+			return [
+			  'error' => true,
+			  'status_code' => $statusCode,
+			  'message' => $e->getMessage()
+			];
+	  	}
+	}
+  
+	private function get($endpoint, $params = []) {
+	  return $this->getArrPenWsRest('GET', $endpoint, ['query' => $params]);
+	}
+  
+	private function post($endpoint, $data = []) {
+	  return $this->getArrPenWsRest('POST', $endpoint, ['json' => $data]);
+	}
+  
+	private function put($endpoint, $data = []) {
+	  return $this->getArrPenWsRest('PUT', $endpoint, ['json' => $data]);
+	}
+  
+	private function delete($endpoint, $params = []) {
+	  return $this->getArrPenWsRest('DELETE', $endpoint, ['query' => $params]);
+	}
 }
