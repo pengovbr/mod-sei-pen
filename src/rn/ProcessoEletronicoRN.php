@@ -197,41 +197,37 @@ class ProcessoEletronicoRN extends InfraRN
      * @param int $numIdentificacaoDoRepositorioDeEstruturas Código de identificação do repositório de estruturas do PEN
      * @return void
      */
-  public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
-    {
-      $objRepositorioDTO = null;
-    try{
-        $parametros = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura = new stdClass();
-        $parametros->filtroDeConsultaDeRepositoriosDeEstrutura->ativos = false;
+	/**
+	 * Consulta a lista de repositório de estruturas disponíveis no Barramento de Serviços do PEN
+	 *
+	 * @param int $numIdentificacaoDoRepositorioDeEstruturas Código de identificação do repositório de estruturas do PEN
+	 */
+	public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
+	{
+		$objRepositorioDTO = null;
+		$endpoint = "/interoperabilidade/rest/v3/repositorios-de-estruturas/{$numIdentificacaoDoRepositorioDeEstruturas}/estruturas-organizacionais";
+		try {
+			$parametros = [
+				'ativo' => true
+			];
+			$arrResultado = $this->get($endpoint, $parametros);
 
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarRepositoriosDeEstruturas($parametros);
-        });
+			if (isset($arrResultado)) {
+				foreach ($arrResultado as $repositorio) {
+					$objRepositorioDTO = new RepositorioDTO();
+					$objRepositorioDTO->setNumId($repositorio['id']);
+					$objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio['nome'], 'UTF-8'));
+					$objRepositorioDTO->setBolAtivo($repositorio['ativo']);
+				}
+			}
+		} catch (Exception $e) {
+			$mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+			$detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+			throw new InfraException($mensagem, $e, $detalhes);
+		}
 
-      if(isset($result->repositoriosEncontrados->repositorio)){
-
-        if(!is_array($result->repositoriosEncontrados->repositorio)) {
-            $result->repositoriosEncontrados->repositorio = array($result->repositoriosEncontrados->repositorio);
-        }
-
-        foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
-          if($repositorio->id == $numIdentificacaoDoRepositorioDeEstruturas){
-                $objRepositorioDTO = new RepositorioDTO();
-                $objRepositorioDTO->setNumId($repositorio->id);
-                $objRepositorioDTO->setStrNome(utf8_decode($repositorio->nome));
-                $objRepositorioDTO->setBolAtivo($repositorio->ativo);
-          }
-        }
-      }
-    } catch(Exception $e){
-        $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-
-      return $objRepositorioDTO;
-  }
+		return $objRepositorioDTO;
+	}
 
     /**
      * Lista todo os repositórios de estruturas disponíveis no Barramento de Serviços do PEN
