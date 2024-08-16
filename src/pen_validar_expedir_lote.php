@@ -16,6 +16,23 @@ try {
       throw new InfraException('Nenhum procedimento foi informado', 'Desconhecido');
   }    
 
+  $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+  $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigem);
+  if ($objInfraException->contemValidacoes()) {
+    $arrErros = array();
+    foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+      $strAtributo = $objInfraValidacao->getStrAtributo();
+      if (!array_key_exists($strAtributo, $arrErros)) {
+        $arrErros[$strAtributo] = array();
+      }
+      $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+    }
+
+    $arrResponse['erros'] = $arrErros;
+    print json_encode($arrResponse);
+    exit(0);
+  }
+
   foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
 
       $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();

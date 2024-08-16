@@ -2842,6 +2842,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
+    $objReceberProcessosPEN->setBolExclusaoLogica(false);
     $objReceberProcessosPEN->retTodos();
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) > 0) {
       $objReceberProcessosPEN->retTodos();
