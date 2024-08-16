@@ -549,7 +549,7 @@ class PenBlocoProcessoRN extends InfraRN
    * @param int $idBloco
    * @throws InfraException
    */
-  public function atualizarEstadoDoBloco(int $idBloco)
+  public function atualizarEstadoDoBloco($idBloco)
   {
     $blocoResultado = $this->buscarBloco($idBloco);
 
