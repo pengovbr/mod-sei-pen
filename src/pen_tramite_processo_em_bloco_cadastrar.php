@@ -47,17 +47,19 @@ try {
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
         $objPenBlocoProcessoDTO->setDblIdProtocolo($_GET['id_procedimento']);
         $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objPenBlocoProcessoDTO->setNumIdAndamento(
-          array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE),
-          InfraDTO::$OPER_NOT_IN
-        );
+        $objPenBlocoProcessoDTO->retNumIdAndamento();
         $objPenBlocoProcessoDTO->retDblIdProtocolo();
         $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
         $objPenBlocoProcessoDTO->retNumIdBloco();
-
+ 
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
         $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-        $objPenBlocoProcessoRN->excluir($arrObjPenBlocoProcessoDTO);
+        foreach($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO){
+          if($objPenBlocoProcessoDTO->getNumIdAndamento() != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE){
+            $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
+          }
+        }
+
         $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {
         $strMensagem = $e->getMessage();
