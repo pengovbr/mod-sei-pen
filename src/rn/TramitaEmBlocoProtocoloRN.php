@@ -71,8 +71,8 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
         $objPenLoteProcedimentoDTO->retDthRegistro();
         $objPenLoteProcedimentoDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
 
-        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-        $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarLoteProcedimento($objPenLoteProcedimentoDTO);
+        $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+        $objPenLoteProcedimentoRN = $objPenLoteProcedimentoRN->listarProtocolosBloco($objPenLoteProcedimentoDTO);
 
         $dto->setObjPenLoteProcedimentoDTO($objPenLoteProcedimentoRN);
 
@@ -386,60 +386,110 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
 
   /**
    * Atualizar Bloco  de tramite externo para concluído
+   *
+   * @param int $idBloco
+   * @throws InfraException
    */
-  public function atualizarEstadoDoBloco(TramitaEmBlocoProtocoloDTO $tramiteEmBlocoProtocoloDTO, $novoEstadoDoBloco)
+  public function atualizarEstadoDoBloco(int $idBloco)
   {
-    // Verificar se tem existe processo recusado dentro de um bloco
-    $objTramiteEmBlocoProtocoloDTO2 = new TramitaEmBlocoProtocoloDTO();
-    $objTramiteEmBlocoProtocoloDTO2->setNumIdTramitaEmBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
-    $objTramiteEmBlocoProtocoloDTO2->retNumIdTramitaEmBloco();
-    $objTramiteEmBlocoProtocoloDTO2->retDblIdProtocolo();
+    $blocoResultado = $this->buscarBloco($idBloco);
 
-    $objTramiteEmBlocoProtocoloDTORN = new TramitaEmBlocoProtocoloRN($objTramiteEmBlocoProtocoloDTO2);
+    if ($blocoResultado != null) {
+      $arrObjTramiteEmBlocoProtocoloDTO = $this->buscarBlocoProcessos($idBloco);
+      
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $idAndamentoBloco = TramiteEmBlocoRN::$TE_ABERTO;
+      if (count($arrObjTramiteEmBlocoProtocoloDTO) > 0) {
+        $idAndamentoBloco = $this->validarStatusProcessoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $idAndamentoBloco);
+        $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
+      } else {
+        $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
+      }
 
-    $arrTramiteEmBlocoProtocolo = $objTramiteEmBlocoProtocoloDTORN->listar($objTramiteEmBlocoProtocoloDTO2);
+      $objTramiteEmBlocoDTO->setNumId($idBloco);
 
-    $objPenProtocolo = new PenProtocoloDTO();
-    $objPenProtocolo->setDblIdProtocolo(InfraArray::converterArrInfraDTO($arrTramiteEmBlocoProtocolo, 'IdProtocolo'), InfraDTO::$OPER_IN);
-    $objPenProtocolo->setStrSinObteveRecusa('S');
-    $objPenProtocolo->setNumMaxRegistrosRetorno(1);
-    $objPenProtocolo->retDblIdProtocolo();
-
-    $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-    $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
-
-    if ($ObjPenProtocoloDTO != null) {
-      return null;
-    }
-    // não atualizar para concluido quando o bloco estiver em concluido parcialmente
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado([
-      TramiteEmBlocoRN::$TE_ABERTO,
-      TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
-    ], InfraDTO::$OPER_IN);
-    $objTramiteEmBlocoDTO->retNumId();
-    $objTramiteEmBlocoDTO->retStrStaEstado();
-    
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
-    
-    if ($objTramiteEmBlocoDTO != null) {
-      $objTramiteEmBlocoDTO->setStrStaEstado($novoEstadoDoBloco);
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
       $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
     }
   }
 
   /**
-   * Atualizar Bloco  de tramite externo para concluído parcialmente
+   * Busca um bloco pelo ID
+   *
+   * @param int $dblIdBloco
    */
-  public function atualizarEstadoDoBlocoConcluidoParcialmente($arrTramiteEmBlocoProtocoloDTO)
+  private function buscarBloco($idBloco)
   {
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($arrTramiteEmBlocoProtocoloDTO[0]->getNumIdBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+    $objTramiteEmBlocoDTO->setNumId($idBloco);
+    $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retStrStaEstado();
 
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+
+    return $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+  }
+
+  /**
+   * Busca todos os processos de um bloco
+   *
+   * @param int $dblIdBloco
+   */
+  private function buscarBlocoProcessos($idBloco)
+  {
+    $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
+    $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($idBloco);
+    $objTramiteEmBlocoProtocoloDTO->retNumIdAndamento();
+    $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
+
+    $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+
+    return $tramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+  }
+
+  /**
+   * Valida o status do processo para o bloco
+   *
+   * @param array $arrObjTramiteEmBlocoProtocoloDTO
+   * @param int $idAndamentoBloco
+   */
+  private function validarStatusProcessoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $idAndamentoBloco)
+  {
+    $concluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+    $parcialmenteConcluido = array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+    );
+    $emAndamento = array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
+    );
+    foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
+      if (
+        in_array($objDTO->getNumIdAndamento(), $emAndamento)
+        && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE
+      ) {
+        $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
+      }
+      if (in_array($objDTO->getNumIdAndamento(), $parcialmenteConcluido)) {
+        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE;
+      }
+      if (
+        $objDTO->getNumIdAndamento() == $concluido
+        && (
+          $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
+          || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
+        )
+      ) {
+        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
+      }
+    }
+
+    return $idAndamentoBloco;
   }
 }

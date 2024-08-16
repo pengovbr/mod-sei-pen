@@ -143,6 +143,7 @@ class ReceberReciboTramiteRN extends InfraRN
           // Atualizar Bloco para concluido parcialmente
           $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
           $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objTramiteEmBlocoProtocoloDTO->retTodos();
 
@@ -154,7 +155,9 @@ class ReceberReciboTramiteRN extends InfraRN
               $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE);
               $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
             }
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($arrTramiteEmBlocoProtocolo[0], TramiteEmBlocoRN::$TE_CONCLUIDO);
+            
+            $idBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdBloco();
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($idBloco);
           }
 
           $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());
