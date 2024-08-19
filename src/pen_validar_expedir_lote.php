@@ -58,11 +58,9 @@ try {
         $objInfraException->adicionarValidacao('Informe Unidade de destino', $strProtocoloFormatado);
     }
 
-    if(!$objInfraException->contemValidacoes()) {
-        $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
-        $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
-        $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
-    }
+    $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
+    $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
+    $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
   }
 }
 catch(\InfraException $e) {
@@ -71,21 +69,20 @@ catch(\InfraException $e) {
     LogSEI::getInstance()->gravar($strmensagemErro);
 }
 
-if($objInfraException->contemValidacoes()) {
+if ($objInfraException->contemValidacoes()) {
 
-    $arrErros = array();
-  foreach($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
-      $strAtributo = $objInfraValidacao->getStrAtributo();
-    if(!array_key_exists($strAtributo, $arrErros)){
-        $arrErros[$strAtributo] = array();
+  $arrErros = array();
+  foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+    $strAtributo = $objInfraValidacao->getStrAtributo();
+    if (!array_key_exists($strAtributo, $arrErros)) {
+      $arrErros[$strAtributo] = array();
     }
-      $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+    $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
   }
 
-    $arrResponse['erros'] = $arrErros;
-}
-else {
-    $arrResponse['sucesso'] = true;
+  $arrResponse['erros'] = $arrErros;
+} else {
+  $arrResponse['sucesso'] = true;
 }
 
 print json_encode($arrResponse);
