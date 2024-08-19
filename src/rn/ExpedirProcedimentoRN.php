@@ -2646,6 +2646,45 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
+    public function validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigem)
+    {
+      foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
+
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
+
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+
+        if (empty($objProcedimentoDTO)) {
+          throw new InfraException('Procedimento ' . $strProtocoloFormatado . ' não foi localizado', 'Desconhecido');
+        }
+
+        $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
+        $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
+        $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
+      }
+    }
+
+    public function trazerTextoSeContemValidacoes($objInfraException)
+    {
+      if ($objInfraException->contemValidacoes()) {
+        $arrErros = array();
+        $message = "";
+        foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+          $strAtributo = $objInfraValidacao->getStrAtributo();
+          if (!array_key_exists($strAtributo, $arrErros)) {
+            $arrErros[$strAtributo] = array();
+          }
+          $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+          $message .= $objInfraValidacao->getStrDescricao() . "\n";
+        }
+
+        return $message;
+      }
+
+      return null;
+    }
+
     private function obterNivelSigiloPEN($strNivelSigilo)
       {
       switch ($strNivelSigilo) {

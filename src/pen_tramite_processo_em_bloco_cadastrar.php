@@ -159,6 +159,22 @@ try {
             exit(0);
           }
 
+          $objInfraException = new InfraException();
+          $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigemProtocolo);
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            break;
+          }
+
+          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigemProtocolo);
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            break;
+          }
+
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
             $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
             $objPenBlocoProcessoDTO->setDblIdProtocolo($idItensSelecionados);
