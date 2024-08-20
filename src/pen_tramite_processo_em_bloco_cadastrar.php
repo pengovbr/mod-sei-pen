@@ -188,6 +188,25 @@ try {
             header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
             exit(0);
           }
+         
+          //Verifica processo aberto em outra unidade.
+          $objInfraException = new InfraException();
+          $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($_GET['id_procedimento']));
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);
+          }
+
+          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($_GET['id_procedimento']));
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);
+          }          
 
           $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
           $strMensagem = 'Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco';
@@ -225,23 +244,7 @@ try {
 
             header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao']));
             exit(0);
-          }
-
-          $objInfraException = new InfraException();
-          $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigemProtocolo);
-          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
-          if (!is_null($mensagemDeErro)) {
-            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
-            break;
-          }
-
-          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigemProtocolo);
-          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
-          if (!is_null($mensagemDeErro)) {
-            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
-            break;
-          }
+          }         
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
             $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
@@ -257,15 +260,31 @@ try {
 
             $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
 
-            if ($validar == false) {
+            if ($validar != false){
+              $erros = true;              
+              $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);            
+              break;
+            }else{
+              $objInfraException = new InfraException();
+              $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+              $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($idItensSelecionados));
+              $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+              if (!is_null($mensagemDeErro)) {
+                $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+                break;
+              }
+  
+              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($idItensSelecionados));
+              $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+              if (!is_null($mensagemDeErro)) {
+                $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+                break;
+              }
               $sucesso = true;
               $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
-            } else {
-              $erros = true;
-              $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
             }
           }
-
+          
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
           $objTramiteEmBlocoDTO->setNumId($idBlocoExterno);
           $objTramiteEmBlocoDTO->retNumOrdem();       
