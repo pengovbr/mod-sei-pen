@@ -1665,9 +1665,10 @@ class ExpedirProcedimentoRN extends InfraRN {
       }else{
           $dados = $objEditorDTO;
       }
-
+      $bolSessao = SessaoSEI::getInstance()->isBolHabilitada();
+      SessaoSEI::getInstance()->setBolHabilitada(false);
       $strResultado = $objEditorRN->consultarHtmlVersao($dados);
-
+      SessaoSEI::getInstance()->setBolHabilitada($bolSessao);
       if(!empty($arrSiglaOrgaoLegado)){
           $alterarTitle = true;
 
