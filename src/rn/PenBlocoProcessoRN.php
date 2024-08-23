@@ -489,6 +489,7 @@ class PenBlocoProcessoRN extends InfraRN
     $tramiteEmBlocoDTO->retStrDescricao();
     $tramiteEmBlocoDTO->retStrStaEstado();
     $tramiteEmBlocoDTO->retNumId();
+    $tramiteEmBlocoDTO->retNumOrdem(); 
 
     $tramiteEmBlocoRN = new TramiteEmBlocoRN();
     $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);

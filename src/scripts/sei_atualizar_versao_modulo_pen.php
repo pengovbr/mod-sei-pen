@@ -3091,8 +3091,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenBlocoProcessoDTO->setNumIdUsuario($blocoTramite['id_usuario_gerador']);
         $objPenBlocoProcessoDTO->setNumIdUnidade($blocoTramite['id_unidade_geradora']);
 
-        $numIdAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-        if ($blocoTramite['sta_estado'] != TramiteEmBlocoRN::$TE_CONCLUIDO) {
+        $numIdAndamento = null;
+        if ($blocoTramite['sta_estado'] != TramiteEmBlocoRN::$TE_ABERTO) {
           $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo']);
         }
         $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
