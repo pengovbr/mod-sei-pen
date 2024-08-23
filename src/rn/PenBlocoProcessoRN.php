@@ -317,29 +317,24 @@ class PenBlocoProcessoRN extends InfraRN
     }
   }
 
-  /**
-   * Método utilizado para exclusão de dados.
-   * @param array $arrayObjDTO
-   * @return array
-   * @throws InfraException
-   */
   protected function excluirControlado(array $arrayObjDTO)
   {
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_excluir', __METHOD__, $arrayObjDTO);
 
-      $arrayExcluido = array();
+      $arrExcluido = array();
+
+      $arrPodeExcluir = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      );
 
       foreach ($arrayObjDTO as $objDTO) {
+
         $objBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-
-        $objPenProtocoloDTO = new PenProtocoloDTO();
-        $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
-        $objPenProtocoloDTO->retStrSinObteveRecusa();
-
-        $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-        $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
         $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
         $tramiteEmBlocoDTO->setNumId($objDTO->getNumIdBloco());
@@ -355,26 +350,21 @@ class PenBlocoProcessoRN extends InfraRN
           continue;
         }
 
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
-        $objAtividadeDTO->setNumIdTarefa([
-          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
-          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
-          ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)
-        ], InfraDTO::$OPER_IN);
-        $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-        $objAtividadeDTO->retNumIdAtividade();
-        $objAtividadeDTO->retNumIdTarefa();
-        $objAtividadeDTO->retDblIdProcedimentoProtocolo();
-        $objAtividadeRN = new AtividadeRN();
-        $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+        $objPenProtocoloDTO = new PenBlocoProcessoDTO();
+        $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+        $objPenProtocoloDTO->retNumIdAndamento();
+        $objPenProtocoloDTO->retDblIdProtocolo();
+        $objPenProtocoloDTO->setNumIdAndamento($arrPodeExcluir, InfraDTO::$OPER_IN);
 
-        if ($objAtividadeDTO != null) {
-          $arrayExcluido[] = $objBD->excluir($objDTO);
-        }
+        $objPenProtocoloDTO = $this->consultar($objPenProtocoloDTO);
+
+        if ($objPenProtocoloDTO != null) {
+          $arrExcluido[] = $objBD->excluir($objDTO);
+          continue;
+        }  
       }
-      return $arrayExcluido;
+
+      return $arrExcluido;
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo Bloco.', $e);
     }

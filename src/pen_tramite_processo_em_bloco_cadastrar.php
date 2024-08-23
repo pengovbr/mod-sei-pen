@@ -177,6 +177,7 @@ try {
           $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
           $dthRegistro = date('d/m/Y H:i:s');
           $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
+          // $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
           $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
           $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
           $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -231,8 +232,8 @@ try {
       if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
 
         try {
-          $erros = [];
-          $sucesso = false;
+          $bolInclusaoSucesso = false;
+          $arrMensagensErros = [];
           $arrProtocolosOrigemProtocolo = explode(',', $strIdItensSelecionados);
 
           // Refatorar validarQuantidadeDeItensNoBloco
@@ -247,55 +248,66 @@ try {
           }         
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
+            $bolInclusaoErro = false;
             $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
             $objPenBlocoProcessoDTO->setDblIdProtocolo($idItensSelecionados);
             $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
             $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
             $objPenBlocoProcessoDTO->retNumIdBloco();
+            // $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
             $dtRegistro = date('d/m/Y H:i:s');
             $objPenBlocoProcessoDTO->setDthRegistro($dtRegistro);
             $objPenBlocoProcessoDTO->setDthAtualizado($dtRegistro);
             $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
             $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-            $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
+            $validarPreCondicoesIncluir = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
 
-            if ($validar != false){
-              $erros = true;              
-              $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);            
-              break;
+            if ($validarPreCondicoesIncluir != false) {
+              $bolInclusaoErro = true;
+              $arrMensagensErros[] = $validarPreCondicoesIncluir;                   
             }else{
               $objInfraException = new InfraException();
               $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
               $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($idItensSelecionados));
               $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
               if (!is_null($mensagemDeErro)) {
-                $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
-                break;
+                $bolInclusaoErro = true;
+                $arrMensagensErros[] = $mensagemDeErro;
               }
   
               $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($idItensSelecionados));
               $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
               if (!is_null($mensagemDeErro)) {
-                $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
-                break;
+                $bolInclusaoErro = true;
+                $arrMensagensErros[] = $mensagemDeErro;
               }
-              $sucesso = true;
-              $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+
+              if ($bolInclusaoErro === false) {
+                $bolInclusaoSucesso = true;
+                $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+              }
+             
             }
           }
-          
+
+          if (!empty($arrMensagensErros)) {
+            foreach ($arrMensagensErros as $mensagemErro) {
+              $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
+            }
+          }
+            
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
           $objTramiteEmBlocoDTO->setNumId($idBlocoExterno);
           $objTramiteEmBlocoDTO->retNumOrdem();       
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
           $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
 
-          if ($sucesso) {
+          if ($bolInclusaoSucesso) {
             $mensagemSucesso = "Processo(s) incluído(s) com sucesso no bloco {$blocoResultado->getNumOrdem()}";
           }
 
-          if ($sucesso && $erros) {
+          if ($bolInclusaoSucesso && !empty($arrMensagensErros)) {
             $mensagemSucesso = "Os demais processos selecionados foram incluídos com sucesso no bloco {$blocoResultado->getNumOrdem()}";
           }
 

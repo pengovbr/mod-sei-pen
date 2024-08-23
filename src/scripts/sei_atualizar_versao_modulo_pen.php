@@ -2867,6 +2867,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $sql = "SELECT DISTINCT
           mpb.id as id_bloco,
+          mpb.sta_estado,
           mpbp.id_protocolo,
           p.protocolo_formatado,
           mpb.id_unidade as id_unidade_geradora,
@@ -2931,17 +2932,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaDTO->setStrNome('md_pen_seq_bloco_processo');
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
+    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);    
 
     // Atualizar md_pen_bloco_processo->ordem para 1
-    $objInfraBanco->executarSql('delete from md_pen_bloco_processo');
+    $objInfraBanco->executarSql('delete from md_pen_bloco_processo');   
 
     $this->atualizarBlocosLegado($blocosTramite);
 
-    // Atualizar md_pen_bloco_processo->ordem para 1
     $objInfraBanco->executarSql('update md_pen_bloco set ordem=1');
-
-    $this->atualizarLotesLegados($lotesVazios);
 
     $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
 
@@ -3093,7 +3091,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenBlocoProcessoDTO->setNumIdUsuario($blocoTramite['id_usuario_gerador']);
         $objPenBlocoProcessoDTO->setNumIdUnidade($blocoTramite['id_unidade_geradora']);
 
-        $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo']);
+        $numIdAndamento = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+        if ($blocoTramite['sta_estado'] != TramiteEmBlocoRN::$TE_CONCLUIDO) {
+          $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo']);
+        }
         $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
 
         if (!is_null($blocoTramite['id_atividade_expedicao'])) {
@@ -3132,51 +3133,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
   }
 
-  /**
-   * Atualiza os lotes legados
-   *
-   * @param array $lotesVazios
-   * @return void
-   */
-  private function atualizarLotesLegados($lotesVazios)
-  {
-    if (!empty($lotesVazios)) {
-      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-      $dthRegistro = date('d/m/Y H:i:s');
-      $arrIdProcedimento = array();
-      foreach ($lotesVazios as $loteVazio) {
-        if (in_array($loteVazio['id_procedimento'], $arrIdProcedimento)) {
-          continue;
-        }
-
-        $objTramiteEmBlocoDTO = $this->cadastrarBlocoGenerico($loteVazio['id_unidade'], $loteVazio['id_usuario']);
-        $numIdAndamento = $this->buscarIdAndamento($loteVazio['id_procedimento']);
-
-        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setNumIdUsuario($loteVazio['id_usuario']);
-        $objPenBlocoProcessoDTO->setNumIdUnidade($loteVazio['id_unidade']);
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($loteVazio['id_procedimento']);
-        $objPenBlocoProcessoDTO->setNumTentativas($loteVazio['tentativas'] ?: 0);
-        $objPenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBlocoDTO->getNumId());
-        if (!is_null($numIdAndamento)) {
-          $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
-        }
-        $objPenBlocoProcessoDTO->setNumIdAtividade($loteVazio['id_atividade_expedicao']);
-        $objPenBlocoProcessoDTO->setNumIdRepositorioOrigem($loteVazio['id_repositorio_origem']);
-        $objPenBlocoProcessoDTO->setNumIdUnidadeOrigem($loteVazio['id_unidade_origem']);
-        $objPenBlocoProcessoDTO->setNumIdRepositorioDestino($loteVazio['id_repositorio_destino']);
-        $objPenBlocoProcessoDTO->setStrRepositorioDestino($loteVazio['str_repositorio_destino']);
-        $objPenBlocoProcessoDTO->setNumIdUnidadeDestino($loteVazio['id_unidade_destino']);
-        $objPenBlocoProcessoDTO->setStrUnidadeDestino($loteVazio['str_unidade_destino']);
-        $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
-        $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
-
-        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
-        
-        $arrIdProcedimento[] = $loteVazio['id_procedimento'];
-      }
-    }
-  }
 
   /**
    * Retorna o id do andamento do protocolo informado
@@ -3230,14 +3186,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     
     switch ($numIdAndamento) {
       case $processoConcluidoAvulso:
-      case $processoTramiteExpedido:
-      case $processoConcluidoRecebido:
+      case $processoTramiteExpedido:      
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
       case $processoTramiteProcessamento:
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO;
       case $processoTramiteCancelado:
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
       case $processoTramiteAberto:
+      case $processoConcluidoRecebido:      
       default:
           return null;
     }
@@ -3334,3 +3290,4 @@ try {
 
   exit(1);
 }
+
