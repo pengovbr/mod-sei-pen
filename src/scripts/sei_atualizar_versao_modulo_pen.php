@@ -2946,19 +2946,33 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     //Remover blocos sem nenhum processo vinculado
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->retNumId();
-
+    $objTramiteEmBlocoDTO->retStrStaEstado();
+    
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
     $arrObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
     if (!is_null($arrObjTramiteEmBlocoDTO)) {
       foreach($arrObjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
+
+        //Remover blocos sem nenhum processo vinculado
         $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
         $objPenBlocoProcessoDTO->setNumIdBloco($tramiteEmBlocoDTO->getNumId());
         $objPenBlocoProcessoDTO->retTodos();
 
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-        if ($objPenBlocoProcessoDTO == null) {
+        $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        if ($arrPenBlocoProcessoDTO == null) {
           $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
+        }
+
+        //Verificar se todos os processos de um bloco concluído na 3.6.2 foram concluídos
+        $staEstado = $tramiteEmBlocoDTO->getStrStaEstado();
+        if ($staEstado == TramiteEmBlocoRN::$TE_CONCLUIDO) {
+          $bolVeriicarStatusDiferenteDeSucesso = $this->verificarIdAndamentoConcluido($arrPenBlocoProcessoDTO);
+          if (!empty($bolVeriicarStatusDiferenteDeSucesso)) {
+            $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoDTO->getNumId());
+            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
+            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+          }
         }
       }
     }
@@ -3093,7 +3107,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         $numIdAndamento = null;
         if ($blocoTramite['sta_estado'] != TramiteEmBlocoRN::$TE_ABERTO) {
-          $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo']);
+          $numIdAndamento = $this->buscarIdAndamento($blocoTramite['id_protocolo'], $blocoTramite['sta_estado']);
         }
         $objPenBlocoProcessoDTO->setNumIdAndamento($numIdAndamento);
 
@@ -3133,6 +3147,16 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
   }
 
+  private function verificarIdAndamentoConcluido($arrPenBlocoProcessoDTO) 
+  {
+    $arrIdAndamentoProcesso = InfraArray::converterArrInfraDTO($arrPenBlocoProcessoDTO, 'IdAndamento', 'IdAndamento');
+
+    $bolVeriicarStatusDiferenteDeSucesso = array_filter($arrIdAndamentoProcesso, function($valor) {
+      return $valor != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+    });
+
+    return !empty($bolVeriicarStatusDiferenteDeSucesso);
+  }
 
   /**
    * Retorna o id do andamento do protocolo informado
@@ -3140,7 +3164,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
    * @param int $idProtocolo
    * @return int
    */
-  private function buscarIdAndamento($idProtocolo)
+  private function buscarIdAndamento($idProtocolo, $staBloco)
   {
     $objPenProtocoloDTO = new PenProtocoloDTO();
     $objPenProtocoloDTO->setDblIdProtocolo($idProtocolo);
@@ -3192,8 +3216,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO;
       case $processoTramiteCancelado:
           return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
+      case $processoConcluidoRecebido:
+        if ($staBloco == TramiteEmBlocoRN::$TE_ABERTO) {
+          return null;
+        } else {
+          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+        }
       case $processoTramiteAberto:
-      case $processoConcluidoRecebido:      
       default:
           return null;
     }
