@@ -64,15 +64,21 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
     protected function cadastrarDocumentoInternoFixture($dadosDocumentoInterno, $idProtocolo)
     {
-        $objDocumentoFixture = new DocumentoFixture();
-        $objDocumentoDTO = $objDocumentoFixture->carregar([
+        $dadosDocumentoDTO = [
             'IdProtocolo' => $idProtocolo,
             'IdProcedimento' => $idProtocolo,
             'Descricao' => $dadosDocumentoInterno['DESCRICAO'],
             'IdHipoteseLegal' => $dadosDocumentoInterno["HIPOTESE_LEGAL"] ?: null,
             'StaNivelAcessoGlobal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
             'StaNivelAcessoLocal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
-        ]);
+        ];
+
+        if ($serieDTO = $this->buscarIdSerieDoDocumento($dadosDocumentoInterno['TIPO_DOCUMENTO'])) {
+            $dadosDocumentoDTO['IdSerie'] = $serieDTO->getNumIdSerie();
+        }
+
+        $objDocumentoFixture = new DocumentoFixture();
+        $objDocumentoDTO = $objDocumentoFixture->carregar($dadosDocumentoDTO);
 
         //Adicionar assinatura ao documento
         $objAssinaturaFixture = new AssinaturaFixture();
@@ -85,15 +91,21 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
     protected function cadastrarDocumentoExternoFixture($dadosDocumentoExterno, $idProtocolo)
     {
-        $objDocumentoFixture = new DocumentoFixture();
-        $objDocumentoDTO = $objDocumentoFixture->carregar([
+        $dadosDocumentoDTO = [
             'IdProtocolo' => $idProtocolo,
             'IdProcedimento' => $idProtocolo,
             'Descricao' => $dadosDocumentoExterno['DESCRICAO'],
             'StaProtocolo' => \ProtocoloRN::$TP_DOCUMENTO_RECEBIDO,
             'StaDocumento' => \DocumentoRN::$TD_EXTERNO,
             'IdConjuntoEstilos' => NULL,
-        ]);
+        ];
+
+        if ($serieDTO = $this->buscarIdSerieDoDocumento($dadosDocumentoExterno['TIPO_DOCUMENTO'])) {
+            $dadosDocumentoDTO['IdSerie'] = $serieDTO->getNumIdSerie();
+        }
+
+        $objDocumentoFixture = new DocumentoFixture();
+        $objDocumentoDTO = $objDocumentoFixture->carregar($dadosDocumentoDTO);
 
         //Adicionar anexo ao documento
         $objAnexoFixture = new AnexoFixture();
@@ -127,6 +139,16 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdProtocolo' => $protocoloPrincipalId,
             'IdDocumento' => $protocoloProcessoAnexadoId,
         ]);
+    }
+
+    protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
+    {
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloDTO = $objProtocoloFixture->buscar([
+            'ProtocoloFormatado' => $protocoloFormatado,
+            'StaProtocolo' => $staProtocolo ?: \ProtocoloRN::$TP_DOCUMENTO_GERADO,
+        ]);
+        return $objProtocoloDTO;
     }
     
     protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
@@ -216,6 +238,17 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
     public function realizarTramiteExternoSemvalidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario)
     {
         $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, false);
+    }
+
+    protected function buscarIdSerieDoDocumento($tipoDocumento)
+    {
+        $serieDTO = new \SerieDTO();
+        $serieDTO->setStrNome($tipoDocumento);
+        $serieDTO->retNumIdSerie();
+        $serieDTO->setNumMaxRegistrosRetorno(1);
+
+        $objBD = new \SerieBD(\BancoSEI::getInstance());
+        return $objBD->consultar($serieDTO);
     }
 
 }

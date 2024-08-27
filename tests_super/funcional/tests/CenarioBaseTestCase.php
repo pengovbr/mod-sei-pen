@@ -406,7 +406,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(1);
     }
 
-    protected function tramitarProcessoExternamenteGestorNaoResponsavelUnidade ($repositorio, $unidadeDestino, $unidadeDestinoHierarquia) {
+    protected function tramitarProcessoExternamenteGestorNaoResponsavelUnidade ($dados) {
 
         // Acessar funcionalidade de trâmite externo
         try {
@@ -416,14 +416,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
 
         // Preencher parâmetros do trâmite
-        $this->paginaTramitar->repositorio($repositorio);
-        $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
+        $this->paginaTramitar->repositorio($dados['repositorio']);
+        $this->paginaTramitar->unidade($dados['unidadeDestino'], '');
         $this->paginaTramitar->tramitar();
 
-        $callbackEnvio = function ($testCase) {
+        $callbackEnvio = function ($testCase) use ($dados) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemValidacao = utf8_encode('Por favor, observe o seguinte procedimento para realizar o mapeamento adequado: Acesse a funcionalidade Administração, em seguida selecione Tramita GOV.BR e, por fim, proceda ao mapeamento utilizando somente as unidades pertinentes ao seu órgão/entidade na funcionalidade Mapeamento de Unidades. Certifique-se de seguir esse processo para garantir a correta execução do mapeamento.');
+                $mensagemValidacao = utf8_encode('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.');             
                 $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
