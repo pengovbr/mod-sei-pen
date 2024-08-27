@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoGeradoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -30,17 +30,19 @@ class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
+
+        // 1 - Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado(); 
+        
+        // 2 - Incluir Documentos no Processo
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+
+        // 3 - Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-
-        // 4 - Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        // 4 - Abrir processo
+        $this->abrirProcesso(self::$protocoloTeste);
 
         // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(

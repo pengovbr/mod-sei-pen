@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_alone_group5
  */
-class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -34,7 +34,7 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends CenarioBaseT
         self::$destinatario['NOME_UNIDADE'] = self::$remetente['NOME_UNIDADE_SECUNDARIA'];
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'] = self::$remetente['SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'];
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 

@@ -32,7 +32,7 @@ Escopo do caso de teste:
  * Execution Groups
  * @group exxecute_parallel
  */
-class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -47,6 +47,10 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
     public static $documentoTeste5;
     public static $documentoTeste6;
     public static $documentoTeste7;
+    public static $objProtocoloTestePrincipalDTO;
+    public static $objProtocoloTestePrincipalOrg2DTO;
+
+
     
     /*  
     Escopo da função:
@@ -68,27 +72,30 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        // acessar remetente (Órgão 1)
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
         // 1-criar Processo Principal ($processoTestePrincipal) (Órgão 1)
         self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
+        // $this->paginaBase->navegarParaControleProcesso();
+        self::$objProtocoloTestePrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+        self::$protocoloTestePrincipal = self::$objProtocoloTestePrincipalDTO->getStrProtocoloFormatado(); 
 
         // 2-criar Documento Externo (documentoTeste1) no Processo Principal
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, self::$objProtocoloTestePrincipalDTO->getDblIdProtocolo());
 
         // 3-criar Documento Interno (documentoTeste2) no Processo Principal
         self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste2);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, self::$objProtocoloTestePrincipalDTO->getDblIdProtocolo());
 
         // 4-criar Documento Interno (documentoTeste3) no Processo Principal
         self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste3);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste3, self::$objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+
+        // acessar remetente (Órgão 1)
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        
+        // Abrir processo
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         // 5-tramitar Processo Principal para o Órgão 2 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -146,9 +153,11 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
         // 7-criar Processo Secundário ($processoTesteSecundario) (Órgão 2)
+        putenv("DATABASE_HOST=org2-database");
         self::$processoTesteSecundario = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$protocoloTesteSecundario = $this->cadastrarProcesso(self::$processoTesteSecundario);
-    
+        $objProtocoloSecundarioDTO = $this->cadastrarProcessoFixture(self::$processoTesteSecundario);
+        self::$protocoloTesteSecundario = $objProtocoloSecundarioDTO->getStrProtocoloFormatado(); 
+
         // abrir Processo Principal
         $this->abrirProcesso(self::$protocoloTestePrincipal);
         
@@ -166,15 +175,18 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
         $this->paginaDocumento->navegarParaMoverDocumento();
         $this->paginaMoverDocumento->moverDocumentoParaProcesso(self::$protocoloTesteSecundario, "Motivo de teste");
 
+        // Consultar processo org-2
+        self::$objProtocoloTestePrincipalOrg2DTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, $staProtocolo = 'P');
+
         // 10-criar documento externo (documentoTeste4) no Processo Principal
         self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste4);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste4, self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
 
         // 11-criar documento interno (documentoTeste5) no Processo Principal
         self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste5);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste5,self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
+        
+        putenv("DATABASE_HOST=org1-database");
         // 12-tramitar Processo Principal para o Órgão 1 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
@@ -231,8 +243,7 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
 
         // 14-criar documento interno (documentoTeste6) no Processo Principal
         self::$documentoTeste6 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste6);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste6, self::$objProtocoloTestePrincipalDTO->getDblIdProtocolo());
 
         // 15-tramitar Processo Principal para o Órgão 2 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -284,12 +295,13 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends CenarioBaseTestC
         // definir Órgão 1 como destinatário e Órgão 2 como remetente
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // 17-criar documento interno (documentoTeste7) no Processo Principal
         self::$documentoTeste7 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste7);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste7,self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
 
+        putenv("DATABASE_HOST=org1-database");
         // 18-tramitar Processo Principal para o Órgão 1 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
