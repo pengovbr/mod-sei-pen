@@ -6,7 +6,7 @@
  * Execution Groups
  * @group execute_alone_group6
  */
-class TramiteProcessosComDevolucaoAmbosAnexadosTest extends CenarioBaseTestCase
+class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -44,7 +44,7 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTestePrincipal, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTestePrincipal, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTestePrincipal = self::$processoTestePrincipal["PROTOCOLO"];
 
         $this->sairSistema();
@@ -55,7 +55,7 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends CenarioBaseTestCase
         self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste3, self::$documentoTeste4);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTesteAnexado = self::$processoTesteAnexado["PROTOCOLO"];
     }
 
@@ -96,21 +96,30 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Definição de dados de teste do processo principal
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste6 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
+        $objProtocoloAnexadoDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
+        $objProtocoloPrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, \ProtocoloRN::$TP_PROCEDIMENTO);
+        
+        // Cadastra documento Externo ao processo anexado
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloAnexadoDTO->getDblIdProtocolo());
+
+        // Anexa processo ao processo principal
+        $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
+
+        // Cadastra documento Externo ao processo principal
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste6, $objProtocoloPrincipalDTO->getDblIdProtocolo());
+        
+        putenv("DATABASE_HOST=org1-database");
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Incluir novos documentos relacionados no processo anexado
-        $this->abrirProcesso(self::$protocoloTesteAnexado);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
-
         $this->abrirProcesso(self::$protocoloTestePrincipal);
-        $this->anexarProcesso(self::$protocoloTesteAnexado);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste6);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
