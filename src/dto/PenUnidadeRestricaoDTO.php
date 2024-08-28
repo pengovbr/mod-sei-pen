@@ -19,12 +19,12 @@ class PenUnidadeRestricaoDTO extends UnidadeDTO
 
   public function getStrNomeTabela()
   {
-    return 'md_pen_unid_restricao';
+    return 'md_pen_uni_restr';
   }
 
   public function getStrNomeSequenciaNativa()
   {
-    return 'md_pen_seq_unid_restricao';
+    return 'md_pen_seq_uni_restr';
   }
 
   public function montar()
