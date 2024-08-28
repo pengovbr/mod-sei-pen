@@ -2642,7 +2642,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
 
       if ($naoAbertoUnidadeAtual == true) {
-        $objInfraException->adicionarValidacao("Esse é um bloco criado em uma versão anterior do módulo. Portanto, é necessário excluir o(s) processo(s) citado(s) do bloco.");
+        $objInfraException->adicionarValidacao("É necessário excluir o(s) processo(s) citado(s) do bloco.");
       }
     }
 

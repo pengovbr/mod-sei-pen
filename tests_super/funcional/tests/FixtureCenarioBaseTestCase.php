@@ -153,16 +153,6 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdDocumento' => $protocoloProcessoAnexadoId,
         ]);
     }
-
-    protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
-    {
-        $objProtocoloFixture = new ProtocoloFixture();
-        $objProtocoloDTO = $objProtocoloFixture->buscar([
-            'ProtocoloFormatado' => $protocoloFormatado,
-            'StaProtocolo' => $staProtocolo ?: \ProtocoloRN::$TP_DOCUMENTO_GERADO,
-        ]);
-        return $objProtocoloDTO;
-    }
     
     protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
     {
