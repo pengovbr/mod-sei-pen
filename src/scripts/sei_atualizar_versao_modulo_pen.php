@@ -2106,42 +2106,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
     }
 
-    $objMetaBD = $this->objMeta;
-    // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
-    $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
-    $objMetaBD->criarTabela(array(
-      'tabela' => 'md_pen_unid_restricao',
-      'cols' => array(
-        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
-        'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-        'id_unidade_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
-        'nome_unidade_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
-        'id_unidade_rh_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
-        'nome_unidade_rh_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
-      ),
-      'pk' => array('cols' => array('id')),
-      'fks' => array(
-        'unidade' => array('id_unidade', 'id_unidade')
-      )
-    ));
-
-    // Criando nova sequência 
-    $objInfraSequenciaRN = new InfraSequenciaRN();
-    $objInfraSequenciaDTO = new InfraSequenciaDTO();
-
-    //Sequência: md_pen_seq_hipotese_legal
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_unid_restricao');
-    $numMaxId = $rs[0]['total'];
-    if ($numMaxId == null) {
-      $numMaxId = 0;
-    }
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unid_restricao', $numMaxId + 1);
-    $objInfraSequenciaDTO->setStrNome('md_pen_unid_restricao');
-    $objInfraSequenciaDTO->retStrNome();
-    $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
-    $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);
-
     // Remoção de agendamento de tarefas do verificação dos serviços do Barramento por não ser mais necessário
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
     $objInfraAgendamentoTarefaDTO = new InfraAgendamentoTarefaDTO();
@@ -2836,6 +2800,46 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3070()
   {
+    // Criação da tabela restrição
+    $objMetaRestricaoBD = $this->objMeta;
+    // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
+    $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
+    $objMetaRestricaoBD->criarTabela(array(
+      'tabela' => 'md_pen_uni_restr',
+      'cols' => array(
+        'id' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaRestricaoBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+      ),
+      'pk' => array('cols' => array('id')),
+      'fks' => array(
+        'unidade' => array('id_unidade', 'id_unidade')
+      )
+    ));
+    
+
+    // Criando nova sequência 
+    $objInfraSequenciaRestricaoRN = new InfraSequenciaRN();
+    $objInfraSequenciaRestricaoDTO = new InfraSequenciaDTO();
+
+    //Sequência: md_pen_seq_hipotese_legal
+    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_uni_restr');
+    $numMaxId = $rs[0]['total'];
+    if ($numMaxId == null) {
+      $numMaxId = 0;
+    }
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unid_restricao', $numMaxId + 1);
+    $objInfraSequenciaRestricaoDTO->setStrNome('md_pen_uni_restr');
+    $objInfraSequenciaRestricaoDTO->retStrNome();
+    $arrObjInfraSequenciaRestricaoDTO = $objInfraSequenciaRestricaoRN->listar($objInfraSequenciaRestricaoDTO);
+    $objInfraSequenciaRestricaoRN->excluir($arrObjInfraSequenciaRestricaoDTO);
+
+    // FIM da Criação da tabela restrição
+
     $objMetaBD = $this->objMeta;
     $objInfraBanco = BancoSEI::getInstance();
 
@@ -2849,21 +2853,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
       $objInfraAgendamentoTarefaBD->excluir($objReceberProcessosPEN);
     }
-
-    $sql = "SELECT DISTINCT
-          mpel.*,
-          mprel.id_procedimento,
-          p.protocolo_formatado,
-          mprel.id_andamento,
-          mprel.id_atividade_expedicao,
-          mprel.tentativas
-        FROM md_pen_expedir_lote mpel
-        inner join md_pen_rel_expedir_lote mprel on mprel.id_lote = mpel.id_lote
-        inner join protocolo p on p.id_protocolo = mprel.id_procedimento
-        LEFT join md_pen_bloco_protocolo mpbp on mpbp.id_protocolo = mprel.id_procedimento
-        WHERE mpbp.id_tramita_em_bloco is NULL ";
-
-    $lotesVazios = $objInfraBanco->consultarSql($sql);
 
     $sql = "SELECT DISTINCT
           mpb.id as id_bloco,
@@ -2916,8 +2905,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
 
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_procedimento", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bloco", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_proc_procedi", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bl", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
 
     //Adicionar coluna para ordenar blocos por unidade 
     $objMetaBD->adicionarColuna('md_pen_bloco', 'ordem', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
@@ -2995,10 +2984,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $tramiteEmBlocoDTO = $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
     }
 
-    $objMetaBD->removerTabela('md_pen_bloco_protocolo');
-    $objMetaBD->removerTabela('md_pen_seq_bloco_protocolo');
-    $objMetaBD->removerTabela('md_pen_rel_expedir_lote');
-    $objMetaBD->removerTabela('md_pen_seq_expedir_lote');
+    if ($objMetaBD->isTabelaExiste('md_pen_bloco_protocolo')) {
+      $objMetaBD->removerTabela('md_pen_bloco_protocolo');
+    }
+
+    if ($objMetaBD->isTabelaExiste('md_pen_seq_bloco_protocolo')) {
+      $objMetaBD->removerTabela('md_pen_seq_bloco_protocolo');
+    }
+
+    if ($objMetaBD->isTabelaExiste('md_pen_rel_expedir_lote')) {
+      $objMetaBD->removerTabela('md_pen_rel_expedir_lote');
+    }
+
+    if ($objMetaBD->isTabelaExiste('md_pen_seq_expedir_lote')) {
+      $objMetaBD->removerTabela('md_pen_seq_expedir_lote');
+    }
 
     // Adicionar agendamento de atualização de informações de envio
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
