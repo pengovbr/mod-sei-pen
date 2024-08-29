@@ -495,14 +495,24 @@ class PenBlocoProcessoRN extends InfraRN
     $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
     if (!empty($tramiteEmBloco)) {
-      $objPenProtocolo = new PenProtocoloDTO();
-      $objPenProtocolo->setDblIdProtocolo($idProtocolo);
-      $objPenProtocolo->setStrSinObteveRecusa('S');
-      $objPenProtocolo->setNumMaxRegistrosRetorno(1);
-      $objPenProtocolo->retDblIdProtocolo();
 
-      $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
+      $parcialmenteConcluido = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      );
+
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
+      $objPenBlocoProcessoDTO->setNumIdBloco($dblIdbloco);
+      $objPenBlocoProcessoDTO->setNumIdAndamento($parcialmenteConcluido, InfraDTO::$OPER_IN);
+      $objPenBlocoProcessoDTO->retDblIdProtocolo();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
+      $objPenBlocoProcessoDTO->retNumIdAndamento();
+
+      $objPenProtocoloBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenBlocoProcessoDTO);
 
       if ($ObjPenProtocoloDTO != null) {
         return $tramiteEmBloco;
