@@ -2832,7 +2832,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     if ($numMaxId == null) {
       $numMaxId = 0;
     }
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_unid_restricao', $numMaxId + 1);
+    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_uni_restr', $numMaxId + 1);
     $objInfraSequenciaRestricaoDTO->setStrNome('md_pen_uni_restr');
     $objInfraSequenciaRestricaoDTO->retStrNome();
     $arrObjInfraSequenciaRestricaoDTO = $objInfraSequenciaRestricaoRN->listar($objInfraSequenciaRestricaoDTO);
