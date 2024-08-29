@@ -511,10 +511,10 @@ class PenBlocoProcessoRN extends InfraRN
       $objPenBlocoProcessoDTO->retNumIdBloco();
       $objPenBlocoProcessoDTO->retNumIdAndamento();
 
-      $objPenProtocoloBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenBlocoProcessoDTO);
+      $penBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+      $objPenProtocoloDTO = $penBlocoProcessoBD->consultar($objPenBlocoProcessoDTO);
 
-      if ($ObjPenProtocoloDTO != null) {
+      if ($objPenProtocoloDTO != null) {
         return $tramiteEmBloco;
       }
     }
