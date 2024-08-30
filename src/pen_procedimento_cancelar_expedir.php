@@ -29,6 +29,7 @@ try {
 
   $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
   $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
+  $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
   $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
   $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
