@@ -2885,7 +2885,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // Alterar id da tabela    
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
-    $objMetaBD->renomearColuna('md_pen_expedir_lote', 'id_lote', 'id_bloco_processo', $objMetaBD->tipoNumero());
+    try {
+      $objMetaBD->renomearColuna("md_pen_expedir_lote", "id_lote", "id_bloco_processo", $objMetaBD->tipoNumero());
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
+      }
+    }
 
     // Adicionar coluna de atualização do registro
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), PenMetaBD::SNULLO);
@@ -2902,8 +2908,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_bloco_protocolo", true);
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
     $this->excluirChaveEstrangeira("md_pen_bloco_protocolo", "fk_bloco_protocolo", true);
-
-    $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
+    try {
+      $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
+      }
+    }
 
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_proc_procedi", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bl", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
