@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group4
  */
-class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
+class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -87,7 +87,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
     /**
@@ -125,8 +126,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
     /**
