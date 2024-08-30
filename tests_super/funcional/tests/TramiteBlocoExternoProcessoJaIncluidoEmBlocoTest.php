@@ -10,8 +10,8 @@ use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,Atividade
  */
 class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCase
 {
-    private $objBlocoDeTramiteDTO;
-    private $objProtocoloDTO;
+    public static $objBlocoDeTramiteDTO;
+    public static $objProtocoloDTO;
     public static $remetente;
     public static $penOrgaoExternoId;
 
@@ -22,9 +22,6 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
     {
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-
-        $this->cadastrarBlocoDeTramite();
-        $this->cadastrarProcessos();
     }
 
     /**
@@ -40,15 +37,17 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
             self::$remetente['SENHA']
         );
 
+        self::$objBlocoDeTramiteDTO = $this->cadastrarBlocoDeTramite();
+        self::$objProtocoloDTO = $this->cadastrarProcessos();
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramiteEmBloco->selecionarProcessos([$this->objProtocoloDTO->getStrProtocoloFormatado()]);
+        $this->paginaTramiteEmBloco->selecionarProcessos([self::$objProtocoloDTO->getStrProtocoloFormatado()]);
         $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
-        $this->paginaTramiteEmBloco->selecionarBloco($this->objBlocoDeTramiteDTO->getNumId());
+        $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
         $this->paginaTramiteEmBloco->clicarSalvar();
         sleep(2);
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Processo(s) incluído(s) com sucesso no bloco ' . $this->objBlocoDeTramiteDTO->getNumOrdem()),
+            utf8_encode('Processo(s) incluído(s) com sucesso no bloco ' . self::$objBlocoDeTramiteDTO->getNumOrdem()),
             $mensagem
         );
 
@@ -61,11 +60,6 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
      */
     public function teste_mesmo_processo_em_bloco()
     {
-        $objBlocoDeTramiteProtocoloFixture = new BlocoDeTramiteProtocoloFixture();
-        $objBlocoDeTramiteProtocoloFixture->carregar([
-            'IdProtocolo' => $this->objProtocoloDTO->getDblIdProtocolo(),
-            'IdBloco' => $this->objBlocoDeTramiteDTO->getNumId()
-        ]);
 
         $this->acessarSistema(
             self::$remetente['URL'],
@@ -75,18 +69,18 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         );
 
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramiteEmBloco->selecionarProcessos([$this->objProtocoloDTO->getStrProtocoloFormatado()]);
+        $this->paginaTramiteEmBloco->selecionarProcessos([self::$objProtocoloDTO->getStrProtocoloFormatado()]);
         $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
-        $this->paginaTramiteEmBloco->selecionarBloco($this->objBlocoDeTramiteDTO->getNumId());
+        $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
         $this->paginaTramiteEmBloco->clicarSalvar();
         sleep(2);
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         
         $this->assertStringContainsString(
             utf8_encode(
-                'Prezado(a) usuário(a), o processo ' . $this->objProtocoloDTO->getStrProtocoloFormatado()
-                . ' encontra-se inserido no bloco ' . $this->objBlocoDeTramiteDTO->getNumId() . ' - '
-                .  $this->objBlocoDeTramiteDTO->getStrDescricao() 
+                'Prezado(a) usuário(a), o processo ' . self::$objProtocoloDTO->getStrProtocoloFormatado()
+                . ' encontra-se inserido no bloco ' . self::$objBlocoDeTramiteDTO->getNumId() . ' - '
+                .  self::$objBlocoDeTramiteDTO->getStrDescricao() 
                 . '. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'
             ),
             $mensagem
@@ -97,23 +91,21 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
 
     /**
      * Cadastra o bloco de tramite
-     * @return void
      */
-    private function cadastrarBlocoDeTramite()
+    public function cadastrarBlocoDeTramite()
     {
         $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
-        $this->objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
+        return $objBlocoDeTramiteFixture->carregar();
     }
 
     /**
      * Cadastra o bloco de tramite
-     * @return void
      */
     private function cadastrarProcessos()
     {
-        $parametros = [];
+        $parametros = ['Descricao' => 'teste'];
         $objProtocoloFixture = new ProtocoloFixture();
-        $this->objProtocoloDTO = $objProtocoloFixture->carregar(
+        return $objProtocoloFixture->carregar(
             $parametros,
             function($objProtocoloDTO) {
                 $objProcedimentoFixture = new ProcedimentoFixture();
