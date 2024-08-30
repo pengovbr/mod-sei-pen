@@ -444,7 +444,6 @@ class PenBlocoProcessoRN extends InfraRN
       $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdBloco());
       $tramiteEmBlocoDTO->setStrStaEstado([
         TramiteEmBlocoRN::$TE_ABERTO,
-        TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
       ], InfraDTO::$OPER_IN);
       $tramiteEmBlocoDTO->retStrDescricao();
       $tramiteEmBlocoDTO->retStrStaEstado();
@@ -458,9 +457,10 @@ class PenBlocoProcessoRN extends InfraRN
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumOrdem()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
 
-      $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdBloco(), $idProtocolo);
-      if ($processoRecusadoNoBlocoParcial !== false) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumOrdem()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+      $arrPermitirInclusaoConcluidos = [TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE, TramiteEmBlocoRN::$TE_DISPONIBILIZADO];
+      $bolValidarInclusao = $this->validarInclusaoQuandoProcessoConcluido($tramitaEmBloco->getNumIdBloco(), $idProtocolo, $arrPermitirInclusaoConcluidos);
+      if ($bolValidarInclusao !== true) {
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$bolValidarInclusao->getNumOrdem()} - {$bolValidarInclusao->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
     }
 
@@ -478,13 +478,23 @@ class PenBlocoProcessoRN extends InfraRN
 
     return false;
   }
-
-  public function validarBlocoEstadoConcluidoParcial($dblIdbloco, $idProtocolo)
+  
+  /**
+   * Valida a inclusão de um processo quando este é concluído.
+   * Retorna o objeto TramiteEmBloco se o processo não puder ser incluído
+   *
+   * @param int $dblIdbloco
+   * @param int $idProtocolo 
+   * @param array $arrEstadoBlocos
+   *
+   * @return TramiteEmBloco|true
+   */
+  public function validarInclusaoQuandoProcessoConcluido($dblIdbloco, $idProtocolo, $arrEstadoBlocos)
   {
     $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $tramiteEmBlocoDTO->setNumId($dblIdbloco);
     $tramiteEmBlocoDTO->setStrStaEstado([
-      TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
+      $arrEstadoBlocos,
     ], InfraDTO::$OPER_IN);
     $tramiteEmBlocoDTO->retStrDescricao();
     $tramiteEmBlocoDTO->retStrStaEstado();
@@ -496,7 +506,7 @@ class PenBlocoProcessoRN extends InfraRN
 
     if (!empty($tramiteEmBloco)) {
 
-      $parcialmenteConcluido = array(
+      $arrEstadosDeNaoConclusaoDoProcesso = array(
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
@@ -506,7 +516,7 @@ class PenBlocoProcessoRN extends InfraRN
       $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
       $objPenBlocoProcessoDTO->setNumIdBloco($dblIdbloco);
-      $objPenBlocoProcessoDTO->setNumIdAndamento($parcialmenteConcluido, InfraDTO::$OPER_IN);
+      $objPenBlocoProcessoDTO->setNumIdAndamento($arrEstadosDeNaoConclusaoDoProcesso, InfraDTO::$OPER_IN);
       $objPenBlocoProcessoDTO->retDblIdProtocolo();
       $objPenBlocoProcessoDTO->retNumIdBloco();
       $objPenBlocoProcessoDTO->retNumIdAndamento();
@@ -519,7 +529,7 @@ class PenBlocoProcessoRN extends InfraRN
       }
     }
 
-    return false;
+    return true;
   }
 
   public function validarQuantidadeDeItensNoBloco($dblIdbloco, $arrProtocolosOrigem)
