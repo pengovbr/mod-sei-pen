@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-
 /**
  * Teste de trâmite de um processo com devolução contendo novos documentos e com outro processo anexado
  *

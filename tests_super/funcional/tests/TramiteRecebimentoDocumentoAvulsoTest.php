@@ -128,6 +128,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         putenv("DATABASE_HOST=org2-database");
+        $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 

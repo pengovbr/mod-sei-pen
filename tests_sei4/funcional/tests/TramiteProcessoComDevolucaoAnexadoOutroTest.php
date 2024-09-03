@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-
 /**
  * Testes de trâmite de um processo tendo a sua devolução através de sua anexação à outro processo
  * criado no órgão de destino.
@@ -93,11 +91,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
          // Busca ID que Protocolo principal recebeu no org2
-         $parametros = [
-            'ProtocoloFormatado' => self::$protocoloTesteAnexado,
-        ];
-        $objProtocoloFixture = new ProtocoloFixture();
-        $objProtocoloAnexadoDTO = $objProtocoloFixture->buscar($parametros)[0];
+        $objProtocoloAnexadoDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
         // Gerar dados de testes para representar o processo principal

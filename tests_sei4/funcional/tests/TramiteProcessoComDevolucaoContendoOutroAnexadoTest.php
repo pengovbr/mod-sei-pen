@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-
 /**
  * Teste de trâmite de um processo com devolução contendo novos documentos e com outro processo anexado
  *
@@ -97,11 +95,7 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends FixtureCenario
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
         // Incluir novos documentos relacionados no processo anexado
-        $parametros = [
-            'ProtocoloFormatado' => self::$protocoloTestePrincipal,
-        ];
-        $objProtocoloFixture = new ProtocoloFixture();
-        $objProtocoloPrincipalDTO = $objProtocoloFixture->buscar($parametros)[0];
+        $objProtocoloPrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, \ProtocoloRN::$TP_PROCEDIMENTO);
 
         $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
