@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-
 /**
  * Testes de trâmite de um processo tendo a sua devolução através de sua anexação à outro processo
  * criado no órgão de destino.

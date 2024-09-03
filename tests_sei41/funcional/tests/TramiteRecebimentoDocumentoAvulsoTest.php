@@ -27,7 +27,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
 
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
-     *
+     * 
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -39,6 +39,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         // Carregar contexto de testes e dados sobre certificado digital
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Instanciar objeto de teste utilizando o BeSimpleSoap
         $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
@@ -87,6 +88,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
+        putenv("DATABASE_HOST=org1-database");
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
@@ -125,8 +127,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
         putenv("DATABASE_HOST=org2-database");
+        $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
