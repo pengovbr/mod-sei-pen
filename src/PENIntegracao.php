@@ -80,12 +80,10 @@ class PENIntegracao extends SeiIntegracao
       $objAtividadeRN = new AtividadeRN();
       $numRegistros = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->retNumIdUnidade();
-      $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objPenUnidadeRN = new PenUnidadeRN();
+      // Verifica se existe uma unidade mapeada
+      $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
       
-      if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+      if ($numRegistros > 0 && $bolUnidadeMapeada) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
         $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Incluir Processos no Bloco de Trâmite" title="Incluir Processos no Bloco de Trâmite" />';
@@ -169,15 +167,9 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    $objPenUnidadeDTO = new PenUnidadeDTO();
-    $objPenUnidadeDTO->retNumIdUnidade();
-    $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-    $objPenUnidadeRN = new PenUnidadeRN();
-    $bolUnidadeMapeada = false;
-    
-    if($objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
-      $bolUnidadeMapeada = true;
-    }
+    // Verifica se existe uma unidade mapeada
+    $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
+
     //Apresenta o botão de expedir processo
     if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
