@@ -2800,20 +2800,22 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3070()
   {
+    $objMetaBD = $this->objMeta;
+    $objInfraBanco = BancoSEI::getInstance();
+
     // Criação da tabela restrição
-    $objMetaRestricaoBD = $this->objMeta;
     // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
     $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
-    $objMetaRestricaoBD->criarTabela(array(
+    $objMetaBD->criarTabela(array(
       'tabela' => 'md_pen_uni_restr',
       'cols' => array(
-        'id' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-        'id_unidade' => array($objMetaRestricaoBD->tipoNumero(), PenMetaBD::NNULLO),
-        'id_unidade_rh' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-        'id_unidade_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
-        'nome_unidade_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
-        'id_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
-        'nome_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade' => array($objMetaBD->tipoNumero(), PenMetaBD::NNULLO),
+        'id_unidade_rh' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
+        'id_unidade_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
       ),
       'pk' => array('cols' => array('id')),
       'fks' => array(
@@ -2827,12 +2829,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRestricaoDTO = new InfraSequenciaDTO();
 
     //Sequência: md_pen_seq_hipotese_legal
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_uni_restr');
+    $rs = $objInfraBanco->consultarSql('select max(id) as total from md_pen_uni_restr');
     $numMaxId = $rs[0]['total'];
     if ($numMaxId == null) {
       $numMaxId = 0;
     }
-    BancoSEI::getInstance()->criarSequencialNativa('md_pen_seq_uni_restr', $numMaxId + 1);
+    $objInfraBanco->criarSequencialNativa('md_pen_seq_uni_restr', $numMaxId + 1);
     $objInfraSequenciaRestricaoDTO->setStrNome('md_pen_uni_restr');
     $objInfraSequenciaRestricaoDTO->retStrNome();
     $arrObjInfraSequenciaRestricaoDTO = $objInfraSequenciaRestricaoRN->listar($objInfraSequenciaRestricaoDTO);
@@ -2840,10 +2842,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // FIM da Criação da tabela restrição
 
-    $objMetaBD = $this->objMeta;
-    $objInfraBanco = BancoSEI::getInstance();
-
-    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD($objInfraBanco);
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
     $objReceberProcessosPEN->setBolExclusaoLogica(false);
@@ -2885,13 +2884,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     // Alterar id da tabela    
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
-    try {
-      $objMetaBD->renomearColuna("md_pen_expedir_lote", "id_lote", "id_bloco_processo", $objMetaBD->tipoNumero());
-    } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
-        throw $e;
-      }
-    }
+    $this->renomearColunaTabela("md_pen_expedir_lote", "id_lote", "id_bloco_processo", $objMetaBD->tipoNumero());
 
     // Adicionar coluna de atualização do registro
     $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), PenMetaBD::SNULLO);
@@ -2908,13 +2901,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_bloco_protocolo", true);
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
     $this->excluirChaveEstrangeira("md_pen_bloco_protocolo", "fk_bloco_protocolo", true);
-    try {
-      $objMetaBD->novoRenomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
-    } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
-        throw $e;
-      }
-    }
+
+    $this->renomearTabela("md_pen_expedir_lote", "md_pen_bloco_processo");
 
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_proc_procedi", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
     $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bl", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
@@ -2926,7 +2914,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
 
     //Sequência: md_pen_seq_lote
-    $rs = BancoSEI::getInstance()->consultarSql('select max(id_bloco_processo) as total from md_pen_bloco_processo');
+    $rs = $objInfraBanco->consultarSql('select max(id_bloco_processo) as total from md_pen_bloco_processo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
     $objInfraBanco->criarSequencialNativa('md_pen_seq_bloco_processo', $numMaxId + 1);
     $objInfraSequenciaDTO->setStrNome('md_pen_seq_bloco_processo');
@@ -2987,7 +2975,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->removerTabelas($tabelas);
 
     // Adicionar agendamento de atualização de informações de envio
-    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
+    $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD($objInfraBanco);
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasEnvioPEN");
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN) == 0) {
@@ -3065,26 +3053,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
 
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
-    BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_estrutura_novo = str_estrutura");
+    $objInfraBanco->executarSql("update md_pen_envio_comp_digitais set str_estrutura_novo = str_estrutura");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_estrutura');
-    try {
-      $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', 'str_estrutura', $objMetaBD->tipoTextoVariavel(255));
-    } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
-        throw $e;
-      }
-    }
+    $this->renomearColunaTabela('md_pen_envio_comp_digitais', 'str_estrutura_novo', 'str_estrutura', $objMetaBD->tipoTextoVariavel(255));
 
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
-    BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_unidade_pen_novo = str_unidade_pen");
+    $objInfraBanco->executarSql("update md_pen_envio_comp_digitais set str_unidade_pen_novo = str_unidade_pen");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_unidade_pen');
-    try {
-      $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', 'str_unidade_pen', $objMetaBD->tipoTextoVariavel(255));
-    } catch (Exception $e) {
-      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
-        throw $e;
-      }
-    }
+    $this->renomearColunaTabela('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', 'str_unidade_pen', $objMetaBD->tipoTextoVariavel(255));
     
     $this->atualizarNumeroVersao("3.7.0");
   }
@@ -3096,9 +3072,48 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
    */
   private function removerTabelas($tabelas)
   {
+    $objMetaBD = $this->objMeta;
     foreach($tabelas as $tabela) {
-      if ($this->objMeta->isTabelaExiste($tabela)) {
-        $this->objMeta->removerTabela($tabela);
+      if ($objMetaBD->isTabelaExiste($tabela)) {
+        $objMetaBD->removerTabela($tabela);
+      }
+    }
+  }
+
+  /**
+   * Renomear tabelas 
+   * @param string $tabela
+   * @param string $tabela_novo
+   * @return void
+   */
+  private function renomearTabela($tabela, $tabela_novo)
+  {
+    try {
+      $objMetaBD = $this->objMeta;
+      $objMetaBD->novoRenomearTabela($tabela, $tabela_novo);
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
+      }
+    }
+  }
+
+  /**
+   * Renomear coluna de tabela 
+   * @param string $tabela
+   * @param string $coluna
+   * @param string $coluna_novo
+   * @param string $tipo_coluna
+   * @return void
+   */
+  private function renomearColunaTabela($tabela, $coluna, $coluna_novo, $tipo_coluna)
+  {
+    try {
+      $objMetaBD = $this->objMeta;
+      $objMetaBD->renomearColuna($tabela, $coluna, $coluna_novo, $tipo_coluna);
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
       }
     }
   }
