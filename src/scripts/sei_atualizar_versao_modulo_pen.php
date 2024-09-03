@@ -2977,39 +2977,14 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       }
     }
 
-    //Atualiza ordenacao dos blocos por unidade
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumOrdem(0, InfraDTO::$OPER_DIFERENTE);
-    $objTramiteEmBlocoDTO->retTodos();
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $arrobjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
-    
-    $arrUnidadeTramiteBloco = array();
-    foreach($arrobjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
-      if(!in_array($tramiteEmBlocoDTO->getNumIdUnidade(), array_keys($arrUnidadeTramiteBloco))){
-        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()] = 1; 
-      } else {
-        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]++;
-      }
-      $tramiteEmBlocoDTO->setNumOrdem($arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]);
-      $tramiteEmBlocoDTO = $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
-    }
+    $this->atualizaOrdemTramiteEmBlocoPorUnidade();
 
-    if ($objMetaBD->isTabelaExiste('md_pen_bloco_protocolo')) {
-      $objMetaBD->removerTabela('md_pen_bloco_protocolo');
-    }
+    $tabelas = ['md_pen_bloco_protocolo',
+                'md_pen_seq_bloco_protocolo',
+                'md_pen_rel_expedir_lote',
+                'md_pen_seq_expedir_lote'];
 
-    if ($objMetaBD->isTabelaExiste('md_pen_seq_bloco_protocolo')) {
-      $objMetaBD->removerTabela('md_pen_seq_bloco_protocolo');
-    }
-
-    if ($objMetaBD->isTabelaExiste('md_pen_rel_expedir_lote')) {
-      $objMetaBD->removerTabela('md_pen_rel_expedir_lote');
-    }
-
-    if ($objMetaBD->isTabelaExiste('md_pen_seq_expedir_lote')) {
-      $objMetaBD->removerTabela('md_pen_seq_expedir_lote');
-    }
+    $this->removerTabelas($tabelas);
 
     // Adicionar agendamento de atualização de informações de envio
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
@@ -3102,6 +3077,47 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.7.0");
   }
 
+  /**
+   * Remover tabelas verificando se existe
+   * @param array $tabelas
+   * @return void
+   */
+  private function removerTabelas($tabelas)
+  {
+    foreach($tabelas as $tabela) {
+      if ($objMetaBD->isTabelaExiste($tabela)) {
+        $objMetaBD->removerTabela($tabela);
+      }
+    }
+  }
+
+  /**
+   * Atualiza coluna 'ordem' do tramite em bloco por unidade
+   *
+   * @param array $blocosTramite
+   * @return void
+   */
+  private function atualizaOrdemTramiteEmBlocoPorUnidade()
+  {
+    //Atualiza ordenacao dos blocos por unidade
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setNumOrdem(0, InfraDTO::$OPER_DIFERENTE);
+    $objTramiteEmBlocoDTO->retTodos();
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $arrobjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
+    
+    $arrUnidadeTramiteBloco = array();
+    foreach($arrobjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
+      if(!in_array($tramiteEmBlocoDTO->getNumIdUnidade(), array_keys($arrUnidadeTramiteBloco))){
+        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()] = 1; 
+      } else {
+        $arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]++;
+      }
+      $tramiteEmBlocoDTO->setNumOrdem($arrUnidadeTramiteBloco[$tramiteEmBlocoDTO->getNumIdUnidade()]);
+      $tramiteEmBlocoDTO = $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
+    }
+  }
+          
   /**
    * Atualiza os blocos legados
    *
