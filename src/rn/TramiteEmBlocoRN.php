@@ -140,6 +140,21 @@ class TramiteEmBlocoRN extends InfraRN
     }
   }
 
+  /**
+   * Metodo responsável por verificar se existe uma unidade mapeada para a unidade logada
+   *
+   * @return bool
+   */
+  public function existeUnidadeMapeadaParaUnidadeLogada()
+  {
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->retNumIdUnidade();
+    $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objPenUnidadeRN = new PenUnidadeRN();
+
+    return $objPenUnidadeRN->contar($objPenUnidadeDTO) > 0;
+  }
+
   protected function listarConectado(TramiteEmBlocoDTO $objTramiteEmBlocoDTO)
   {
     try {
