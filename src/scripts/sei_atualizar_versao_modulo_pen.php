@@ -3092,13 +3092,25 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
     BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_estrutura_novo = str_estrutura");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_estrutura');
-    $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', 'str_estrutura', $objMetaBD->tipoTextoVariavel(255));
+    try {
+      $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', 'str_estrutura', $objMetaBD->tipoTextoVariavel(255));
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
+      }
+    }
 
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
     BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_unidade_pen_novo = str_unidade_pen");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_unidade_pen');
-    $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', 'str_unidade_pen', $objMetaBD->tipoTextoVariavel(255));
-
+    try {
+      $objMetaBD->renomearColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', 'str_unidade_pen', $objMetaBD->tipoTextoVariavel(255));
+    } catch (Exception $e) {
+      if (strpos($e->__toString(), 'Caution: Changing any part of an object name could break scripts and stored procedures.') === false) {
+        throw $e;
+      }
+    }
+    
     $this->atualizarNumeroVersao("3.7.0");
   }
 
