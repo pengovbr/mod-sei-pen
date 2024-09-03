@@ -3097,8 +3097,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   private function removerTabelas($tabelas)
   {
     foreach($tabelas as $tabela) {
-      if ($objMetaBD->isTabelaExiste($tabela)) {
-        $objMetaBD->removerTabela($tabela);
+      if ($this->objMeta->isTabelaExiste($tabela)) {
+        $this->objMeta->removerTabela($tabela);
       }
     }
   }
