@@ -2109,15 +2109,12 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
             $objDocumentoDTO = null;
             $strStaAssociacao = null;
-            $bolMultiplosComponentesCount = 0;
             foreach ($arrObjDocumentoDTOAssociacao as $objDocumentoDTOAssociacao) {
               $strStaAssociacao = $objDocumentoDTOAssociacao['StaAssociacao'];
               if($strStaAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
                 $objDocumentoDTO = $objDocumentoDTOAssociacao['Documento'];
-                $bolMultiplosComponentesCount++;
               }
             }
-            $bolMultiplosComponentes = $bolMultiplosComponentesCount > 1;
             $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
             //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
