@@ -2874,14 +2874,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $blocosTramite = $objInfraBanco->consultarSql($sql);
 
     // Alterar colunas em md_pen_expedir_lote
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_destino', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_repositorio_destino', $objMetaBD->tipoTextoVariavel(250), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_origem', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade_origem', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade_destino', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_unidade_destino', $objMetaBD->tipoTextoVariavel(250), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_usuario', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
-    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade', $objMetaBD->tipoNumero(), PenMetaBD::SNULLO);
+    $SNULLO = BancoSEI::getInstance() instanceof InfraPostgreSql ? 'null' : PenMetaBD::SNULLO;
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_destino', $objMetaBD->tipoNumero(), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_repositorio_destino', $objMetaBD->tipoTextoVariavel(250), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_origem', $objMetaBD->tipoNumero(), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade_origem', $objMetaBD->tipoNumero(), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade_destino', $objMetaBD->tipoNumero(), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_unidade_destino', $objMetaBD->tipoTextoVariavel(250), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_usuario', $objMetaBD->tipoNumero(), $SNULLO);
+    $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade', $objMetaBD->tipoNumero(), $SNULLO);
 
     // Alterar id da tabela    
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
