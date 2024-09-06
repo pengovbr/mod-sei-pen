@@ -170,25 +170,30 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
      */
     public function test_verificar_envio_tramite_em_bloco()
     {
+      $this->acessarSistema(
+          self::$remetente['URL'],
+          self::$remetente['SIGLA_UNIDADE'],
+          self::$remetente['LOGIN'],
+          self::$remetente['SENHA']
+      );
+      $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
+      $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
+
+      if (self::$tramitar == true) {
+        $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
+          $this->assertNotEquals('Aguardando Processamento', $novoStatus);
+          return true;
+        }, PEN_WAIT_TIMEOUT);
         
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
-        $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
         $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
+        $this->assertEquals(utf8_encode("Concluído"), $novoStatus);
+      } else {
+        $this->assertEquals("Aberto", $novoStatus);
+      }
 
-        if (self::$tramitar == true) {
-            $this->assertEquals(utf8_encode("Concluído"), $novoStatus);
-        } else {
-            $this->assertEquals(utf8_encode("Aberto"), $novoStatus);
-        }  
-
-        $this->sairSistema();
+      $this->sairSistema();
     }
 }
