@@ -1,8 +1,9 @@
 <?php
 
 use \utilphp\util;
+use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
 
-class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends CenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -90,11 +91,48 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoB;
         $destinatario = self::$contextoOrgaoA;
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTesteInterno = $this->gerarDadosDocumentoInternoTeste($remetente);
 
-        $novosDocumentos =  array($documentoTesteInterno);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloDTO = $objProtocoloFixture->buscar([
+            'ProtocoloFormatado' => self::$processoTeste['PROTOCOLO'],
+        ])[0];
+
+        $this->cadastrarDocumentoInternoFixture($documentoTesteInterno, $objProtocoloDTO->getDblIdProtocolo());
+
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
+        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        
+        $this->tramitarProcessoExternamente(
+            self::$processoTeste['PROTOCOLO'], $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'],
+            $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+        );
+
+        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            sleep(5);
+            $this->atualizarTramitesPEN();
+            $testCase->refresh();
+            $paginaProcesso = new PaginaProcesso($testCase);
+            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertFalse($paginaProcesso->processoAberto());
+            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
+        $unidade = mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1");
+        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$processoTeste['PROTOCOLO'], $unidade);
+        $this->validarRecibosTramite($mensagemRecibo, true, true);
+
+        // 8 - Validar histórico de trâmite do processo
+        $this->validarHistoricoTramite($destinatario['NOME_UNIDADE'], true, true);
+
+        // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
+        $this->validarProcessosTramitados(self::$processoTeste['PROTOCOLO'], $orgaosDiferentes);
+
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteInterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
     }
@@ -111,14 +149,48 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoA;
         $destinatario = array_slice(self::$contextoOrgaoB, 0);
-        $destinatario['SIGLA_UNIDADE'] = $destinatario['SIGLA_UNIDADE_SECUNDARIA'];
-        $destinatario['NOME_UNIDADE'] = $destinatario['NOME_UNIDADE_SECUNDARIA'];
-        $destinatario['SIGLA_UNIDADE_HIERARQUIA'] = $destinatario['SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'];
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTesteExterno = $this->gerarDadosDocumentoExternoTeste($remetente, self::CONTEUDO_DOCUMENTO_A);
 
-        $novosDocumentos =  array($documentoTesteExterno);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        putenv("DATABASE_HOST=org1-database");
+        $objProtocoloFixture = new ProtocoloFixture();
+        $objProtocoloDTO = $objProtocoloFixture->buscar([
+            'ProtocoloFormatado' => self::$processoTeste['PROTOCOLO'],
+        ])[0];
+
+        $this->cadastrarDocumentoExternoFixture($documentoTesteExterno, $objProtocoloDTO->getDblIdProtocolo());
+
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
+        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
+        
+        $this->tramitarProcessoExternamente(
+            self::$processoTeste['PROTOCOLO'], $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'],
+            $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+        );
+
+        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            sleep(5);
+            $this->atualizarTramitesPEN();
+            $testCase->refresh();
+            $paginaProcesso = new PaginaProcesso($testCase);
+            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertFalse($paginaProcesso->processoAberto());
+            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
+        $unidade = mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1");
+        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$processoTeste['PROTOCOLO'], $unidade);
+        $this->validarRecibosTramite($mensagemRecibo, true, true);
+
+        // 8 - Validar histórico de trâmite do processo
+        $this->validarHistoricoTramite($destinatario['NOME_UNIDADE'], true, true);
+
+        // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
+        $this->validarProcessosTramitados(self::$processoTeste['PROTOCOLO'], $orgaosDiferentes);
+
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteExterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
     }
