@@ -63,6 +63,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      * Verificar processo recebido no Órgão 2 com envio parcial mapeado
      * @group mapeamento
      *
+     * @depends test_criar_processo_contendo_documento_tramitar_remetente_envio_parcial
      * @return void
      */
   public function test_verificar_processo_recebido_tramitar_destinatario_envio_parcial()
@@ -109,6 +110,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      * Devolver processo ao Órgão 1 com envio parcial mapeado
      * @group mapeamento
      *
+     * @depends test_verificar_processo_recebido_tramitar_destinatario_envio_parcial
      * @return void
      */
   public function test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial()
@@ -120,12 +122,15 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
       self::$destinatario['SENHA']
     );
 
+    putenv("DATABASE_HOST=org2-database");
+
     $this->paginaBase->navegarParaControleProcesso();
-    $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
     self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$destinatario);
-    $this->cadastrarDocumentoInterno(self::$documentoTeste2);
-    $this->assinarDocumento(self::$destinatario['ORGAO'], self::$destinatario['CARGO_ASSINATURA'], self::$destinatario['SENHA']);
+    $protocoloTestePrincipalOrg2 = $this->consultarProcessoFixture(self::$protocoloTestePrincipal->getStrProtocoloFormatado(), \ProtocoloRN::$TP_PROCEDIMENTO);
+    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+
+    $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
     $this->tramitarProcessoExternamente(
       self::$protocoloTestePrincipal,
@@ -142,6 +147,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      * Verificar processo recebido no Órgão 1 com envio parcial mapeado
      * @group mapeamento
      *
+     * @depends test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial
      * @return void
      */
   public function test_verificar_processo_recebido_tramitar_remetente_envio_parcial()
