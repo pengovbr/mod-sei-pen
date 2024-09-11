@@ -493,9 +493,7 @@ class PenBlocoProcessoRN extends InfraRN
   {
     $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $tramiteEmBlocoDTO->setNumId($dblIdbloco);
-    $tramiteEmBlocoDTO->setStrStaEstado([
-      $arrEstadoBlocos,
-    ], InfraDTO::$OPER_IN);
+    $tramiteEmBlocoDTO->setStrStaEstado($arrEstadoBlocos, InfraDTO::$OPER_IN);
     $tramiteEmBlocoDTO->retStrDescricao();
     $tramiteEmBlocoDTO->retStrStaEstado();
     $tramiteEmBlocoDTO->retNumId();
