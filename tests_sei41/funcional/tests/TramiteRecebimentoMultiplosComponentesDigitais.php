@@ -1,7 +1,6 @@
 <?php
 
 use \utilphp\util;
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
 
 /**
  * Execution Groups
@@ -100,46 +99,9 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         $documentoTeste1 = $this->gerarDadosDocumentoInternoTeste($remetente);
         $documentoTeste2 = $this->gerarDadosDocumentoExternoTeste($remetente);
 
-        $objProtocoloFixture = new ProtocoloFixture();
-        $objProtocoloDTO = $objProtocoloFixture->buscar([
-            'ProtocoloFormatado' => self::$processoTeste['PROTOCOLO'],
-        ])[0];
+        $novosDocumentos =  array($documentoTeste1, $documentoTeste2);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
 
-        $this->cadastrarDocumentoInternoFixture($documentoTeste1, $objProtocoloDTO->getDblIdProtocolo());
-        $this->cadastrarDocumentoExternoFixture($documentoTeste2, $objProtocoloDTO->getDblIdProtocolo());
-
-        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
-        $this->abrirProcesso(self::$processoTeste['PROTOCOLO']);
-        
-        $this->tramitarProcessoExternamente(
-            self::$processoTeste['PROTOCOLO'], $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'],
-            $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
-        );
-
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
-            sleep(5);
-            $this->atualizarTramitesPEN();
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-
-        // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
-        $unidade = mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1");
-        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$processoTeste['PROTOCOLO'], $unidade);
-        $this->validarRecibosTramite($mensagemRecibo, true, true);
-
-        // 8 - Validar histórico de trâmite do processo
-        $this->validarHistoricoTramite($destinatario['NOME_UNIDADE'], true, true);
-
-        // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
-        $this->validarProcessosTramitados(self::$processoTeste['PROTOCOLO'], $orgaosDiferentes);
-
-        $totalDdocumentos =  array(self::$documentoZip, $documentoTeste1, $documentoTeste2);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $totalDdocumentos, $destinatario);
     }
 
     /**
