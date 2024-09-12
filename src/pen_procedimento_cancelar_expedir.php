@@ -33,6 +33,8 @@ try {
   $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
   $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
+  $objTramiteEmBlocoProtocoloDTO->setNumIdAtividade(array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE), InfraDTO::$OPER_NOT_IN);
+  $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
   $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
   $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);

@@ -143,7 +143,7 @@ class ReceberReciboTramiteRN extends InfraRN
           // Atualizar Bloco para concluido parcialmente
           $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
           $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objTramiteEmBlocoProtocoloDTO->retTodos();
 
