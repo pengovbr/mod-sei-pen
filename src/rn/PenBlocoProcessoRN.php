@@ -355,6 +355,7 @@ class PenBlocoProcessoRN extends InfraRN
         $objPenProtocoloDTO->retNumIdAndamento();
         $objPenProtocoloDTO->retDblIdProtocolo();
         $objPenProtocoloDTO->setNumIdAndamento($arrPodeExcluir, InfraDTO::$OPER_IN);
+        $objPenProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
         $objPenProtocoloDTO = $this->consultar($objPenProtocoloDTO);
 
