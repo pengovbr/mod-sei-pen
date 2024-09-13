@@ -143,7 +143,24 @@ class ReceberReciboTramiteRN extends InfraRN
           // Atualizar Bloco para concluido parcialmente
           $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+
+          $objAtividadeDTO = new AtividadeDTO();
+          $objAtividadeDTO->setDistinct(true);
+          $objAtividadeDTO->retStrSiglaUnidade();
+          $objAtividadeDTO->retNumIdUnidade();
+          $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_REMETIDO_UNIDADE);
+          $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objAtividadeDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+
+          $objAtividadeRN = new AtividadeRN();
+          $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+          $idUnidade = $objProtocoloDTO->getNumIdUnidadeGeradora();
+          if(!is_null($arrObjAtividadeDTO) && !empty($arrObjAtividadeDTO)) {
+            $idUnidade = $arrObjAtividadeDTO[0]->getNumIdUnidade();
+          }
+
+          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade($idUnidade);
           $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objTramiteEmBlocoProtocoloDTO->retTodos();
 
