@@ -251,27 +251,27 @@ class ProcessarPendenciasRN extends InfraRN
       $this->gravarLogDebug("Processando envio de protocolo [expedirProcedimento] com IDProcedimento " . $idProcedimento, 0, true);
       $numTempoInicialEnvio = microtime(true);
 
-      $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
-      $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
-      $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
-      $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
-      $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
-      $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
-      $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
-      $objPenLoteProcedimentoDTO->retDblIdProtocolo();
-      $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
-      $objPenLoteProcedimentoDTO->retNumIdAtividade();
-      $objPenLoteProcedimentoDTO->retNumIdBloco();
-      $objPenLoteProcedimentoDTO->retNumIdUnidade();
-      $objPenLoteProcedimentoDTO->retNumTentativas();
-      $objPenLoteProcedimentoDTO->setDblIdProtocolo(intval($idProcedimento));
-      $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
-      $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
+      $objPenBlocoProcedimentoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcedimentoDTO->retNumIdRepositorioOrigem();
+      $objPenBlocoProcedimentoDTO->retNumIdUnidadeOrigem();
+      $objPenBlocoProcedimentoDTO->retNumIdRepositorioDestino();
+      $objPenBlocoProcedimentoDTO->retStrRepositorioDestino();
+      $objPenBlocoProcedimentoDTO->retNumIdUnidadeDestino();
+      $objPenBlocoProcedimentoDTO->retStrUnidadeDestino();
+      $objPenBlocoProcedimentoDTO->retDblIdProtocolo();
+      $objPenBlocoProcedimentoDTO->retNumIdBlocoProcesso();
+      $objPenBlocoProcedimentoDTO->retNumIdAtividade();
+      $objPenBlocoProcedimentoDTO->retNumIdBloco();
+      $objPenBlocoProcedimentoDTO->retNumIdUnidade();
+      $objPenBlocoProcedimentoDTO->retNumTentativas();
+      $objPenBlocoProcedimentoDTO->setDblIdProtocolo(intval($idProcedimento));
+      $objPenBlocoProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+      $objPenBlocoProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
-      $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
-      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);
+      $objPenBlocoProcedimentoRN = new PenBlocoProcessoRN();
+      $objPenBlocoProcedimentoDTO = $objPenBlocoProcedimentoRN->consultar($objPenBlocoProcedimentoDTO);
 
-      if (!is_null($objPenLoteProcedimentoDTO)) {
+      if (!is_null($objPenBlocoProcedimentoDTO)) {
 
         // Ajuste na variável global $_SERVER['HTTPS'] para considerar a mesma configuração definida para o SEI
         // e evitar erros na rotina validaHttps quando em execução por linha de comando
@@ -284,35 +284,36 @@ class ProcessarPendenciasRN extends InfraRN
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $numTentativasErroMaximo = $objConfiguracaoModPEN->getValor("PEN", "NumeroTentativasErro", false, ProcessoEletronicoRN::WS_TENTATIVAS_ERRO);
         $numTentativasErroMaximo = (is_numeric($numTentativasErroMaximo)) ? intval($numTentativasErroMaximo) : ProcessoEletronicoRN::WS_TENTATIVAS_ERRO;
-        $numTentativasProcesso = $objPenLoteProcedimentoDTO->getNumTentativas() ?: 0;
+        $numTentativasProcesso = $objPenBlocoProcedimentoDTO->getNumTentativas() ?: 0;
 
         if ($numTentativasErroMaximo >= $numTentativasProcesso + 1) {
-          $objPenLoteProcedimentoRN->registrarTentativaEnvio($objPenLoteProcedimentoDTO);
+          $objPenBlocoProcedimentoRN->registrarTentativaEnvio($objPenBlocoProcedimentoDTO);
 
           $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
-          $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($objPenLoteProcedimentoDTO->getNumIdRepositorioOrigem());
-          $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($objPenLoteProcedimentoDTO->getNumIdUnidadeOrigem());
+          $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($objPenBlocoProcedimentoDTO->getNumIdRepositorioOrigem());
+          $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($objPenBlocoProcedimentoDTO->getNumIdUnidadeOrigem());
 
-          $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($objPenLoteProcedimentoDTO->getNumIdRepositorioDestino());
-          $objExpedirProcedimentoDTO->setStrRepositorioDestino($objPenLoteProcedimentoDTO->getStrRepositorioDestino());
-          $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($objPenLoteProcedimentoDTO->getNumIdUnidadeDestino());
-          $objExpedirProcedimentoDTO->setStrUnidadeDestino($objPenLoteProcedimentoDTO->getStrUnidadeDestino());
+          $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($objPenBlocoProcedimentoDTO->getNumIdRepositorioDestino());
+          $objExpedirProcedimentoDTO->setStrRepositorioDestino($objPenBlocoProcedimentoDTO->getStrRepositorioDestino());
+          $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($objPenBlocoProcedimentoDTO->getNumIdUnidadeDestino());
+          $objExpedirProcedimentoDTO->setStrUnidadeDestino($objPenBlocoProcedimentoDTO->getStrUnidadeDestino());
           $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
           $objExpedirProcedimentoDTO->setBolSinUrgente(false);
-          $objExpedirProcedimentoDTO->setDblIdProcedimento($objPenLoteProcedimentoDTO->getDblIdProtocolo());
+          $objExpedirProcedimentoDTO->setDblIdProcedimento($objPenBlocoProcedimentoDTO->getDblIdProtocolo());
           $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
           $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(true);
-          $objExpedirProcedimentoDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdBlocoProcesso());
-          $objExpedirProcedimentoDTO->setNumIdAtividade($objPenLoteProcedimentoDTO->getNumIdAtividade());
-          $objExpedirProcedimentoDTO->setNumIdUnidade($objPenLoteProcedimentoDTO->getNumIdUnidade());
+          $objExpedirProcedimentoDTO->setNumIdLote($objPenBlocoProcedimentoDTO->getNumIdBlocoProcesso());
+          $objExpedirProcedimentoDTO->setNumIdAtividade($objPenBlocoProcedimentoDTO->getNumIdAtividade());
+          $objExpedirProcedimentoDTO->setNumIdUnidade($objPenBlocoProcedimentoDTO->getNumIdUnidade());
 
           $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
           $objExpedirProcedimentoRN->expedirProcedimento($objExpedirProcedimentoDTO);
 
+          $numIDT = $objPenBlocoProcedimentoDTO->getDblIdProtocolo();
           $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
           $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
         } else {
-          $objPenLoteProcedimentoRN->desbloquearProcessoLote($objPenLoteProcedimentoDTO->getDblIdProtocolo());
+          $objPenBlocoProcedimentoRN->desbloquearProcessoBloco($objPenBlocoProcedimentoDTO->getDblIdProtocolo());
         }
       }
     } catch (\Exception $e) {

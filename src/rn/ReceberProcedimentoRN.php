@@ -529,7 +529,15 @@ class ReceberProcedimentoRN extends InfraRN
           // Atualizar Bloco para concluido parcialmente
           $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $objTramiteEmBlocoProtocoloDTO->setNumIdAndamento(
+            array(
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+            ),
+            InfraDTO::$OPER_NOT_IN
+          );
           $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objTramiteEmBlocoProtocoloDTO->retTodos();
 
@@ -537,12 +545,17 @@ class ReceberProcedimentoRN extends InfraRN
           $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
         if ($arrTramiteEmBlocoProtocolo != null) {
+          $blocos = array();
           foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
             $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA);
             $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+
+            $blocos[] = $tramiteEmBlocoProtocolo->getNumIdBloco();
           }
-          $idBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdBloco();
-          $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($idBloco);
+
+          foreach ($blocos as $idBloco) {
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($idBloco);
+          }
         }
       }
 

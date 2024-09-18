@@ -35,16 +35,9 @@ class PenBlocoProcessoRN extends InfraRN
       $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
       $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoBD->consultar($objPenLoteProcedimentoDTO);
 
-      $situacaoPodeExcluir = array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE ,
-      );
       if (
         $objPenLoteProcedimentoDTO != null
-        && !is_null($objPenLoteProcedimentoDTO->getNumIdAndamento())
-        && !in_array($objPenLoteProcedimentoDTO->getNumIdAndamento(), $situacaoPodeExcluir)
+        && $objPenLoteProcedimentoDTO->getNumIdAndamento() !== null
       ) {
         $messagem .= "\n - {$objPenLoteProcedimentoDTO->getStrProtocoloFormatadoProtocolo()}";
         $podeExcluir = false;
@@ -84,10 +77,9 @@ class PenBlocoProcessoRN extends InfraRN
     }
   }
 
-  protected function desbloquearProcessoLoteControlado($dblIdProcedimento)
+  protected function desbloquearProcessoBlocoControlado($dblIdProcedimento)
   {
     try {
-
       $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
       $objPenLoteProcedimentoDTO->retTodos();
       $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -100,21 +92,8 @@ class PenBlocoProcessoRN extends InfraRN
 
         $this->alterar($objPenLoteProcedimentoDTO);
 
-        // Atualizar Bloco para concluido parcialmente
-        $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-        $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
-        $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-        $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
-
-        $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-        $tramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
-
-        if ($tramiteEmBlocoProtocolo != null) {
-          $idBloco = $tramiteEmBlocoProtocolo[0]->getNumIdBloco();
-          $this->atualizarEstadoDoBloco($idBloco);
-        }
+        $idBloco = $$objPenLoteProcedimentoDTO->getNumIdBloco();
+        $this->atualizarEstadoDoBloco($idBloco);
       }
 
       //Desbloqueia o processo
@@ -325,13 +304,6 @@ class PenBlocoProcessoRN extends InfraRN
 
       $arrExcluido = array();
 
-      $arrPodeExcluir = array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-      );
-
       foreach ($arrayObjDTO as $objDTO) {
 
         $objBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
@@ -354,15 +326,14 @@ class PenBlocoProcessoRN extends InfraRN
         $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
         $objPenProtocoloDTO->retNumIdAndamento();
         $objPenProtocoloDTO->retDblIdProtocolo();
-        $objPenProtocoloDTO->setNumIdAndamento($arrPodeExcluir, InfraDTO::$OPER_IN);
         $objPenProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
         $objPenProtocoloDTO = $this->consultar($objPenProtocoloDTO);
 
-        if ($objPenProtocoloDTO != null) {
+        if ($objPenProtocoloDTO != null && $objPenProtocoloDTO->getNumIdAndamento() === null) {
           $arrExcluido[] = $objBD->excluir($objDTO);
           continue;
-        }  
+        }
       }
 
       return $arrExcluido;
@@ -433,35 +404,38 @@ class PenBlocoProcessoRN extends InfraRN
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
     $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
-    $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
     $objPenBlocoProcessoDTO->retNumIdBloco();
     $objPenBlocoProcessoDTO->retDblIdProtocolo();
+    $objPenBlocoProcessoDTO->retNumIdAndamento();
     $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
 
+    $concluidos = array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+    );
+
     $arrTramitaEmBloco = $this->listar($objPenBlocoProcessoDTO);
+    if (!is_null($arrTramitaEmBloco) && count($arrTramitaEmBloco) > 0) {
+      foreach ($arrTramitaEmBloco as $tramitaEmBloco) {
+        if ($tramitaEmBloco->getNumIdAndamento() !== null && in_array($tramitaEmBloco->getNumIdAndamento(), $concluidos)) {
+          continue;
+        }
 
-    foreach ($arrTramitaEmBloco as $tramitaEmBloco) {
-      $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdBloco());
-      $tramiteEmBlocoDTO->setStrStaEstado([
-        TramiteEmBlocoRN::$TE_ABERTO,
-      ], InfraDTO::$OPER_IN);
-      $tramiteEmBlocoDTO->retStrDescricao();
-      $tramiteEmBlocoDTO->retStrStaEstado();
-      $tramiteEmBlocoDTO->retNumId();
-      $tramiteEmBlocoDTO->retNumOrdem();
+        $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $tramiteEmBlocoDTO->setNumId($tramitaEmBloco->getNumIdBloco());
+        $tramiteEmBlocoDTO->retStrDescricao();
+        $tramiteEmBlocoDTO->retStrStaEstado();
+        $tramiteEmBlocoDTO->retStrSiglaUnidade();
+        $tramiteEmBlocoDTO->retNumId();
+        $tramiteEmBlocoDTO->retNumOrdem();
 
-      $tramiteEmBlocoRN = new TramiteEmBlocoRN();
-      $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
+        $tramiteEmBlocoRN = new TramiteEmBlocoRN();
+        $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
 
-      if (!empty($tramiteEmBloco)) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumOrdem()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
-      }
-
-      $arrPermitirInclusaoConcluidos = [TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE, TramiteEmBlocoRN::$TE_DISPONIBILIZADO];
-      $bolValidarInclusao = $this->validarInclusaoQuandoProcessoConcluido($tramitaEmBloco->getNumIdBloco(), $idProtocolo, $arrPermitirInclusaoConcluidos);
-      if ($bolValidarInclusao !== true) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$bolValidarInclusao->getNumOrdem()} - {$bolValidarInclusao->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumOrdem()} - {$tramiteEmBloco->getStrDescricao()} da unidade {$tramiteEmBloco->getStrSiglaUnidade()}."
+          . " Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
     }
 
@@ -478,57 +452,6 @@ class PenBlocoProcessoRN extends InfraRN
     }
 
     return false;
-  }
-  
-  /**
-   * Valida a inclusão de um processo quando este é concluído.
-   * Retorna o objeto TramiteEmBloco se o processo não puder ser incluído
-   *
-   * @param int $dblIdbloco
-   * @param int $idProtocolo 
-   * @param array $arrEstadoBlocos
-   *
-   * @return TramiteEmBloco|true
-   */
-  public function validarInclusaoQuandoProcessoConcluido($dblIdbloco, $idProtocolo, $arrEstadoBlocos)
-  {
-    $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $tramiteEmBlocoDTO->setNumId($dblIdbloco);
-    $tramiteEmBlocoDTO->setStrStaEstado($arrEstadoBlocos, InfraDTO::$OPER_IN);
-    $tramiteEmBlocoDTO->retStrDescricao();
-    $tramiteEmBlocoDTO->retStrStaEstado();
-    $tramiteEmBlocoDTO->retNumId();
-    $tramiteEmBlocoDTO->retNumOrdem(); 
-
-    $tramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
-
-    if (!empty($tramiteEmBloco)) {
-
-      $arrEstadosDeNaoConclusaoDoProcesso = array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-      );
-
-      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-      $objPenBlocoProcessoDTO->setDblIdProtocolo($idProtocolo);
-      $objPenBlocoProcessoDTO->setNumIdBloco($dblIdbloco);
-      $objPenBlocoProcessoDTO->setNumIdAndamento($arrEstadosDeNaoConclusaoDoProcesso, InfraDTO::$OPER_IN);
-      $objPenBlocoProcessoDTO->retDblIdProtocolo();
-      $objPenBlocoProcessoDTO->retNumIdBloco();
-      $objPenBlocoProcessoDTO->retNumIdAndamento();
-
-      $penBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-      $objPenProtocoloDTO = $penBlocoProcessoBD->consultar($objPenBlocoProcessoDTO);
-
-      if ($objPenProtocoloDTO != null) {
-        return $tramiteEmBloco;
-      }
-    }
-
-    return true;
   }
 
   public function validarQuantidadeDeItensNoBloco($dblIdbloco, $arrProtocolosOrigem)
@@ -625,12 +548,12 @@ class PenBlocoProcessoRN extends InfraRN
    */
   private function validarStatusProcessoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $idAndamentoBloco)
   {
-    $concluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-    $parcialmenteConcluido = array(
+    $concluido = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
     );
     $emAndamento = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
@@ -639,25 +562,25 @@ class PenBlocoProcessoRN extends InfraRN
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
     );
+    
+    $qtdProcesos = count($arrObjTramiteEmBlocoProtocoloDTO);
+    $arrayConcluidos = array();
+    $arrayEmAndamento = array();
     foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
-      if (
-        in_array($objDTO->getNumIdAndamento(), $emAndamento)
-        && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE
-      ) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
+      if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
+        $arrayConcluidos[] = $objDTO;
       }
-      if (in_array($objDTO->getNumIdAndamento(), $parcialmenteConcluido)) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE;
+
+      if (in_array($objDTO->getNumIdAndamento(), $emAndamento)) {
+        $arrayEmAndamento[] = $objDTO;
       }
-      if (
-        $objDTO->getNumIdAndamento() == $concluido
-        && (
-          $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
-          || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
-        )
-      ) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
-      }
+    }
+
+    if ($qtdProcesos == count($arrayConcluidos)) {
+      $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
+    }
+    if (count($arrayEmAndamento) > 0) {
+      $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
     }
 
     return $idAndamentoBloco;

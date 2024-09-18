@@ -11,14 +11,14 @@ try {
 
   switch ($_GET['acao']) {
     case 'pen_tramita_em_bloco_protocolo_excluir':
-      $arrExcluidos = array(); 
+      $arrExcluidos = array();
       try {
         $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
 
         $arrStrIds = $objPaginaSEI->getArrStrItensSelecionados();
         $arrObjTramiteBlocoProtocoloDTO = array();
         if (count($arrStrIds) > 0) {
-          for ($i = 0; $i < count($arrStrIds); $i++) {     
+          for ($i = 0; $i < count($arrStrIds); $i++) {
             $arrStrIdComposto = explode('-', $arrStrIds[$i]);
             $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
             $objTramiteEmBlocoProtocoloDTO->setNumIdBlocoProcesso($arrStrIdComposto[0]);
@@ -40,13 +40,11 @@ try {
         }
         
           $contemValidacoes = $objTramitaEmBlocoProtocoloRN->verificarExclusaoBloco($arrObjTramiteBlocoProtocoloDTO);
-          // print_r($arrObjTramiteBlocoProtocoloDTO);
           $arrExcluidos = $objTramitaEmBlocoProtocoloRN->excluir($arrObjTramiteBlocoProtocoloDTO);
         if (!empty($arrExcluidos)) {
           $dblIdBloco = $arrObjTramiteBlocoProtocoloDTO[0]->getNumIdBloco();
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
           $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
-          // $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
           $objTramiteEmBlocoDTO->retNumId();
           $objTramiteEmBlocoDTO->retStrStaEstado();
           $objTramiteEmBlocoDTO->retNumOrdem();
@@ -66,12 +64,12 @@ try {
             $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
             $arrObjTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
             if (count($arrObjTramiteEmBlocoProtocoloDTO) > 0) {
-              $concluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-              $parcialmenteConcluido = array(
+              $concluido = array(
                 ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
                 ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
                 ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
                 ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
               );
               $emAndamento = array(
                 ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
@@ -83,14 +81,11 @@ try {
               foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
                 if (
                   in_array($objDTO->getNumIdAndamento(), $emAndamento)
-                  && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE
+                  && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO
                 ) {
                   $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
                 }
-                if (in_array($objDTO->getNumIdAndamento(), $parcialmenteConcluido)) {
-                  $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE;
-                }
-                if ($objDTO->getNumIdAndamento() == $concluido
+                if (in_array($objDTO->getNumIdAndamento(), $concluido)
                   && (
                     $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
                     || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
@@ -235,8 +230,6 @@ try {
         $strResultado .= str_repeat('<td align="center"></td>' . "\n", 3);
       }
 
-
-      // print_r($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento()); die('asas');
       $strResultado .= '<td align="center">' . "\n";
       switch ($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento()) {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
@@ -257,7 +250,7 @@ try {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/falhou.png" title="Cancelado" style="width:16px; alt="Cancelado" />';
             break;
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:       
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO:    
           if(is_null($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento())){
             $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/nao_iniciado.png" title="Em aberto" style="width:16px;" alt="Em aberto" />';
               break;
@@ -272,22 +265,10 @@ try {
 
       $strResultado .= '<td align="center">'. "\n";
 
-      $estadosBloqueados = array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO
-      );
       if (        
         $objTramitaEmBlocoProtocoloDTO->getNumIdUnidadeBloco() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()
-        && (
-          !in_array($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento(), $estadosBloqueados)
-          || is_null($objTramitaEmBlocoProtocoloDTO->getNumIdAndamento())
-        )
-        ) {
+        && $objTramitaEmBlocoProtocoloDTO->getNumIdAndamento() === null
+      ) {
         $strResultado .= '<a onclick="onCLickLinkDelete(\''
           .$objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_protocolo_excluir&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&hdnInfraItensSelecionados='.$numIdBlocoProtocolo.'&id_bloco='.$_GET['id_bloco']).'\', this)" tabindex="'.PaginaSEI::getInstance()->getProxTabTabela().'"><img src="'.PaginaSEI::getInstance()->getIconeExcluir().'" title="Excluir processo" alt="Excluir processo" class="infraImg" /></a>&nbsp;';
       }

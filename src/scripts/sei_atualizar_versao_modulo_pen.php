@@ -2964,17 +2964,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         if ($arrPenBlocoProcessoDTO == null) {
           $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
         }
-
-        //Verificar se todos os processos de um bloco concluído na 3.6.2 foram concluídos
-        $staEstado = $tramiteEmBlocoDTO->getStrStaEstado();
-        if ($staEstado == TramiteEmBlocoRN::$TE_CONCLUIDO) {
-          $bolVeriicarStatusDiferenteDeSucesso = $this->verificarIdAndamentoConcluido($arrPenBlocoProcessoDTO);
-          if (!empty($bolVeriicarStatusDiferenteDeSucesso)) {
-            $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoDTO->getNumId());
-            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
-          }
-        }
       }
     }
 
