@@ -83,7 +83,6 @@ try {
       $checkboxesEstados = [
         'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
         'chkSinEstadoDisponibilizado' => TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
-        'chkSinEstadoConcluidoParcialmente' => TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
         'chkSinEstadoConcluido' => TramiteEmBlocoRN::$TE_CONCLUIDO
       ];
 
@@ -501,11 +500,6 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
           <div id="divSinEstadoDisponibilizado" class="infraDivCheckbox">
             <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_DISPONIBILIZADO, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoDisponibilizado" name="chkSinEstadoDisponibilizado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoDisponibilizado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
             <label id="lblSinEstadoDisponibilizado" for="chkSinEstadoDisponibilizado" accesskey="" class="infraLabelCheckbox">Aguardando Processamento</label>
-          </div>
-
-          <div id="divSinEstadoConcluidoParcialmente" class="infraDivCheckbox">
-            <input type="checkbox" id="chkSinEstadoConcluidoParcialmente" <?php echo in_array(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> name="chkSinEstadoConcluidoParcialmente" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoConcluidoParcialmente) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-            <label id="lblSinEstadoConcluido" for="chkSinEstadoConcluidoParcialmente" accesskey="" class="infraLabelCheckbox">Concluído Parcialmente</label>
           </div>
 
           <div id="divSinEstadoConcluido" class="infraDivCheckbox">

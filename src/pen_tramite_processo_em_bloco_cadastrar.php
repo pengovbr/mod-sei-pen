@@ -64,7 +64,6 @@ try {
         $dblIdBloco = $arrObjPenBlocoProcessoDTO[0]->getNumIdBloco();
         $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
         $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
-        // $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
         $objTramiteEmBlocoDTO->retNumId();
         $objTramiteEmBlocoDTO->retStrStaEstado();
         $objTramiteEmBlocoDTO->retNumOrdem();
@@ -85,12 +84,12 @@ try {
           $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
           $arrObjTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
           if (count($arrObjTramiteEmBlocoProtocoloDTO) > 0) {
-            $concluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-            $parcialmenteConcluido = array(
+            $concluido = array(
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
             );
             $emAndamento = array(
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
@@ -102,14 +101,11 @@ try {
             foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
               if (
                 in_array($objDTO->getNumIdAndamento(), $emAndamento)
-                && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE
+                && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO
               ) {
                 $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
               }
-              if (in_array($objDTO->getNumIdAndamento(), $parcialmenteConcluido)) {
-                $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE;
-              }
-              if ($objDTO->getNumIdAndamento() == $concluido
+              if (in_array($objDTO->getNumIdAndamento(), $concluido)
                 && (
                   $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
                   || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
@@ -177,7 +173,6 @@ try {
           $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
           $dthRegistro = date('d/m/Y H:i:s');
           $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
-          // $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
           $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
           $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
           $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -245,7 +240,7 @@ try {
 
             header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao']));
             exit(0);
-          }         
+          }
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
             $bolInclusaoErro = false;
@@ -254,7 +249,6 @@ try {
             $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
             $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
             $objPenBlocoProcessoDTO->retNumIdBloco();
-            // $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
             $dtRegistro = date('d/m/Y H:i:s');
             $objPenBlocoProcessoDTO->setDthRegistro($dtRegistro);
             $objPenBlocoProcessoDTO->setDthAtualizado($dtRegistro);
@@ -265,7 +259,7 @@ try {
 
             if ($validarPreCondicoesIncluir != false) {
               $bolInclusaoErro = true;
-              $arrMensagensErros[] = $validarPreCondicoesIncluir;                   
+              $arrMensagensErros[] = $validarPreCondicoesIncluir;
             }else{
               $objInfraException = new InfraException();
               $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();

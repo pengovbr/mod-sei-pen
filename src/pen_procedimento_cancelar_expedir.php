@@ -29,11 +29,19 @@ try {
 
   $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
   $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
-  $objTramiteEmBlocoProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
   $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
   $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
-  $objTramiteEmBlocoProtocoloDTO->setNumIdAtividade(array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE), InfraDTO::$OPER_NOT_IN);
+  $objTramiteEmBlocoProtocoloDTO->setNumIdAtividade(
+    array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    ),
+    InfraDTO::$OPER_NOT_IN
+  );
   $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
   $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
@@ -41,16 +49,8 @@ try {
 
   if ($tramiteEmBlocoProtocoloDTO != null) {
     // TODO: tratar atualização a partir de um metodo
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
-    $objTramiteEmBlocoDTO->retTodos();
-    // Consultar se o bloco esta como concluído
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $retObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
-    if ($retObjTramiteEmBlocoDTO != null && $retObjTramiteEmBlocoDTO->getStrStaEstado() != TramiteEmBlocoRN::$TE_CONCLUIDO) {
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-      $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
-    }
+    $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+    $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
   }
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();

@@ -319,43 +319,6 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       if (!empty($tramiteEmBloco)) {
         return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$tramiteEmBloco->getNumOrdem()} - {$tramiteEmBloco->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
       }
-
-      $processoRecusadoNoBlocoParcial = $this->validarBlocoEstadoConcluidoParcial($tramitaEmBloco->getNumIdBloco(), $idProtocolo);
-      if ($processoRecusadoNoBlocoParcial !== false) {
-        return "Prezado(a) usuário(a), o processo {$tramitaEmBloco->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$processoRecusadoNoBlocoParcial->getNumOrdem()} - {$processoRecusadoNoBlocoParcial->getStrDescricao()}. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
-      }
-    }
-
-    return false;
-  }
-
-  public function validarBlocoEstadoConcluidoParcial($dblIdbloco, $idProtocolo)
-  {
-    $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $tramiteEmBlocoDTO->setNumId($dblIdbloco);
-    $tramiteEmBlocoDTO->setStrStaEstado([
-      TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
-    ], InfraDTO::$OPER_IN);
-    $tramiteEmBlocoDTO->retStrDescricao();
-    $tramiteEmBlocoDTO->retStrStaEstado();
-    $tramiteEmBlocoDTO->retNumId();
-
-    $tramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $tramiteEmBloco = $tramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
-
-    if (!empty($tramiteEmBloco)) {
-      $objPenProtocolo = new PenProtocoloDTO();
-      $objPenProtocolo->setDblIdProtocolo($idProtocolo);
-      $objPenProtocolo->setStrSinObteveRecusa('S');
-      $objPenProtocolo->setNumMaxRegistrosRetorno(1);
-      $objPenProtocolo->retDblIdProtocolo();
-
-      $objPenProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
-      $ObjPenProtocoloDTO = $objPenProtocoloBD->consultar($objPenProtocolo);
-
-      if ($ObjPenProtocoloDTO != null) {
-        return $tramiteEmBloco;
-      }
     }
 
     return false;
@@ -456,12 +419,12 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
    */
   private function validarStatusProcessoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $idAndamentoBloco)
   {
-    $concluido = ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-    $parcialmenteConcluido = array(
+    $concluido = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
     );
     $emAndamento = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
@@ -470,25 +433,23 @@ class TramitaEmBlocoProtocoloRN extends InfraRN
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
     );
+    $qtdProcesos = count($arrObjTramiteEmBlocoProtocoloDTO);
+    $arrayConcluidos = array();
+    $arrayEmAndamento = array();
     foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
-      if (
-        in_array($objDTO->getNumIdAndamento(), $emAndamento)
-        && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE
-      ) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
+      if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
+        $arrayConcluidos[] = $objDTO;
       }
-      if (in_array($objDTO->getNumIdAndamento(), $parcialmenteConcluido)) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE;
+
+      if (in_array($objDTO->getNumIdAndamento(), $emAndamento)) {
+        $arrayEmAndamento[] = $objDTO;
       }
-      if (
-        $objDTO->getNumIdAndamento() == $concluido
-        && (
-          $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
-          || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
-        )
-      ) {
-        $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
-      }
+    }
+
+    if (count($arrayEmAndamento)) {
+      $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
+    } elseif ($qtdProcesos == count($arrayConcluidos)) {
+      $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
     }
 
     return $idAndamentoBloco;
