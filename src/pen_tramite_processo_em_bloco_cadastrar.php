@@ -55,74 +55,20 @@ try {
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
         $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
         foreach($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO){
-          if($objPenBlocoProcessoDTO->getNumIdAndamento() != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE){
+          $concluido = array(
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+          );
+          if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
             $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
           }
         }
 
-        //Atualizando o status do bloco após clicar no btn de retirar processo do bloco
-        $dblIdBloco = $arrObjPenBlocoProcessoDTO[0]->getNumIdBloco();
-        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
-        $objTramiteEmBlocoDTO->retNumId();
-        $objTramiteEmBlocoDTO->retStrStaEstado();
-        $objTramiteEmBlocoDTO->retNumOrdem();
-
-        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
-        $numBlocoLegado = 0;
-
-        if ($blocoResultado != null && $blocoResultado->getNumOrdem() != $numBlocoLegado) {
-          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-          $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($dblIdBloco);
-          $objTramiteEmBlocoProtocoloDTO->retNumIdAndamento();
-          $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
-
-          $idAndamentoBloco = TramiteEmBlocoRN::$TE_ABERTO;
-
-          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-          $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-          $arrObjTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
-          if (count($arrObjTramiteEmBlocoProtocoloDTO) > 0) {
-            $concluido = array(
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-            );
-            $emAndamento = array(
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
-            );
-            foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
-              if (
-                in_array($objDTO->getNumIdAndamento(), $emAndamento)
-                && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO
-              ) {
-                $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
-              }
-              if (in_array($objDTO->getNumIdAndamento(), $concluido)
-                && (
-                  $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
-                  || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
-                )
-              ) {
-                $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
-              }
-            }
-
-            $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
-          } else {
-            $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
-          }
-
-          $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
-          $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
-        }
+        $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+        $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($dblIdBloco);
 
         $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {

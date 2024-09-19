@@ -31,6 +31,8 @@ class PenBlocoProcessoRN extends InfraRN
       $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
       $objPenLoteProcedimentoDTO->retNumIdAndamento();
       $objPenLoteProcedimentoDTO->retStrProtocoloFormatadoProtocolo();
+      $objPenLoteProcedimentoDTO->retStrProtocoloFormatadoProtocolo();
+      $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
       $objPenLoteProcedimentoBD = new PenLoteProcedimentoBD($this->getObjInfraIBanco());
       $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoBD->consultar($objPenLoteProcedimentoDTO);
@@ -323,10 +325,11 @@ class PenBlocoProcessoRN extends InfraRN
         }
 
         $objPenProtocoloDTO = new PenBlocoProcessoDTO();
+        $objPenProtocoloDTO->setNumIdBlocoProcesso($objDTO->getNumIdBlocoProcesso());
         $objPenProtocoloDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+        $objPenProtocoloDTO->setNumIdBloco($objDTO->getNumIdBloco());
         $objPenProtocoloDTO->retNumIdAndamento();
         $objPenProtocoloDTO->retDblIdProtocolo();
-        $objPenProtocoloDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
 
         $objPenProtocoloDTO = $this->consultar($objPenProtocoloDTO);
 

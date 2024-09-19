@@ -153,15 +153,21 @@ class PENIntegracao extends SeiIntegracao
     $bolProcessoEmBloco = false;
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-    $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
     $objPenBlocoProcessoDTO->retNumIdAndamento();
     $objPenBlocoProcessoDTO->retNumIdBloco();
 
     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
     $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
     if (count($arrObjPenBlocoProcessoDTO) > 0){
+      $concluido = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+      );
       foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
-        if ($objBlocoProcessoDTO->getNumIdAndamento() != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
+        if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
           $bolProcessoEmBloco = true;
         }
       }
