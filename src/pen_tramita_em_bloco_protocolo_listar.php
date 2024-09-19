@@ -53,55 +53,8 @@ try {
           $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
 
           if ($blocoResultado != null) {
-            $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-            $objTramiteEmBlocoProtocoloDTO->setNumIdBloco($dblIdBloco);
-            $objTramiteEmBlocoProtocoloDTO->retNumIdAndamento();
-            $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
-
-            $idAndamentoBloco = TramiteEmBlocoRN::$TE_ABERTO;
-
-            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-            $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-            $arrObjTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
-            if (count($arrObjTramiteEmBlocoProtocoloDTO) > 0) {
-              $concluido = array(
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-              );
-              $emAndamento = array(
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
-                ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
-              );
-              foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
-                if (
-                  in_array($objDTO->getNumIdAndamento(), $emAndamento)
-                  && $idAndamentoBloco != TramiteEmBlocoRN::$TE_CONCLUIDO
-                ) {
-                  $idAndamentoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
-                }
-                if (in_array($objDTO->getNumIdAndamento(), $concluido)
-                  && (
-                    $idAndamentoBloco == TramiteEmBlocoRN::$TE_CONCLUIDO
-                    || $idAndamentoBloco == TramiteEmBlocoRN::$TE_ABERTO
-                  )
-                ) {
-                  $idAndamentoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
-                }
-              }
-
-              $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
-            } else {
-              $objTramiteEmBlocoDTO->setStrStaEstado($idAndamentoBloco);
-            }
-              
-            $objTramiteEmBlocoDTO->setNumId($dblIdBloco);
-            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+            $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($dblIdBloco);
           }
         }
         if (!is_null($contemValidacoes)) {
