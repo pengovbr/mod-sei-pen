@@ -47,14 +47,14 @@ try {
   $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
   $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
 
+  $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+  $objExpedirProcedimentosRN->cancelarTramite($idProcedimento);
+
   if ($tramiteEmBlocoProtocoloDTO != null) {
     // TODO: tratar atualização a partir de um metodo
     $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
     $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
   }
-
-  $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-  $objExpedirProcedimentosRN->cancelarTramite($idProcedimento);
 } catch (InfraException $e) {
   $strMensagem = $e->getStrDescricao();
 } catch (Exception $e) {

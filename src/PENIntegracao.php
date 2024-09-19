@@ -153,6 +153,7 @@ class PENIntegracao extends SeiIntegracao
     $bolProcessoEmBloco = false;
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
     $objPenBlocoProcessoDTO->retNumIdAndamento();
     $objPenBlocoProcessoDTO->retNumIdBloco();
 

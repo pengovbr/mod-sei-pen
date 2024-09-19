@@ -62,13 +62,13 @@ try {
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
           );
-          if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+          if ($objPenBlocoProcessoDTO->getNumIdAndamento() === null || !in_array($objPenBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
             $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
-          }
-        }
-
-        $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-        $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($dblIdBloco);
+           
+            $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
+          }          
+        }       
 
         $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {

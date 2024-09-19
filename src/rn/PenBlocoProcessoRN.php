@@ -416,6 +416,7 @@ class PenBlocoProcessoRN extends InfraRN
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
     );
 
