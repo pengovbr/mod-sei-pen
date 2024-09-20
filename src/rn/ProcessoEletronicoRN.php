@@ -116,7 +116,7 @@ class ProcessoEletronicoRN extends InfraRN
 	  $numTentativasErro = (is_numeric($numTentativasErro)) ? intval($numTentativasErro) : self::WS_TENTATIVAS_ERRO;
   
 	  $this->strEnderecoWebService = $strEnderecoWebService;
-	  $this->strComumXSD = $this->strEnderecoWebService . '?xsd=comum.xsd';
+	  $this->strComumXSD = $this->strEnderecoWebService . '/interoperabilidade/soap/v3/?xsd=comum.xsd';
 	  $this->strLocalCert = $strLocalizacaoCertificadoDigital;
 	  $this->strLocalCertPassword = $strSenhaCertificadoDigital;
 	  $this->numTentativasErro = $numTentativasErro;
@@ -135,6 +135,8 @@ class ProcessoEletronicoRN extends InfraRN
 		)
 	  );
   
+      $strWSDL = $this->strEnderecoWebService . '/interoperabilidade/soap/v3/?wsdl';
+      $this->objPenWs = new BeSimple\SoapClient\SoapClient($strWSDL, $this->options);
   
 	  // TODO: lembrar de pegar url dinamicamente quando SOAP for removido
 	  $this->strBaseUri = 'https://homolog.api.processoeletronico.gov.br';
@@ -159,9 +161,8 @@ class ProcessoEletronicoRN extends InfraRN
 
 
     /**
-     * Construtor do objeto SoapClien utilizado para comunicação Webservice SOAP
+     * Construtor do objeto SoapClien utilizado para comunicação Webservice 
      *
-     * @return void
      */
   private function getObjPenWs()
     {
@@ -189,6 +190,36 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $this->objPenWs;
   }
+
+
+
+    // private function getObjPenWs()
+    // {
+    //     if (InfraString::isBolVazia($this->strEnderecoWebService)) {
+    //         throw new InfraException('Endereço do serviço de integração do Tramita GOV.BR não informado.');
+    //     }
+
+    //     if (InfraString::isBolVazia($this->strLocalCertPassword)) {
+    //         throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+    //     }
+
+    //     // Validar disponibilidade do serviço 
+    //     $endpoint = $this->strEnderecoWebService . '/interoperabilidade/rest/v3/healthcheck';
+
+    //     try{
+    //         $response = $this->strClientGuzzle->request('GET', $endpoint);
+
+    //         if ($response->getStatusCode() !== 200) {
+    //             throw new \RuntimeException('Falha ao conectar com o serviço REST');
+    //         }
+    //     } catch (RequestException $e) {
+    //         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+    //         $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
+    //         throw new \Exception($mensagem);
+    //     }
+
+    //    // return $this->objPenWs;
+    // }
 
 
     /**
@@ -245,6 +276,7 @@ class ProcessoEletronicoRN extends InfraRN
             ];
 
             $arrResultado = $this->get($endpoint, $parametros); 
+
             if (isset($arrResultado)) {
                 foreach ($arrResultado as $repositorio) {
                     $objRepositorioDTO = new RepositorioDTO();
@@ -308,50 +340,6 @@ class ProcessoEletronicoRN extends InfraRN
 			throw new InfraException($mensagem, $e, $detalhes);
 		}
 	}
-
-    /**
-    * Método responsável por recuperar pela estutura pai a estrutura de filhos de uma unidade
-    * @param $idRepositorioEstrutura
-    * @param null $numeroDeIdentificacaoDaEstrutura
-    * @param bool $bolRetornoRaw
-    * @return array
-    * @throws InfraException
-    */
-  public function consultarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null, $bolRetornoRaw = false)
-    {
-    try {
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturasPorEstruturaPai = new stdClass();
-        $parametros->filtroDeEstruturasPorEstruturaPai->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-
-      	if(!is_null($numeroDeIdentificacaoDaEstrutura)){
-        	$parametros->filtroDeEstruturasPorEstruturaPai->numeroDeIdentificacaoDaEstrutura = $numeroDeIdentificacaoDaEstrutura;
-      	}
-
-        $parametros->filtroDeEstruturasPorEstruturaPai->apenasAtivas = true;
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturasPorEstruturaPai($parametros);
-        });
-
-        $estruturasUnidades = is_array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura) ? $result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura : array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura);
-
-        //Cria um array com os nomes da unidades para realizar a ordenação das mesmas
-        $nomesUnidades = [];
-      foreach ($estruturasUnidades as $estrutura) {
-        $nomesUnidades[] = $estrutura->nome;
-      }
-
-        //Ordena as unidades pelo nome
-        array_multisort($nomesUnidades, SORT_ASC, $estruturasUnidades);
-
-        return $estruturasUnidades;
-    }
-    catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
 
 	/**
 	 * Lista estruturas de um repositório de estruturas.
@@ -672,18 +660,18 @@ class ProcessoEletronicoRN extends InfraRN
 			}
 			if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
 				$strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
-			}
+      }
 
-		$e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
-		$strMensagem = $e->faultstring;
-		$strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
-		throw new InfraException($strMensagem, $e, $strDetalhes);
-		} catch (\Exception $e) {
-		$mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
-		$detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-		throw new InfraException($mensagem, $e, $detalhes);
-		}
-	}
+        $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
+        $strMensagem = $e->faultstring;
+        $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        throw new InfraException($strMensagem, $e, $strDetalhes);
+    } catch (\Exception $e) {
+        $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
 
   private function validarTramitaEmAndamento($parametros, $strMensagem)
     {
@@ -802,7 +790,6 @@ class ProcessoEletronicoRN extends InfraRN
   private function atribuirInformacoesAssunto($objCabecalho, $dblIdProcedimento)
     {
 
-
     try{
 
 
@@ -903,7 +890,7 @@ class ProcessoEletronicoRN extends InfraRN
 	//   $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
 	//   $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
 	//   $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-  
+	
 	//   $strBaseUri = 'https://homolog.api.processoeletronico.gov.br';
 	//   // $arrheaders = [
 	// 	// 'Accept' => '*/*',
@@ -953,7 +940,6 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-
     /**
     * Método responsável por realizar o envio da parte de um componente digital
     * @param $parametros
@@ -1000,23 +986,6 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-//   public function solicitarMetadados($parNumIdentificacaoTramite)
-//     {
-//     try {
-//         $parametros = new stdClass();
-//         $parametros->IDT = $parNumIdentificacaoTramite;
-//         return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-//             $objMetadadosProtocolo = $objPenWs->solicitarMetadados($parametros);
-//             $objMetadadosProtocolo->IDT = $parametros->IDT;
-//             return $objMetadadosProtocolo;
-//         });
-//     } catch (\Exception $e) {
-//         $mensagem = "Falha na solicitação de metadados do processo";
-//         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-//         throw new InfraException($mensagem, $e, $detalhes);
-//     }
-//   }
-	
 
 	public function solicitarMetadados($parNumIdentificacaoTramite)
 	{
@@ -1027,11 +996,12 @@ class ProcessoEletronicoRN extends InfraRN
 			];
 			
 			$arrResultado = $this->get($endpoint, $parametros);
+			$arrResultado['propriedadeAdicional'] = $arrResultado['propriedadesAdicionais'];
 
-			$arrResultadoDocumentos = $arrResultado['processo']['documentos'];
-			foreach ($arrResultadoDocumentos as $chave => $documento) {
-				$arrResultado['processo']['documentos'][$chave]['componenteDigital'] = (array) $documento['componentesDigitais'][0];	
-			}
+			$arrResultadoDocumentos = $arrResultado['processo']['documentos'][0];
+			$arrResultado['processo']['documentos'][0]['componenteDigital'] = $arrResultadoDocumentos['componentesDigitais'][0];
+			$arrResultado['processo']['documentos'][0]['componenteDigital']['assinaturaDigital'] = $arrResultadoDocumentos['componentesDigitais'][0]['assinaturasDigitais'][0];
+
 			$objResultado = new stdClass();
 			$objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
 
@@ -1041,7 +1011,7 @@ class ProcessoEletronicoRN extends InfraRN
 
 			$objResultado->IDT = $parNumIdentificacaoTramite;
 			$objResultado->metadados->NRE = $objResultado->metadados->nre;
-			$objResultado->metadados->processo->documento = $arrObjMetaDocumento;
+			$objResultado->metadados->processo->documento = $arrObjMetaDocumento[0];
 			$objResultado->metadados->processo->interessado = $arrObjMetaInteressado;
 
 			return $objResultado;
@@ -1447,10 +1417,62 @@ class ProcessoEletronicoRN extends InfraRN
       return $arrObjComponenteDigitalDTO;
   }
 
-  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
+
+    public function receberComponenteDigitalR($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
+    {
+    $endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
+    try
+    {	
+      $client = new GuzzleHttp\Client([
+        'base_uri' => $this->strBaseUri,
+        'timeout'  => 5.0,
+        'cert'     => [$this->strLocalCert, $this->strLocalCertPassword],
+      ]);
+
+      $body = json_encode([
+        'hashDoComponenteDigital' => $parStrHashComponenteDigital,
+        'protocolo' => $parStrProtocolo,
+      ]);
+
+    //   if (!is_null($parObjParteComponente)) {
+    //     $endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
+    //   }
+
+    $response = $client->request('POST', $endpoint, [
+        'headers' => [
+            'accept' => '*/*',
+            'Content-Type' => 'application/json',
+        ],
+        'json' => $body // Envia o corpo como JSON
+    ]);
+
+    if ($response->getStatusCode() === 200) {
+        echo "Requisição bem-sucedida: " . $response->getBody();
+    } else {
+        echo "Falha na requisição. Status: " . $response->getStatusCode();
+    }
+
+    } catch (\RequestException  $fault) {
+      $mensagem = $this->tratarFalhaWebService($fault);
+      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+    } catch (\Exception $e) {
+      throw new InfraException("Error Processing Request", $e);
+    }
+  }
+
+    public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
     {
     try
       {
+        // $dbug = [
+        //   'parNumIdentificacaoTramite' => $parNumIdentificacaoTramite,
+        //   'parStrHashComponenteDigital' => $parStrHashComponenteDigital,
+        //   'parStrProtocolo' => $parStrProtocolo,
+        //   'parObjParteComponente' => $parObjParteComponente
+        // ];
+
+        // print_R($dbug); die('aki');
+
         $parametros = new stdClass();
         $parametros->parametrosParaRecebimentoDeComponenteDigital = new stdClass();
         $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital = new stdClass();
@@ -1897,11 +1919,6 @@ class ProcessoEletronicoRN extends InfraRN
 		}
 	}
 
-
-
-
-  
-
     /**
     * Método que faz a recusa de um trâmite
     *
@@ -1947,96 +1964,27 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function isDisponivelCancelarTramite($strProtocolo = '')
+    public function consultarHipotesesLegais() 
     {
-      //Obtem o id_rh que representa a unidade no barramento
-      $objPenParametroRN = new PenParametroRN();
-      $numIdRespositorio = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        $endpoint = "/interoperabilidade/rest/v3/hipoteses";
+        try {
+            $parametros = [];
+            $arrResultado = $this->get($endpoint, $parametros);
+            return $arrResultado;
 
-      //Obtem os dados da unidade
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objPenUnidadeDTO->retNumIdUnidadeRH();
+            if (empty($hipoteses)) {
+                return [];
+            }
 
-      $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
-      $objPenUnidadeDTO = $objGenericoBD->consultar($objPenUnidadeDTO);
+            return $hipoteses;
 
-      //Obtem os dados do último trâmite desse processo no barramento
-      $objProtocoloDTO = new ProtocoloDTO();
-      $objProtocoloDTO->setStrProtocoloFormatado($strProtocolo);
-      $objProtocoloDTO->retDblIdProtocolo();
-
-      $objProtocoloRN = new ProtocoloRN();
-      $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
-
-      $objTramiteDTO = new TramiteDTO();
-      $objTramiteDTO->setNumIdProcedimento($objProtocoloDTO->retDblIdProtocolo());
-      $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
-      $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-      $objTramiteDTO->retNumIdTramite();
-
-      $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-      $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
-
-    if(!$arrObjTramiteDTO){
-        return false;
-    }
-
-      $objTramiteDTO = $arrObjTramiteDTO[0];
-
-    try {
-        $parametros = new stdClass();
-        $parametros->filtroDeConsultaDeTramites = new stdClass();
-        $parametros->filtroDeConsultaDeTramites->IDT = $objTramiteDTO->getNumIdTramite();
-        $parametros->filtroDeConsultaDeTramites->remetente = new stdClass();
-        $parametros->filtroDeConsultaDeTramites->remetente->identificacaoDoRepositorioDeEstruturas = $numIdRespositorio;
-        $parametros->filtroDeConsultaDeTramites->remetente->numeroDeIdentificacaoDaEstrutura = $objPenUnidadeDTO->getNumIdUnidadeRH();
-
-        $objMeta = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarTramites($parametros);
-        });
-
-      if($objMeta->tramitesEncontrados) {
-        $arrObjMetaTramite = !is_array($objMeta->tramitesEncontrados->tramite) ? array($objMeta->tramitesEncontrados->tramite) : $objMeta->tramitesEncontrados->tramite;
-        $objMetaTramite = $arrObjMetaTramite[0];
-
-        $strSituacoesDisponíveisCancelamento = array(
-          static::$STA_SITUACAO_TRAMITE_INICIADO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-          static::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO
-        );
-
-        if(in_array($objMetaTramite->situacaoAtual, $strSituacoesDisponíveisCancelamento)){
-            return true;
+        } catch(Exception $e){
+            $mensagem = "Falha na obtenção de hipóteses legais";
+            $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+            throw new InfraException($mensagem, $e, $detalhes);
         }
-      }
-
-        return false;
     }
-    catch(SoapFault $e) {
-        return false;
-    }
-    catch(Exception $e) {
-        return false;
-    }
-  }
-
-  public function consultarHipotesesLegais() {
-    try{
-        $hipoteses = $this->tentarNovamenteSobErroHTTP(function($objPenWs) {
-            return $objPenWs->consultarHipotesesLegais();
-        });
-
-      if (empty($hipoteses)) {
-        return [];
-      }
-        return $hipoteses;
-
-    } catch(Exception $e){
-        $mensagem = "Falha na obtenção de hipóteses legais";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
+    
 
   protected function contarConectado(ProcessoEletronicoDTO $objProcessoEletronicoDTO)
     {

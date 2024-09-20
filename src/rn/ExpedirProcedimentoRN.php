@@ -387,7 +387,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrHashIndexados = array();
       foreach ($parObjProcesso->documento as $objDoc)
         {
-            $arrComponentesDigitais = is_array($objDoc->componentesDigitais) ? $objDoc->componentesDigitais : array($objDoc->componentesDigitais);
+            $arrComponentesDigitais = is_array($objDoc->componenteDigital) ? $objDoc->componenteDigital : array($objDoc->componenteDigital);
         foreach ($arrComponentesDigitais as $objComponenteDigital) {
           $strHashComponente = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
           if(!in_array($strHashComponente, $arrHashIndexados)){
@@ -2155,9 +2155,8 @@ class ExpedirProcedimentoRN extends InfraRN {
                   ];
 
                   $this->salvarAnexoImutavel($dados);
-                  // $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($objDadosArquivo['CONTEUDO'], XSD_BASE64BINARY);
 
-                  $dadosDoComponenteDigital->conteudoDoComponenteDigital = $objDadosArquivo;
+                 $dadosDoComponenteDigital->conteudoDoComponenteDigital = $objDadosArquivo['CONTEUDO'];
 
                   $parametros = new stdClass();
                   $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
