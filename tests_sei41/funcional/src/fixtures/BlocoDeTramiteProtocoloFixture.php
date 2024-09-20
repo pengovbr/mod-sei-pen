@@ -19,6 +19,8 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
         $this->objBlocoDeTramiteProtocoloDTO->setDblIdProtocolo($dados['IdProtocolo'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setNumIdBloco($dados['IdBloco'] ?: null);
         $this->objBlocoDeTramiteProtocoloDTO->setNumSequencia($dados['Sequencia'] ?: null);
+        $this->objBlocoDeTramiteProtocoloDTO->setNumIdUsuario($dados['IdUsuario'] ?: '100000001');
+        $this->objBlocoDeTramiteProtocoloDTO->setNumIdUnidade($dados['IdUnidade'] ?: '110000001');
         $dthRegistro = date('d/m/Y H:i:s');
         $this->objBlocoDeTramiteProtocoloDTO->setDthRegistro($dados['DthRegistro'] ?: $dthRegistro);
         $this->objBlocoDeTramiteProtocoloDTO->setDthAtualizado($dados['DthAtualizado'] ?: $dthRegistro);
