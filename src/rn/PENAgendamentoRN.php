@@ -19,13 +19,23 @@ class PENAgendamentoRN extends InfraRN
         $objBD = new PenHipoteseLegalBD($this->inicializarObjInfraIBanco());
         $processoEletronicoRN = new ProcessoEletronicoRN();
         $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
+        $hipotesesPenDesativadas = $processoEletronicoRN->consultarHipotesesLegais(false);
 
-      if(empty($hipotesesPen)){
+      $hipoteses = array();
+      if (!empty($hipotesesPen) && !empty($hipotesesPen->hipotesesLegais) && !empty($hipotesesPen->hipotesesLegais->hipotese)) {
+        $hipoteses = $hipotesesPen->hipotesesLegais->hipotese;
+      }
+
+      if (!empty($hipotesesPenDesativadas) && !empty($hipotesesPenDesativadas->hipotesesLegais) && !empty($hipotesesPenDesativadas->hipotesesLegais->hipotese)) {
+        $hipoteses = array_merge($hipoteses, $hipotesesPenDesativadas->hipotesesLegais->hipotese);
+      }
+
+      if(empty($hipoteses)){
         throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');
       }
 
         //Para cada hipótese vinda do PEN será verificado a existencia.
-      foreach ($hipotesesPen['hipotesesLegais'] as $hipotese) {
+      foreach ($hipoteses as $hipotese) {
 
           $objDTO = new PenHipoteseLegalDTO();
           $objDTO->setNumIdentificacao($hipotese['identificacao']);
@@ -179,7 +189,7 @@ class PENAgendamentoRN extends InfraRN
      *
      * @return void
      */
-  public function processarTarefasPEN($arrParametros)
+  public function processarTarefasRecebimentoPEN($arrParametros)
     {
       InfraDebug::getInstance()->setBolLigado(true);
       InfraDebug::getInstance()->setBolDebugInfra(false);
@@ -209,7 +219,7 @@ class PENAgendamentoRN extends InfraRN
       }
 
         // Faz uma requisição para o controlador do sistema
-        PendenciasTramiteRN::inicializarMonitoramentoPendencias($numValorWorkers, $bolMonitoramentoAtivado, $bolExecutarEmSegundoPlano, $bolDebugAtivo);
+        PendenciasTramiteRN::inicializarMonitoramentoRecebimentoPendencias($numValorWorkers, $bolMonitoramentoAtivado, $bolExecutarEmSegundoPlano, $bolDebugAtivo);
 
     }catch(Exception $e){
         InfraDebug::getInstance()->setBolLigado(false);
@@ -220,6 +230,51 @@ class PENAgendamentoRN extends InfraRN
     }
   }
 
+  /**
+   * Processa tarefas recebidas pelo Barramento de Serviços do PEN para receber novos processos/documentos,
+   * notificações de conclusão de trâmites ou notificação de recusa de processos
+   *
+   * @return void
+   */
+  public function processarTarefasEnvioPEN($arrParametros)
+  {
+    InfraDebug::getInstance()->setBolLigado(true);
+    InfraDebug::getInstance()->setBolDebugInfra(false);
+    InfraDebug::getInstance()->setBolEcho(false);
+    InfraDebug::getInstance()->limpar();
+
+    try {
+      if (!PENIntegracao::verificarCompatibilidadeConfiguracoes()) {
+        return false;
+      }
+
+      $bolDebugAtivo = array_key_exists('debug', $arrParametros) && $arrParametros['debug'][0] != false;
+      $bolMonitoramentoAtivado = array_key_exists('monitorar', $arrParametros) && $arrParametros['monitorar'][0] != false;
+      $strValorWorkers = array_key_exists('workers', $arrParametros) ? $arrParametros['workers'][0] : null;
+      $strValorWorkers = (is_null($strValorWorkers) && array_key_exists('worker', $arrParametros)) ? $arrParametros['worker'][0] : $strValorWorkers;
+      $numValorWorkers = is_numeric($strValorWorkers) ? intval($strValorWorkers) : null;
+      $bolForcarInicializacaoWorkers = array_key_exists('forcarInicializacaoWorkers', $arrParametros) && $arrParametros['forcarInicializacaoWorkers'][0] == true;
+      $bolAtivaWorker = (is_null($numValorWorkers) || $numValorWorkers > 0) && ($this->foiIniciadoPeloTerminal() || $bolForcarInicializacaoWorkers);
+
+      $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+      $arrObjGearman = $objConfiguracaoModPEN->getValor("PEN", "Gearman", false);
+      $bolExecutarEmSegundoPlano = !empty(trim(@$arrObjGearman["Servidor"] ?: null));
+
+      // Inicializa workers do Gearman caso este componente esteja configurado e não desativado no agendamento do sistema
+      if ($bolAtivaWorker && $bolExecutarEmSegundoPlano) {
+        ProcessarPendenciasRN::inicializarWorkers($numValorWorkers);
+      }
+
+      // Faz uma requisição para o controlador do sistema
+      PendenciasEnvioTramiteRN::inicializarMonitoramentoEnvioPendencias($numValorWorkers, $bolMonitoramentoAtivado, $bolExecutarEmSegundoPlano, $bolDebugAtivo);
+    } catch (Exception $e) {
+      InfraDebug::getInstance()->setBolLigado(false);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+
+      throw new InfraException('Erro processando pendências de trâmites do Barramento de Serviços do PEN.', $e);
+    }
+  }
 
   private function foiIniciadoPeloTerminal()
     {

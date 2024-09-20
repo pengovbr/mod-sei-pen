@@ -35,6 +35,54 @@ try {
   $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarProcessoEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
   $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $acao . $strParametros) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
   switch ($_GET['acao']) {
+    case 'pen_excluir_processo_em_bloco_tramite':
+      try {
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+        $objProcedimentoDTO->setDblIdProcedimento($_GET['id_procedimento']);
+
+        $objProcedimentoRN = new ProcedimentoRN();
+        $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($_GET['id_procedimento']);
+        $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objPenBlocoProcessoDTO->retNumIdAndamento();
+        $objPenBlocoProcessoDTO->retDblIdProtocolo();
+        $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
+        $objPenBlocoProcessoDTO->retNumIdBloco();
+ 
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        foreach($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO){
+          $concluido = array(
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+          );
+          if ($objPenBlocoProcessoDTO->getNumIdAndamento() === null || !in_array($objPenBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+            $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
+           
+            $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
+          }          
+        }       
+
+        $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
+      } catch (Exception $e) {
+        $strMensagem = $e->getMessage();
+        PaginaSEI::getInstance()->processarExcecao($e);
+      }
+      ?>
+      <script type="text/javascript">
+        alert('<?= $strMensagem ?>');
+        parent.parent.location.reload();
+      </script>
+      <?php
+        exit(0);
+      break;
     case 'pen_incluir_processo_em_bloco_tramite':
       $objSessaoSEI->validarPermissao($_GET['acao']);
 
@@ -54,8 +102,8 @@ try {
             exit(0);
           }
 
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, [$_GET['id_procedimento']]);
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $validar = $objPenBlocoProcessoRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, [$_GET['id_procedimento']]);
 
           if ($validar !== false) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
@@ -64,28 +112,56 @@ try {
             exit(0);
           }
 
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          // Esse quem vai ficar
+          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $objPenBlocoProcessoDTO->setNumIdBlocoProcesso(null);
+          $objPenBlocoProcessoDTO->setDblIdProtocolo($_GET['id_procedimento']);
+          $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
+          $dthRegistro = date('d/m/Y H:i:s');
+          $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
+          $objPenBlocoProcessoDTO->setDthAtualizado($dthRegistro);
+          $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+          $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-          $objTramiteEmBlocoProtocoloDTO->setNumId(null);
-          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($_GET['id_procedimento']);
-          $objTramiteEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoExterno);
-          $objTramiteEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
-
-          $objTramiteEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $objTramiteEmBlocoProtocoloRN->validarBlocoDeTramite($_GET['id_procedimento']);
+          $validar = $objPenBlocoProcessoRN->validarBlocoDeTramite($_GET['id_procedimento']);
 
           if ($validar) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_AVISO);
             header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
             exit(0);
           }
+         
+          //Verifica processo aberto em outra unidade.
+          $objInfraException = new InfraException();
+          $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($_GET['id_procedimento']));
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);
+          }
 
-          $objTramiteEmBlocoProtocoloDTO = $objTramiteEmBlocoProtocoloRN->cadastrar($objTramiteEmBlocoProtocoloDTO);
-          $objPaginaSEI->adicionarMensagem('Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco', InfraPagina::$TIPO_MSG_AVISO);
+          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($_GET['id_procedimento']));
+          $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+          if (!is_null($mensagemDeErro)) {
+            $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+            exit(0);
+          }          
+
+          $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+          $strMensagem = 'Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco';
         } catch (Exception $e) {
+          $strMensagem = $e->getMessage();
           PaginaSEI::getInstance()->processarExcecao($e);
         }
-        header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+        ?>
+        <script type="text/javascript">
+          alert('<?= $strMensagem ?>');
+          parent.parent.location.reload();
+        </script>
+        <?php
         exit(0);
       }
         break;
@@ -97,12 +173,13 @@ try {
       if (isset($_POST['sbmCadastrarProcessoEmBloco'])) {
 
         try {
-          $erros = [];
-          $sucesso = false;
+          $bolInclusaoSucesso = false;
+          $arrMensagensErros = [];
           $arrProtocolosOrigemProtocolo = explode(',', $strIdItensSelecionados);
 
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $validar = $tramitaEmBlocoProtocoloRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, $arrProtocolosOrigemProtocolo);
+          // Refatorar validarQuantidadeDeItensNoBloco
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $validar = $objPenBlocoProcessoRN->validarQuantidadeDeItensNoBloco($idBlocoExterno, $arrProtocolosOrigemProtocolo);
 
           if ($validar !== false) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
@@ -112,40 +189,66 @@ try {
           }
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
+            $bolInclusaoErro = false;
+            $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+            $objPenBlocoProcessoDTO->setDblIdProtocolo($idItensSelecionados);
+            $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoExterno);
+            $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
+            $objPenBlocoProcessoDTO->retNumIdBloco();
+            $dtRegistro = date('d/m/Y H:i:s');
+            $objPenBlocoProcessoDTO->setDthRegistro($dtRegistro);
+            $objPenBlocoProcessoDTO->setDthAtualizado($dtRegistro);
+            $objPenBlocoProcessoDTO->setNumIdUsuario($objSessaoSEI->getNumIdUsuario());
+            $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-            $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-            $tramitaEmBlocoProtocoloDTO->setDblIdProtocolo($idItensSelecionados);
-            $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoExterno);
-            $tramitaEmBlocoProtocoloDTO->retNumId();
-            $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-            $tramitaEmBlocoProtocoloDTO->retStrIdxRelBlocoProtocolo();
+            $validarPreCondicoesIncluir = $objPenBlocoProcessoRN->validarBlocoDeTramite($idItensSelecionados);
 
-            $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-            $validar = $tramitaEmBlocoProtocoloRN->validarBlocoDeTramite($idItensSelecionados);
+            if ($validarPreCondicoesIncluir != false) {
+              $bolInclusaoErro = true;
+              $arrMensagensErros[] = $validarPreCondicoesIncluir;
+            }else{
+              $objInfraException = new InfraException();
+              $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+              $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($idItensSelecionados));
+              $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+              if (!is_null($mensagemDeErro)) {
+                $bolInclusaoErro = true;
+                $arrMensagensErros[] = $mensagemDeErro;
+              }
+  
+              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($idItensSelecionados));
+              $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
+              if (!is_null($mensagemDeErro)) {
+                $bolInclusaoErro = true;
+                $arrMensagensErros[] = $mensagemDeErro;
+              }
 
-            if ($validar == false) {
-              $sucesso = true;
-              $objProcedimentoDTO = new ProcedimentoDTO();
-              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
-              $objProcedimentoDTO->setDblIdProcedimento($idItensSelecionados);
-
-              $objProcedimentoRN = new ProcedimentoRN();
-              $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-
-              $tramitaEmBlocoProtocoloDTO->setStrIdxRelBlocoProtocolo($procedimento->getStrProtocoloProcedimentoFormatado());
-              $objTramiteEmBlocoProtocoloDTO = $tramitaEmBlocoProtocoloRN->cadastrar($tramitaEmBlocoProtocoloDTO);
-            } else {
-              $erros = true;
-              $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+              if ($bolInclusaoErro === false) {
+                $bolInclusaoSucesso = true;
+                $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
+              }
+             
             }
           }
 
-          if ($sucesso) {
-            $mensagemSucesso = "Processo(s) incluído(s) com sucesso no bloco {$idBlocoExterno}";
+          if (!empty($arrMensagensErros)) {
+            foreach ($arrMensagensErros as $mensagemErro) {
+              $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
+            }
+          }
+            
+          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+          $objTramiteEmBlocoDTO->setNumId($idBlocoExterno);
+          $objTramiteEmBlocoDTO->retNumOrdem();       
+          $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+          $blocoResultado = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+          if ($bolInclusaoSucesso) {
+            $mensagemSucesso = "Processo(s) incluído(s) com sucesso no bloco {$blocoResultado->getNumOrdem()}";
           }
 
-          if ($sucesso && $erros) {
-            $mensagemSucesso = "Os demais processos selecionados foram incluídos com sucesso no bloco {$idBlocoExterno}";
+          if ($bolInclusaoSucesso && !empty($arrMensagensErros)) {
+            $mensagemSucesso = "Os demais processos selecionados foram incluídos com sucesso no bloco {$blocoResultado->getNumOrdem()}";
           }
 
           $objPaginaSEI->adicionarMensagem($mensagemSucesso, 5);
@@ -162,15 +265,17 @@ try {
   $arrMapIdBloco = array();
 
   $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-  $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+  $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO); //($objSessaoSEI->getNumIdUnidadeAtual());
+  $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
   $objTramiteEmBlocoDTO->retNumId();
+  $objTramiteEmBlocoDTO->retNumOrdem();
   $objTramiteEmBlocoDTO->retNumIdUnidade();
   $objTramiteEmBlocoDTO->retStrDescricao();
   PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
 
   $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
   foreach ($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO) as $dados) {
-    $arrMapIdBloco[$dados->getNumId()] = "{$dados->getNumId()} - {$dados->getStrDescricao()}";
+    $arrMapIdBloco[$dados->getNumId()] = "{$dados->getNumOrdem()} - {$dados->getStrDescricao()}"; // ISSUE 536 mudar aqui para seq Ordem por unidade
   }
 } catch (Exception $e) {
   PaginaSEI::getInstance()->processarExcecao($e);

@@ -4,7 +4,7 @@
   * Execution Groups
   * @group execute_alone_group3
  */
-class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
+class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -58,7 +58,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
         self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -98,7 +98,8 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
         self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste3);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
 
@@ -136,6 +137,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        putenv("DATABASE_HOST=org1-database");
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
         $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
@@ -154,7 +156,7 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends CenarioBaseTestCase
         $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
 
         $documentos = array(self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 

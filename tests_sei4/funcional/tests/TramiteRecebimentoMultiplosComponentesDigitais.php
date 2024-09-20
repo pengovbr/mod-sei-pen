@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -94,14 +94,14 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoA;
         $destinatario = self::$contextoOrgaoB;
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTeste1 = $this->gerarDadosDocumentoInternoTeste($remetente);
         $documentoTeste2 = $this->gerarDadosDocumentoExternoTeste($remetente);
 
         $novosDocumentos =  array($documentoTeste1, $documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
-        $totalDdocumentos =  array(self::$documentoZip, $documentoTeste1, $documentoTeste2);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $totalDdocumentos, $destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+
     }
 
     /**

@@ -108,7 +108,8 @@ dist:
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
-	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoEnvioTarefasPEN.php $(SEI_SCRIPTS_DIR)/
+	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoRecebimentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/	
 	@mv $(SEI_MODULO_DIR)/config/ConfiguracaoModPEN.exemplo.php $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/supervisor.exemplo.ini $(SEI_CONFIG_DIR)/
@@ -519,26 +520,38 @@ atualizaSequencia:
 tramitar-pendencias:
 	i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T1 $$i"; \
-		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php;
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php & \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php;
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done & i=1; while [ "$$i" -le 2 ]; do \
     	echo "Executando T2 $$i"; \
-		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php & \
-		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php;
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php & \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php;
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done
 
-tramitar-pendencias-simples:
-	@$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php; \
-	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php;
+tramitar-pendencias-simples: tramitar-pendencias-simples-org1 tramitar-pendencias-simples-org2
+	@$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
+
+tramitar-pendencias-simples-org1:
+	@$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
+
+tramitar-pendencias-simples-org2:
+	@$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+	$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php;
 
 tramitar-pendencias-silent:
 	@echo 'Executando monitoramento de pendências do Org1 e Org2'
 	@i=1; while [ "$$i" -le 3000 ]; do \
-		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 & \
-		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoTarefasPEN.php > /dev/null 2>&1 ; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org1-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php; \
+		$(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php; \
+	  $(CMD_COMPOSE_FUNC) exec org2-http php /opt/sei/scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php; \
 		i=$$((i + 1));\
   	done 
 

@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "3.6.2");
+define("VERSAO_MODULO_PEN", "3.7.0");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -53,9 +53,22 @@ class PENIntegracao extends SeiIntegracao
     $objSessaoSEI = SessaoSEI::getInstance();
     $strAcoesProcedimento = "";
 
-    $bolAcaoGerarPendencia = $objSessaoSEI->verificarPermissao('pen_expedir_lote');
+    $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
 
-    if ($bolAcaoGerarPendencia) {
+    $bolBlocoAbertoUnidade = false; 
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+    $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+    $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retNumIdUnidade();
+    $objTramiteEmBlocoDTO->retStrDescricao();
+  
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+      $bolBlocoAbertoUnidade = true;
+    }
+
+    if ($bolAcaoIncluirProcessoEmBloco && $bolBlocoAbertoUnidade) {
       $objPaginaSEI = PaginaSEI::getInstance();
 
       $objAtividadeDTO = new AtividadeDTO();
@@ -67,12 +80,10 @@ class PENIntegracao extends SeiIntegracao
       $objAtividadeRN = new AtividadeRN();
       $numRegistros = $objAtividadeRN->contarRN0035($objAtividadeDTO);
 
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->retNumIdUnidade();
-      $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objPenUnidadeRN = new PenUnidadeRN();
-
-      if ($numRegistros > 0 && $objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+      // Verifica se existe uma unidade mapeada
+      $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
+      
+      if ($numRegistros > 0 && $bolUnidadeMapeada) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a href="#" onclick="return acaoControleProcessos(\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_tramita_em_bloco_adicionar&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\', true, false);" tabindex="' . $numTabBotao . '" class="botaoSEI">';
         $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) . '" class="infraCorBarraSistema" alt="Incluir Processos no Bloco de Trâmite" title="Incluir Processos no Bloco de Trâmite" />';
@@ -116,6 +127,7 @@ class PENIntegracao extends SeiIntegracao
 
     //Verificação da Restrição de Acesso a Funcionalidade
     $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
+    
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
 
@@ -124,18 +136,78 @@ class PENIntegracao extends SeiIntegracao
       ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
     ));
 
+    $bolBlocoAbertoUnidade = false;
+    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+    $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+    $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retNumIdUnidade();
+    $objTramiteEmBlocoDTO->retStrDescricao();
+    PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+  
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+      $bolBlocoAbertoUnidade = true;
+    }
+
+    $bolProcessoEmBloco = false;
+    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+    $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+    $objPenBlocoProcessoDTO->retNumIdAndamento();
+    $objPenBlocoProcessoDTO->retNumIdBloco();
+
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+    if (count($arrObjPenBlocoProcessoDTO) > 0){
+      $concluido = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+      );
+      foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+        if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+          $bolProcessoEmBloco = true;
+        }
+      }
+    }
+
+    // Verifica se existe uma unidade mapeada
+    $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
+
     //Apresenta o botão de expedir processo
-    if ($bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-
-      $objPenUnidadeDTO = new PenUnidadeDTO();
-      $objPenUnidadeDTO->retNumIdUnidade();
-      $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
-      $objPenUnidadeRN = new PenUnidadeRN();
-
-      if($objPenUnidadeRN->contar($objPenUnidadeDTO) != 0) {
+    if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . ' alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
-      }
+    }
+
+    //Apresenta o botão de cancelar trâmite
+    $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
+    if (
+            $objAtividadeDTO &&
+            $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) &&
+            $objAtividadeDTO->getNumIdUnidade() == $numIdUnidadeAtual
+        ) {
+        $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
+        $strAcoesProcedimento .= '</a>';
+    }
+     
+    //Apresenta o botão de incluir processo no bloco de trâmite
+    $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
+    if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolBlocoAbertoUnidade && $bolFlagAberto && $bolAcaoIncluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+      $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+      $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
+    }
+
+    //Apresenta o botão de excluir processo no bloco de trâmite
+    $bolAcaoExcluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_excluir');
+    if ($bolUnidadeMapeada && $bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExcluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+      $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+      $strAcoesProcedimento .= '<a onclick="return confirm(\\\'Confirma a remoção do processo do bloco de trâmite externo?\\\');" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_excluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco_excluir.svg", $this->getDiretorioImagens()) .'" title="Remover Processo do Bloco de Trâmite" alt="Remover Processo do Bloco de Trâmite"/></a>';
     }
 
     //Apresenta o botão da página de recibos
@@ -152,27 +224,50 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
-    //Apresenta o botão de cancelar trâmite
-    $objAtividadeDTO = $objExpedirProcedimentoRN->verificarProcessoEmExpedicao($objSeiIntegracaoDTO->getIdProcedimento());
-    if (
-            $objAtividadeDTO &&
-            $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) &&
-            $objAtividadeDTO->getNumIdUnidade() == $numIdUnidadeAtual
-        ) {
-        $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_cancelar_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_cancelar_tramite.gif", $this->getDiretorioImagens()) . '  alt="Cancelar Tramitação Externa" title="Cancelar Tramitação Externa" />';
-        $strAcoesProcedimento .= '</a>';
-    }
-
-    //Apresenta o botão de incluir processo no bloco de trâmite
-    $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-    $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
-
-
     return array($strAcoesProcedimento);
   }
 
+  public function excluirHipoteseLegal($arrObjHipoteseLegalDTO)
+  {
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'exclusão');
+  }
+
+  public function desativarHipoteseLegal($arrObjHipoteseLegalDTO)
+  {
+    $this->validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalDTO, 'inativação');
+  }
+
+  public function validarExcluirDesativarHipoteseLegal($arrObjHipoteseLegalAPI, $strAcao)
+  {
+    $excecao = new InfraException();
+    foreach ($arrObjHipoteseLegalAPI as $objHipoteseLegalAPI) {
+      $objPenHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
+      $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+      $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
+      $objPenHipoteseLegalDTO->setNumMaxRegistrosRetorno(1);
+
+      $objPenRelHipoteseLegalEnvioRN = new PenRelHipoteseLegalEnvioRN();
+      $objPenRelHipoteseLegalEnvioDTO = $objPenRelHipoteseLegalEnvioRN->consultar($objPenHipoteseLegalDTO);
+
+      $objPenRelHipoteseLegalRecebidoRN = new PenRelHipoteseLegalRecebidoRN();
+      $objPenRelHipoteseLegalRecebidoDTO = $objPenRelHipoteseLegalRecebidoRN->consultar($objPenHipoteseLegalDTO);
+      
+      if (!is_null($objPenRelHipoteseLegalEnvioDTO) || !is_null($objPenRelHipoteseLegalRecebidoDTO)) {
+
+        $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
+        $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($objHipoteseLegalAPI->getIdHipoteseLegal());
+        $objPenHipoteseLegalDTO->retStrNome();
+
+        $objPenHipoteseLegalRN = new PenHipoteseLegalRN();
+        $objPenHipoteseLegalDTO = $objPenHipoteseLegalRN->consultar($objPenHipoteseLegalDTO);
+        $nome = $objPenHipoteseLegalDTO->getStrNome();
+        $excecao->lancarValidacao($this->getNome().": 
+          A $strAcao da hipótese legal $nome não é permitida. 
+          A referida hipótese legal está relacionada a uma hipótese legal do Tramita."
+        );
+      }
+    }
+  }
 
   public function montarIconeControleProcessos($arrObjProcedimentoAPI = array())
   {
@@ -700,6 +795,7 @@ class PENIntegracao extends SeiIntegracao
           require_once dirname(__FILE__) . '/pen_tramita_em_bloco_protocolo_listar.php';
           break;
 
+      case 'pen_excluir_processo_em_bloco_tramite':
       case 'pen_incluir_processo_em_bloco_tramite':
       case 'pen_tramita_em_bloco_adicionar':
         require_once dirname(__FILE__) . '/pen_tramite_processo_em_bloco_cadastrar.php';
@@ -851,12 +947,8 @@ class PENIntegracao extends SeiIntegracao
         require_once dirname(__FILE__) . '/pen_envio_processo_lote_cadastrar.php';
           break;
 
-      case 'pen_expedir_lote':
-        require_once dirname(__FILE__) . '/pen_expedir_lote.php';
-          break;
-
-      case 'pen_expedir_lote_listar':
-        require_once dirname(__FILE__) . '/pen_expedir_lote_listar.php';
+      case 'pen_expedir_bloco':
+        require_once dirname(__FILE__) . '/pen_expedir_bloco.php';
           break;
 
       case 'pen_map_envio_parcial_listar':
@@ -877,51 +969,130 @@ class PENIntegracao extends SeiIntegracao
     return true;
   }
 
+  public function autoCompletarUnidadesCadastrar($bolPermiteEnvio = false)
+  {
+    $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
+    if (count($arrObjEstruturaDTO['itens']) == 0) {
+      return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+    }
+
+    return self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
+  }
+
+  public function autoCompletarExpedirProcedimento()
+  {
+    $xml = null;
+    $bolPermiteEnvio = false;
+    if ($_GET['acao'] != 'pen_procedimento_expedir' && $_GET['acao_ajax'] != 'pen_unidade_auto_completar_expedir_procedimento') {
+      $bolPermiteEnvio = true;
+    }
+
+    $restricaoCadastrada = false;
+    if ($bolPermiteEnvio == false) {
+      $objUnidadeDTO = new PenUnidadeDTO();
+      $objUnidadeDTO->retNumIdUnidadeRH();
+      $objUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+
+      $objUnidadeRN = new UnidadeRN();
+      $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+      $arrObjEstruturaDTO = array();
+      if (!is_null($objUnidadeDTO)) {
+        try {
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRestricao($_POST['id_repositorio']);
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao(null, InfraDTO::$OPER_DIFERENTE);
+          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRHRestricao();
+          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRHRestricao();
+
+          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+          $restricaoCadastrada = $objPenUnidadeRestricaoRN->contar($objPenUnidadeRestricaoDTO);
+          $restricaoCadastrada = $restricaoCadastrada > 0;
+
+          if ($restricaoCadastrada) {
+            $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+
+            foreach ($arrEstruturas as $key => $unidade) {
+              if ($unidade->getNumIdUnidadeRHRestricao() != null) {
+                $arrObjEstruturaDTO[] = $unidade;
+              }
+            }
+          }
+        } catch (Exception $e) {
+        }
+      }
+
+      if (count($arrObjEstruturaDTO) > 0) {
+        $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+      } else if ($restricaoCadastrada) {
+          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+      }
+    }
+    if (!$restricaoCadastrada && (is_null($arrObjEstruturaDTO) || count($arrObjEstruturaDTO) == 0)) {
+      $xml = $this->autoCompletarUnidadesCadastrar($bolPermiteEnvio);
+    }
+
+    return $xml;
+  }
+
+  public function penUnidadeAutoCompletarMapeados()
+  {
+    // DTO de paginao
+    $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
+    $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
+    $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
+    $objPenUnidadeDTOFiltro->retNumIdUnidade();
+    $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
+
+    // Filtragem
+    if (!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
+      $objPenUnidadeDTOFiltro->setStrNomeUnidadeRH('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+    }
+
+    $objPenUnidadeRN = new PenUnidadeRN();
+    $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
+    if (count($objArrPenUnidadeDTO) == 0) {
+      return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
+    }
+
+    foreach ($objArrPenUnidadeDTO as $dto) {
+      $dto->setNumIdUnidadeMap($dto->getNumIdUnidadeRH());
+      $dto->setStrDescricaoMap($dto->getStrNomeUnidadeRH() . '-' . $dto->getStrSiglaUnidadeRH());
+    }
+
+    return InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
+  }
 
   public function processarControladorAjax($strAcao) {
     $xml = null;
 
     switch ($_GET['acao_ajax']) {
 
+      case 'pen_listar_repositorios_estruturas_auto_completar':
+        try {
+          $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarRepositorioEstruturas($_POST['palavras_pesquisa']);
+          if (count($arrObjEstruturaDTO) > 0) {
+            $xml = InfraAjax::gerarXMLItensArrInfraDTO($arrObjEstruturaDTO, 'Id', 'Nome');
+          } else {
+            return '<itens><item grupo="vazio" id="0" descricao="Repositório de Estruturas não Encontrado."></item></itens>';
+          }
+        }catch(Throwable $e){
+          $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
+          throw new InfraException($mensagem, $e);
+        }
+          break;
+      case 'pen_unidade_auto_completar_cadastro':
+        $xml = $this->autoCompletarUnidadesCadastrar();
+          break;
       case 'pen_unidade_auto_completar_expedir_procedimento':
-        $bolPermiteEnvio = false;
-        if ($_GET['acao'] != 'pen_procedimento_expedir') {
-          $bolPermiteEnvio = true;
-        }
-
-        $arrObjEstruturaDTO = (array) ProcessoEletronicoINT::autoCompletarEstruturasAutoCompletar($_POST['id_repositorio'], $_POST['palavras_pesquisa'], $bolPermiteEnvio);
-
-        if (count($arrObjEstruturaDTO['itens']) > 0) {
-          $xml = self::gerarXMLItensArrInfraDTOAutoCompletar($arrObjEstruturaDTO, 'NumeroDeIdentificacaoDaEstrutura', 'Nome');
-        } else {
-          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
-        }
+        $xml = $this->autoCompletarExpedirProcedimento();
           break;
 
       case 'pen_unidade_auto_completar_mapeados':
-        // DTO de paginao
-        $objPenUnidadeDTOFiltro = new PenUnidadeDTO();
-        $objPenUnidadeDTOFiltro->retStrSiglaUnidadeRH();
-        $objPenUnidadeDTOFiltro->retStrNomeUnidadeRH();
-        $objPenUnidadeDTOFiltro->retNumIdUnidade();
-        $objPenUnidadeDTOFiltro->retNumIdUnidadeRH();
-
-          // Filtragem
-        if(!empty($_POST['palavras_pesquisa']) && $_POST['palavras_pesquisa'] !== 'null') {
-          $objPenUnidadeDTOFiltro->setStrNomeUnidadeRH('%'.$_POST['palavras_pesquisa'].'%', InfraDTO::$OPER_LIKE);
-        }
-
-        $objPenUnidadeRN = new PenUnidadeRN();
-        $objArrPenUnidadeDTO = (array) $objPenUnidadeRN->listar($objPenUnidadeDTOFiltro);
-        if (count($objArrPenUnidadeDTO) > 0) {
-          foreach ($objArrPenUnidadeDTO as $dto) {
-            $dto->setNumIdUnidadeMap($dto->getNumIdUnidadeRH());
-            $dto->setStrDescricaoMap($dto->getStrNomeUnidadeRH(). '-' . $dto->getStrSiglaUnidadeRH());
-          }
-          $xml = InfraAjax::gerarXMLItensArrInfraDTO($objArrPenUnidadeDTO, 'IdUnidadeMap', 'DescricaoMap');
-        } else {
-          return '<itens><item id="0" descricao="Unidade não Encontrada."></item></itens>';
-        }
+        $xml = $this->penUnidadeAutoCompletarMapeados();
           break;
 
       case 'pen_apensados_auto_completar_expedir_procedimento':
@@ -969,7 +1140,7 @@ class PENIntegracao extends SeiIntegracao
         $offset       = $_POST['offset'] * $registrosPorPagina;
 
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturas($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
+        $arrObjEstruturaDTO = $objProcessoEletronicoRN->listarEstruturasBuscaTextual($idRepositorioEstruturaOrganizacional, null, $numeroDeIdentificacaoDaEstrutura, $nomeUnidade, $siglaUnidade, $offset, $registrosPorPagina);
 
         $interface = new ProcessoEletronicoINT();
         //Gera a hierarquia de SIGLAS das estruturas
@@ -1107,6 +1278,35 @@ class PENIntegracao extends SeiIntegracao
   {
     SessaoSEI::getInstance(false);
     ProcessarPendenciasRN::getInstance()->processarPendencias();
+  }
+
+  public function assinarDocumento($arrObjDocumentoAPI = array()){
+
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+    foreach($arrObjDocumentoAPI as $objDocumentoAPI){
+      //Pode ser assinado documentos de mais de um processo
+      $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($objDocumentoAPI->getIdProcedimento());
+      $objUltimoTramiteRecebidoDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
+
+      //Se não tiver trâmite não há o que se checar
+      if(!is_null($objUltimoTramiteRecebidoDTO)){
+        $arrObjComponentesDigitais = $objProcessoEletronicoRN->listarComponentesDigitais($objUltimoTramiteRecebidoDTO);
+        if(!is_null($arrObjComponentesDigitais)){
+          foreach($arrObjComponentesDigitais as $objComponentesDigitais){
+            if ($objComponentesDigitais->getDblIdDocumento() == $objDocumentoAPI->getIdDocumento()){
+              $nomeModulo = $this->getNome();
+              $mensagem = "$nomeModulo: Prezado(a) usuário(a) esse documento já foi tramitado externamente via Tramita GOV.BR. Por esse motivo, este documento não pode receber uma nova assinatura.";
+              LogSEI::getInstance()->gravar($mensagem, LogSEI::$AVISO);
+              $objInfraException = new InfraException();
+              $objInfraException->adicionarValidacao($mensagem);
+              $objInfraException->lancarValidacoes();
+            }
+          }
+        }
+      }
+    }
   }
 }
 class ModuloIncompativelException extends InfraException { }

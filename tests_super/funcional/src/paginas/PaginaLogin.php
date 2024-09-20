@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Extensions\Selenium2TestCase\WebDriverException;
+
 class PaginaLogin extends PaginaTeste
 {
     public function __construct($test)
@@ -8,8 +10,13 @@ class PaginaLogin extends PaginaTeste
         parent::__construct($test);
         $this->usuarioInput = $test->byId('txtUsuario');
         $this->passwordInput = $test->byId('pwdSenha');
-        $this->loginButton = $test->byId('Acessar');
-        
+        try{
+          $this->loginButton = $test->byId('Acessar');
+        }
+        //SEI 4.0.12 alterou para sbmAcessar
+        catch (WebDriverException $wde){
+          $this->loginButton = $test->byId('sbmAcessar');
+        }
     }
 
     public function usuario($value)

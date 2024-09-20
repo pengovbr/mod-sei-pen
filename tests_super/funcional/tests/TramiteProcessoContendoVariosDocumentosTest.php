@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoVariosDocumentosTest extends CenarioBaseTestCase
+class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -39,7 +39,7 @@ class TramiteProcessoContendoVariosDocumentosTest extends CenarioBaseTestCase
 
         shuffle(self::$documentosTeste);
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, self::$documentosTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentosTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 

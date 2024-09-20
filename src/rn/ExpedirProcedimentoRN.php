@@ -128,7 +128,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
           $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
 
-          $objLoteProcedimentoRN = new PenLoteProcedimentoRN();
+          $objLoteProcedimentoRN = new PenBlocoProcessoRN();
           $bolSinProcessamentoEmLote = $objExpedirProcedimentoDTO->getBolSinProcessamentoEmLote();
           $numIdLote = $objExpedirProcedimentoDTO->getNumIdLote();
           $numIdAtividade = $objExpedirProcedimentoDTO->getNumIdAtividade();
@@ -142,9 +142,13 @@ class ExpedirProcedimentoRN extends InfraRN {
             $numTempoInicialRecebimento = microtime(true);
 
             $this->gravarLogDebug(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_VALIDACAO, 2);
-            $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
-            $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-            $objPenLoteProcedimentoDTO->setNumIdLote($numIdLote);
+            $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
+            $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objPenLoteProcedimentoDTO->setNumIdBlocoProcesso($numIdLote);
+            $objPenLoteProcedimentoDTO->retTodos();
+
+            $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+            $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);
         }
 
           $objInfraException = new InfraException();
@@ -173,7 +177,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }
 
               $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
-              $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento);
+              $objLoteProcedimentoRN->desbloquearProcessoBloco($dblIdProcedimento);
               return false;
           }
         }
@@ -239,7 +243,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             if($bolSinProcessamentoEmLote){
               $this->gravarLogDebug(sprintf('Envio do metadados do processo %s', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
               $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
-              $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+              $objLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
               $idAtividadeExpedicao = $numIdAtividade;
             }else{
                 $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $objProcesso->idProcedimentoSEI);
@@ -289,7 +293,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             }else{
               $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
               $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
-              $objLoteProcedimentoRN->alterarLoteProcedimento($objPenLoteProcedimentoDTO);
+              $objLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
             }
 
                   $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
@@ -322,7 +326,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       } catch (\Exception $e) {
         $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
         if($bolSinProcessamentoEmLote){
-            $objLoteProcedimentoRN->desbloquearProcessoLote($dblIdProcedimento);
+            $objLoteProcedimentoRN->desbloquearProcessoBloco($dblIdProcedimento);
         } else {
             throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
         }
@@ -509,23 +513,36 @@ class ExpedirProcedimentoRN extends InfraRN {
         );
     }
 
+    /**
+     * Verifica se a unidade tem mapeamento de apenas envio de componentes digitais pendentes
+     *
+     * @param $numIdRepositorioDestino
+     * @param $numIdUnidadeDestino
+     * @return bool
+     */
     private function enviarApenasComponentesDigitaisPendentes($numIdRepositorioDestino, $numIdUnidadeDestino)
     {
-      $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
-      $objPenRestricaoEnvioComponentesDigitaisDTO->setNumIdEstrutura($numIdRepositorioDestino);
+      $objEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+      $objEnvioParcialDTO->retNumIdEstrutura();
+      $objEnvioParcialDTO->retNumIdUnidadePen();
+      $objEnvioParcialDTO->setNumIdEstrutura($numIdRepositorioDestino);
 
-      $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
-      $arrObjPenRestricaoEnvioComponentesDigitaisDTO = 
-        $objPenRestricaoEnvioComponentesDigitaisRN->listar($objPenRestricaoEnvioComponentesDigitaisDTO);
+      $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      $arrObjEnvioParcialDTO = $objEnvioParcialRN->listar($objEnvioParcialDTO);
 
-      if (!is_null($arrObjPenRestricaoEnvioComponentesDigitaisDTO) && count($arrObjPenRestricaoEnvioComponentesDigitaisDTO) > 0) {
-        $arrIdUnidadesParaEnvioPendentes = array();
-        foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $value) {
-          $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
+      if (!is_null($arrObjEnvioParcialDTO) && count($arrObjEnvioParcialDTO) > 0) {
+        if (count($arrObjEnvioParcialDTO) > 1) {
+          $arrIdUnidadesParaEnvioPendentes = array();
+          foreach ($arrObjEnvioParcialDTO as $value) {
+            $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
+          }
+
+          return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+        } elseif (!empty($arrObjEnvioParcialDTO[0]->getNumIdUnidadePen())) {
+          return $arrObjEnvioParcialDTO[0]->getNumIdUnidadePen() == $numIdUnidadeDestino;
         }
 
-        return in_array($numIdUnidadeDestino, $arrIdUnidadesParaEnvioPendentes);
+        return true;
       }
 
       return false;
@@ -2090,12 +2107,14 @@ class ExpedirProcedimentoRN extends InfraRN {
             $dadosDoComponenteDigital->hashDoComponenteDigital = $objComponenteDigitalDTO->getStrHashConteudo();
 
             $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($objComponenteDigitalDTO->getDblIdProcedimento(), $objComponenteDigitalDTO->getDblIdDocumento());
-            $arrObjDocumentoDTOAssociacao = array_filter($arrObjDocumentoDTOAssociacao, function($item){
-              return $item["StaAssociacao"] == RelProtocoloProtocoloRN::$TA_DOCUMENTO_ASSOCIADO;
-            });
-            $arrObjDocumentoDTOAssociacao = array_values($arrObjDocumentoDTOAssociacao);
-            $objDocumentoDTO = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['Documento'] : null;
-            $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
+            $objDocumentoDTO = null;
+            $strStaAssociacao = null;
+            foreach ($arrObjDocumentoDTOAssociacao as $objDocumentoDTOAssociacao) {
+              $strStaAssociacao = $objDocumentoDTOAssociacao['StaAssociacao'];
+              if($strStaAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO){
+                $objDocumentoDTO = $objDocumentoDTOAssociacao['Documento'];
+              }
+            }
             $strNomeDocumento = $this->consultarNomeDocumentoPEN($objDocumentoDTO);
 
             //Verifica se existe o objeto anexoDTO para recuperar informações do arquivo
@@ -2593,6 +2612,76 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
+    public function verificarProcessosAbertoNaUnidade(InfraException $objInfraException, array $arrProtocolosOrigem)
+    {
+      $naoAbertoUnidadeAtual = false;
+      foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
+
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDistinct(true);
+        $objAtividadeDTO->retStrSiglaUnidade();
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setOrdStrSiglaUnidade(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setDthConclusao(null);
+
+        $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
+        if(count($arrObjAtividadeDTO) == 0) {
+          if ($naoAbertoUnidadeAtual == false) {
+            $naoAbertoUnidadeAtual = true;
+            $objInfraException->adicionarValidacao("Verifique o(s) seguinte(s) impedimento(s) para a realização do trâmite:");
+          }
+          $objInfraException->adicionarValidacao("O processo {$strProtocoloFormatado} não possui andamento aberto nesta unidade;");
+        }
+      }
+
+      if ($naoAbertoUnidadeAtual == true) {
+        $objInfraException->adicionarValidacao("É necessário excluir o(s) processo(s) citado(s) do bloco.");
+      }
+    }
+
+    public function validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigem)
+    {
+      foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
+
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
+
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+
+        if (empty($objProcedimentoDTO)) {
+          throw new InfraException('Procedimento ' . $strProtocoloFormatado . ' não foi localizado', 'Desconhecido');
+        }
+
+        $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
+        $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
+        $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
+      }
+    }
+
+    public function trazerTextoSeContemValidacoes($objInfraException)
+    {
+      if ($objInfraException->contemValidacoes()) {
+        $arrErros = array();
+        $message = "";
+        foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+          $strAtributo = $objInfraValidacao->getStrAtributo();
+          if (!array_key_exists($strAtributo, $arrErros)) {
+            $arrErros[$strAtributo] = array();
+          }
+          $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+          $message .= $objInfraValidacao->getStrDescricao() . "\n";
+        }
+
+        return $message;
+      }
+
+      return null;
+    }
 
     private function obterNivelSigiloPEN($strNivelSigilo)
       {
@@ -3002,13 +3091,20 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $dblIdProcedimento = $objDtoProtocolo->getDblIdProtocolo();
 
-      $objPenLoteProcedimentoDTO = new PenLoteProcedimentoDTO();
+      // Atualizar aqui PenBlocoProcessoDTO PenBlocoProcessoRN
+      $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
       $objPenLoteProcedimentoDTO->retTodos();
-      $objPenLoteProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
-      $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+      $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPenLoteProcedimentoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+      $objPenLoteProcedimentoDTO->setNumIdAndamento(array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE
+      ), InfraDTO::$OPER_IN);
+      $objPenLoteProcedimentoDTO->setNumMaxRegistrosRetorno(1);
 
-      $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultarLoteProcedimento($objPenLoteProcedimentoDTO);
+      $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+      $objPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->consultar($objPenLoteProcedimentoDTO);
       $cancelarLote=false;
 
       if(!is_null($objPenLoteProcedimentoDTO)){
@@ -3085,14 +3181,12 @@ class ExpedirProcedimentoRN extends InfraRN {
       ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
 
       if(is_object($objPenLoteProcedimentoDTO)){
+        // Atualizar aqui PenBlocoProcessoDTO PenBlocoProcessoRN
+        $objPenLoteProcedimentoDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
 
-        $objPenExpedirLoteDTO = new PenLoteProcedimentoDTO();
-        $objPenExpedirLoteDTO->setNumIdLote($objPenLoteProcedimentoDTO->getNumIdLote());
-        $objPenExpedirLoteDTO->setDblIdProcedimento($dblIdProcedimento);
-        $objPenExpedirLoteDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO);
-
-        $objPenLoteProcedimentoRN = new PenLoteProcedimentoRN();
-        $objPenLoteProcedimentoRN->alterarLoteProcedimento($objPenExpedirLoteDTO);
+        $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
+        $objPenLoteProcedimentoRN->alterar($objPenLoteProcedimentoDTO);
       }
 
       if(!$cancelarLote){

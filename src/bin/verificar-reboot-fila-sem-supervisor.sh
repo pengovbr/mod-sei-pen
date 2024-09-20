@@ -14,7 +14,8 @@ r=$?
 
 if [ "$r" == "2" ]; then
     echo "Retornou com erro critico. Reboot... $(date)"
-    kill $(ps -ef | grep "MonitoramentoTarefasPEN.php" | grep -v grep | awk '{print $2}')
+    kill $(ps -ef | grep "MonitoramentoEnvioTarefasPEN.php" | grep -v grep | awk '{print $2}')
+    kill $(ps -ef | grep "MonitoramentoRecebimentoTarefasPEN.php" | grep -v grep | awk '{print $2}')
     echo "rebootado"
     rm -rf pendencias.json
 fi

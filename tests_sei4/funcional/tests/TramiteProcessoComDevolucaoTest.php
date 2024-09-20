@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_alone_group6
  */
-class TramiteProcessoComDevolucaoTest extends CenarioBaseTestCase
+class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -36,7 +36,7 @@ class TramiteProcessoComDevolucaoTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -77,7 +77,8 @@ class TramiteProcessoComDevolucaoTest extends CenarioBaseTestCase
         self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste3, self::$documentoTeste4);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
 

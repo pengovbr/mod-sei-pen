@@ -138,19 +138,36 @@ class ReceberReciboTramiteRN extends InfraRN
           $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
           $objProtocoloDTO = $objProtocoloBD->consultar($objProtocoloDTO);
 
-          // atualizar bloco de tramite externo
-          $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+          // Atualizar Bloco para concluido
+          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
           $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
-          $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-          $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+          $objTramiteEmBlocoProtocoloDTO->setNumIdAndamento(
+            array(
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+            ),
+            InfraDTO::$OPER_NOT_IN
+          );
+          $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objTramiteEmBlocoProtocoloDTO->retTodos();
 
-          $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+          $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+          $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
 
-          if ($tramiteEmBlocoProtocoloDTO != null) {
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO, TramiteEmBlocoRN::$TE_CONCLUIDO);
+          if ($arrTramiteEmBlocoProtocolo != null) {
+            $blocos = array();
+            foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
+              $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE);
+              $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+
+              $blocos[] = $tramiteEmBlocoProtocolo->getNumIdBloco();
+            }
+
+            foreach ($blocos as $idBloco) {
+              $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($idBloco);
+            }
           }
 
           $this->objProcedimentoAndamentoRN->setOpts($objTramiteDTO->getStrNumeroRegistro(), $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objProcessoEletronicoDTO->getDblIdProcedimento());

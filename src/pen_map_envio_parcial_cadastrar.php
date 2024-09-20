@@ -45,6 +45,7 @@ try {
         header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
         exit(0);
       }
+
       if (empty($_POST['hdnIdUnidade']) || empty($_POST['txtUnidade']) || $_POST['txtUnidade'] == "0") {
         $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_ERRO);
         header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
@@ -88,9 +89,14 @@ try {
         $objPenRestricaoEnvioComponentesDigitaisRN->alterar($objDTO);
         $messagem = TITULO_PAGINA . " atualizado com sucesso.";
       } else {
+        if ($objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO) > 0) {
+          $objPaginaSEI->adicionarMensagem( 'Já existe um registro cadastrado para a estrutura selecionada.', InfraPagina::$TIPO_MSG_ERRO);
+          header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
+          exit(0);
+        }
         $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objDTO);
       }
-      $objPaginaSEI->adicionarMensagem($messagem, InfraPagina::$TIPO_MSG_AVISO);
+      $objPaginaSEI->adicionarMensagem($messagem, 5);
       header('Location: ' . $objSessaoSEI->assinarLink(
         'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao_']
       ));
@@ -475,7 +481,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
       <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" <?= $disabilitarVisualizar ?> placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= PaginaSEI::tratarHTML($strNomeUnidade); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
       <?php if ($_GET['acao'] != 'pen_map_envio_parcial_visualizar') { ?>
         <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
-        <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
+        <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
       <?php } ?>
     </div>
 

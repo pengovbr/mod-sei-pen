@@ -46,6 +46,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaCadastrarProcessoEmBloco = null;
     protected $paginaTramiteEmBloco = null;
     protected $paginaEnvioParcialListar = null;
+    protected $paginaPenHipoteseLegalListar = null;
+    protected $paginaMapUnidades = null;
 
     public function setUpPage(): void
     {
@@ -72,6 +74,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
         $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
         $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
+        $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
+        $this->paginaMapUnidades = new PaginaMapUnidades($this);
         $this->currentWindow()->maximize();
     }
 
@@ -100,7 +104,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // Configuração do prefíxo de processos
         $bancoOrgaoA->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_A_NUMERO_SEI, CONTEXTO_ORGAO_A_SIGLA_ORGAO));
         $bancoOrgaoA->execute("update unidade set sin_protocolo=? where sigla=?", array('S', CONTEXTO_ORGAO_A_SIGLA_UNIDADE));
-        $bancoOrgaoA->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasPEN'", null);
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasEnvioPEN'", null);
+        $bancoOrgaoA->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasRecebimentoPEN'", null);
 
         // Remoção de mapeamento de espécie não mapeada na origem
         $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
@@ -140,7 +145,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         $bancoOrgaoB->execute("update orgao set codigo_sei=? where sigla=?", array(CONTEXTO_ORGAO_B_NUMERO_SEI, CONTEXTO_ORGAO_B_SIGLA_ORGAO));
         $bancoOrgaoB->execute("update unidade set sin_protocolo=? where sigla=?", array('S', CONTEXTO_ORGAO_B_SIGLA_UNIDADE));
-        $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasPEN'", null);
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasEnvioPEN'", null);
+        $bancoOrgaoB->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasRecebimentoPEN'", null);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
         // Remoção de mapeamento de espécie não mapeada na origem
@@ -220,6 +226,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             'SIGLA_UNIDADE_SECUNDARIA' => constant($nomeContexto . '_SIGLA_UNIDADE_SECUNDARIA'),
             'SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA' => constant($nomeContexto . '_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'),
             'NOME_UNIDADE_SECUNDARIA' => constant($nomeContexto . '_NOME_UNIDADE_SECUNDARIA'),
+            'HIPOTESE_RESTRICAO_ID' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_ID'),
             'HIPOTESE_RESTRICAO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO'),
             'HIPOTESE_RESTRICAO_NAO_MAPEADO' => constant($nomeContexto . '_HIPOTESE_RESTRICAO_NAO_MAPEADO'),
             'REP_ESTRUTURAS' => constant($nomeContexto . '_REP_ESTRUTURAS'),
@@ -552,8 +559,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados Externamente'));
-        $this->byLinkText("Processos Tramitados Externamente")->click();
+        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos em Tramitação Externa'));
+        $this->byLinkText(utf8_encode("Processos em Tramitação Externa"))->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 

@@ -64,4 +64,9 @@ class PaginaTeste
         $this->test->keys(Keys::ENTER);
     }
 
+    public function refresh()
+    {
+      $this->test->refresh();
+    }
+
 }

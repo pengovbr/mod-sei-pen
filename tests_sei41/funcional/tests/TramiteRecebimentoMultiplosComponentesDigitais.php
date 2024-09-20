@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -26,7 +26,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento dedocumento avulso com 2 componentes digitais
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -47,7 +47,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento processo contendo documento com 3 componentes digitais
-     * 
+     *
      * @return void
      */
     public function test_recebimento_processo_com_3_componentes_digitais()
@@ -65,7 +65,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C, self::CONTEUDO_DOCUMENTO_A,
             self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C,
         ));
-        
+
         // Simular um trâmite chamando a API do Barramento diretamente
         $metadadosProcessoTeste = $this->construirMetadadosProcessoTeste(self::$processoTeste, array(self::$documentoZip));
         $novoTramite = $this->enviarMetadadosProcesso(self::$servicoPEN, $remetente, $destinatario, $metadadosProcessoTeste);
@@ -94,14 +94,14 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoA;
         $destinatario = self::$contextoOrgaoB;
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTeste1 = $this->gerarDadosDocumentoInternoTeste($remetente);
         $documentoTeste2 = $this->gerarDadosDocumentoExternoTeste($remetente);
 
         $novosDocumentos =  array($documentoTeste1, $documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
-        $totalDdocumentos =  array(self::$documentoZip, $documentoTeste1, $documentoTeste2);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $totalDdocumentos, $destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+
     }
 
     /**
@@ -139,7 +139,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros->IDT = $dadosTramite->tramite->IDT;
         return $servicoPEN->receberReciboDeEnvio($parametros);
     }
-    
+
     private function receberReciboEnvioProcesso($servicoPEN, $novoTramite)
     {
         $dadosTramite = $novoTramite->dadosTramiteDeProcessoCriado;
@@ -154,7 +154,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros = new StdClass();
         $parametros->IDT = $dadosTramite->IDT;
         return $servicoPEN->receberReciboDeTramite($parametros);
-    }   
+    }
 
     private function enviarMetadadosProcesso($servicoPEN, $remetente, $destinatario, $processoTeste)
     {

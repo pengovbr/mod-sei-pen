@@ -126,6 +126,36 @@ class PenMetaBD extends InfraMetaBD {
               ->executarSql('ALTER TABLE '.$strNomeTabela.' ADD CONSTRAINT UK_'.$strNomeTabela.' UNIQUE('.implode(', ', $arrNomeChave).')');
   }
 
+  public function novoRenomearTabela($strNomeTabelaAtual, $strNomeTabelaNovo){
+
+    if($this->isTabelaExiste($strNomeTabelaAtual)) {
+
+        $objInfraBanco = $this->getObjInfraIBanco();
+        $strTableDrive = get_parent_class($objInfraBanco);
+        $strQuery = '';
+
+      switch ($strTableDrive) {
+        case 'InfraMySqli':
+          $strQuery = sprintf("ALTER TABLE `%s` RENAME TO `%s`", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
+
+        case 'InfraSqlServer':
+          $strQuery = sprintf("sp_rename '%s', '%s'", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
+
+        case 'InfraOracle':
+          $strQuery = sprintf("RENAME %s TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
+
+        case 'InfraPostgreSql':
+          $strQuery = sprintf("ALTER TABLE %s RENAME TO %s", $strNomeTabelaAtual, $strNomeTabelaNovo);
+            break;
+      }
+
+        $objInfraBanco->executarSql($strQuery);
+    }
+  }
+  
   public function renomearTabela($strNomeTabelaAtual, $strNomeTabelaNovo){
 
     if($this->isTabelaExiste($strNomeTabelaAtual)) {

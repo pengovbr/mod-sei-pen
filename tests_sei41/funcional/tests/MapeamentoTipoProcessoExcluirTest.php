@@ -22,17 +22,19 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        self::$penOrgaoExternoId = $penOrgaoExternoFixture->cadastrar([
-            'idRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'repositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE'],
-            'idOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'nomeOrigem' => self::$destinatario['NOME_UNIDADE']
+        
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+            'Id' => self::$remetente['ID_ESTRUTURA'],
+            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'Nome' => self::$remetente['NOME_UNIDADE'],
+            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
         ]);
+    
+        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
     }
 
     /**
@@ -44,10 +46,6 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
      */
     public function test_excluir_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-        
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
 
@@ -57,8 +55,9 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
             self::$remetente['LOGIN'],
             self::$remetente['SENHA']
         );
-        $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
 
+        $this->paginaTramiteMapeamentoOrgaoExterno->navegarRelacionamentoEntreOrgaos();
+        sleep(5);
         $this->paginaCadastroOrgaoExterno->selecionarExcluirMapOrgao(self::$penOrgaoExternoId);
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
@@ -66,13 +65,12 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
             utf8_encode('Relacionamento entre unidades foi excluído com sucesso.'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
-    function tearDown(): void
+    public static function tearDownAfterClass(): void
     {
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        $penOrgaoExternoFixture->deletar(self::$penOrgaoExternoId);
-
-        parent::tearDown();
+        parent::tearDownAfterClass();
     }
 }

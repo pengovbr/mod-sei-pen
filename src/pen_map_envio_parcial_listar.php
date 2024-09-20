@@ -148,9 +148,11 @@ try {
       $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
         . '</td>';
+      
       $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
         . '</td>';
+
       $strResultado .= '<td align="center">';
 
       if ($objSessaoSEI->verificarPermissao('pen_map_envio_parcial_atualizar')) {

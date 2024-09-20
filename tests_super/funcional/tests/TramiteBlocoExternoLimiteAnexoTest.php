@@ -11,7 +11,7 @@ use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,Atividade
 class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
 {
     protected static $numQtyProcessos = 2; // max: 99
-    protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
+    protected static $tramitar = false; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
     public static $destinatario;
@@ -94,20 +94,12 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
             $objAnexoFixture->carregar([
                 'IdProtocolo' => $objDocumentoDTO->getDblIdDocumento(),
                 'Nome' => basename(self::$documentoTeste1['ARQUIVO']),
-            ]);   
-
-            // $objAssinaturaFixture = new AssinaturaFixture();
-            // $objAssinaturaFixture->carregar([
-            //     'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-            //     'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-            //     'IdAtividade' => $objAtividadeDTO->getNumIdAtividade(),
-            // ]);
+            ]);
 
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
                 'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdTramitaEmBloco' => $objBlocoDeTramiteDTO->getNumId(),
-                'IdxRelBlocoProtocolo' => $objProtocoloFixtureDTO->getStrProtocoloFormatado()
+                'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
             ]);
 
             self::$protocoloTestePrincipal['PROTOCOLO'] = $objProtocoloFixtureDTO->getStrProtocoloFormatado();
@@ -125,7 +117,24 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
             $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
             $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
                 self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
+                function ($testCase) {
+                  try {
+                      $testCase->frame('ifrEnvioProcesso');
+                      $mensagemSucesso = utf8_encode('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'');
+                      $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
+                      $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                      $btnFechar->click();
+                  } finally {
+                      try {
+                          $testCase->frame(null);
+                          $testCase->frame("ifrVisualizacao");
+                      } catch (Exception $e) {
+                      }
+                  }
+      
+                  return true;
+              }
             );
             sleep(10);
         } else {
@@ -139,24 +148,32 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
     }
 
     public function test_verificar_envio_processo()
-    {
-        $this->markTestIncomplete(
-            'Tela de confirmação de envio suprimida. Aguardando refatoração da funcionalidade do bloco para refatorar este teste.'
-        );
-        
+    {      
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->visualizarProcessoTramitadosEmLote($this);
-        $this->navegarProcessoEmLote(0);
+
+        $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
+        $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
             $testCase->refresh();
-            $paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Nenhum registro encontrado."), $paginaTramitarProcessoEmLote->informacaoLote());
+            $linhasDaTabela = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+
+            $totalConcluidos = 0;
+            foreach ($linhasDaTabela as $linha) {
+                $statusTd = $linha->byXPath('./td[7]');
+                if (self::$tramitar == true) {
+                    $statusImg = $statusTd->byXPath(utf8_encode("(//img[@title='Concluído'])"));
+                } else {
+                    $statusImg = $statusTd->byXPath(utf8_encode("(//img[@title='Em aberto'])"));
+                }
+                $totalConcluidos++;
+            }
+            $this->assertEquals($totalConcluidos, self::$numQtyProcessos);
             return true;
-        }, PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE);
+        }, PEN_WAIT_TIMEOUT);
         
         sleep(5);
     }
@@ -173,9 +190,9 @@ class TramiteBlocoExternoLimiteAnexoTest extends CenarioBaseTestCase
         $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
 
         if (self::$tramitar == true) {
-            $this->assertNotEquals('Aberto', $novoStatus);
+            $this->assertEquals(utf8_encode("Concluído"), $novoStatus);
         } else {
-            $this->assertEquals('Aberto', $novoStatus);
+            $this->assertEquals(utf8_encode("Aberto"), $novoStatus);
         }  
 
         $this->sairSistema();

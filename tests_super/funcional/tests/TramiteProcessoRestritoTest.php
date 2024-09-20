@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoRestritoTest extends CenarioBaseTestCase
+class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -40,13 +40,14 @@ class TramiteProcessoRestritoTest extends CenarioBaseTestCase
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
         // Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado();
 
-        // Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
+        // Incluir e assinar documento no processo
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
 
-        // Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        // Abrir processo
+        $this->abrirProcesso(self::$protocoloTeste);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(

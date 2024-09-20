@@ -123,6 +123,7 @@ try {
     $objPenHipoteseLegalDTO->setDistinct(true);
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
     $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
+    $objPenHipoteseLegalDTO->setStrAtivo('S');
     $objPenHipoteseLegalDTO->retStrNome();
    
     $objPenHipoteseLegalRN = new PenHipoteseLegalRN();

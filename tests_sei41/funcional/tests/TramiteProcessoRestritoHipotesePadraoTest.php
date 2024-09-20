@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
+class TramiteProcessoRestritoHipotesePadraoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -35,17 +35,18 @@ class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
         self::$processoTeste["RESTRICAO"] = PaginaIniciarProcesso::STA_NIVEL_ACESSO_RESTRITO;
         self::$processoTeste["HIPOTESE_LEGAL"] = self::$remetente["HIPOTESE_RESTRICAO_NAO_MAPEADO"];
 
+        // Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado();
+
+        // Incluir e assinar documento no processo
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+        
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-
-        // Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        // Abrir processo
+        $this->abrirProcesso(self::$protocoloTeste);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -127,7 +128,7 @@ class TramiteProcessoRestritoHipotesePadraoTest extends CenarioBaseTestCase
             self::$processoTeste['RESTRICAO'],
             self::$processoTeste['OBSERVACOES'],
             array(self::$processoTeste['INTERESSADOS']),
-            self::$destinatario["HIPOTESE_RESTRICAO_PADRAO"]);
+            self::$destinatario["HIPOTESE_RESTRICAO_NAO_MAPEADO"]);
 
         // 13 - Verificar recibos de trâmite
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);

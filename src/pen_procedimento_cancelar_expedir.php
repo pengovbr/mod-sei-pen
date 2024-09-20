@@ -27,27 +27,34 @@ try {
 
   $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
 
-  $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
+  $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
   $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
-  $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
+  $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
   $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-  $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+  $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
+  $objTramiteEmBlocoProtocoloDTO->setNumIdAtividade(
+    array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    ),
+    InfraDTO::$OPER_NOT_IN
+  );
+  $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
 
-  $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultarProtocolosBloco($objTramiteEmBlocoProtocoloDTO);
-
-  if ($tramiteEmBlocoProtocoloDTO != null) {
-    // TODO: tratar atualização a partir de um metodo
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
-  }
+  $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
   $objExpedirProcedimentosRN->cancelarTramite($idProcedimento);
+
+  if ($tramiteEmBlocoProtocoloDTO != null) {
+    // TODO: tratar atualização a partir de um metodo
+    $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
+    $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
+  }
 } catch (InfraException $e) {
   $strMensagem = $e->getStrDescricao();
 } catch (Exception $e) {
