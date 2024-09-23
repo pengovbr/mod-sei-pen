@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php'; 
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\{GuzzleException, RequestException};
+
 class ProcessoNaoPodeSerDesbloqueadoException extends Exception {}
 
 /**
@@ -145,7 +148,7 @@ class ProcessoEletronicoRN extends InfraRN
 		'Content-Type' => 'application/json',
 	  ];
 	
-	  $this->strClientGuzzle = new GuzzleHttp\Client([
+	  $this->strClientGuzzle = new Client([
 		'base_uri' => $this->strBaseUri,
 		'timeout'  => 5.0,
 		'headers'  => $this->arrheaders,
@@ -868,59 +871,6 @@ class ProcessoEletronicoRN extends InfraRN
 
   }
 
-  // public function enviarComponenteDigital($parametros)
-  //   {
-  //   try {
-	// 	$objParametros = $parametros->dadosDoComponenteDigital;
-	// 	$idTicketDeEnvio = $objParametros->ticketParaEnvioDeComponentesDigitais;
-
-
-  //   // print_r($objParametros); die('db');
-
-	// 	$protocolo = $objParametros->protocolo;
-	// 	$hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
-	// 	$conteudo = $objParametros->conteudoDoComponenteDigital;
-
-	// 	$endpoint = "/interoperabilidade/rest/v3/tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar?hashDoComponenteDigital={$hashDoComponenteDigital}&protocolo={$protocolo}";
-
-	//   $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
-	//   $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
-	//   $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
-	
-	//   $strBaseUri = 'https://homolog.api.processoeletronico.gov.br';
-	//   // $arrheaders = [
-	// 	// 'Accept' => '*/*',
-	// 	// 'Content-Type' => 'multipart/form-data',
-	//   // ];
-
-	//   $strClientGuzzle = new GuzzleHttp\Client([
-	// 	'base_uri' => $strBaseUri,
-	// 	'timeout'  => 5.0,
-	// //	'headers'  => $arrheaders,
-	// 	'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
-	//   ]);
-
-
-  //   $arrOptions = [
-	// 		'multipart' => [
-	// 			[
-	// 				'name'     => 'conteudo',
-	// 				'contents' => $conteudo, 
-  //         'filename' => 'conteudo'
-	// 			],
-	// 		],
-	// 	];
-
-	// 	$response = $strClientGuzzle->request('PUT', $endpoint, $arrOptions);
-
-
-
-  //   } catch (\Exception $e) {
-  //       $mensagem = "Falha no envio de componentes digitais";
-  //       $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-  //       throw new InfraException($mensagem, $e, $detalhes);
-  //   }
-  // }
 
 
   public function enviarComponenteDigital($parametros)
@@ -1416,45 +1366,26 @@ class ProcessoEletronicoRN extends InfraRN
 
     public function receberComponenteDigitalR($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
     {
-    $endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
-    try
-    {	
-      $client = new GuzzleHttp\Client([
-        'base_uri' => $this->strBaseUri,
-        'timeout'  => 5.0,
-        'cert'     => [$this->strLocalCert, $this->strLocalCertPassword],
-      ]);
+		$endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
+		try {	
+			$identificacaoDoComponenteDigital = [
+				'hashDoComponenteDigital' => $parStrHashComponenteDigital,
+				'protocolo' => $parStrProtocolo,
+			];
 
-      $body = json_encode([
-        'hashDoComponenteDigital' => $parStrHashComponenteDigital,
-        'protocolo' => $parStrProtocolo,
-      ]);
+			//   if (!is_null($parObjParteComponente)) {
+			//     $endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
+			//   }
 
-    //   if (!is_null($parObjParteComponente)) {
-    //     $endpoint = "/interoperabilidade/rest/v3/tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
-    //   }
+			$this->post($endpoint, $identificacaoDoComponenteDigital);
 
-    $response = $client->request('POST', $endpoint, [
-        'headers' => [
-            'accept' => '*/*',
-            'Content-Type' => 'application/json',
-        ],
-        'json' => $body // Envia o corpo como JSON
-    ]);
-
-    if ($response->getStatusCode() === 200) {
-        echo "Requisição bem-sucedida: " . $response->getBody();
-    } else {
-        echo "Falha na requisição. Status: " . $response->getStatusCode();
-    }
-
-    } catch (\RequestException  $fault) {
-      $mensagem = $this->tratarFalhaWebService($fault);
-      throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-    } catch (\Exception $e) {
-      throw new InfraException("Error Processing Request", $e);
-    }
-  }
+		} catch (\RequestException  $fault) {
+			$mensagem = $this->tratarFalhaWebService($fault);
+			throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
+		} catch (\Exception $e) {
+			throw new InfraException("Error Processing Request", $e);
+		}
+	}
 
     public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
     {
@@ -1707,13 +1638,13 @@ class ProcessoEletronicoRN extends InfraRN
 			openssl_sign($parStrReciboTramite, $strHashAssinatura, $objPrivatekey, 'sha256');
 			$strHashDaAssinaturaBase64 = base64_encode($strHashAssinatura);
 
-			$parametros = [
-				'IDT' => $parNumIdTramite,
+			$envioDeReciboDeTramite = [
 				'dataDeRecebimento' => $parDthRecebimento,
-				'hashDaAssinatura' => $strHashDaAssinaturaBase64
+				'hashDaAssinatura' => $strHashDaAssinaturaBase64,
+			//	'hashDaAssinaturaAsBytes' => $strHashDaAssinaturaBase64
 			];
 
-			$this->post($endpoint, $parametros);
+			$this->post($endpoint, $envioDeReciboDeTramite);
 
 			return $strHashDaAssinaturaBase64;
 
@@ -1916,26 +1847,25 @@ class ProcessoEletronicoRN extends InfraRN
     * @return mixed
     * @throws InfraException
     */
-  public function recusarTramite($idTramite, $justificativa, $motivo)
-    {
-    try {
-        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $parametros = new stdClass();
-        $parametros->recusaDeTramite = new stdClass();
-        $parametros->recusaDeTramite->IDT = $idTramite;
-        $parametros->recusaDeTramite->justificativa = utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000));
-        $parametros->recusaDeTramite->motivo = $motivo;
+	public function recusarTramite($idTramite, $justificativa, $motivo)
+	{
+	try {
+		$endpoint = "/interoperabilidade/rest/v3/tramites/{$idTramite}/recusa";
+		$objProcessoEletronicoRN = new ProcessoEletronicoRN();
+		
+		$parametros = [
+			'justificativa' => utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000)),
+			'motivo' => $motivo
+		];
 
-        $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->recusarTramite($parametros);
-        });
+		$this->post($endpoint, $parametros);
 
-    } catch (Exception $e) {
-        $mensagem = "Falha na recusa de trâmite de processo";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
+		} catch (Exception $e) {
+			$mensagem = "Falha na recusa de trâmite de processo";
+			$detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+			throw new InfraException($mensagem, $e, $detalhes);
+		}
+	}
 
   public function cadastrarTramitePendente($numIdentificacaoTramite, $idAtividadeExpedicao)
     {
@@ -1961,7 +1891,6 @@ class ProcessoEletronicoRN extends InfraRN
         ];
 
         try {
-            $parametros = [];
             $arrResultado = $this->get($endpoint, $parametros);
             return $arrResultado;
 
