@@ -2982,6 +2982,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
         if ($arrPenBlocoProcessoDTO == null) {
           $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
+        } elseif ($tramiteEmBlocoDTO->getStrStaEstado() == TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE) {
+          $estadoBloco = $this->validarSituacaoParaBloco($arrPenBlocoProcessoDTO,$tramiteEmBlocoDTO->getStrStaEstado());	  
+          $tramiteEmBlocoDTO->setStrStaEstado($estadoBloco);
+          $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
         }
       }
     }
@@ -3053,6 +3057,53 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     }
     
     $this->atualizarNumeroVersao("3.7.0");
+  }
+
+  /**
+   * Validar situacao para bloco
+   *
+   * @param array $arrObjTramiteEmBlocoProtocoloDTO
+   * @param string $situacaoBloco
+   * @return int
+   */
+  public function validarSituacaoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $situacaoBloco)
+  {
+    $concluido = array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    );
+    $emAndamento = array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO
+    );
+   
+    $qtdProcesos = count($arrObjTramiteEmBlocoProtocoloDTO);
+    $arrayConcluidos = array();
+    $arrayEmAndamento = array();
+    foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
+      if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
+        $arrayConcluidos[] = $objDTO;
+      }
+ 
+      if (in_array($objDTO->getNumIdAndamento(), $emAndamento)) {
+        $arrayEmAndamento[] = $objDTO;
+      }
+    }
+ 
+    if ($qtdProcesos == count($arrayConcluidos)) {
+      $situacaoBloco = TramiteEmBlocoRN::$TE_CONCLUIDO;
+    }
+    if (count($arrayEmAndamento) > 0) {
+      $situacaoBloco = TramiteEmBlocoRN::$TE_DISPONIBILIZADO;
+    }
+ 
+    return $situacaoBloco;
   }
 
   public function atualizarHipotesesLegais()
