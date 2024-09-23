@@ -2947,48 +2947,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     //Remover blocos sem nenhum processo vinculado
     $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
     $objTramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoDTO->retNumIdUnidade();
     $objTramiteEmBlocoDTO->retStrStaEstado();
-    
+
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
     $arrObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
-    if (!is_null($arrObjTramiteEmBlocoDTO)) {
-      foreach($arrObjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
-        //Remover blocos sem nenhum processo vinculado
-        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setNumIdBloco($tramiteEmBlocoDTO->getNumId());
-        $objPenBlocoProcessoDTO->retTodos();
-
-        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-        $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-
-        if($arrPenBlocoProcessoDTO != null){
-          foreach ($arrPenBlocoProcessoDTO as $objDTO) {
-            $objAtividadeDTO = new AtividadeDTO();
-            $objAtividadeDTO->setDistinct(true);
-            $objAtividadeDTO->retStrSiglaUnidade();
-            $objAtividadeDTO->setNumIdUnidade($objDTO->getNumIdUnidade());
-            $objAtividadeDTO->setOrdStrSiglaUnidade(InfraDTO::$TIPO_ORDENACAO_ASC);
-            $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
-            $objAtividadeDTO->setDthConclusao(null);
-
-            $objAtividadeRN = new AtividadeRN();
-            $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
-            if(count($arrObjAtividadeDTO) == 0) {
-              // ecluir processo do bloco
-              $objPenBlocoProcessoRN->excluir(array($objDTO));
-            }
-          }
-          $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-        }
-        if ($arrPenBlocoProcessoDTO == null) {
-          $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
-        } elseif ($tramiteEmBlocoDTO->getStrStaEstado() == TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE) {
-          $estadoBloco = $this->validarSituacaoParaBloco($arrPenBlocoProcessoDTO,$tramiteEmBlocoDTO->getStrStaEstado());	  
-          $tramiteEmBlocoDTO->setStrStaEstado($estadoBloco);
-          $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
-        }
-      }
-    }
+    $this->validarBlocos($arrObjTramiteEmBlocoDTO);    
 
     $this->atualizaOrdemTramiteEmBlocoPorUnidade();
 
@@ -3059,6 +3023,67 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $this->atualizarNumeroVersao("3.7.0");
   }
 
+  /**
+   * Valida blocos de tramite
+   *
+   * @param $arrObjTramiteEmBlocoDTO
+   * @return void
+   */
+  public function validarBlocos($arrObjTramiteEmBlocoDTO)
+  {
+    if (!is_null($arrObjTramiteEmBlocoDTO)) {
+      foreach($arrObjTramiteEmBlocoDTO as $tramiteEmBlocoDTO) {
+        //Remover blocos sem nenhum processo vinculado
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setNumIdBloco($tramiteEmBlocoDTO->getNumId());
+        $objPenBlocoProcessoDTO->retTodos();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+
+        if($arrPenBlocoProcessoDTO != null){
+          foreach ($arrPenBlocoProcessoDTO as $objDTO) {
+            $concluido = array(
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+            );
+            if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
+              continue;
+            }
+
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDistinct(true);
+            $objAtividadeDTO->retStrSiglaUnidade();
+            $objAtividadeDTO->setNumIdUnidade($tramiteEmBlocoDTO->getNumIdUnidade());
+            $objAtividadeDTO->setOrdStrSiglaUnidade(InfraDTO::$TIPO_ORDENACAO_ASC);
+            $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+            $objAtividadeDTO->setDthConclusao(null);
+
+            $objAtividadeRN = new AtividadeRN();
+            $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+            if(count($arrObjAtividadeDTO) == 0) {
+              // ecluir processo do bloco
+              $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+              $objPenBlocoProcessoBD->excluir($objDTO);
+            }
+          }
+          $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        }
+
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        if ($arrPenBlocoProcessoDTO == null) {
+          $objTramiteEmBlocoRN->excluir(array($tramiteEmBlocoDTO));
+        } elseif ($tramiteEmBlocoDTO->getStrStaEstado() == TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE) {
+          $estadoBloco = $this->validarSituacaoParaBloco($arrPenBlocoProcessoDTO, $tramiteEmBlocoDTO->getStrStaEstado());
+          $tramiteEmBlocoDTO->setStrStaEstado($estadoBloco);
+          $objTramiteEmBlocoRN->alterar($tramiteEmBlocoDTO);
+        }
+      }
+    }
+  }
+ 
   /**
    * Validar situacao para bloco
    *
