@@ -3043,13 +3043,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         if($arrPenBlocoProcessoDTO != null){
           foreach ($arrPenBlocoProcessoDTO as $objDTO) {
-            $concluido = array(
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-            );
-            if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
+            if ($objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
               continue;
             }
 
@@ -3064,9 +3058,20 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
             if(count($arrObjAtividadeDTO) == 0) {
-              // ecluir processo do bloco
-              $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-              $objPenBlocoProcessoBD->excluir($objDTO);
+              $objProcedimentoDTO = new ProcedimentoDTO();
+              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+              $objProcedimentoDTO->retDblIdProcedimento();
+              $objProcedimentoDTO->retNumIdUnidadeGeradoraProtocolo();
+              $objProcedimentoDTO->setDblIdProcedimento($objDTO->getDblIdProtocolo());
+
+              $objProcedimentoRN = new ProcedimentoRN();
+              $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
+              if ($tramiteEmBlocoDTO->getNumIdUnidade() != $procedimento->getNumIdUnidadeGeradoraProtocolo()) {
+                // excluir processo do bloco
+                $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+                $objPenBlocoProcessoBD->excluir($objDTO);
+              }
             }
           }
           $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
@@ -3314,7 +3319,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
     if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-      return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO;
+      return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA;
     } 
 
     $objAtividadeDTO = new AtividadeDTO();
