@@ -3058,6 +3058,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
             if(count($arrObjAtividadeDTO) == 0) {
+              $objProcedimentoDTO = new ProcedimentoDTO();
+              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+              $objProcedimentoDTO->retDblIdProcedimento();
+              $objProcedimentoDTO->retNumIdUnidadeGeradoraProtocolo();
+              $objProcedimentoDTO->setDblIdProcedimento($objDTO->getDblIdProtocolo());
+
+              $objProcedimentoRN = new ProcedimentoRN();
+              $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+              
               // Consultar atividae de envio interno
               $objAtividadeDTO = new AtividadeDTO();
               $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
