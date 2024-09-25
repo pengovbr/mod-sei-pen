@@ -3058,11 +3058,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
             if(count($arrObjAtividadeDTO) == 0) {
-              $objProcedimentoDTO = new ProcedimentoDTO();
-              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
-              $objProcedimentoDTO->retDblIdProcedimento();
-              $objProcedimentoDTO->retNumIdUnidadeGeradoraProtocolo();
-              $objProcedimentoDTO->setDblIdProcedimento($objDTO->getDblIdProtocolo());
+              // Consultar atividae de envio interno
+              $objAtividadeDTO = new AtividadeDTO();
+              $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+              $objAtividadeDTO->setNumIdTarefa(32);
+              $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+              $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+              $objAtividadeDTO->retNumIdAtividade();
+              $objAtividadeDTO->retNumIdUnidade();
+              $objAtividadeDTO->retNumIdTarefa();
+              $objAtividadeRN = new AtividadeRN();
+              $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
               $objProcedimentoRN = new ProcedimentoRN();
               $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
@@ -3070,7 +3076,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               // Consultar atividae de envio interno
               $objAtividadeDTO = new AtividadeDTO();
               $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
-              $objAtividadeDTO->setNumIdTarefa(32);
+              $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_REMETIDO_UNIDADE);
               $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
               $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
               $objAtividadeDTO->retNumIdAtividade();
