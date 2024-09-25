@@ -3070,6 +3070,21 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               $objAtividadeRN = new AtividadeRN();
               $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
+              $objProcedimentoRN = new ProcedimentoRN();
+              $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+              
+              // Consultar atividae de envio interno
+              $objAtividadeDTO = new AtividadeDTO();
+              $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
+              $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_PROCESSO_REMETIDO_UNIDADE);
+              $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+              $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+              $objAtividadeDTO->retNumIdAtividade();
+              $objAtividadeDTO->retNumIdUnidade();
+              $objAtividadeDTO->retNumIdTarefa();
+              $objAtividadeRN = new AtividadeRN();
+              $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+
               // excluir processo do bloco
               if ($arrObjAtividadeDTO !== null) {
                 if ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
