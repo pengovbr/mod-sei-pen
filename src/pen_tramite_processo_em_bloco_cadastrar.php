@@ -165,7 +165,11 @@ try {
       }
         break;
     case 'pen_tramita_em_bloco_adicionar':
-      $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'));
+      $arrProtocolosOrigem = array_merge(
+        $objPaginaSEI->getArrStrItensSelecionados('Gerados'),
+        $objPaginaSEI->getArrStrItensSelecionados('Recebidos'),
+        $objPaginaSEI->getArrStrItensSelecionados('Detalhado')
+      );
       $strIdItensSelecionados = $strIdItensSelecionados ?: $_GET['processos'];
       $strTitulo = 'Incluir Processo(s) no Bloco de Trâmite';
 
@@ -270,7 +274,9 @@ try {
   $objTramiteEmBlocoDTO->retNumOrdem();
   $objTramiteEmBlocoDTO->retNumIdUnidade();
   $objTramiteEmBlocoDTO->retStrDescricao();
-  PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+  if ($_GET['acao'] != 'pen_tramita_em_bloco_adicionar') {
+    PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+  }
 
   $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
   foreach ($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO) as $dados) {
