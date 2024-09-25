@@ -3080,10 +3080,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
               // excluir processo do bloco
-              if ($arrObjAtividadeDTO == null && $tramiteEmBlocoDTO->getNumIdUnidade() != $procedimento->getNumIdUnidadeGeradoraProtocolo()) {
-                $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-                $objPenBlocoProcessoBD->excluir($objDTO);
-              } elseif ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
+              if ($arrObjAtividadeDTO !== null) {
+                if ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
+                  $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+                  $objPenBlocoProcessoBD->excluir($objDTO);
+                }
+              } elseif ($tramiteEmBlocoDTO->getNumIdUnidade() != $procedimento->getNumIdUnidadeGeradoraProtocolo()) {
                 $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
                 $objPenBlocoProcessoBD->excluir($objDTO);
               }
