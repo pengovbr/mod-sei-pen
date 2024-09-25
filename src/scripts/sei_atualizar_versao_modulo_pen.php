@@ -3084,9 +3084,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
                 $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
                 $objPenBlocoProcessoBD->excluir($objDTO);
               } elseif ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
-                  $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-                  $objPenBlocoProcessoBD->excluir($objDTO);
-                }
+                $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+                $objPenBlocoProcessoBD->excluir($objDTO);
               }
             }
           }
