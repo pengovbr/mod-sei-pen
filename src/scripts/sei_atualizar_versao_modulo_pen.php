@@ -3058,21 +3058,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $objAtividadeRN = new AtividadeRN();
             $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
             if(count($arrObjAtividadeDTO) == 0) {
-              // Consultar atividae de envio interno
-              $objAtividadeDTO = new AtividadeDTO();
-              $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
-              $objAtividadeDTO->setNumIdTarefa(32);
-              $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-              $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-              $objAtividadeDTO->retNumIdAtividade();
-              $objAtividadeDTO->retNumIdUnidade();
-              $objAtividadeDTO->retNumIdTarefa();
-              $objAtividadeRN = new AtividadeRN();
-              $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+              $objProcedimentoDTO = new ProcedimentoDTO();
+              $objProcedimentoDTO->retStrProtocoloProcedimentoFormatado();
+              $objProcedimentoDTO->retDblIdProcedimento();
+              $objProcedimentoDTO->retNumIdUnidadeGeradoraProtocolo();
+              $objProcedimentoDTO->setDblIdProcedimento($objDTO->getDblIdProtocolo());
 
               $objProcedimentoRN = new ProcedimentoRN();
               $procedimento = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-              
+
               // Consultar atividae de envio interno
               $objAtividadeDTO = new AtividadeDTO();
               $objAtividadeDTO->setDblIdProtocolo($objDTO->getDblIdProtocolo());
@@ -3086,14 +3080,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
 
               // excluir processo do bloco
-              if ($arrObjAtividadeDTO !== null) {
-                if ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
+              if ($arrObjAtividadeDTO == null && $tramiteEmBlocoDTO->getNumIdUnidade() != $procedimento->getNumIdUnidadeGeradoraProtocolo()) {
+                $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
+                $objPenBlocoProcessoBD->excluir($objDTO);
+              } elseif ($arrObjAtividadeDTO[0]->getNumIdUnidade() != $tramiteEmBlocoDTO->getNumIdUnidade()) {
                   $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
                   $objPenBlocoProcessoBD->excluir($objDTO);
                 }
-              } elseif ($tramiteEmBlocoDTO->getNumIdUnidade() != $procedimento->getNumIdUnidadeGeradoraProtocolo()) {
-                $objPenBlocoProcessoBD = new PenBlocoProcessoBD(BancoSEI::getInstance());
-                $objPenBlocoProcessoBD->excluir($objDTO);
               }
             }
           }
