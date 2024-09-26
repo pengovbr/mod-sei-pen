@@ -2466,7 +2466,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
-    private function validarProcessoIncluidoEmBlocoEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
+    public function validarProcessoIncluidoBlocoEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
       $concluido = array(
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
@@ -2631,7 +2631,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
       $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarProcessoAbertoUnidade($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-      $this->validarProcessoIncluidoEmBlocoEmAndamento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
       $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
