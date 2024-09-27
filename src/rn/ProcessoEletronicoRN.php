@@ -120,7 +120,7 @@ class ProcessoEletronicoRN extends InfraRN
 	  $this->strEnderecoWebService = $strEnderecoWebService;
     $parsed_url = parse_url($strEnderecoWebService);
     $base_url = $parsed_url['scheme'] . '://' . $parsed_url['host'] . '/';
-	  $this->strComumXSD = $base_url . 'interoperabilidade/soap/v3/?xsd=comum.xsd';;
+	  $this->strComumXSD = $base_url . 'interoperabilidade/soap/v3/?xsd=comum.xsd';
 	  $this->strLocalCert = $strLocalizacaoCertificadoDigital;
 	  $this->strLocalCertPassword = $strSenhaCertificadoDigital;
 	  $this->numTentativasErro = $numTentativasErro;
@@ -176,8 +176,6 @@ class ProcessoEletronicoRN extends InfraRN
             $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
             throw new \Exception($mensagem);
         }
-
-       // return $this->objPenWs;
     }
 
 
@@ -685,7 +683,7 @@ class ProcessoEletronicoRN extends InfraRN
   }
 
 
-    public function construirCabecalhoREST($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
+    public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
     $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false, $dblIdProcedimento = null)
     {
 
@@ -891,7 +889,7 @@ class ProcessoEletronicoRN extends InfraRN
 
 
     $conteudoByte = fread($conteudo, filesize($conteudo));
-
+		
 		$endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar?hashDoComponenteDigital={$hashDoComponenteDigital}&protocolo={$protocolo}";
 
 	  $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
@@ -902,23 +900,23 @@ class ProcessoEletronicoRN extends InfraRN
 
 	  $strClientGuzzle = new GuzzleHttp\Client([
 		'base_uri' => $strBaseUri,
-		'timeout'  => 5.0,
-		'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
-	  ]);
-
+      'timeout'  => 5.0,
+      'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+    ]);
+  
 
     $arrOptions = [
 			'multipart' => [
-				[
-					'name'     => 'conteudo',
+        [
+            'name'     => 'conteudo',
 					'contents' => $conteudoByte, 
           'filename' => 'conteudo'
 				],
-			],
-		];
-
+        ],
+      ];
+      
 		$response = $strClientGuzzle->request('PUT', $endpoint, $arrOptions);
-
+    
 
 
     } catch (\Exception $e) {
@@ -1432,9 +1430,9 @@ class ProcessoEletronicoRN extends InfraRN
 				'protocolo' => $parStrProtocolo,
 			];
 
-			//   if (!is_null($parObjParteComponente)) {
-			//     $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
-			//   }
+			  if (!is_null($parObjParteComponente)) {
+			    $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
+			  }
 
 			$this->post($endpoint, $identificacaoDoComponenteDigital);
 
@@ -1700,7 +1698,6 @@ class ProcessoEletronicoRN extends InfraRN
 			$envioDeReciboDeTramite = [
 				'dataDeRecebimento' => $parDthRecebimento,
 				'hashDaAssinatura' => $strHashDaAssinaturaBase64,
-			//	'hashDaAssinaturaAsBytes' => $strHashDaAssinaturaBase64
 			];
 
 			$this->post($endpoint, $envioDeReciboDeTramite);

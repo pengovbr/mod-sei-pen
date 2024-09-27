@@ -589,7 +589,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     
     $objProcesso = $this->atribuirDadosInteressadosREST($objProcesso, $dblIdProcedimento);
     
-   // $this->adicionarProcessosApensadosREST($objProcesso, $arrIdProcessoApensado);
+   $this->adicionarProcessosApensadosREST($objProcesso, $arrIdProcessoApensado);
     
     $objProcesso = $this->atribuirDadosHistoricoREST($objProcesso, $dblIdProcedimento);
 
@@ -870,8 +870,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException('Parâmetro $objProcesso não informado.');
       }
 
-      // $objProcesso = [];
-
       $objUsuarioProdutor = $this->consultarUsuario($dblIdProcedimento);
       if (isset($objUsuarioProdutor)) {
           // Dados do produtor do processo
@@ -908,7 +906,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrParticipantesDTO = $this->listarInteressados($dblIdProcedimento);
     
       if (isset($arrParticipantesDTO) && count($arrParticipantesDTO) > 0) {
-        $objProcesso['interessados'] = [];
+        $objProcesso['interessados'] = array();
     
         foreach ($arrParticipantesDTO as $participanteDTO) {
             $interessado = [
@@ -979,13 +977,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           $documento['retirado'] = true;
         }
         if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
-          $documento['hipoteseLegal'] = []; // Inicializando a chave 'hipoteseLegal' como um array
+          $documento['hipoteseLegal'] = array(); // Inicializando a chave 'hipoteseLegal' como um array
           $documento['hipoteseLegal']['identificacao'] = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());          
           //TODO: Adicionar nome da hipótese legal atribuida ao documento
         }
         $documento['dataHoraDeProducao'] = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
         $documento['dataHoraDeRegistro'] = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
-        $documento['produtor'] = []; // Inicializando a chave 'produtor' como um array        
+        $documento['produtor'] = array(); // Inicializando a chave 'produtor' como um array        
         $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
         if(isset($usuarioDTO)) {
           $documento['produtor']['nome'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($usuarioDTO->getStrNome(), 150));
@@ -1291,62 +1289,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objComponenteDigital->assinaturaDigital->cadeiaDoCertificado = new SoapVar('<cadeiaDoCertificado formato="PKCS7"></cadeiaDoCertificado>', XSD_ANYXML);
         $objComponenteDigital->assinaturaDigital->hash = new SoapVar("<hash algoritmo='{self::ALGORITMO_HASH_ASSINATURA}'>{$objAssinaturaDTO->getStrP7sBase64()}</hash>", XSD_ANYXML);
       }
-    }
-
-    private function atribuirComponentesDigitais($objDocumento, DocumentoDTO $objDocumentoDTO, $dblIdProcedimento = null)
-      {
-      if(!isset($objDocumento)){
-        throw new InfraException('Parâmetro $objDocumento não informado.');
-      }
-
-      if(!isset($objDocumentoDTO)){
-        throw new InfraException('Parâmetro $objDocumentoDTO não informado.');
-      }
-
-      $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($dblIdProcedimento, $objDocumentoDTO->getDblIdDocumento());
-      $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
-      $arrObjDadosArquivos = $this->listarDadosArquivos($objDocumentoDTO, $strStaAssociacao);
-
-      $objDocumento->componenteDigital = array();
-      foreach ($arrObjDadosArquivos as $numOrdemComponente => $objDadosArquivos) {
-
-        if(!isset($objDadosArquivos) || count($objDadosArquivos) == 0){
-          throw new InfraException('Erro durante obtenção de informações sobre o componente digital do documento {$objDocumentoDTO->getStrProtocoloDocumentoFormatado()}.');
-        }
-
-        $strAlgoritmoHash = self::ALGORITMO_HASH_DOCUMENTO;
-        $hashDoComponenteDigital = $objDadosArquivos['HASH_CONTEUDO'];
-        $strAlgoritmoHash = $objDadosArquivos['ALGORITMO_HASH_CONTEUDO'];
-
-        //TODO: Revisar tal implementação para atender a gerao de hash de arquivos grandes
-        $objComponenteDigital = new stdClass();
-        $objComponenteDigital->ordem = $numOrdemComponente;
-        $objComponenteDigital->nome = utf8_encode($objDadosArquivos["NOME"]);
-        $objComponenteDigital->hash = new SoapVar("<hash algoritmo='{$strAlgoritmoHash}'>{$hashDoComponenteDigital}</hash>", XSD_ANYXML);
-        $objComponenteDigital->tamanhoEmBytes = $objDadosArquivos['TAMANHO'];
-
-        //TODO: Validar os tipos de mimetype de acordo com o WSDL do SEI
-        //Caso no identifique o tipo correto, informar o valor [outro]
-        $objComponenteDigital->mimeType = $objDadosArquivos['MIME_TYPE'];
-        $objComponenteDigital->tipoDeConteudo = $this->obterTipoDeConteudo($objDadosArquivos['MIME_TYPE']);
-        $objComponenteDigital = $this->atribuirDadosAssinaturaDigital($objDocumentoDTO, $objComponenteDigital, $hashDoComponenteDigital);
-
-        if($objDadosArquivos['MIME_TYPE'] == 'outro'){
-          $objComponenteDigital->dadosComplementaresDoTipoDeArquivo = $objDadosArquivos['dadosComplementaresDoTipoDeArquivo'];
-        }
-
-        //TODO: Preencher dados complementares do tipo de arquivo
-        //$objComponenteDigital->dadosComplementaresDoTipoDeArquivo = '';
-
-        //TODO: Carregar informações da assinatura digital
-        //$this->atribuirAssinaturaEletronica($objComponenteDigital, $objDocumentoDTO);
-
-        $objComponenteDigital->idAnexo = $objDadosArquivos['ID_ANEXO'];
-
-        $objDocumento->componenteDigital[] = $objComponenteDigital;
-      }
-
-      return $objDocumento;
     }
 
     private function atribuirComponentesDigitaisREST($objDocumento, DocumentoDTO $objDocumentoDTO, $dblIdProcedimento = null)
@@ -2078,20 +2020,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     return $objDocumento;
   }
 
-    private function adicionarProcessosApensados($objProcesso, $arrIdProcessoApensado)
-    {
-      if(isset($arrIdProcessoApensado) && is_array($arrIdProcessoApensado) && count($arrIdProcessoApensado) > 0) {
-        $objProcesso->processoApensado = array();
-        foreach($arrIdProcessoApensado as $idProcedimentoApensado) {
-          $objProcesso->processoApensado[] = $this->construirProcesso($idProcedimentoApensado);
-        }
-      }
-    }
-
     private function adicionarProcessosApensadosREST($objProcesso, $arrIdProcessoApensado)
       {
         if (isset($arrIdProcessoApensado) && is_array($arrIdProcessoApensado) && count($arrIdProcessoApensado) > 0) {
-          $objProcesso['processoApensado'] = [];
+          $objProcesso['processoApensado'] = array();
   
           foreach ($arrIdProcessoApensado as $idProcedimentoApensado) {
               $objProcesso['processoApensado'][] = $this->construirProcesso($idProcedimentoApensado);
