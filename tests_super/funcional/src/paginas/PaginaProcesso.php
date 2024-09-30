@@ -241,4 +241,15 @@ class PaginaProcesso extends PaginaTeste
         return array_map(function($item) {return $item->text();}, $itens);
     }
 
+    public function validarBotaoExiste($botao)
+    {
+        try {
+            $this->test->frame(null);
+            $this->test->frame("ifrVisualizacao");
+            $botao = $this->test->byXPath("//img[@alt='$botao']");
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
