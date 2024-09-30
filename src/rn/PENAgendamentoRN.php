@@ -45,9 +45,9 @@ class PENAgendamentoRN extends InfraRN
           $objConsulta = $objBD->consultar($objDTO);
 
           //Caso não haja um nome para a hipótese legal, ele pula para a próxima.
-          if (empty($hipotese['nome'])) {
-            continue;
-          }
+        if (empty($hipotese['nome'])) {
+          continue;
+        }
 
           $objDTO->setStrNome(utf8_decode($hipotese['nome']));
 
