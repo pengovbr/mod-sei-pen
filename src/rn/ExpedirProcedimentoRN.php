@@ -2710,6 +2710,43 @@ class ExpedirProcedimentoRN extends InfraRN {
       }
     }
 
+    public function validarProcessoIncluidoBlocoEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
+    {
+      $concluido = array(
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+      );
+
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+      $objPenBlocoProcessoDTO->retNumIdAtividade();
+      $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
+
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+
+      foreach ($arrPenBlocoProcessoDTO as $objPenBlocoProcessoDTO) {
+        if (!in_array($objPenBlocoProcessoDTO->getNumIdAtividade(), $concluido)) {
+          $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+          $objTramiteEmBlocoDTO->setNumId($objPenBlocoProcessoDTO->getNumIdBloco());
+          $objTramiteEmBlocoDTO->retNumOrdem();
+          $objTramiteEmBlocoDTO->retStrSiglaUnidade();
+          $objTramiteEmBlocoDTO->retStrDescricao();
+
+          $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+          $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
+
+          $mensagem = "Prezado(a) usuário(a), o processo {$objPenBlocoProcessoDTO->getStrProtocoloFormatadoProtocolo()} encontra-se inserido no bloco {$objTramiteEmBlocoDTO->getNumOrdem()} - "
+            . " {$objTramiteEmBlocoDTO->getStrDescricao()} da unidade {$objTramiteEmBlocoDTO->getStrSiglaUnidade()}."
+            . " Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.";
+          $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
+        }
+      }
+    }
+
     private function validarNivelAcessoProcesso(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
       {
       if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_SIGILOSO) {

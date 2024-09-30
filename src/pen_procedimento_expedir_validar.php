@@ -43,6 +43,7 @@ try {
       $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
       $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
+      $objExpedirProcedimentosRN->validarProcessoIncluidoBlocoEmAndamento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
 
       // Processos apensados
     if(array_key_exists('selProcedimentosApensados', $_POST) && is_array($_POST['selProcedimentosApensados'])){
@@ -52,6 +53,7 @@ try {
         $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
         $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
         $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
+        $objExpedirProcedimentosRN->validarProcessoIncluidoBlocoEmAndamento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
       }
     }
   }

@@ -151,7 +151,6 @@ try {
 
     $situacaoPodeExcluir = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
     );
@@ -190,13 +189,13 @@ try {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO:
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/em_processamento.png" title="Aguardando Processamento" style="width:16px; alt="Aguardando Processamento" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-concluido.svg" title="Concluído" style="width:16px; alt="Concluído" />';
             break;
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:
-        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:        
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg" title="Recusado" style="width:16px; alt="Recusado" />';
             break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
