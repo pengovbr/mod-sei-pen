@@ -3044,9 +3044,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         if($arrPenBlocoProcessoDTO != null){
           foreach ($arrPenBlocoProcessoDTO as $objDTO) {
-            if (
-              $objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-              || $objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO) {
+            if ($objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
               continue;
             }
 
