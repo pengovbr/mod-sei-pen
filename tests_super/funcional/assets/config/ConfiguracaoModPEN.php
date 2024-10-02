@@ -36,8 +36,8 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
             "PEN" => array(
                 // Endereço do Web Service principal de integração com o Barramento de Serviços do PEN
                 // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-                //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
-                //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/
+                //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/
+                //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v3/
                 "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/",
 
                 // Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
@@ -51,10 +51,10 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
                 // e assinar os recibos de envio/conclusão dos trâmites de processo
                 // Necessário que o arquivo de certificado esteja localizado dentro da pasta de configurações do módulo:
                 //  Ex: <DIRETÓRIO RAIZ DE INSTALAÇÃO DO SEI>/sei/config/mod-pen/certificado.pem
-                "LocalizacaoCertificado" => getenv('CERTIFICADO'),
+                "LocalizacaoCertificado" => '/sei/config/mod-pen/certificado.pem',
 
                 // Senha do certificado digital necessário para a aplicação descriptografar a chave privada
-                "SenhaCertificado" => getenv('CERTIFICADO_SENHA'),
+                "SenhaCertificado" => 'sua_senha_certificado',
 
                 // Quantidade de tentativas de requisção dos serviços do Barramento PEN antes que um erro possa ser lançado pela aplicação
                 // Necessário para aumentar a resiliência da integração em contextos de instabilidade de rede.

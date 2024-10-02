@@ -889,6 +889,11 @@ class ProcessoEletronicoRN extends InfraRN
         $hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
         $conteudo = $objParametros->conteudoDoComponenteDigital;
 
+        $queryParams = [
+          'hashDoComponenteDigital' => $hashDoComponenteDigital,
+          'protocolo' => $protocolo
+        ];
+
 
         $detachedFilePath = tempnam(DIR_SEI_TEMP, 'detached_') . '.html';
         // guarda paths dos arquivos para posterior exclusão
@@ -897,7 +902,7 @@ class ProcessoEletronicoRN extends InfraRN
         // Escreve o conteúdo nos arquivos temporários
         file_put_contents($detachedFilePath, $conteudo);
 
-        $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar?protocolo={$protocolo}&hashDoComponenteDigital={$hashDoComponenteDigital}";
+        $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
 
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
@@ -913,6 +918,7 @@ class ProcessoEletronicoRN extends InfraRN
 
 
         $arrOptions = [
+            'query' => $queryParams,
             'multipart' => [
                 [
                     'name'     => 'conteudo',
@@ -939,9 +945,51 @@ class ProcessoEletronicoRN extends InfraRN
   public function enviarParteDeComponenteDigital($parametros)
     {
     try {
-        return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use (&$parametros) {
-            return $objPenWs->enviarParteDeComponenteDigital($parametros);
-        });
+
+      $objParametros = $parametros->dadosDaParteDeComponenteDigital;
+      $idTicketDeEnvio = $objParametros->ticketParaEnvioDeComponentesDigitais;
+
+      $protocolo = $objParametros->protocolo;
+      $hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
+      
+      $indetificacaoDaParte = $objParametros->identificacaoDaParte;
+      $parte = $indetificacaoDaParte->inicio . '-' . $indetificacaoDaParte->fim;
+
+      $conteudo = $objParametros->conteudoDaParteDeComponenteDigital;
+
+      $queryParams = [
+        'hashDoComponenteDigital' => $hashDoComponenteDigital,
+        'protocolo' => $protocolo
+      ];
+
+      $endpoint = "/interoperabilidade/rest/v3/tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar/partes/{$parte}";
+
+      $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
+      $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
+      $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
+
+       $strBaseUri = $this->strEnderecoWebService;
+      
+      $strClientGuzzle = new GuzzleHttp\Client([
+        'base_uri' => $strBaseUri,
+        'timeout'  => 5.0,
+        'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
+      ]);
+
+
+      $arrOptions = [
+          'query' => $queryParams,
+          'multipart' => [
+              [
+                  'name'     => 'conteudo',
+                  'contents' => $conteudo,
+              ],              
+          ],
+      ];
+              
+      $strClientGuzzle->request('PUT', $endpoint, $arrOptions);
+
+
     } catch (\Exception $e) {
         $mensagem = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e);
@@ -1091,27 +1139,31 @@ class ProcessoEletronicoRN extends InfraRN
         throw new InfraException('Parâmetro $objProcesso não informado.');
     }
 
+	if (is_array($parObjProtocolo)) {
+		$parObjProtocolo = (object) $parObjProtocolo;
+	}
+
       //Monta dados do processo eletrônico
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
       $objProcessoEletronicoDTO->setDblIdProcedimento($parDblIdProcedimento);
-      $objProcessoEletronicoDTO->setStrStaTipoProtocolo($parObjProtocolo['staTipoProtocolo']);
+      $objProcessoEletronicoDTO->setStrStaTipoProtocolo($parObjProtocolo->staTipoProtocolo);
 
       //Montar dados dos procedimentos apensados
-    if(isset($parObjProtocolo['processoApensado'])){
-      if(!is_array($parObjProtocolo['processoApensado'])){
-          $parObjProtocolo['processoApensado'] = array($parObjProtocolo['processoApensado']);
-      }
+    if (isset($parObjProtocolo->processoApensado)) {
+		if (!is_array($parObjProtocolo->processoApensado)) {
+			$parObjProtocolo->processoApensado = array($parObjProtocolo->processoApensado);
+		}
 
         $arrObjRelProcessoEletronicoApensadoDTO = array();
         $objRelProcessoEletronicoApensadoDTO = null;
-      foreach ($parObjProtocolo['processoApensado'] as $objProcessoApensado) {
-          $objRelProcessoEletronicoApensadoDTO = new RelProcessoEletronicoApensadoDTO();
-          $objRelProcessoEletronicoApensadoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
-          $objRelProcessoEletronicoApensadoDTO->setDblIdProcedimentoApensado($objProcessoApensado['idProcedimentoSEI']);
-          $objRelProcessoEletronicoApensadoDTO->setStrProtocolo($objProcessoApensado['protocolo']);
-          $arrObjRelProcessoEletronicoApensadoDTO[] = $objRelProcessoEletronicoApensadoDTO;
-      }
+		foreach ($parObjProtocolo->processoApensado as $objProcessoApensado) {
+			$objRelProcessoEletronicoApensadoDTO = new RelProcessoEletronicoApensadoDTO();
+			$objRelProcessoEletronicoApensadoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
+			$objRelProcessoEletronicoApensadoDTO->setDblIdProcedimentoApensado($objProcessoApensado['idProcedimentoSEI']);
+			$objRelProcessoEletronicoApensadoDTO->setStrProtocolo($objProcessoApensado['protocolo']);
+			$arrObjRelProcessoEletronicoApensadoDTO[] = $objRelProcessoEletronicoApensadoDTO;
+		}
 
         $objProcessoEletronicoDTO->setArrObjRelProcessoEletronicoApensado($arrObjRelProcessoEletronicoApensadoDTO);
     }
@@ -1433,10 +1485,6 @@ class ProcessoEletronicoRN extends InfraRN
             'hashDoComponenteDigital' => $parStrHashComponenteDigital,
             'protocolo' => $parStrProtocolo,
         ];
-
-        if (!is_null($parObjParteComponente)) {
-          $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parObjParteComponente}";
-        }
 
           $this->post($endpoint, $identificacaoDoComponenteDigital);
 
@@ -2031,7 +2079,7 @@ class ProcessoEletronicoRN extends InfraRN
     {
       $arrObjDocumento = array();
     if(isset($parObjProtocolo->documentos)){
-        $arrObjProtocolo = is_array($parObjProtocolo->documentos) ? $parObjProtocolo->documentos : array($parObjProtocolo->documentos);
+        $arrObjProtocolo = is_array($parObjProtocolo->documentos) ? $parObjProtocolo->documentos : json_decode(json_encode($parObjProtocolo->documentos), true);
         usort($arrObjProtocolo, array("ProcessoEletronicoRN", "comparacaoOrdemAjustadaDocumentos"));
 
         //Tratamento recursivo para processos anexados
@@ -2065,27 +2113,33 @@ class ProcessoEletronicoRN extends InfraRN
 
       $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
 
-    foreach ($arrObjDocumentoPadronizados as $objDocumento) {
-        $objDocumento->componentesDigitais = self::obterComponentesDocumentos($objDocumento);
+    foreach ($arrObjDocumentoPadronizados as $documento) {
+		if (is_array($documento) && $documento['componentesDigitais']) {
+			$documento['componentesDigitais'] = self::obterComponentesDocumentos($documento);
+		} else {
+			$documento->componentesDigitais = self::obterComponentesDocumentos($documento);
+		}
     }
 
       return $arrObjDocumentoPadronizados;
   }
 
 
-  public static function obterComponentesDocumentos($parObjDocumento)
-    {
-      $arrObjComponenteDigital=array();
-    if(isset($parObjDocumento->componentesDigitais)){
+	public static function obterComponentesDocumentos($parObjDocumento)
+	{
+		
+		if (is_array($parObjDocumento) && isset($parObjDocumento['componentesDigitais'])) {
+			return $parObjDocumento['componentesDigitais'];
+		}
+		
+		$arrObjComponenteDigital = array();
+		if (isset($parObjDocumento->componentesDigitais)) {
+			$arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
+			usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
+		}
 
-        $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
-        usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
-    }
-
-
-      return $arrObjComponenteDigital;
-
-  }
+		return $arrObjComponenteDigital;
+	}
 
     /**
      * Retorna a referência para o processo ou documento avulso
@@ -2140,9 +2194,9 @@ class ProcessoEletronicoRN extends InfraRN
   public static function obterComponentesDigitaisDocumento($parObjDocumento)
     {
       $arrObjComponenteDigital = array();
-    if(isset($parObjDocumento->componenteDigital)){
-        $arrObjComponenteDigital = is_array($parObjDocumento->componenteDigital) ? $parObjDocumento->componenteDigital : array($parObjDocumento->componenteDigital);
-    }
+		if (isset($parObjDocumento['componentesDigitais'])) {
+			$arrObjComponenteDigital = is_array($parObjDocumento['componentesDigitais']) ? $parObjDocumento['componentesDigitais'] : array($parObjDocumento['componentesDigitais']);
+		}
 
       return $arrObjComponenteDigital;
   }
@@ -2161,7 +2215,10 @@ class ProcessoEletronicoRN extends InfraRN
     */
   public static function desmembrarProcessosAnexados($parObjProtocolo)
     {
-    $parObjProtocolo = (object) $parObjProtocolo;
+	if (is_array($parObjProtocolo)) {
+		$parObjProtocolo = (object) $parObjProtocolo;
+	}
+
     if(!ProcessoEletronicoRN::existeProcessoAnexado($parObjProtocolo)){
       return $parObjProtocolo;
     }
@@ -2256,7 +2313,7 @@ class ProcessoEletronicoRN extends InfraRN
       return (
           isset($parObjDocumento->protocoloDoProcessoAnexado) &&
           !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-          $parObjProtocolo['protocolo'] != $parObjDocumento['protocoloDoProcessoAnexado']
+          $parObjProtocolo['protocolo'] != $parObjDocumento->protocoloDoProcessoAnexado
       );
   }
 
