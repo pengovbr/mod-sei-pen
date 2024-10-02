@@ -2869,7 +2869,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         inner join md_pen_bloco_protocolo mpbp on mpbp.id_tramita_em_bloco = mpb.id 
         inner join protocolo p on p.id_protocolo = mpbp.id_protocolo 
         left join md_pen_expedir_lote mpel on mpel.id_lote = mpb.id 
-        LEFT join md_pen_rel_expedir_lote mprel on mprel.id_procedimento = mpbp.id_protocolo";
+        LEFT join md_pen_rel_expedir_lote mprel on mprel.id_procedimento = mpbp.id_protocolo
+          and mprel.id_lote = mpel.id_lote";
 
     $blocosTramite = $objInfraBanco->consultarSql($sql);
 
@@ -3043,7 +3044,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
         if($arrPenBlocoProcessoDTO != null){
           foreach ($arrPenBlocoProcessoDTO as $objDTO) {
-            if ($objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE) {
+            if (
+              $objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+              || $objDTO->getNumIdAndamento() == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO) {
               continue;
             }
 
@@ -3254,7 +3257,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
       $arrIdProtocolo = array();
       foreach($blocosTramite as $blocoTramite) {
-        if (in_array($blocoTramite['id_protocolo'], $arrIdProtocolo)) {
+        $chave = $blocoTramite['id_protocolo'] . '-' . $blocoTramite['id_bloco'];
+        if (in_array($chave, $arrIdProtocolo)) {
           continue;
         }
 
@@ -3303,20 +3307,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objPenBlocoProcessoDTO->setDthRegistro($dthRegistro);
         $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
 
-        $arrIdProtocolo[] = $blocoTramite['id_protocolo'];
+        $arrIdProtocolo[] = $blocoTramite['id_protocolo'] . '-' . $blocoTramite['id_bloco'];
       }
     }
-  }
-
-  private function verificarIdAndamentoConcluido($arrPenBlocoProcessoDTO) 
-  {
-    $arrIdAndamentoProcesso = InfraArray::converterArrInfraDTO($arrPenBlocoProcessoDTO, 'IdAndamento', 'IdAndamento');
-
-    $bolVeriicarStatusDiferenteDeSucesso = array_filter($arrIdAndamentoProcesso, function($valor) {
-      return $valor != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-    });
-
-    return !empty($bolVeriicarStatusDiferenteDeSucesso);
   }
 
   /**
@@ -3336,7 +3329,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
 
     if (!empty($objPenProtocoloDTO) && $objPenProtocoloDTO->getStrSinObteveRecusa() == 'S') {
-      return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA;
+      return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO;
     } 
 
     $objAtividadeDTO = new AtividadeDTO();
@@ -3369,20 +3362,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $processoTramiteProcessamento = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
     $processoTramiteAberto = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
     
+    if ($numIdAndamento == $processoConcluidoRecebido && $staBloco == TramiteEmBlocoRN::$TE_ABERTO) {
+      return null;
+    }
+    
     switch ($numIdAndamento) {
-      case $processoConcluidoAvulso:
-      case $processoTramiteExpedido:      
-          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
       case $processoTramiteProcessamento:
-          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO;
+      case $processoConcluidoAvulso:
+      case $processoTramiteExpedido:
       case $processoTramiteCancelado:
-          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO;
       case $processoConcluidoRecebido:
-        if ($staBloco == TramiteEmBlocoRN::$TE_ABERTO) {
-          return null;
-        } else {
-          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
-        }
+          return ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO;
       case $processoTramiteAberto:
       default:
           return null;

@@ -38,6 +38,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static $STA_SITUACAO_TRAMITE_RECUSADO = 8;                           // Trâmite do processo recusado pelo destinatário (Situações 2, 3, 4)
   public static $STA_SITUACAO_TRAMITE_CIENCIA_RECUSA = 9;                     // Remetente ciente da recusa do trâmite
   public static $STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE = 10;
+  public static $STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO = 99;
 
     /* TIPO DE TRÂMITE EXTERNO DE PROCESSO */
   public static $STA_TIPO_TRAMITE_ENVIO = 'E'; // Trâmite de ENVIO de processo externo

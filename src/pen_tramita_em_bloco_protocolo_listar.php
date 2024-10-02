@@ -195,6 +195,9 @@ try {
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-concluido.svg" title="Concluído" style="width:16px; alt="Concluído" />';
             break;
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO:
+          $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-concluido.svg" title="Concluído Legado" style="width:16px; alt="Concluído Legado" />';
+            break;
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:        
           $strResultado .= '<img src="' . PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg" title="Recusado" style="width:16px; alt="Recusado" />';
             break;

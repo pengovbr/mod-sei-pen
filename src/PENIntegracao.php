@@ -164,7 +164,8 @@ class PENIntegracao extends SeiIntegracao
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
         ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO
       );
       foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
         if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
