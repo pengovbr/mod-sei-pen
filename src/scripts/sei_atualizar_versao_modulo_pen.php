@@ -2953,7 +2953,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
     $arrObjTramiteEmBlocoDTO = $objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO);
-    $this->validarBlocos($arrObjTramiteEmBlocoDTO);    
+    $this->validarBlocos($arrObjTramiteEmBlocoDTO);
 
     $this->atualizaOrdemTramiteEmBlocoPorUnidade();
 
@@ -3122,7 +3122,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CONCLUIDO_LEGADO
     );
     $emAndamento = array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
