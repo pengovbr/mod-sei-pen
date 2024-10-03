@@ -43,7 +43,6 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $objAtividadeFixture = new AtividadeFixture();
         $objAtividadeDTO = $objAtividadeFixture->carregar([
             'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-            'Conclusao' => \InfraData::getStrDataHoraAtual(),
             'IdTarefa' => \TarefaRN::$TI_GERACAO_PROCEDIMENTO,
             'IdUsuarioConclusao' => 100000001
         ]);
@@ -100,6 +99,8 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
         ]);
 
+        return $objDocumentoDTO;
+
     }
 
     protected function cadastrarDocumentoExternoFixture($dadosDocumentoExterno, $idProtocolo)
@@ -154,7 +155,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         ]);
     }
     
-    protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo)
+    protected function consultarProcessoFixture($protocoloFormatado, $staProtocolo = null)
     {
         $objProtocoloFixture = new ProtocoloFixture();
         $objProtocoloDTO = $objProtocoloFixture->buscar([
@@ -168,16 +169,10 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
     {
         $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
-        $buscar = false;
         // 1 - Cadastrar novo processo de teste
         if (isset($processoTeste['PROTOCOLO'])) {
             $strProtocoloTeste = $processoTeste['PROTOCOLO'];
-
-            $parametros = [
-                'ProtocoloFormatado' => $strProtocoloTeste,
-            ];
-            $objProtocoloFixture = new ProtocoloFixture();
-            $objProtocoloDTO = $objProtocoloFixture->buscar($parametros)[0];
+            $objProtocoloDTO = $this->consultarProcessoFixture($strProtocoloTeste, \ProtocoloRN::$TP_PROCEDIMENTO);
 
         } else {
             $objProtocoloDTO  = $this->cadastrarProcessoFixture($processoTeste);
@@ -212,7 +207,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
                 sleep(5);
                 $testCase->refresh();
                 $paginaProcesso = new PaginaProcesso($testCase);
-                $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+                $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
                 $testCase->assertFalse($paginaProcesso->processoAberto());
                 $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
                 return true;
@@ -237,7 +232,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, true);
     }
 
-    public function realizarTramiteExternoSemvalidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario)
+    public function realizarTramiteExternoSemValidacaoNoRemetenteFixture(&$processoTeste, $documentosTeste, $remetente, $destinatario)
     {
         $this->realizarTramiteExternoFixture($processoTeste, $documentosTeste, $remetente, $destinatario, false);
     }

@@ -27,10 +27,10 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestC
         self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1);
-        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $paginaProcesso = new PaginaProcesso($this);
-        $this->assertStringNotContainsString(utf8_encode("externa para SEGES TESTE SEM PAI - - RE CGPRO"), $paginaProcesso->informacao());
+        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGPRO", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
     }
 }

@@ -14,65 +14,65 @@ class PaginaTramiteEmBloco extends PaginaTeste
     /**
      * @inheritdoc
      */
-    public function __construct($test)
+  public function __construct($test)
     {
-        parent::__construct($test);
-    }
+      parent::__construct($test);
+  }
 
     /**
      * Selecionar processo
      * @param array $arrNumProtocolo
      * @return void
      */
-    public function selecionarProcessos($arrNumProtocolo = array())
+  public function selecionarProcessos($arrNumProtocolo = array())
     {
-        foreach ($arrNumProtocolo as $numProtocolo) {
-            $chkProtocolo = $this->test->byXPath('//tr[contains(.,"'.$numProtocolo.'")]/td/div/label');
-            $chkProtocolo->click();
-        }
+    foreach ($arrNumProtocolo as $numProtocolo) {
+        $chkProtocolo = $this->test->byXPath('//tr[contains(.,"'.$numProtocolo.'")]/td/div/label');
+        $chkProtocolo->click();
     }
+  }
 
     /**
      * Selecionar tramite em bloco
      * @return void
      */
-    public function selecionarTramiteEmBloco()
+  public function selecionarTramiteEmBloco()
     {
-        $btnTramiteEmBloco = $this->test->byXPath(
-            "//img[@alt='". utf8_encode("Incluir Processos no Bloco de Trâmite") ."']"
-        );
-        $btnTramiteEmBloco->click();
-    }
+      $btnTramiteEmBloco = $this->test->byXPath(
+          "//img[@alt='". mb_convert_encoding("Incluir Processos no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1') ."']"
+      );
+      $btnTramiteEmBloco->click();
+  }
 
     /**
      * Selecionar bloco
      * @param string $selAndamento
      * @return void
      */
-    public function selecionarBloco($selAndamento)
+  public function selecionarBloco($selAndamento)
     {
-        $select = $this->test->select($this->test->byId('selBlocos'));
-        $select->selectOptionByValue($selAndamento);
-    }
+      $select = $this->test->select($this->test->byId('selBlocos'));
+      $select->selectOptionByValue($selAndamento);
+  }
 
     /**
      * Clicar em salvar
      * @return void
      */
-    public function clicarSalvar()
+  public function clicarSalvar()
     {
-        $btnSalvar = $this->test->byXPath("//button[@name='sbmCadastrarProcessoEmBloco']");
-        $btnSalvar->click();
-    }
+      $btnSalvar = $this->test->byXPath("//button[@name='sbmCadastrarProcessoEmBloco']");
+      $btnSalvar->click();
+  }
 
     /**
      * Buscar mensagem de alerta da página
      *
      * @return string
      */
-    public function buscarMensagemAlerta()
+  public function buscarMensagemAlerta()
     {
-        $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-        return !empty($alerta->text()) ? $alerta->text() : "";
-    }
+      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
+      return !empty($alerta->text()) ? $alerta->text() : "";
+  }
 }

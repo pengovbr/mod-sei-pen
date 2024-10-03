@@ -21,7 +21,7 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -102,4 +102,5 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
+
 }

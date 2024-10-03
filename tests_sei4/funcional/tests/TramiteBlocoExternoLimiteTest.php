@@ -1,16 +1,18 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
-
-class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
+/**
+ * Teste de tramite de processos em bloco
+ *
+ * Execution Groups
+ * @group execute_alone_group1
+ */
+class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
 {
-    protected static $numQtyProcessos = 5; // max: 100
-    protected static $tramitar = true; // mude para false, caso queira rodar o script sem o tramite final
+    protected static $numQtyProcessos = 4; // max: 99
+    protected static $tramitar = false; // mude para false, caso queira rodar o script sem o tramite final
 
     public static $remetente;
     public static $destinatario;
-    public static $penOrgaoExternoId;
-    public static $protocoloTestePrincipal;
 
     function setUp(): void 
     {
@@ -21,62 +23,24 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
 
     public function teste_tramite_bloco_externo()
     {
+        // Definição de dados de teste do processo principal
+        $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+        $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
 
         for ($i = 0; $i < self::$numQtyProcessos; $i++) {
-            $objProtocoloFixture = new ProtocoloFixture();
-            $objProtocoloFixtureDTO = $objProtocoloFixture->carregar([
-                'Descricao' => 'teste'
-            ]);
 
-            $objProcedimentoFixture = new ProcedimentoFixture();
-            $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtividadeFixture = new AtividadeFixture();
-            $objAtividadeDTO = $objAtividadeFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdTarefa' => TarefaRN::$TI_GERACAO_PROCEDIMENTO,
-            ]);
-
-            $objParticipanteFixture = new ParticipanteFixture();
-            $objParticipanteFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdContato' => 100000006,
-            ]);
-
-            $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
-            $objProtocoloAssuntoFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
-            $objAtributoAndamentoFixture->carregar([
-                'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-            ]);
-
-            $objDocumentoFixture = new DocumentoFixture();
-            $objDocumentoDTO = $objDocumentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
-            ]);
-
-            $objAssinaturaFixture = new AssinaturaFixture();
-            $objAssinaturaFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
-                'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-            ]);
+            $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+            $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
 
             $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
             $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
-                'IdProtocolo' => $objProtocoloFixtureDTO->getDblIdProtocolo(),
+                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
                 'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
             ]);
 
-            self::$protocoloTestePrincipal = $objProtocoloFixtureDTO->getStrProtocoloFormatado();
         }
 
         $this->acessarSistema(
@@ -96,7 +60,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
                 function ($testCase) {
                   try {
                       $testCase->frame('ifrEnvioProcesso');
-                      $mensagemSucesso = utf8_encode('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'');
+                      $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
                       $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
                       $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                       $btnFechar->click();
@@ -147,9 +111,9 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
             foreach ($linhasDaTabela as $linha) {
                 $statusTd = $linha->byXPath('./td[7]');
                 if (self::$tramitar == true) {
-                    $statusImg = $statusTd->byXPath(utf8_encode("(//img[@title='Concluído'])"));
+                    $statusImg = $statusTd->byXPath(mb_convert_encoding("(//img[@title='Concluído'])", 'UTF-8', 'ISO-8859-1'));
                 } else {
-                    $statusImg = $statusTd->byXPath(utf8_encode("(//img[@title='Em aberto'])"));
+                    $statusImg = $statusTd->byXPath(mb_convert_encoding("(//img[@title='Em aberto'])", 'UTF-8', 'ISO-8859-1'));
                 }
                 $totalConcluidos++;
             }
@@ -189,7 +153,7 @@ class TramiteBlocoExternoLimiteTest extends CenarioBaseTestCase
         }, PEN_WAIT_TIMEOUT);
         
         $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
-        $this->assertEquals(utf8_encode("Concluído"), $novoStatus);
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $novoStatus);
       } else {
         $this->assertEquals("Aberto", $novoStatus);
       }

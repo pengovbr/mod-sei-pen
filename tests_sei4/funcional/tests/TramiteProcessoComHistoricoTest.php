@@ -23,7 +23,6 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
     public function test_tramitar_processo_da_origem()
     {
  
-
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
@@ -50,21 +49,20 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
     public function test_verificar_destino_processo_para_devolucao()
     {
 
-
         $localCertificado = self::$destinatario['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$destinatario['SENHA_CERTIFICADO_DIGITAL'];
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
 
         // Captura o IDT do processo
-        $idtEnviado=$bancoOrgaoA->query("SELECT tra.id_tramite FROM protocolo p 
+        $idtEnviado = $bancoOrgaoA->query("SELECT tra.id_tramite FROM protocolo p 
         inner join md_pen_processo_eletronico pen on p.id_protocolo=pen.id_procedimento
         inner join md_pen_tramite tra on pen.numero_registro=tra.numero_registro
         where protocolo_formatado=?",array(self::$protocoloTeste));
 
         if (array_key_exists("id_tramite", $idtEnviado[0])) {
             $idtEnviado=$idtEnviado[0]["id_tramite"];
-        }else{
+        } else {
             $idtEnviado=$idtEnviado[0]["ID_TRAMITE"];
         }
 
@@ -75,10 +73,8 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
         curl_setopt($curl_handler, CURLOPT_SSLCERTPASSWD, $senhaCertificado);
 
-        $saida= json_decode(curl_exec($curl_handler));
+        $saida = json_decode(curl_exec($curl_handler));
         curl_close($curl_handler);
-
-
 
         foreach($saida->propriedadesAdicionais as $propriedades){
         
@@ -110,25 +106,13 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
  
                 case "CLASSIFICACAO_Descricao_1":
                      $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
-                     break;
-                     
+                     break;                
                      
             }
         }
- 
-     //    usort($saida->processo->itensHistorico,function($a,$b){
-     //      return ($a->dataHoraOperacao < $b->dataHoraOperacao? -1: 1);
-     //     });
 
         $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
 
-
-
-
-
-
     }
-
-
 
 }
