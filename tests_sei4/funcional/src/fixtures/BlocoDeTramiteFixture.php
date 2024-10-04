@@ -29,9 +29,22 @@ class BlocoDeTramiteFixture extends \FixtureBase
       $objBlocoDeTramiteDTO->setNumOrdem($ordem);
 
       $objBlocoDeTramiteDB = new \TramiteEmBlocoBD($this->inicializarObjInfraIBanco());
-      $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
+      $objBlocoDeTramiteDTO = $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
 
-      return $objBlocoDeTramiteDTO;
+      $objUnidadeDTO = $this->consultarUnidadeRelacionada($objBlocoDeTramiteDTO);
+      $objBlocoDeTramiteDTO->setStrSiglaUnidade($objUnidadeDTO->getStrSigla());
+
+      return $objBlocoDeTramiteDTO; 
+  }
+
+  protected function consultarUnidadeRelacionada(TramiteEmBlocoDTO $objBlocoDeTramiteDB)
+  {
+    $objUnidadeDTO = new \UnidadeDTO();
+    $objUnidadeDTO->setNumIdUnidade($objBlocoDeTramiteDB->getNumIdUnidade());
+    $objUnidadeDTO->retTodos();
+
+    $objUnidadeBD = new \UnidadeBD($this->inicializarObjInfraIBanco());
+    return $objUnidadeBD->consultar($objUnidadeDTO);
   }
 
   public function excluir($id)

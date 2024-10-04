@@ -77,13 +77,14 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBas
         $this->assertStringContainsString(
             mb_convert_encoding(
                 'Prezado(a) usuário(a), o processo ' . self::$objProtocoloDTO->getStrProtocoloFormatado()
-                . ' encontra-se inserido no bloco ' . self::$objBlocoDeTramiteDTO->getNumId() . ' - '
+                . ' encontra-se inserido no bloco ' . self::$objBlocoDeTramiteDTO->getNumOrdem() . ' - '
                 .  self::$objBlocoDeTramiteDTO->getStrDescricao() 
+                . ' da unidade ' . self::$objBlocoDeTramiteDTO->getStrSiglaUnidade()
                 . '. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'
                 , 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
-
+        
         $this->paginaBase->sairSistema();
     }
 
