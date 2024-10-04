@@ -54,11 +54,11 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends FixtureCenarioBaseTes
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->abrirProcesso(self::$protocoloTeste);;
+        $this->abrirProcesso(self::$protocoloTeste);
 
         $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
         $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
-        $this->expectExceptionMessage(utf8_encode($mensagemEsperada));
+        $this->expectExceptionMessage(mb_convert_encoding($mensagemEsperada, 'UTF-8', 'ISO-8859-1'));
         $this->tramitarProcessoExternamente(self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
     }
 
@@ -94,7 +94,7 @@ class TramiteProcessoDocumentoNaoMapeadoOrigemTest extends FixtureCenarioBaseTes
 
         $tipoDocumento = mb_convert_encoding(self::$documentoTeste["TIPO_DOCUMENTO"], "ISO-8859-1");
         $mensagemEsperada = sprintf("Não existe mapeamento de envio para %s no documento", $tipoDocumento);
-        $this->expectExceptionMessage(utf8_encode($mensagemEsperada));
+        $this->expectExceptionMessage(mb_convert_encoding($mensagemEsperada, 'UTF-8', 'ISO-8859-1'));
         $this->tramitarProcessoExternamente(self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
+class PesquisarMapeamentoUnidadeTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
 
@@ -22,7 +22,7 @@ class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
         $this->byId('txtSiglaUnidade')->value('00000');
         $this->byId('btnPesquisar')->click();
 
-        $mensagem = utf8_encode('Nenhum mapeamento foi encontrado');
+        $mensagem = mb_convert_encoding('Nenhum mapeamento foi encontrado', 'UTF-8', 'ISO-8859-1');
 
         $this->waitUntil(function ($testCase) use ($mensagem) {
             $this->assertStringContainsString($mensagem, $testCase->byCssSelector('body')->text());
@@ -38,7 +38,7 @@ class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
         $this->byId('txtSiglaUnidade')->value('TESTE');
         $this->byId('btnPesquisar')->click();
 
-        $mensagem = utf8_encode('TESTE');
+        $mensagem = mb_convert_encoding('TESTE', 'UTF-8', 'ISO-8859-1');
         
         $this->waitUntil(function ($testCase) use ($mensagem) {
             $this->assertStringContainsString($mensagem, $testCase->byCssSelector('body')->text());
@@ -54,7 +54,7 @@ class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
         $this->byId('txtDescricaoUnidade')->value('00000');
         $this->byId('btnPesquisar')->click();
 
-        $mensagem = utf8_encode('Nenhum mapeamento foi encontrado');
+        $mensagem = mb_convert_encoding('Nenhum mapeamento foi encontrado', 'UTF-8', 'ISO-8859-1');
         
         $this->waitUntil(function ($testCase) use ($mensagem) {
             $this->assertStringContainsString($mensagem, $testCase->byCssSelector('body')->text());
@@ -70,7 +70,7 @@ class PesquisarMapeamentoUnidadeTest extends CenarioBaseTestCase
         $this->byId('txtDescricaoUnidade')->value('Unidade de Teste');
         $this->byId('btnPesquisar')->click();
 
-        $mensagem = utf8_encode('Unidade de Teste');
+        $mensagem = mb_convert_encoding('Unidade de Teste', 'UTF-8', 'ISO-8859-1');
         
         $this->waitUntil(function ($testCase) use ($mensagem) {
             $this->assertStringContainsString($mensagem, $testCase->byCssSelector('body')->text());

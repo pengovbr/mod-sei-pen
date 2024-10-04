@@ -9,15 +9,15 @@ class PaginaEnvioParcialListar extends PaginaTeste
      * 
      * @return void
      */
-    public function __construct($test)
+  public function __construct($test)
     {
-        parent::__construct($test);
-    }
+      parent::__construct($test);
+  }
 
-    public function navegarEnvioParcialListar()
+  public function navegarEnvioParcialListar()
     {
-        $this->test->byId("txtInfraPesquisarMenu")->value(utf8_encode('Mapeamento de Envio Parcial'));
-        $this->test->byXPath("//a[@link='pen_map_envio_parcial_listar']")->click();
-    }
+      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Mapeamento de Envio Parcial', 'UTF-8', 'ISO-8859-1'));
+      $this->test->byXPath("//a[@link='pen_map_envio_parcial_listar']")->click();
+  }
 
 }

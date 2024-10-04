@@ -31,7 +31,7 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -57,10 +57,9 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -101,7 +100,7 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // 12 - Validar dados  do processo
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(self::$processoTeste['DESCRICAO'], self::$processoTeste['RESTRICAO'], self::$processoTeste['OBSERVACOES'], array(self::$processoTeste['INTERESSADOS']));

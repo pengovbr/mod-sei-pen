@@ -72,7 +72,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
 
         $this->enviarComponentesDigitaisDoProcesso(self::$servicoPEN, $novoTramite, $metadadosProcessoTeste);
         $reciboTramite = $this->receberReciboEnvioProcesso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -123,7 +123,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         $novoTramite = $this->enviarMetadadosDocumento(self::$servicoPEN, $remetente, $destinatario, $metadadosDocumentoTeste);
         $this->enviarComponentesDigitaisDoDocumentoAvulso(self::$servicoPEN, $novoTramite, $metadadosDocumentoTeste);
         $reciboTramite = $this->receberReciboEnvioDocumentoAvulso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -296,12 +296,12 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -352,13 +352,13 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
             'ordem' => $ordemDocumento,
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
                 'numeroDeIdentificacao' => '999999',
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -391,7 +391,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
             'interessado' => array(
                 'nome' => $processoTeste['INTERESSADOS'],
