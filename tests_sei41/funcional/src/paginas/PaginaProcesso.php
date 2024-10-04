@@ -255,7 +255,7 @@ class PaginaProcesso extends PaginaTeste
   {
       try {
           $this->test->frame(null);
-          $this->test->frame("ifrVisualizacao");
+          $this->test->frame("ifrConteudoVisualizacao");
           $botao = $this->test->byXPath("//img[@alt='$botao']");
           return true;
       } catch (\Exception $e) {
