@@ -168,11 +168,12 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
         // Configuração do dados para teste do cenário
         $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
 
+        $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);        
-        $strProtocoloTeste = $this->cadastrarProcesso($processoTeste);
 
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramiteEmBloco->selecionarProcessos([$strProtocoloTeste]);
+        $this->paginaTramiteEmBloco->selecionarProcessos([$objProtocoloDTO->getStrProtocoloFormatado()]);
         $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
         $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO->getNumId());
         $this->paginaTramiteEmBloco->clicarSalvar();
