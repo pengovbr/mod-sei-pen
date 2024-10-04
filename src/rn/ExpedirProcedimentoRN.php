@@ -2477,7 +2477,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-      $objPenBlocoProcessoDTO->retNumIdAtividade();
+      $objPenBlocoProcessoDTO->retNumIdAndamento();
       $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
       $objPenBlocoProcessoDTO->retNumIdBloco();
 
@@ -2485,7 +2485,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
       foreach ($arrPenBlocoProcessoDTO as $objPenBlocoProcessoDTO) {
-        if (!in_array($objPenBlocoProcessoDTO->getNumIdAtividade(), $concluido)) {
+        if (!in_array($objPenBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
           $objTramiteEmBlocoDTO->setNumId($objPenBlocoProcessoDTO->getNumIdBloco());
           $objTramiteEmBlocoDTO->retNumOrdem();
