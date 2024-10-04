@@ -8,7 +8,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoExportarTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoExportarTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
 

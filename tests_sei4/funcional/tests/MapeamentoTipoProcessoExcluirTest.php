@@ -7,7 +7,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoExcluirTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -62,7 +62,7 @@ class MapeamentoTipoProcessoExcluirTest extends CenarioBaseTestCase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre unidades foi excluído com sucesso.'),
+            mb_convert_encoding('Relacionamento entre unidades foi excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
         

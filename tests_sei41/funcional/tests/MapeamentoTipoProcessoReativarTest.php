@@ -7,7 +7,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -66,7 +66,7 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
         $this->paginaTipoProcessoReativar->reativarMapeamento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Mapeamento de Tipo de Processo foi reativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -94,7 +94,7 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
         $this->paginaTipoProcessoReativar->reativarMapeamentoCheckbox();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Mapeamento de Tipo de Processo foi reativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -129,14 +129,14 @@ class MapeamentoTipoProcessoReativarTest extends CenarioBaseTestCase
             array(
                 'IdMapeamento' => $idMapeamento,
                 'IdProcedimento' => 100000348,
-                'NomeProcedimento' => utf8_encode('Acompanhamento Legislativo: Congresso Nacional'),
-                'SimAtivo' => $sinAtivo
+                'NomeProcedimento' => mb_convert_encoding('Acompanhamento Legislativo: Congresso Nacional', 'UTF-8', 'ISO-8859-1'),
+                'SinAtivo' => $sinAtivo
             ),
             array(
                 'IdMapeamento' => $idMapeamento,
                 'IdProcedimento' => 100000425,
-                'NomeProcedimento' => utf8_encode('mauro teste'),
-                'SimAtivo' => $sinAtivo
+                'NomeProcedimento' => mb_convert_encoding('mauro teste', 'UTF-8', 'ISO-8859-1'),
+                'SinAtivo' => $sinAtivo
             )
         );
     }

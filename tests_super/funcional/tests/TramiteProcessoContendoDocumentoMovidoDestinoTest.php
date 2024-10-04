@@ -104,10 +104,9 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -186,7 +185,6 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         $this->cadastrarDocumentoInternoFixture(self::$documentoTeste5,self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
         
-        putenv("DATABASE_HOST=org1-database");
         // 12-tramitar Processo Principal para o Órgão 1 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
@@ -194,10 +192,9 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -237,14 +234,16 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         // definir Órgão 1 como remetente e Órgão 2 como destinatário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        putenv("DATABASE_HOST=org1-database");
 
-        // abrir Processo Principal
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        self::$objProtocoloTestePrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, $staProtocolo = 'P');
 
         // 14-criar documento interno (documentoTeste6) no Processo Principal
         self::$documentoTeste6 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste6);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste6,self::$objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+
+        // abrir Processo Principal
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         // 15-tramitar Processo Principal para o Órgão 2 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -253,10 +252,9 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -296,11 +294,16 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         // definir Órgão 1 como destinatário e Órgão 2 como remetente
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
+
+        self::$objProtocoloTestePrincipalOrg2DTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, $staProtocolo = 'P');
 
         // 17-criar documento interno (documentoTeste7) no Processo Principal
         self::$documentoTeste7 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste7);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste7, self::$objProtocoloTestePrincipalOrg2DTO->getDblIdProtocolo());
+
+        // abrir Processo Principal
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
 
         // 18-tramitar Processo Principal para o Órgão 1 com validação no remetente
         $this->tramitarProcessoExternamente(self::$protocoloTestePrincipal, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'], self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -309,10 +312,9 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

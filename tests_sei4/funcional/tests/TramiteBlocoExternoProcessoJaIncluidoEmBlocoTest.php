@@ -1,14 +1,12 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
-
 /**
  * Teste de inclusão de processo em bloco
  *
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCase
+class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBaseTestCase
 {
     public static $objBlocoDeTramiteDTO;
     public static $objProtocoloDTO;
@@ -47,7 +45,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         sleep(2);
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Processo(s) incluído(s) com sucesso no bloco ' . self::$objBlocoDeTramiteDTO->getNumOrdem()),
+            mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . self::$objBlocoDeTramiteDTO->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
 
@@ -77,12 +75,12 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         
         $this->assertStringContainsString(
-            utf8_encode(
+            mb_convert_encoding(
                 'Prezado(a) usuário(a), o processo ' . self::$objProtocoloDTO->getStrProtocoloFormatado()
                 . ' encontra-se inserido no bloco ' . self::$objBlocoDeTramiteDTO->getNumId() . ' - '
                 .  self::$objBlocoDeTramiteDTO->getStrDescricao() 
                 . '. Para continuar com essa ação é necessário que o processo seja removido do bloco em questão.'
-            ),
+                , 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
 
@@ -103,49 +101,12 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends CenarioBaseTestCa
      */
     private function cadastrarProcessos()
     {
-        $parametros = ['Descricao' => 'teste'];
-        $objProtocoloFixture = new ProtocoloFixture();
-        return $objProtocoloFixture->carregar(
-            $parametros,
-            function($objProtocoloDTO) {
-                $objProcedimentoFixture = new ProcedimentoFixture();
-                $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-                ]);
-
-                $objAtividadeFixture = new AtividadeFixture();
-                $objAtividadeDTO = $objAtividadeFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                ]);
-
-                $objParticipanteFixture = new ParticipanteFixture();
-                $objParticipanteFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                    'IdContato' => 100000006,
-                ]);
-
-                $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
-                $objProtocoloAssuntoFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-                ]);
-
-                $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
-                $objAtributoAndamentoFixture->carregar([
-                    'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-                ]);
-
-                $objDocumentoFixture = new DocumentoFixture();
-                $objDocumentoDTO = $objDocumentoFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                    'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
-                ]);
-
-                $objAssinaturaFixture = new AssinaturaFixture();
-                $objAssinaturaFixture->carregar([
-                    'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                    'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-                ]);
-            }
-        );
+        $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+        $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        
+        $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+        $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+        
+        return $objProtocoloDTO;
     }
 }
