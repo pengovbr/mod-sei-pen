@@ -91,10 +91,10 @@ class PaginaTramitarProcesso extends PaginaTeste
       return $this->unidadeInput->value();
   }
 
-  public function tramitarInterno()
+  public function manterAbertoNaUnidadeAtual()
     {
-      $tramitarButton = $this->test->byXPath("//button[@value='Enviar']");
-      $tramitarButton->click();
+      $manterAbertoCheckBox = $this->test->byXPath("//label[@id='lblSinManterAberto']");
+      $manterAbertoCheckBox->click();
   }
 
   public function tramitarInterno()
