@@ -45,7 +45,7 @@ class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends FixtureCenarioBaseTe
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste['TIPO_DOCUMENTO'] = self::$destinatario['TIPO_DOCUMENTO_NAO_MAPEADO'];
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -69,10 +69,9 @@ class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends FixtureCenarioBaseTe
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase)  {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Processo aberto somente na unidade"), $paginaProcesso->informacao());
+            $testCase->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertTrue($paginaProcesso->processoAberto());
             $testCase->assertFalse($paginaProcesso->processoBloqueado());
             return true;

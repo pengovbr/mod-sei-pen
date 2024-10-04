@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_with_two_group1
  */
-class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -35,16 +35,18 @@ class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_corrompimento_besimplesoap.pdf');
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
+        // Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado(); 
+
+
+        // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        
+        $this->abrirProcesso(self::$protocoloTeste);
 
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
-
-        // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
+        // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
                 self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false, null, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES);
@@ -72,10 +74,9 @@ class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBase
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -116,7 +117,7 @@ class TramiteProcessoContendoDocumentoBeSimpleCorrompidoTest extends CenarioBase
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // 12 - Validar dados  do processo
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(self::$processoTeste['DESCRICAO'], self::$processoTeste['RESTRICAO'], self::$processoTeste['OBSERVACOES'], array(self::$processoTeste['INTERESSADOS']));

@@ -1,14 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-use Tests\Funcional\Sei\Fixtures\ProcedimentoFixture;
-use Tests\Funcional\Sei\Fixtures\ParticipanteFixture;
-use Tests\Funcional\Sei\Fixtures\RelProtocoloAssuntoFixture;
-use Tests\Funcional\Sei\Fixtures\AtributoAndamentoFixture;
-use Tests\Funcional\Sei\Fixtures\DocumentoFixture;
-use Tests\Funcional\Sei\Fixtures\AssinaturaFixture;
-use Tests\Funcional\Sei\Fixtures\AtividadeFixture;
-
 /**
  * Mapeia as Unidades com limitação de repositórios
  * para tramite de processos entre orgãos
@@ -107,55 +98,12 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
    */
   private function criarProcesso()
   {
-    $objProtocoloFixture = new ProtocoloFixture();
-    $this->objProtocoloDTO = $objProtocoloFixture->carregar([], function ($objProtocoloDTO) {
+    // Definição de dados de teste do processo principal
+    $processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
+    $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+    $this->objProtocoloDTO = $this->cadastrarProcessoFixture($processoTestePrincipal);
+    $this->cadastrarDocumentoInternoFixture($documentoTeste, $this->objProtocoloDTO->getDblIdProtocolo());    
 
-      $objProcedimentoFixture = new ProcedimentoFixture();
-      $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-      ]);
-
-      $objAtividadeFixture = new AtividadeFixture();
-      $objAtividadeDTO = $objAtividadeFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-      ]);
-
-      $objParticipanteFixture = new ParticipanteFixture();
-      $objParticipanteFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        'IdContato' => 100000006
-      ]);
-
-      $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
-      $objProtocoloAssuntoFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-      ]);
-
-      $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
-      $objAtributoAndamentoFixture->carregar([
-        'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-      ]);
-
-      $objDocumentoFixture = new DocumentoFixture();
-      $objDocumentoDTO = $objDocumentoFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
-        'IdSerie' => 34
-      ]);
-
-      $objAtividadeFixture = new AtividadeFixture();
-      $objAtividadeDTO = $objAtividadeFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        'IdTarefa' => TarefaRN::$TI_ASSINATURA_DOCUMENTO
-      ]);
-
-      $objAssinaturaFixture = new AssinaturaFixture();
-      $objAssinaturaFixture->carregar([
-        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-        'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-      ]);
-    });
   }
 
   /**
@@ -171,4 +119,5 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
       'NomeUnidadeRHRestricao' => self::$remetente['NOME_UNIDADE']
     ]);
   }
+
 }

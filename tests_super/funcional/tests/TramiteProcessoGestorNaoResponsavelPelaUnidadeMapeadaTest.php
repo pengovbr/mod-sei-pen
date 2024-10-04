@@ -43,8 +43,8 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
         $this->abrirProcesso(self::$protocoloTeste);
 
         $this->tramitarProcessoExternamenteGestorNaoResponsavelUnidade([
-            'repositorio' => utf8_encode(self::$destinatario['REP_ESTRUTURAS']),
-            'unidadeDestino' => utf8_encode(self::$destinatario['NOME_UNIDADE']),
+            'repositorio' => mb_convert_encoding(self::$destinatario['REP_ESTRUTURAS'], 'UTF-8', 'ISO-8859-1'),
+            'unidadeDestino' => mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], 'UTF-8', 'ISO-8859-1'),
             'nomeUnidadeMalMapeada' => self::$nomeOrgNaoMapeada,
             'idUnidadeMalMapeada' => self::$idOrgNaoMapeada
         ]);
