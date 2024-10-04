@@ -2,8 +2,11 @@
 
 /**
  * Testes de mapeamento de envio de envio parcial
+ * 
+ * Execution Groups
+ * @group execute_alone_group1
  */
-class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
+class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $remetenteB;
@@ -43,7 +46,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
         $this->assertNotNull($nomeUnidadeCadastrado);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Mapeamento de Envio Parcial cadastrado com sucesso.'),
+            mb_convert_encoding('Mapeamento de Envio Parcial cadastrado com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
@@ -84,7 +87,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
         $this->assertNotNull($nomeUnidadeCadastrado);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Mapeamento de Envio Parcial atualizado com sucesso.'),
+            mb_convert_encoding('Mapeamento de Envio Parcial atualizado com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
@@ -172,7 +175,7 @@ class MapeamentoEnvioParcialTest extends CenarioBaseTestCase
         sleep(1);
         $mensagem = $this->paginaCadastroMapEnvioCompDigitais->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Mapeamento excluído com sucesso.'),
+            mb_convert_encoding('Mapeamento excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }

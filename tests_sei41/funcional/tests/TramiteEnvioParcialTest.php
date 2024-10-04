@@ -89,7 +89,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
     // 12 - Validar dados  do processo
-    $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+    $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
     $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
     self::$processoTestePrincipal['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
     $this->validarDadosProcesso(
@@ -172,7 +172,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
     // 12 - Validar dados  do processo
-    $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+    $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
     $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
     self::$processoTestePrincipal['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
     $this->validarDadosProcesso(

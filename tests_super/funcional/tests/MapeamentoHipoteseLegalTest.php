@@ -5,22 +5,12 @@
  *
  * @package tests_super\funcional\tests
  */
-class MapeamentoHipoteseLegalTest extends CenarioBaseTestCase
+class MapeamentoHipoteseLegalTest extends FixtureCenarioBaseTestCase
 {
     /**
      * @var array
      */
     public static $remetente;
-
-    /**
-     * @inheritdoc
-     * @return void
-     */
-    function setUp(): void
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-    }
 
     /**
      * Verificar se lista de mapeamento de hipótese legal é exibida
