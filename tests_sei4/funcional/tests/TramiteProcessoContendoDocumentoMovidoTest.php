@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\ProtocoloFixture;
-
 /**
  * Testes de trâmite de processos contendo um documento movido
  *
@@ -92,10 +90,9 @@ class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestC
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -126,7 +123,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestC
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(
@@ -171,12 +168,10 @@ class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestC
         // Criar novo processo secundário na ORG 2
         $protocoloSecundarioTeste = $this->cadastrarProcessoFixture($processoSecundarioTeste);
 
-        // Criar novo documento externo no processo principal recebido na ORG 2
-        $parametros = [
-            'ProtocoloFormatado' => self::$protocoloTeste,
-        ];
-        $objProtocoloFixture = new ProtocoloFixture();
-        $objProtocoloTesteDTO = $objProtocoloFixture->buscar($parametros)[0];
+        // Busca dados do Protocolo principal no ORG 2
+        $objProtocoloTesteDTO = $this->consultarProcessoFixture(self::$protocoloTeste, \ProtocoloRN::$TP_PROCEDIMENTO);
+
+        // Criar novo documento externo no processo principal recebido na ORG 2"
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloTesteDTO->getDblIdProtocolo());
 
         // Acessar sistema do this->REMETENTE do processo
@@ -223,10 +218,9 @@ class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestC
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

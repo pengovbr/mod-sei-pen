@@ -5,74 +5,74 @@ class ImportacaoTiposProcessoFixture extends \FixtureBase
     protected $objPenMapTipoProcedimentoDTO;
     protected $dthRegistro;
 
-    public function __construct()
+  public function __construct()
     {
-        $this->objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
-        $this->dthRegistro = \InfraData::getStrDataAtual();
-    }
+      $this->objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
+      $this->dthRegistro = \InfraData::getStrDataAtual();
+  }
 
-    protected function inicializarObjInfraIBanco()
+  protected function inicializarObjInfraIBanco()
     {
-        return \BancoSEI::getInstance();
-    }
+      return \BancoSEI::getInstance();
+  }
 
-    public function cadastrar($dados = [])
+  public function cadastrar($dados = [])
     {
-        $objPenMapTipoProcedimentoDTO = $this->consultar($dados);
-        if ($objPenMapTipoProcedimentoDTO) {
-            return $objPenMapTipoProcedimentoDTO;
-        }
-        
-        $this->objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
-        $this->objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdProcedimento']);
-        $this->objPenMapTipoProcedimentoDTO->setStrNomeTipoProcesso($dados['NomeProcedimento']);
-        $this->objPenMapTipoProcedimentoDTO->setNumIdUnidade(($dados['IdUnidade'] ?? 110000001));
-        $this->objPenMapTipoProcedimentoDTO->setStrAtivo(($dados['SimAtivo'] ?? 'S'));
-        $this->objPenMapTipoProcedimentoDTO->setDthRegistro(\InfraData::getStrDataAtual());
-        
-        $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD(\BancoSEI::getInstance());
-        return $objPenMapTipoProcedimentoBD->cadastrar($this->objPenMapTipoProcedimentoDTO);
+      $objPenMapTipoProcedimentoDTO = $this->consultar($dados);
+    if ($objPenMapTipoProcedimentoDTO) {
+        return $objPenMapTipoProcedimentoDTO;
     }
+        
+      $this->objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
+      $this->objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdProcedimento']);
+      $this->objPenMapTipoProcedimentoDTO->setStrNomeTipoProcesso($dados['NomeProcedimento']);
+      $this->objPenMapTipoProcedimentoDTO->setNumIdUnidade(($dados['IdUnidade'] ?: 110000001));
+      $this->objPenMapTipoProcedimentoDTO->setStrAtivo(($dados['SinAtivo'] ?: 'S'));
+      $this->objPenMapTipoProcedimentoDTO->setDthRegistro(\InfraData::getStrDataAtual());
+        
+      $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
+      return $objPenMapTipoProcedimentoBD->cadastrar($this->objPenMapTipoProcedimentoDTO);
+  }
     
-    public function consultar($dados = [])
+  public function consultar($dados = [])
     {
-        $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
-        $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
+      $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
+      $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
+      $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdProcedimento']);
+      $objPenMapTipoProcedimentoDTO->setNumIdUnidade(($dados['IdUnidade'] ?: 110000001));
+      $objPenMapTipoProcedimentoDTO->setStrAtivo(($dados['SinAtivo'] ?: 'S'));
+      $objPenMapTipoProcedimentoDTO->retTodos();
+        
+      $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
+      return $objPenMapTipoProcedimentoBD->consultar($objPenMapTipoProcedimentoDTO);
+  }
+
+  public function listar($dados = [])
+    {
+      $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
+      $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
+    if ($dados['IdProcedimento']) {
         $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdProcedimento']);
-        $objPenMapTipoProcedimentoDTO->setNumIdUnidade(($dados['IdUnidade'] ?? 110000001));
-        $objPenMapTipoProcedimentoDTO->setStrAtivo(($dados['SimAtivo'] ?? 'S'));
-        $objPenMapTipoProcedimentoDTO->retTodos();
+    }
+    if ($dados['IdUnidade']) {
+        $objPenMapTipoProcedimentoDTO->setNumIdUnidade($dados['IdUnidade']);
+
+    }
+    if ($dados['SinAtivo']) {
+        $objPenMapTipoProcedimentoDTO->setStrAtivo($dados['SinAtivo']);
+    }
+      $objPenMapTipoProcedimentoDTO->retTodos();
         
-        $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD(\BancoSEI::getInstance());
-        return $objPenMapTipoProcedimentoBD->consultar($objPenMapTipoProcedimentoDTO);
-    }
+      $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
+      return $objPenMapTipoProcedimentoBD->listar($objPenMapTipoProcedimentoDTO);
+  }
 
-    public function listar($dados = [] )
+  public function excluir($dados = [])
     {
-        $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
-        $objPenMapTipoProcedimentoDTO->setNumIdMapOrgao($dados['IdMapeamento']);
-        if ($dados['IdProcedimento']) {
-            $objPenMapTipoProcedimentoDTO->setNumIdTipoProcessoOrigem($dados['IdProcedimento']);
-        }
-        if ($dados['IdUnidade']) {
-            $objPenMapTipoProcedimentoDTO->setNumIdUnidade($dados['IdUnidade']);
+      $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
+      $objPenMapTipoProcedimentoDTO->setDblId($dados['Id']);
 
-        }
-        if ($dados['SimAtivo']) {
-            $objPenMapTipoProcedimentoDTO->setStrAtivo($dados['SimAtivo']);
-        }
-        $objPenMapTipoProcedimentoDTO->retTodos();
-        
-        $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD(\BancoSEI::getInstance());
-        return $objPenMapTipoProcedimentoBD->listar($objPenMapTipoProcedimentoDTO);
-    }
-
-    public function excluir($dados = [])
-    {
-        $objPenMapTipoProcedimentoDTO = new \PenMapTipoProcedimentoDTO();
-        $objPenMapTipoProcedimentoDTO->setDblId($dados['Id']);
-
-        $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD(\BancoSEI::getInstance());
-        return $objPenMapTipoProcedimentoBD->excluir($objPenMapTipoProcedimentoDTO);
-    }
+      $objPenMapTipoProcedimentoBD = new \PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
+      return $objPenMapTipoProcedimentoBD->excluir($objPenMapTipoProcedimentoDTO);
+  }
 }

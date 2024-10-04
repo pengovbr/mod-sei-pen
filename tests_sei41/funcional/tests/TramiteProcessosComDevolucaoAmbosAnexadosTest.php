@@ -152,10 +152,9 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -213,14 +212,5 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste3, self::$destinatario);
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste5, self::$destinatario);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public static function tearDownAfterClass(): void
-    {
-        putenv("DATABASE_HOST=org1-database");
-        parent::tearDownAfterClass();
     }
 }

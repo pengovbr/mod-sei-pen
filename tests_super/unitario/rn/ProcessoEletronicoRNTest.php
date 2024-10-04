@@ -83,22 +83,22 @@ final class ProcessoEletronicoRNTest extends TestCase
         $this->assertTrue(strlen($strResultadoAtual) <= 150);
 
         $strTexto =             "ããããã ããããã";
-        $strResultadoEsperado = utf8_encode("ããããã ...");
-        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 9));
+        $strResultadoEsperado = mb_convert_encoding("ããããã ...", 'UTF-8', 'ISO-8859-1');
+        $strResultadoAtual = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 9), 'UTF-8', 'ISO-8859-1');
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
-        $this->assertTrue(strlen(utf8_decode($strResultadoAtual)) <= 9);
+        $this->assertTrue(strlen(mb_convert_encoding($strResultadoAtual, 'ISO-8859-1', 'UTF-8')) <= 9);
 
         $strTexto =             "ããããã ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniamr quis";
-        $strResultadoEsperado = utf8_encode("ããããã ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniam ...");
-        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 150));
+        $strResultadoEsperado = mb_convert_encoding("ããããã ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut lbore et dolore magna aliqua. Ut enim ad minim veniam ...", 'UTF-8', 'ISO-8859-1');
+        $strResultadoAtual = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 150), 'UTF-8', 'ISO-8859-1');
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
         $this->assertTrue(mb_strlen($strResultadoAtual) <= 150);
 
         $strTexto =             "Assessoria de Comunicação do Gabinete do Diretor-Presidente da Autoridade Nacional dede Proteção de dados";
-        $strResultadoEsperado = utf8_encode("Assessoria de Comunicação do Gabinete do Diretor-Presidente da Autoridade Nacional dede Proteçã ...");
-        $strResultadoAtual = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 100));
+        $strResultadoEsperado = mb_convert_encoding("Assessoria de Comunicação do Gabinete do Diretor-Presidente da Autoridade Nacional dede Proteçã ...", 'UTF-8', 'ISO-8859-1');
+        $strResultadoAtual = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strTexto, 100), 'UTF-8', 'ISO-8859-1');
         $this->assertEquals($strResultadoEsperado, $strResultadoAtual);
-        $this->assertTrue(strlen(utf8_decode($strResultadoAtual)) <= 100);
+        $this->assertTrue(strlen(mb_convert_encoding($strResultadoAtual, 'ISO-8859-1', 'UTF-8')) <= 100);
 
     }
 

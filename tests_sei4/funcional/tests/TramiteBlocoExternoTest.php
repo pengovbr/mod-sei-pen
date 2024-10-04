@@ -1,86 +1,37 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture};
-
 /**
- * EnviarProcessoTest
- * @group group
+ * Enviar bloco simples
+ *
+ * Execution Groups
+ * @group execute_alone_group1
  */
-class TramiteBlocoExternoTest extends CenarioBaseTestCase
+class TramiteBlocoExternoTest extends FixtureCenarioBaseTestCase
 {
-    private $objProtocoloFixture;
     public static $remetente;
     public static $destinatario;
-    public static $penOrgaoExternoId;
-
-    function setUp(): void 
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        $parametros = [
-            'Descricao' => 'teste'
-        ];
-        $this->objProtocoloFixture = new ProtocoloFixture();
-        $this->objProtocoloFixture->carregar($parametros, function($objProtocoloDTO) {
-
-            $objProcedimentoFixture = new ProcedimentoFixture();
-            $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtividadeFixture = new AtividadeFixture();
-            $objAtividadeDTO = $objAtividadeFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-            ]);
-
-            $objParticipanteFixture = new ParticipanteFixture();
-            $objParticipanteFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdContato' => 100000006,
-            ]);
-
-            $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
-            $objProtocoloAssuntoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-            ]);
-
-            $objAtributoAndamentoFixture = new AtributoAndamentoFixture();
-            $objAtributoAndamentoFixture->carregar([
-                'IdAtividade' => $objAtividadeDTO->getNumIdAtividade()
-            ]);
-
-            $objDocumentoFixture = new DocumentoFixture();
-            $objDocumentoDTO = $objDocumentoFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdProcedimento' => $objProcedimentoDTO->getDblIdProcedimento(),
-            ]);
-
-            $objAssinaturaFixture = new AssinaturaFixture();
-            $objAssinaturaFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdDocumento' => $objDocumentoDTO->getDblIdDocumento(),
-            ]);
-
-            $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
-            $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
-
-            $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
-            $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
-                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-                'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
-            ]);
-
-        });
-
-    }
 
     public function teste_tramite_bloco_externo()
     {
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+        $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        
+        $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+        $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+        
+        $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
+        $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
+
+        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->carregar([
+            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+            'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
+        ]);
+
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -96,7 +47,7 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
             function ($testCase) {
               try {
                   $testCase->frame('ifrEnvioProcesso');
-                  $mensagemSucesso = utf8_encode('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'');
+                  $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
                   $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
                   $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                   $btnFechar->click();
@@ -111,7 +62,7 @@ class TramiteBlocoExternoTest extends CenarioBaseTestCase
               return true;
           }
         );
-        sleep(10);
+        sleep(1);
 
         $this->sairSistema();
     }

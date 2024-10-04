@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
+class TramiteBlocoExternoCadastroTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -36,7 +36,7 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
         sleep(1);
         $mensagem = $this->paginaCadastrarProcessoEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Bloco de Trâmite externo criado com sucesso!'),
+            mb_convert_encoding('Bloco de Trâmite externo criado com sucesso!', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
 
@@ -65,7 +65,7 @@ class TramiteBlocoExternoCadastroTest extends CenarioBaseTestCase
         sleep(1);
         $mensagem = $this->paginaCadastrarProcessoEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Bloco de trâmite externo alterado com sucesso!'),
+            mb_convert_encoding('Bloco de trâmite externo alterado com sucesso!', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
 
