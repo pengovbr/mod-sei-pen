@@ -47,7 +47,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
@@ -89,7 +89,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
     }
 
-
+    
     private function recusarTramite($servicoPEN, $id_tramite)
     {
         $justificativa = "An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82dc-6f451f51825e', 1333864526, null, null, null, null, 3534979787, null, null]: ORA-00001: restrição exclusiva (SAPIENS.UNIQ_867686DHDKJ97876) violada";
@@ -97,7 +97,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();
         $parametros->recusaDeTramite->IDT = $id_tramite;
-        $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
+        $parametros->recusaDeTramite->justificativa = mb_convert_encoding($justificativa, 'UTF-8', 'ISO-8859-1');
         $parametros->recusaDeTramite->motivo = "99";
         return $servicoPEN->recusarTramite($parametros);
     }

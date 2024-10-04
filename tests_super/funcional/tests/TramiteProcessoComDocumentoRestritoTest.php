@@ -46,7 +46,7 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
 
     self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);  // Cadastrar novo processo de teste
     self::$documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito
-    self::$documentoTeste["HIPOTESE_LEGAL"] =  self::$remetente["HIPOTESE_RESTRICAO_ID"] ?? 3; // Configurar Hipotese legal
+    self::$documentoTeste["HIPOTESE_LEGAL"] =  self::$remetente["HIPOTESE_RESTRICAO_ID"] ?: 3; // Configurar Hipotese legal
     $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, self::$protocoloTeste->getDblIdProtocolo()); // Incluir Documentos no Processo
 
     $this->paginaBase->navegarParaControleProcesso();
@@ -90,7 +90,7 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
       sleep(5);
       $testCase->refresh();
       $paginaProcesso = new PaginaProcesso($testCase);
-      $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+      $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
       $testCase->assertFalse($paginaProcesso->processoAberto());
       $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
       return true;
@@ -136,7 +136,7 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
     // 12 - Validar dados  do processo
-    $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+    $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
     $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
     self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
     $this->validarDadosProcesso(

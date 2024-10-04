@@ -114,7 +114,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoA->execute("update infra_agendamento_tarefa set parametro='debug=true' where comando='PENAgendamentoRN::processarTarefasRecebimentoPEN'", null);
 
         // Remoção de mapeamento de espécie não mapeada na origem
-        $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO);
+        $nomeSerieNaoMapeada = mb_convert_encoding(CONTEXTO_ORGAO_A_TIPO_DOCUMENTO_NAO_MAPEADO, 'UTF-8', 'ISO-8859-1');
         $serieNaoMapeadaOrigem = $bancoOrgaoA->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
         $serieNaoMapeadaOrigem[0] = array_change_key_case($serieNaoMapeadaOrigem[0], CASE_UPPER);
         
@@ -156,7 +156,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
         // Remoção de mapeamento de espécie não mapeada na origem
-        $nomeSerieNaoMapeada = utf8_encode(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO);
+        $nomeSerieNaoMapeada = mb_convert_encoding(CONTEXTO_ORGAO_B_TIPO_DOCUMENTO_NAO_MAPEADO, 'UTF-8', 'ISO-8859-1');
         $serieNaoMapeadaOrigem = $bancoOrgaoB->query('select ID_SERIE from serie where nome = ?', array($nomeSerieNaoMapeada));
         $serieNaoMapeadaOrigem[0] = array_change_key_case($serieNaoMapeadaOrigem[0], CASE_UPPER);
         
@@ -282,15 +282,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaBase->sairSistema();
     }
 
-    protected function cadastrarProcesso(&$dadosProcesso)
-    {
-        $this->paginaBase->navegarParaControleProcesso();
-        $protocoloGerado = PaginaIniciarProcesso::gerarProcessoTeste($this, $dadosProcesso);
-        $dadosProcesso['PROTOCOLO'] = $protocoloGerado;
-        sleep(2);
-        return $protocoloGerado;
-    }
-
     protected function abrirProcesso($protocolo)
     {
         $this->paginaBase->navegarParaControleProcesso();
@@ -307,19 +298,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         return $protocolo;
     }
 
-    protected function cadastrarDocumentoInterno($dadosDocumentoInterno)
-    {
-        $this->paginaProcesso->selecionarProcesso();
-        $this->paginaIncluirDocumento->gerarDocumentoTeste($dadosDocumentoInterno);
-        sleep(2);
-    }
-
-    protected function cadastrarDocumentoExterno($dadosDocumentoExterno, $comAnexo = true)
-    {
-        $this->paginaProcesso->selecionarProcesso();
-        $this->paginaIncluirDocumento->gerarDocumentoExternoTeste($dadosDocumentoExterno, $comAnexo);
-        sleep(2);
-    }
 
     protected function assinarDocumento($siglaOrgao, $cargoAssinante, $loginSenha)
     {
@@ -333,12 +311,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaAssinaturaDocumento->assinarComLoginSenha($loginSenha);
         $this->window('');
         sleep(2);
-    }
-
-    protected function anexarProcesso($protocoloProcessoAnexado)
-    {
-        $this->paginaProcesso->navegarParaAnexarProcesso();
-        $this->paginaAnexarProcesso->anexarProcesso($protocoloProcessoAnexado);
     }
 
     protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
@@ -378,7 +350,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $callbackEnvio = $callbackEnvio ?: function ($testCase) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemSucesso = utf8_encode('Trâmite externo do processo finalizado com sucesso!');
+                $mensagemSucesso = mb_convert_encoding('Trâmite externo do processo finalizado com sucesso!', 'UTF-8', 'ISO-8859-1');
                 $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
@@ -423,7 +395,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $callbackEnvio = function ($testCase) use ($dados) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemValidacao = utf8_encode('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.');             
+                $mensagemValidacao = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
                 $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
@@ -493,7 +465,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function validarRecibosTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)
     {
-        $mensagem = utf8_encode($mensagem);
+        $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
         $this->waitUntil(function ($testCase) use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
             sleep(5);
             $testCase->refresh();
@@ -522,7 +494,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         if ($verificarProcessoRejeitado) {
 
-            $motivoRecusa = utf8_encode($motivoRecusa);
+            $motivoRecusa = mb_convert_encoding($motivoRecusa, 'UTF-8', 'ISO-8859-1');
             $this->waitUntil(function ($testCase) use ($unidadeDestino, $motivoRecusa) {
                 sleep(5);
                 $testCase->refresh();
@@ -538,7 +510,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(2);
         $this->paginaProcesso->navegarParaEditarProcesso();
         $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
-        $this->assertEquals(utf8_encode($descricao), $this->paginaEditarProcesso->descricao());
+        $this->assertEquals(mb_convert_encoding($descricao, 'UTF-8', 'ISO-8859-1'), $this->paginaEditarProcesso->descricao());
         $this->assertEquals($restricao, $this->paginaEditarProcesso->restricao());
 
         $listaInteressados = is_array($listaInteressados) ? $listaInteressados : array($listaInteressados);
@@ -608,8 +580,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos em Tramitação Externa'));
-        $this->byLinkText(utf8_encode("Processos em Tramitação Externa"))->click();
+        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
+        $this->byLinkText(mb_convert_encoding("Processos em Tramitação Externa", 'UTF-8', 'ISO-8859-1'))->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 
@@ -693,74 +665,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         );
     }
 
-    protected function realizarTramiteExterno(&$processoTeste, $documentosTeste, $remetente, $destinatario, $validarTramite)
-    {
-        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
-
-        // 1 - Acessar sistema do REMETENTE do processo
-        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
-
-        // 2 - Cadastrar novo processo de teste
-        if (isset($processoTeste['PROTOCOLO'])) {
-            $strProtocoloTeste = $processoTeste['PROTOCOLO'];
-            $this->abrirProcesso($strProtocoloTeste);
-        } else {
-            $strProtocoloTeste = $this->cadastrarProcesso($processoTeste);
-            $processoTeste['PROTOCOLO'] = $strProtocoloTeste;
-        }
-
-        // 3 - Incluir Documentos no Processo
-        $documentosTeste = array_key_exists('TIPO', $documentosTeste) ? array($documentosTeste) : $documentosTeste;
-        foreach ($documentosTeste as $doc) {
-            if ($doc['TIPO'] == 'G') {
-                $this->cadastrarDocumentoInterno($doc);
-                $this->assinarDocumento($remetente['ORGAO'], $remetente['CARGO_ASSINATURA'], $remetente['SENHA']);
-            } else if ($doc['TIPO'] == 'R') {
-                $this->cadastrarDocumentoExterno($doc);
-            }
-        }
-
-        // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
-        $paginaTramitar = $this->paginaTramitar;
-        $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
-
-        if ($validarTramite) {
-            // 6 - Verificar se situação atual do processo está como bloqueado
-            $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
-                sleep(5);
-                $this->atualizarTramitesPEN();
-                $testCase->refresh();
-                $paginaProcesso = new PaginaProcesso($testCase);
-                $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
-                $testCase->assertFalse($paginaProcesso->processoAberto());
-                $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-                return true;
-            }, PEN_WAIT_TIMEOUT);
-
-            // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
-            $unidade = mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1");
-            $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", $strProtocoloTeste, $unidade);
-            $this->validarRecibosTramite($mensagemRecibo, true, true);
-
-            // 8 - Validar histórico de trâmite do processo
-            $this->validarHistoricoTramite(self::$nomeUnidadeDestinatario, true, true);
-
-            // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
-            $deveExistir = $remetente['URL'] != $destinatario['URL'];
-            $this->validarProcessosTramitados($strProtocoloTeste, $deveExistir);
-        }
-    }
-
-    public function realizarTramiteExternoSemvalidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
-    {
-        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, false);
-    }
-
-    public function realizarTramiteExternoComValidacaoNoRemetente(&$processoTeste, $documentosTeste, $remetente, $destinatario)
-    {
-        $this->realizarTramiteExterno($processoTeste, $documentosTeste, $remetente, $destinatario, true);
-    }
-
     public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste, $documentosTeste, $destinatario, $devolucao = false, $unidadeSecundaria = false)
     {
         $strProtocoloTeste = $processoTeste['PROTOCOLO'];
@@ -779,7 +683,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         // 12 - Validar dados  do processo
         $devolucao = $processoTeste['ORIGEM'] == $destinatario['URL'];
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= $processoTeste['TIPO_PROCESSO'];
         $processoTeste['OBSERVACOES'] = (!$devolucao) ? $strTipoProcesso : $processoTeste['OBSERVACOES'];
         $this->validarDadosProcesso($processoTeste['DESCRICAO'], $processoTeste['RESTRICAO'], $processoTeste['OBSERVACOES'], $processoTeste['INTERESSADOS']);
@@ -856,7 +760,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function visualizarProcessoTramitadosEmLote($test)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(utf8_encode('Processos Tramitados em Bloco'));
+        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos Tramitados em Bloco', 'UTF-8', 'ISO-8859-1'));
         $this->byLinkText("Processos Tramitados em Bloco")->click();
     }
 
@@ -872,22 +776,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
     }
 
-    protected function navegarMapeamentoUnidade () {
+    protected function navegarMapeamentoUnidade() {
         $this->frame(null);
         $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
         $this->paginaMapeamentoUnidade->navegarMapeamentoUnidade();
-    }
-
-    public function atualizarTramitesPEN($bolOrg1 = true, $bolOrg2 = true, $org2Primeiro = true, $quantidade = 1)
-    {
-        /*for($i=0;$i<$quantidade;$i++){
-            if($org2Primeiro){
-                if($bolOrg2)exec(PEN_SCRIPT_MONITORAMENTO_ORG2);
-                if($bolOrg1)exec(PEN_SCRIPT_MONITORAMENTO_ORG1);
-            }else{
-                if($bolOrg1)exec(PEN_SCRIPT_MONITORAMENTO_ORG1);
-                if($bolOrg2)exec(PEN_SCRIPT_MONITORAMENTO_ORG2);
-            }
-        }*/
     }
 }

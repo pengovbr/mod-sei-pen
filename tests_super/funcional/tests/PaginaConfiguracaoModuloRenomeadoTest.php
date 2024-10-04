@@ -1,6 +1,6 @@
 <?php
 
-class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
+class PaginaConfiguracaoModuloRenomeadoTest extends FixtureCenarioBaseTestCase
 {
     protected static $remetente;
     protected static $destinatario;
@@ -25,7 +25,7 @@ class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
 
         $value = $this->paginaConfiguracaoModuloRenomeado->getTituloPaginaConfiguracao();
 
-        $menssagemValidacao = utf8_encode('Parâmetros de Configuração do Módulo Tramita GOV.BR');
+        $menssagemValidacao = mb_convert_encoding('Parâmetros de Configuração do Módulo Tramita GOV.BR', 'UTF-8', 'ISO-8859-1');
  
         $this->assertStringContainsString(
             $menssagemValidacao,
@@ -48,7 +48,7 @@ class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
 
         $value = $this->paginaConfiguracaoModuloRenomeado->getTituloPaginaNovoMapeamentoUnidade();
 
-        $menssagemValidacao = utf8_encode('Unidades do Tramita GOV.BR (Estruturas Organizacionais):');
+        $menssagemValidacao = mb_convert_encoding('Unidades do Tramita GOV.BR (Estruturas Organizacionais):', 'UTF-8', 'ISO-8859-1');
  
         $this->assertStringContainsString(
             $menssagemValidacao,
@@ -71,7 +71,7 @@ class PaginaConfiguracaoModuloRenomeadoTest extends CenarioBaseTestCase
 
         $value = $this->paginaConfiguracaoModuloRenomeado->getTituloPaginaHipoteseRestricaoPadrao();
 
-        $menssagemValidacao = utf8_encode('Hipótese de Restrição Padrão - Tramita GOV.BR');
+        $menssagemValidacao = mb_convert_encoding('Hipótese de Restrição Padrão - Tramita GOV.BR', 'UTF-8', 'ISO-8859-1');
  
         $this->assertStringContainsString(
             $menssagemValidacao,
