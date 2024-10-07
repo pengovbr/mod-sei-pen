@@ -1,10 +1,10 @@
 <?
 
 /**
- * Arquivo de configuraÁ„o do MÛdulo de IntegraÁ„o do SEI com o Processo EletrÙnico Nacional
+ * Arquivo de configura√ß√£o do M√≥dulo de Integra√ß√£o do SEI com o Processo Eletr√¥nico Nacional
  *
- * Seu desenvolvimento seguiu os mesmos padrıes de configuraÁ„o implementado pelo SEI e SIP e este
- * arquivo precisa ser adicionado ‡ pasta de configuraÁıes do SEI para seu correto carregamento pelo mÛdulo.
+ * Seu desenvolvimento seguiu os mesmos padr√µes de configura√ß√£o implementado pelo SEI e SIP e este
+ * arquivo precisa ser adicionado √† pasta de configura√ß√µes do SEI para seu correto carregamento pelo m√≥dulo.
  */
 
 class ConfiguracaoModPEN extends InfraConfiguracao  {
@@ -12,7 +12,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
 	private static $instance = null;
 
     /**
-     * ObtÈm inst‚ncia ˙nica (singleton) dos dados de configuraÁ„o do mÛdulo de integraÁ„o com Barramento PEN
+     * Obt√©m inst√¢ncia √∫nica (singleton) dos dados de configura√ß√£o do m√≥dulo de integra√ß√£o com Barramento PEN
      *
      *
      * @return ConfiguracaoModPEN
@@ -26,7 +26,7 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
 	}
 
     /**
-     * DefiniÁ„o dos par‚metros de configuraÁ„o do mÛdulo
+     * Defini√ß√£o dos par√¢metros de configura√ß√£o do m√≥dulo
      *
      * @return array
      */
@@ -34,41 +34,65 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
     {
         return array(
             "PEN" => array(
-                // EndereÁo do Web Service principal de integraÁ„o com o Barramento de ServiÁos do PEN
-                // Os endereÁos disponÌveis s„o os seguintes (verifique se houve atualizaÁıes durante o procedimento de instalaÁ„o):
-                //    - HomologaÁ„o: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
-                //    - ProduÁ„o: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/
-                "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/",
+                // Endere√ßo do Web Service principal de integra√ß√£o com o Barramento de Servi√ßos do PEN
+                // Os endere√ßos dispon√≠veis s√£o os seguintes (verifique se houve atualiza√ß√µes durante o procedimento de instala√ß√£o):
+                //    - Homologa√ß√£o: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/
+                //    - Produ√ß√£o: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v3/
+                "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/",
 
-                // EndereÁo do Web Service de monitoramente de pendÍncias de tr‚mite no Barramento de ServiÁos do PEN
-                // ConfiguraÁ„o necess·ria para que o envio e recebimento de processos sejam feitas de forma din‚mica pelo sistema
-                // Os endereÁos disponÌveis s„o os seguintes (verifique se houve atualizaÁıes durante o procedimento de instalaÁ„o):
-                //    - HomologaÁ„o: https://homolog.pendencias.processoeletronico.gov.br/
-                //    - ProduÁ„o: https://pendencias.conectagov.processoeletronico.gov.br/
+                // Endere√ßo do Web Service de monitoramente de pend√™ncias de tr√¢mite no Barramento de Servi√ßos do PEN
+                // Configura√ß√£o necess√°ria para que o envio e recebimento de processos sejam feitas de forma din√¢mica pelo sistema
+                // Os endere√ßos dispon√≠veis s√£o os seguintes (verifique se houve atualiza√ß√µes durante o procedimento de instala√ß√£o):
+                //    - Homologa√ß√£o: https://homolog.pendencias.processoeletronico.gov.br/
+                //    - Produ√ß√£o: https://pendencias.conectagov.processoeletronico.gov.br/
                 "WebServicePendencias" => "",
 
-                // LocalizaÁ„o completa do certificado digital utilizado para autenticaÁ„o nos serviÁos do Barramento de ServiÁos do PEN
-                // e assinar os recibos de envio/conclus„o dos tr‚mites de processo
-                // Necess·rio que o arquivo de certificado esteja localizado dentro da pasta de configuraÁıes do mÛdulo:
-                //  Ex: <DIRET”RIO RAIZ DE INSTALA«√O DO SEI>/sei/config/mod-pen/certificado.pem
-                "LocalizacaoCertificado" => '/tmp/',
+                // Localiza√ß√£o completa do certificado digital utilizado para autentica√ß√£o nos servi√ßos do Barramento de Servi√ßos do PEN
+                // e assinar os recibos de envio/conclus√£o dos tr√¢mites de processo
+                // Necess√°rio que o arquivo de certificado esteja localizado dentro da pasta de configura√ß√µes do m√≥dulo:
+                //  Ex: <DIRET√ìRIO RAIZ DE INSTALA√á√ÉO DO SEI>/sei/config/mod-pen/certificado.pem
+                "LocalizacaoCertificado" => getenv('CERTIFICADO'),
 
-                // Senha do certificado digital necess·rio para a aplicaÁ„o descriptografar a chave privada
-                "SenhaCertificado" => '123456',
+                // Senha do certificado digital necess√°rio para a aplica√ß√£o descriptografar a chave privada
+                "SenhaCertificado" => getenv('CERTIFICADO_SENHA'),
 
-                // Quantidade de tentativas de requisÁ„o dos serviÁos do Barramento PEN antes que um erro possa ser lanÁado pela aplicaÁ„o
-                // Necess·rio para aumentar a resiliÍncia da integraÁ„o em contextos de instabilidade de rede.
-                // Valor padr„o: 3
+                // Quantidade de tentativas de requis√ß√£o dos servi√ßos do Barramento PEN antes que um erro possa ser lan√ßado pela aplica√ß√£o
+                // Necess√°rio para aumentar a resili√™ncia da integra√ß√£o em contextos de instabilidade de rede.
+                // Valor padr√£o: 3
                 "NumeroTentativasErro" => 3,
 
-                // LocalizaÁ„o do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
-                // As mensagem recebidas s„o organizadas em filas de tarefas e distribuÌdas entre os nÛs da aplicaÁ„o para
-                // processamento paralelo. Caso este par‚metro n„o seja configurado ou o servidor este indisponÌvel, o processamento ser·
+                // Localiza√ß√£o do servidor Gearman de gerenciamento de fila de processamento de tarefas do Barramento PEN
+                // As mensagem recebidas s√£o organizadas em filas de tarefas e distribu√≠das entre os n√≥s da aplica√ß√£o para
+                // processamento paralelo. Caso este par√¢metro n√£o seja configurado ou o servidor este indispon√≠vel, o processamento ser√°
                 // feito diretamente pelo sistema na periodicidade definida pelo agendamento da tarefa PENAgendamento::receberProcessos
-                "Gearman" => array(
-                    "Servidor" => "",
-                    "Porta" => "", //Padr„o: 4730
-                )
+                // "Gearman" => array(
+                //     "Servidor" => "",
+                //     "Porta" => "", //Padr√£o: 4730
+                // )
+
+                "ControleURL" => array(
+                    "atual"=>"servidor.gov.br",
+                    "antigos"=>array(
+                        "[servidor_php]",
+                        "[servidor_php2]",
+                    )
+                ),
+
+                // Configura√ß√£o padr√£o do Envio Parcial
+                "EnviarApenasComponentesDigitaisPendentes" => false
+                // "EnviarApenasComponentesDigitaisPendentes" => array(
+                //     "1" => array(  // 1 = Poder Executivo Federal
+                //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+                //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+                //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
+                //     ),
+                //     "21" => array(  // 2 = Poder Legislativo Federal
+                //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+                //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+                //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
+                //     )
+                // )
+
             )
         );
     }
