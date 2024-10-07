@@ -94,7 +94,7 @@ class PenBlocoProcessoRN extends InfraRN
 
         $this->alterar($objPenLoteProcedimentoDTO);
 
-        $idBloco = $$objPenLoteProcedimentoDTO->getNumIdBloco();
+        $idBloco = $objPenLoteProcedimentoDTO->getNumIdBloco();
         $this->atualizarEstadoDoBloco($idBloco);
       }
 
