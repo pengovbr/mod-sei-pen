@@ -22,16 +22,29 @@ class BlocoDeTramiteFixture extends \FixtureBase
 
       $objBlocoDeTramiteDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
       $objBlocoDeTramiteDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
-      $objBlocoDeTramiteDTO->setStrDescricao($dados['Descricao'] ?: 'Bloco para envio');
+      $objBlocoDeTramiteDTO->setStrDescricao($dados['Descricao'] ?: 'Bloco para envio 12');
       $objBlocoDeTramiteDTO->setStrIdxBloco($dados['IdxBloco'] ?: 'Bloco para envio');
       $objBlocoDeTramiteDTO->setStrStaTipo($dados['IdxBloco'] ?: 'I');
       $objBlocoDeTramiteDTO->setStrStaEstado($dados['IdxBloco'] ?: 'A');
       $objBlocoDeTramiteDTO->setNumOrdem($ordem);
 
       $objBlocoDeTramiteDB = new \TramiteEmBlocoBD($this->inicializarObjInfraIBanco());
-      $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
+      $objBlocoDeTramiteDTO = $objBlocoDeTramiteDB->cadastrar($objBlocoDeTramiteDTO);
 
-      return $objBlocoDeTramiteDTO;
+      $objUnidadeDTO = $this->consultarUnidadeRelacionada($objBlocoDeTramiteDTO);
+      $objBlocoDeTramiteDTO->setStrSiglaUnidade($objUnidadeDTO->getStrSigla());
+
+      return $objBlocoDeTramiteDTO; 
+  }
+
+  protected function consultarUnidadeRelacionada(TramiteEmBlocoDTO $objBlocoDeTramiteDB)
+  {
+    $objUnidadeDTO = new \UnidadeDTO();
+    $objUnidadeDTO->setNumIdUnidade($objBlocoDeTramiteDB->getNumIdUnidade());
+    $objUnidadeDTO->retTodos();
+
+    $objUnidadeBD = new \UnidadeBD($this->inicializarObjInfraIBanco());
+    return $objUnidadeBD->consultar($objUnidadeDTO);
   }
 
   public function excluir($id)
