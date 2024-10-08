@@ -10,7 +10,7 @@ use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,Atividade
 class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
-    public static $processoTeste;
+    public static $destinatario;
 
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
@@ -23,10 +23,13 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
     public function test_validar_situacao_do_processo_no_bloco()
     {
       self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-      self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
       // Cadastrar novo processo de teste
-      $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+      $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+      $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());    
 
       $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
       $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
@@ -43,63 +46,47 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
       $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
-      $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
-        $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
-        return true;
-      }, PEN_WAIT_TIMEOUT);
+      $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
+      $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
+        self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
+        self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
+        function ($testCase) {
+          try {
+              $testCase->frame('ifrEnvioProcesso');
+              $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
+              $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
+              $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+              $btnFechar->click();
+          } finally {
+              try {
+                  $testCase->frame(null);
+                  $testCase->frame("ifrVisualizacao");
+              } catch (Exception $e) {
+              }
+          }
 
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(2, $objProtocoloDTO->getDblIdProtocolo()));
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
-        $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
-        return true;
-      }, PEN_WAIT_TIMEOUT);
+          return true;
+        }
+      );
 
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(3, $objProtocoloDTO->getDblIdProtocolo()));
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
+      $this->waitUntil(function ($testCase) use ($objProtocoloDTO) {
+        sleep(5);
         $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
-        return true;
-      }, PEN_WAIT_TIMEOUT);
 
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(4, $objProtocoloDTO->getDblIdProtocolo()));
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
-        $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
-        return true;
-      }, PEN_WAIT_TIMEOUT);
+        $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
+        $this->assertEquals("Aguardando Processamento", $colunaEstado[0]->text());
+        
+        $objPenBlocoProcessoDTO = new \PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
+        $objPenBlocoProcessoDTO->retNumIdAndamento();
+        $objPenBlocoProcessoDTO->retStrUnidadeDestino();
+        $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
 
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(5, $objProtocoloDTO->getDblIdProtocolo()));
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
-        $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
-        return true;
-      }, PEN_WAIT_TIMEOUT);
+        $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
+        $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
 
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(8, $objProtocoloDTO->getDblIdProtocolo()));
-      
-      $this->waitUntil(function ($testCase) {
-        sleep(2);
-        $testCase->refresh();
-        $situacaoTr = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr[1]/td[7]//img[@title="Aguardando Processamento"]'));
-        $this->assertEquals(1, count($situacaoTr));
+        $statusEmAndamento = in_array($objPenBlocoProcesso->getNumIdAndamento(), [1,2,3,4,5,8]);
+        $this->assertTrue($statusEmAndamento);
         return true;
       }, PEN_WAIT_TIMEOUT);
     }
