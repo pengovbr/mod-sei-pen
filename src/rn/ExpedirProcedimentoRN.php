@@ -174,9 +174,12 @@ class ExpedirProcedimentoRN extends InfraRN {
                 $arrErros[$strAtributo] = array();
               }
                 $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
-            }
 
+                
+            }
               $this->gravarLogDebug(sprintf('Erro durante validação dos dados do processo %s.', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), $arrErros), 2);
+              LogSEI::getInstance()->gravar("Erro(s) observado(s) na validação do trâmite de bloco externo $numIdLote: ".InfraException::inspecionar($objInfraException));
+              
               $objLoteProcedimentoRN->desbloquearProcessoBloco($dblIdProcedimento);
               return false;
           }
@@ -2354,31 +2357,31 @@ class ExpedirProcedimentoRN extends InfraRN {
       {
       if(!isset($objExpedirProcedimentoDTO)){
         $objInfraException->adicionarValidacao('Parâmetro $objExpedirProcedimentoDTO não informado.');
-      }
+      }      
 
       //TODO: Validar se repositrio de origem foi informado
       if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdRepositorioOrigem())){
-        $objInfraException->adicionarValidacao('Identificação do repositório de estruturas da unidade atual não informado.');
+        $objInfraException->adicionarValidacao('Identificação do repositório de estruturas da unidade atual não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
       }
 
       //TODO: Validar se unidade de origem foi informado
       if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdUnidadeOrigem())){
-        $objInfraException->adicionarValidacao('Identificação da unidade atual no repositório de estruturas organizacionais não informado.');
+        $objInfraException->adicionarValidacao('Identificação da unidade atual no repositório de estruturas organizacionais não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
       }
 
       //TODO: Validar se repositrio foi devidamente informado
       if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdRepositorioDestino())){
-        $objInfraException->adicionarValidacao('Repositório de estruturas organizacionais não informado.');
+        $objInfraException->adicionarValidacao('Repositório de estruturas organizacionais não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
       }
 
       //TODO: Validar se unidade foi devidamente informada
       if (InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdUnidadeDestino())){
-        $objInfraException->adicionarValidacao('Unidade de destino não informado.');
+        $objInfraException->adicionarValidacao('Unidade de destino não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
       }
 
       //TODO: Validar se motivo de urgncia foi devidamente informado, caso expedio urgente
       if ($objExpedirProcedimentoDTO->getBolSinUrgente() && InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdMotivoUrgencia())){
-        $objInfraException->adicionarValidacao('Motivo de urgência não informado.');
+        $objInfraException->adicionarValidacao('Motivo de urgência não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
       }
     }
 
