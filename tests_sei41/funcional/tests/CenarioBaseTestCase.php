@@ -375,13 +375,17 @@ class CenarioBaseTestCase extends Selenium2TestCase
         sleep(1);
     }
 
-    protected function tramitarProcessoInternamente($unidadeDestino)
+    protected function tramitarProcessoInternamente($unidadeDestino, $manterAbertoNaUnidadeAtual = false)
     {
         // Acessar funcionalidade de trâmite interno
         $this->paginaProcesso->navegarParaTramitarProcessoInterno();
 
         // Preencher parâmetros do trâmite
         $this->paginaTramitar->unidadeInterna($unidadeDestino);
+
+        if ($manterAbertoNaUnidadeAtual) {
+            $this->paginaTramitar->manterAbertoNaUnidadeAtual();
+        }
         $this->paginaTramitar->tramitarInterno();
 
         sleep(1);
