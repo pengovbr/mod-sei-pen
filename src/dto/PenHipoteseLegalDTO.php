@@ -25,7 +25,5 @@ class PenHipoteseLegalDTO extends InfraDTO {
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Ativo', 'sin_ativo');
 
       $this->configurarPK('IdHipoteseLegal', InfraDTO::$TIPO_PK_NATIVA);
-
-      //$this->configurarExclusaoLogica('Ativo', 'N');
   }
 }

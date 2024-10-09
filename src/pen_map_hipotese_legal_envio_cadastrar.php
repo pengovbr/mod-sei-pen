@@ -191,7 +191,7 @@ function onSubmit() {
 $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
+<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('12em'); ?>

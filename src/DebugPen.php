@@ -43,6 +43,6 @@ class DebugPen
       }
     }
 
-      $this->objInfraDebug->gravar(utf8_encode($strLog));
+      $this->objInfraDebug->gravar(mb_convert_encoding($strLog, 'UTF-8', 'ISO-8859-1'));
   }
 }

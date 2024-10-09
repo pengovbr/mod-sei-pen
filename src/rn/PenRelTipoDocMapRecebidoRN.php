@@ -15,14 +15,13 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
   protected function listarEmUsoConectado($dblCodigoEspecie)
     {
       $arrNumCodigoEspecie = array();
-      $objInfraIBanco = $this->inicializarObjInfraIBanco();
 
       $objDTO = new PenRelTipoDocMapRecebidoDTO();
       $objDTO->retNumCodigoEspecie();
       $objDTO->setDistinct(true);
       $objDTO->setBolExclusaoLogica(false);
 
-      $objGenericoBD = new GenericoBD($objInfraIBanco);
+      $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
       $arrObjPenRelTipoDocMapRecebidoDTO = $objGenericoBD->listar($objDTO);
 
     if(!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {

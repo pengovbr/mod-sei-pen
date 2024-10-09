@@ -9,8 +9,6 @@ try {
   $objPaginaSEI = PaginaSEI::getInstance();
   $objSessaoSEI = SessaoSEI::getInstance();
 
-  // $objSessaoSEI->validarLink();
-
   $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . '&id_documento=' . $_GET['id_documento']);
   PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
 
@@ -48,16 +46,16 @@ try {
         $arrObjTramiteEmBloco = [];
         $excluir = true;
         foreach ($arrTramiteEmBloco as $objTramiteEmBloco) {
-          $tramitaEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-          $tramitaEmBlocoProtocoloDTO->setNumIdBloco($objTramiteEmBloco->getNumId());
-          $tramitaEmBlocoProtocoloDTO->retNumIdBloco();
-          $tramitaEmBlocoProtocoloDTO->retNumIdBlocoProcesso();
-          $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $PenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $PenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBloco->getNumId());
+          $PenBlocoProcessoDTO->retNumIdBloco();
+          $PenBlocoProcessoDTO->retNumIdBlocoProcesso();
+          $PenBlocoProcessoDTO->retDblIdProtocolo();
 
-          $tramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-          $arrTramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
+          $PenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $arrPenBlocoProcessoRN = $PenBlocoProcessoRN->listar($PenBlocoProcessoDTO);
   
-          if ($arrTramitaEmBlocoProtocoloRN == null) {
+          if ($arrPenBlocoProcessoRN == null) {
             $arrObjTramiteEmBloco[] = $objTramiteEmBloco;
           } else {
             $excluir = false;
@@ -214,10 +212,10 @@ try {
      $objPenBlocoProcessoDTO->retNumIdBloco();
  
      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-     $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+     $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
      $bolUnidadeMapeada = $objTramiteEmBloco->existeUnidadeMapeadaParaUnidadeLogada();
-    if (!empty($arrTramiteEmBlocoProtocolo) && $bolUnidadeMapeada && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
+    if (!empty($arrPenBlocoProcesso) && $bolUnidadeMapeada && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
       $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_bloco&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
     }
 

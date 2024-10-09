@@ -301,8 +301,8 @@ class ProcessarPendenciasRN extends InfraRN
           $objExpedirProcedimentoDTO->setBolSinUrgente(false);
           $objExpedirProcedimentoDTO->setDblIdProcedimento($objPenBlocoProcedimentoDTO->getDblIdProtocolo());
           $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
-          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(true);
-          $objExpedirProcedimentoDTO->setNumIdLote($objPenBlocoProcedimentoDTO->getNumIdBlocoProcesso());
+          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(true);
+          $objExpedirProcedimentoDTO->setNumIdBloco($objPenBlocoProcedimentoDTO->getNumIdBlocoProcesso());
           $objExpedirProcedimentoDTO->setNumIdAtividade($objPenBlocoProcedimentoDTO->getNumIdAtividade());
           $objExpedirProcedimentoDTO->setNumIdUnidade($objPenBlocoProcedimentoDTO->getNumIdUnidade());
 
@@ -317,7 +317,7 @@ class ProcessarPendenciasRN extends InfraRN
         }
       }
     } catch (\Exception $e) {
-      throw new InfraException('Falha ao expedir processso em lote.', $e);
+      throw new InfraException('Falha ao expedir processso em bloco.', $e);
     }
   }
 

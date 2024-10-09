@@ -49,7 +49,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       $objPenRelTipoDocMapRecebidoDTO->setDistinct(true);
       $objPenRelTipoDocMapRecebidoDTO->setOrdNumIdSerie(InfraDTO::$TIPO_ORDENACAO_ASC);
 
-      $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD(BancoSEI::getInstance());
+      $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->inicializarObjInfraIBanco());
       $arrObjPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapEnviadoBD->listar($objPenRelTipoDocMapRecebidoDTO);
 
     if (!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {
@@ -245,7 +245,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objEspecieDocumentalDTO->retDblIdEspecie();
         $objEspecieDocumentalDTO->setDblIdEspecie($strIdEspeciePadrao);
 
-        $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
+        $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objEspecieDocumentalDTO = $objGenericoBD->consultar($objEspecieDocumentalDTO);
     }
 

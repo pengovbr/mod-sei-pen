@@ -64,8 +64,8 @@ try {
           if ($objPenBlocoProcessoDTO->getNumIdAndamento() === null || !in_array($objPenBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
             $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
            
-            $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
+            $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+            $objPenBlocoProcessoRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
           }          
         }       
 
@@ -280,7 +280,7 @@ try {
 
   $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
   foreach ($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO) as $dados) {
-    $arrMapIdBloco[$dados->getNumId()] = "{$dados->getNumOrdem()} - {$dados->getStrDescricao()}"; // ISSUE 536 mudar aqui para seq Ordem por unidade
+    $arrMapIdBloco[$dados->getNumId()] = "{$dados->getNumOrdem()} - {$dados->getStrDescricao()}"; 
   }
 } catch (Exception $e) {
   PaginaSEI::getInstance()->processarExcecao($e);

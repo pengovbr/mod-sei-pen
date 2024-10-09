@@ -189,7 +189,6 @@ try {
 
   // DTO de paginao
   $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-  // $objPenOrgaoExternoDTO->setNumIdUnidade($objSessao->getNumIdUnidadeAtual());
   $objPenOrgaoExternoDTO->setStrAtivo('S');
   $objPenOrgaoExternoDTO->retDblId();
   $objPenOrgaoExternoDTO->retNumIdOrgaoOrigem();
@@ -624,7 +623,6 @@ $objPagina->montarStyle();
         })
         .text(tipoProcessoNome);
       $('<tr>')
-        //.addClass(strCssTr)
         .append(td1)
         .append(td2)
         .appendTo($('#tableImportar'));

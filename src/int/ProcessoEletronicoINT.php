@@ -10,7 +10,7 @@ class ProcessoEletronicoINT extends InfraINT {
     const TEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 'Enviando dados do processo %s';
     const TEE_EXPEDICAO_ETAPA_DOCUMENTO = 'Enviando documento %s';
     const TEE_EXPEDICAO_ETAPA_CONCLUSAO = 'Trâmite externo do processo finalizado com sucesso!';
-    const TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'';
+    const TEE_EXPEDICAO_BLOCO_ETAPA_CONCLUSAO = 'Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'';
 
     /**
      * Concate as siglas das hierarquias no nome da unidade
@@ -192,16 +192,12 @@ class ProcessoEletronicoINT extends InfraINT {
             return '/infra_css/svg/excluir.svg';
             break;
         case '/pen_expedir_procedimento.gif':
-            // return '/infra_css/svg/upload.svg';
-            // return 'svg/arquivo_mapeamento_assunto.svg';
             return 'modulos/' . $strModulo . '/imagens/pen_expedir_procedimento.png';
             break;
         case '/pen_consultar_recibos.png':
-            // return '/infra_css/svg/pesquisar.svg';
             return 'modulos/' . $strModulo . '/imagens/consultar_recibo.png';
             break;
         case '/pen_cancelar_tramite.gif':
-            // return '/infra_css/svg/remover.svg';
             return 'modulos/' . $strModulo . '/imagens/pen_cancelar_envio.svg';
             break;
         case '/infra_js/arvore/plus.gif':
@@ -291,7 +287,6 @@ class ProcessoEletronicoINT extends InfraINT {
           //IdUnidadeRestricao NomeUnidadeRestricao
           $arrayKeys[] = $item->getNumIdUnidadeRestricao();
           $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
-          //$strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" name="hdnRepoEstruturas' . $item->getNumIdUnidadeRestricao() . '" value="" />' . "\n";
           $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
         }
         if ($item->getNumIdUnidadeRHRestricao() != null) {

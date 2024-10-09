@@ -114,7 +114,6 @@ class EditorSEI4RN extends InfraRN
     if ($objEditorDTO->getStrSinSomenteLeitura() == 'S') {
       $strInicializacao .= "CKEDITOR.config.readOnly=true;\n";
     }
-    //$ret->setStrCss($this->jsEncode($this->montarCssEditor(0)));
     $strInicializacao .= "</script>\n";
     $ret->setStrInicializacao($strInicializacao);
 
@@ -517,7 +516,7 @@ class EditorSEI4RN extends InfraRN
       $bolDesabilitarCorretor=false;
       if ($scayt != "") {
         $includePlugins[] = $scayt;
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
         $numTamanhoDesabilitarEditor=$objInfraParametro->getValor('SEI_TAM_MB_CORRETOR_DESABILITADO', false);
         if($numTamanhoDesabilitarEditor===null){
           $numTamanhoDesabilitarEditor=2;
@@ -812,9 +811,7 @@ class EditorSEI4RN extends InfraRN
   public function filtrarTags($strConteudo)
   {
     $strConteudo = preg_replace("%<font[^>]*>%si", "", $strConteudo);
-    //$strConteudo = preg_replace("%<span style=\"[^(color|backgroung)][^>]*>%si", "", $strConteudo);
     $strConteudo = preg_replace("%</font>%si", "", $strConteudo);
-    //$strConteudo = preg_replace("%</span>%si", "", $strConteudo);
     return str_replace(array('<o:p>', '</o:p>'), '', $strConteudo);
   }
 
@@ -823,17 +820,13 @@ class EditorSEI4RN extends InfraRN
   {
     try {
 
-      //$objParametrosEditorDTO = $this->obterParametros($parObjEditorDTO);
-
       self::$arrTags = array();
       self::$arrTags['versao'] = 1;
 
       $objSecaoModeloRN = new SecaoModeloRN();
       $objSecaoDocumentoRN = new SecaoDocumentoRN();
       $objVersaoSecaoDocumentoRN = new VersaoSecaoDocumentoRN();
-      //$objRelSecaoModeloEstiloRN = new RelSecaoModeloEstiloRN();
       $objDocumentoRN = new DocumentoRN();
-      //$objSerieRN = new SerieRN();
       $dthAtual = InfraData::getStrDataHoraAtual();
 
       $parObjEditorDTO->setNumIdConjuntoEstilos(null);
@@ -1029,7 +1022,6 @@ class EditorSEI4RN extends InfraRN
             } else {
 
               //efetua limpeza de tags para documentos gerados com conteudo inicial
-              //$strConteudo = $this->limparTagsCriticas($strConteudo);
               $this->validarTagsCriticas($arrImagemPermitida, $strConteudo);
               $strConteudo = $this->processarLinksSei($strConteudo);
 
@@ -1180,7 +1172,6 @@ class EditorSEI4RN extends InfraRN
       }
 
       //cadastrar conjunto de estilos
-      //print_r($parObjEditorDTO); die;
       $this->atualizarConteudo($parObjEditorDTO);
 
     } catch (Exception $e) {
@@ -1411,15 +1402,6 @@ class EditorSEI4RN extends InfraRN
           throw new InfraException('Seção [' . $arrObjSecaoDocumentoDTOBanco[$i]->getNumIdSecaoModelo() . '] do documento não encontrada.');
         }
       }
-
-//      self::$arrTags = null;
-//      foreach ($arrObjSecaoDocumentoDTO as $objSecaoDocumentoDTO) {
-//        if ($objSecaoDocumentoDTO->getStrSinDinamica()=='S') {
-//          $objParametrosEditorDTO = $this->obterParametros($parObjEditorDTO);
-//          $arrTags = $objParametrosEditorDTO->getArrTags();
-//          break;
-//        }
-//      }
 
       //bloquear registros de versão
       $objVersaoSecaoDocumentoDTO = new VersaoSecaoDocumentoDTO();
@@ -1677,9 +1659,7 @@ class EditorSEI4RN extends InfraRN
   public function converteTextoEstiloCss($arrEstilosCss, $strConteudo)
   {
 
-    //print_r($strConteudo);
     $strConteudoNovo = "";
-//    $posAtual = 0;
     $posAnterior = 0;
     $cntNaoEncontrados = 0;
     $cntEncontrados = 0;
@@ -1835,9 +1815,6 @@ class EditorSEI4RN extends InfraRN
     $html .= ', versão ' . $numVersao . ' por ';
     $html .= '<a onclick="alert(\'' . PaginaSEI::getInstance()->formatarParametrosJavaScript($strNomeUsuarioVersao) . '\')" alt="' . $strNomeUsuarioVersao . '" title="' . $strNomeUsuarioVersao . '" style="color:#0066cc;text-decoration:none;cursor:pointer;">' . $strSiglaUsuarioVersao . '</a>';
     $html .= ' em ' . $dthVersao . '.' . "\n";
-
-//    $html = '<hr style="border:1px solid #c0c0c0;" />';
-//    $html .= 'Criado por  '. $strSiglaUsuarioGerador . ', versão ' . $numVersao . ' por '.$strSiglaUsuarioVersao . ' em ' . $dthVersao . '.' . "\n";
 
     return $html;
   }
@@ -2088,8 +2065,6 @@ class EditorSEI4RN extends InfraRN
     if ($parObjEditorDTO->isSetStrSinProcessarLinks() && $parObjEditorDTO->getStrSinProcessarLinks()=='S') {
 
       $strHtml=$this->processarLinksSei($strHtml);
-//      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO,'$4',$strHtml);
-
       $strHtml=$this->assinarLinksSei($strHtml, $dblIdProcedimento);
       $strHtml=$this->assinarLinkFederacao($strHtml);
 
@@ -2274,7 +2249,6 @@ class EditorSEI4RN extends InfraRN
     if ($parObjEditorDTO->isSetStrSinProcessarLinks() && $parObjEditorDTO->getStrSinProcessarLinks()=='S') {
 
       $strHtml=$this->processarLinksSei($strHtml);
-//      $strHtml=preg_replace(self::$REGEXP_LINK_ASSINADO,'$4',$strHtml);
 
       $strHtml=$this->assinarLinksSei($strHtml, $dblIdProcedimento);
       $strHtml=$this->assinarLinkFederacao($strHtml);
@@ -2799,15 +2773,6 @@ class EditorSEI4RN extends InfraRN
         $objUnidadeDTO->retStrDescricaoOrgao();
         $objUnidadeDTO->retStrTimbreOrgao();
         $objUnidadeDTO->retStrSitioInternetOrgaoContato();
-
-        //$objUnidadeDTO->retStrEnderecoContato();
-        //$objUnidadeDTO->retStrComplementoContato();
-        //$objUnidadeDTO->retStrNomeCidadeContato();
-        //$objUnidadeDTO->retStrBairroContato();
-        //$objUnidadeDTO->retStrTelefoneFixoContato();
-        //$objUnidadeDTO->retStrTelefoneCelularContato();
-        //$objUnidadeDTO->retStrCepContato();
-        //$objUnidadeDTO->retStrSiglaUfContato();
 
 
         $objUnidadeDTO->setNumIdUnidade(self::$arrTags['#numIdUnidadeResponsavel']);
@@ -3354,7 +3319,6 @@ class EditorSEI4RN extends InfraRN
    */
   private function validarLink($matches)
   {
-//    LogSEI::getInstance()->gravar('M3='.$matches[3].'  - '.SessaoSEI::getInstance()->getNumIdSistema());
     if($matches[3]!=SessaoSEI::getInstance()->getNumIdSistema()){
       return $matches[0];
     }
@@ -3558,7 +3522,7 @@ class EditorSEI4RN extends InfraRN
 
   protected function recuperarLinkAcessoExternoControlado(DocumentoDTO $parObjDocumentoDTO){
     try {
-      $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+      $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
       $objUsuarioDTO = new UsuarioDTO();
       $objUsuarioDTO->retNumIdContato();
       $objUsuarioDTO->setNumIdUsuario($objInfraParametro->getValor('ID_USUARIO_SEI'));

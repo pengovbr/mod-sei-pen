@@ -27,12 +27,12 @@ try {
 
   $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
 
-  $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-  $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
-  $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
-  $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-  $objTramiteEmBlocoProtocoloDTO->retNumIdBloco();
-  $objTramiteEmBlocoProtocoloDTO->setNumIdAtividade(
+  $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+  $objPenBlocoProcessoDTO->setDblIdProtocolo($idProcedimento);
+  $objPenBlocoProcessoDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
+  $objPenBlocoProcessoDTO->retDblIdProtocolo();
+  $objPenBlocoProcessoDTO->retNumIdBloco();
+  $objPenBlocoProcessoDTO->setNumIdAtividade(
     array(
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
       ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
@@ -41,18 +41,18 @@ try {
     ),
     InfraDTO::$OPER_NOT_IN
   );
-  $objTramiteEmBlocoProtocoloDTO->setNumMaxRegistrosRetorno(1);
+  $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
 
-  $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultar($objTramiteEmBlocoProtocoloDTO);
+  $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+  $PenBlocoProcessoDTO = $objPenBlocoProcessoRN->consultar($objPenBlocoProcessoDTO);
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
   $objExpedirProcedimentosRN->cancelarTramite($idProcedimento);
 
-  if ($tramiteEmBlocoProtocoloDTO != null) {
+  if ($PenBlocoProcessoDTO != null) {
     // TODO: tratar atualização a partir de um metodo
-    $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-    $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($tramiteEmBlocoProtocoloDTO->getNumIdBloco());
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    $objPenBlocoProcessoRN->atualizarEstadoDoBloco($PenBlocoProcessoDTO->getNumIdBloco());
   }
 } catch (InfraException $e) {
   $strMensagem = $e->getStrDescricao();
@@ -71,8 +71,7 @@ $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody();
 ?>
 <link rel="stylesheet" href="<?php print PENIntegracao::getDiretorio(); ?>/css/style-modulos.css" type="text/css" />
-<?php //$objPaginaSEI->montarBarraComandosSuperior($arrComandos); 
-?>
+
 <script type="text/javascript">
   alert('<?php echo $strMensagem ?>');
   parent.parent.location.reload();

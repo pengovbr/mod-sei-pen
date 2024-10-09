@@ -58,7 +58,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
   protected function alterarControlado(PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO)
   {
     try {
-      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD(BancoSEI::getInstance());
+      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->alterar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro alterando mapeamento de procedimento.', $e);
@@ -74,7 +74,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
   protected function cadastrarConectado(PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO)
   {
     try {
-      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD(BancoSEI::getInstance());
+      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->cadastrar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro cadastrando mapeamento de procedimento.', $e);
@@ -90,7 +90,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
   protected function excluirControlado(PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO)
   {
     try {
-      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD(BancoSEI::getInstance());
+      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->excluir($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo mapeamento de procedimento.', $e);
@@ -106,7 +106,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
   protected function contarConectado(PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO)
   {
     try {
-      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD(BancoSEI::getInstance());
+      $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->contar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro contando mapeamento de procedimento.', $e);

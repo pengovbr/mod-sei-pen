@@ -2024,9 +2024,6 @@ class PenAtualizarSipRN extends InfraRN
     $idMenuProcessoTramitadosExterno = $this->criarMenu('Processos Tramitados Externamente', 57, $idMenuTramita, $numIdMenu, $numIdRecurso3, $numIdSistema);
     $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso3, $numIdMenu, $idMenuProcessoTramitadosExterno);
     
-    // $idMenuProcessoTramitadosLote = $this->criarMenu('Processos Tramitados em Bloco', 58, $idMenuTramita, $numIdMenu, $numIdRecurso4, $numIdSistema);
-    // $this->cadastrarRelPerfilItemMenu($idPerfilAdm, $numIdRecurso4, $numIdMenu, $idMenuProcessoTramitadosLote);
-
     if (InfraUtil::compararVersoes(SIP_VERSAO, ">=", "3.0.0")) {
       $objItemMenuDTO = new ItemMenuDTO();
       $objItemMenuDTO->setNumIdItemMenu($idMenuTramita);

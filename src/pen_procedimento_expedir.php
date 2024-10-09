@@ -143,8 +143,8 @@ try {
           $objExpedirProcedimentoDTO->setBolSinUrgente($boolSinUrgente);
           $objExpedirProcedimentoDTO->setDblIdProcedimento($numIdProcedimento);
           $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia($numIdMotivoUrgente);
-          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(false);
-          $objExpedirProcedimentoDTO->setNumIdLote(null);
+          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+          $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
 
@@ -557,9 +557,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
-<?
-//$objPaginaSEI->montarBarraComandosInferior($arrComandos);
-?>
+
 </form>
 <?php
 $objPaginaSEI->montarAreaDebug();

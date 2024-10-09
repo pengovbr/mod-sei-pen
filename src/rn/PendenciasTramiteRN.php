@@ -166,7 +166,7 @@ class PendenciasTramiteRN extends InfraRN
     if($parBolDebugAtivado){
         $strTextoDebug = InfraDebug::getInstance()->getStrDebug();
       if(!InfraString::isBolVazia($strTextoDebug)){
-        LogSEI::getInstance()->gravar(utf8_decode($strTextoDebug), LogSEI::$DEBUG);
+        LogSEI::getInstance()->gravar(mb_convert_encoding($strTextoDebug, 'ISO-8859-1', 'UTF-8'), LogSEI::$DEBUG);
       }
     }
   }

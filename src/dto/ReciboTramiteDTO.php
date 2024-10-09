@@ -12,7 +12,6 @@ class ReciboTramiteDTO extends InfraDTO {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'id_tramite');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Recebimento', 'dth_recebimento');
-    //$this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'HashComponenteDigital', 'hash_componente_digital');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'CadeiaCertificado', 'cadeia_certificado');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'HashAssinatura', 'hash_assinatura');
   }

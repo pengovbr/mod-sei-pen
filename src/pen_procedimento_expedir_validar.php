@@ -72,7 +72,7 @@ if($objInfraException->contemValidacoes()) {
     if(!array_key_exists($strAtributo, $arrErros)){
         $arrErros[$strAtributo] = array();
     }
-      $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+      $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
   }
 
     $arrResponse['erros'] = $arrErros;

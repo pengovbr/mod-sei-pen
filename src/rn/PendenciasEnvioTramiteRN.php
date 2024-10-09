@@ -81,29 +81,29 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
     $arrPendenciasRetornadas = array();
     $arrObjPendenciasDTO = array();
 
-    $objPenLoteProcedimentoDTO = new PenBlocoProcessoDTO();
-    $objPenLoteProcedimentoDTO->retNumIdBlocoProcesso();
-    $objPenLoteProcedimentoDTO->retDblIdProtocolo();
-    $objPenLoteProcedimentoDTO->retNumIdAndamento();
-    $objPenLoteProcedimentoDTO->retNumIdAtividade();
-    $objPenLoteProcedimentoDTO->retNumIdRepositorioDestino();
-    $objPenLoteProcedimentoDTO->retStrRepositorioDestino();
-    $objPenLoteProcedimentoDTO->retNumIdRepositorioOrigem();
-    $objPenLoteProcedimentoDTO->retNumIdUnidadeDestino();
-    $objPenLoteProcedimentoDTO->retStrUnidadeDestino();
-    $objPenLoteProcedimentoDTO->retNumIdUnidadeOrigem();
-    $objPenLoteProcedimentoDTO->retNumIdBloco();
-    $objPenLoteProcedimentoDTO->retNumIdUsuario();
-    $objPenLoteProcedimentoDTO->retStrProtocoloFormatadoProtocolo();
-    $objPenLoteProcedimentoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+    $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
+    $objPenBlocoProcessoDTO->retDblIdProtocolo();
+    $objPenBlocoProcessoDTO->retNumIdAndamento();
+    $objPenBlocoProcessoDTO->retNumIdAtividade();
+    $objPenBlocoProcessoDTO->retNumIdRepositorioDestino();
+    $objPenBlocoProcessoDTO->retStrRepositorioDestino();
+    $objPenBlocoProcessoDTO->retNumIdRepositorioOrigem();
+    $objPenBlocoProcessoDTO->retNumIdUnidadeDestino();
+    $objPenBlocoProcessoDTO->retStrUnidadeDestino();
+    $objPenBlocoProcessoDTO->retNumIdUnidadeOrigem();
+    $objPenBlocoProcessoDTO->retNumIdBloco();
+    $objPenBlocoProcessoDTO->retNumIdUsuario();
+    $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
+    $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
 
-    $objPenLoteProcedimentoRN = new PenBlocoProcessoRN();
-    $arrObjPenLoteProcedimentoDTO = $objPenLoteProcedimentoRN->obterPendenciasLote($objPenLoteProcedimentoDTO);
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->obterPendenciasBloco($objPenBlocoProcessoDTO);
 
-    foreach ($arrObjPenLoteProcedimentoDTO as $objPenLoteProcedimentoDTO) {
+    foreach ($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO) {
         $objPendenciaDTO = new PendenciaDTO();
-        $objPendenciaDTO->setNumIdentificacaoTramite($objPenLoteProcedimentoDTO->getDblIdProtocolo());
-        $objPendenciaDTO->setStrStatus($objPenLoteProcedimentoDTO->getNumIdAndamento());
+        $objPendenciaDTO->setNumIdentificacaoTramite($objPenBlocoProcessoDTO->getDblIdProtocolo());
+        $objPendenciaDTO->setStrStatus($objPenBlocoProcessoDTO->getNumIdAndamento());
         $arrObjPendenciasDTO[] = $objPendenciaDTO;
     }
 

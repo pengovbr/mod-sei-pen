@@ -449,24 +449,6 @@ class PENIntegracao extends SeiIntegracao
 
   private function getObjArvoreAcao($dblIdProcedimento, $arrObjArvoreAcaoItemAPI)
   {
-    // $objAtividadeDTO = new AtividadeDTO();
-    // $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
-    // $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo($idTarefaAtividade));
-    // $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-    // $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
-    // $objAtividadeDTO->retNumIdAtividade();
-    
-    // $objAtividadeRN = new AtividadeRN();
-    // $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-
-    
-    // if (!empty($objAtividadeDTO)) {
-    //   if ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) {
-    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoEnviado($dblIdProcedimento);
-    //   } elseif ($idTarefaAtividade == ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) {
-    //     $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoRecebido($dblIdProcedimento);
-    //   }
-    // }
 
     $arrTiProcessoEletronico = array(
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
@@ -752,7 +734,6 @@ class PENIntegracao extends SeiIntegracao
       $str = str_replace('>', '&amp;gt;', $str);
       $str = str_replace('\"', '&amp;quot;', $str);
       $str = str_replace('"', '&amp;quot;', $str);
-      //$str = str_replace("\n",'_',$str);
     }
     return $str;
   }
@@ -1134,8 +1115,8 @@ class PENIntegracao extends SeiIntegracao
         $registrosPorPagina = 50;
         $idRepositorioEstruturaOrganizacional = $_POST['idRepositorioEstruturaOrganizacional'];
         $numeroDeIdentificacaoDaEstrutura     = $_POST['numeroDeIdentificacaoDaEstrutura'];
-        $siglaUnidade = ($_POST['siglaUnidade'] == '') ? null : utf8_encode($_POST['siglaUnidade']);
-        $nomeUnidade  = ($_POST['nomeUnidade']  == '') ? null : utf8_encode($_POST['nomeUnidade']);
+        $siglaUnidade = ($_POST['siglaUnidade'] == '') ? null : mb_convert_encoding($_POST['siglaUnidade'], 'UTF-8', 'ISO-8859-1');
+        $nomeUnidade  = ($_POST['nomeUnidade']  == '') ? null : mb_convert_encoding($_POST['nomeUnidade'], 'UTF-8', 'ISO-8859-1');
         $offset       = $_POST['offset'] * $registrosPorPagina;
 
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
@@ -1149,9 +1130,9 @@ class PENIntegracao extends SeiIntegracao
         if(!is_null($arrHierarquiaEstruturaDTO[0])){
           foreach ($arrHierarquiaEstruturaDTO as $key => $estrutura) {
             //Monta um array com as estruturas para retornar o JSON
-            $arrEstruturas['estrutura'][$key]['nome'] = utf8_encode($estrutura->get('Nome'));
+            $arrEstruturas['estrutura'][$key]['nome'] = mb_convert_encoding($estrutura->get('Nome'), 'UTF-8', 'ISO-8859-1');
             $arrEstruturas['estrutura'][$key]['numeroDeIdentificacaoDaEstrutura'] = $estrutura->get('NumeroDeIdentificacaoDaEstrutura');
-            $arrEstruturas['estrutura'][$key]['sigla'] = utf8_encode($estrutura->get('Sigla'));
+            $arrEstruturas['estrutura'][$key]['sigla'] = mb_convert_encoding($estrutura->get('Sigla'), 'UTF-8', 'ISO-8859-1');
             $arrEstruturas['estrutura'][$key]['ativo'] = $estrutura->get('Ativo');
             $arrEstruturas['estrutura'][$key]['aptoParaReceberTramites'] = $estrutura->get('AptoParaReceberTramites');
             $arrEstruturas['estrutura'][$key]['codigoNoOrgaoEntidade'] = $estrutura->get('CodigoNoOrgaoEntidade');
@@ -1200,7 +1181,7 @@ class PENIntegracao extends SeiIntegracao
         if (!is_null($arrObjEstruturaDTO[0])) {
           $interface = new ProcessoEletronicoINT();
           $arrHierarquiaEstruturaDTO = $interface->gerarHierarquiaEstruturas($arrObjEstruturaDTO);
-          $arrEstruturas[$key]->nome = utf8_encode($arrHierarquiaEstruturaDTO[0]->get('Nome'));
+          $arrEstruturas[$key]->nome = mb_convert_encoding($arrHierarquiaEstruturaDTO[0]->get('Nome'), 'UTF-8', 'ISO-8859-1');
         }
       }
     }

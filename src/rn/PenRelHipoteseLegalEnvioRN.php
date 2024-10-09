@@ -41,8 +41,7 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
      * @return integer
      */
   protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
-      $objBanco = BancoSEI::getInstance();
-      $objGenericoBD = new GenericoBD($objBanco);
+      $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
       // Mapeamento da hipotese legal remota
       $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
