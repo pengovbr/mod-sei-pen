@@ -76,6 +76,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
     protected function cadastrarDocumentoInternoFixture($dadosDocumentoInterno, $idProtocolo)
     {
+
         $dadosDocumentoDTO = [
             'IdProtocolo' => $idProtocolo,
             'IdProcedimento' => $idProtocolo,
@@ -83,6 +84,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'IdHipoteseLegal' => $dadosDocumentoInterno["HIPOTESE_LEGAL"] ?: null,
             'StaNivelAcessoGlobal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
             'StaNivelAcessoLocal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
+            'IdUnidadeResponsavel' => $dadosDocumentoInterno["UNIDADE_RESPONSAVEL"] ?: null
         ];
 
         if ($serieDTO = $this->buscarIdSerieDoDocumento($dadosDocumentoInterno['TIPO_DOCUMENTO'])) {
