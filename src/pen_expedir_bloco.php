@@ -32,11 +32,11 @@ try {
     }
 
     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-    $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-    $idTramiteEmBloco = $arrTramiteEmBlocoProtocolo[0]->getNumIdBloco();
+    $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+    $idTramiteEmBloco = $arrPenBlocoProcesso[0]->getNumIdBloco();
     $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
-    foreach ($arrTramiteEmBlocoProtocolo as $i => $tramiteEmBlocoProtocolo) {
-      $arrProtocolosOrigem[] = $tramiteEmBlocoProtocolo->getDblIdProtocolo();
+    foreach ($arrPenBlocoProcesso as $i => $PenBlocoProcesso) {
+      $arrProtocolosOrigem[] = $PenBlocoProcesso->getDblIdProtocolo();
     }
   } else {
     $idTramiteEmBloco = null;
@@ -150,9 +150,9 @@ try {
           $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
 
           $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-          $arrTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+          $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
           $arrProcedimentos = array();
-          foreach ($arrTramiteEmBlocoProtocolo as $objDTO) {
+          foreach ($arrPenBlocoProcesso as $objDTO) {
             $objDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
             $objDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
             $objDTO->setNumIdRepositorioDestino($numIdRepositorio);
@@ -172,9 +172,9 @@ try {
             $arrProcedimentos[] = $objDTO->getDblIdProtocolo();
           }
 
-          $arrTramiteEmBlocoProtocolo[0]->setArrListaProcedimento($arrProcedimentos);
-          $objPenExpedirLoteRN = new PenExpedirLoteRN();
-          $ret = $objPenExpedirLoteRN->cadastrarBloco($arrTramiteEmBlocoProtocolo[0]);
+          $arrPenBlocoProcesso[0]->setArrListaProcedimento($arrProcedimentos);
+          $objPenExpedirBlocoRN = new PenExpedirBlocoRN();
+          $ret = $objPenExpedirBlocoRN->cadastrarBloco($arrPenBlocoProcesso[0]);
           
           $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 

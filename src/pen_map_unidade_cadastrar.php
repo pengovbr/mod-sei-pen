@@ -154,7 +154,7 @@ try {
       $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
       $objPenUnidadeDTO->retTodos();
 
-      $objEspecieDocumentalBD = new GenericoBD(BancoSEI::getInstance());
+      $objEspecieDocumentalBD = new GenericoBD($objBanco);
       $objPenUnidadeDTO = $objEspecieDocumentalBD->consultar($objPenUnidadeDTO);
   }
 
@@ -279,7 +279,7 @@ if ($objPenUnidadeDTO!= null)
 $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
+<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->abrirAreaDados('15em'); ?>
 
@@ -341,7 +341,7 @@ function onSubmit() {
     }
     field = jQuery('#hdnUnidadeRh', form);
     if(field.val() === 'null' || field.val() == '' || field.val() == '0' || field.val() == 0){
-        alert('Nenhum "ID da Unidade - PEN" foi selecionada');
+        alert('Nenhum "ID da Unidade - Tramita GOV.BR" foi selecionada');
         field.focus();
         return false;
     }

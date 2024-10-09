@@ -61,7 +61,7 @@ class PenBlocoProcessoDTO extends InfraDTO
       $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'TramiteDTO');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'AtividadeDTO');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'ProtocoloDTO');
-      $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'PenLoteProcedimentoDTO');
+      $this->adicionarAtributo(InfraDTO::$PREFIXO_OBJ, 'PenBlocoProcedimentoDTO');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'PalavrasPesquisa');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'SinAberto');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'StaIdTarefa');

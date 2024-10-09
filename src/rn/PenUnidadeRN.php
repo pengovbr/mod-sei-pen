@@ -66,7 +66,7 @@ class PenUnidadeRN extends InfraRN {
      */
   protected function alterarControlado(UnidadeDTO $objPenUnidadeDTO){
     try {
-        $objPenUnidadeBD = new PenUnidadeBD(BancoSEI::getInstance());
+        $objPenUnidadeBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
         return $objPenUnidadeBD->alterar($objPenUnidadeDTO);
     } 
     catch (Exception $e) {
@@ -82,7 +82,7 @@ class PenUnidadeRN extends InfraRN {
      */
   protected function cadastrarConectado(UnidadeDTO $objDTO){
     try {
-        $objBD = new PenUnidadeBD(BancoSEI::getInstance());
+        $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
         return $objBD->cadastrar($objDTO);
     } 
     catch (Exception $e) {
@@ -98,7 +98,7 @@ class PenUnidadeRN extends InfraRN {
      */
   protected function excluirControlado(UnidadeDTO $objDTO){
     try {
-        $objBD = new PenUnidadeBD(BancoSEI::getInstance());
+        $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
         return $objBD->excluir($objDTO);
     } 
     catch (Exception $e) {
@@ -131,7 +131,7 @@ class PenUnidadeRN extends InfraRN {
    */
   protected function consultarConectado(PenUnidadeDTO $objDTO){
     try {
-        $objBD = new PenUnidadeBD(BancoSEI::getInstance());
+        $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
         return $objBD->consultar($objDTO);
     } 
     catch (Exception $e) {

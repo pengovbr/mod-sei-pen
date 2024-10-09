@@ -22,11 +22,6 @@ try {
 
     SessaoSEI::getInstance()->validarLink();
 
-
-
-// $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-// $resultDadosHierarquia  = $objExpedirProcedimentosRN->consultarUnidadesHierarquia();
-
   switch ($_GET['acao']) {
 
     case 'pen_unidade_sel_expedir_procedimento':

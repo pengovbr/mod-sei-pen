@@ -198,7 +198,7 @@ class ProcessoEletronicoRN extends InfraRN
           if($repositorio->id == $numIdentificacaoDoRepositorioDeEstruturas){
                 $objRepositorioDTO = new RepositorioDTO();
                 $objRepositorioDTO->setNumId($repositorio->id);
-                $objRepositorioDTO->setStrNome(utf8_decode($repositorio->nome));
+                $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio->nome, 'ISO-8859-1', 'UTF-8'));
                 $objRepositorioDTO->setBolAtivo($repositorio->ativo);
           }
         }
@@ -238,7 +238,7 @@ class ProcessoEletronicoRN extends InfraRN
         foreach ($result->repositoriosEncontrados->repositorio as $repositorio) {
                 $item = new RepositorioDTO();
                 $item->setNumId($repositorio->id);
-                $item->setStrNome(utf8_decode($repositorio->nome));
+                $item->setStrNome(mb_convert_encoding($repositorio->nome, 'ISO-8859-1', 'UTF-8'));
                 $item->setBolAtivo($repositorio->ativo);
                 $arrObjRepositorioDTO[] = $item;
         }
@@ -277,8 +277,8 @@ class ProcessoEletronicoRN extends InfraRN
         $arrObjEstrutura = is_array($result->estruturasEncontradas->estrutura) ? $result->estruturasEncontradas->estrutura : array($result->estruturasEncontradas->estrutura);
         $objEstrutura = current($arrObjEstrutura);
 
-        $objEstrutura->nome = utf8_decode($objEstrutura->nome);
-        $objEstrutura->sigla = utf8_decode($objEstrutura->sigla);
+        $objEstrutura->nome = mb_convert_encoding($objEstrutura->nome, 'ISO-8859-1', 'UTF-8');
+        $objEstrutura->sigla = mb_convert_encoding($objEstrutura->sigla, 'ISO-8859-1', 'UTF-8');
 
         if ($bolRetornoRaw !== false) {
           if (isset($objEstrutura->hierarquia) && isset($objEstrutura->hierarquia->nivel)) {
@@ -287,7 +287,7 @@ class ProcessoEletronicoRN extends InfraRN
             }
 
             foreach ($objEstrutura->hierarquia->nivel as &$objNivel) {
-              $objNivel->nome = utf8_decode($objNivel->nome);
+              $objNivel->nome = mb_convert_encoding($objNivel->nome, 'ISO-8859-1', 'UTF-8');
             }
           }
           return $objEstrutura;
@@ -462,7 +462,7 @@ class ProcessoEletronicoRN extends InfraRN
         if(is_numeric($nome)) {
             $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
         } else {
-            $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+            $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
         }
       }
 
@@ -471,7 +471,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
       if(!is_null($nomeUnidade)){
-          $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
+          $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1');
       }
 
       if(!is_null($registrosPorPagina) && !is_null($offset)){
@@ -501,8 +501,8 @@ class ProcessoEletronicoRN extends InfraRN
         foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
           $item = new EstruturaDTO();
           $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-          $item->setStrNome(utf8_decode($estrutura->nome));
-          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setStrNome(mb_convert_encoding($estrutura->nome, 'ISO-8859-1', 'UTF-8'));
+          $item->setStrSigla(mb_convert_encoding($estrutura->sigla, 'ISO-8859-1', 'UTF-8'));
           $item->setBolAtivo($estrutura->ativo);
           $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
           $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
@@ -511,7 +511,7 @@ class ProcessoEletronicoRN extends InfraRN
           if(!empty($estrutura->hierarquia->nivel)) {
             $array = array();
             foreach($estrutura->hierarquia->nivel as $nivel) {
-              $array[] = utf8_decode($nivel->sigla);
+              $array[] = mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
             }
             $item->setArrHierarquia($array);
           }
@@ -581,8 +581,8 @@ class ProcessoEletronicoRN extends InfraRN
         foreach ($estruturasUnidades as $estrutura) {
           $item = new EstruturaDTO();
           $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-          $item->setStrNome(utf8_decode($estrutura->nome));
-          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setStrNome(mb_convert_encoding($estrutura->nome, 'ISO-8859-1', 'UTF-8'));
+          $item->setStrSigla(mb_convert_encoding($estrutura->sigla, 'ISO-8859-1', 'UTF-8'));
           $item->setBolAtivo($estrutura->ativo);
           $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
           $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
@@ -591,7 +591,7 @@ class ProcessoEletronicoRN extends InfraRN
           if (!empty($estrutura->hierarquia->nivel)) {
             $array = array();
             foreach ($estrutura->hierarquia->nivel as $nivel) {
-              $array[] = utf8_decode($nivel->sigla);
+              $array[] = mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
             }
             $item->setArrHierarquia($array);
           }
@@ -624,7 +624,7 @@ class ProcessoEletronicoRN extends InfraRN
       if (is_numeric($nome)) {
         $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
       } else {
-        $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+        $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
       }
     }
 
@@ -633,7 +633,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
     if (!is_null($filtro['nomeUnidade'])) {
-      $parametros->filtroDeEstruturas->nome = utf8_encode($filtro['nomeUnidade']);
+      $parametros->filtroDeEstruturas->nome = mb_convert_encoding($filtro['nomeUnidade'], 'UTF-8', 'ISO-8859-1');
     }
 
     if (!is_null($filtro['registrosPorPagina']) && !is_null($filtro['offset'])) {
@@ -686,7 +686,7 @@ class ProcessoEletronicoRN extends InfraRN
         if (is_numeric($nome)) {
           $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
         } else {
-          $parametros->filtroDeEstruturas->nome = utf8_encode($nome);
+          $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
         }
       }
 
@@ -695,7 +695,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
       if (!is_null($nomeUnidade)) {
-        $parametros->filtroDeEstruturas->nome = utf8_encode($nomeUnidade);
+        $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1');
       }
 
       if (!is_null($registrosPorPagina) && !is_null($offset)) {
@@ -725,8 +725,8 @@ class ProcessoEletronicoRN extends InfraRN
         foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
           $item = new EstruturaDTO();
           $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-          $item->setStrNome(utf8_decode($estrutura->nome));
-          $item->setStrSigla(utf8_decode($estrutura->sigla));
+          $item->setStrNome(mb_convert_encoding($estrutura->nome, 'ISO-8859-1', 'UTF-8'));
+          $item->setStrSigla(mb_convert_encoding($estrutura->sigla, 'ISO-8859-1', 'UTF-8'));
           $item->setBolAtivo($estrutura->ativo);
           $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
           $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
@@ -735,7 +735,7 @@ class ProcessoEletronicoRN extends InfraRN
           if (!empty($estrutura->hierarquia->nivel)) {
             $array = array();
             foreach ($estrutura->hierarquia->nivel as $nivel) {
-              $array[] = utf8_decode($nivel->sigla);
+              $array[] = mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
             }
             $item->setArrHierarquia($array);
           }
@@ -789,7 +789,7 @@ class ProcessoEletronicoRN extends InfraRN
         $valor = $entry->getAttribute('value');
         $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
         $descricao = $documentationNode->item(0)->nodeValue;
-        $resultado[$valor] = utf8_decode($descricao);
+        $resultado[$valor] = mb_convert_encoding($descricao, 'ISO-8859-1', 'UTF-8');
       }
     } finally{
         curl_close($curl);
@@ -843,7 +843,7 @@ class ProcessoEletronicoRN extends InfraRN
         $valor = $entry->getAttribute('value');
         $documentationNode = $xpath->query('x:annotation/x:documentation', $entry);
         $descricao = $documentationNode->item(0)->nodeValue;
-        $resultado[$valor] = utf8_decode($descricao);
+        $resultado[$valor] = mb_convert_encoding($descricao, 'ISO-8859-1', 'UTF-8');
       }
     } finally{
         curl_close($curl);
@@ -861,10 +861,10 @@ class ProcessoEletronicoRN extends InfraRN
         });
 
     } catch (\SoapFault $e) {
-        $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(utf8_decode($e->faultstring)));
+        $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(mb_convert_encoding($e->faultstring, 'ISO-8859-1', 'UTF-8')));
         
       if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-          $strMensagem .= 'O código mapeado para a unidade ' . utf8_decode($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome) . ' está incorreto.';
+          $strMensagem .= 'O código mapeado para a unidade ' . mb_convert_encoding($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome, 'ISO-8859-1', 'UTF-8') . ' está incorreto.';
       }
 
         $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
@@ -934,7 +934,7 @@ class ProcessoEletronicoRN extends InfraRN
       $mensagem = InfraException::inspecionar($fault);
     if($fault instanceof SoapFault && isset($fault->detail->interoperabilidadeException)) {
         $strWsException = $fault->detail->interoperabilidadeException;
-        $mensagem = utf8_decode($strWsException->mensagem);
+        $mensagem = mb_convert_encoding($strWsException->mensagem, 'ISO-8859-1', 'UTF-8');
 
         // Fixação de mensagem de erro para quando já existe um trâmite em andamento
       if($strWsException->codigoErro == "0044"){
@@ -965,7 +965,6 @@ class ProcessoEletronicoRN extends InfraRN
       $cabecalho->urgente = $urgente;
       $cabecalho->motivoDaUrgencia = $motivoUrgencia;
       //Parâmetro abaixo foi descontinuado por falhas e substituido pelo enviarApenasComponentesDigitaisPendentes
-      //$cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = $enviarTodosDocumentos;
       $cabecalho->enviarApenasComponentesDigitaisPendentes = !$enviarTodosDocumentos;
 
       $this->atribuirInformacoesAssunto($cabecalho, $dblIdProcedimento);
@@ -979,7 +978,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     try{
 
-        $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
+        $objInfraParametro = new InfraParametro($this->inicializarObjInfraIBanco());
         $arrPropAdicionais=$objCabecalho->propriedadeAdicional;
         $arrPropAdicionais[] = new SoapVar("<propriedadeAdicional
             chave='MODULO_PEN_VERSAO'>". $objInfraParametro->getValor('VERSAO_MODULO_PEN') . "</propriedadeAdicional>", XSD_ANYXML);
@@ -1044,11 +1043,11 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
 
-          $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)):"NA";
+          $valorInput=$objRelProtocoloAssuntoDTO->getStrDescricaoAssunto()?mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($objRelProtocoloAssuntoDTO->getStrDescricaoAssunto(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000), 'UTF-8', 'ISO-8859-1'):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Descricao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
-          $valorInput=$infoAssunto->getStrCodigoEstruturado()?utf8_encode($infoAssunto->getStrCodigoEstruturado()):"NA";
+          $valorInput=$infoAssunto->getStrCodigoEstruturado()?mb_convert_encoding($infoAssunto->getStrCodigoEstruturado(), 'UTF-8', 'ISO-8859-1'):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_CodigoEstruturado_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
@@ -1060,11 +1059,11 @@ class ProcessoEletronicoRN extends InfraRN
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_PrazoIntermediario_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
-          $valorInput=$destinacao?utf8_encode($destinacao):"NA";
+          $valorInput=$destinacao?mb_convert_encoding($destinacao, 'UTF-8', 'ISO-8859-1'):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Destinacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
-          $valorInput=$infoAssunto->getStrObservacao()?utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)):"NA";
+          $valorInput=$infoAssunto->getStrObservacao()?mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000), 'UTF-8', 'ISO-8859-1'):"NA";
           $arrDadosAssunto[] = new SoapVar("<propriedadeAdicional
             chave='CLASSIFICACAO_Observacao_" . $contagem . "'>" . $valorInput . "</propriedadeAdicional>", XSD_ANYXML);
 
@@ -1188,7 +1187,7 @@ class ProcessoEletronicoRN extends InfraRN
   }
 
   public function cadastrarTramiteDeProcesso($parDblIdProcedimento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parStrStaTipoTramite, $parDthRegistroTramite, $parNumIdRepositorioOrigem,
-        $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmLote = false, $numIdUnidade = null)
+        $parNumIdEstruturaOrigem, $parNumIdRepositorioDestino, $parNumIdEstruturaDestino, $parObjProtocolo, $parNumTicketComponentesDigitais = null, $parObjComponentesDigitaisSolicitados = null, $bolSinProcessamentoEmBloco = false, $numIdUnidade = null)
     {
 
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
@@ -1258,7 +1257,7 @@ class ProcessoEletronicoRN extends InfraRN
       $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite);
       $objTramiteDTO->setNumTicketEnvioComponentes($parNumTicketComponentesDigitais);
       $objTramiteDTO->setDthRegistro($this->converterDataSEI($parDthRegistroTramite));
-    if($bolSinProcessamentoEmLote){
+    if($bolSinProcessamentoEmBloco){
         $objTramiteDTO->setNumIdUnidade($numIdUnidade);
     }else{
         $objTramiteDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
@@ -1496,11 +1495,11 @@ class ProcessoEletronicoRN extends InfraRN
         }
 
           $objComponenteDigital = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital[0] : $objDocumento->componenteDigital;
-          $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
+          $objComponenteDigitalDTO->setStrNome(mb_convert_encoding($objComponenteDigital->nome, 'ISO-8859-1', 'UTF-8'));
 
         if(isset($objDocumento->especie)){
             $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
-            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
+            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(mb_convert_encoding($objDocumento->especie->nomeNoProdutor, 'ISO-8859-1', 'UTF-8'));
         }
 
           $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
@@ -1687,11 +1686,11 @@ class ProcessoEletronicoRN extends InfraRN
       $objProtocoloDTO = $objBD->consultar($objProtocoloDTO);
 
     if (empty($objProtocoloDTO)) {
-        throw new InfraException(utf8_encode(sprintf('Nenhum procedimento foi encontrado com o id %s', $strProtocoloFormatado)));
+        throw new InfraException(mb_convert_encoding(sprintf('Nenhum procedimento foi encontrado com o id %s', $strProtocoloFormatado), 'UTF-8', 'ISO-8859-1'));
     }
 
     if ($objProtocoloDTO->getStrStaEstado() != ProtocoloRn::$TE_PROCEDIMENTO_BLOQUEADO) {
-        throw new InfraException(utf8_encode('O processo não esta com o estado com "Em Processamento" ou "Bloqueado"'));
+        throw new InfraException(mb_convert_encoding('O processo não esta com o estado com "Em Processamento" ou "Bloqueado"', 'UTF-8', 'ISO-8859-1'));
     }
 
       $objTramiteDTO = new TramiteDTO();
@@ -1720,7 +1719,7 @@ class ProcessoEletronicoRN extends InfraRN
       $objTramitesEncontrados = $objResultado->tramitesEncontrados;
 
     if (empty($objTramitesEncontrados) || !isset($objTramitesEncontrados->tramite)) {
-        throw new InfraException(utf8_encode(sprintf('Nenhum tramite foi encontrado para o procedimento %s', $strProtocoloFormatado)));
+        throw new InfraException(mb_convert_encoding(sprintf('Nenhum tramite foi encontrado para o procedimento %s', $strProtocoloFormatado), 'UTF-8', 'ISO-8859-1'));
     }
 
     if(!is_array($objTramitesEncontrados->tramite)){
@@ -1743,7 +1742,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objPenUnidadeDTO = $objBD->consultar($objPenUnidadeDTO);
 
       if (empty($objPenUnidadeDTO)) {
-          throw new InfraException(utf8_encode('Número da Unidade RH não foi encontrado'));
+          throw new InfraException(mb_convert_encoding('Número da Unidade RH não foi encontrado', 'UTF-8', 'ISO-8859-1'));
       }
 
         $numIdEstrutura = $objPenUnidadeDTO->getNumIdUnidadeRH();
@@ -1751,7 +1750,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     if ($objTramite->remetente->numeroDeIdentificacaoDaEstrutura != $numIdEstrutura ||
               $objTramite->remetente->identificacaoDoRepositorioDeEstruturas != $numIdRepositorio) {
-        throw new InfraException(utf8_encode('O último trâmite desse processo não pertence a esse órgão'));
+        throw new InfraException(mb_convert_encoding('O último trâmite desse processo não pertence a esse órgão', 'UTF-8', 'ISO-8859-1'));
     }
 
     switch ($objTramite->situacaoAtual) {
@@ -1761,7 +1760,7 @@ class ProcessoEletronicoRN extends InfraRN
           break;
 
       case static::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
-          throw new InfraException(utf8_encode('O trâmite externo deste processo já foi concluído'));
+          throw new InfraException(mb_convert_encoding('O trâmite externo deste processo já foi concluído', 'UTF-8', 'ISO-8859-1'));
         break;
 
       default:
@@ -1871,15 +1870,15 @@ class ProcessoEletronicoRN extends InfraRN
     }
 
       $objOperacaoDTO = new OperacaoDTO();
-      $objOperacaoDTO->setStrCodigo(utf8_decode($objOperacaoPEN->codigo));
-      $objOperacaoDTO->setStrComplemento(utf8_decode($objOperacaoPEN->complemento));
+      $objOperacaoDTO->setStrCodigo(mb_convert_encoding($objOperacaoPEN->codigo, 'ISO-8859-1', 'UTF-8'));
+      $objOperacaoDTO->setStrComplemento(mb_convert_encoding($objOperacaoPEN->complemento, 'ISO-8859-1', 'UTF-8'));
       $objOperacaoDTO->setDthOperacao($this->converterDataSEI($objOperacaoPEN->dataHora));
 
       $strIdPessoa =  ($objOperacaoPEN->pessoa->numeroDeIdentificacao) ?: null;
-      $objOperacaoDTO->setStrIdentificacaoPessoaOrigem(utf8_decode($strIdPessoa));
+      $objOperacaoDTO->setStrIdentificacaoPessoaOrigem(mb_convert_encoding($strIdPessoa, 'ISO-8859-1', 'UTF-8'));
 
       $strNomePessoa =  ($objOperacaoPEN->pessoa->nome) ?: null;
-      $objOperacaoDTO->setStrNomePessoaOrigem(utf8_decode($strNomePessoa));
+      $objOperacaoDTO->setStrNomePessoaOrigem(mb_convert_encoding($strNomePessoa, 'ISO-8859-1', 'UTF-8'));
 
     switch ($objOperacaoPEN->codigo) {
       case "01":
@@ -1952,7 +1951,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objRelTarefaOperacaoDTO->retStrCodigoOperacao();
         $objRelTarefaOperacaoDTO->setNumIdTarefa($numIdTarefa);
 
-        $objRelTarefaOperacaoBD = new RelTarefaOperacaoBD(BancoSEI::getInstance());
+        $objRelTarefaOperacaoBD = new RelTarefaOperacaoBD($this->inicializarObjInfraIBanco());
         $objRelTarefaOperacaoDTO = $objRelTarefaOperacaoBD->consultar($objRelTarefaOperacaoDTO);
 
       if($objRelTarefaOperacaoDTO != null) {
@@ -2011,7 +2010,7 @@ class ProcessoEletronicoRN extends InfraRN
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();
         $parametros->recusaDeTramite->IDT = $idTramite;
-        $parametros->recusaDeTramite->justificativa = utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000));
+        $parametros->recusaDeTramite->justificativa = mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000), 'UTF-8', 'ISO-8859-1');
         $parametros->recusaDeTramite->motivo = $motivo;
 
         $resultado = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {

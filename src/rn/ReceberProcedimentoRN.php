@@ -412,7 +412,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objTramiteDTO->setNumIdTramite($numIdTramite);
         $objTramiteDTO->retNumIdUnidade();
 
-        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
       if(isset($objTramiteDTO)){
@@ -462,7 +462,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objReceberTramiteRecusadoDTO->setNumIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
           $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
           $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
-          $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($tramite->justificativaDaRecusa, 500)));
+          $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($tramite->justificativaDaRecusa, 500), 'ISO-8859-1', 'UTF-8'));
           $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
 
           //Faz o tratamento do processo e do trâmite recusado
@@ -527,9 +527,9 @@ class ReceberProcedimentoRN extends InfraRN
           $objPenProtocoloBD->alterar($objPenProtocolo);
 
           // Atualizar Bloco para concluido parcialmente
-          $objTramiteEmBlocoProtocoloDTO = new PenBlocoProcessoDTO();
-          $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-          $objTramiteEmBlocoProtocoloDTO->setNumIdAndamento(
+          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $objPenBlocoProcessoDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
+          $objPenBlocoProcessoDTO->setNumIdAndamento(
             array(
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
               ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
@@ -538,23 +538,23 @@ class ReceberProcedimentoRN extends InfraRN
             ),
             InfraDTO::$OPER_NOT_IN
           );
-          $objTramiteEmBlocoProtocoloDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
-          $objTramiteEmBlocoProtocoloDTO->retTodos();
+          $objPenBlocoProcessoDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objPenBlocoProcessoDTO->retTodos();
 
-          $objTramitaEmBlocoProtocoloRN = new PenBlocoProcessoRN();
-          $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramiteEmBlocoProtocoloDTO);
+          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $arrObjPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
-        if ($arrTramiteEmBlocoProtocolo != null) {
+        if ($arrObjPenBlocoProcesso != null) {
           $blocos = array();
-          foreach ($arrTramiteEmBlocoProtocolo as $tramiteEmBlocoProtocolo) {
-            $tramiteEmBlocoProtocolo->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA);
-            $objTramitaEmBlocoProtocoloRN->alterar($tramiteEmBlocoProtocolo);
+          foreach ($arrObjPenBlocoProcesso as $objBlocoProcesso) {
+            $objBlocoProcesso->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA);
+            $objPenBlocoProcessoRN->alterar($objBlocoProcesso);
 
-            $blocos[] = $tramiteEmBlocoProtocolo->getNumIdBloco();
+            $blocos[] = $objBlocoProcesso->getNumIdBloco();
           }
 
           foreach ($blocos as $idBloco) {
-            $objTramitaEmBlocoProtocoloRN->atualizarEstadoDoBloco($idBloco);
+            $objPenBlocoProcessoRN->atualizarEstadoDoBloco($idBloco);
           }
         }
       }
@@ -722,12 +722,12 @@ class ReceberProcedimentoRN extends InfraRN
         $objPenRelTipoDocMapEnviadoDTO->retTodos();
         $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($objDocument->especie->codigo);
 
-        $objProcessoEletronicoDB = new PenRelTipoDocMapRecebidoBD(BancoSEI::getInstance());
+        $objProcessoEletronicoDB = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
         $numContador = (int)$objProcessoEletronicoDB->contar($objPenRelTipoDocMapEnviadoDTO);
 
         // Não achou, ou seja, não esta cadastrado na tabela, então não é aceito nesta unidade como válido
         if($numContador <= 0) {
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', mb_convert_encoding($objDocument->especie->nomeNoProdutor, 'ISO-8859-1', 'UTF-8')), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
             throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
         }
       }
@@ -845,7 +845,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objTramiteDTOPesquisa->retStrNumeroRegistro();
         $objTramiteDTOPesquisa->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
 
-        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
         $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTOPesquisa);
       if(isset($objTramiteDTO)){
           $dblIdProcedimento = $objTramiteDTO->getNumIdProcedimento();
@@ -946,12 +946,10 @@ class ReceberProcedimentoRN extends InfraRN
           $this->gravarLogDebug("Processo $parDblIdProcedimento não pode ser desbloqueado", 2);
       }
 
-        //$numUnidadeReceptora = $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
         $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
         $this->enviarProcedimentoUnidade($objProcedimentoDTO, $numUnidadeReceptora);
 
     } finally {
-        //$numUnidadeReceptora = $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
         $numUnidadeReceptora = ModPenUtilsRN::obterUnidadeRecebimento();
         SessaoSEI::getInstance()->setNumIdUnidadeAtual($numUnidadeReceptora);
     }
@@ -1028,7 +1026,7 @@ class ReceberProcedimentoRN extends InfraRN
       //TODO: Validar cada uma das informações de entrada do webservice
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setDblIdProtocolo(null);
-      $objProtocoloDTO->setStrDescricao(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100)));
+      $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjProtocolo->descricao, 100), 'ISO-8859-1', 'UTF-8'));
       $objProtocoloDTO->setStrStaNivelAcessoLocal($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo));
 
     if($this->obterNivelSigiloSEI($parObjProtocolo->nivelDeSigilo) == ProtocoloRN::$NA_RESTRITO){
@@ -1051,7 +1049,7 @@ class ReceberProcedimentoRN extends InfraRN
       // trâmites de processos. No caso de recebimento de documentos avulsos, o número do novo processo sempre deverá ser
       // gerado pelo destinatário, conforme regras definidas em legislação vigente
       $strProtocoloFormatado = ($parObjProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO) ? $parObjProtocolo->protocolo : null;
-      $objProtocoloDTO->setStrProtocoloFormatado(utf8_decode($strProtocoloFormatado));
+      $objProtocoloDTO->setStrProtocoloFormatado(mb_convert_encoding($strProtocoloFormatado, 'ISO-8859-1', 'UTF-8'));
       $objProtocoloDTO->setDtaGeracao($this->objProcessoEletronicoRN->converterDataSEI($parObjProtocolo->dataHoraDeProducao));
       $objProtocoloDTO->setArrObjAnexoDTO(array());
       $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
@@ -1060,7 +1058,7 @@ class ReceberProcedimentoRN extends InfraRN
 
       $strDescricao = "";
     if(isset($parObjProtocolo->processoDeNegocio)){
-        $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', utf8_decode($parObjProtocolo->processoDeNegocio)).PHP_EOL;
+        $strDescricao  = sprintf('Tipo de processo no órgão de origem: %s', mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8')).PHP_EOL;
         $strDescricao .= $parObjProtocolo->observacao;
     }
 
@@ -1083,13 +1081,13 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setArrObjObservacaoDTO(array($objObservacaoDTO));
 
       //Atribuição de dados do procedimento
-      $strProcessoNegocio = utf8_decode($parObjProtocolo->processoDeNegocio);
+      $strProcessoNegocio = mb_convert_encoding($parObjProtocolo->processoDeNegocio, 'ISO-8859-1', 'UTF-8');
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->setDblIdProcedimento(null);
       $objProcedimentoDTO->setObjProtocoloDTO($objProtocoloDTO);
       $objProcedimentoDTO->setStrNomeTipoProcedimento($strProcessoNegocio);
       $objProcedimentoDTO->setDtaGeracaoProtocolo($this->objProcessoEletronicoRN->converterDataSEI($parObjProtocolo->dataHoraDeProducao));
-      $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(utf8_decode($parObjProtocolo->protocolo));
+      $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado(mb_convert_encoding($parObjProtocolo->protocolo, 'ISO-8859-1', 'UTF-8'));
       $objProcedimentoDTO->setStrSinGerarPendencia('S');
       $objProcedimentoDTO->setArrObjDocumentoDTO(array());
 
@@ -1173,7 +1171,7 @@ class ReceberProcedimentoRN extends InfraRN
       $strDescricao  = sprintf(
         'Um processo com o número de protocolo %s já existe no sistema de destino. '
         . 'OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.',
-        utf8_decode($parObjProtocolo->protocolo)
+        mb_convert_encoding($parObjProtocolo->protocolo, 'ISO-8859-1', 'UTF-8')
       ).PHP_EOL;
       throw new InfraException($strDescricao);
     }
@@ -1390,7 +1388,7 @@ class ReceberProcedimentoRN extends InfraRN
         $objInteressado = $arrObjInteressados[$i];
         $objParticipanteDTO  = new ParticipanteDTO();
         $objParticipanteDTO->setStrSiglaContato($objInteressado->numeroDeIdentificacao);
-        $objParticipanteDTO->setStrNomeContato(utf8_decode($objInteressado->nome));
+        $objParticipanteDTO->setStrNomeContato(mb_convert_encoding($objInteressado->nome, 'ISO-8859-1', 'UTF-8'));
         $objParticipanteDTO->setStrStaParticipacao(ParticipanteRN::$TP_INTERESSADO);
         $objParticipanteDTO->setNumSequencia($i);
         $arrObjParticipantesDTO[] = $objParticipanteDTO;
@@ -1746,7 +1744,6 @@ class ReceberProcedimentoRN extends InfraRN
 
           $objDocumentoDTO->setDblIdDocumentoEdoc(null);
           $objDocumentoDTO->setDblIdDocumentoEdocBase(null);
-          //$objDocumentoDTO->setNumIdUnidadeResponsavel($objUnidadeDTO->getNumIdUnidade());
           $objDocumentoDTO->setNumIdUnidadeResponsavel(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
           $objDocumentoDTO->setNumIdTipoConferencia(null);
           $objDocumentoDTO->setStrConteudo(null);
@@ -1758,8 +1755,8 @@ class ReceberProcedimentoRN extends InfraRN
           $objProtocoloDTO->setStrStaProtocolo(ProtocoloRN::$TP_DOCUMENTO_RECEBIDO);
 
         if($objDocumento->descricao != '***'){
-          $objProtocoloDTO->setStrDescricao(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 100)));
-          $objDocumentoDTO->setStrNumero(utf8_decode($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 50)));
+          $objProtocoloDTO->setStrDescricao(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 100), 'ISO-8859-1', 'UTF-8'));
+          $objDocumentoDTO->setStrNumero(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objDocumento->descricao, 50), 'ISO-8859-1', 'UTF-8'));
         }else{
             $objProtocoloDTO->setStrDescricao("");
             $objDocumentoDTO->setStrNumero("");
@@ -1935,7 +1932,6 @@ class ReceberProcedimentoRN extends InfraRN
       }
     }
     return $arrObjAnexoDTO;
-    // $objDocumentoDTO->getObjProtocoloDTO()->setArrObjAnexoDTO($arrObjAnexoDTO);
   }
 
 
@@ -2450,7 +2446,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
     }
 
-      //$objPenAtividadeRN = new PenAtividadeRN();
       $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
 
       $objInfraException->lancarValidacoes();

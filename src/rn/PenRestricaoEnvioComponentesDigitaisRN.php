@@ -54,7 +54,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
         __METHOD__,
         $objDTO
       );
-      $objBD = new PenRestricaoEnvioComponentesDigitaisBD(BancoSEI::getInstance());
+      $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro consultar mapeamento de unidades.', $e);
@@ -76,7 +76,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
         __METHOD__,
         $objDTO
       );
-      $objBD = new PenRestricaoEnvioComponentesDigitaisBD(BancoSEI::getInstance());
+      $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->alterar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro alterando mapeamento de unidades.', $e);
@@ -98,7 +98,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
         __METHOD__,
         $objDTO
       );
-      $objBD = new PenRestricaoEnvioComponentesDigitaisBD(BancoSEI::getInstance());
+      $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->cadastrar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
@@ -120,7 +120,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
         __METHOD__,
         $objDTO
       );
-      $objBD = new PenRestricaoEnvioComponentesDigitaisBD(BancoSEI::getInstance());
+      $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo mapeamento de unidades.', $e);

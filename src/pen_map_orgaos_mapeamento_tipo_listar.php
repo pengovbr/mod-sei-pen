@@ -26,7 +26,6 @@ try {
   $objDebug->limpar();
 
   $objSessao->validarLink();
-  // $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
   $idOrgaoExterno = $_GET['id'];
 

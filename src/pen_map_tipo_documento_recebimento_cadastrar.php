@@ -162,7 +162,7 @@ function onSubmit() {
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="pen-map-tipo-doc-recebido" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
+<form id="pen-map-tipo-doc-recebido" onsubmit="return onSubmit();" method="post" action="">
     <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPaginaSEI->montarAreaValidacao(); ?>
     <?php $objPaginaSEI->abrirAreaDados('12em'); ?>

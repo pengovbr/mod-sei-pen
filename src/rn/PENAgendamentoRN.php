@@ -49,7 +49,7 @@ class PENAgendamentoRN extends InfraRN
           continue;
         }
 
-          $objDTO->setStrNome(utf8_decode($hipotese->nome));
+          $objDTO->setStrNome(mb_convert_encoding($hipotese->nome, 'ISO-8859-1', 'UTF-8'));
 
         if ($hipotese->status) {
             $objDTO->setStrAtivo('S');
@@ -91,7 +91,7 @@ class PENAgendamentoRN extends InfraRN
         $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();
 
         // Obtém lista de espécies documentais registradas na base de dados do SEI
-        $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
+        $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
         $objEspecieDocumentalDTO->retDblIdEspecie();
         $objEspecieDocumentalDTO->retStrNomeEspecie();

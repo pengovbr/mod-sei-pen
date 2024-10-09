@@ -21,8 +21,8 @@ class ExpedirProcedimentoDTO extends InfraDTO {
     $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'SinUrgente');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdMotivoUrgencia');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_ARR, 'IdProcessoApensado');
-    $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'SinProcessamentoEmLote');
-    $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdLote');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_BOL, 'SinProcessamentoEmBloco');
+    $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdBloco');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdAtividade');
     $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidade');
   }

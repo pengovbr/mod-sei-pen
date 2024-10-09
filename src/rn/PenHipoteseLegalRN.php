@@ -41,7 +41,7 @@ class PenHipoteseLegalRN extends InfraRN
   {
     try {
       //Valida Permissao
-      $objBD = new GenericoBD(BancoSEI::getInstance());
+      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro ao consultar Hipotese Legal.', $e);

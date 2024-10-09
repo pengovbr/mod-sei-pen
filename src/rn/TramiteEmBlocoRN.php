@@ -366,8 +366,8 @@ class TramiteEmBlocoRN extends InfraRN
       foreach ($blocoIds as $blocoId) {
         $objBloco->setNumIdBloco($blocoId);
         $objBloco->retDblIdProtocolo();
-        $tramiteEmBlocoProtocoloRn = new PenBlocoProcessoRN();
-        $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $protocoloIds = $objPenBlocoProcessoRN->listar($objBloco);
         $protocoloRn = new ExpedirProcedimentoRN();
         foreach ($protocoloIds as $protocoloId) {
           $protocoloRn->cancelarTramite($protocoloId->getDblIdProtocolo());

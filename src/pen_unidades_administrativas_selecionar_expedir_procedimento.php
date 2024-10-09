@@ -324,10 +324,6 @@ try {
         if(objJanelaPesquisaTextual.closed) {
             window.clearInterval(evnJanelaPesquisaTextual);
             jQuery('#divInfraModalFundo', window.parent.document).css('visibility', 'hidden');
-            //var strDestino = '<?php //print $objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=procedimento_controlar&acao_retorno=procedimento_controlar&id_procedimento='.$idProcedimento); ?>//';
-            //if(strDestino) {
-            //    window.top.location =  strDestino;
-            //}
         }
     }
 

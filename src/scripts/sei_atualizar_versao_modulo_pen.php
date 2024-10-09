@@ -1479,7 +1479,6 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       if ($objEspecieDocumentalBD->contar($objEspecieDocumentalDTO) == 0) {
         $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
         // Descrição da espécie documental não mais necessária a partir da versão 2.0.0
-        //$objEspecieDocumentalDTO->setStrDescricao($strDescricao);
         $objEspecieDocumentalBD->cadastrar($objEspecieDocumentalDTO);
       }
     };

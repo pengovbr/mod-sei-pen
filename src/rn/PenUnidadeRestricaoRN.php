@@ -90,7 +90,7 @@ class PenUnidadeRestricaoRN extends InfraRN
   {
     try {
       $retArrayObjDTO = array();
-      $objBD = new PenUnidadeRestricaoBD(BancoSEI::getInstance());
+      $objBD = new PenUnidadeRestricaoBD($this->inicializarObjInfraIBanco());
       foreach ($arrayObjDTO as $objDTO) {
         $retArrayObjDTO[] = $objBD->cadastrar($objDTO);
       }
@@ -132,7 +132,7 @@ class PenUnidadeRestricaoRN extends InfraRN
   protected function excluirControlado(PenUnidadeRestricaoDTO $objDTO)
   {
     try {
-      $objBD = new PenUnidadeRestricaoBD(BancoSEI::getInstance());
+      $objBD = new PenUnidadeRestricaoBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo mapeamento de unidades.', $e);

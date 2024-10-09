@@ -46,7 +46,7 @@ class PenOrgaoExternoRN extends InfraRN
     try {
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_orgaos_externos_visualizar', __METHOD__, $objDTO);
-      $objBD = new PenOrgaoExternoBD(BancoSEI::getInstance());
+      $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro consultando mapeamento de unidades.', $e);
@@ -64,7 +64,7 @@ class PenOrgaoExternoRN extends InfraRN
     try {
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_orgaos_externos_salvar', __METHOD__, $objDTO);
-      $objBD = new PenOrgaoExternoBD(BancoSEI::getInstance());
+      $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->alterar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro alterando mapeamento de unidades.', $e);
@@ -82,7 +82,7 @@ class PenOrgaoExternoRN extends InfraRN
     try {
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_orgaos_externos_salvar', __METHOD__, $objDTO);
-      $objBD = new PenOrgaoExternoBD(BancoSEI::getInstance());
+      $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->cadastrar($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
@@ -100,7 +100,7 @@ class PenOrgaoExternoRN extends InfraRN
     try {
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_orgaos_externos_excluir', __METHOD__, $objDTO);
-      $objBD = new PenOrgaoExternoBD(BancoSEI::getInstance());
+      $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
       throw new InfraException('Erro excluindo mapeamento de unidades.', $e);

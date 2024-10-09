@@ -2,7 +2,7 @@
 
 require_once DIR_SEI_WEB . '/SEI.php';
 
-class PenExpedirLoteRN extends InfraRN
+class PenExpedirBlocoRN extends InfraRN
 {
 
     private $barraProgresso;
@@ -33,39 +33,39 @@ class PenExpedirLoteRN extends InfraRN
       $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
   }
     
-  private function validarParametrosLote(InfraException $objInfraException, PenBlocoProcessoDTO $objLoteDTO)
+  private function validarParametrosBloco(InfraException $objInfraException, PenBlocoProcessoDTO $objBlocoDTO)
     {
-    if(!isset($objLoteDTO)){
-        $objInfraException->adicionarValidacao('Parâmetro $objLoteDTO não informado.');
+    if(!isset($objBlocoDTO)){
+        $objInfraException->adicionarValidacao('Parâmetro $objBlocoDTO não informado.');
     }
 
       //TODO: Validar se repositrio de origem foi informado
-    if (InfraString::isBolVazia($objLoteDTO->getNumIdRepositorioOrigem())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioOrigem())){
         $objInfraException->adicionarValidacao('Identificação do repositório de estruturas da unidade atual não informado.');
     }
 
       //TODO: Validar se unidade de origem foi informado
-    if (InfraString::isBolVazia($objLoteDTO->getNumIdUnidadeOrigem())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeOrigem())){
         $objInfraException->adicionarValidacao('Identificação da unidade atual no repositório de estruturas organizacionais não informado.');
     }
 
       //TODO: Validar se repositrio foi devidamente informado
-    if (InfraString::isBolVazia($objLoteDTO->getNumIdRepositorioDestino())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioDestino())){
         $objInfraException->adicionarValidacao('Repositório de estruturas organizacionais não informado.');
     }
 
       //TODO: Validar se unidade foi devidamente informada
-    if (InfraString::isBolVazia($objLoteDTO->getNumIdUnidadeDestino()) || InfraString::isBolVazia($objLoteDTO->getStrUnidadeDestino())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeDestino()) || InfraString::isBolVazia($objBlocoDTO->getStrUnidadeDestino())){
         $objInfraException->adicionarValidacao('Unidade de destino não informado.');
     }
 
       //TODO: Validar se usuário foi devidamente informada
-    if (InfraString::isBolVazia($objLoteDTO->getNumIdUsuario())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUsuario())){
         $objInfraException->adicionarValidacao('Usuário não informado.');
     }
         
       //TODO: Validar se usuário foi devidamente informada
-    if (InfraString::isBolVazia($objLoteDTO->getDthRegistro())){
+    if (InfraString::isBolVazia($objBlocoDTO->getDthRegistro())){
         $objInfraException->adicionarValidacao('Data do registro não informada.');
     }
 
@@ -89,10 +89,8 @@ class PenExpedirLoteRN extends InfraRN
         //Exibe a barra de progresso após definir o seu tamanho
         $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
 
-        $objPenExpedirLoteBD = new PenExpedirLoteBD($this->getObjInfraIBanco());
-
         $objInfraException = new InfraException();
-        $this->validarParametrosLote($objInfraException, $objPenBlocoProcessoDTO);
+        $this->validarParametrosBloco($objInfraException, $objPenBlocoProcessoDTO);
 
       if ($objPenBlocoProcessoDTO->isSetArrListaProcedimento()) {
 
@@ -112,18 +110,17 @@ class PenExpedirLoteRN extends InfraRN
             $objDto->setDblIdProtocolo($dblIdProcedimento);
             $objDto->retTodos();
 
-            $objTramiteEmBlocoProtocolo = $objPenBlocoProcessoRN->consultar($objDto);
+            $objPenBlocoProcesso = $objPenBlocoProcessoRN->consultar($objDto);
 
-            $objTramiteEmBlocoProtocolo->setNumIdAtividade($idAtividadeExpedicao);
-            $objPenBlocoProcessoRN->alterar($objTramiteEmBlocoProtocolo);
+            $objPenBlocoProcesso->setNumIdAtividade($idAtividadeExpedicao);
+            $objPenBlocoProcessoRN->alterar($objPenBlocoProcesso);
 
             $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_LOTE_ETAPA_CONCLUSAO);
+            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_BLOCO_ETAPA_CONCLUSAO);
           } catch (\Exception $e) {
                 //Realiza o desbloqueio do processo
             try {
               $this->objExpedirProcedimentoRN->desbloquearProcessoExpedicao($objPenBlocoProcessoDTO->getDblIdProcedimento());
-              $this->objExpedirProcedimentoRN->desbloquearProcessoExpedicao($objPenExpedirLoteDTO->getDblIdProcedimento());
             } catch (InfraException $ex) {
             }
                 throw $e;
