@@ -44,6 +44,21 @@ class PaginaTramiteEmBloco extends PaginaTeste
       $btnTramiteEmBloco->click();
   }
 
+  /**
+   * Seleciona um processo específico com base no número do protocolo formatado.
+   *
+   * Este método busca o rótulo que contém o número do protocolo
+   * fornecido e simula um clique sobre ele para selecionar o processo.
+   *
+   * @param string $numProtocoloFormatado O número do protocolo formatado a ser selecionado.
+   * @return void
+   */
+  public function selecionarProcesso($numProtocoloFormatado)
+  {
+    $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
+    $btnTramiteEmBloco->click();
+  }
+
     /**
      * Selecionar bloco
      * @param string $selAndamento
