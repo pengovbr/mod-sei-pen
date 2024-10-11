@@ -6,7 +6,7 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
 
   public function __construct()
     {
-      $this->objBlocoDeTramiteProtocoloDTO = new \PenBlocoProcessoDTO();
+    $this->objBlocoDeTramiteProtocoloDTO = new \PenBlocoProcessoDTO();
   }
  
   protected function inicializarObjInfraIBanco()
@@ -24,6 +24,19 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
       $dthRegistro = date('d/m/Y H:i:s');
       $this->objBlocoDeTramiteProtocoloDTO->setDthRegistro($dados['DthRegistro'] ?: $dthRegistro);
       $this->objBlocoDeTramiteProtocoloDTO->setDthAtualizado($dados['DthAtualizado'] ?: $dthRegistro);
+
+      // atualização 3.7.0
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdAndamento($dados['IdAndamento'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setStrUnidadeDestino($dados['UnidadeDestino'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdUnidadeOrigem($dados['IdUnidadeOrigem'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdUnidadeDestino($dados['IdUnidadeDestino'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdAtividade($dados['IdAtividade'] ?: null);
+
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdRepositorioOrigem($dados['IdRepositorioOrigem'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setNumIdRepositorioDestino($dados['IdRepositorioDestino'] ?: null);
+      $this->objBlocoDeTramiteProtocoloDTO->setDthEnvio($dados['Envio'] ?: $dthRegistro);
+
+      $this->objBlocoDeTramiteProtocoloDTO->setStrRepositorioDestino($dados['RepositorioDestino'] ?: null);
 
       $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD($this->inicializarObjInfraIBanco());
       $objBlocoDeTramiteProtocoloBD->cadastrar($this->objBlocoDeTramiteProtocoloDTO);
