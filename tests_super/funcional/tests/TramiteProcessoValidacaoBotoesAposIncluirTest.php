@@ -51,7 +51,7 @@ class TramiteProcessoValidacaoBotoesAposIncluirTest extends FixtureCenarioBaseTe
         $this->abrirProcesso(self::$protocoloTeste);
 
         $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste("Envio Externo de Processo"));
-        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste(utf8_encode("Incluir Processo no Bloco de Trâmite")));
-        $this->assertTrue($this->paginaProcesso->validarBotaoExiste(utf8_encode("Remover Processo do Bloco de Trâmite")));
+        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste(mb_convert_encoding("Incluir Processo no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1')));
+        $this->assertTrue($this->paginaProcesso->validarBotaoExiste(mb_convert_encoding("Remover Processo do Bloco de Trâmite", 'UTF-8', 'ISO-8859-1')));
     }
 }

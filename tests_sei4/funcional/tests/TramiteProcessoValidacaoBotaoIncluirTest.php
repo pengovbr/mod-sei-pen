@@ -73,6 +73,6 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
         // Abrir processo
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste(utf8_encode("Incluir Processo no Bloco de Trâmite")));
+        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste(mb_convert_encoding("Incluir Processo no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1')));
     }
 }
