@@ -327,6 +327,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
         if($bolSinProcessamentoEmLote){
             $objLoteProcedimentoRN->desbloquearProcessoBloco($dblIdProcedimento);
+            throw new InfraException('Erro no envio do bloco. Por favor, confira o(s) processo(s)', $e);
         } else {
             throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
         }
@@ -1454,7 +1455,39 @@ class ExpedirProcedimentoRN extends InfraRN {
 
           $strConteudoAssinatura = null;
 
-          $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
+          try {
+            $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);   
+          } catch (Exception $e) {
+
+            if ($nrTamanhoBytesArquivo === null) {
+
+              $objAtualizarAndamentoDTO = new AtualizarAndamentoDTO();
+              $arrIdProtocolo = array($objDocumentoDTO->getDblIdDocumento());
+
+              $objAtividadeRN = new AtividadeRN();
+        
+              $arrStrIdProtocolo = implode(',', $arrIdProtocolo);
+              
+              $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+              $objPesquisaPendenciaDTO->setDblIdProtocolo($arrIdProtocolo);
+              $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+              $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+              $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+              
+              $arrObjAtividadeDTO = array();
+              foreach($arrObjProcedimentoDTO as $objProcedimentoDTO){
+                $arrObjAtividadeDTO = array_merge($arrObjAtividadeDTO,$objProcedimentoDTO->getArrObjAtividadeDTO()); 
+              }
+              
+             $arrStrIdAtividade = implode(',',InfraArray::converterArrInfraDTO($arrObjAtividadeDTO,'IdAtividade'));
+              
+              $objAtualizarAndamentoDTO->setStrDescricao('Houve um erro de processamento, favor verificar o motivo na funcionalidade Infra > log, ou contate o administrador do sistema.');
+
+              $objAtualizarAndamentoDTO->setArrObjProtocoloDTO(InfraArray::gerarArrInfraDTO('ProtocoloDTO','IdProtocolo',explode(',',$arrStrIdProtocolo)));
+              $objAtualizarAndamentoDTO->setArrObjAtividadeDTO(InfraArray::gerarArrInfraDTO('AtividadeDTO','IdAtividade',explode(',',$arrStrIdAtividade)));
+           }
+          }
+
           list($strDadosComplementares, $strMimeType) = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
 
           $objInformacaoArquivo['NOME'] = $strNomeComponenteDigital;
