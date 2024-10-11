@@ -116,6 +116,12 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
       return !empty($alerta->text()) ? $alerta->text() : "";
   }
 
+  public function buscarQuantidadeProcessosRecusados()
+  {
+    $linhasDaTabelaRecusadas = $this->test->elements($this->test->using('xpath')->value("//img[@title='Recusado']"));
+    return count($linhasDaTabelaRecusadas);
+  } 
+
   public function tramitarProcessoExternamente($repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
       // Preencher parâmetros do trâmite

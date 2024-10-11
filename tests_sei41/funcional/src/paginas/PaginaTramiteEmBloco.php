@@ -44,6 +44,37 @@ class PaginaTramiteEmBloco extends PaginaTeste
       $btnTramiteEmBloco->click();
   }
 
+  /**
+   * Seleciona um processo específico com base no número do protocolo formatado.
+   *
+   * Este método busca o rótulo que contém o número do protocolo
+   * fornecido e simula um clique sobre ele para selecionar o processo.
+   *
+   * @param string $numProtocoloFormatado O número do protocolo formatado a ser selecionado.
+   * @return void
+   */
+  public function selecionarProcesso($numProtocoloFormatado)
+  {
+    $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
+    $btnTramiteEmBloco->click();
+  }
+
+  /**
+   * Verifica o título da página atual.
+   *
+   * Este método busca e retorna o texto do título da página
+   * atual, comparando-o com o título fornecido. Ele é útil para
+   * garantir que a navegação ocorreu corretamente.
+   *
+   * @param string $titulo O título esperado da página.
+   * @return string O título da página atual.
+   */
+  public function verificarTituloDaPagina($titulo)
+  {
+    $tituloDaPagina = $this->test->byXPath('//div[text()="' . $titulo . '"]');
+    return $tituloDaPagina->text();
+  }
+
     /**
      * Selecionar bloco
      * @param string $selAndamento
