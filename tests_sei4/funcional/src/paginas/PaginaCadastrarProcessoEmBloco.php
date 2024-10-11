@@ -215,6 +215,22 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
     {
       $this->test->byXPath("(//img[@title='Visualizar Processos'])[1]")->click();
   }
+  
+  public function btnSelecionarTodosProcessos()
+  {
+    $this->test->byXPath("//*[@id='imgInfraCheck']")->click();
+  }
+
+  public function btnComandoSuperiorExcluir()
+  {
+    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Excluir"]')->click();
+    $this->test->acceptAlert();
+  }
+
+  public function btnComandoSuperiorFechar()
+  {
+    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Fechar"]')->click();
+  }
 
   public function btnSalvar()
     {
