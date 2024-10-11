@@ -5,7 +5,7 @@ use PHPUnit\Extensions\Selenium2TestCase;
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};
 use Tests\Funcional\Sei\Fixtures\{DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture};
+use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture};
 
 use function PHPSTORM_META\map;
 /**
@@ -15,7 +15,6 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 {
     protected function cadastrarProcessoFixture(&$dadosProcesso)
     {
-
         if (!is_null($dadosProcesso['HIPOTESE_LEGAL'])){
             $param = [
                 'Nome' => trim(explode('(',$dadosProcesso['HIPOTESE_LEGAL'])[0]),
@@ -36,9 +35,13 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $objProtocoloDTO = $objProtocoloFixture->carregar($parametros);
         $objProcedimentoFixture = new ProcedimentoFixture();
 
-        $objProcedimentoDTO = $objProcedimentoFixture->carregar([
-            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
-        ]);
+        $parametrosProcedimento = [
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
+        ];
+        if (!is_null($dadosProcesso['ID_TIPO_PROCESSO'])) {
+          $parametrosProcedimento['IdTipoProcedimento'] = $dadosProcesso['ID_TIPO_PROCESSO'];
+        }
+        $objProcedimentoDTO = $objProcedimentoFixture->carregar($parametrosProcedimento);
 
         $objAtividadeFixture = new AtividadeFixture();
         $objAtividadeDTO = $objAtividadeFixture->carregar([
@@ -246,6 +249,16 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
         $objBD = new \SerieBD(\BancoSEI::getInstance());
         return $objBD->consultar($serieDTO);
+    }
+
+    protected function cadastrarTipoProcedimentoFixture($dados = [])
+    {
+      $objTipoProcedimentoFixture = new TipoProcedimentoFixture();
+      $objTipoProcedimentoDTO = $objTipoProcedimentoFixture->carregar([
+        'Nome' => $dados['NOME']
+      ]);
+
+      return $objTipoProcedimentoDTO;
     }
 
 }
