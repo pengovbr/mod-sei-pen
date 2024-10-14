@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-
 /**
  *
  * Execution Groups
@@ -72,17 +70,14 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         $testCase->refresh();
 
         $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(utf8_encode("Concluído"), $colunaEstado[0]->text());
-        
-        $objPenBlocoProcessoDTO = new \PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
 
-        $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
-        $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
+        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+        ]);
 
-        $this->assertEquals(6, $objPenBlocoProcesso->getNumIdAndamento());
+        $this->assertEquals(6, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
         return true;
       }, PEN_WAIT_TIMEOUT);
     }
@@ -153,17 +148,14 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         $testCase->refresh();
 
         $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(utf8_encode("Concluído"), $colunaEstado[0]->text());
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
         
-        $objPenBlocoProcessoDTO = new \PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
+        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+        ]);
 
-        $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
-        $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
-
-        $this->assertEquals(7, $objPenBlocoProcesso->getNumIdAndamento());
+        $this->assertEquals(7, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
         return true;
       }, PEN_WAIT_TIMEOUT);
     }
@@ -227,17 +219,14 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         $testCase->refresh();
 
         $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(utf8_encode("Concluído"), $colunaEstado[0]->text());
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
         
-        $objPenBlocoProcessoDTO = new \PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
+        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+        ]);
 
-        $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
-        $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
-
-        $this->assertEquals(9, $objPenBlocoProcesso->getNumIdAndamento());
+        $this->assertEquals(9, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
         return true;
       }, PEN_WAIT_TIMEOUT);
     }
