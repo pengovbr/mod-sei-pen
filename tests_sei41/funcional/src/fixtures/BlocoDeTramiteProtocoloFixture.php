@@ -30,4 +30,13 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
 
       return $this->objBlocoDeTramiteProtocoloDTO;
   }
+
+  protected function listar($dados = [])
+    { 
+      $this->objBlocoDeTramiteProtocoloDTO->setDblIdProtocolo($dados['IdProtocolo']);
+      $this->objBlocoDeTramiteProtocoloDTO->retTodos();
+
+      $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD($this->inicializarObjInfraIBanco());
+      return $objBlocoDeTramiteProtocoloBD->listar($this->objBlocoDeTramiteProtocoloDTO);
+  }
 }
