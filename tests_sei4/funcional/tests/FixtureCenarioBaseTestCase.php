@@ -13,7 +13,7 @@ use function PHPSTORM_META\map;
  */
 class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 {
-    protected function cadastrarProcessoFixture(&$dadosProcesso)
+    protected function cadastrarProcessoFixture(&$dadosProcesso, $cadastrarParticipante = true)
     {
 
         if (!is_null($dadosProcesso['HIPOTESE_LEGAL'])){
@@ -52,11 +52,13 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'Nome' => $parametros['Interessados']
         ]);
 
-        $objParticipanteFixture = new ParticipanteFixture();
-        $objParticipanteDTO = $objParticipanteFixture->carregar([
-            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-            'IdContato' => $objContatoDTO->getNumIdContato()
-        ]);
+        if ($cadastrarParticipante) {
+            $objParticipanteFixture = new ParticipanteFixture();
+            $objParticipanteDTO = $objParticipanteFixture->carregar([
+                'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+                'IdContato' => $objContatoDTO->getNumIdContato()
+            ]);
+        }
 
         $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
         $objProtocoloAssuntoFixture->carregar([
@@ -248,4 +250,19 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         return $objBD->consultar($serieDTO);
     }
 
+    protected function atualizarProcessoFixture($objProtocoloDTO, $dadosProcesso = [])
+    {
+        if (!is_null($dadosProcesso['DESCRICAO'])) {
+            $parametros['Descricao'] = $dadosProcesso['DESCRICAO'];
+        }
+
+        if (!is_null($dadosProcesso['INTERESSADOS'])) {
+            $parametros['Interessados'] = $dadosProcesso['INTERESSADOS'];
+        }
+
+        $parametros['IdProtocolo'] = $objProtocoloDTO->getDblIdProtocolo();
+        $objProtocoloFixture = new ProtocoloFixture();
+
+        return $objProtocoloFixture->atualizar($parametros);
+    }
 }

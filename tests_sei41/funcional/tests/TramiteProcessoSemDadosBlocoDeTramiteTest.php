@@ -28,13 +28,11 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         // Cadastrar novo processo de teste
-        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste, false);
+        $this->atualizarProcessoFixture($objProtocoloDTO, ['DESCRICAO' => '']);
 
         // Incluir e assinar documento no processo
         $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
-
-        // Limpa os campos interessados e descrição do processo
-        $this->removerDados($objProtocoloDTO->getDblIdProtocolo());
 
         $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
@@ -60,12 +58,5 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
             utf8_encode('Interessados do processo '.$objProtocoloDTO->getStrProtocoloFormatado().' não informados.'),
             $mensagem
         );
-    }
-
-    private function removerDados($idProdotocolo)
-    {
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $bancoOrgaoA->execute("update protocolo set descricao=NULL where id_protocolo=?;", array($idProdotocolo));
-        $bancoOrgaoA->execute("delete from participante where id_protocolo=?;", array($idProdotocolo));
     }
 }
