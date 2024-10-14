@@ -11,6 +11,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
 {
     public static $remetente;
     public static $destinatario;
+    public static $idsEmAndamento;
 
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
@@ -22,6 +23,15 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
      */
     public function test_validar_situacao_do_processo_no_bloco()
     {
+      self::$idsEmAndamento = [
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO        
+      ];
+
       self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
       self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
       $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -85,7 +95,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
         $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
         $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
 
-        $statusEmAndamento = in_array($objPenBlocoProcesso->getNumIdAndamento(), [1,2,3,4,5,8]);
+        $statusEmAndamento = in_array($objPenBlocoProcesso->getNumIdAndamento(), self::$idsEmAndamento);
         $this->assertTrue($statusEmAndamento);
         return true;
       }, PEN_WAIT_TIMEOUT);
