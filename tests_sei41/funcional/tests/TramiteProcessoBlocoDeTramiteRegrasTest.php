@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-
 /**
  *
  * Execution Groups
@@ -14,6 +12,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 
     public static function setUpBeforeClass():void
     {
+        parent::setUpBeforeClass();
         $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
         self::$objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
     }
@@ -36,22 +35,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
         // Cadastrar novo processo de teste
         $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
 
-        // Incluir e assinar documento no processo
-        $dadosDocumentoDTO = [
-            'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-            'IdProcedimento' => $objProtocoloDTO->getDblIdProtocolo(),
-            'Descricao' => $documentoTeste['DESCRICAO'],
-            'IdHipoteseLegal' => $documentoTeste["HIPOTESE_LEGAL"],
-            'StaNivelAcessoGlobal' => $documentoTeste["RESTRICAO"],
-            'StaNivelAcessoLocal' => $documentoTeste["RESTRICAO"],
-        ];
-
-        if ($serieDTO = $this->buscarIdSerieDoDocumento($documentoTeste['TIPO_DOCUMENTO'])) {
-            $dadosDocumentoDTO['IdSerie'] = $serieDTO->getNumIdSerie();
-        }
-
-        $objDocumentoFixture = new DocumentoFixture();
-        $objDocumentoDTO = $objDocumentoFixture->carregar($dadosDocumentoDTO);
+        $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo(), false);
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
@@ -65,7 +49,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Não é possível tramitar um processos com documentos gerados e não assinados'),
+            mb_convert_encoding('Não é possível tramitar um processos com documentos gerados e não assinados', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
@@ -105,7 +89,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Prezado(a) usuário(a), o processo ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' encontra-se bloqueado. Dessa forma, não foi possível realizar a sua inserção no bloco selecionado.'),
+            mb_convert_encoding('Prezado(a) usuário(a), o processo ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' encontra-se bloqueado. Dessa forma, não foi possível realizar a sua inserção no bloco selecionado.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
@@ -146,11 +130,11 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Não é possível tramitar um processo aberto em mais de uma unidade.'),
+            mb_convert_encoding('Não é possível tramitar um processo aberto em mais de uma unidade.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
         $this->assertStringContainsString(
-            utf8_encode('Processo ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' está aberto na(s) unidade(s): ' . self::$remetente['SIGLA_UNIDADE_SECUNDARIA']),
+            mb_convert_encoding('Processo ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' está aberto na(s) unidade(s): ' . self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
@@ -181,7 +165,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Não é possível tramitar um processo sem documentos'),
+            mb_convert_encoding('Não é possível tramitar um processo sem documentos', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
     }
