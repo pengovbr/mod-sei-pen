@@ -100,9 +100,15 @@ class PaginaTramitarProcesso extends PaginaTeste
           return true;
       }, PEN_WAIT_TIMEOUT);
 
-      sleep(1);
-      return $this->unidadeInput->value();
-  }
+        sleep(1);
+        return $this->unidadeInput->value();
+    }
+
+    public function manterAbertoNaUnidadeAtual()
+    {
+        $manterAbertoCheckBox = $this->test->byXPath("//label[@id='lblSinManterAberto']");
+        $manterAbertoCheckBox->click();
+    }
 
   public function tramitarInterno()
     {

@@ -48,6 +48,26 @@ class PaginaProcesso extends PaginaTeste
       $this->editarProcessoButton->click();
   }
 
+  public function navegarParaOrdenarDocumentos()
+  {
+    $this->test->frame(null);
+    $this->test->frame("ifrVisualizacao");
+    $button = $this->test->byXPath(mb_convert_encoding("//img[@alt='Ordenar Árvore do Processo']", 'UTF-8', 'ISO-8859-1'));
+    $button->click();
+  }
+
+  public function trocarOrdenacaoDocumentos()
+  {
+    $this->test->frame(null);
+    $this->test->frame("ifrVisualizacao");
+    
+    $this->test->byXPath("//*[@id='selRelProtocoloProtocolo']/option[1]")->click();
+    sleep(1);
+    $this->test->byXPath("//*[@id='imgRelProtocoloProtocoloAbaixo']")->click();
+    sleep(1);
+    $this->test->byXPath("//*[@id='divInfraBarraComandosSuperior']/button[@value='Salvar']")->click();
+  }
+
   public function navegarParaTramitarProcesso()
     {
       $this->test->waitUntil(function($testCase) {
@@ -234,11 +254,22 @@ class PaginaProcesso extends PaginaTeste
 
   private function listarArvoreProcesso()
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrArvore");
-      $itens = $this->test->elements($this->test->using('css selector')->value('div.infraArvore > a > span[id]'));
-      return array_map(function($item) {return $item->text();
-      }, $itens);
-  }
+        $this->test->frame(null);
+        $this->test->frame("ifrArvore");
+        $itens = $this->test->elements($this->test->using('css selector')->value('div.infraArvore > a > span[id]'));
+        return array_map(function($item) {return $item->text();
+        }, $itens);
+    }
 
+    public function validarBotaoExiste($botao)
+    {
+        try {
+            $this->test->frame(null);
+            $this->test->frame("ifrVisualizacao");
+            $botao = $this->test->byXPath("//img[@alt='$botao']");
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }

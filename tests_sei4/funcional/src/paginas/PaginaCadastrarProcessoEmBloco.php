@@ -116,6 +116,12 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
       return !empty($alerta->text()) ? $alerta->text() : "";
   }
 
+  public function buscarQuantidadeProcessosRecusados()
+  {
+    $linhasDaTabelaRecusadas = $this->test->elements($this->test->using('xpath')->value("//img[@title='Recusado']"));
+    return count($linhasDaTabelaRecusadas);
+  } 
+
   public function tramitarProcessoExternamente($repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
       // Preencher parâmetros do trâmite
@@ -214,6 +220,22 @@ class PaginaCadastrarProcessoEmBloco extends PaginaTeste
   public function bntVisualizarProcessos()
     {
       $this->test->byXPath("(//img[@title='Visualizar Processos'])[1]")->click();
+  }
+  
+  public function btnSelecionarTodosProcessos()
+  {
+    $this->test->byXPath("//*[@id='imgInfraCheck']")->click();
+  }
+
+  public function btnComandoSuperiorExcluir()
+  {
+    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Excluir"]')->click();
+    $this->test->acceptAlert();
+  }
+
+  public function btnComandoSuperiorFechar()
+  {
+    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Fechar"]')->click();
   }
 
   public function btnSalvar()
