@@ -12,10 +12,13 @@ class PaginaProcesso extends PaginaTeste
 
   public function concluirProcesso()
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $concluirProcessoButton = $this->test->byXPath("//img[@alt='Concluir Processo']");
-      $concluirProcessoButton->click();
+        $this->test->frame(null);
+        $this->test->frame("ifrConteudoVisualizacao");
+        $concluirProcessoButton = $this->test->byXPath("//img[@alt='Concluir Processo']");
+        $concluirProcessoButton->click();
+        $this->test->frame("ifrVisualizacao");
+        $confirmarConcluirProcessoButton = $this->test->byId('sbmSalvar');
+        $confirmarConcluirProcessoButton->click();
   }
 
   public function incluirDocumento()
@@ -48,6 +51,26 @@ class PaginaProcesso extends PaginaTeste
       $this->editarProcessoButton->click();
   }
 
+  public function navegarParaOrdenarDocumentos()
+  {
+    $this->test->frame(null);
+    $this->test->frame("ifrConteudoVisualizacao");
+    $button = $this->test->byXPath(mb_convert_encoding("//img[@alt='Ordenar Árvore do Processo']", 'UTF-8', 'ISO-8859-1'));
+    $button->click();
+  }
+
+  public function trocarOrdenacaoDocumentos()
+  {
+    $this->test->frame(null);
+    $this->test->frame("ifrConteudoVisualizacao");
+    $this->test->frame("ifrVisualizacao");
+    $this->test->byXPath("//*[@id='selRelProtocoloProtocolo']/option[1]")->click();
+    sleep(1);
+    $this->test->byXPath("//*[@id='imgRelProtocoloProtocoloAbaixo']")->click();
+    sleep(1);
+    $this->test->byXPath("//*[@id='divInfraBarraComandosSuperior']/button[@value='Salvar']")->click();
+  }
+  
   public function navegarParaTramitarProcesso()
     {
       $this->test->waitUntil(function($testCase) {
@@ -251,4 +274,16 @@ class PaginaProcesso extends PaginaTeste
       }, $itens);
   }
 
+  public function validarBotaoExiste($botao)
+  {
+    try {
+        $this->test->frame(null);
+        $this->test->frame("ifrConteudoVisualizacao");
+        $botao = $this->test->byXPath("//img[@alt='$botao']");
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
+  }
+  
 }

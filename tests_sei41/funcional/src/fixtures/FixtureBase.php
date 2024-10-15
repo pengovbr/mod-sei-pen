@@ -75,4 +75,22 @@ abstract class FixtureBase extends \InfraRN
           'callback' => $callback
       ]);
   }
+
+  public function atualizarInternoControlado($parametros){
+      $dto = $this->alterar($parametros["dados"]);
+
+    if (isset($parametros["callback"])) {
+        $parametros["callback"]($dto);
+    }
+
+      return $dto;
+  }
+
+  public function atualizar($dados = null, $callback = null){
+      $dados = $dados ?: [];
+      return $this->atualizarInterno([
+          'dados' => $dados,
+          'callback' => $callback
+      ]);
+  }
 }
