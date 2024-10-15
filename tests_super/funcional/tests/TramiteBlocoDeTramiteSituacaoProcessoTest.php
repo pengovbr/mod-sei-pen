@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-
 /**
  *
  * Execution Groups
@@ -49,9 +47,6 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
         'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
         'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
       ]);
-
-      $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(1, $objProtocoloDTO->getDblIdProtocolo()));
 
       $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
