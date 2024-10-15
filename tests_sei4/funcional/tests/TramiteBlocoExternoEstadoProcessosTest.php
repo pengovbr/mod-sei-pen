@@ -3,7 +3,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteBlocoExternoEstadoProcessos extends FixtureCenarioBaseTestCase
+class TramiteBlocoExternoEstadoProcessosTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;

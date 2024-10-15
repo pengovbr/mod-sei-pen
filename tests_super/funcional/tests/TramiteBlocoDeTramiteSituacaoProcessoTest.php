@@ -1,7 +1,5 @@
 <?php
 
-use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture,ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture,DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-
 /**
  *
  * Execution Groups
@@ -50,9 +48,6 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
         'IdBloco' => $objBlocoDeTramiteDTO->getNumId()
       ]);
 
-      $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-      $bancoOrgaoA->execute("update md_pen_bloco_processo set id_andamento=? where id_protocolo=?;", array(1, $objProtocoloDTO->getDblIdProtocolo()));
-
       $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
@@ -86,16 +81,12 @@ class TramiteBlocoDeTramiteSituacaoProcessoTest extends FixtureCenarioBaseTestCa
         $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
         $this->assertEquals("Aguardando Processamento", $colunaEstado[0]->text());
         
-        $objPenBlocoProcessoDTO = new \PenBlocoProcessoDTO();
-        $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
-        $objPenBlocoProcessoDTO->retNumIdAndamento();
-        $objPenBlocoProcessoDTO->retStrUnidadeDestino();
-        $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
+        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+        $objBlocoDeTramiteProtocoloFixtureDTO = $objBlocoDeTramiteProtocoloFixture->buscar([
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo()
+        ])[0];
 
-        $objBD = new \PenBlocoProcessoBD(\BancoSEI::getInstance());
-        $objPenBlocoProcesso = $objBD->consultar($objPenBlocoProcessoDTO);
-
-        $statusEmAndamento = in_array($objPenBlocoProcesso->getNumIdAndamento(), self::$idsEmAndamento);
+        $statusEmAndamento = in_array($objBlocoDeTramiteProtocoloFixtureDTO->getNumIdAndamento(), self::$idsEmAndamento);
         $this->assertTrue($statusEmAndamento);
         return true;
       }, PEN_WAIT_TIMEOUT);

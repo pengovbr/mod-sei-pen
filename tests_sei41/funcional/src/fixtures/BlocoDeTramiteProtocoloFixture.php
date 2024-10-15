@@ -52,4 +52,34 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
       $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD($this->inicializarObjInfraIBanco());
       return $objBlocoDeTramiteProtocoloBD->listar($this->objBlocoDeTramiteProtocoloDTO);
   }
+
+  protected function alterar($dados = [])
+  {
+    
+    $objBlocoDeTramiteProtocoloDTO = $this->listar($dados)[0];
+
+    $objBlocoDeTramiteProtocoloDTO->setNumIdBloco($dados['IdBloco'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdBloco());
+    $objBlocoDeTramiteProtocoloDTO->setNumSequencia($dados['Sequencia'] ?: $objBlocoDeTramiteProtocoloDTO->getNumSequencia());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdUsuario($dados['IdUsuario'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdUsuario());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdUnidade($dados['IdUnidade'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdUnidade());
+    $dthRegistro = date('d/m/Y H:i:s');
+    $objBlocoDeTramiteProtocoloDTO->setDthRegistro($dados['DthRegistro'] ?: $objBlocoDeTramiteProtocoloDTO->getDthRegistro());
+    $objBlocoDeTramiteProtocoloDTO->setDthAtualizado($dados['DthAtualizado'] ?: $dthRegistro);
+
+    $objBlocoDeTramiteProtocoloDTO->setNumIdAndamento($dados['IdAndamento'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdAndamento());
+    $objBlocoDeTramiteProtocoloDTO->setStrUnidadeDestino($dados['UnidadeDestino'] ?: $objBlocoDeTramiteProtocoloDTO->getStrUnidadeDestino());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdUnidadeOrigem($dados['IdUnidadeOrigem'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdUnidadeOrigem());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdUnidadeDestino($dados['IdUnidadeDestino'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdUnidadeDestino());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdAtividade($dados['IdAtividade'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdAtividade());
+
+    $objBlocoDeTramiteProtocoloDTO->setNumIdRepositorioOrigem($dados['IdRepositorioOrigem'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdRepositorioOrigem());
+    $objBlocoDeTramiteProtocoloDTO->setNumIdRepositorioDestino($dados['IdRepositorioDestino'] ?: $objBlocoDeTramiteProtocoloDTO->getNumIdRepositorioDestino());
+    $objBlocoDeTramiteProtocoloDTO->setDthEnvio($dados['Envio'] ?: $objBlocoDeTramiteProtocoloDTO->getDthEnvio());
+
+    $objBlocoDeTramiteProtocoloDTO->setStrRepositorioDestino($dados['RepositorioDestino'] ?: $objBlocoDeTramiteProtocoloDTO->getStrRepositorioDestino());
+    
+    $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD($this->inicializarObjInfraIBanco());
+    return $objBlocoDeTramiteProtocoloBD->alterar($objBlocoDeTramiteProtocoloDTO);
+  }
+
 }

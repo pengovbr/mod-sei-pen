@@ -267,13 +267,13 @@ class PaginaProcesso extends PaginaTeste
 
   public function validarBotaoExiste($botao)
   {
-      try {
-          $this->test->frame(null);
-          $this->test->frame("ifrVisualizacao");
-          $botao = $this->test->byXPath("//img[@alt='$botao']");
-          return true;
-      } catch (\Exception $e) {
-          return false;
-      }
+    try {
+        $this->test->frame(null);
+        $this->test->frame("ifrVisualizacao");
+        $botao = $this->test->byXPath("//img[@alt='$botao']");
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
   }
 }

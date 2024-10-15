@@ -15,11 +15,11 @@ class PaginaProcesso extends PaginaTeste
         $this->test->frame(null);
         $this->test->frame("ifrConteudoVisualizacao");
         $concluirProcessoButton = $this->test->byXPath("//img[@alt='Concluir Processo']");
-    	$concluirProcessoButton->click();
+        $concluirProcessoButton->click();
         $this->test->frame("ifrVisualizacao");
         $confirmarConcluirProcessoButton = $this->test->byId('sbmSalvar');
-    	$confirmarConcluirProcessoButton->click();
-    }
+        $confirmarConcluirProcessoButton->click();
+  }
 
   public function incluirDocumento()
     {
@@ -276,14 +276,14 @@ class PaginaProcesso extends PaginaTeste
 
   public function validarBotaoExiste($botao)
   {
-      try {
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-          $botao = $this->test->byXPath("//img[@alt='$botao']");
-          return true;
-      } catch (\Exception $e) {
-          return false;
-      }
+    try {
+        $this->test->frame(null);
+        $this->test->frame("ifrConteudoVisualizacao");
+        $botao = $this->test->byXPath("//img[@alt='$botao']");
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
   }
   
 }

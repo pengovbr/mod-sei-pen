@@ -79,9 +79,9 @@ abstract class FixtureBase extends \InfraRN
   public function atualizarInternoControlado($parametros){
       $dto = $this->alterar($parametros["dados"]);
 
-      if (isset($parametros["callback"])) {
-          $parametros["callback"]($dto);
-      }
+    if (isset($parametros["callback"])) {
+        $parametros["callback"]($dto);
+    }
 
       return $dto;
   }

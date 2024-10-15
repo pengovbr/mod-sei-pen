@@ -102,13 +102,13 @@ class PaginaTramitarProcesso extends PaginaTeste
 
         sleep(1);
         return $this->unidadeInput->value();
-    }
+  }
 
-    public function manterAbertoNaUnidadeAtual()
+  public function manterAbertoNaUnidadeAtual()
     {
-        $manterAbertoCheckBox = $this->test->byXPath("//label[@id='lblSinManterAberto']");
-        $manterAbertoCheckBox->click();
-    }
+      $manterAbertoCheckBox = $this->test->byXPath("//label[@id='lblSinManterAberto']");
+      $manterAbertoCheckBox->click();
+  }
 
   public function tramitarInterno()
     {
