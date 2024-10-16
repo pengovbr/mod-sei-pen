@@ -2802,7 +2802,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     // Criação da tabela restrição
     $objMetaRestricaoBD = $this->objMeta;
     $SNULLO = BancoSEI::getInstance() instanceof InfraPostgreSql ? 'null' : PenMetaBD::SNULLO;
-
+ 
     // Remoção de coluna sin_padrao da tabela md_pen_rel_doc_map_enviado
     $this->logar("CRIANDO TABELA DE CONFIGURACAO PARA RESTRICAO ");
     $objMetaRestricaoBD->criarTabela(array(
@@ -2821,11 +2821,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         'unidade' => array('id_unidade', 'id_unidade')
       )
     ));
-
-    // Criando nova sequência 
+ 
+    // Criando nova sequência
     $objInfraSequenciaRestricaoRN = new InfraSequenciaRN();
     $objInfraSequenciaRestricaoDTO = new InfraSequenciaDTO();
-
+ 
     //Sequência: md_pen_seq_hipotese_legal
     $rs = BancoSEI::getInstance()->consultarSql('select max(id) as total from md_pen_uni_restr');
     $numMaxId = $rs[0]['total'];
@@ -2837,12 +2837,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaRestricaoDTO->retStrNome();
     $arrObjInfraSequenciaRestricaoDTO = $objInfraSequenciaRestricaoRN->listar($objInfraSequenciaRestricaoDTO);
     $objInfraSequenciaRestricaoRN->excluir($arrObjInfraSequenciaRestricaoDTO);
-
+ 
     // FIM da Criação da tabela restrição
-
+ 
     $objMetaBD = $this->objMeta;
     $objInfraBanco = BancoSEI::getInstance();
-
+ 
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasPEN");
@@ -2853,7 +2853,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN = $objInfraAgendamentoTarefaBD->consultar($objReceberProcessosPEN);
       $objInfraAgendamentoTarefaBD->excluir($objReceberProcessosPEN);
     }
-
+ 
     // Alterar colunas em md_pen_expedir_lote
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_repositorio_destino', $objMetaBD->tipoNumero(), $SNULLO);
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_repositorio_destino', $objMetaBD->tipoTextoVariavel(250), $SNULLO);
@@ -2863,7 +2863,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'str_unidade_destino', $objMetaBD->tipoTextoVariavel(250), $SNULLO);
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_usuario', $objMetaBD->tipoNumero(), $SNULLO);
     $objMetaBD->alterarColuna('md_pen_expedir_lote', 'id_unidade', $objMetaBD->tipoNumero(), $SNULLO);
-
+ 
     // Alterar id da tabela    
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
     try {
@@ -2873,19 +2873,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         throw $e;
       }
     }
-
-    // Adicionar coluna de atualização do registro
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_atualizado', $objMetaBD->tipoDataHora(), $SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'dth_envio', $objMetaBD->tipoDataHora(), $SNULLO);
-
-    // Adicionar campos extrar para a tabela md_pen_expedir_lote
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_protocolo', $objMetaBD->tipoNumeroGrande(10), PenMetaBD::NNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_bloco', $objMetaBD->tipoNumero(10), $SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'sequencia', $objMetaBD->tipoNumero(10), $SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_andamento', $objMetaBD->tipoNumero(11), $SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'id_atividade_expedicao', $objMetaBD->tipoTextoVariavel(4000), $SNULLO);
-    $objMetaBD->adicionarColuna('md_pen_expedir_lote', 'tentativas', $objMetaBD->tipoNumero(), $SNULLO);
-
+ 
     $this->excluirChaveEstrangeira("md_pen_expedir_lote", "fk_bloco_protocolo", true);
     $this->excluirChaveEstrangeira("md_pen_rel_expedir_lote", "fk_md_pen_rel_expedir_lote", true);
     $this->excluirChaveEstrangeira("md_pen_bloco_protocolo", "fk_bloco_protocolo", true);
@@ -2896,13 +2884,10 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         throw $e;
       }
     }
-
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_proc_procedi", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
-    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bl", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
-
+ 
     $objInfraSequenciaRN = new InfraSequenciaRN();
     $objInfraSequenciaDTO = new InfraSequenciaDTO();
-
+ 
     //Sequência: md_pen_seq_lote
     $rs = BancoSEI::getInstance()->consultarSql('select max(id_bloco_processo) as total from md_pen_bloco_processo');
     $numMaxId = isset($rs[0]['total']) ? $rs[0]['total'] : 0;
@@ -2911,25 +2896,38 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $objInfraSequenciaDTO->retStrNome();
     $arrObjInfraSequenciaDTO = $objInfraSequenciaRN->listar($objInfraSequenciaDTO);
     $objInfraSequenciaRN->excluir($arrObjInfraSequenciaDTO);    
-
+ 
     // Atualizar md_pen_bloco_processo->ordem para 1
-    $objInfraBanco->executarSql('delete from md_pen_bloco_processo');   
-
-    $objMetaBD->alterarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
-
+    $objInfraBanco->executarSql('delete from md_pen_bloco_processo');  
+ 
     // Excluir bloco legados
     $this->limparBlocos();
-
-    //Adicionar coluna para ordenar blocos por unidade 
+ 
+    // Adicionar coluna de atualização do registro
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'dth_atualizado', $objMetaBD->tipoDataHora(), $SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'dth_envio', $objMetaBD->tipoDataHora(), $SNULLO);
+ 
+    // Adicionar campos extrar para a tabela md_pen_bloco_processo
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'id_protocolo', $objMetaBD->tipoNumeroGrande(10), PenMetaBD::NNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'id_bloco', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'sequencia', $objMetaBD->tipoNumero(10), $SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'id_andamento', $objMetaBD->tipoNumero(11), $SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'id_atividade_expedicao', $objMetaBD->tipoTextoVariavel(4000), $SNULLO);
+    $objMetaBD->adicionarColuna('md_pen_bloco_processo', 'tentativas', $objMetaBD->tipoNumero(), $SNULLO);
+   
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_proc_procedi", "md_pen_bloco_processo", array('id_protocolo'), "protocolo", array('id_protocolo'), false);
+    $objMetaBD->adicionarChaveEstrangeira("fk_md_pen_bloco_processo_bl", "md_pen_bloco_processo", array('id_bloco'), "md_pen_bloco", array('id'), false);
+ 
+    //Adicionar coluna para ordenar blocos por unidade
     $objMetaBD->adicionarColuna('md_pen_bloco', 'ordem', $objMetaBD->tipoNumero(10), PenMetaBD::NNULLO);
-
+ 
     $tabelas = ['md_pen_bloco_protocolo',
                 'md_pen_seq_bloco_protocolo',
                 'md_pen_rel_expedir_lote',
                 'md_pen_seq_expedir_lote'];
-
+ 
     $this->removerTabelas($tabelas);
-
+ 
     // Adicionar agendamento de atualização de informações de envio
     $objInfraAgendamentoTarefaBD = new InfraAgendamentoTarefaBD(BancoSEI::getInstance());
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
@@ -2946,7 +2944,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN->setStrSinSucesso("S");
       $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
     }
-
+ 
     $objReceberProcessosPEN = new InfraAgendamentoTarefaDTO();
     $objReceberProcessosPEN->setStrComando("PENAgendamentoRN::processarTarefasRecebimentoPEN");
     if ($objInfraAgendamentoTarefaBD->contar($objReceberProcessosPEN)  == 0) {
@@ -2962,9 +2960,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $objReceberProcessosPEN->setStrSinSucesso("S");
       $objInfraAgendamentoTarefaBD->cadastrar($objReceberProcessosPEN);
     }
-
+ 
     $this->atualizarHipotesesLegais();
-
+ 
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_estrutura_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
     BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_estrutura_novo = str_estrutura");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_estrutura');
@@ -2975,7 +2973,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         throw $e;
       }
     }
-
+ 
     $objMetaBD->adicionarColuna('md_pen_envio_comp_digitais', 'str_unidade_pen_novo', $objMetaBD->tipoTextoVariavel(255), 'null');
     BancoSEI::getInstance()->executarSql("update md_pen_envio_comp_digitais set str_unidade_pen_novo = str_unidade_pen");
     $objMetaBD->excluirColuna('md_pen_envio_comp_digitais', 'str_unidade_pen');
@@ -2986,7 +2984,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         throw $e;
       }
     }
-    
+   
     $this->atualizarNumeroVersao("3.7.0");
   }
 
