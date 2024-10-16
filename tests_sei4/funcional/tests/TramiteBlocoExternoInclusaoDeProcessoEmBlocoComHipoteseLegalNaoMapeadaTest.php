@@ -49,7 +49,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
           'HIPOTESE_LEGAL' => 'Hipotese Legal Recusa Processo',
           'HIPOTESE_LEGAL_BASE_LEGAL' => 'Base Hipotese Legal Recusa Processo'
         ]);
-        $processoTeste["HIPOTESE_LEGAL"] = 'Hipotese Legal Recusa Processo (Base Hipotese Legal Recusa Processo)';
+        $processoTeste["HIPOTESE_LEGAL"] = $objHipoteseLegalDTO->getStrNome(). '('. $objHipoteseLegalDTO->getStrBaseLegal().')';
         $processoTeste["RESTRICAO"] = PaginaIniciarProcesso::STA_NIVEL_ACESSO_RESTRITO;
 
         // Cadastro do processo e documento
@@ -124,7 +124,8 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
           'HIPOTESE_LEGAL' => 'Hipotese Legal Recusa Documento',
           'HIPOTESE_LEGAL_BASE_LEGAL' => 'Base Hipotese Legal Recusa Documento'
         ]);
-        $documentoTeste["HIPOTESE_LEGAL"] = $objHipoteseLegalDTO->getNumIdHipoteseLegal();
+
+        $documentoTeste["HIPOTESE_LEGAL"] = $objHipoteseLegalDTO->getStrNome(). '('. $objHipoteseLegalDTO->getStrBaseLegal().')';
         $documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO;
 
         // Cadastro do documento restrito

@@ -31,7 +31,7 @@ class TramiteProcessoComDocumentoRestritoHipotesePadraoTest extends FixtureCenar
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         // Configuração de documento restrito
-        self::$documentoTeste["RESTRICAO"] = PaginaIncluirDocumento::STA_NIVEL_ACESSO_RESTRITO;
+        self::$documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO;
         self::$documentoTeste["HIPOTESE_LEGAL"] = self::$remetente["HIPOTESE_RESTRICAO_NAO_MAPEADO"];
       
         $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);

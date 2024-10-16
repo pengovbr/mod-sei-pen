@@ -75,7 +75,7 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
         $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $bancoOrgaoA->execute("update protocolo set sta_estado=? where id_protocolo=?;", array(4, $objProtocoloDTO->getDblIdProtocolo()));
+        $bancoOrgaoA->execute("update protocolo set sta_estado=? where id_protocolo=?", array(4, $objProtocoloDTO->getDblIdProtocolo()));
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);

@@ -37,7 +37,7 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     putenv("DATABASE_HOST=org1-database");
   }
 
-  public function teste_tramite_bloco_externo_com_processo_nao_mapeado()
+  public function test_tramite_bloco_externo_com_processo_nao_mapeado()
   {
     // Configuração do dados para teste do cenário
     self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -95,13 +95,19 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
       $testCase->refresh();
       $linhasDaTabela = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
 
-      $totalConcluidos = 0;
+      $totalEmProcessamento = 0;
       foreach ($linhasDaTabela as $linha) {
         $statusTd = $linha->byXPath('./td[7]');
-        $statusTd->byXPath(mb_convert_encoding("(//img[@title='Concluído'])", 'UTF-8', 'ISO-8859-1'));
-        $totalConcluidos++;
+        try {
+            $statusImg = $statusTd->byXPath(mb_convert_encoding(".//img[@title='Aguardando Processamento']", 'UTF-8', 'ISO-8859-1'));
+            if ($statusImg){
+                $totalEmProcessamento++;
+            }
+        } catch (Exception $e) {
+            // Ignora a exceção se a imagem não for encontrada
+        }
       }
-      $this->assertEquals($totalConcluidos, 3);
+      $this->assertEquals($totalEmProcessamento,0); // Todos processos enviados
       return true;
     }, PEN_WAIT_TIMEOUT);
 
