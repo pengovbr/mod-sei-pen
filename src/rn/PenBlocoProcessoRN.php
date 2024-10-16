@@ -443,6 +443,18 @@ class PenBlocoProcessoRN extends InfraRN
     return false;
   }
 
+  public function validarBlocosEmAndamento()
+  {
+    $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+    $tramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
+    $tramiteEmBlocoDTO->retNumId();
+    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+    $arrTramiteEmBloco = $objTramiteEmBlocoRN->listar($tramiteEmBlocoDTO);
+    foreach ($arrTramiteEmBloco as $blocoDTO) {
+      $this->atualizarEstadoDoBloco($blocoDTO->getNumId());
+    }
+  } 
+
   /**
    * Atualizar Bloco  de tramite externo para concluído
    *

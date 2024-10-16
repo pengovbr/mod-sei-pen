@@ -128,6 +128,13 @@ class PendenciasTramiteRN extends InfraRN
         return self::CODIGO_EXECUCAO_ERRO;
     }
 
+    try {      
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();      
+      $objPenBlocoProcessoRN->validarBlocosEmAndamento();    
+    } catch(Exception $e) {        
+      $this->gravarLogDebug(InfraException::inspecionar($e));    
+    }
+    
       // Caso não esteja sendo realizado o monitoramente de pendências, lança exceção diretamente na página para apresentação ao usuário
     if(!$parBolMonitorarPendencias){
         $this->salvarLogDebug($parBolDebug);
