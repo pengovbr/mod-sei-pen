@@ -46,7 +46,7 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
 
     self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);  // Cadastrar novo processo de teste
     self::$documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito
-    self::$documentoTeste["HIPOTESE_LEGAL"] =  self::$remetente["HIPOTESE_RESTRICAO_ID"] ?: 3; // Configurar Hipotese legal
+    self::$documentoTeste["HIPOTESE_LEGAL"] = self::$remetente["HIPOTESE_RESTRICAO"]; // Configurar Hipotese legal
     $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, self::$protocoloTeste->getDblIdProtocolo()); // Incluir Documentos no Processo
 
     $this->paginaBase->navegarParaControleProcesso();

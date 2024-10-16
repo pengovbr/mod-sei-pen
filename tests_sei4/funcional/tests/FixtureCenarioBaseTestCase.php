@@ -16,12 +16,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
     protected function cadastrarProcessoFixture(&$dadosProcesso, $cadastrarParticipante = true)
     {
         if (!is_null($dadosProcesso['HIPOTESE_LEGAL'])){
-            $param = [
-                'Nome' => trim(explode('(',$dadosProcesso['HIPOTESE_LEGAL'])[0]),
-                'BaseLegal' => explode(')',trim(explode('(',$dadosProcesso['HIPOTESE_LEGAL'])[1]))[0]
-            ];
-            $objHipLegalFixture = new HipoteseLegalFixture();
-            $objHipLegalDTO = $objHipLegalFixture->buscar($param)[0];
+            $objHipLegalDTO = $this->buscarHipoteseLegal($dadosProcesso);
         }
 
         $parametros = [
@@ -79,14 +74,28 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         return $objProtocoloDTO;
     }
 
+    protected function buscarHipoteseLegal($dados)
+    {
+        $param = [
+            'Nome' => trim(explode('(',$dados['HIPOTESE_LEGAL'])[0]),
+            'BaseLegal' => explode(')',trim(explode('(',$dados['HIPOTESE_LEGAL'])[1]))[0]
+        ];
+        $objHipLegalFixture = new HipoteseLegalFixture();     
+        return $objHipLegalFixture->buscar($param)[0];
+    }
+
     protected function cadastrarDocumentoInternoFixture($dadosDocumentoInterno, $idProtocolo, $assinarDocumento = true)
     {
+
+        if (!is_null($dadosDocumentoInterno['HIPOTESE_LEGAL'])){
+            $objHipLegalDTO = $this->buscarHipoteseLegal($dadosDocumentoInterno);
+        }
 
         $dadosDocumentoDTO = [
             'IdProtocolo' => $idProtocolo,
             'IdProcedimento' => $idProtocolo,
             'Descricao' => $dadosDocumentoInterno['DESCRICAO'],
-            'IdHipoteseLegal' => $dadosDocumentoInterno["HIPOTESE_LEGAL"] ?: null,
+            'IdHipoteseLegal' => $dadosDocumentoInterno["HIPOTESE_LEGAL"] ? $objHipLegalDTO->getNumIdHipoteseLegal() : null,
             'StaNivelAcessoGlobal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
             'StaNivelAcessoLocal' => $dadosDocumentoInterno["RESTRICAO"] ?: \ProtocoloRN::$NA_PUBLICO,
             'IdUnidadeResponsavel' => $dadosDocumentoInterno["UNIDADE_RESPONSAVEL"] ?: null

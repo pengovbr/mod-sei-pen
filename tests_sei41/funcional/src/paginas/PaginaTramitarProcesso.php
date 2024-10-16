@@ -118,7 +118,7 @@ class PaginaTramitarProcesso extends PaginaTeste
 
   public function alertTextAndClose($confirm = true)
     {
-      sleep(5);
+      sleep(10);
       $result = $this->test->alertText();
       $result = (!is_array($result) ? $result : null);
 
