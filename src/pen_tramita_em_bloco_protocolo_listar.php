@@ -81,9 +81,6 @@ try {
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
-  $arrComandos = array();
-  $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';
-  $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
   $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
   $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
@@ -359,21 +356,6 @@ $idBloco=$_GET['id_bloco']; ?>
       console.log(link)
     if (confirm('Confirma a cancelamento do trâmite "' + strTipoDocumento + '"?')) {
         window.location = url;
-    }
-  }
-
-  function onClickBtnTramitarProcessos() {
-    try {
-      var len = jQuery('input[name*=chkInfraItem]:checked').length;
-      if (len > 0) {
-        var form = jQuery('#frmLoteListar');
-        form.attr('action', '<?php print $objSessaoSEI->assinarLink('controlador.php?acao=pen_expedir_bloco&acao_origem=pen_tramita_em_bloco_protocolo_listar&acao_retorno=pen_tramita_em_bloco_protocolo_listar&tramite_em_bloco=1'); ?>');
-        form.submit();
-      } else {
-        alert('Selecione pelo menos um processo');
-      }
-    } catch (e) {
-      alert('Erro : ' + e.message);
     }
   }
 
