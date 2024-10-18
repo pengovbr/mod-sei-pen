@@ -2,6 +2,7 @@
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
+# Opçoes possíveis para base: mysql, sqlserver, oracle, postgresql
 sistema=super
 base=mysql
 teste=
@@ -189,10 +190,10 @@ destroy: .env
 down: .env
 	$(CMD_COMPOSE_FUNC) stop
 
-
 # make teste=TramiteProcessoComDevolucaoTest test-functional
+# make textdox="--textdox" test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml $(textdox) /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up

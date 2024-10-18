@@ -116,6 +116,10 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
     $penUnidadeRestricaoFixture = new \PenUnidadeRestricaoFixture();
     $penUnidadeRestricaoFixture->remover([
       'NomeUnidadeRestricao' => self::$remetente['REP_ESTRUTURAS'],
+      'NomeUnidadeRHRestricao' => self::$remetente['NOME_UNIDADE'] . ' - ' . self::$remetente['SIGLA_ESTRUTURA']
+    ]);
+    $penUnidadeRestricaoFixture->remover([
+      'NomeUnidadeRestricao' => self::$remetente['REP_ESTRUTURAS'],
       'NomeUnidadeRHRestricao' => self::$remetente['NOME_UNIDADE']
     ]);
   }

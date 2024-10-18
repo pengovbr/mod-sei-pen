@@ -160,7 +160,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
         
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -187,7 +188,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     {
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
@@ -223,7 +225,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
         $strProtocoloTeste = self::$protocoloTestePrincipal;
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
 
         $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
@@ -288,7 +291,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
 
         putenv("DATABASE_HOST=org1-database");
 
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -315,7 +319,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     {
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
@@ -348,7 +353,8 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTestePrincipal);
 
         $this->validarDadosProcesso(
             self::$processoTestePrincipal['DESCRICAO'],

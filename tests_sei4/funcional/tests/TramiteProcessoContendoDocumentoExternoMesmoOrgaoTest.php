@@ -47,7 +47,8 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends FixtureCenar
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTeste);
+        // Abrir processo por pesquisa
+        $this->paginaBase->pesquisar(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
