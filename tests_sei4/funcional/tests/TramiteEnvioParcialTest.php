@@ -132,6 +132,8 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
+    sleep(5);
+
     $this->tramitarProcessoExternamente(
       self::$protocoloTestePrincipal,
       self::$remetente['REP_ESTRUTURAS'],
