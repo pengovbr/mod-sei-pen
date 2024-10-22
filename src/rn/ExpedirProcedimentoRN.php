@@ -3066,28 +3066,18 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
       $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->consultar($objPenBlocoProcessoDTO);
-      $cancelarLote=false;
 
-      if(!is_null($objPenBlocoProcessoDTO)){
-        $cancelarLote=true;
-      }
+      $objTramiteDTO = new TramiteDTO();
+      $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
+      $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+      $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+      $objTramiteDTO->retNumIdTramite();
 
-      if(!$cancelarLote){
+      $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+      $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-        $objTramiteDTO = new TramiteDTO();
-        $objTramiteDTO->setNumIdProcedimento($objDtoProtocolo->getDblIdProtocolo());
-        $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
-        $objTramiteDTO->setOrd('Registro', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-        $objTramiteDTO->retNumIdTramite();
-
-        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
-        $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-
-        if(!isset($objTramiteDTO)){
-          throw new InfraException("Trâmite não encontrado para o processo {$objDtoProtocolo->getDblIdProtocolo()}.");
-        }
-
+      if(isset($objTramiteDTO)) {
         $tramites = $this->objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite(), null, $objPenUnidadeDTO->getNumIdUnidadeRH(), null, null, $numIdRespositorio);
         $tramite = $tramites ? $tramites[0] : null;
 
@@ -3132,7 +3122,8 @@ class ExpedirProcedimentoRN extends InfraRN {
           break;
         }
 
-        //Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
+        // Solicitação de cancelamento de tramite de processo ao TramitaGOV.br
+        // Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
         if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
           $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
         }
@@ -3150,7 +3141,8 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objPenBlocoProcessoRN->alterar($objPenBlocoProcessoDTO);
       }
 
-      if(!$cancelarLote){
+      // Cancelmento de tramite do processo no MOD_PEN
+      if(isset($objTramiteDTO)){
         $objDTOFiltro = new TramiteDTO();
         $objDTOFiltro->setNumIdTramite($tramite->IDT);
         $objDTOFiltro->setNumMaxRegistrosRetorno(1);
