@@ -23,10 +23,10 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
 
         // Altera status de qualquer Bloco aberto
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $bancoOrgaoA->execute("update md_pen_bloco set sta_estado=? where sta_estado=?;", array('C', 'A'));
+        $bancoOrgaoA->execute("update md_pen_bloco set sta_estado=? where sta_estado=?", array('C', 'A'));
 
         // Limpa os mapeamentos de unidade
-        $bancoOrgaoA->execute("delete from md_pen_unidade;", array());
+        $bancoOrgaoA->execute("delete from md_pen_unidade", array());
     }      
         
     public static function tearDownAfterClass() :void {
