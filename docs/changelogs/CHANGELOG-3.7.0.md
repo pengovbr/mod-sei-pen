@@ -30,7 +30,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * **Visualização de Hipóteses Legais:** Hipóteses Legais desativadas no Portal de Administração não serão exibidas ao criar um novo mapeamento [#354](https://github.com/pengovbr/mod-sei-pen/issues/354);
 
-* Acesso ao envio por bloco: o script de atualização do SIP foi alterado para assegurar que as funcionalidades de envio por bloco estejam disponíveis para usuários com permissões de perfil Básico [#523](https://github.com/pengovbr/mod-sei-pen/issues/523) e [#542](https://github.com/pengovbr/mod-sei-pen/issues/542);
+* **Acesso ao envio por bloco:** o script de atualização do SIP foi alterado para assegurar que as funcionalidades de envio por bloco estejam disponíveis para usuários com permissões de perfil Básico [#523](https://github.com/pengovbr/mod-sei-pen/issues/523) e [#542](https://github.com/pengovbr/mod-sei-pen/issues/542);
 
 #### **MELHORIAS**
 
@@ -48,7 +48,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * Remoção do ícone de organograma na tela de envio de trâmite externo e envio de bloco de trâmite exteno [#540](https://github.com/pengovbr/mod-sei-pen/issues/540);
 
-* **Ajuste no menu:** Tela Processos Tramitados em Lote removida e melhoria no layout da tela Processos em Tramitação Externa [#475](https://github.com/pengovbr/mod-sei-pen/issues/475);
+* **Ajuste no menu:** Tela _Processos Tramitados em Lote_ removida e melhoria no layout da tela _Processos em Tramitação Externa_ [#475](https://github.com/pengovbr/mod-sei-pen/issues/475);
 
 * **Blocos de Trâmite Externo:**
   - Mensagem aprimirada após o envio de um bloco [#435](https://github.com/pengovbr/mod-sei-pen/issues/435);
