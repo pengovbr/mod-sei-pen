@@ -24,7 +24,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * Tramitação de processos com caracteres inválidos no assunto [#328](https://github.com/pengovbr/mod-sei-pen/issues/328);
 
-* **Atualização do script de instalação/atualização:** a variável  EnviarApenasComponentesDigitaisPendentes" é inserida automaticamente no arquivo de configuração do módulo. Essa variável tornou-se obrigatória a partir desta versão [#527](https://github.com/pengovbr/mod-sei-pen/issues/527);
+* **Atualização do script de instalação/atualização:** a variável  "EnviarApenasComponentesDigitaisPendentes" é inserida automaticamente no arquivo de configuração do módulo. Essa variável tornou-se obrigatória a partir desta versão [#527](https://github.com/pengovbr/mod-sei-pen/issues/527);
 
 * Implementação uma regra que impede a inclusão de novas assinaturas em documentos já tramitados, evitando problemas de hash nos trâmites [#333](https://github.com/pengovbr/mod-sei-pen/issues/333);
 
