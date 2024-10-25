@@ -18,47 +18,45 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
-#### Correções de problemas
+#### **CORREÇÕES DE PROBLEMAS**
 
 #### Nesta versão, foram corrigidos os seguintes erros:
 
-Tramitação de processos com caracteres inválidos no assunto (#328);
+* Tramitação de processos com caracteres inválidos no assunto (#328);
 
-Atualização do script de instalação/atualização: a variável  EnviarApenasComponentesDigitaisPendentes" é inserida automaticamente no arquivo de configuração do módulo. Essa variável tornou-se obrigatória a partir desta versão (#527);
+* **Atualização do script de instalação/atualização:** a variável  EnviarApenasComponentesDigitaisPendentes" é inserida automaticamente no arquivo de configuração do módulo. Essa variável tornou-se obrigatória a partir desta versão (#527);
 
-Implementação uma regra que impede a inclusão de novas assinaturas em documentos já tramitados, evitando problemas de hash nos trâmites (#333);
+* Implementação uma regra que impede a inclusão de novas assinaturas em documentos já tramitados, evitando problemas de hash nos trâmites (#333);
 
-Visualização de Hipóteses Legais: legais: hipóteses legais desativadas no Portal de Administração não serão exibidas ao criar um novo mapeamento (#354);
+* **Visualização de Hipóteses Legais:** Hipóteses Legais desativadas no Portal de Administração não serão exibidas ao criar um novo mapeamento (#354);
 
-Acesso ao envio por bloco: o script de atualização do SIP foi alterado para assegurar que as funcionalidades de envio por bloco estejam disponíveis para usuários com permissões de perfil Básico (#523 e #542);
+* Acesso ao envio por bloco: o script de atualização do SIP foi alterado para assegurar que as funcionalidades de envio por bloco estejam disponíveis para usuários com permissões de perfil Básico (#523 e #542);
 
-#### Melhorias
+#### **MELHORIAS**
 
 #### As melhorias implementadas nesta versão incluem:
 
-Verificação de tamanho de componentes digitais: antes de iniciar o download, o sistema agora verifica, pelos metadados, se o tamanho das componentes digitais é aceito no SPE de destino (#155);
+* **Verificação de tamanho de componentes digitais:** antes de iniciar o download, o sistema agora verifica, pelos metadados, se o tamanho das componentes digitais é aceito no SPE de destino (#155);
 
-Mapeamento Automático de Hipóteses Legais (#350);
+* Mapeamento Automático de Hipóteses Legais (#350);
 
-Mensagem aprimorada para tentativas de envio de trâmites por unidades incorretamente mapeadas (#481);
+* Mensagem aprimorada para tentativas de envio de trâmites por unidades incorretamente mapeadas (#481);
 
-Registro no histórico do processo: alterações no tipo de processo agora são registradas no histórico (#416);
+* **Registro no histórico do processo:** alterações no tipo de processo agora são registradas no histórico (#416);
 
-Limitação de repositórios e unidades: Gestores de Protocolo agora podem limitar quais repositórios e unidades aparecem na lista de destino de cada unidade mapeada (#196);
+* **Limitação de repositórios e unidades:** Gestores de Protocolo agora podem limitar quais repositórios e unidades aparecem na lista de destino de cada unidade mapeada (#196);
 
-Remoção do ícone de organograma na tela de envio de trâmite externo e envio de bloco de trâmite exteno (#540);
+* Remoção do ícone de organograma na tela de envio de trâmite externo e envio de bloco de trâmite exteno (#540);
 
-Ajuste no menu: Tela Processos Tramitados em Lote removida e melhoria no layout da tela Processos em Tramitação Externa (#475);
+* **Ajuste no menu:** Tela Processos Tramitados em Lote removida e melhoria no layout da tela Processos em Tramitação Externa (#475);
 
-**Blocos de Trâmite Externo:**
-
-    Mensagem aprimirada após o envio de um bloco (#435);
-    Novo botão para remover processo de bloco e reformulação das regras negociais     (#496, #506, #536, #610, #627, #629, #635, #648 e #696), incluindo:
-
-        Blocos criados em versões anteriores não serão recuperados após atualização;
-        Blocos estarão visíveis apenas para unidades onde foram criados e que estiverem devidamente mapeadas;
-        Processos incluídos em bloco, e não tramitados, devem ser removidos do bloco antes de tramitarem individualmente;
-        Reclassificação dos Estados dos blocos conforme a Situação dos processos tramitados.";
+* **Blocos de Trâmite Externo:**
+  - Mensagem aprimirada após o envio de um bloco (#435);
+  - Novo botão para remover processo de bloco e reformulação das regras negociais (#496, #506, #536, #610, #627, #629, #635, #648 e #696), incluindo:
+    + Blocos criados em versões anteriores não serão recuperados após atualização;
+    + Blocos estarão visíveis apenas para unidades onde foram criados e que estiverem devidamente mapeadas;
+    + Processos incluídos em bloco, e não tramitados, devem ser removidos do bloco antes de tramitarem individualmente;
+    + Reclassificação dos Estados dos blocos conforme a Situação dos processos tramitados.";
 
 Para obter informações detalhadas sobre cada um dos passos de atualização, vide arquivo **ATUALIZACAO.md**.
 
