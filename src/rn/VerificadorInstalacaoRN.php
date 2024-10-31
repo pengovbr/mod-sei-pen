@@ -34,7 +34,7 @@ class VerificadorInstalacaoRN extends InfraRN
         // Versões SEI
         '3.1.0', '3.1.1', '3.1.2', '3.1.3', '3.1.4', '3.1.5', '3.1.6', '3.1.7',
         '4.0.0', '4.0.1' , '4.0.2' , '4.0.3', '4.0.4', '4.0.5', '4.0.6', '4.0.7',
-        '4.0.8', '4.0.9', '4.0.10', '4.0.11', '4.0.12', '4.1.1', '4.1.2',
+        '4.0.8', '4.0.9', '4.0.10', '4.0.11', '4.0.12', '4.1.1', '4.1.2', '4.1.3',
         // Versões SUPER
         '4.0.3.1', '4.0.3.2', '4.0.3.3', '4.0.3.4', '4.0.3.5', '4.0.4.6', '4.0.5.7',
         '4.0.6.8', '4.0.7.9', '4.0.8.10', '4.0.9.11', '4.0.9.12', '4.0.9.13', '4.0.9.14', '4.0.12.15'
@@ -57,7 +57,8 @@ class VerificadorInstalacaoRN extends InfraRN
     {
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/sei_atualizar_versao_modulo_pen.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/verifica_instalacao_modulo_pen.php');
-        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/MonitoramentoTarefasPEN.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/MonitoramentoEnvioTarefasPEN.php');
+        $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/MonitoramentoRecebimentoTarefasPEN.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../scripts/mod-pen/ProcessamentoTarefasPEN.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../config/mod-pen/ConfiguracaoModPEN.php');
         $this->verificarExistenciaArquivo(DIR_SEI_WEB . '/../bin/mod-pen/verificar-reboot-fila.sh');

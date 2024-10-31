@@ -16,7 +16,6 @@ try {
 
     $objSessaoSEI = SessaoSEI::getInstance();
 
-    //$objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao('pen_procedimento_expedir');
     $objGenericoBD = new GenericoBD(BancoSEI::getInstance());
 

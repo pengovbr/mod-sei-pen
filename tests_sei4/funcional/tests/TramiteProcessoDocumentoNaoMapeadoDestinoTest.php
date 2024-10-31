@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_parallel_with_two_group1
  */
-class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
+class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -45,22 +45,8 @@ class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste['TIPO_DOCUMENTO'] = self::$destinatario['TIPO_DOCUMENTO_NAO_MAPEADO'];
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-
-        // 4 - Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
-        // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
-        $this->tramitarProcessoExternamente(
-                self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
 
@@ -83,10 +69,9 @@ class TramiteProcessoDocumentoNaoMapeadoDestinoTest extends CenarioBaseTestCase
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase)  {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Processo aberto somente na unidade"), $paginaProcesso->informacao());
+            $testCase->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertTrue($paginaProcesso->processoAberto());
             $testCase->assertFalse($paginaProcesso->processoBloqueado());
             return true;

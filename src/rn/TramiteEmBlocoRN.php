@@ -140,6 +140,21 @@ class TramiteEmBlocoRN extends InfraRN
     }
   }
 
+  /**
+   * Metodo responsável por verificar se existe uma unidade mapeada para a unidade logada
+   *
+   * @return bool
+   */
+  public function existeUnidadeMapeadaParaUnidadeLogada()
+  {
+    $objPenUnidadeDTO = new PenUnidadeDTO();
+    $objPenUnidadeDTO->retNumIdUnidade();
+    $objPenUnidadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objPenUnidadeRN = new PenUnidadeRN();
+
+    return $objPenUnidadeRN->contar($objPenUnidadeDTO) > 0;
+  }
+
   protected function listarConectado(TramiteEmBlocoDTO $objTramiteEmBlocoDTO)
   {
     try {
@@ -218,7 +233,6 @@ class TramiteEmBlocoRN extends InfraRN
 
 
       $this->validarStrStaTipo($objTramiteEmBlocoDTO, $objInfraException);
-      $this->validarNumIdUsuario($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrDescricao($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrIdxBloco($objTramiteEmBlocoDTO, $objInfraException);
       $this->validarStrStaEstado($objTramiteEmBlocoDTO, $objInfraException);
@@ -348,12 +362,12 @@ class TramiteEmBlocoRN extends InfraRN
   protected function cancelarControlado(array $blocoIds)
   {
     try {
-      $objBloco = new TramitaEmBlocoProtocoloDTO();
+      $objBloco = new PenBlocoProcessoDTO();
       foreach ($blocoIds as $blocoId) {
-        $objBloco->setNumIdTramitaEmBloco($blocoId);
+        $objBloco->setNumIdBloco($blocoId);
         $objBloco->retDblIdProtocolo();
-        $tramiteEmBlocoProtocoloRn = new TramitaEmBlocoProtocoloRN();
-        $protocoloIds = $tramiteEmBlocoProtocoloRn->listar($objBloco);
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $protocoloIds = $objPenBlocoProcessoRN->listar($objBloco);
         $protocoloRn = new ExpedirProcedimentoRN();
         foreach ($protocoloIds as $protocoloId) {
           $protocoloRn->cancelarTramite($protocoloId->getDblIdProtocolo());

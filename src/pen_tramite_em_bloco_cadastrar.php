@@ -44,12 +44,28 @@ try {
       $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
 
       if (isset($_POST['sbmCadastrarTramiteEmBloco'])) {
+        // Calcula a ordem do novo bloco
+        $tramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $tramiteEmBlocoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $tramiteEmBlocoDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_DESC);
+        $tramiteEmBlocoDTO->retNumOrdem();
+        $tramiteEmBlocoDTO->setNumMaxRegistrosRetorno(1);
+
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        $tramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($tramiteEmBlocoDTO);
+        if ($tramiteEmBlocoDTO == null) {
+          $ordem = 1;
+        } else {
+          $ordem = $tramiteEmBlocoDTO->getNumOrdem() + 1;
+        }
+        
         $strNovaDescricao = 'Novo Bloco';
         $strDescricao = $objPaginaSEI->recuperarCampo('txtDescricao');
         if ($strDescricao) {
           $strNovaDescricao = $strDescricao;
         }
         $objTramiteEmBlocoDTO->setStrDescricao($strNovaDescricao);
+        $objTramiteEmBlocoDTO->setNumOrdem($ordem);
        
         try {
           $objTramiteEmBlocoRN = new TramiteEmBlocoRN();

@@ -118,9 +118,7 @@ class PenConsoleRN extends InfraRN {
   public static function format($strMensagem = '', $strFonte = '', $bolBold = false){
         
      $strBold = ($bolBold !== false) ? '1' : '0';
-        
-     //$strMensagem = escapeshellarg($strMensagem);
-        
+                
     if(!empty($strFonte)) {
             
       switch($strFonte){

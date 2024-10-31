@@ -56,8 +56,36 @@ try {
         $objPenParametroRN = new PenParametroRN();
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
+      try {
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidadeRH();
+        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+
+        $objUnidadeRN = new UnidadeRN();
+        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+
         //Preparação dos dados para montagem da tela de expedição de processos
+        if ($arrIdUnidadeRestricao != null) {
+          $repositorios = array();
+          foreach ($arrIdUnidadeRestricao as $value) {
+            $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+          }
+        } else {
+          $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        }
+      } catch (Exception $e) {
         $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+      }
+
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 
         $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
@@ -70,14 +98,7 @@ try {
         $strLinkAjaxProcedimentoApensado = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_apensados_auto_completar_expedir_procedimento');
 
         $strLinkProcedimentosApensadosSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_apensados_selecionar_expedir_procedimento&tipo_selecao=2&id_object=objLupaProcedimentosApensados&id_procedimento='.$idProcedimento.'');
-        $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
-
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->retNumIdUnidadeRH();
-        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+        $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas');
 
       if (!$objUnidadeDTO) {
         throw new InfraException("A unidade atual não foi mapeada.");
@@ -122,8 +143,8 @@ try {
           $objExpedirProcedimentoDTO->setBolSinUrgente($boolSinUrgente);
           $objExpedirProcedimentoDTO->setDblIdProcedimento($numIdProcedimento);
           $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia($numIdMotivoUrgente);
-          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmLote(false);
-          $objExpedirProcedimentoDTO->setNumIdLote(null);
+          $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+          $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
 
@@ -255,6 +276,11 @@ function inicializar() {
             alert('Selecione um repositório de Estruturas Organizacionais');
         }
     });
+
+    objLupaUnidadesAdministrativas.prepararExecucao = function(){
+        var parametros = '&idRepositorioEstrutura='+$('#selRepositorioEstruturas').val();
+        return parametros;
+    };
 
     objAutoCompletarApensados = new infraAjaxAutoCompletar('hdnIdProcedimentoApensado','txtProcedimentoApensado','<?=$strLinkAjaxProcedimentoApensado?>');
     objAutoCompletarApensados.mostrarAviso = true;
@@ -504,7 +530,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
                     value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
                 <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
-                <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" />
+                <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
             </div>
 
         <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" />
@@ -531,9 +557,7 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
-<?
-//$objPaginaSEI->montarBarraComandosInferior($arrComandos);
-?>
+
 </form>
 <?php
 $objPaginaSEI->montarAreaDebug();

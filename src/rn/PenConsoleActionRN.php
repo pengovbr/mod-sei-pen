@@ -61,7 +61,7 @@ class PenConsoleActionRN extends InfraRN {
       $objAssuntoDTO->setNumMaxRegistrosRetorno(1);
       $objAssuntoDTO->retNumIdAssunto();
 
-      $objAssuntoBD = new AssuntoBD(BancoSEI::getInstance());
+      $objAssuntoBD = new AssuntoBD($this->inicializarObjInfraIBanco());
       $objAssuntoDTO = $objAssuntoBD->consultar($objAssuntoDTO);
 
     if (empty($objAssuntoDTO)) {
@@ -356,7 +356,6 @@ class PenConsoleActionRN extends InfraRN {
       // Cadastra o procedimento
       $objProcedimentoDTO = new ProcedimentoDTO(); 
       $objProcedimentoDTO->setDblIdProcedimento(null);
-      //$objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($args['tipo']);        
       $objProcedimentoDTO->setNumIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
       $objProcedimentoDTO->setStrNomeTipoProcedimento($objTipoProcedimentoDTO->getStrNome());
       $objProcedimentoDTO->setStrSinGerarPendencia('S');

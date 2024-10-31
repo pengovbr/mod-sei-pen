@@ -1,43 +1,63 @@
 <?php
 
-class PenOrgaoExternoFixture
+class PenOrgaoExternoFixture extends \FixtureBase
 {
-    private static $contexto;
+    protected $objPenOrgaoExternoDTO;
 
-    public function __construct(string $contexto)
+  public function __construct()
     {
-        self::$contexto = $contexto;
+      $this->objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+  }
+
+  protected function inicializarObjInfraIBanco()
+    {
+      return \BancoSEI::getInstance();
+  }
+
+  public function cadastrar($dados = [])
+    {
+      $this->objPenOrgaoExternoDTO = $this->consultar($dados);
+    if ($this->objPenOrgaoExternoDTO) {
+        return $this->objPenOrgaoExternoDTO;
     }
 
-    protected function inicializarObjInfraIBanco()
+      $this->objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+      $this->objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($dados['IdOrigem']);
+      $this->objPenOrgaoExternoDTO->setStrOrgaoOrigem($dados['NomeOrigem']);
+      $this->objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalOrigem($dados['IdRepositorio']);
+      $this->objPenOrgaoExternoDTO->setStrEstrutaOrganizacionalOrigem($dados['RepositorioEstruturas']);
+
+      $this->objPenOrgaoExternoDTO->setNumIdOrgaoDestino($dados['Id']);
+      $this->objPenOrgaoExternoDTO->setStrOrgaoDestino($dados['Nome']);
+
+      $this->objPenOrgaoExternoDTO->setDthRegistro($dados['DataRegistro'] ?: \InfraData::getStrDataAtual());
+      $this->objPenOrgaoExternoDTO->setStrAtivo($dados['SinAtivo'] ?: 'S');
+      $this->objPenOrgaoExternoDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+
+      $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
+      $this->objPenOrgaoExternoDTO = $objPenOrgaoExternoBD->cadastrar($this->objPenOrgaoExternoDTO);
+
+      return $this->objPenOrgaoExternoDTO;
+  }
+
+  public function consultar($dados = [])
     {
-        return \BancoSEI::getInstance();
-    }
+      $objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+      $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($dados['IdOrigem']);
+      $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($dados['Id']);
+      $objPenOrgaoExternoDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+      $objPenOrgaoExternoDTO->retTodos();
 
-    public function cadastrar($dados = [])
+      $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
+      return $objPenOrgaoExternoBD->consultar($objPenOrgaoExternoDTO);
+  }
+
+  public function excluir($dados = [])
     {
-        $penMapUnidadesFixture = new PenMapUnidadesFixture(self::$contexto, $dados);
-        $penMapUnidadesFixture->gravar();
+      $objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+      $objPenOrgaoExternoDTO->setDblId($dados['Id']);
 
-        $bancoOrgaoA = new DatabaseUtils(self::$contexto);
-        $bancoOrgaoA->execute(
-            "insert into md_pen_orgao_externo ".
-            "(id,id_orgao_origem,str_orgao_origem,id_estrutura_origem,str_estrutura_origem,id_orgao_destino,str_orgao_destino,sin_ativo,id_unidade,dth_criacao) ".
-            "values (?,?,?,?,?,?,?,?,?,?) ",
-            array(
-                999999,
-                $dados['idOrigem'], $dados['nomeOrigem'], $dados['idRepositorio'], $dados['repositorioEstruturas'],
-                $dados['id'], $dados['nome'],
-                'S', 110000001, date('Y-m-d H:i:s')
-            )
-        );
-
-        return 999999;
-    }
-
-    public function deletar(int $id): void
-    {
-        $bancoOrgaoA = new DatabaseUtils(self::$contexto);
-        $bancoOrgaoA->execute("delete from md_pen_orgao_externo where id = ?", array($id));
-    }
+      $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
+      return $objPenOrgaoExternoBD->excluir($objPenOrgaoExternoDTO);
+  }
 }

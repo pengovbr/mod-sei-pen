@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_alone_group3
  */
-class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
+class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -22,7 +22,6 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
      */
     public static function setUpBeforeClass() :void {
 
-        parent::setUpBeforeClass();
         // Redução de limite máximo de tamanho de documento externo
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
@@ -54,10 +53,17 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_003.pdf');
+        
+        // Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado();
+
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
+
+        $this->abrirProcesso(self::$protocoloTeste);
+
         $this->tramitarProcessoExternamente(
                 self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -84,10 +90,9 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends CenarioBaseTestCase
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase)  {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringContainsString(utf8_encode("Processo aberto somente na unidade"), $paginaProcesso->informacao());
+            $testCase->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertTrue($paginaProcesso->processoAberto());
             $testCase->assertFalse($paginaProcesso->processoBloqueado());
             return true;

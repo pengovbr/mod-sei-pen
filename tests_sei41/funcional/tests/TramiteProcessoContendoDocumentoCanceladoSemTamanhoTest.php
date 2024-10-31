@@ -9,7 +9,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -22,7 +22,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -33,20 +33,21 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
         // Definição de dados de teste do processo principal
-        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        
+        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);        
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+
+        $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, $objProtocoloPrincipalDTO->getDblIdProtocolo());
+        self::$protocoloTeste = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste e incluir documentos relacionados
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);
+        $this->abrirProcesso(self::$protocoloTeste);
 
         //Tramitar internamento para liberação da funcionalidade de cancelar
-        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], self::$processoTeste);
+        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], [ 'PROTOCOLO' => self::$protocoloTeste ]);
 
         $this->navegarParaCancelarDocumento(0);
         $this->paginaCancelarDocumento->cancelar("Motivo de teste");
@@ -55,7 +56,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         
-        $idAnexo=$bancoOrgaoA->query("SELECT an.id_anexo FROM rel_protocolo_protocolo pp
+        $idAnexo = $bancoOrgaoA->query("SELECT an.id_anexo FROM rel_protocolo_protocolo pp
         inner join protocolo p on pp.id_protocolo_1=p.id_protocolo
         inner join anexo an on an.id_protocolo=pp.id_protocolo_2
         where p.descricao=?",array($processo['DESCRICAO']));
@@ -97,10 +98,9 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -131,7 +131,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends CenarioBas
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(

@@ -15,7 +15,7 @@
  * Execution Groups
  * @group execute_alone_group2
  */
-class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
+class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -31,6 +31,11 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
     public static $documentoTeste8;
     public static $protocoloTestePrincipal;
     public static $protocoloTesteAnexado;
+    public static $objProtocoloTestePrincipalDTO;
+    public static $objProtocoloTesteAnexadoDTO;
+
+
+
 
     /**
      * Teste inicial de trâmite de processo apartado para o órgão B
@@ -53,7 +58,7 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTesteAnexado = self::$processoTesteAnexado["PROTOCOLO"];
     }
 
@@ -89,13 +94,16 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Definição de dados de teste do processo principal
         self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste3, self::$documentoTeste4);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTesteAnexado, $documentos, self::$remetente, self::$destinatario);
+        
+        putenv("DATABASE_HOST=org1-database");
     }
 
 
@@ -137,20 +145,23 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste6 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
+        $objProtocoloTestePrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
+        self::$protocoloTestePrincipal = $objProtocoloTestePrincipalDTO->getStrProtocoloFormatado();
+
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+
+        $objProtocoloTesteAnexadoDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
+
+        // Realizar a anexação de processos
+        $this->anexarProcessoFixture($objProtocoloTestePrincipalDTO->getDblIdProtocolo(), $objProtocoloTesteAnexadoDTO->getDblIdProtocolo());
+
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste6, $objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste principal e incluir documentos relacionados
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTestePrincipal = $this->cadastrarProcesso(self::$processoTestePrincipal);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste5);
-
-        // Realizar a anexação de processos
-        $this->anexarProcesso(self::$protocoloTesteAnexado);
-
-        $this->cadastrarDocumentoInterno(self::$documentoTeste6);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
             self::$protocoloTestePrincipal,
@@ -180,10 +191,9 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -215,7 +225,7 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(
@@ -260,6 +270,7 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Definição de dados de teste do processo principal
         self::$documentoTeste7 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
@@ -268,11 +279,16 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
+        // Consulta no Org2/B o DTO do Protocolo Principal
+        $objProtocoloTestePrincipalDTO = $this->consultarProcessoFixture(self::$protocoloTestePrincipal, \ProtocoloRN::$TP_PROCEDIMENTO);
+
         // Incluir novos documentos relacionados
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste7, $objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste8, $objProtocoloTestePrincipalDTO->getDblIdProtocolo());
+
+        putenv("DATABASE_HOST=org1-database");
+
         $this->abrirProcesso(self::$protocoloTestePrincipal);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste7);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste8);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -303,10 +319,9 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

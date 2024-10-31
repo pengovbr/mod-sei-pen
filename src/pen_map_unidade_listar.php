@@ -12,7 +12,7 @@ session_start();
 
 define('PEN_RECURSO_ATUAL', 'pen_map_unidade_listar');
 define('PEN_RECURSO_BASE', 'pen_map_unidade');
-define('PEN_PAGINA_TITULO', 'Mapeamento de Unidade');
+define('PEN_PAGINA_TITULO', 'Mapeamento de Unidades');
 define('PEN_PAGINA_GET_ID', 'id_unidade');
 
 
@@ -87,8 +87,6 @@ try {
     $arrComandos = array();
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-    //$arrComandos[] = '<button type="button" value="Ativar" onclick="onClickBtnAtivar()" class="infraButton">Ativar</button>';
-    //$arrComandos[] = '<button type="button" value="Desativar" onclick="onClickBtnDesativar()" class="infraButton">Desativar</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
     $arrComandos[] = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
@@ -183,7 +181,6 @@ try {
         $strResultado .= '<td>'.$objPenUnidadeDTO->getStrNomeUnidadeRH().'</td>';
         $strResultado .= '<td align="center">';
 
-        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.htmlspecialchars($_GET['acao']).'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
       if($objSessao->verificarPermissao('pen_map_unidade_alterar')) {
         $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao']).'&'.PEN_PAGINA_GET_ID.'='.$objPenUnidadeDTO->getNumIdUnidade()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
@@ -206,7 +203,6 @@ catch(InfraException $e){
     print_r($e);
     print '</pre>';
     exit(0);
-    //$objPagina->processarExcecao($e);
 }
 
 
@@ -275,35 +271,6 @@ function onClickBtnNovo(){
     window.location = '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.htmlspecialchars($_GET['acao_origem'])); ?>';
 }
 
-function onClickBtnAtivar(){
-
-   try {
-
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_ativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-
-        alert('Erro : ' + e.message);
-    }
-
-}
-
-function onClickBtnDesativar(){
-
-    try {
-
-        var form = jQuery('#frmAcompanharEstadoProcesso');
-        form.attr('action', '<?php print $objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_desativar&acao_origem='.htmlspecialchars($_GET['acao_origem']).'&acao_retorno='.PEN_RECURSO_BASE.'_listar'); ?>');
-        form.submit();
-    }
-    catch(e){
-
-        alert('Erro : ' + e.message);
-    }
-}
-
 function onClickBtnExcluir(){
 
     try {
@@ -334,7 +301,7 @@ function onClickBtnExcluir(){
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
-<form id="frmAcompanharEstadoProcesso" method="post" action="<?php // print $objSessao->assinarLink($strProprioLink); ?>">
+<form id="frmAcompanharEstadoProcesso" method="post" action="">
 
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>

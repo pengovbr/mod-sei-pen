@@ -1,28 +1,50 @@
 <?php
 
-require_once DIR_SEI_WEB.'/SEI.php';
+require_once DIR_SEI_WEB . '/SEI.php';
 
 /**
  * Description of PenHipoteseLegalRN
  *
  * @author michael
  */
-class PenHipoteseLegalRN extends InfraRN 
+class PenHipoteseLegalRN extends InfraRN
 {
 
-  protected function inicializarObjInfraIBanco(){
-      return BancoSEI::getInstance();
+  /**
+   * Inicializador de banco de dados
+   *
+   * @return object
+   */
+  protected function inicializarObjInfraIBanco()
+  {
+    return BancoSEI::getInstance();
   }
-    
+
+  /**
+   * Listar hipoteses legais
+   *
+   * @param PenHipoteseLegalDTO $objDTO
+   * @return array
+   * @throws InfraException
+   */
   protected function listarConectado(PenHipoteseLegalDTO $objDTO)
-    {               
+  {
     try {
-        //SessaoSEI::getInstance()->validarAuditarPermissao('email_sistema_excluir', __METHOD__, $arrObjEmailSistemaDTO);
-        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());            
-        return $objBD->listar($objDTO);
-    } 
-    catch (Exception $e) {
-        throw new InfraException('Erro excluindo E-mail do Sistema.', $e);
+      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+      return $objBD->listar($objDTO);
+    } catch (Exception $e) {
+      throw new InfraException('Erro listando hipotese legal.', $e);
+    }
+  }
+
+  protected function consultarConectado(PenHipoteseLegalDTO $objDTO)
+  {
+    try {
+      //Valida Permissao
+      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+      return $objBD->consultar($objDTO);
+    } catch (Exception $e) {
+      throw new InfraException('Erro ao consultar Hipotese Legal.', $e);
     }
   }
 }

@@ -27,27 +27,33 @@ try {
 
   $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
 
-  $objTramiteEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-  $objTramiteEmBlocoProtocoloDTO->setDblIdProtocolo($idProcedimento);
-  $objTramiteEmBlocoProtocoloDTO->setOrdNumId(InfraDTO::$TIPO_ORDENACAO_DESC);
-  $objTramiteEmBlocoProtocoloDTO->retDblIdProtocolo();
-  $objTramiteEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
+  $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+  $objPenBlocoProcessoDTO->setDblIdProtocolo($idProcedimento);
+  $objPenBlocoProcessoDTO->setOrdNumIdBloco(InfraDTO::$TIPO_ORDENACAO_DESC);
+  $objPenBlocoProcessoDTO->retDblIdProtocolo();
+  $objPenBlocoProcessoDTO->retNumIdBloco();
+  $objPenBlocoProcessoDTO->setNumIdAtividade(
+    array(
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+    ),
+    InfraDTO::$OPER_NOT_IN
+  );
+  $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
 
-  $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-  $tramiteEmBlocoProtocoloDTO = $objTramitaEmBlocoProtocoloRN->consultarProtocolosBloco($objTramiteEmBlocoProtocoloDTO);
-
-  if ($tramiteEmBlocoProtocoloDTO != null) {
-    // TODO: tratar atualização a partir de um metodo
-    $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-    $objTramiteEmBlocoDTO->setNumId($tramiteEmBlocoProtocoloDTO->getNumIdTramitaEmBloco());
-    $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE);
-
-    $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
-  }
+  $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+  $PenBlocoProcessoDTO = $objPenBlocoProcessoRN->consultar($objPenBlocoProcessoDTO);
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
   $objExpedirProcedimentosRN->cancelarTramite($idProcedimento);
+
+  if ($PenBlocoProcessoDTO != null) {
+    // TODO: tratar atualização a partir de um metodo
+    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+    $objPenBlocoProcessoRN->atualizarEstadoDoBloco($PenBlocoProcessoDTO->getNumIdBloco());
+  }
 } catch (InfraException $e) {
   $strMensagem = $e->getStrDescricao();
 } catch (Exception $e) {
@@ -65,8 +71,7 @@ $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody();
 ?>
 <link rel="stylesheet" href="<?php print PENIntegracao::getDiretorio(); ?>/css/style-modulos.css" type="text/css" />
-<?php //$objPaginaSEI->montarBarraComandosSuperior($arrComandos); 
-?>
+
 <script type="text/javascript">
   alert('<?php echo $strMensagem ?>');
   parent.parent.location.reload();

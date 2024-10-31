@@ -119,6 +119,7 @@ try {
     // Mapeamento da hipotese legal remota
     $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPenHipoteseLegalDTO->setStrAtivo('S');
   if(!empty($arrNumIdHipoteseLegal)) {
       // Remove os que j esto em uso
       $objPenHipoteseLegalDTO->setNumIdHipoteseLegal($arrNumIdHipoteseLegal, InfraDTO::$OPER_NOT_IN);
@@ -189,7 +190,7 @@ function onSubmit() {
 $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="<?php //print $objSessaoSEI->assinarLink($strProprioLink);  ?>">
+<form id="<?php print PEN_RECURSO_BASE; ?>_form" onsubmit="return onSubmit();" method="post" action="">
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php $objPagina->montarAreaValidacao(); ?>
     <?php $objPagina->abrirAreaDados('12em'); ?>

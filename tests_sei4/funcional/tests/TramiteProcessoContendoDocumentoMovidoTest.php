@@ -9,7 +9,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -41,22 +41,25 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
+        // Criar processo principal e processo secundário
+        $protocoloSecundarioTeste = $this->cadastrarProcessoFixture($processoSecundarioTeste);
+        self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);
+
+        // Cadastrando documentos no processo principal
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, self::$protocoloTeste->getDblIdProtocolo());
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, self::$protocoloTeste->getDblIdProtocolo());
+
         // Acessar sistema do this->REMETENTE do processo
+        self::$protocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Criar processo secundário para o qual o documento será movido
-        $protocoloSecundarioTeste = $this->cadastrarProcesso($processoSecundarioTeste);
+        $this->abrirProcesso(self::$protocoloTeste);
 
-        // Cadastrar novo processo de teste e incluir documentos a ser movido
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);
+        // Movendo documento do processo principal para o processo secundário
+        $documentoParaMover = $this->paginaProcesso->listarDocumentos()[0];
+        $this->paginaProcesso->selecionarDocumento($documentoParaMover);
         $this->paginaDocumento->navegarParaMoverDocumento();
-        $this->paginaMoverDocumento->moverDocumentoParaProcesso($protocoloSecundarioTeste, "Motivo de teste");
-
-        // Cadastramento de documento adicional
-        $this->cadastrarDocumentoInterno(self::$documentoTeste2);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->paginaMoverDocumento->moverDocumentoParaProcesso($protocoloSecundarioTeste->getStrProtocoloFormatado(), "Motivo de teste");
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -87,10 +90,9 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -121,7 +123,7 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(
@@ -161,21 +163,30 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
         $processoSecundarioTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
         self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+        putenv("DATABASE_HOST=org2-database");
+
+        // Criar novo processo secundário na ORG 2
+        $protocoloSecundarioTeste = $this->cadastrarProcessoFixture($processoSecundarioTeste);
+
+        // Busca dados do Protocolo principal no ORG 2
+        $objProtocoloTesteDTO = $this->consultarProcessoFixture(self::$protocoloTeste, \ProtocoloRN::$TP_PROCEDIMENTO);
+
+        // Criar novo documento externo no processo principal recebido na ORG 2"
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloTesteDTO->getDblIdProtocolo());
 
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        $protocoloSecundarioTeste = $this->cadastrarProcesso($processoSecundarioTeste);
-
-        // Incluir novos documentos ao processo para ser movido
         $this->abrirProcesso(self::$protocoloTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
-        $this->paginaDocumento->navegarParaMoverDocumento();
-        $this->paginaMoverDocumento->moverDocumentoParaProcesso($protocoloSecundarioTeste, "Motivo de teste");
 
-        // Cadastramento de documento adicional
-        $this->cadastrarDocumentoInterno(self::$documentoTeste4);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        // Acessando novo documento externo e movendo-o ao novo processo secundario da ORG 2
+        $listaDeDocumentos = $this->paginaProcesso->listarDocumentos();
+        $documentoParaMover = $listaDeDocumentos[array_key_last($listaDeDocumentos)];
+        $this->paginaProcesso->selecionarDocumento($documentoParaMover);
+        $this->paginaDocumento->navegarParaMoverDocumento();
+        $this->paginaMoverDocumento->moverDocumentoParaProcesso($protocoloSecundarioTeste->getStrProtocoloFormatado(), "Motivo de teste");
+
+        // Cadastrando novo documento interno no processo principal
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4, $objProtocoloTesteDTO->getDblIdProtocolo());
 
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -207,10 +218,9 @@ class TramiteProcessoContendoDocumentoMovidoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

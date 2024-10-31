@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoInternoExternoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoInternoExternoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -32,20 +32,23 @@ class TramiteProcessoContendoDocumentoInternoExternoTest extends CenarioBaseTest
         self::$documentoInternoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoExternoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
+        // 1 - Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado(); 
+
+        // 2 - Incluir e assinar documentos no processo
+        $this->cadastrarDocumentoInternoFixture(self::$documentoInternoTeste, $objProtocoloDTO->getDblIdProtocolo());
+
+        // 3 - Incluir documento externo ao processo
+        $this->cadastrarDocumentoExternoFixture(self::$documentoExternoTeste, $objProtocoloDTO->getDblIdProtocolo());
+
+        // 4 - Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
+        // 5 - Abrir processo
+        $this->abrirProcesso(self::$protocoloTeste);
 
-        // 3 - Incluir e assinar documentos no processo
-        $this->cadastrarDocumentoInterno(self::$documentoInternoTeste);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
-        // 4 - Incluir documento externo ao processo
-        $this->cadastrarDocumentoExterno(self::$documentoExternoTeste);
-
-        // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
+        // 6 - Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
                 self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
@@ -70,27 +73,26 @@ class TramiteProcessoContendoDocumentoInternoExternoTest extends CenarioBaseTest
 
         $this->abrirProcesso(self::$protocoloTeste);
 
-        // 6 - Verificar se situação atual do processo está como bloqueado
+        // 7 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
         }, PEN_WAIT_TIMEOUT);
 
-        // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
+        // 8 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
         $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTeste, $unidade);
         $this->validarRecibosTramite($mensagemRecibo, true, true);
 
-        // 8 - Validar histórico de trâmite do processo
+        // 9 - Validar histórico de trâmite do processo
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
 
-        // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
+        // 10 - Verificar se processo está na lista de Processos Tramitados Externamente
         $this->validarProcessosTramitados(self::$protocoloTeste, $orgaosDiferentes);
     }
 
@@ -117,7 +119,7 @@ class TramiteProcessoContendoDocumentoInternoExternoTest extends CenarioBaseTest
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // 12 - Validar dados  do processo
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(self::$processoTeste['DESCRICAO'], self::$processoTeste['RESTRICAO'], self::$processoTeste['OBSERVACOES'], array(self::$processoTeste['INTERESSADOS']));

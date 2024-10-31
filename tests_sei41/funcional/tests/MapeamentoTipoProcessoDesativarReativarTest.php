@@ -7,7 +7,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -23,16 +23,18 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        $penOrgaoExternoFixture = new PenOrgaoExternoFixture(CONTEXTO_ORGAO_A);
-        self::$penOrgaoExternoId = $penOrgaoExternoFixture->cadastrar([
-            'idRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'repositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE'],
-            'idOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'nomeOrigem' => self::$destinatario['NOME_UNIDADE']
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+            'Id' => self::$remetente['ID_ESTRUTURA'],
+            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+            'Nome' => self::$remetente['NOME_UNIDADE'],
+            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
         ]);
+    
+        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
     }
 
     /**
@@ -44,10 +46,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_desativacao_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -60,10 +58,12 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+
+        $this->sairSistema();
     }
 
     /**
@@ -75,10 +75,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_reativacao_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -91,10 +87,12 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi reativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
     }
 
     /**
@@ -106,10 +104,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_desativacao_checkbox_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
-
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -122,10 +116,12 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi desativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
     }
 
     /**
@@ -137,9 +133,6 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
      */
     public function test_reativar_checkbox_mapeamento_orgao_externo()
     {
-        $this->markTestIncomplete(
-            'Teste refatorado a partir da entrega 3.7.0.'
-        );
         $this->acessarSistema(
             self::$remetente['URL'],
             self::$remetente['SIGLA_UNIDADE'],
@@ -152,9 +145,32 @@ class MapeamentoTipoProcessoDesativarReativarTest extends CenarioBaseTestCase
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $menssagemValidacao = utf8_encode('Relacionamento entre Unidades foi reativado com sucesso.');
+            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
             $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $this->sairSistema();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
+        $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->buscar([
+            'IdMapeamento' => self::$penOrgaoExternoId
+        ]);
+
+        foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
+            $importacaoTiposProcessoFixture->remover([
+                'Id' => $objPenMapTipoProcedimentoDTO->getDblId()
+            ]);
+        }
+
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+        $penOrgaoExternoFixture->remover([
+            'Id' => self::$penOrgaoExternoId,
+        ]);
+
+        parent::tearDownAfterClass();
     }
 }

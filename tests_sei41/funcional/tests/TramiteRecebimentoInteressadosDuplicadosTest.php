@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_parallel_group3
  */
-class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
+class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -53,7 +53,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         $novoTramite = $this->enviarMetadadosProcesso(self::$servicoPEN, self::$remetente, self::$destinatario, $processoTeste);
         $this->enviarComponentesDigitaisDoTramite(self::$servicoPEN, $novoTramite, $processoTeste);
         $reciboTramite = $this->receberReciboEnvio(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verifica recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -73,6 +73,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             , 'local_cert' => $localCertificado
             , 'passphrase' => $senhaCertificado
             , 'resolve_wsdl_remote_includes' => true
+            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
             , 'connection_timeout' => $connectionTimeout
             , CURLOPT_TIMEOUT => $connectionTimeout
             , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
@@ -84,6 +85,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         );
 
         return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+
     }
 
 
@@ -173,7 +175,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         }
 
         $arrInteressados = array_map(function($item) {
-            return array('nome' => utf8_encode($item));
+            return array('nome' => mb_convert_encoding($item, 'UTF-8', 'ISO-8859-1'));
         }, 
         $processoTeste['INTERESSADOS']);
 
@@ -185,7 +187,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
             'interessado' => $arrInteressados,
             'documento' => $metadadosDocumentos,
@@ -231,13 +233,13 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             'ordem' => $ordemDocumento,
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
                 'numeroDeIdentificacao' => '999999',
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(

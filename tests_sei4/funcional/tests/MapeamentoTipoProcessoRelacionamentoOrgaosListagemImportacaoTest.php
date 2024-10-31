@@ -8,7 +8,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;

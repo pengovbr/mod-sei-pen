@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -26,7 +26,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento dedocumento avulso com 2 componentes digitais
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -47,7 +47,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
 
     /**
      * Teste de recebimento processo contendo documento com 3 componentes digitais
-     * 
+     *
      * @return void
      */
     public function test_recebimento_processo_com_3_componentes_digitais()
@@ -65,14 +65,14 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C, self::CONTEUDO_DOCUMENTO_A,
             self::CONTEUDO_DOCUMENTO_A, self::CONTEUDO_DOCUMENTO_B, self::CONTEUDO_DOCUMENTO_C,
         ));
-        
+
         // Simular um trâmite chamando a API do Barramento diretamente
         $metadadosProcessoTeste = $this->construirMetadadosProcessoTeste(self::$processoTeste, array(self::$documentoZip));
         $novoTramite = $this->enviarMetadadosProcesso(self::$servicoPEN, $remetente, $destinatario, $metadadosProcessoTeste);
 
         $this->enviarComponentesDigitaisDoProcesso(self::$servicoPEN, $novoTramite, $metadadosProcessoTeste);
         $reciboTramite = $this->receberReciboEnvioProcesso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -94,14 +94,14 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoA;
         $destinatario = self::$contextoOrgaoB;
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTeste1 = $this->gerarDadosDocumentoInternoTeste($remetente);
         $documentoTeste2 = $this->gerarDadosDocumentoExternoTeste($remetente);
 
         $novosDocumentos =  array($documentoTeste1, $documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
-        $totalDdocumentos =  array(self::$documentoZip, $documentoTeste1, $documentoTeste2);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $totalDdocumentos, $destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+
     }
 
     /**
@@ -123,7 +123,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $novoTramite = $this->enviarMetadadosDocumento(self::$servicoPEN, $remetente, $destinatario, $metadadosDocumentoTeste);
         $this->enviarComponentesDigitaisDoDocumentoAvulso(self::$servicoPEN, $novoTramite, $metadadosDocumentoTeste);
         $reciboTramite = $this->receberReciboEnvioDocumentoAvulso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -139,7 +139,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros->IDT = $dadosTramite->tramite->IDT;
         return $servicoPEN->receberReciboDeEnvio($parametros);
     }
-    
+
     private function receberReciboEnvioProcesso($servicoPEN, $novoTramite)
     {
         $dadosTramite = $novoTramite->dadosTramiteDeProcessoCriado;
@@ -154,7 +154,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
         $parametros = new StdClass();
         $parametros->IDT = $dadosTramite->IDT;
         return $servicoPEN->receberReciboDeTramite($parametros);
-    }   
+    }
 
     private function enviarMetadadosProcesso($servicoPEN, $remetente, $destinatario, $processoTeste)
     {
@@ -296,12 +296,12 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -352,13 +352,13 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             'ordem' => $ordemDocumento,
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
                 'numeroDeIdentificacao' => '999999',
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -391,7 +391,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends CenarioBaseTestCase
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
             'interessado' => array(
                 'nome' => $processoTeste['INTERESSADOS'],

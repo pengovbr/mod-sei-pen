@@ -7,7 +7,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBaseTestCase
+class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -20,13 +20,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
     {
         parent::setUp();
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-
-        $penMapUnidadesFixture = new PenMapUnidadesFixture(CONTEXTO_ORGAO_A, [
-            'id' => self::$remetente['ID_ESTRUTURA'],
-            'sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'nome' => self::$remetente['NOME_UNIDADE']
-        ]);
-        $penMapUnidadesFixture->gravar();
     }
 
     /**
@@ -62,9 +55,11 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Unidades cadastrado com sucesso.'),
+            mb_convert_encoding('Relacionamento entre Unidades cadastrado com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     /**
@@ -96,9 +91,11 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Cadastro de relacionamento entre unidades já existente.'),
+            mb_convert_encoding('Cadastro de relacionamento entre unidades já existente.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     /**
@@ -136,9 +133,11 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends CenarioBase
         sleep(1);
         $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
         $this->assertStringContainsString(
-            utf8_encode('Relacionamento entre Unidades atualizado com sucesso.'),
+            mb_convert_encoding('Relacionamento entre Unidades atualizado com sucesso.', 'UTF-8', 'ISO-8859-1'),
             $mensagem
         );
+        
+        $this->sairSistema();
     }
 
     public static function tearDownAfterClass(): void

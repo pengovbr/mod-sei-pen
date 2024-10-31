@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoValidacaoEnvioTest extends CenarioBaseTestCase
+class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -40,13 +40,16 @@ class TramiteProcessoValidacaoEnvioTest extends CenarioBaseTestCase
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
 
+        // Cadastrar novo processo de teste
+        $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
+
         // Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
+        $this->abrirProcesso(self::$protocoloTeste);
 
-        $this->expectExceptionMessage(utf8_encode("Não é possível tramitar um processo sem documentos"));
+        $this->expectExceptionMessage(mb_convert_encoding("Não é possível tramitar um processo sem documentos", 'UTF-8', 'ISO-8859-1'));
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste,
             self::$destinatario['REP_ESTRUTURAS'],

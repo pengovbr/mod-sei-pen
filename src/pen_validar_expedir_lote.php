@@ -16,6 +16,23 @@ try {
       throw new InfraException('Nenhum procedimento foi informado', 'Desconhecido');
   }    
 
+  $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+  $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigem);
+  if ($objInfraException->contemValidacoes()) {
+    $arrErros = array();
+    foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+      $strAtributo = $objInfraValidacao->getStrAtributo();
+      if (!array_key_exists($strAtributo, $arrErros)) {
+        $arrErros[$strAtributo] = array();
+      }
+      $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
+    }
+
+    $arrResponse['erros'] = $arrErros;
+    print json_encode($arrResponse);
+    exit(0);
+  }
+
   foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
 
       $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
@@ -41,11 +58,9 @@ try {
         $objInfraException->adicionarValidacao('Informe Unidade de destino', $strProtocoloFormatado);
     }
 
-    if(!$objInfraException->contemValidacoes()) {
-        $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
-        $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
-        $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
-    }
+    $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
+    $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
+    $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO);
   }
 }
 catch(\InfraException $e) {
@@ -54,21 +69,20 @@ catch(\InfraException $e) {
     LogSEI::getInstance()->gravar($strmensagemErro);
 }
 
-if($objInfraException->contemValidacoes()) {
+if ($objInfraException->contemValidacoes()) {
 
-    $arrErros = array();
-  foreach($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
-      $strAtributo = $objInfraValidacao->getStrAtributo();
-    if(!array_key_exists($strAtributo, $arrErros)){
-        $arrErros[$strAtributo] = array();
+  $arrErros = array();
+  foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
+    $strAtributo = $objInfraValidacao->getStrAtributo();
+    if (!array_key_exists($strAtributo, $arrErros)) {
+      $arrErros[$strAtributo] = array();
     }
-      $arrErros[$strAtributo][] = utf8_encode($objInfraValidacao->getStrDescricao());
+    $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
   }
 
-    $arrResponse['erros'] = $arrErros;
-}
-else {
-    $arrResponse['sucesso'] = true;
+  $arrResponse['erros'] = $arrErros;
+} else {
+  $arrResponse['sucesso'] = true;
 }
 
 print json_encode($arrResponse);

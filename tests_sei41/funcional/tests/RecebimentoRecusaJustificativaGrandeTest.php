@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group4
  */
-class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
+class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCase
 {
 
     protected $destinatarioWs;
@@ -47,7 +47,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
@@ -97,7 +97,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends CenarioBaseTestCase
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();
         $parametros->recusaDeTramite->IDT = $id_tramite;
-        $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
+        $parametros->recusaDeTramite->justificativa = mb_convert_encoding($justificativa, 'UTF-8', 'ISO-8859-1');
         $parametros->recusaDeTramite->motivo = "99";
         return $servicoPEN->recusarTramite($parametros);
     }

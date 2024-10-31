@@ -9,8 +9,6 @@ try {
   $objPaginaSEI = PaginaSEI::getInstance();
   $objSessaoSEI = SessaoSEI::getInstance();
 
-  // $objSessaoSEI->validarLink();
-
   $strActionPadrao = SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . '&id_documento=' . $_GET['id_documento']);
   PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaBloco', 'chakSinEstadoGerado', 'selUnidadeGeradora', 'hdnMeusBlocos'));
 
@@ -48,16 +46,16 @@ try {
         $arrObjTramiteEmBloco = [];
         $excluir = true;
         foreach ($arrTramiteEmBloco as $objTramiteEmBloco) {
-          $tramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-          $tramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($objTramiteEmBloco->getNumId());
-          $tramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-          $tramitaEmBlocoProtocoloDTO->retNumId();
-          $tramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
+          $PenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+          $PenBlocoProcessoDTO->setNumIdBloco($objTramiteEmBloco->getNumId());
+          $PenBlocoProcessoDTO->retNumIdBloco();
+          $PenBlocoProcessoDTO->retNumIdBlocoProcesso();
+          $PenBlocoProcessoDTO->retDblIdProtocolo();
+
+          $PenBlocoProcessoRN = new PenBlocoProcessoRN();
+          $arrPenBlocoProcessoRN = $PenBlocoProcessoRN->listar($PenBlocoProcessoDTO);
   
-          $tramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-          $arrTramitaEmBlocoProtocoloRN = $tramitaEmBlocoProtocoloRN->listar($tramitaEmBlocoProtocoloDTO);
-  
-          if ($arrTramitaEmBlocoProtocoloRN == null) {
+          if ($arrPenBlocoProcessoRN == null) {
             $arrObjTramiteEmBloco[] = $objTramiteEmBloco;
           } else {
             $excluir = false;
@@ -83,7 +81,6 @@ try {
       $checkboxesEstados = [
         'chkSinEstadoGerado' => TramiteEmBlocoRN::$TE_ABERTO,
         'chkSinEstadoDisponibilizado' => TramiteEmBlocoRN::$TE_DISPONIBILIZADO,
-        'chkSinEstadoConcluidoParcialmente' => TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE,
         'chkSinEstadoConcluido' => TramiteEmBlocoRN::$TE_CONCLUIDO
       ];
 
@@ -120,8 +117,10 @@ try {
 
   $objFiltroDTO = new TramiteEmBlocoDTO();
   $objFiltroDTO->retNumId();
+  $objFiltroDTO->retNumOrdem();
   $objFiltroDTO->retStrStaEstado();
   $objFiltroDTO->retStrDescricao();
+  $objFiltroDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
   $objFiltroDTO->setStrPalavrasPesquisa($setStrPalavrasPesquisa);
 
 
@@ -136,7 +135,8 @@ try {
 
   // Cabeçalho da tabela
   $colunas = [
-    'id' => 'Número',
+    'id' => 'Id',
+    'ordem' => 'Número',
     'estado' => 'Estado',
     'descricao' => 'Descrição',
   ];
@@ -146,6 +146,7 @@ try {
   foreach ($arrObjBlocosListar as $objFiltro) {
     $tabelaLinhas[] = [
       'id' => $objFiltro->getNumId(),
+      'ordem' => $objFiltro->getNumOrdem(),
       'estado' => $objTramiteEmBloco->retornarEstadoDescricao($objFiltro->getStrStaEstado()),
       'descricao' => $objFiltro->getStrDescricao(),
     ];
@@ -171,46 +172,51 @@ try {
   $strResultado .= '<th class="infraTh" width="1%">' . PaginaSEI::getInstance()->getThCheck() . '</th>' . "\n";
 
   // Adicionar colunas dinamicamente
-  foreach ($colunas as $coluna) {
-    $strResultado .= '<th class="infraTh" width="10%">';
+  foreach ($colunas as $key => $coluna) {
+    if ($key != 'id') {
+      $strResultado .= '<th class="infraTh" width="10%">';
 
-    $strResultado .= '<div class="infraDivOrdenacao">';
-    $strResultado .= "<div class='infraDivRotuloOrdenacao'>{$coluna}</div>";
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() . '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
-    $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() . '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
-    $strResultado .= '</div>';
+      $strResultado .= '<div class="infraDivOrdenacao">';
+      $strResultado .= "<div class='infraDivRotuloOrdenacao'>{$coluna}</div>";
+      $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1002"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAcima() . '" title="Ordenar Processo Ascendente" alt="Ordenar Processo Ascendente" class="infraImgOrdenacao"></a></div>';
+      $strResultado .= '<div class="infraDivSetaOrdenacao"><a href="javascript:void(0);" tabindex="1003"><img src="' . PaginaSEI::getInstance()->getIconeOrdenacaoColunaAbaixo() . '" title="Ordenar Processo Descendente" alt="Ordenar Processo Descendente" class="infraImgOrdenacao"></a></div>';
+      $strResultado .= '</div>';
 
-    $strResultado .= '</th>' . "\n";
+      $strResultado .= '</th>' . "\n";
+    }
   }
   // Adicionar coluna ações
   $strResultado .= '<th class="infraTh" width="10%">';
   $strResultado .= "<div class='infraDivRotuloOrdenacao'>Ações</div>";
   $strResultado .= '</th>' . "\n";
   $strResultado .= "</thead>";
-
   foreach ($tabelaLinhas as $cont => $linha) {
+
     $strResultado .= "<tr class='infraTrClara'>";
     $strResultado .= '<td>' . PaginaSEI::getInstance()->getTrCheck($cont, $linha['id'], $linha['id']) . '</td>';
     $idBlocoTramite = '';
     foreach ($colunas as $key => $coluna) {
       $idBlocoTramite = $linha['id'];
 
-      if ($linha[$key]) {
+      if (!is_null($linha[$key]) && $key != 'id') {
         $strResultado .= "<td align='center'> {$linha[$key]} </td>";
       }
+      
     }
 
     $strResultado .= "<td align=''>";
      // Tramitar bloco
-    $objTramitaEmBlocoProtocoloDTO = new TramitaEmBlocoProtocoloDTO();
-    $objTramitaEmBlocoProtocoloDTO->setNumIdTramitaEmBloco($idBlocoTramite);
-    $objTramitaEmBlocoProtocoloDTO->retDblIdProtocolo();
-    $objTramitaEmBlocoProtocoloDTO->retNumIdTramitaEmBloco();
-    $objTramitaEmBlocoProtocoloRN = new TramitaEmBlocoProtocoloRN();
-    $arrTramiteEmBlocoProtocolo = $objTramitaEmBlocoProtocoloRN->listar($objTramitaEmBlocoProtocoloDTO);
+     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+     $objPenBlocoProcessoDTO->setNumIdBloco($idBlocoTramite);
+     $objPenBlocoProcessoDTO->retDblIdProtocolo();
+     $objPenBlocoProcessoDTO->retNumIdBloco();
+ 
+     $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+     $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
-    if (!empty($arrTramiteEmBlocoProtocolo) && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
-      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_lote&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
+     $bolUnidadeMapeada = $objTramiteEmBloco->existeUnidadeMapeadaParaUnidadeLogada();
+    if (!empty($arrPenBlocoProcesso) && $bolUnidadeMapeada && $linha['estado'] == $objTramiteEmBloco->retornarEstadoDescricao(TramiteEmBlocoRN::$TE_ABERTO)) {
+      $strResultado .= '<a href="' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_expedir_bloco&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao'] . '&id_tramita_em_bloco=' . $idBlocoTramite . '&tramite_em_bloco=1') . '" tabindex="' . PaginaSEI::getInstance()->getProxTabTabela() . '"><img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . '" title="Tramitar Bloco" alt="Bloco-' . $cont . '" class="infraImg iconTramita" /></a>&nbsp;';
     }
 
 
@@ -492,11 +498,6 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
           <div id="divSinEstadoDisponibilizado" class="infraDivCheckbox">
             <input type="checkbox" <?php echo in_array(TramiteEmBlocoRN::$TE_DISPONIBILIZADO, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> id="chkSinEstadoDisponibilizado" name="chkSinEstadoDisponibilizado" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoDisponibilizado) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
             <label id="lblSinEstadoDisponibilizado" for="chkSinEstadoDisponibilizado" accesskey="" class="infraLabelCheckbox">Aguardando Processamento</label>
-          </div>
-
-          <div id="divSinEstadoConcluidoParcialmente" class="infraDivCheckbox">
-            <input type="checkbox" id="chkSinEstadoConcluidoParcialmente" <?php echo in_array(TramiteEmBlocoRN::$TE_CONCLUIDO_PARCIALMENTE, $arrEstadosSelecionados) || empty($arrEstadosSelecionados) ? "checked" : ""; ?> name="chkSinEstadoConcluidoParcialmente" class="infraCheckbox CheckboxEstado" <?= $objPaginaSEI->setCheckbox($strSinEstadoConcluidoParcialmente) ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-            <label id="lblSinEstadoConcluido" for="chkSinEstadoConcluidoParcialmente" accesskey="" class="infraLabelCheckbox">Concluído Parcialmente</label>
           </div>
 
           <div id="divSinEstadoConcluido" class="infraDivCheckbox">

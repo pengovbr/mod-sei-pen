@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group4
  */
-class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
+class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -39,6 +39,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         // Carregar contexto de testes e dados sobre certificado digital
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Instanciar objeto de teste utilizando o BeSimpleSoap
         $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
@@ -60,7 +61,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, self::$remetente, self::$destinatario, $metadadosDocumentoTeste);
         $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $metadadosDocumentoTeste);
         $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
+         
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -87,7 +88,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org1-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
     /**
@@ -125,8 +127,9 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
         self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
+        putenv("DATABASE_HOST=org2-database");
         $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
     /**
@@ -267,12 +270,12 @@ class TramiteRecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(

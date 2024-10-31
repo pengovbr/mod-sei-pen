@@ -2,9 +2,9 @@
 
 /**
  * Execution Groups
- * @group execute_alone_group5
+ * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -34,7 +34,7 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends CenarioBaseT
         self::$destinatario['NOME_UNIDADE'] = self::$remetente['NOME_UNIDADE_SECUNDARIA'];
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'] = self::$remetente['SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'];
 
-        $this->realizarTramiteExternoSemvalidacaoNoRemetente(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -52,10 +52,9 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends CenarioBaseT
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

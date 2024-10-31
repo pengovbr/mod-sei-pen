@@ -4,7 +4,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoGeradoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -30,17 +30,19 @@ class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        // 1 - Acessar sistema do this->REMETENTE do processo
+
+        // 1 - Cadastrar novo processo de teste
+        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado(); 
+        
+        // 2 - Incluir Documentos no Processo
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+
+        // 3 - Acessar sistema do this->REMETENTE do processo
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // 2 - Cadastrar novo processo de teste
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-
-        // 3 - Incluir Documentos no Processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-
-        // 4 - Assinar documento interno criado anteriormente
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        // 4 - Abrir processo
+        $this->abrirProcesso(self::$protocoloTeste);
 
         // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
@@ -70,10 +72,9 @@ class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
         // 6 - Verificar se situação atual do processo está como bloqueado
         $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -114,7 +115,7 @@ class TramiteProcessoContendoDocumentoGeradoTest extends CenarioBaseTestCase
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // 12 - Validar dados  do processo
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(self::$processoTeste['DESCRICAO'], self::$processoTeste['RESTRICAO'], self::$processoTeste['OBSERVACOES'], array(self::$processoTeste['INTERESSADOS']));

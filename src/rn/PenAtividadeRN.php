@@ -108,12 +108,8 @@ class PenAtividadeRN extends AtividadeRN {
             $objAtributoAndamentoBD = new AtributoAndamentoBD($objBancoSEI);
             $arrAtributoAndamentoDTO = $objAtributoAndamentoBD->listar($objAtributoAndamentoDTO);
 
-            //$objAtributoAndamentoDTO = current($arrAtributoAndamentoDTO);
             $objAtributoAndamentoDTO = $arrAtributoAndamentoDTO[0];
-            //print_r($objAtributoAndamentoDTO);
 
-            //echo "objAtributoAndamentoDTO->getStrValor(): " . $objAtributoAndamentoDTO->getStrValor();
-            //die();
             $obProtocoloDTO = new ProtocoloDTO();
             $obProtocoloDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
             $obProtocoloDTO->retStrProtocoloFormatado();

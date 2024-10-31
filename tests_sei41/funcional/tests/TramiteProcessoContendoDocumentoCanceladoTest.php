@@ -9,7 +9,7 @@
  * Execution Groups
  * @group execute_parallel_with_two_group1
  */
-class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
+class TramiteProcessoContendoDocumentoCanceladoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -40,19 +40,17 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
         self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
         // Acessar sistema do this->REMETENTE do processo
+        $objProtocoloTesteDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+        self::$protocoloTeste = $objProtocoloTesteDTO->getStrProtocoloFormatado();
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, $objProtocoloTesteDTO->getDblIdProtocolo());
+        $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, $objProtocoloTesteDTO->getDblIdProtocolo());
+
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // Cadastrar novo processo de teste e incluir documentos relacionados
-        $this->paginaBase->navegarParaControleProcesso();
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste1);     
-
-        // Realiza o cancelamento de um documento interno do processo
-        $this->cadastrarDocumentoInterno(self::$documentoTeste2);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
+        $this->abrirProcesso(self::$protocoloTeste);
 
         //Tramitar internamento para liberação da funcionalidade de cancelar
-        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], self::$processoTeste);
+        $this->tramitarProcessoInternamenteParaCancelamento(self::$remetente['SIGLA_UNIDADE'], self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], [ 'PROTOCOLO' => self::$protocoloTeste ]);
 
         $this->navegarParaCancelarDocumento(1);
         $this->paginaCancelarDocumento->cancelar("Motivo de teste");
@@ -86,10 +84,9 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
@@ -120,7 +117,7 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $strTipoProcesso = utf8_encode("Tipo de processo no órgão de origem: ");
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
         $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
         $this->validarDadosProcesso(
@@ -154,17 +151,19 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        putenv("DATABASE_HOST=org2-database");
 
         // Definição de dados de teste do processo principal
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        // Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
+        // Busca dados do protocolo no org2
+        $objProtocoloTesteDTO = $this->consultarProcessoFixture(self::$protocoloTeste, \ProtocoloRN::$TP_PROCEDIMENTO);
+        
         // Incluir novos documentos relacionados
-        $this->abrirProcesso(self::$protocoloTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste3);
+        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloTesteDTO->getDblIdProtocolo());
 
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+        $this->abrirProcesso(self::$protocoloTeste);
         // Trâmitar Externamento processo para órgão/unidade destinatária
         $this->tramitarProcessoExternamente(
             self::$protocoloTeste,
@@ -195,10 +194,9 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends CenarioBaseTestCase
 
         $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
             sleep(5);
-            $this->atualizarTramitesPEN();
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(utf8_encode("Processo em trâmite externo para "), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;

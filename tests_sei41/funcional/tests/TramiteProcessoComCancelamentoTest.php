@@ -6,7 +6,7 @@
  * Execution Groups
  * @group execute_without_receiving
  */
-class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
+class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -32,19 +32,12 @@ class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoInterno(self::$documentoTeste);
-        $this->assinarDocumento(self::$remetente['ORGAO'], self::$remetente['CARGO_ASSINATURA'], self::$remetente['SENHA']);
-
-        $this->tramitarProcessoExternamente(
-            self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
-        );
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $this->paginaProcesso->cancelarTramitacaoExterna();
         $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
-        $mensagemEsperada = utf8_encode("O trâmite externo do processo foi cancelado com sucesso!");
+        $mensagemEsperada = mb_convert_encoding("O trâmite externo do processo foi cancelado com sucesso!", 'UTF-8', 'ISO-8859-1');
         $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);
         $this->assertFalse($this->paginaProcesso->processoBloqueado());
         $this->assertTrue($this->paginaProcesso->processoAberto());
@@ -95,18 +88,12 @@ class TramiteProcessoComCancelamentoTest extends CenarioBaseTestCase
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_001.pdf');
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-        self::$protocoloTeste = $this->cadastrarProcesso(self::$processoTeste);
-        $this->cadastrarDocumentoExterno(self::$documentoTeste);
-
-        $this->tramitarProcessoExternamente(
-            self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
-        );
+        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $this->paginaProcesso->cancelarTramitacaoExterna();
         $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
-        $mensagemEsperada = utf8_encode("O trâmite externo do processo foi cancelado com sucesso!");
+        $mensagemEsperada = mb_convert_encoding("O trâmite externo do processo foi cancelado com sucesso!", 'UTF-8', 'ISO-8859-1');
         $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta);
         $this->assertFalse($this->paginaProcesso->processoBloqueado());
         $this->assertTrue($this->paginaProcesso->processoAberto());

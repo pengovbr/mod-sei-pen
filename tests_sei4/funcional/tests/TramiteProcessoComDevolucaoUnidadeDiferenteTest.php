@@ -5,7 +5,7 @@
  * Execution Groups
  * @group execute_alone_group3
  */
-class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCase
+class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -21,7 +21,7 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCas
      *
      * @group envio
      * @large
-     * 
+     *
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
      * @return void
@@ -36,7 +36,7 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCas
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
     }
 
@@ -82,7 +82,8 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCas
         self::$documentoTeste4 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
         $documentos = array(self::$documentoTeste3, self::$documentoTeste4);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+        putenv("DATABASE_HOST=org2-database");
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
     }
 
 
@@ -101,4 +102,5 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends CenarioBaseTestCas
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
+
 }

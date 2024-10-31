@@ -91,7 +91,6 @@ try {
   $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
   $objTipoProcedimentoDTO->retNumIdTipoProcedimento();
   $objTipoProcedimentoDTO->retStrNome();
-  //$objTipoProcedimentoDTO->retStrDescricao();
 
   if ($_GET['acao'] == 'tipo_procedimento_reativar') {
     //Lista somente inativos

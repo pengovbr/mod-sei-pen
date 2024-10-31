@@ -154,6 +154,7 @@ try {
     $objPenHipoteseLegalDTO = new PenHipoteseLegalDTO();
     $objPenHipoteseLegalDTO->setDistinct(true);
     $objPenHipoteseLegalDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPenHipoteseLegalDTO->setStrAtivo('S');
     $objPenHipoteseLegalDTO->retNumIdHipoteseLegal();
     $objPenHipoteseLegalDTO->retStrNome();
    
@@ -205,7 +206,6 @@ try {
         $strResultado .= '<td>'.$arrMapIdHipoteseLegal[$objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal()].'</td>';
         $strResultado .= '<td align="center">';
             
-        //$strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_visualizar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src="imagens/consultar.gif" title="Consultar Mapeamento" alt="Consultar Mapeamento" class="infraImg"></a>';
       if($objSessao->verificarPermissao('pen_map_hipotese_legal_recebimento_alterar')) {
         $strResultado .= '<a href="'.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao_origem'].'&acao_retorno='.$_GET['acao'].'&'.PEN_PAGINA_GET_ID.'='.$objPenRelHipoteseLegalDTO->getDblIdMap()).'"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif") . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
@@ -352,7 +352,7 @@ function onClickBtnExcluir(){
 $objPagina->fecharHead();
 $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
 ?>
-<form id="frmAcompanharEstadoProcesso" method="post" action="<?php // print $objSessao->assinarLink($strProprioLink); ?>">
+<form id="frmAcompanharEstadoProcesso" method="post" action="">
     
     <?php $objPagina->montarBarraComandosSuperior($arrComandos); ?>
     <?php //$objPagina->montarAreaValidacao(); ?>

@@ -41,8 +41,7 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
      * @return integer
      */
   protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
-      $objBanco = BancoSEI::getInstance();
-      $objGenericoBD = new GenericoBD($objBanco);
+      $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
       // Mapeamento da hipotese legal remota
       $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
@@ -56,6 +55,23 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
         return $objPenRelHipoteseLegal->getNumIdentificacao();
     } else {
         return null;
+    }
+  }
+
+  /**
+   * Contar HipoteseLegal
+   *
+   * @param PenRelHipoteseLegalDTO $objDTO
+   * @return int
+   * @throws InfraException
+   */
+  protected function contarConectado(PenRelHipoteseLegalDTO $objDTO) {
+    try {
+        $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        return $objGenericoBD->contar($objDTO);
+    }
+    catch(Exception $e){
+        throw new InfraException('Erro contando HipoteseLegal.', $e);
     }
   }
 }

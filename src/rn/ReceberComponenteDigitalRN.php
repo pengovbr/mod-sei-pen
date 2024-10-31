@@ -243,7 +243,6 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objComponenteDigitalDTO->setStrNumeroRegistro($parObjComponenteDigitalDTO->getStrNumeroRegistro());
       $objComponenteDigitalDTO->setDblIdDocumento($parObjComponenteDigitalDTO->getDblIdDocumento());
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjComponenteDigitalDTO->getDblIdProcedimento());
-      //$objComponenteDigitalDTO->setNumOrdem($parObjComponenteDigitalDTO->getNumOrdem());
       $objComponenteDigitalDTO->setNumIdAnexo($parObjAnexoDTO->getNumIdAnexo());
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
       $objComponenteDigitalDTO = $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
@@ -282,7 +281,6 @@ class ReceberComponenteDigitalRN extends InfraRN
       $strHashInformado = $strHashConteudo;
       $strHashInformado = base64_decode($strHashInformado);
 
-      //$objAnexoRN = new AnexoRN();
       $strCaminhoAnexo = DIR_SEI_TEMP.'/'.$objAnexoDTO->getNumIdAnexo();
       $strHashDoArquivo = hash_file("sha256", $strCaminhoAnexo, true);
 
