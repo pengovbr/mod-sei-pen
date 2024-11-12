@@ -7,7 +7,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 ## Compatibilidade de versões
 * O módulo é compatível com as seguintes versões do **SEI**:
   * 4.0.0 até 4.0.12,
-  * 4.1.1.
+  * 4.1.1, 4.1.2, 4.1.3 e 4.1.4
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
