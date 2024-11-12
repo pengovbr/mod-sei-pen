@@ -2812,9 +2812,9 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         'id_unidade' => array($objMetaRestricaoBD->tipoNumero(), PenMetaBD::NNULLO),
         'id_unidade_rh' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
         'id_unidade_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::NNULLO),
-        'nome_unidade_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), $SNULLO),
-        'id_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), $SNULLO),
-        'nome_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), $SNULLO),
+        'nome_unidade_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
+        'id_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoNumeroGrande(), PenMetaBD::SNULLO),
+        'nome_unidade_rh_restricao' => array($objMetaRestricaoBD->tipoTextoVariavel(255), PenMetaBD::SNULLO),
       ),
       'pk' => array('cols' => array('id')),
       'fks' => array(
