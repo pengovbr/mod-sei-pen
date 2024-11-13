@@ -5,7 +5,7 @@ use PHPUnit\Extensions\Selenium2TestCase;
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};
 use Tests\Funcional\Sei\Fixtures\{DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
-use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture};
+use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture,InfraAgendamentoTarefaFixture};
 
 use function PHPSTORM_META\map;
 /**
@@ -281,6 +281,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
 
         return $objProtocoloFixture->atualizar($parametros);
     }
+
   /**
    * Método cadastrarHipoteseLegal
    * 
@@ -328,4 +329,29 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
       return $objTipoProcedimentoDTO;
     }
 
+    /**
+     * Reativar ou desativar tarefas de agendamento específicas.
+     *
+     * Esse método busca e atualiza uma tarefa de agendamento com base no comando fornecido
+     * e no status desejado. Ele permite ativar ou desativar tarefas específicas de acordo com
+     * a configuração passada no parâmetro.
+     *
+     * @param array $dados Contém os parâmetros da tarefa de agendamento:
+     *                     - 'COMANDO': Nome do comando da tarefa a ser buscada.
+     *                     - 'SIN_ATIVO': Estado desejado para a tarefa ('S' para ativo, 'N' para inativo).
+     *
+     * @return void
+     */
+    protected function desativarReativarAgendamentoTarefas($dados = [])
+    {
+      $objInfraAgendamentoTarefaFixture = new InfraAgendamentoTarefaFixture();
+      $objInfraAgendamentoTarefaDTO = $objInfraAgendamentoTarefaFixture->buscar([
+        'Comando' => $dados['COMANDO']
+      ]);
+      $param = [
+        'IdInfraAgendamentoTarefa' => $objInfraAgendamentoTarefaDTO[0]->getNumIdInfraAgendamentoTarefa(),
+        'SinAtivo' => $dados['SIN_ATIVO']
+      ];
+      $objInfraAgendamentoTarefaFixture->atualizar($param);
+    }
 }
