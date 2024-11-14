@@ -150,62 +150,62 @@ class ReceberComponenteDigitalRN extends InfraRN
 
         $contDocumentosDto = 0;
         $arrayRetornoObjAnexoDTO = array();
-      foreach ($arrObjDocumentoDTO as $objDocumentoDTO){
-          $contDocumentosDto++;
-          $objAnexoRN = new AnexoRN();
+      	foreach ($arrObjDocumentoDTO as $objDocumentoDTO) {
+			$contDocumentosDto++;
+			$objAnexoRN = new AnexoRN();
 
-          $strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
-          $strNomeArquivoCompactado = $objAnexoRN->gerarNomeArquivoTemporario();
-          $strCaminhoCompletoArquivoZip = DIR_SEI_TEMP.'/'.$strNomeArquivoCompactado;
+			$strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
+			$strNomeArquivoCompactado = $objAnexoRN->gerarNomeArquivoTemporario();
+			$strCaminhoCompletoArquivoZip = DIR_SEI_TEMP.'/'.$strNomeArquivoCompactado;
 
-          $zipFile= new ZipArchive();
-          $zipFile->open($strCaminhoCompletoArquivoZip, ZIPARCHIVE::CREATE);
+			$zipFile= new ZipArchive();
+			$zipFile->open($strCaminhoCompletoArquivoZip, ZIPARCHIVE::CREATE);
 
-          $arrObjDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTO, 'IdDocumento');
-          $numCasas=floor(log10(count($arrObjDocumentoDTO)))+1;
-          $numSequencial = 0;
-        foreach($arrIdDocumentos as $dblIdDocumento){
-          $objDocumentoDTO = $arrObjDocumentoDTO[$dblIdDocumento];
-          $strDocumento = '';
-          if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
-              $arrayAnexosExcluirFisicamente = array();
-            foreach ($parArrAnexoDTO as $objAnexoDTO){
-              $numSequencial++;
+			$arrObjDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTO, 'IdDocumento');
+			$numCasas=floor(log10(count($arrObjDocumentoDTO)))+1;
+			$numSequencial = 0;
+			foreach($arrIdDocumentos as $dblIdDocumento){
+			$objDocumentoDTO = $arrObjDocumentoDTO[$dblIdDocumento];
+			$strDocumento = '';
+			if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
+				$arrayAnexosExcluirFisicamente = array();
+				foreach ($parArrAnexoDTO as $objAnexoDTO){
+				$numSequencial++;
 
-              if ($objAnexoDTO==null){
-                    $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
-              }else{
-                      /**
-                       * Aqui será atribuído um nome aos anexos
-                       */
-                      $ext = explode('.', $objAnexoDTO->getStrNome());
-                      /**
-                       * o código abaixo foi comentado, pois com ele estavam sendo gerados os nomes que não refletiam os nomes reais dos arquivos.
-                       */
-                      $ext = strtolower($ext[count($ext)-1]);
-                      $strNomeArquivo = $objAnexoDTO->getStrNome();
+				if ($objAnexoDTO==null){
+						$objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
+				}else{
+						/**
+						 * Aqui será atribuído um nome aos anexos
+						 */
+						$ext = explode('.', $objAnexoDTO->getStrNome());
+						/**
+						 * o código abaixo foi comentado, pois com ele estavam sendo gerados os nomes que não refletiam os nomes reais dos arquivos.
+						 */
+						$ext = strtolower($ext[count($ext)-1]);
+						$strNomeArquivo = $objAnexoDTO->getStrNome();
 
-                      /**
-                       * Aqui, o anexo será adicionado ao zip
-                       */
-                      $strLocalizacaoArquivo = DIR_SEI_TEMP.'/'. $objAnexoDTO->getNumIdAnexo() ;
-                      //if ($zipFile->addFile($strLocalizacaoArquivo,'['.$numComponenteDigital.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
-                if ($zipFile->addFile($strLocalizacaoArquivo, '['.$numSequencial.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
-                          throw new InfraException('Erro adicionando arquivo externo ao zip.');
-                }
-                else{
-                              /**
-                               * Aqui quer dizer que o arquivo já foi colocado dentro do zip.
-                               * Vamos colocá-lo em um array e depois utilizarmos este array para fazer as exclusões.
-                               */
-                              array_push($arrayAnexosExcluirFisicamente, $strLocalizacaoArquivo);
-                }
-              }
-            }
-          }else{
-              $objInfraException->adicionarValidacao('Não foi possível detectar o tipo do documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado().'.');
-          }
-        }
+						/**
+						 * Aqui, o anexo será adicionado ao zip
+						 */
+						$strLocalizacaoArquivo = DIR_SEI_TEMP.'/'. $objAnexoDTO->getNumIdAnexo() ;
+						//if ($zipFile->addFile($strLocalizacaoArquivo,'['.$numComponenteDigital.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
+					if ($zipFile->addFile($strLocalizacaoArquivo, '['.$numSequencial.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
+							throw new InfraException('Erro adicionando arquivo externo ao zip.');
+					}
+					else{
+								/**
+								 * Aqui quer dizer que o arquivo já foi colocado dentro do zip.
+								 * Vamos colocá-lo em um array e depois utilizarmos este array para fazer as exclusões.
+								 */
+								array_push($arrayAnexosExcluirFisicamente, $strLocalizacaoArquivo);
+					}
+				}
+				}
+			}else{
+				$objInfraException->adicionarValidacao('Não foi possível detectar o tipo do documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado().'.');
+			}
+			}
           $objInfraException->lancarValidacoes();
         if ($zipFile->close() === false) {
             throw new InfraException('Não foi possível fechar arquivo zip.');
@@ -243,6 +243,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objComponenteDigitalDTO->setStrNumeroRegistro($parObjComponenteDigitalDTO->getStrNumeroRegistro());
       $objComponenteDigitalDTO->setDblIdDocumento($parObjComponenteDigitalDTO->getDblIdDocumento());
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjComponenteDigitalDTO->getDblIdProcedimento());
+      //$objComponenteDigitalDTO->setNumOrdem($parObjComponenteDigitalDTO->getNumOrdem());
       $objComponenteDigitalDTO->setNumIdAnexo($parObjAnexoDTO->getNumIdAnexo());
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
       $objComponenteDigitalDTO = $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
@@ -253,11 +254,11 @@ class ReceberComponenteDigitalRN extends InfraRN
      * @return AnexoDTO
      *
      */
-  public function copiarComponenteDigitalPastaTemporaria($parObjComponenteDigital, $parObjConteudo)
-    {
-    if(!isset($parObjComponenteDigital)){
-        throw new InfraException("Componente Digital não informado");
-    }
+  public function copiarComponenteDigitalPastaTemporaria($parArrComponenteDigital, $parObjConteudo)
+  {
+      if (!isset($parArrComponenteDigital)) {
+          throw new InfraException("Componente Digital não informado");
+      }
       $objAnexoRN = new AnexoRN();
       $strNomeArquivoUpload = $objAnexoRN->gerarNomeArquivoTemporario();
       $strConteudoCodificado = $parObjConteudo->conteudoDoComponenteDigital;
@@ -272,12 +273,12 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
       $objAnexoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUpload));
       $objAnexoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objAnexoDTO->setStrNome($parObjComponenteDigital->nome);
+      $objAnexoDTO->setStrNome($parArrComponenteDigital['nome']);
       return $objAnexoDTO;
   }
 
   public function validarIntegridadeDoComponenteDigital(AnexoDTO $objAnexoDTO, $strHashConteudo, $parNumIdentificacaoTramite, $parNumOrdemComponente)
-    {
+  {
       $strHashInformado = $strHashConteudo;
       $strHashInformado = base64_decode($strHashInformado);
 
