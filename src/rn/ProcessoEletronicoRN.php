@@ -402,6 +402,71 @@ class ProcessoEletronicoRN extends InfraRN
       return $arrObjEstruturaDTO;
   }
 
+
+      /**
+     * Lista estruturas de um repositório de estruturas.
+     *
+     * @param int $idRepositorioEstrutura ID do repositório de estruturas.
+     * @param string $nome
+     * @param int $numeroDeIdentificacaoDaEstruturaRaizDaConsulta 
+     * @param string $nomeUnidade 
+     * @param string $siglaUnidade 
+     * @param int $offset Offset 
+     * @param int $registrosPorPagina 
+     * @param bool $parBolPermiteRecebimento 
+     * @param bool $parBolPermiteEnvio
+     * @throws InfraException 
+     * @return EstruturaDTO 
+     */
+	public function buscarEstrutura(
+    $idRepositorioEstrutura,
+    $nome = '',
+    $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
+    $nomeUnidade = null,
+    $siglaUnidade = null,
+    $offset = null,
+    $registrosPorPagina = null,
+    $parBolPermiteRecebimento = null,
+    $parBolPermiteEnvio = null
+) {
+  $arrObjEstruturaDTO = [];
+try {
+    $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
+  if (!$idRepositorioEstrutura) {
+    throw new InfraException('Repositório de Estruturas inválido');
+  }
+
+   $rh = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta ?: $nome;
+
+   $estrutura = $this->buscarEstruturaRest($idRepositorioEstrutura, $rh);
+
+    if ($estrutura !== null) {
+
+      $objEstruturaDTO = new EstruturaDTO();
+      $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($estrutura['numeroDeIdentificacaoDaEstrutura']);
+      $objEstruturaDTO->setStrNome(mb_convert_encoding($estrutura['nome'], 'ISO-8859-1', 'UTF-8'));
+      $objEstruturaDTO->setStrSigla(mb_convert_encoding($estrutura['sigla'], 'ISO-8859-1', 'UTF-8'));
+      $objEstruturaDTO->setBolAtivo($estrutura['ativo']);
+      $objEstruturaDTO->setBolAptoParaReceberTramites($estrutura['aptoParaReceberTramites']);
+      $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura['codigoNoOrgaoEntidade']);
+
+      $arrHerarquia = array_map(function ($nivel) {
+          return mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8');
+      }, $estrutura['hierarquia'] ?: []);
+
+      $objEstruturaDTO->setArrHierarquia($arrHerarquia);
+
+      return $objEstruturaDTO;
+    }
+
+    return null;
+} catch (Exception $e) {
+    throw new InfraException("Falha na obtenção de unidades externas");
+}
+
+  return $arrObjEstruturaDTO;
+}
+
     /**
    * Verifica se o repositório de estruturas possui limitação de repositórios/unidades mapeadas
    *
@@ -1662,35 +1727,6 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }
 
-  public function receberComponenteDigitalS($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
-    {
-    try
-    {
-
-        $parametros = new stdClass();
-        $parametros->parametrosParaRecebimentoDeComponenteDigital = new stdClass();
-        $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital = new stdClass();
-        $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->IDT = $parNumIdentificacaoTramite;
-        $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->protocolo = $parStrProtocolo;
-        $parametros->parametrosParaRecebimentoDeComponenteDigital->identificacaoDoComponenteDigital->hashDoComponenteDigital = $parStrHashComponenteDigital;
-
-        //Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
-      if(!is_null($parObjParteComponente)){
-        $parametros->parametrosParaRecebimentoDeComponenteDigital->parte = $parObjParteComponente;
-      }
-
-        return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->receberComponenteDigital($parametros);
-        });
-    } catch (\SoapFault $fault) {
-        $mensagem = $this->tratarFalhaWebService($fault);
-        throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
-    } catch (\Exception $e) {
-        throw new InfraException("Error Processing Request", $e);
-    }
-  }
-
-
   public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
     {
       $endpoint = 'tramites';
@@ -2478,17 +2514,17 @@ class ProcessoEletronicoRN extends InfraRN
         // existe apenas o número do protocolo de referência
       if($bolDocumentoAnexado && !array_key_exists($strProtocoloProcAnexado, $arrObjRefProcessosAnexados)){
           $objProcessoAnexado = clone $objProcessoPrincipal;
-          $objProcessoAnexado->documento = array();
+          $objProcessoAnexado->documentos = array();
           $objProcessoAnexado->protocolo = $strProtocoloProcAnexado;
-          $objProcessoAnexado->ordemAjustada = count($objProcessoPrincipal->documento) + 1;
-          $objProcessoPrincipal->documento[] = $objProcessoAnexado;
+          $objProcessoAnexado->ordemAjustada = count($objProcessoPrincipal->documentos) + 1;
+          $objProcessoPrincipal->documentos[] = $objProcessoAnexado;
           $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] = $objProcessoAnexado;
       }
 
         $objProcessoDoDocumento = ($bolDocumentoAnexado) ? $arrObjRefProcessosAnexados[$strProtocoloProcAnexado] : $objProcessoPrincipal;
         $objDocumentoReposicionado = clone $objDocumento;
-        $objDocumentoReposicionado->ordemAjustada = count($objProcessoDoDocumento->documento) + 1;
-        $objProcessoDoDocumento->documento[] = $objDocumentoReposicionado;
+        $objDocumentoReposicionado->ordemAjustada = count($objProcessoDoDocumento->documentos) + 1;
+        $objProcessoDoDocumento->documentos[] = $objDocumentoReposicionado;
     }
 
     return $objProcessoPrincipal;
@@ -2548,11 +2584,16 @@ class ProcessoEletronicoRN extends InfraRN
      */
   private static function documentoFoiAnexado($parObjProtocolo, $parObjDocumento)
     {
+
       return (
-          isset($parObjDocumento->protocoloDoProcessoAnexado) &&
-          !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-          $parObjProtocolo['protocolo'] != $parObjDocumento->protocoloDoProcessoAnexado
-      );
+        isset($parObjDocumento->protocoloDoProcessoAnexado) &&
+        !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
+        (
+            is_array($parObjProtocolo) 
+                ? $parObjProtocolo['protocolo'] != $parObjDocumento->protocoloDoProcessoAnexado
+                : (is_object($parObjProtocolo) && $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado)
+        )
+    );
   }
 
     /**
@@ -2757,6 +2798,28 @@ class ProcessoEletronicoRN extends InfraRN
         $mensagem = "Falha na obtenção de unidades externas";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
+      /**
+     * Consulta as estruturas de um repositório de estruturas.
+     *
+     * @param int $idRepositorioEstrutura O ID do repositório de estruturas.
+     * @param array $parametros Parâmetros adicionais para a consulta.
+     * @throws InfraException Falha na obtenção de unidades externas.
+     * @return array
+     */
+    public function buscarEstruturaRest($idRepositorioEstrutura, $idUnidadeRH)
+    {
+      $endpoint = "repositorios-de-estruturas/{$idRepositorioEstrutura}/estruturas-organizacionais/{$idUnidadeRH}";
+    try {
+        $arrResultado = $this->get($endpoint);
+        return $arrResultado;
+    } catch (Exception $e) {
+        $mensagem = "Falha na obtenção de unidades externas";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        LogSEI::getInstance()->gravar($detalhes, InfraLog::$ERRO);
+        throw new InfraException($mensagem, $e, $mensagem);
     }
   }
 

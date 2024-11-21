@@ -1842,10 +1842,17 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objDocumentoDTO->setStrSinBloqueado('N');
 
+
+        if (isset($objDocumento->componenteDigital)) {
+          $componentesDigitais = $objDocumento->componenteDigital;
+        } else {
+          $componentesDigitais[] = $objDocumento->componentesDigitais;
+        } 
+
         //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
         $this->atribuirComponentesDigitais(
             $objDocumentoDTO, 
-            $objDocumento->componenteDigital,
+            $componentesDigitais,
             $arrDocumentosExistentesPorHash,
             $parObjMetadadosProcedimento->arrHashComponenteBaixados);
         
@@ -1921,6 +1928,7 @@ class ReceberProcedimentoRN extends InfraRN
     $arrObjAnexosDTO = array();
     $arrObjAnexoDTO = array();
     foreach ($objComponentesDigitais as $objComponenteDigital) {
+
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
         $bolComponenteDigitalExistente = array_key_exists($strHashComponenteDigital, $arrDocumentosExistentesPorHash);
@@ -2061,7 +2069,7 @@ class ReceberProcedimentoRN extends InfraRN
     // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
     $arrAnexo = array();
     $arrAnexo = $this->atribuirComponentesJaExistentesNoProcesso(
-                  $parObjDocumentoDTO,
+                  $objDocumentoDTO,
                   $parArrObjComponentesDigitais,
                   $arrDocumentosExistentesPorHash,
                   $arrHashComponenteBaixados
