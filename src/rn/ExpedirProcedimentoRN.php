@@ -245,14 +245,14 @@ class ExpedirProcedimentoRN extends InfraRN {
             try {
               $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
 
-            if($bolSinProcessamentoEmBloco){
-              $this->gravarLogDebug(sprintf('Envio do metadados do processo %s', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
-              $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
-              $objPenBlocoProcessoRN->alterar($objPenBlocoProcessoDTO);
-              $idAtividadeExpedicao = $numIdAtividade;
-            }else{
+              if($bolSinProcessamentoEmBloco){
+                $this->gravarLogDebug(sprintf('Envio do metadados do processo %s', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+                $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO);
+                $objPenBlocoProcessoRN->alterar($objPenBlocoProcessoDTO);
+                $idAtividadeExpedicao = $numIdAtividade;
+              }else{
                 $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $arrProcesso['idProcedimentoSEI']);
-            }
+              }
 
               $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
                   $arrProcesso['idProcedimentoSEI'],
@@ -292,14 +292,14 @@ class ExpedirProcedimentoRN extends InfraRN {
                   //TODO: Alterar atualizao para somente apresentar ao final de todo o trâmite
                   //$this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_CONCLUSAO);
 
-            if(!$bolSinProcessamentoEmBloco){
-              $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-              $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
-            }else{
-              $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
-              $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
-              $objPenBlocoProcessoRN->alterar($objPenBlocoProcessoDTO);
-            }
+              if(!$bolSinProcessamentoEmBloco){
+                $this->barraProgresso->mover($this->barraProgresso->getNumMax());
+                $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+              }else{
+                $this->gravarLogDebug('Concluído envio dos componentes do processo', 2);
+                $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE);
+                $objPenBlocoProcessoRN->alterar($objPenBlocoProcessoDTO);
+              }
 
                   $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 

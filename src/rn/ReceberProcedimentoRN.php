@@ -1667,9 +1667,9 @@ class ReceberProcedimentoRN extends InfraRN
 
     foreach($arrObjDocumentos as $objDocumento) {
 
-		if (is_array($objDocumento)) {
-			$objDocumento = (object) $objDocumento;
-		}
+      if (is_array($objDocumento)) {
+          $objDocumento = (object) $objDocumento;
+      }
 
       if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
@@ -2643,23 +2643,23 @@ class ReceberProcedimentoRN extends InfraRN
     * @param $parComponentePendente
     * @return $tamanhoComponentePendende
     */
-	private function obterTamanhoComponenteDigitalPendente($parObjProtocolo, $parComponentePendente)
-	{
-		//Obtém os documentos do protocolo em um array
-		$arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+  private function obterTamanhoComponenteDigitalPendente($parObjProtocolo, $parComponentePendente)
+    {
+      //Obtém os documentos do protocolo em um array
+      $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
 
-		//Percorre os documentos e compoenntes para pegar o tamanho em bytes do componente
-		foreach ($arrObjDocumentos as $objDocumento) {
-			$arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
-			foreach ($arrObjComponentesDigitais as $arrComponentesDigital) {
-				if (ProcessoEletronicoRN::getHashFromMetaDados($arrComponentesDigital['hash']) == $parComponentePendente) {
-					$tamanhoComponentePendende = $arrComponentesDigital['tamanhoEmBytes'];
-					break;
-				}
-			}
-		}
-		return $tamanhoComponentePendende;
-	}
+      //Percorre os documentos e compoenntes para pegar o tamanho em bytes do componente
+    foreach ($arrObjDocumentos as $objDocumento) {
+        $arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
+      foreach ($arrObjComponentesDigitais as $arrComponentesDigital) {
+        if (ProcessoEletronicoRN::getHashFromMetaDados($arrComponentesDigital['hash']) == $parComponentePendente) {
+            $tamanhoComponentePendende = $arrComponentesDigital['tamanhoEmBytes'];
+            break;
+        }
+      }
+    }
+      return $tamanhoComponentePendende;
+  }
 
 
     /**
@@ -2722,21 +2722,21 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
-	private function indexarComponenteDigitaisDoProtocolo($parObjProtocolo)
-	{
-		$resultado = array();
-		$arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
-		foreach ($arrObjDocumentos as $arrDocumento) {
-			if(isset($arrDocumento['componentesDigitais']) && !is_array($arrDocumento['componentesDigitais'])){
-				$arrDocumento['componentesDigitais'] = array($arrDocumento['componentesDigitais']);
-			}
-			foreach ($arrDocumento['componentesDigitais'] as $objComponente) {
-				$strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente['hash']);
-				$resultado[$strHash] = $objComponente;
-			}
-		}
-		return $resultado;
-	}
+  private function indexarComponenteDigitaisDoProtocolo($parObjProtocolo)
+    {
+      $resultado = array();
+      $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+    foreach ($arrObjDocumentos as $arrDocumento) {
+      if(isset($arrDocumento['componentesDigitais']) && !is_array($arrDocumento['componentesDigitais'])){
+        $arrDocumento['componentesDigitais'] = array($arrDocumento['componentesDigitais']);
+      }
+      foreach ($arrDocumento['componentesDigitais'] as $objComponente) {
+          $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente['hash']);
+          $resultado[$strHash] = $objComponente;
+      }
+    }
+      return $resultado;
+  }
 
 
     /**
