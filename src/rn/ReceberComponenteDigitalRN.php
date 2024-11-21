@@ -154,23 +154,23 @@ class ReceberComponenteDigitalRN extends InfraRN
           $contDocumentosDto++;
           $objAnexoRN = new AnexoRN();
 
-			$strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
-			$strNomeArquivoCompactado = $objAnexoRN->gerarNomeArquivoTemporario();
-			$strCaminhoCompletoArquivoZip = DIR_SEI_TEMP.'/'.$strNomeArquivoCompactado;
+          $strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
+          $strNomeArquivoCompactado = $objAnexoRN->gerarNomeArquivoTemporario();
+          $strCaminhoCompletoArquivoZip = DIR_SEI_TEMP.'/'.$strNomeArquivoCompactado;
 
-			$zipFile= new ZipArchive();
-			$zipFile->open($strCaminhoCompletoArquivoZip, ZIPARCHIVE::CREATE);
+          $zipFile= new ZipArchive();
+          $zipFile->open($strCaminhoCompletoArquivoZip, ZIPARCHIVE::CREATE);
 
-			$arrObjDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTO, 'IdDocumento');
-			$numCasas=floor(log10(count($arrObjDocumentoDTO)))+1;
-			$numSequencial = 0;
-			foreach($arrIdDocumentos as $dblIdDocumento){
-			$objDocumentoDTO = $arrObjDocumentoDTO[$dblIdDocumento];
-			$strDocumento = '';
-			if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
-				$arrayAnexosExcluirFisicamente = array();
-				foreach ($parArrAnexoDTO as $objAnexoDTO){
-				$numSequencial++;
+          $arrObjDocumentoDTO = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTO, 'IdDocumento');
+          $numCasas=floor(log10(count($arrObjDocumentoDTO)))+1;
+          $numSequencial = 0;
+        foreach($arrIdDocumentos as $dblIdDocumento){
+          $objDocumentoDTO = $arrObjDocumentoDTO[$dblIdDocumento];
+          $strDocumento = '';
+          if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
+              $arrayAnexosExcluirFisicamente = array();
+            foreach ($parArrAnexoDTO as $objAnexoDTO){
+              $numSequencial++;
 
               if ($objAnexoDTO==null){
                       $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');

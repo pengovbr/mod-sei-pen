@@ -2643,10 +2643,10 @@ class ReceberProcedimentoRN extends InfraRN
     * @param $parComponentePendente
     * @return $tamanhoComponentePendende
     */
-	private function obterTamanhoComponenteDigitalPendente($parObjProtocolo, $parComponentePendente)
-	{
-		//Obtém os documentos do protocolo em um array
-		$arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
+  private function obterTamanhoComponenteDigitalPendente($parObjProtocolo, $parComponentePendente)
+    {
+      //Obtém os documentos do protocolo em um array
+      $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
 
       //Percorre os documentos e compoenntes para pegar o tamanho em bytes do componente
     foreach ($arrObjDocumentos as $objDocumento) {

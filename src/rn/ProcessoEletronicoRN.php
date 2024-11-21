@@ -204,8 +204,8 @@ class ProcessoEletronicoRN extends InfraRN
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
-		return $objRepositorioDTO;
-	}
+      return $objRepositorioDTO;
+  }
 
     /**
      * Lista todo os repositórios de estruturas disponíveis no Barramento de Serviços do PEN
@@ -295,7 +295,7 @@ class ProcessoEletronicoRN extends InfraRN
     * @return array
     * @throws InfraException
     */
-    public function consultarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null, $bolRetornoRaw = false)
+  public function consultarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null, $bolRetornoRaw = false)
     {
     try {
       $estruturasUnidades = null;
@@ -742,7 +742,7 @@ class ProcessoEletronicoRN extends InfraRN
   }
 
 
-    public function consultarMotivosUrgencia()
+  public function consultarMotivosUrgencia()
     {
       $endpoint = 'motivosUrgencia';
     try {
@@ -774,7 +774,7 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return array
      */
-    public function consultarEspeciesDocumentais()
+  public function consultarEspeciesDocumentais()
     {
     $endpoint = 'especies';
     try {
@@ -870,7 +870,7 @@ class ProcessoEletronicoRN extends InfraRN
       return $arrObjPendenciaDTO;
   }
 
-    private function tratarFalhaWebService(Exception $fault)
+  private function tratarFalhaWebService(Exception $fault)
     {
 
       $mensagem = InfraException::inspecionar($fault);
@@ -975,7 +975,7 @@ class ProcessoEletronicoRN extends InfraRN
         $contagem=1;
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
 
-        foreach ($arrobjRelProtocoloAssuntoDTO as $objRelProtocoloAssuntoDTO) {
+      foreach ($arrobjRelProtocoloAssuntoDTO as $objRelProtocoloAssuntoDTO) {
 
         $idAssunto = $objRelProtocoloAssuntoDTO->getNumIdAssunto();
         $assuntoDTO = new AssuntoDTO();
@@ -990,9 +990,9 @@ class ProcessoEletronicoRN extends InfraRN
         $infoAssunto = $objAssuntoRN->consultarRN0256($assuntoDTO);
 
         switch ($infoAssunto->getStrStaDestinacao()) {
-            case AssuntoRN::$TD_ELIMINACAO:
+          case AssuntoRN::$TD_ELIMINACAO:
             $destinacao = "Eliminação";
-                break;
+              break;
 
           case AssuntoRN::$TD_GUARDA_PERMANENTE:
             $destinacao = "Guarda Permanente";
@@ -1059,9 +1059,9 @@ class ProcessoEletronicoRN extends InfraRN
         throw new InfraException($mensagem, $e);
     }
 
-    }
+  }
 
-    public function enviarComponenteDigital($parametros)
+  public function enviarComponenteDigital($parametros)
     {
     try {
 
@@ -1124,7 +1124,7 @@ class ProcessoEletronicoRN extends InfraRN
     * @return mixed
     * @throws InfraException
     */
-    public function enviarParteDeComponenteDigital($parametros)
+  public function enviarParteDeComponenteDigital($parametros)
     {
     try {
 
@@ -1669,28 +1669,28 @@ class ProcessoEletronicoRN extends InfraRN
 
 
 
-    public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
+  public function receberComponenteDigital($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
     {
-        $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
-        try {   
-            $identificacaoDoComponenteDigital = [
-                'hashDoComponenteDigital' => $parStrHashComponenteDigital,
-                'protocolo' => $parStrProtocolo,
-            ];
+      $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
+    try {   
+        $identificacaoDoComponenteDigital = [
+            'hashDoComponenteDigital' => $parStrHashComponenteDigital,
+            'protocolo' => $parStrProtocolo,
+        ];
 
-            // Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
-            if (!is_null($parObjParteComponente)) {
-                $parte = $parObjParteComponente->inicio . '-' . $parObjParteComponente->fim;
-                $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parte}";
-            }
+        // Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
+        if (!is_null($parObjParteComponente)) {
+            $parte = $parObjParteComponente->inicio . '-' . $parObjParteComponente->fim;
+            $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parte}";
+        }
 
-            $strComponenteDigitalBase64 = $this->post($endpoint, $identificacaoDoComponenteDigital);
+        $strComponenteDigitalBase64 = $this->post($endpoint, $identificacaoDoComponenteDigital);
 
-            $objResultado = new stdClass();
-            $objResultado->conteudoDoComponenteDigital = new stdClass();
-            $objResultado->conteudoDoComponenteDigital = base64_decode($strComponenteDigitalBase64);
+        $objResultado = new stdClass();
+        $objResultado->conteudoDoComponenteDigital = new stdClass();
+        $objResultado->conteudoDoComponenteDigital = base64_decode($strComponenteDigitalBase64);
 
-            return $objResultado;
+        return $objResultado;
 
         } catch (\Exception $e) {
           $mensagem = "Falha no recebimento do componente digital";
@@ -2244,14 +2244,14 @@ class ProcessoEletronicoRN extends InfraRN
           return $objPenWs->consultarTramites($parametros);
       });
 
-    if($objMeta->tramitesEncontrados) {
-      $arrObjMetaTramite = !is_array($objMeta->tramitesEncontrados->tramite) ? array($objMeta->tramitesEncontrados->tramite) : $objMeta->tramitesEncontrados->tramite;
-      $objMetaTramite = $arrObjMetaTramite[0];
+      if($objMeta->tramitesEncontrados) {
+        $arrObjMetaTramite = !is_array($objMeta->tramitesEncontrados->tramite) ? array($objMeta->tramitesEncontrados->tramite) : $objMeta->tramitesEncontrados->tramite;
+        $objMetaTramite = $arrObjMetaTramite[0];
 
-      $strSituacoesDisponíveisCancelamento = array(
-        static::$STA_SITUACAO_TRAMITE_INICIADO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-        static::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO
-      );
+        $strSituacoesDisponíveisCancelamento = array(
+          static::$STA_SITUACAO_TRAMITE_INICIADO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+          static::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO, static::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO
+        );
 
         if(in_array($objMetaTramite->situacaoAtual, $strSituacoesDisponíveisCancelamento)){
           return true;
@@ -2837,9 +2837,9 @@ class ProcessoEletronicoRN extends InfraRN
         $base64 = $arrResultado->getBody()->getContents();
 
         $foo = json_decode($arrResultado->getBody(), true);
-        if ($foo != null) {
-          return $foo; 
-        }
+      if ($foo != null) {
+        return $foo; 
+      }
 
         return $base64;
     } catch (RequestException $e) {
