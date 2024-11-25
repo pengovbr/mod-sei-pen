@@ -89,14 +89,164 @@ class PaginaMapUnidades extends PaginaTeste
       $this->test->assertTrue($sucesso);
   }
 
-    /**
-     * Selcionar botão salvar da página
-     *
-     * @return void
-     */
+  /**
+   * Clica em botão salvar da página
+   *
+   * @return void
+   */
   public function salvar()
     {
       $this->test->byId("btnSalvar")->click();
+  }
+
+  /**
+   * Clica em botão novo da página
+   *
+   * @return void
+   */
+  public function btnNovo()
+  {
+    $buttonElement = $this->test->byXPath("//button[@type='button' and @value='Novo']");
+    $buttonElement->click();  
+  }
+
+  /**
+   * Seleciona a unidade na pagina de cadastro
+   *
+   * @return void
+   */
+  public function selecionarUnidadeCadastro($numUnidade = '110000001'){
+
+    $select = $this->test->byId('selUnidadeSei');
+    $this->test->select($select)->selectOptionByValue($numUnidade);
+    sleep(2);
+    $selectedOption = $this->test->select($select)->selectedValue();
+    $this->test->assertEquals($numUnidade, $selectedOption);
+
+  }
+  /**
+   * Seleciona a unidade PEN na pagina de cadastro
+   *
+   * @return void
+   */
+  public function selecionarUnidadePenCadastro($textoUnidade)
+  {
+    $this->repoUnidadeInput = $this->test->byId('txtUnidadePen');
+    $this->repoUnidadeInput->clear();
+    $this->repoUnidadeInput->value($textoUnidade);
+    $this->test->keys(Keys::ENTER);
+    $sucesso = $this->test->waitUntil(function($testCase) {
+        $bolExisteAlerta=null;
+        $nomeUnidade = $testCase->byId('txtUnidadePen')->value();
+
+      try{
+          $bolExisteAlerta = $this->alertTextAndClose();
+        if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
+        }
+      }catch(Exception $e){}
+        $testCase->byPartialLinkText($nomeUnidade)->click();
+        return true;
+    }, PEN_WAIT_TIMEOUT);
+
+    $this->test->assertTrue($sucesso);
+  }
+
+  /**
+   * Cadastrar novo mapeamento
+   *  
+   * @return void
+   */
+  public function cadastrarNovoMapeamento($dados = []){
+      $this->btnNovo();
+      $this->selecionarUnidadeCadastro($dados['numUnidade']);
+      $this->selecionarUnidadePenCadastro($dados['nomeUnidade']);
+      $this->salvar();
+
+      sleep(2);
+      
+      $mensagem = $this->buscarMensagemAlerta();
+      $this->test->assertStringContainsString(
+          mb_convert_encoding('Mapeamento de Unidade gravado com sucesso.', 'UTF-8', 'ISO-8859-1'),
+          $mensagem
+      );
+  }
+
+  /**
+   * Excluir mapeamentos existentes
+   *  
+   * @return void
+   */
+  public function excluirMapeamentosExistentes()
+    {
+    try{
+        $lnkInfraCheck=$this->test->byXPath('//*[@id="lnkInfraCheck"]');
+        $lnkInfraCheck->click();
+        $this->excluir();
+        sleep(1);
+        $mensagem = $this->buscarMensagemAlerta();
+        $this->test->assertStringContainsString(
+            mb_convert_encoding('Mapeamento de Unidades foi excluido com sucesso.', 'UTF-8', 'ISO-8859-1'),
+            $mensagem
+        );
+    } catch (Exception $e) {
+    }
+  }
+
+  public function listarMapeamentos()
+  {
+    $this->test->refresh();
+
+    $this->test->assertTrue($this->existeTabela());
+      
+    $linhasListagem = $this->test->elements($this->test->using('xpath')->value('//table[@class="infraTable"]/tbody/tr'));
+    unset($linhasListagem[0]);
+    unset($linhasListagem[1]);
+
+    return $linhasListagem;
+  }
+
+  /**
+   * Valida mapeamentos existentes
+   *  
+   * @return void
+   */
+  public function validarMapeamentoExistente($mapeamento)
+  {
+
+    $linhasDaTabela = $this->listarMapeamentos();
+    foreach ($linhasDaTabela as $linha) {
+      $td = $linha->byXPath('./td[6]');
+      if ($td->text() == $mapeamento) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * btn Excluir
+   *  
+   * @return void
+   */
+  public function excluir()
+    {
+    $this->test->byXPath("//button[@type='button' and @value='Excluir']")->click();
+    $this->test->acceptAlert();
+  }
+
+  /**
+   * Verificar se a tabela de hipótese legal é exibida
+   *
+   * @return bool
+   */
+  public function existeTabela()
+    {
+    try {
+        $trTh = $this->test->byXPath('//*[@id="divInfraAreaTabela"]/table/tbody/tr[1]/th[2]')->text();
+        return !empty($trTh) && !is_null($trTh) && count($trTh) >= 1;
+    } catch (Exception $ex) {
+        return false;
+    }
   }
 
   public function limparRestricoes()
