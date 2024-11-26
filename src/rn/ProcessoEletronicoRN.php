@@ -2806,9 +2806,9 @@ class ProcessoEletronicoRN extends InfraRN
         $base64 = $arrResultado->getBody()->getContents();
 
         $foo = json_decode($arrResultado->getBody(), true);
-      if ($foo != null) {
-        return $foo; 
-      }
+        if ($foo != null) {
+          return $foo; 
+        }
 
         return $base64;
     } catch (RequestException $e) {
