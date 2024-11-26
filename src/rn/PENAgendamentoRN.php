@@ -49,7 +49,7 @@ class PENAgendamentoRN extends InfraRN
           continue;
         }
 
-          $objDTO->setStrNome(mb_convert_encoding($hipotese->nome, 'ISO-8859-1', 'UTF-8'));
+          $objDTO->setStrNome(mb_convert_encoding($hipotese['nome'], 'ISO-8859-1', 'UTF-8'));
 
         if ($hipotese['status']) {
             $objDTO->setStrAtivo('S');

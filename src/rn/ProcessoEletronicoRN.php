@@ -212,14 +212,14 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return void
      */
-  public function listarRepositoriosDeEstruturas()
+  public function listarRepositoriosDeEstruturas($ativo = true)
     {
       $arrObjRepositorioDTO = [];
       $endpoint = 'repositorios-de-estruturas';
     
     try {
         $parametros = [
-            'ativos' => true
+            'ativos' => $ativo
         ];
     
         $arrResultado = $this->get($endpoint, $parametros);
@@ -799,37 +799,9 @@ class ProcessoEletronicoRN extends InfraRN
     return $arrEspecies;
   }
 
-
-  public function enviarProcesso($parametros)
-    {
-    try {
-        return $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->enviarProcesso($parametros);
-        });
-
-    } catch (\SoapFault $e) {
-      $strMensagem = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript(mb_convert_encoding($e->faultstring, 'ISO-8859-1', 'UTF-8')));
-        
-      if ($e instanceof \SoapFault && !empty($e->detail->interoperabilidadeException->codigoErro) && $e->detail->interoperabilidadeException->codigoErro == '0005') {
-          $strMensagem .= 'O código mapeado para a unidade ' . mb_convert_encoding($parametros->novoTramiteDeProcesso->processo->documento[0]->produtor->unidade->nome, 'ISO-8859-1', 'UTF-8') . ' está incorreto.';
-      }
-
-        $e->faultstring = $this->validarTramitaEmAndamento($parametros, $strMensagem);
-        $strMensagem = $e->faultstring;
-        $strDetalhes = str_replace(array("\n", "\r"), ' ', InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
-        throw new InfraException($strMensagem, $e, $strDetalhes);
-    } catch (\Exception $e) {
-        $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
-
-
-
   public function enviarProcessoREST($parametros)
-    {       
-      $endpoint = "tramites/processo";
+  {       
+    $endpoint = "tramites/processo";
     try {
         $arrResultado = $this->post($endpoint, $parametros['novoTramiteDeProcesso']);
             
@@ -837,8 +809,8 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (Exception $e) {
 
-        $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
-        $erroRequest = json_decode($e->getMessage());
+      $mensagem = "Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.";
+      $erroRequest = json_decode($e->getMessage());
       if ($erroRequest != null) {
           $mensagem = "Falha no envio externo do processo. Erro: {$erroRequest->codigoErro} - {$erroRequest->message}";
       }
@@ -880,17 +852,17 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
 
-        if (isset($arrResultado)) {
-          foreach ($arrResultado as $idt) {
-              $pendenciaDTO = new PendenciaDTO();
-              $pendenciaDTO->setNumIdentificacaoTramite($idt['IDT']);
-              $pendenciaDTO->setStrStatus($idt['status']);
-              $arrObjPendenciaDTO[] = $pendenciaDTO;
+        if (is_array($arrResultado) && !is_null($arrResultado)) {
+          foreach ($arrResultado as $strPendencia) {
+            $pendenciaDTO = new PendenciaDTO();
+            $pendenciaDTO->setNumIdentificacaoTramite($strPendencia['IDT']);
+            $pendenciaDTO->setStrStatus($strPendencia['status']);
+            $arrObjPendenciaDTO[] = $pendenciaDTO;
           }
-        }
+        } 
 
     } catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
+        $mensagem = "Falha na listagem de pendências de trâmite de processos";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -2853,19 +2825,19 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
   
-  private function get($endpoint, $params = []) {
+  public function get($endpoint, $params = []) {
     return $this->getArrPenWsRest('GET', $endpoint, ['query' => $params]);
   }
   
-  private function post($endpoint, $data = []) {
+  public function post($endpoint, $data = []) {
     return $this->getArrPenWsRest('POST', $endpoint, ['json' => $data]);
   }
   
-  private function put($endpoint, $data = []) {
+  public function put($endpoint, $data = []) {
     return $this->getArrPenWsRest('PUT', $endpoint, ['json' => $data]);
   }
   
-  private function delete($endpoint, $params = []) {
+  public function delete($endpoint, $params = []) {
     return $this->getArrPenWsRest('DELETE', $endpoint, ['query' => $params]);
   }
 }

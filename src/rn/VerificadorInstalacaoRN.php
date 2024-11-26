@@ -233,12 +233,14 @@ class VerificadorInstalacaoRN extends InfraRN
         $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
         $strSenhaCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "SenhaCertificado");
 
-        $strEnderecoWSDL = $strEnderecoWebService . '?wsdl';
-        $curl = curl_init($strEnderecoWSDL);
+        $healthcheck = 'healthcheck';
+
+        $strEnderecoBarramento = $strEnderecoWebService . '/' . $healthcheck;
+        $curl = curl_init($strEnderecoBarramento);
 
       try{
           $bolEmProducao = boolval(ConfiguracaoSEI::getInstance()->getValor('SEI', 'Producao'));
-          curl_setopt($curl, CURLOPT_URL, $strEnderecoWSDL);
+          curl_setopt($curl, CURLOPT_URL, $strEnderecoBarramento);
           curl_setopt($curl, CURLOPT_HEADER, 0);
           curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
           curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
@@ -254,12 +256,7 @@ class VerificadorInstalacaoRN extends InfraRN
            $strErrorMsg = curl_error($curl);
         }
         if (isset($strErrorMsg)) {
-            throw new Exception("Erro no CURL ao obter o WSDL em $strEnderecoWSDL. Erro detalhado: $strErrorMsg.");
-        }
-          $objXML = simplexml_load_string($strOutput);
-
-        if(empty($strOutput) || $strOutput === false || empty($objXML) || $objXML === false){
-            throw new Exception("Falha na validação do WSDL do webservice de integração com o Tramita GOV.BR localizado em $strEnderecoWSDL");
+            throw new Exception("Erro no CURL para $strEnderecoBarramento. Erro detalhado: $strErrorMsg.");
         }
 
       } finally{
@@ -282,6 +279,7 @@ class VerificadorInstalacaoRN extends InfraRN
       try{
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
           $objProcessoEletronicoRN->listarPendencias(false);
+          
           return true;
       } catch(Exception $e){
           throw new InfraException("Falha no acesso aos serviços de integração do Tramita GOV.BR: $e");
