@@ -6,8 +6,9 @@ final class ProcessoEletronicoRNTest extends TestCase
 {
     private $ProcessoEletronicoRN;
 
-    public function setUp()
+    public function setUp(): void
     {
+        parent::setUp();
         $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
     }
 

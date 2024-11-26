@@ -36,9 +36,9 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
             "PEN" => array(
                 // Endereço do Web Service principal de integração com o Barramento de Serviços do PEN
                 // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-                //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
-                //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/
-                "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/",
+                //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/
+                //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v3/
+                "WebService" => "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/",
 
                 // Endereço do Web Service de monitoramente de pendências de trâmite no Barramento de Serviços do PEN
                 // Configuração necessária para que o envio e recebimento de processos sejam feitas de forma dinâmica pelo sistema
@@ -80,6 +80,19 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
 
                 // Configuração padrão do Envio Parcial
                 "EnviarApenasComponentesDigitaisPendentes" => false
+                // "EnviarApenasComponentesDigitaisPendentes" => array(
+                //     "1" => array(  // 1 = Poder Executivo Federal
+                //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+                //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+                //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
+                //     ),
+                //     "21" => array(  // 2 = Poder Legislativo Federal
+                //         "123456",  // Id de estrutura de unidade X do Poder Executivo Federal
+                //         "234567",  // Id de estrutura de unidade Y do Poder Executivo Federal
+                //         "345678"   // Id de estrutura de unidade Z do Poder Executivo Federal
+                //     )
+                // )
+
             )
         );
     }

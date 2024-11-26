@@ -104,10 +104,10 @@ try {
         $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' do Portal de Administração.');     }
       // CARREGAR NOME E SIGLA DA ESTRUTURA
       $objProcessoEletronico     = new ProcessoEletronicoRN();
-      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
+      $objProcessoEletronicoDTO  = $objProcessoEletronico->buscarEstrutura($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
 
-      $nomeUnidadeRH = $objProcessoEletronicoDTO[0]->getStrNome();
-      $siglaUnidadeRH = $objProcessoEletronicoDTO[0]->getStrSigla();
+      $nomeUnidadeRH = $objProcessoEletronicoDTO->getStrNome();
+      $siglaUnidadeRH = $objProcessoEletronicoDTO->getStrSigla();
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($_POST['id_unidade']);
       $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);

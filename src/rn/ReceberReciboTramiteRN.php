@@ -37,7 +37,6 @@ class ReceberReciboTramiteRN extends InfraRN
         throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
       }
 
-      $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;
 
       // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
       // evitando processamento simultâneo de cadastramento do mesmo processo
@@ -227,7 +226,7 @@ class ReceberReciboTramiteRN extends InfraRN
 
     if (isset($objEstrutura->hierarquia)) {
 
-      $arrObjNivel = $objEstrutura->hierarquia->nivel;
+      $arrObjNivel = $objEstrutura->hierarquia;
 
       $nome = "";
       $siglasUnidades = array();
