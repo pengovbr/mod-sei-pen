@@ -204,7 +204,7 @@ test-parallel-otimizado: .env $(FILE_VENDOR_FUNCIONAL) up
 	
 	
 test-unit: .env $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html html rn/$(addsuffix .php,$(teste))'
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'XDEBUG_MODE=coverage vendor/bin/phpunit --testdox --coverage-html html rn/$(addsuffix .php,$(teste))'
 
 test: test-unit test-functional
 

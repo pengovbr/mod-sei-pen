@@ -121,7 +121,7 @@ services:
       - "host.docker.internal:host-gateway"
     command: "true"
 
-  ### CONTAINERS DO AMBIENTE DO ÃRGÃO 1 ###
+  ### CONTAINERS DO AMBIENTE DO ORGAO 1 ###
 
   org1-database:
     image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
@@ -181,7 +181,7 @@ services:
       - smtp:smtp
       - org1-database:${ORG1_DATABASE_HOST}
 
-  ### CONTAINERS DO AMBIENTE DO ÃRGÃO 2 ###
+  ### CONTAINERS DO AMBIENTE DO ORGAO 2 ###
 
   org2-database:
     image: ${ORG2_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
