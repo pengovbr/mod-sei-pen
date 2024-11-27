@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php'; 
+$dirSeiVendor = !defined("DIR_SEI_VENDOR") ? getenv("DIR_SEI_VENDOR") ?: __DIR__ . "/../vendor" : DIR_SEI_VENDOR;
+require_once $dirSeiVendor . '/autoload.php';
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -1692,12 +1693,12 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $objResultado;
 
-    } catch (\Exception $e) {
-      $mensagem = "Falha no recebimento do componente digital";
-      $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-      throw new InfraException($mensagem, $e, $detalhes);
+        } catch (\Exception $e) {
+          $mensagem = "Falha no recebimento do componente digital";
+          $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+          throw new InfraException($mensagem, $e, $detalhes);
+        }
     }
-  }
 
   public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
     {
