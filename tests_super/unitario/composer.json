@@ -19,7 +19,8 @@
     "require-dev": {
         "phpunit/phpunit": "9.*",
         "phpunit/php-code-coverage": "*",
-        "phpunit/phpunit-selenium": "dev-master"
+        "phpunit/phpunit-selenium": "dev-master",
+        "guzzlehttp/guzzle": "^7.0"
     }
 }
  

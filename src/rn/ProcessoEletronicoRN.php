@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php'; 
+$dirSeiVendor = !defined("DIR_SEI_VENDOR") ? getenv("DIR_SEI_VENDOR") ?: __DIR__ . "/../vendor" : DIR_SEI_VENDOR;
+require_once $dirSeiVendor . '/autoload.php';
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
