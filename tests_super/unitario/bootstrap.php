@@ -1,6 +1,8 @@
 <?php
 
-//require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
+ 
+define("DIR_SEI_VENDOR", __DIR__ . '/vendor');
 
 // define('DIR_SEI_WEB', realpath(DIR_SEI_CONFIG . '/../web'));
 

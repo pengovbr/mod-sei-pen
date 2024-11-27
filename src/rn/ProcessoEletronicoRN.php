@@ -1,6 +1,7 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php'; 
+$dirSeiVendor = !defined("DIR_SEI_VENDOR") ? getenv("DIR_SEI_VENDOR") ?: __DIR__ . "/../vendor" : DIR_SEI_VENDOR;
+require_once $dirSeiVendor . '/autoload.php';
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
@@ -1698,37 +1699,6 @@ class ProcessoEletronicoRN extends InfraRN
           throw new InfraException($mensagem, $e, $detalhes);
         }
     }
-
-  public function receberComponenteDigitalS($parNumIdentificacaoTramite, $parStrHashComponenteDigital, $parStrProtocolo, $parObjParteComponente = null)
-    {
-      $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais";
-    try {   
-        $identificacaoDoComponenteDigital = [
-            'hashDoComponenteDigital' => $parStrHashComponenteDigital,
-            'protocolo' => $parStrProtocolo,
-        ];
-
-        // Se for passado o parametro $parObjParteComponente retorna apenas parte especifica do componente digital
-        if (!is_null($parObjParteComponente)) {
-            $parte = $parObjParteComponente->inicio . '-' . $parObjParteComponente->fim;
-            $endpoint = "tramites/{$parNumIdentificacaoTramite}/protocolos/componentes-digitais/partes/{$parte}";
-        }
-
-        $strComponenteDigitalBase64 = $this->post($endpoint, $identificacaoDoComponenteDigital);
-
-        $objResultado = new stdClass();
-        $objResultado->conteudoDoComponenteDigital = new stdClass();
-        $objResultado->conteudoDoComponenteDigital = base64_decode($strComponenteDigitalBase64);
-
-        return $objResultado;
-
-    } catch (\Exception $e) {
-      $mensagem = "Falha no recebimento do componente digital";
-      $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-      throw new InfraException($mensagem, $e, $detalhes);
-    }
-  }
-
 
   public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
     {
