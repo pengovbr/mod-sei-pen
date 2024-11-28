@@ -1,8 +1,14 @@
-on: ["push", "pull_request"]
-  paths:
-    - "**.php"
-    - "phpunit.xml"
-    - ".github/workflows/coveralls.yml"
+on: 
+  push:
+    paths:
+      - "**.php"
+      - "phpunit.xml"
+      - ".github/workflows/coveralls.yml"
+  pull_request:
+    paths:
+      - "**.php"
+      - "phpunit.xml"
+      - ".github/workflows/coveralls.yml"
 
 name: Test Coveralls
 env:
