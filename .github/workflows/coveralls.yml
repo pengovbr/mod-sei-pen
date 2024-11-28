@@ -1,0 +1,22 @@
+on: ["push", "pull_request"]
+
+name: Test Coveralls
+github-token: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v4
+
+    - name: make test-unit
+      run: |
+        make test-unit
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        file: tests_super/unitario/cobertura.xml

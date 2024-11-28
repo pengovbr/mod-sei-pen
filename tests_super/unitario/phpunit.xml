@@ -13,5 +13,8 @@
     <include>
       <directory suffix=".php">/opt/sei/web/modulos/pen</directory>
     </include>
+    <report>
+      <cobertura outputFile="cobertura.xml"/>
+    </report>
   </coverage>
 </phpunit>
