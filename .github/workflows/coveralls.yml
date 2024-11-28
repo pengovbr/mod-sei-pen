@@ -11,17 +11,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v4
-    - name: Set up QEMU
-      uses: docker/setup-qemu-action@v3
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+    - name: Fetch Pull Request branch
+      uses: actions/checkout@v4
+      with:
+          repository: pengovbr/sei
+          token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+          path: sei
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+          path: sei/src/sei/web/modulos/mod-sei-pen
 
     - name: make test-unit
       run: |
+        cd sei/src/sei/web/modulos/mod-sei-pen
         make test-unit
 
     - name: Coveralls
       uses: coverallsapp/github-action@v2
       with:
-        file: tests_super/unitario/cobertura.xml
+        file: sei/src/sei/web/modulos/mod-sei-pen/tests_super/unitario/cobertura.xml
