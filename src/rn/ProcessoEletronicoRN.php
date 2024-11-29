@@ -2275,7 +2275,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  private function tentarNovamenteSobErroHTTP($callback, $numTentativa = 1)
+  protected function tentarNovamenteSobErroHTTP($callback, $numTentativa = 1)
     {
     try {
         return $callback($this->getObjPenWs());
