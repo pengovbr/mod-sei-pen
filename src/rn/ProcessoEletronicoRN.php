@@ -269,7 +269,7 @@ class ProcessoEletronicoRN extends InfraRN
           }
         }
 
-        return self::converterArrayParaObjeto($arrResultado);
+        return $this->converterArrayParaObjeto($arrResultado);
       }
 
         $objEstruturaDTO = new EstruturaDTO();
@@ -2740,12 +2740,12 @@ class ProcessoEletronicoRN extends InfraRN
     /**
      * Converter arrays associativo para objetos
     */
-  public static function converterArrayParaObjeto($array) 
+  public function converterArrayParaObjeto($array) 
     {
     if (is_array($array)) {
         $object = new stdClass();
       foreach ($array as $key => $value) {
-        $object->$key = self::converterArrayParaObjeto($value);
+        $object->$key = $this->converterArrayParaObjeto($value);
       }
         return $object;
     }
