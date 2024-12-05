@@ -474,7 +474,7 @@ class ProcessoEletronicoRN extends InfraRN
    * @param $idRepositorioEstrutura
    * @return array|null
    */
-  private function validarRestricaoUnidadesCadastradas($idRepositorioEstrutura)
+  protected function validarRestricaoUnidadesCadastradas($idRepositorioEstrutura)
   {
     //Verificar limitação de repositórios/unidades mapeadas
     $arrEstruturasCadastradas = null;
@@ -540,7 +540,7 @@ class ProcessoEletronicoRN extends InfraRN
    * @param null|string $numeroDeIdentificacaoDaEstrutura
    * @return array
    */
-  private function buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null)
+  protected function buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null)
   {
     $parametros = new stdClass();
     $parametros->filtroDeEstruturasPorEstruturaPai = new stdClass();
