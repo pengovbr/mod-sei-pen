@@ -183,18 +183,19 @@ try {
     $objUnidadeDTO->retStrDescricao();
     $arrMapIdUnidade = array();
     $objPenUnidadeRN = new PenUnidadeRN();
-  foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
-      $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
-  }
+    foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
+        $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
+    }
 
     //Verifica se o numero da unidade esta vazio, senão estiver busca o nome da unidade para exibição
     $strNomeUnidadeSelecionada = '';
   if(!empty($objPenUnidadeDTO->getNumIdUnidadeRH())){
-      $objProcessoEletronico     = new ProcessoEletronicoRN();
-      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $objPenUnidadeDTO->getNumIdUnidadeRH());
 
-    if(!is_null($objProcessoEletronicoDTO[0])){
-        $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO[0]->getStrNome();
+    $objProcessoEletronico     = new ProcessoEletronicoRN();
+    $objProcessoEletronicoDTO  = $objProcessoEletronico->buscarEstrutura($numIdRepositorioOrigem, $objPenUnidadeDTO->getNumIdUnidadeRH());
+
+    if(!is_null($objProcessoEletronicoDTO)){
+        $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO->getStrNome();
     }else{
         $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
     }

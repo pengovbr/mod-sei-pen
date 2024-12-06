@@ -1247,7 +1247,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objAssinaturaDTO->retStrP7sBase64();
       $resAssinatura = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
 
-      $objComponenteDigital['assinaturasDigitais'] = array();
       foreach ($resAssinatura as $keyOrder => $assinatura) {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade()); //7
@@ -1281,8 +1280,11 @@ class ExpedirProcedimentoRN extends InfraRN {
             'formato' => 'PKCS7',
             'conteudo' => 'vazio'
           ];
-        }
+        }  
+      }
 
+      
+      if ($objAssinaturaDigital != null) {
         $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital;
       }
 
@@ -1780,7 +1782,6 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $strStaNumeracao = $objSerieDTO->getStrStaNumeracao();
 
-      $objDocumento['identificacao'] = array();
       if ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
         $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());

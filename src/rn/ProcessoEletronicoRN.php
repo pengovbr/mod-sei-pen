@@ -1218,30 +1218,21 @@ class ProcessoEletronicoRN extends InfraRN
 
   public function solicitarMetadados($parNumIdentificacaoTramite)
     {
-      $endpoint = "tramites/{$parNumIdentificacaoTramite}";
+    $endpoint = "tramites/{$parNumIdentificacaoTramite}";
     try {
         $parametros = [
             'IDT' => $parNumIdentificacaoTramite
         ];
             
         $arrResultado = $this->get($endpoint, $parametros);
-        $arrResultado['propriedadeAdicional'] = $arrResultado['propriedadesAdicionais'];
 
-        $arrResultadoDocumentos = $arrResultado['processo']['documentos'][0];
-        $arrResultado['processo']['documentos'][0]['componenteDigital'] = $arrResultadoDocumentos['componentesDigitais'][0];
-        $arrResultado['processo']['documentos'][0]['componenteDigital']['assinaturaDigital'] = $arrResultadoDocumentos['componentesDigitais'][0]['assinaturasDigitais'][0];
+        $arrResultado['IDT'] = $parNumIdentificacaoTramite;
+        $arrResultado['NRE'] = $arrResultado['nre'];
 
         $objResultado = new stdClass();
-        $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
-
-        $objMetaProcesso = $objResultado->metadados->processo;
-        $arrObjMetaDocumento = (array) $objMetaProcesso->documentos;
-        $arrObjMetaInteressado = (array) $objMetaProcesso->interessados;
-
         $objResultado->IDT = $parNumIdentificacaoTramite;
-        $objResultado->metadados->NRE = $objResultado->metadados->nre;
-        $objResultado->metadados->processo->documento = $arrObjMetaDocumento[0];
-        $objResultado->metadados->processo->interessado = $arrObjMetaInteressado;
+        $objResultado->NRE = $arrResultado['nre'];
+        $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
 
         return $objResultado;
 

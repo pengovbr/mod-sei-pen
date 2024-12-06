@@ -21,6 +21,7 @@ class ReceberProcedimentoRN extends InfraRN
     private $objSeiRN;
     private $objEnviarReciboTramiteRN;
     private $objExpedirProcedimentoRN;
+    private $objReceberComponenteDigitalRN;
 
   public function __construct()
     {
@@ -334,8 +335,10 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objTramite = $arrObjTramite[0];
 
-      if(!is_array($objTramite->componenteDigitalPendenteDeRecebimento)){
-          $objTramite->componenteDigitalPendenteDeRecebimento = array($objTramite->componenteDigitalPendenteDeRecebimento);
+      if(!is_array($objTramite->hashDosComponentesPendentesDeRecebimento)){
+          $objTramite->componenteDigitalPendenteDeRecebimento = (array) $objTramite->hashDosComponentesPendentesDeRecebimento;
+
+          $objTramite->hashDosComponentesPendentesDeRecebimento = (array) $objTramite->hashDosComponentesPendentesDeRecebimento;
       }
     }
 
@@ -1054,7 +1057,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objProtocoloDTO->setArrObjAnexoDTO(array());
       $objProtocoloDTO->setArrObjRelProtocoloAssuntoDTO(array());
       $objProtocoloDTO->setArrObjRelProtocoloProtocoloDTO(array());
-      $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessado);
+      $this->atribuirParticipantes($objProtocoloDTO, $parObjProtocolo->interessados);
 
       $strDescricao = "";
     if(isset($parObjProtocolo->processoDeNegocio)){
@@ -1381,7 +1384,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
     if (!is_array($arrObjInteressados)) {
-        $arrObjInteressados = array($arrObjInteressados);
+        $arrObjInteressados = (array) $arrObjInteressados;
     }
 
     for($i=0; $i < count($arrObjInteressados); $i++){
@@ -1843,16 +1846,16 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumentoDTO->setStrSinBloqueado('N');
 
 
-        if (isset($objDocumento->componenteDigital)) {
-          $componentesDigitais = $objDocumento->componenteDigital;
-        } else {
-          $componentesDigitais[] = $objDocumento->componentesDigitais;
-        } 
+        // if (isset($objDocumento->componenteDigital)) {
+        //   $componentesDigitais = $objDocumento->componenteDigital;
+        // } else {
+        //   $componentesDigitais = (array) $objDocumento->componentesDigitais;
+        // } 
 
         //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
         $this->atribuirComponentesDigitais(
             $objDocumentoDTO, 
-            $componentesDigitais,
+            $objDocumento->componentesDigitais,
             $arrDocumentosExistentesPorHash,
             $parObjMetadadosProcedimento->arrHashComponenteBaixados);
         
@@ -1928,7 +1931,10 @@ class ReceberProcedimentoRN extends InfraRN
     $arrObjAnexosDTO = array();
     $arrObjAnexoDTO = array();
     foreach ($objComponentesDigitais as $objComponenteDigital) {
-
+        if (is_array($objComponenteDigital)) {
+          $objComponenteDigital = (object) $objComponenteDigital;
+        }
+      
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
         $bolComponenteDigitalExistente = array_key_exists($strHashComponenteDigital, $arrDocumentosExistentesPorHash);
@@ -2069,7 +2075,7 @@ class ReceberProcedimentoRN extends InfraRN
     // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
     $arrAnexo = array();
     $arrAnexo = $this->atribuirComponentesJaExistentesNoProcesso(
-                  $objDocumentoDTO,
+                  $parObjDocumentoDTO,
                   $parArrObjComponentesDigitais,
                   $arrDocumentosExistentesPorHash,
                   $arrHashComponenteBaixados
@@ -2816,7 +2822,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
       $arrObjObservacoes = array();
-      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor->numeroDeIdentificacao;
+      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor['numeroDeIdentificacao'];
     if(!empty($strNumeroDocumentoOrigem)){
         $objObservacaoDTO = new ObservacaoDTO();
         $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
