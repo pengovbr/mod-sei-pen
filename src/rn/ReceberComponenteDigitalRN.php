@@ -254,11 +254,15 @@ class ReceberComponenteDigitalRN extends InfraRN
      * @return AnexoDTO
      *
      */
-  public function copiarComponenteDigitalPastaTemporaria($parArrComponenteDigital, $parObjConteudo)
+  public function copiarComponenteDigitalPastaTemporaria($parObjComponenteDigital, $parObjConteudo)
   {
-    if (!isset($parArrComponenteDigital)) {
+    if (!isset($parObjComponenteDigital)) {
         throw new InfraException("Componente Digital não informado");
     }
+
+      if (is_array($parObjComponenteDigital)) {
+        $parObjComponenteDigital = (object) $parObjComponenteDigital;
+      }
       $objAnexoRN = new AnexoRN();
       $strNomeArquivoUpload = $objAnexoRN->gerarNomeArquivoTemporario();
       $strConteudoCodificado = $parObjConteudo->conteudoDoComponenteDigital;
@@ -273,7 +277,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
       $objAnexoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUpload));
       $objAnexoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objAnexoDTO->setStrNome($parArrComponenteDigital['nome']);
+      $objAnexoDTO->setStrNome($parObjComponenteDigital->nome);
       return $objAnexoDTO;
   }
 

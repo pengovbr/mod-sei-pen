@@ -184,7 +184,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function consultarRepositoriosDeEstruturas($numIdentificacaoDoRepositorioDeEstruturas)
     {
       $objRepositorioDTO = null;
-      $endpoint = "repositorios-de-estruturas/{$numIdentificacaoDoRepositorioDeEstruturas}/estruturas-organizacionais";
+      $endpoint = 'repositorios-de-estruturas';
     try {
         $parametros = [
             'ativo' => true
@@ -193,10 +193,12 @@ class ProcessoEletronicoRN extends InfraRN
 
         if (isset($arrResultado)) {
           foreach ($arrResultado as $repositorio) {
+            if ($repositorio['id'] == $numIdentificacaoDoRepositorioDeEstruturas) {
               $objRepositorioDTO = new RepositorioDTO();
               $objRepositorioDTO->setNumId($repositorio['id']);
               $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio['nome'], 'ISO-8859-1', 'UTF-8'));
               $objRepositorioDTO->setBolAtivo($repositorio['ativo']);
+            }
           }
         }
     } catch (Exception $e) {
@@ -1233,7 +1235,19 @@ class ProcessoEletronicoRN extends InfraRN
         $objResultado = new stdClass();
         $objResultado->IDT = $parNumIdentificacaoTramite;
         $objResultado->NRE = $arrResultado['nre'];
+
+        $multivalorado = false;
+        if (count($arrResultado['processo']['documentos']) <= 1) {
+          $arrResultado['processo']['documentos'] =  (object) $arrResultado['processo']['documentos'][0];
+        } else {
+          $multivalorado = true;
+        }
+
         $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
+
+        if ($multivalorado) {
+          $objResultado->metadados->processo->documentos = (array) $objResultado->metadados->processo->documentos;
+        }
 
         return $objResultado;
 
@@ -1478,6 +1492,10 @@ class ProcessoEletronicoRN extends InfraRN
     */
   public static function getHashFromMetaDados($objMeta)
     {
+      if (is_array($objMeta)) {
+        $objMeta = (object) $objMeta;
+      }
+
       $strHashConteudo = '';
 
     if (isset($objMeta)) {
@@ -1485,7 +1503,7 @@ class ProcessoEletronicoRN extends InfraRN
         $strHashConteudo = $objMeta;
       } else {
           $matches = array();
-          $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta['conteudo'];
+          $strHashConteudo = (isset($objMeta->enc_value)) ? $objMeta->enc_value : $objMeta->conteudo;
 
         if (preg_match('/^<hash.*>(.*)<\/hash>$/', $strHashConteudo, $matches, PREG_OFFSET_CAPTURE)) {
           $strHashConteudo = $matches[1][0];
@@ -1612,8 +1630,8 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
 
         if(isset($objDocumento->especie)){
-            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie['codigo']));
-            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie['nomeNoProdutor']));
+            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
+            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
         }
 
           $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
@@ -2318,7 +2336,7 @@ class ProcessoEletronicoRN extends InfraRN
     {
       $arrObjDocumento = array();
     if(isset($parObjProtocolo->documentos)){
-        $arrObjProtocolo = is_array($parObjProtocolo->documentos) ? $parObjProtocolo->documentos : json_decode(json_encode($parObjProtocolo->documentos), true);
+        $arrObjProtocolo = is_array($parObjProtocolo->documentos) ? $parObjProtocolo->documentos : array($parObjProtocolo->documentos);
         usort($arrObjProtocolo, array("ProcessoEletronicoRN", "comparacaoOrdemAjustadaDocumentos"));
 
         //Tratamento recursivo para processos anexados
@@ -2352,13 +2370,12 @@ class ProcessoEletronicoRN extends InfraRN
 
       $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
 
-    foreach ($arrObjDocumentoPadronizados as $documento) {
-      if (is_array($documento) && $documento['componentesDigitais']) {
-          $documento['componentesDigitais'] = self::obterComponentesDocumentos($documento);
-      } else {
-          $documento->componentesDigitais = self::obterComponentesDocumentos($documento);
+      foreach ($arrObjDocumentoPadronizados as $documento) {
+        if (is_array($documento) && $documento['componentesDigitais']) {
+          $documento = (object) $documento;
+        }
+        $documento->componentesDigitais = self::obterComponentesDocumentos($documento);
       }
-    }
 
       return $arrObjDocumentoPadronizados;
   }
@@ -2366,11 +2383,7 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static function obterComponentesDocumentos($parObjDocumento)
     {
-        
-    if (is_array($parObjDocumento) && isset($parObjDocumento['componentesDigitais'])) {
-        return $parObjDocumento['componentesDigitais'];
-    }
-        
+             
       $arrObjComponenteDigital = array();
     if (isset($parObjDocumento->componentesDigitais)) {
         $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
@@ -2430,11 +2443,11 @@ class ProcessoEletronicoRN extends InfraRN
     * @param $parObjDocumento
     * @return array
     */
-  public static function obterComponentesDigitaisDocumento($parObjDocumento)
+    public static function obterComponentesDigitaisDocumento($parObjDocumento)
     {
       $arrObjComponenteDigital = array();
-    if (isset($parObjDocumento['componentesDigitais'])) {
-        $arrObjComponenteDigital = is_array($parObjDocumento['componentesDigitais']) ? $parObjDocumento['componentesDigitais'] : array($parObjDocumento['componentesDigitais']);
+    if(isset($parObjDocumento->componentesDigitais)){
+        $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
     }
 
       return $arrObjComponenteDigital;
@@ -2454,9 +2467,6 @@ class ProcessoEletronicoRN extends InfraRN
     */
   public static function desmembrarProcessosAnexados($parObjProtocolo)
     {
-    if (is_array($parObjProtocolo)) {
-        $parObjProtocolo = (object) $parObjProtocolo;
-    }
 
     if(!ProcessoEletronicoRN::existeProcessoAnexado($parObjProtocolo)){
       return $parObjProtocolo;
@@ -2731,18 +2741,30 @@ class ProcessoEletronicoRN extends InfraRN
     /**
      * Converter arrays associativo para objetos
     */
-  public static function converterArrayParaObjeto($array) 
+    public static function converterArrayParaObjeto($array)
     {
-    if (is_array($array)) {
-        $object = new stdClass();
-      foreach ($array as $key => $value) {
-        $object->$key = self::converterArrayParaObjeto($value);
-      }
-        return $object;
+        if (is_array($array)) {
+            // Verificar se o array é associativo
+            if (self::verificarSeArrayAssociativo($array)) {
+                $object = new stdClass();
+                foreach ($array as $key => $value) {
+                    $object->$key = self::converterArrayParaObjeto($value);
+                }
+                return $object;
+            } else {
+                // Para arrays indexados, manter como está
+                return array_map([self::class, 'converterArrayParaObjeto'], $array);
+            }
+        }
+    
+        return $array;
     }
-
-      return $array;
-  }
+    
+    private static function verificarSeArrayAssociativo(array $array): bool
+    {
+        return array_keys($array) !== range(0, count($array) - 1);
+    }
+    
 
     /**
      * Consulta as estruturas de um repositório de estruturas.

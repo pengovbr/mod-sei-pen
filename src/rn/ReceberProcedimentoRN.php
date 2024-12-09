@@ -246,7 +246,7 @@ class ReceberProcedimentoRN extends InfraRN
       // pendentes de recebimento informado pelo Tramita.gov.br não está de acordo com a lista atual de arquivos
       // mantida pela aplicação.
       $arrHashComponentesProtocolo = $this->listarHashDosComponentesMetadado($objProtocolo);
-      $arrHashPendentesRecebimento = $parObjTramite->componenteDigitalPendenteDeRecebimento;
+      $arrHashPendentesRecebimento = $parObjTramite->hashDosComponentesPendentesDeRecebimento;
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
@@ -648,14 +648,19 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
     foreach($arrObjDocumento as $objDocumento){
         //Desconsidera os componendes digitais de documentos cancelados
-      if(!isset($objDocumento['retirado']) || $objDocumento['retirado'] == false) {
-        if(!isset($objDocumento['componentesDigitais'])){
-            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento['ordem']} não informado.");
+      if(!isset($objDocumento->retirado) || $objDocumento->retirado == false) {
+        if(!isset($objDocumento->componentesDigitais)){
+            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
         }
 
-        $arrObjComponentesDigitais = is_array($objDocumento['componentesDigitais']) ? $objDocumento['componentesDigitais'] : array($objDocumento['componentesDigitais']);
+        $arrObjComponentesDigitais = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : array($objDocumento->componentesDigitais);
         foreach ($arrObjComponentesDigitais as $objComponenteDigital) {
-            $arrHashsComponentesDigitais[] = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital['hash']);
+          
+          if (is_array($objComponenteDigital)) {
+            $objComponenteDigital = (object) $objComponenteDigital;
+          }
+
+            $arrHashsComponentesDigitais[] = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         }
       }
     }
@@ -675,8 +680,11 @@ class ReceberProcedimentoRN extends InfraRN
       $objMapBD = new GenericoBD($this->getObjInfraIBanco());
 
       $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
-    foreach($arrObjDocumento as $objDocumento){
-        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componenteDigital->hash);
+    foreach($arrObjDocumento as $key => $objDocumento){
+        if (is_array($objDocumento->componentesDigitais[$key])) {
+          $objDocumento->componentesDigitais[$key] = (object) $objDocumento->componentesDigitais[$key];
+        } 
+        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componentesDigitais[$key]->hash);
         $objMapDTO = new PenRelTipoDocMapRecebidoDTO(true);
         $objMapDTO->setNumMaxRegistrosRetorno(1);
         $objMapDTO->setNumCodigoEspecie($objDocumento->especie->codigo);
@@ -721,25 +729,30 @@ class ReceberProcedimentoRN extends InfraRN
     if(!isset($numIdTipoDocumentoPadrao)){
       foreach($arrObjDocumentos as $objDocument){
 
+        $especie = $objDocument->especie;
+        if (is_array($especie)) {
+          $objDocument->especie = (object) $objDocument->especie;
+        }
+
         $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapRecebidoDTO();
         $objPenRelTipoDocMapEnviadoDTO->retTodos();
-        $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($objDocument['especie']['codigo']);
+        $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($objDocument->especie->codigo);
 
         $objProcessoEletronicoDB = new PenRelTipoDocMapRecebidoBD(BancoSEI::getInstance());
         $numContador = (int)$objProcessoEletronicoDB->contar($objPenRelTipoDocMapEnviadoDTO);
 
         // Não achou, ou seja, não esta cadastrado na tabela, então não é aceito nesta unidade como válido
         if($numContador <= 0) {
-            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', utf8_decode($objDocument['especie']['nomeNoProdutor'])), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
-            throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument['especie']['nomeNoProdutor'], ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
+            $this->objProcessoEletronicoRN->recusarTramite($parNumIdentificacaoTramite, sprintf('O Documento do tipo %s não está mapeado para recebimento no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', utf8_decode($objDocument->especie->nomeNoProdutor)), ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA);
+            throw new InfraException(sprintf('Documento do tipo %s não está mapeado. Motivo da Recusa no Barramento: %s', $objDocument->especie->nomeNoProdutor, ProcessoEletronicoRN::$MOTIVOS_RECUSA[ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_ESPECIE_NAO_MAPEADA]));
         }
       }
     }
 
       //Não valida informações do componente digital caso o documento esteja cancelado
     foreach ($arrObjDocumentos as $objDocumento) {
-      if (!isset($objDocument['retirado']) || $objDocumento['retirado'] === false) {
-        foreach ($objDocumento['componentesDigitais'] as $objComponenteDigital) {
+      if (!isset($objDocumento->retirado) || $objDocumento->retirado === false) {
+        foreach ($objDocumento->componentesDigitais as $objComponenteDigital) {
           $this->validaTamanhoComponenteDigital($objComponenteDigital);
         }
       }
@@ -748,7 +761,11 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function validaTamanhoComponenteDigital($objComponenteDigital)
     {
-    if (is_null($objComponenteDigital['tamanhoEmBytes']) || $objComponenteDigital['tamanhoEmBytes'] == 0){
+      if (is_array($objComponenteDigital)) {
+        $objComponenteDigital = (object) $objComponenteDigital;
+      }
+
+    if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0){
         throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
     }
   }
@@ -1717,7 +1734,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objSerieDTO = $this->obterSerieMapeada($objDocumento);
 
         if ($objSerieDTO==null){
-            throw new InfraException('Tipo de documento [Espécie '.$objDocumento->especie['codigo'].'] não encontrado.');
+            throw new InfraException('Tipo de documento [Espécie '.$objDocumento->especie->codigo.'] não encontrado.');
         }
 
         if (InfraString::isBolVazia($objDocumento->dataHoraDeProducao)) {
@@ -2293,7 +2310,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function obterSerieMapeada($documento)
     {
       $bolPossuiDocumentoReferenciado = isset($documento->ordemDoDocumentoReferenciado);
-      $numCodigoEspecie = (!$bolPossuiDocumentoReferenciado) ? intval($documento->especie['codigo']) : self::NUM_ESPECIE_PEN_ANEXO;
+      $numCodigoEspecie = (!$bolPossuiDocumentoReferenciado) ? intval($documento->especie->codigo) : self::NUM_ESPECIE_PEN_ANEXO;
       return $this->objPenRelTipoDocMapRecebidoRN->obterSerieMapeada($numCodigoEspecie);
   }
 
@@ -2537,12 +2554,16 @@ class ReceberProcedimentoRN extends InfraRN
       $arquivoExtensaoBD = new ArquivoExtensaoBD($this->getObjInfraIBanco());
 
     foreach($arrDocumentos as $objDocumento){
-      if (!isset($objDocumento['retirado']) || $objDocumento['retirado'] == false) {
-        $arrComponentesDigitais = $objDocumento['componentesDigitais'];
+      if (!isset($objDocumento->retirado) || $objDocumento->retirado == false) {
+        $arrComponentesDigitais = $objDocumento->componentesDigitais;
 
         foreach ($arrComponentesDigitais as $componenteDigital) {
+
+          if (is_array($componenteDigital)) {
+            $componenteDigital = (object) $componenteDigital;
+          }
             //Busca o nome do documento
-            $nomeDocumento = $componenteDigital['nome'];
+            $nomeDocumento = $componenteDigital->nome;
 
             //Busca pela extensão do documento
             $arrNomeDocumento = explode('.', $nomeDocumento);
@@ -2657,9 +2678,14 @@ class ReceberProcedimentoRN extends InfraRN
       //Percorre os documentos e compoenntes para pegar o tamanho em bytes do componente
     foreach ($arrObjDocumentos as $objDocumento) {
         $arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
-      foreach ($arrObjComponentesDigitais as $arrComponentesDigital) {
-        if (ProcessoEletronicoRN::getHashFromMetaDados($arrComponentesDigital['hash']) == $parComponentePendente) {
-            $tamanhoComponentePendende = $arrComponentesDigital['tamanhoEmBytes'];
+      foreach ($arrObjComponentesDigitais as $objComponentesDigital) {
+
+        if (is_array($objComponentesDigital)) {
+          $objComponentesDigital = (object) $objComponentesDigital;
+        }
+
+        if (ProcessoEletronicoRN::getHashFromMetaDados($objComponentesDigital->hash) == $parComponentePendente) {
+            $tamanhoComponentePendende = $objComponentesDigital->tamanhoEmBytes;
             break;
         }
       }
@@ -2733,11 +2759,16 @@ class ReceberProcedimentoRN extends InfraRN
       $resultado = array();
       $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
     foreach ($arrObjDocumentos as $arrDocumento) {
-      if(isset($arrDocumento['componentesDigitais']) && !is_array($arrDocumento['componentesDigitais'])){
-        $arrDocumento['componentesDigitais'] = array($arrDocumento['componentesDigitais']);
+      if(isset($arrDocumento->componentesDigitais) && !is_array($arrDocumento->componentesDigitais)){
+        $arrDocumento->componentesDigitais = array($arrDocumento->componentesDigitais);
       }
-      foreach ($arrDocumento['componentesDigitais'] as $objComponente) {
-          $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente['hash']);
+      foreach ($arrDocumento->componentesDigitais as $objComponente) {
+          
+          if (is_array($objComponente)) {
+            $objComponente = (object) $objComponente;
+          }
+
+          $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente->hash);
           $resultado[$strHash] = $objComponente;
       }
     }
@@ -2822,7 +2853,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
       $arrObjObservacoes = array();
-      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor['numeroDeIdentificacao'];
+      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor->numeroDeIdentificacao;
     if(!empty($strNumeroDocumentoOrigem)){
         $objObservacaoDTO = new ObservacaoDTO();
         $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
