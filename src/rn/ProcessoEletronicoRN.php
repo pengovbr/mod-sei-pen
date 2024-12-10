@@ -926,13 +926,7 @@ class ProcessoEletronicoRN extends InfraRN
       $atribuirInformacoes = $this->atribuirInformacoesAssuntoREST($cabecalho, $dblIdProcedimento);
       $atribuirInfoModulo = $this->atribuirInformacoesModuloREST($cabecalho);
 
-      if (!empty($atribuirInformacoes)) {
-          $cabecalho = $atribuirInformacoes;
-      }
-
-      if (!empty($atribuirInfoModulo)) {
-          $cabecalho = $atribuirInfoModulo;
-      }
+      $cabecalho['propriedadesAdicionais'] = array_merge($atribuirInformacoes, $atribuirInfoModulo);
 
       return $cabecalho;
   }
@@ -940,16 +934,18 @@ class ProcessoEletronicoRN extends InfraRN
   private function atribuirInformacoesModuloREST($objCabecalho)
     {
     try{
+        $arrInformacoeesModulo = [];
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
-        $objCabecalho['propriedadesAdicionais'][] = [
+       
+        $arrInformacoeesModulo[] = [
             'chave' => 'MODULO_PEN_VERSAO',
             'valor' => $objInfraParametro->getValor('VERSAO_MODULO_PEN')
         ];
 
-        return $objCabecalho;
+        return $arrInformacoeesModulo;
 
     }catch(Exception $e){
-
+        $mensagem = "Erro ao obter versão do módulo PEN";
         throw new InfraException($mensagem, $e);
     }
   }
@@ -1054,8 +1050,7 @@ class ProcessoEletronicoRN extends InfraRN
         $contagem++;
       }
 
-        $objCabecalho['propriedadesAdicionais'][] = $arrDadosAssunto;
-        return $objCabecalho;
+      return $arrDadosAssunto;
 
     }catch(Exception $e){
       $mensagem = "Falha ao atribuir informações de assunto";
@@ -1741,9 +1736,9 @@ class ProcessoEletronicoRN extends InfraRN
 
         if (isset($arrResultado['tramites']) && !empty($arrResultado['tramites'][0])) {
 
-            $historico = [];
+            $itensHistorico = [];
           foreach ($arrResultado['tramites'][0]['mudancasDeSituacao'] as $mudancaDeSituacao) {
-              $historico['operacao'][] = $mudancaDeSituacao;
+              $itensHistorico['operacao'][] = $mudancaDeSituacao;
           }
 
             $arrResultado['tramites'][0] = array_filter($arrResultado['tramites'][0], function($value) {
@@ -1751,7 +1746,7 @@ class ProcessoEletronicoRN extends InfraRN
             });
 
             $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado['tramites'][0]);
-            $arrObjTramite[0]->historico = (object) $historico;
+            $arrObjTramite[0]->itensHistorico = (object) $itensHistorico;
 
         }
 
@@ -2558,15 +2553,10 @@ class ProcessoEletronicoRN extends InfraRN
      */
   private static function documentoFoiAnexado($parObjProtocolo, $parObjDocumento)
     {
-
       return (
         isset($parObjDocumento->protocoloDoProcessoAnexado) &&
         !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-        (
-            is_array($parObjProtocolo) 
-                ? $parObjProtocolo['protocolo'] != $parObjDocumento->protocoloDoProcessoAnexado
-                : (is_object($parObjProtocolo) && $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado)
-        )
+        $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
     );
   }
 

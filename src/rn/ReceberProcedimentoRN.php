@@ -1862,13 +1862,6 @@ class ReceberProcedimentoRN extends InfraRN
         $objDocumentoDTO->getObjProtocoloDTO()->setNumIdUnidadeGeradora(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
         $objDocumentoDTO->setStrSinBloqueado('N');
 
-
-        // if (isset($objDocumento->componenteDigital)) {
-        //   $componentesDigitais = $objDocumento->componenteDigital;
-        // } else {
-        //   $componentesDigitais = (array) $objDocumento->componentesDigitais;
-        // } 
-
         //TODO: Fazer a atribuição dos componentes digitais do processo a partir desse ponto
         $this->atribuirComponentesDigitais(
             $objDocumentoDTO, 

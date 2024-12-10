@@ -571,7 +571,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           return $dt1 > $dt2;
       });
 
-      $objProcesso['historico'] = $arrObjOperacao;
+      $objProcesso['itensHistorico'] = $arrObjOperacao;
 
       return $objProcesso;
     }
