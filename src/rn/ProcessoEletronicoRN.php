@@ -2336,7 +2336,9 @@ class ProcessoEletronicoRN extends InfraRN
 
         //Tratamento recursivo para processos anexados
       foreach ($arrObjProtocolo as $objProtocolo) {
-        $objProtocolo = (object) $objProtocolo;
+        if (is_array(($objProtocolo))) {
+          $objProtocolo = (object) $objProtocolo;
+        }
         $bolEhProcessoAnexado = $objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
         if($parBolExtrairAnexados && $bolEhProcessoAnexado){
             $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);
@@ -2381,12 +2383,12 @@ class ProcessoEletronicoRN extends InfraRN
              
       $arrObjComponenteDigital = array();
     if (isset($parObjDocumento->componentesDigitais)) {
-        $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
-        usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
-    }
-
-      return $arrObjComponenteDigital;
-  }
+          $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
+          usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
+      }
+  
+        return $arrObjComponenteDigital;
+    }      
 
     /**
      * Retorna a referência para o processo ou documento avulso
@@ -2469,7 +2471,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     $arrObjRefProcessosAnexados = array();
     $objProcessoPrincipal = clone $parObjProtocolo;
-    $objProcessoPrincipal->documento = array();
+    $objProcessoPrincipal->documentos = array();
     $arrObjDocumentosOrdenados = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
     usort($arrObjDocumentosOrdenados, array("ProcessoEletronicoRN", "comparacaoOrdemDocumentos"));
 
