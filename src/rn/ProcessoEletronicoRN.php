@@ -133,7 +133,7 @@ class ProcessoEletronicoRN extends InfraRN
     
     $this->strClientGuzzle = new Client([
       'base_uri' => $this->strBaseUri,
-      'timeout'  => 5.0,
+      'timeout'  => 10,
       'headers'  => $this->arrheaders,
       'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
     ]);
@@ -802,9 +802,11 @@ class ProcessoEletronicoRN extends InfraRN
     return $arrEspecies;
   }
 
+
   public function enviarProcessoREST($parametros)
   {       
     $endpoint = "tramites/processo";
+
     try {
         $arrResultado = $this->post($endpoint, $parametros['novoTramiteDeProcesso']);
             
@@ -1040,7 +1042,7 @@ class ProcessoEletronicoRN extends InfraRN
         ];
         
         $valorInput = $infoAssunto->getStrObservacao() ? 
-          utf8_encode($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000)) 
+        mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto(htmlspecialchars($infoAssunto->getStrObservacao(), ENT_COMPAT | ENT_HTML401 | ENT_SUBSTITUTE, 'ISO-8859-1'), 10000), 'UTF-8', 'ISO-8859-1')
           : "NA";
         $arrDadosAssunto[] = [
           'chave' => 'CLASSIFICACAO_Observacao_' . $contagem,

@@ -397,7 +397,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrHashIndexados = array();
       foreach ($parObjProcesso['documentos'] as $objDoc)
       {
-          $arrComponentesDigitais = is_array($objDoc['componentesDigitais']) ? $objDoc['componentesDigitais'] : array($objDoc['componentesDigitais']);
+        $arrComponentesDigitais = is_array($objDoc['componentesDigitais']) ? $objDoc['componentesDigitais'] : array($objDoc['componentesDigitais']);       
         foreach ($arrComponentesDigitais as $objComponenteDigital) {
           $strHashComponente = ProcessoEletronicoRN::getHashFromMetaDadosREST($objComponenteDigital['hash']);
           if(!in_array($strHashComponente, $arrHashIndexados)){
@@ -960,24 +960,28 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
             $componenteDigital = $arrobjComponenteDigitalDTO[0];
 
+            $componetesDigitais = [];
+
             $documento['componentesDigitais'] = []; // Inicializando 'componentesDigitais' como um array
-            $documento['componentesDigitais']['ordem'] = 1;
-            $documento['componentesDigitais']['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
-            $documento['componentesDigitais']['hash'] = [
+            $componetesDigitais['ordem'] = 1;
+            $componetesDigitais['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
+            $componetesDigitais['hash'] = [
               'algoritmo' => $componenteDigital->getStrAlgoritmoHash(),
               'conteudo' => $componenteDigital->getStrHashConteudo()
             ];
 
-            $documento['componentesDigitais']['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
-            $documento['componentesDigitais']['mimeType'] = $componenteDigital->getStrMimeType();
-            $documento['componentesDigitais']['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
-            $documento['componentesDigitais']['idAnexo'] = $componenteDigital->getNumIdAnexo();
-            $documento['componentesDigitais'] = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $documento['componentesDigitais'], $componenteDigital->getStrHashConteudo());
-
+            $componetesDigitais['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
+            $componetesDigitais['mimeType'] = $componenteDigital->getStrMimeType();
+            $componetesDigitais['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
+            $componetesDigitais['idAnexo'] = $componenteDigital->getNumIdAnexo();
 
             if($componenteDigital->getStrMimeType() == 'outro'){
-              $documento['componentesDigitais']['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+              $componetesDigitais['dadosComplementaresDoTipoDeArquivo'] = 'outro';
             }
+
+            $documento['componentesDigitais'][] = $componetesDigitais;
+            $componetesDigitais = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $documento['componentesDigitais'], $componenteDigital->getStrHashConteudo());
+
           }else{
             $documento = $this->atribuirComponentesDigitaisREST($documento, $documentoDTO, $dblIdProcedimento);
           }
