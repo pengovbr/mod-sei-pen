@@ -960,27 +960,27 @@ class ExpedirProcedimentoRN extends InfraRN {
             $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
             $componenteDigital = $arrobjComponenteDigitalDTO[0];
 
-            $componetesDigitais = [];
+            $arrComponentesDigitais = [];
 
             $documento['componentesDigitais'] = []; // Inicializando 'componentesDigitais' como um array
-            $componetesDigitais['ordem'] = 1;
-            $componetesDigitais['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
-            $componetesDigitais['hash'] = [
+            $arrComponentesDigitais['ordem'] = 1;
+            $arrComponentesDigitais['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
+            $arrComponentesDigitais['hash'] = [
               'algoritmo' => $componenteDigital->getStrAlgoritmoHash(),
               'conteudo' => $componenteDigital->getStrHashConteudo()
             ];
 
-            $componetesDigitais['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
-            $componetesDigitais['mimeType'] = $componenteDigital->getStrMimeType();
-            $componetesDigitais['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
-            $componetesDigitais['idAnexo'] = $componenteDigital->getNumIdAnexo();
+            $arrComponentesDigitais['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
+            $arrComponentesDigitais['mimeType'] = $componenteDigital->getStrMimeType();
+            $arrComponentesDigitais['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
+            $arrComponentesDigitais['idAnexo'] = $componenteDigital->getNumIdAnexo();
 
             if($componenteDigital->getStrMimeType() == 'outro'){
-              $componetesDigitais['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+              $arrComponentesDigitais['dadosComplementaresDoTipoDeArquivo'] = 'outro';
             }
 
-            $documento['componentesDigitais'][] = $componetesDigitais;
-            $componetesDigitais = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $documento['componentesDigitais'], $componenteDigital->getStrHashConteudo());
+            $documento['componentesDigitais'][] = $arrComponentesDigitais;
+            $arrComponentesDigitais = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $documento['componentesDigitais'], $componenteDigital->getStrHashConteudo());
 
           }else{
             $documento = $this->atribuirComponentesDigitaisREST($documento, $documentoDTO, $dblIdProcedimento);

@@ -133,7 +133,7 @@ class ProcessoEletronicoRN extends InfraRN
     
     $this->strClientGuzzle = new Client([
       'base_uri' => $this->strBaseUri,
-      'timeout'  => 10,
+      'timeout'  => self::WS_TIMEOUT_CONEXAO,
       'headers'  => $this->arrheaders,
       'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
     ]);
@@ -802,11 +802,9 @@ class ProcessoEletronicoRN extends InfraRN
     return $arrEspecies;
   }
 
-
   public function enviarProcessoREST($parametros)
   {       
     $endpoint = "tramites/processo";
-
     try {
         $arrResultado = $this->post($endpoint, $parametros['novoTramiteDeProcesso']);
             
@@ -1092,7 +1090,7 @@ class ProcessoEletronicoRN extends InfraRN
       $strClientGuzzle = new GuzzleHttp\Client([
         'base_uri' => $strBaseUri,
         'headers'  => $arrheaders,
-        'timeout'  => 5.0,
+        'timeout'  => self::WS_TIMEOUT_CONEXAO,
         'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
       ]);
 
@@ -1144,7 +1142,7 @@ class ProcessoEletronicoRN extends InfraRN
             'protocolo' => $protocolo
         ];
 
-        $endpoint = "/interoperabilidade/rest/v3/tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar/partes/{$parte}";
+        $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar/partes/{$parte}";
 
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
         $strLocalizacaoCertificadoDigital = $objConfiguracaoModPEN->getValor("PEN", "LocalizacaoCertificado");
@@ -1160,7 +1158,7 @@ class ProcessoEletronicoRN extends InfraRN
         $strClientGuzzle = new GuzzleHttp\Client([
             'base_uri' => $strBaseUri,
             'headers'  => $arrheaders,
-            'timeout'  => 5.0,
+            'timeout'  => self::WS_TIMEOUT_CONEXAO,
             'cert'     => [$strLocalizacaoCertificadoDigital, $strSenhaCertificadoDigital],
         ]);
 
