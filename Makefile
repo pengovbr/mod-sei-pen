@@ -144,6 +144,10 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar update'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar update'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar install'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar install'
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
@@ -153,10 +157,6 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sip
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
-	
-	@if [ -e tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php ]; then rm tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php; fi;
-	@cp tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.exemplo.php tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php
-	@echo "\nArquivo 'ConfiguracaoModPEN.php' restaurado conforme 'ConfiguracaoModPEN.exemplo.php'.\n";
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
 	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
@@ -192,7 +192,7 @@ down: .env
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml $(textdox) /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
@@ -204,7 +204,7 @@ test-parallel-otimizado: .env $(FILE_VENDOR_FUNCIONAL) up
 	
 	
 test-unit: $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/$(addsuffix .php,$(teste))'
 
 test: test-unit test-functional
 
