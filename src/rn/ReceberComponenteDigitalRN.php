@@ -150,7 +150,7 @@ class ReceberComponenteDigitalRN extends InfraRN
 
         $contDocumentosDto = 0;
         $arrayRetornoObjAnexoDTO = array();
-      foreach ($arrObjDocumentoDTO as $objDocumentoDTO){
+      foreach ($arrObjDocumentoDTO as $objDocumentoDTO) {
           $contDocumentosDto++;
           $objAnexoRN = new AnexoRN();
 
@@ -173,7 +173,7 @@ class ReceberComponenteDigitalRN extends InfraRN
               $numSequencial++;
 
               if ($objAnexoDTO==null){
-                    $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
+                      $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
               }else{
                       /**
                        * Aqui será atribuído um nome aos anexos
@@ -191,14 +191,14 @@ class ReceberComponenteDigitalRN extends InfraRN
                       $strLocalizacaoArquivo = DIR_SEI_TEMP.'/'. $objAnexoDTO->getNumIdAnexo() ;
                       //if ($zipFile->addFile($strLocalizacaoArquivo,'['.$numComponenteDigital.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
                 if ($zipFile->addFile($strLocalizacaoArquivo, '['.$numSequencial.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
-                          throw new InfraException('Erro adicionando arquivo externo ao zip.');
+                        throw new InfraException('Erro adicionando arquivo externo ao zip.');
                 }
                 else{
-                              /**
-                               * Aqui quer dizer que o arquivo já foi colocado dentro do zip.
-                               * Vamos colocá-lo em um array e depois utilizarmos este array para fazer as exclusões.
-                               */
-                              array_push($arrayAnexosExcluirFisicamente, $strLocalizacaoArquivo);
+                            /**
+                             * Aqui quer dizer que o arquivo já foi colocado dentro do zip.
+                             * Vamos colocá-lo em um array e depois utilizarmos este array para fazer as exclusões.
+                             */
+                            array_push($arrayAnexosExcluirFisicamente, $strLocalizacaoArquivo);
                 }
               }
             }
@@ -208,7 +208,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         }
           $objInfraException->lancarValidacoes();
         if ($zipFile->close() === false) {
-            throw new InfraException('Não foi possível fechar arquivo zip.');
+          throw new InfraException('Não foi possível fechar arquivo zip.');
         }
           $objAnexoDTO = new AnexoDTO();
           $arrNomeArquivo = explode('/', $strCaminhoCompletoArquivoZip);
@@ -222,7 +222,7 @@ class ReceberComponenteDigitalRN extends InfraRN
            * Vamos varrer os arquivos que devem ser excluídos fisicamente da pasta temporária e excluí-los
            */
         foreach ($arrayAnexosExcluirFisicamente as $caminhoArquivoExcluirFisicamente){
-            unlink($caminhoArquivoExcluirFisicamente);
+          unlink($caminhoArquivoExcluirFisicamente);
         }
       }
         return $objAnexoDTO;
@@ -243,6 +243,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objComponenteDigitalDTO->setStrNumeroRegistro($parObjComponenteDigitalDTO->getStrNumeroRegistro());
       $objComponenteDigitalDTO->setDblIdDocumento($parObjComponenteDigitalDTO->getDblIdDocumento());
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjComponenteDigitalDTO->getDblIdProcedimento());
+      //$objComponenteDigitalDTO->setNumOrdem($parObjComponenteDigitalDTO->getNumOrdem());
       $objComponenteDigitalDTO->setNumIdAnexo($parObjAnexoDTO->getNumIdAnexo());
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
       $objComponenteDigitalDTO = $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
@@ -254,10 +255,14 @@ class ReceberComponenteDigitalRN extends InfraRN
      *
      */
   public function copiarComponenteDigitalPastaTemporaria($parObjComponenteDigital, $parObjConteudo)
-    {
-    if(!isset($parObjComponenteDigital)){
+  {
+    if (!isset($parObjComponenteDigital)) {
         throw new InfraException("Componente Digital não informado");
     }
+
+      if (is_array($parObjComponenteDigital)) {
+        $parObjComponenteDigital = (object) $parObjComponenteDigital;
+      }
       $objAnexoRN = new AnexoRN();
       $strNomeArquivoUpload = $objAnexoRN->gerarNomeArquivoTemporario();
       $strConteudoCodificado = $parObjConteudo->conteudoDoComponenteDigital;
@@ -277,7 +282,7 @@ class ReceberComponenteDigitalRN extends InfraRN
   }
 
   public function validarIntegridadeDoComponenteDigital(AnexoDTO $objAnexoDTO, $strHashConteudo, $parNumIdentificacaoTramite, $parNumOrdemComponente)
-    {
+  {
       $strHashInformado = $strHashConteudo;
       $strHashInformado = base64_decode($strHashInformado);
 

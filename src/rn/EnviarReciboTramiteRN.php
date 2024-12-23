@@ -37,7 +37,7 @@ class EnviarReciboTramiteRN extends InfraRN
 
       $objMetaProcesso = $objMetaRetorno->metadados->processo;
 
-      $arrObjMetaDocumento = is_array($objMetaProcesso->documento) ? $objMetaProcesso->documento : array($objMetaProcesso->documento);
+      $arrObjMetaDocumento = is_array($objMetaProcesso->documentos) ? $objMetaProcesso->documentos : array($objMetaProcesso->documentos);
 
       $objDTO = new ComponenteDigitalDTO();
       $objBD = new ComponenteDigitalBD($this->inicializarObjInfraIBanco());
@@ -152,13 +152,13 @@ class EnviarReciboTramiteRN extends InfraRN
       throw new InfraException('Parâmetro $parObjTramite não informado.');
     }
 
-    if(!is_array($parObjTramite->historico->operacao)) {
-      $parObjTramite->historico->operacao = array($parObjTramite->historico->operacao);
+    if(!is_array($parObjTramite->itensHistorico->operacao)) {
+      $parObjTramite->itensHistorico->operacao = array($parObjTramite->itensHistorico->operacao);
     }
 
-    foreach ($parObjTramite->historico->operacao as $operacao) {
-      if($operacao->situacao == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-        return ProcessoEletronicoRN::converterDataSEI($operacao->dataHora);
+    foreach ($parObjTramite->itensHistorico->operacao as $operacao) {
+      if($operacao['situacao'] == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
+        return ProcessoEletronicoRN::converterDataSEI($operacao['dataHora']);
       }
     }
 
