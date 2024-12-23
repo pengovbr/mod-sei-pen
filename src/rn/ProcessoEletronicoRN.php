@@ -754,10 +754,10 @@ class ProcessoEletronicoRN extends InfraRN
       $arrResultado = $this->get($endpoint, $parametros);
       $arrMotivosUrgencia = [];
       if (isset($arrResultado)) {
-        $count = count($arrResultado['motivosUrgencia']);
-            
+        $count = count($arrResultado['motivosUrgencia']);    
         for ($i = 0; $i < $count; $i++) {
-            $arrMotivosUrgencia[] = mb_convert_encoding($arrResultado['motivosUrgencia'][$i]['descricao'], 'ISO-8859-1', 'UTF-8');
+            $codigo = $i + 1; 
+            $arrMotivosUrgencia[$codigo] = mb_convert_encoding($arrResultado['motivosUrgencia'][$i]['descricao'], 'ISO-8859-1', 'UTF-8');
         }
       }
   
@@ -785,13 +785,13 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
         $arrEspecies = [];
-      if (isset($arrResultado)) {
-          $count = count($arrResultado['especies']);
-            
-        for ($i = 0; $i < $count; $i++) {
-            $arrEspecies[] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
+        if (isset($arrResultado)) {
+            $count = count($arrResultado['especies']);
+            for ($i = 0; $i < $count; $i++) {
+                $codigo = $i + 1; 
+                $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
+            }
         }
-      }
 
     } catch (Exception $e) {
         $mensagem = "Não foi encontrado nenhuma espécie documental.";
