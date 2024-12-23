@@ -149,6 +149,9 @@ services:
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
       - /tmp/sei_arquivos_1:/var/sei/arquivos
+      - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
+      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
+      - ../../vendor:/opt/sei/web/modulos/pen/vendor
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -206,6 +209,9 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - /tmp/sei_arquivos_2:/var/sei/arquivos
+      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
+      - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
+      - ../../vendor:/opt/sei/web/modulos/pen/vendor
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}

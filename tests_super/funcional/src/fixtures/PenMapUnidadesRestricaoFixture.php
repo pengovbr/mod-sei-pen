@@ -40,7 +40,7 @@ class PenUnidadeRestricaoFixture extends \FixtureBase
       $objPenUnidadeRestricaoDTO = new \PenUnidadeRestricaoDTO();
 
       $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRestricao($dados['NomeUnidadeRestricao']);
-      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($dados['NomeUnidadeRHRestricao']);
+      $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao($dados['NomeUnidadeRHRestricao']."%", InfraDTO::$OPER_LIKE);
       $objPenUnidadeRestricaoDTO->retTodos();
 
       $objPenUnidadeRestricaoBD = new \PenUnidadeRestricaoBD($this->inicializarObjInfraIBanco());
