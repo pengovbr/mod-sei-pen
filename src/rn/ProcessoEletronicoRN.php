@@ -271,7 +271,7 @@ class ProcessoEletronicoRN extends InfraRN
           }
         }
 
-        return self::converterArrayParaObjeto($arrResultado);
+        return $this->converterArrayParaObjeto($arrResultado);
       }
 
         $objEstruturaDTO = new EstruturaDTO();
@@ -476,7 +476,7 @@ class ProcessoEletronicoRN extends InfraRN
    * @param $idRepositorioEstrutura
    * @return array|null
    */
-  private function validarRestricaoUnidadesCadastradas($idRepositorioEstrutura)
+  protected function validarRestricaoUnidadesCadastradas($idRepositorioEstrutura)
   {
     //Verificar limitação de repositórios/unidades mapeadas
     $arrEstruturasCadastradas = null;
@@ -542,7 +542,7 @@ class ProcessoEletronicoRN extends InfraRN
    * @param null|string $numeroDeIdentificacaoDaEstrutura
    * @return array
    */
-  private function buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null)
+  protected function buscarEstruturasPorEstruturaPai($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura = null)
   {
     $parametros = new stdClass();
     $parametros->filtroDeEstruturasPorEstruturaPai = new stdClass();
@@ -754,10 +754,10 @@ class ProcessoEletronicoRN extends InfraRN
       $arrResultado = $this->get($endpoint, $parametros);
       $arrMotivosUrgencia = [];
       if (isset($arrResultado)) {
-        $count = count($arrResultado['motivosUrgencia']);
-            
+        $count = count($arrResultado['motivosUrgencia']);    
         for ($i = 0; $i < $count; $i++) {
-            $arrMotivosUrgencia[] = mb_convert_encoding($arrResultado['motivosUrgencia'][$i]['descricao'], 'ISO-8859-1', 'UTF-8');
+            $codigo = $i + 1; 
+            $arrMotivosUrgencia[$codigo] = mb_convert_encoding($arrResultado['motivosUrgencia'][$i]['descricao'], 'ISO-8859-1', 'UTF-8');
         }
       }
   
@@ -777,7 +777,7 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return array
      */
-  public function consultarEspeciesDocumentais()
+    public function consultarEspeciesDocumentais()
     {
     $endpoint = 'especies';
     try {
@@ -785,13 +785,13 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
         $arrEspecies = [];
-      if (isset($arrResultado)) {
-          $count = count($arrResultado['especies']);
-            
-        for ($i = 0; $i < $count; $i++) {
-            $arrEspecies[] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
+        if (isset($arrResultado)) {
+            $count = count($arrResultado['especies']);
+            for ($i = 0; $i < $count; $i++) {
+                $codigo = $i + 1; 
+                $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
+            }
         }
-      }
 
     } catch (Exception $e) {
         $mensagem = "Não foi encontrado nenhuma espécie documental.";
@@ -2242,24 +2242,23 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function consultarHipotesesLegais($ativos = true) 
+  public function consultarHipotesesLegais($ativos = true)
     {
       $endpoint = "hipoteses";
-
+ 
       $parametros = [
         'ativos' => $ativos
       ];
-
+ 
       try {
           $arrResultado = $this->get($endpoint, $parametros);
-          return $arrResultado;
-
-        if (empty($hipoteses)) {
+ 
+        if (empty($arrResultado)) {
             return [];
         }
-
-          return $hipoteses;
-
+       
+        return $arrResultado;
+ 
       } catch(Exception $e){
           $mensagem = "Falha na obtenção de hipóteses legais";
           $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
@@ -2279,7 +2278,8 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  private function tentarNovamenteSobErroHTTP($callback, $numTentativa = 1)
+
+  protected function tentarNovamenteSobErroHTTP($callback, $numTentativa = 1)
     {
     try {
         return $callback($this->getObjPenWs());
@@ -2733,14 +2733,14 @@ class ProcessoEletronicoRN extends InfraRN
     /**
      * Converter arrays associativo para objetos
     */
-    public static function converterArrayParaObjeto($array)
+    public function converterArrayParaObjeto($array)
     {
         if (is_array($array)) {
             // Verificar se o array é associativo
             if (self::verificarSeArrayAssociativo($array)) {
                 $object = new stdClass();
                 foreach ($array as $key => $value) {
-                    $object->$key = self::converterArrayParaObjeto($value);
+                    $object->$key = $this->converterArrayParaObjeto($value);
                 }
                 return $object;
             } else {
