@@ -777,7 +777,7 @@ class ProcessoEletronicoRN extends InfraRN
      *
      * @return array
      */
-    public function consultarEspeciesDocumentais()
+  public function consultarEspeciesDocumentais()
     {
     $endpoint = 'especies';
     try {
@@ -785,13 +785,13 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
         $arrEspecies = [];
-        if (isset($arrResultado)) {
-            $count = count($arrResultado['especies']);
-            for ($i = 0; $i < $count; $i++) {
-                $codigo = $i + 1; 
-                $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
-            }
+      if (isset($arrResultado)) {
+          $count = count($arrResultado['especies']);
+        for ($i = 0; $i < $count; $i++) {
+            $codigo = $i + 1; 
+            $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
         }
+      }
 
     } catch (Exception $e) {
         $mensagem = "Não foi encontrado nenhuma espécie documental.";
@@ -1231,6 +1231,13 @@ class ProcessoEletronicoRN extends InfraRN
         $objResultado->IDT = $parNumIdentificacaoTramite;
         $objResultado->NRE = $arrResultado['nre'];
 
+        // verificar se é um documento avulso
+        if (!array_key_exists('processo', $arrResultado) || $arrResultado['processo'] == null) {
+          $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
+
+          return $objResultado;
+        }
+
         $multivalorado = false;
         if (count($arrResultado['processo']['documentos']) <= 1) {
           $arrResultado['processo']['documentos'] =  (object) $arrResultado['processo']['documentos'][0];
@@ -1487,9 +1494,9 @@ class ProcessoEletronicoRN extends InfraRN
     */
   public static function getHashFromMetaDados($objMeta)
     {
-      if (is_array($objMeta)) {
-        $objMeta = (object) $objMeta;
-      }
+    if (is_array($objMeta)) {
+      $objMeta = (object) $objMeta;
+    }
 
       $strHashConteudo = '';
 
@@ -2367,12 +2374,12 @@ class ProcessoEletronicoRN extends InfraRN
 
       $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
 
-      foreach ($arrObjDocumentoPadronizados as $documento) {
-        if (is_array($documento) && $documento['componentesDigitais']) {
-          $documento = (object) $documento;
-        }
-        $documento->componentesDigitais = self::obterComponentesDocumentos($documento);
+    foreach ($arrObjDocumentoPadronizados as $documento) {
+      if (is_array($documento) && $documento['componentesDigitais']) {
+        $documento = (object) $documento;
       }
+      $documento->componentesDigitais = self::obterComponentesDocumentos($documento);
+    }
 
       return $arrObjDocumentoPadronizados;
   }
@@ -2385,10 +2392,10 @@ class ProcessoEletronicoRN extends InfraRN
     if (isset($parObjDocumento->componentesDigitais)) {
           $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
           usort($arrObjComponenteDigital, array("ProcessoEletronicoRN", "comparacaoOrdemComponenteDigitais"));
-      }
+    }
   
         return $arrObjComponenteDigital;
-    }      
+  }      
 
     /**
      * Retorna a referência para o processo ou documento avulso
@@ -2440,14 +2447,14 @@ class ProcessoEletronicoRN extends InfraRN
     * @param $parObjDocumento
     * @return array
     */
-    public static function obterComponentesDigitaisDocumento($parObjDocumento)
+  public static function obterComponentesDigitaisDocumento($parObjDocumento)
     {
-      $arrObjComponenteDigital = array();
+    $arrObjComponenteDigital = array();
     if(isset($parObjDocumento->componentesDigitais)){
         $arrObjComponenteDigital = is_array($parObjDocumento->componentesDigitais) ? $parObjDocumento->componentesDigitais : array($parObjDocumento->componentesDigitais);
     }
 
-      return $arrObjComponenteDigital;
+    return $arrObjComponenteDigital;
   }
 
 
@@ -2733,29 +2740,29 @@ class ProcessoEletronicoRN extends InfraRN
     /**
      * Converter arrays associativo para objetos
     */
-    public function converterArrayParaObjeto($array)
+  public function converterArrayParaObjeto($array)
     {
-        if (is_array($array)) {
-            // Verificar se o array é associativo
-            if (self::verificarSeArrayAssociativo($array)) {
-                $object = new stdClass();
-                foreach ($array as $key => $value) {
-                    $object->$key = $this->converterArrayParaObjeto($value);
-                }
-                return $object;
-            } else {
-                // Para arrays indexados, manter como está
-                return array_map([self::class, 'converterArrayParaObjeto'], $array);
-            }
+    if (is_array($array)) {
+        // Verificar se o array é associativo
+      if (self::verificarSeArrayAssociativo($array)) {
+        $object = new stdClass();
+        foreach ($array as $key => $value) {
+            $object->$key = $this->converterArrayParaObjeto($value);
         }
-    
-        return $array;
+        return $object;
+      } else {
+          // Para arrays indexados, manter como está
+          return array_map([self::class, 'converterArrayParaObjeto'], $array);
+      }
     }
     
-    private static function verificarSeArrayAssociativo(array $array): bool
+      return $array;
+  }
+    
+  private static function verificarSeArrayAssociativo(array $array)
     {
-        return array_keys($array) !== range(0, count($array) - 1);
-    }
+      return array_keys($array) !== range(0, count($array) - 1);
+  }
     
 
     /**

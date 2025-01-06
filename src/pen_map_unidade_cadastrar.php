@@ -183,9 +183,9 @@ try {
     $objUnidadeDTO->retStrDescricao();
     $arrMapIdUnidade = array();
     $objPenUnidadeRN = new PenUnidadeRN();
-    foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
-        $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
-    }
+  foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
+      $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
+  }
 
     //Verifica se o numero da unidade esta vazio, senão estiver busca o nome da unidade para exibição
     $strNomeUnidadeSelecionada = '';
