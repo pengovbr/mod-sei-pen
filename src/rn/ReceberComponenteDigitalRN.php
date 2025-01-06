@@ -260,9 +260,9 @@ class ReceberComponenteDigitalRN extends InfraRN
         throw new InfraException("Módulo do Tramita: Componente Digital não informado");
     }
 
-      if (is_array($parObjComponenteDigital)) {
-        $parObjComponenteDigital = (object) $parObjComponenteDigital;
-      }
+    if (is_array($parObjComponenteDigital)) {
+      $parObjComponenteDigital = (object) $parObjComponenteDigital;
+    }
       $objAnexoRN = new AnexoRN();
       $strNomeArquivoUpload = $objAnexoRN->gerarNomeArquivoTemporario();
       $strConteudoCodificado = $parObjConteudo->conteudoDoComponenteDigital;

@@ -16,6 +16,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     const CONTEUDO_DOCUMENTO_C = "arquivo_pequeno_C.pdf";
 
     protected $servicoPEN;
+    protected $servicoPEN2;
     public static $remetente;
     public static $destinatario;
     public static $processoTeste;
@@ -39,12 +40,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         // Carregar contexto de testes e dados sobre certificado digital
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        putenv("DATABASE_HOST=org2-database");
-
-        // Instanciar objeto de teste utilizando o BeSimpleSoap
-        $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
-        $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
-        $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
+        
     }
 
     /**
@@ -52,16 +48,21 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_recebimento_documento_avulso()
+    public function test_recebimento_metadados_documento_avulso()
     {
+
+        $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
+        $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
+
+       $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
+
         // Simular um trâmite chamando a API do Barramento diretamente
         self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, array(self::CONTEUDO_DOCUMENTO_A));
 
         $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste(self::$documentoTeste1);
-        $novoTramite = $this->enviarMetadadosDocumento($this->servicoPEN, self::$remetente, self::$destinatario, $metadadosDocumentoTeste);
-        $this->enviarComponentesDigitaisDoTramite($this->servicoPEN, $novoTramite, $metadadosDocumentoTeste);
-        $reciboTramite = $this->receberReciboEnvio($this->servicoPEN, $novoTramite);
-         
+        $novoTramite = $this->enviarMetadadosDocumento(self::$remetente, self::$destinatario, $metadadosDocumentoTeste);
+        $this->enviarComponentesDigitaisDoTramite($novoTramite, $metadadosDocumentoTeste);
+        $reciboTramite = $this->receberReciboEnvio($novoTramite);
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -75,7 +76,6 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
      * @group envio
      * @large
      *
-     * @depends test_recebimento_documento_avulso
      *
      * @return void
      */
@@ -149,76 +149,51 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 
-    private function receberReciboEnvio($servicoPEN, $novoTramite)
+
+    private function receberReciboEnvio($novoTramite)
     {
-        $dadosTramite = $novoTramite->dadosTramiteDeDocumentoCriado;
-        $parametros = new StdClass();
-        $parametros->IDT = $dadosTramite->tramite->IDT;
-        return $servicoPEN->receberReciboDeEnvio($parametros);
+        $dadosTramite = $novoTramite['tramites'];
+        $idt = $dadosTramite[0]['IDT'];
+        return $this->receberReciboDeEnvioAPI($idt);
     }
 
-    private function enviarMetadadosDocumento($servicoPEN, $remetente, $destinatario, $documentoTeste)
+    private function enviarMetadadosDocumento($remetente, $destinatario, $documentoTeste)
     {
-        $parametros = new stdClass();
-        $parametros->novoTramiteDeDocumento = new stdClass();
-        $parametros->novoTramiteDeDocumento->cabecalho = $this->construirCabecalhoTeste($remetente, $destinatario);
-        $parametros->novoTramiteDeDocumento->documento = $documentoTeste;
-        return $servicoPEN->enviarDocumento($parametros);
+        $parametros = [];
+        $parametros['cabecalho'] = $this->construirCabecalhoTeste($remetente, $destinatario);
+        $parametros['documento'] = $documentoTeste['documentoEnvio'];
+
+        return $this->enviarDocumentoAPI($parametros);
     }
 
-    private function enviarComponentesDigitaisDoTramite($servicoPEN, $novoTramite, $documentoTeste)
+    private function enviarComponentesDigitaisDoTramite($novoTramite, $documentoTeste)
     {
-        $dadosTramite = $novoTramite->dadosTramiteDeDocumentoCriado;
-        foreach ($documentoTeste['componenteDigital'] as $item) {
-            $dadosDoComponenteDigital = new stdClass();
-            $dadosDoComponenteDigital->protocolo = $documentoTeste['protocolo'];
-            $dadosDoComponenteDigital->hashDoComponenteDigital = $item['valorHash'];
-            $dadosDoComponenteDigital->conteudoDoComponenteDigital = new SoapVar($item['conteudo'], XSD_BASE64BINARY);
-            $dadosDoComponenteDigital->ticketParaEnvioDeComponentesDigitais = $dadosTramite->ticketParaEnvioDeComponentesDigitais;
+        $parametros = [];
+        $dadosDoComponenteDigital['protocolo'] = $documentoTeste['documentoEnvio']['protocolo'];
+        $dadosDoComponenteDigital['hashDoComponenteDigital'] = $documentoTeste['componenteEnvio']['hashDocumento'];
+        $dadosDoComponenteDigital['conteudoDoComponenteDigital'] = $documentoTeste['componenteEnvio']['conteudo'];
+        $dadosDoComponenteDigital['ticketParaEnvioDeComponentesDigitais'] = $novoTramite['ticketParaEnvioDeComponentesDigitais'];
+        
+        $parametros['dadosDoComponenteDigital'] = $dadosDoComponenteDigital;
 
-            $parametros = new stdClass();
-            $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
-            $servicoPEN->enviarComponenteDigital($parametros);
-        }
-    }
-
-    private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado)
-    {
-        $connectionTimeout = 600;
-        $options = array(
-            'soap_version' => SOAP_1_1
-            , 'local_cert' => $localCertificado
-            , 'passphrase' => $senhaCertificado
-            , 'resolve_wsdl_remote_includes' => true
-            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
-            , 'connection_timeout' => $connectionTimeout
-            , CURLOPT_TIMEOUT => $connectionTimeout
-            , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
-            , 'encoding' => 'UTF-8'
-            , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
-            , 'ssl' => array(
-                'allow_self_signed' => true,
-            ),
-        );
-
-        return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
-
+        $this->enviarComponenteDigitalAPI($parametros);
     }
 
     private function construirCabecalhoTeste($remetente, $destinatario)
     {
-        $cabecalho = new stdClass();
-        $cabecalho->remetente = new stdClass();
-        $cabecalho->remetente->identificacaoDoRepositorioDeEstruturas = $remetente['ID_REP_ESTRUTURAS'];
-        $cabecalho->remetente->numeroDeIdentificacaoDaEstrutura = $remetente['ID_ESTRUTURA'];
-
-        $cabecalho->destinatario = new stdClass();
-        $cabecalho->destinatario->identificacaoDoRepositorioDeEstruturas = $destinatario['ID_REP_ESTRUTURAS'];
-        $cabecalho->destinatario->numeroDeIdentificacaoDaEstrutura =$destinatario['ID_ESTRUTURA'];
-
-        $cabecalho->urgente = false;
-        $cabecalho->motivoDaUrgencia = null;
-        $cabecalho->obrigarEnvioDeTodosOsComponentesDigitais = false;
+        $cabecalho = [
+            'remetente' => [
+                'identificacaoDoRepositorioDeEstruturas' => $remetente['ID_REP_ESTRUTURAS'],
+                'numeroDeIdentificacaoDaEstrutura' => $remetente['ID_ESTRUTURA'],
+            ],
+            'destinatarios' => [
+                [
+                    'identificacaoDoRepositorioDeEstruturas' => $destinatario['ID_REP_ESTRUTURAS'],
+                    'numeroDeIdentificacaoDaEstrutura' => $destinatario['ID_ESTRUTURA'],
+                ],
+            ]
+        ];
+        
         return $cabecalho;
     }
 
@@ -247,42 +222,145 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
                 $nomeArquivo = basename($caminhoArquivo);
                 $componentes[] = array(
                     'nome' => $nomeArquivo,
-                    'hash' => new SoapVar("<hash algoritmo='SHA256'>$hashDocumento</hash>", XSD_ANYXML),
+                    'hash' => [
+                        'algoritmo' => 'SHA256',
+                        'conteudo' => $hashDocumento
+                    ],
                     'tipoDeConteudo' => 'txt',
-                    'mimeType' => 'text/plain',
+                    "mimeType" => "application/pdf",
                     'tamanhoEmBytes' => $tamanhoDocumento,
                     'ordem' => $ordem + 1,
-
-                    // Chaves abaixo adicionadas apenas para simplificaçÃ£o dos testes
-                    'valorHash' => $hashDocumento,
-                    'conteudo' => $conteudo,
                 );
             } finally {
                fclose($fp);
             }
         }
 
-        return array(
-            'protocolo' => '13990.000181/2020-00',
+        $documentoEnvio = array(
+            'protocolo' => '13990.000185/2024-00',
             'nivelDeSigilo' => 1,
             'descricao' => $documentoTeste['DESCRICAO'],
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
-
             'produtor' => array(
-                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                "nome" => "Nome ABC",
+                "tipo" => "orgaopublico"
             ),
-
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
+                'nomeNoProdutor' => 'Despacho',
+            ),
+            'interessados' => array(
+                [
+                    "nome" => $documentoTeste['INTERESSADOS'],
+                    "tipo" => "fisica"
+                ]
             ),
 
-            'interessado' => array(
-                'nome' => $documentoTeste['INTERESSADOS'],
-            ),
-
-            'componenteDigital' => $componentes,
+            'componentesDigitais' => $componentes,
         );
+
+        $componenteEnvio = array(
+            'hashDocumento' => $hashDocumento,
+            'conteudo' => $conteudo
+        );
+
+        return array(
+            'documentoEnvio' => $documentoEnvio,
+            'componenteEnvio' => $componenteEnvio
+        );
+    }
+
+    public function enviarDocumentoAPI($parametros)
+    {
+        try {
+            $endpoint = "tramites/documento";
+
+            $response = $this->servicoPEN->request('POST', $endpoint, [
+                'json' => $parametros
+            ]);
+
+            return  json_decode($response->getBody(), true);
+    
+        } catch (\Exception $e) {
+            $mensagem = "Falha no envio de documento avulso";
+        }
+    }
+
+
+    public function enviarComponenteDigitalAPI($parametros) 
+    {
+        try {
+                
+            $arrParametros = $parametros['dadosDoComponenteDigital'];
+            $idTicketDeEnvio = $arrParametros['ticketParaEnvioDeComponentesDigitais'];
+
+            $protocolo = $arrParametros['protocolo'];
+            $hashDoComponenteDigital = $arrParametros['hashDoComponenteDigital'];
+            $conteudo = $arrParametros['conteudoDoComponenteDigital'];
+
+            $queryParams = [
+                'hashDoComponenteDigital' => $hashDoComponenteDigital,
+                'protocolo' => $protocolo
+            ];
+    
+            $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
+    
+            $arrOptions = [
+                'query' => $queryParams,
+                'multipart' => [
+                    [
+                        'name'     => 'conteudo',
+                        'contents' => $conteudo,
+                        'filename' => 'conteudo.html',
+                        'headers' => ['Content-Type' => 'text/html']
+                    ],              
+                ],
+            ];
+                    
+            $response = $this->servicoPEN->request('PUT', $endpoint, $arrOptions);
+
+            return $response;
+    
+        } catch (\Exception $e) {
+            $mensagem = "Falha no envio de de componentes no documento";
+        }
+    }
+
+
+    public function receberReciboDeEnvioAPI($parNumIdTramite)
+    {
+        $endpoint = "tramites/{$parNumIdTramite}/recibo-de-envio";
+        try{
+            $parametros = [
+                'IDT' => $parNumIdTramite
+            ];
+
+            $response = $this->servicoPEN->request('GET', $endpoint, [
+                'query' => $parametros
+            ]);
+
+            return json_decode($response->getBody(), true);
+        } catch (\Exception $e) {
+            $mensagem = "Falha no recebimento de recibo de trâmite de envio.";
+        }
+    }
+
+    private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado) 
+    {
+        $arrheaders = [
+            'Accept' => '*/*',
+            'Content-Type' => 'application/json',
+        ];
+        
+        $strClientGuzzle = new GuzzleHttp\Client([
+            'base_uri' => PEN_ENDERECO_WEBSERVICE,
+            'handler' => GuzzleHttp\HandlerStack::create(),
+            'timeout'  => 5.0,
+            'headers'  => $arrheaders,
+            'cert'     => [$localCertificado, $senhaCertificado],
+        ]);
+
+        return $strClientGuzzle;
     }
 }

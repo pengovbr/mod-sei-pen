@@ -203,8 +203,8 @@ test-parallel-otimizado: .env $(FILE_VENDOR_FUNCIONAL) up
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit: $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/$(addsuffix .php,$(teste))'
+test-unit: .env $(FILE_VENDOR_UNITARIO)
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'XDEBUG_MODE=coverage vendor/bin/phpunit --testdox --coverage-html html rn/$(addsuffix .php,$(teste))'
 
 test: test-unit test-functional
 
