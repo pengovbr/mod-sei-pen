@@ -9,6 +9,7 @@ src/config/supervisor.ini
 
 .vscode
 
+cobertura.xml
 .env
 *.pem
 *.cache

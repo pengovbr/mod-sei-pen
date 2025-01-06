@@ -1,0 +1,42 @@
+on: 
+  push:
+    paths:
+      - "**.php"
+      - "phpunit.xml"
+      - ".github/workflows/coveralls.yml"
+  pull_request:
+    paths:
+      - "**.php"
+      - "phpunit.xml"
+      - ".github/workflows/coveralls.yml"
+
+name: Test Coveralls
+env:
+  github-token: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Fetch Pull Request branch
+      uses: actions/checkout@v4
+      with:
+          repository: pengovbr/sei
+          token: ${{ secrets.GH_PAT }} # `GH_PAT` is a secret that contains your PAT
+          path: sei
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+          path: sei/src/sei/web/modulos/mod-sei-pen
+
+    - name: make test-unit
+      run: |
+        cd sei/src/sei/web/modulos/mod-sei-pen
+        make test-unit
+    - name: Coveralls
+      uses: coverallsapp/github-action@v2
+      with:
+        file: sei/src/sei/web/modulos/mod-sei-pen/tests_super/unitario/cobertura.xml

@@ -15,7 +15,7 @@
     <const name="PHPUNIT_BROWSER" value="chrome" />
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei" />
     <const name="PEN_ENDERECO_WEBSERVICE"
-      value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/?wsdl" />
+      value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/" />
 
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
