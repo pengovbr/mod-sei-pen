@@ -681,9 +681,9 @@ class ReceberProcedimentoRN extends InfraRN
 
       $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
     foreach($arrObjDocumento as $key => $objDocumento){
-        if (is_array($objDocumento->componentesDigitais[$key])) {
-          $objDocumento->componentesDigitais[$key] = (object) $objDocumento->componentesDigitais[$key];
-        } 
+      if (is_array($objDocumento->componentesDigitais[$key])) {
+        $objDocumento->componentesDigitais[$key] = (object) $objDocumento->componentesDigitais[$key];
+      } 
         $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componentesDigitais[$key]->hash);
         $objMapDTO = new PenRelTipoDocMapRecebidoDTO(true);
         $objMapDTO->setNumMaxRegistrosRetorno(1);
@@ -761,9 +761,9 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function validaTamanhoComponenteDigital($objComponenteDigital)
     {
-      if (is_array($objComponenteDigital)) {
-        $objComponenteDigital = (object) $objComponenteDigital;
-      }
+    if (is_array($objComponenteDigital)) {
+      $objComponenteDigital = (object) $objComponenteDigital;
+    }
 
     if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0){
         throw new InfraException('Módulo do Tramita: Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
@@ -1941,9 +1941,9 @@ class ReceberProcedimentoRN extends InfraRN
     $arrObjAnexosDTO = array();
     $arrObjAnexoDTO = array();
     foreach ($objComponentesDigitais as $objComponenteDigital) {
-        if (is_array($objComponenteDigital)) {
-          $objComponenteDigital = (object) $objComponenteDigital;
-        }
+      if (is_array($objComponenteDigital)) {
+        $objComponenteDigital = (object) $objComponenteDigital;
+      }
       
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
@@ -2757,9 +2757,9 @@ class ReceberProcedimentoRN extends InfraRN
       }
       foreach ($arrDocumento->componentesDigitais as $objComponente) {
           
-          if (is_array($objComponente)) {
-            $objComponente = (object) $objComponente;
-          }
+        if (is_array($objComponente)) {
+          $objComponente = (object) $objComponente;
+        }
 
           $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente->hash);
           $resultado[$strHash] = $objComponente;
