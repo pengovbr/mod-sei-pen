@@ -58,7 +58,9 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         }else{
             $id_tramite=$id_tramite[0]["ID_TRAMITE"];
         }
-        $this->recusarTramite($this->servicoPEN, $id_tramite);        
+
+        sleep(5);
+        $this->recusarTramite($id_tramite);        
     }
 
     /**
@@ -90,39 +92,58 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
     }
 
     
-    private function recusarTramite($servicoPEN, $id_tramite)
+    private function recusarTramite($id_tramite)
     {
         $justificativa = "An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82dc-6f451f51825e', 1333864526, null, null, null, null, 3534979787, null, null]: ORA-00001: restrição exclusiva (SAPIENS.UNIQ_867686DHDKJ97876) violada";
 
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();
         $parametros->recusaDeTramite->IDT = $id_tramite;
-        $parametros->recusaDeTramite->justificativa = mb_convert_encoding($justificativa, 'UTF-8', 'ISO-8859-1');
+        $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
         $parametros->recusaDeTramite->motivo = "99";
-        return $servicoPEN->recusarTramite($parametros);
+        
+        return $this->recusarTramiteAPI($parametros);
     }
 
 
-    private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado)
+    private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado) 
     {
-        $connectionTimeout = 600;
-        $options = array(
-            'soap_version' => SOAP_1_1
-            , 'local_cert' => $localCertificado
-            , 'passphrase' => $senhaCertificado
-            , 'resolve_wsdl_remote_includes' => true
-            , 'cache_wsdl'=> BeSimple\SoapCommon\Cache::TYPE_NONE
-            , 'connection_timeout' => $connectionTimeout
-            , CURLOPT_TIMEOUT => $connectionTimeout
-            , CURLOPT_CONNECTTIMEOUT => $connectionTimeout
-            , 'encoding' => 'UTF-8'
-            , 'attachment_type' => BeSimple\SoapCommon\Helper::ATTACHMENTS_TYPE_MTOM
-            , 'ssl' => array(
-                'allow_self_signed' => true,
-            ),
-        );
+        // TODO: lembrar de pegar url dinamicamente quando SOAP for removido
+        $strBaseUri = PEN_ENDERECO_WEBSERVICE;
+        $arrheaders = [
+            'Accept' => '*/*',
+            'Content-Type' => 'application/json',
+        ];
+        
+        $strClientGuzzle = new GuzzleHttp\Client([
+            'base_uri' => $strBaseUri,
+            'timeout'  => 5.0,
+            'headers'  => $arrheaders,
+            'cert'     => [$localCertificado, $senhaCertificado],
+        ]);
 
-        return new BeSimple\SoapClient\SoapClient(PEN_ENDERECO_WEBSERVICE, $options);
+        return $strClientGuzzle;
+    }
 
+
+    public function recusarTramiteAPI($parametros)
+    {
+        $idt = $parametros->recusaDeTramite->IDT;
+        $justificativa = $parametros->recusaDeTramite->justificativa;
+        $motivo = $parametros->recusaDeTramite->motivo;
+
+        $endpoint = "tramites/{$idt}/recusa";
+
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $parametros = [
+            'justificativa' => mb_convert_encoding($objProcessoEletronicoRN->reduzirCampoTexto($justificativa, 1000), 'UTF-8', 'ISO-8859-1'),
+            'motivo' => $motivo
+        ];
+
+        $response = $this->servicoPEN->request('POST', $endpoint, [
+            'json' => $parametros
+        ]);
+
+        return $response;
     }
 }
