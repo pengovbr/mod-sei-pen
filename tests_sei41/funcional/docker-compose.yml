@@ -39,10 +39,10 @@ services:
     volumes:
       - /dev/shm:/dev/shm
       - ./assets/arquivos/test_files_index.txt:/test_files_index.txt
-      - /tmp:/tmp
+      - .tmp:/tmp
 
   php-test-functional:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/sei5-alpine:${ENVIRONMENT_VERSION}
     depends_on:
       - org1-database
       - org2-database
@@ -58,9 +58,9 @@ services:
       - ../../src/dto:/tests/sei/modpen/dto
       - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
-      - /tmp:/tmp
-      - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
-      - /tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
+      - .tmp:/tmp
+      - .tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
+      - .tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
       - ./assets/config/ConfiguracaoSEI.php:/tests/sei/src/sei/config/ConfiguracaoSEI.php:ro
       - ../../src:/tests/sei/src/sei/web/modulos/pen
       - ./assets/config:/tests/sei/src/sei/config/mod-pen
@@ -95,7 +95,7 @@ services:
     command: "true"
 
   php-test-unit:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/sei5-alpine:${ENVIRONMENT_VERSION}
     volumes:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
@@ -132,7 +132,7 @@ services:
       - "${ORG1_DATABASE_HOST_PORT}:${ORG1_DATABASE_GUEST_PORT}"
 
   org1-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/sei5-alpine:${ENVIRONMENT_VERSION}
     restart: always
     depends_on:
       - org1-database
@@ -192,7 +192,7 @@ services:
       - "${ORG2_DATABASE_HOST_PORT}:${ORG2_DATABASE_GUEST_PORT}"
 
   org2-http:
-    image: processoeletronico/vagrant_sei4_httpd:${ENVIRONMENT_VERSION}
+    image: processoeletronico/sei5-alpine:${ENVIRONMENT_VERSION}
     restart: always
     depends_on:
       - org2-database
