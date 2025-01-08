@@ -195,7 +195,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         if(isset($objMetadadosProcessoTramiteAnterior->documento)){
           $strNumeroRegistro = null;
         }else{
-          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior->NRE;
+          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
         }
 
           $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
@@ -668,15 +668,13 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objEstrutura = $this->objProcessoEletronicoRN->consultarEstrutura(
           $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(), $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(), true
       );
-
-          $dados=ProcessoEletronicoINT::formatarHierarquia($objEstrutura);
-          $nome=$dados['nome'];
-          $objNivel=$dados['objNivel'];
+          $nome=$objEstrutura->nome;
+          $numeroDeIdentificacaoDaEstrutura=$objEstrutura->numeroDeIdentificacaoDaEstrutura;
 
           $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
           $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO_HIRARQUIA');
           $objAtributoAndamentoDTO->setStrValor($nome);
-          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+          $objAtributoAndamentoDTO->setStrIdOrigem($numeroDeIdentificacaoDaEstrutura);
           $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
 

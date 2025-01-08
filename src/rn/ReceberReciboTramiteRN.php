@@ -255,7 +255,7 @@ class ReceberReciboTramiteRN extends InfraRN
       $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
       $objAtributoAndamentoDTO->setStrNome('UNIDADE_DESTINO_HIRARQUIA');
       $objAtributoAndamentoDTO->setStrValor($nome);
-      $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+      $objAtributoAndamentoDTO->setStrIdOrigem($objEstrutura->numeroDeIdentificacaoDaEstrutura);
       $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
     }
 

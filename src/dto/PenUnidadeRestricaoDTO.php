@@ -17,17 +17,17 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class PenUnidadeRestricaoDTO extends UnidadeDTO
 {
 
-  public function getStrNomeTabela()
+  public function getStrNomeTabela(): string
   {
     return 'md_pen_uni_restr';
   }
 
-  public function getStrNomeSequenciaNativa()
+  public function getStrNomeSequenciaNativa(): string
   {
     return 'md_pen_seq_uni_restr';
   }
 
-  public function montar()
+  public function montar(): void
   {
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'Id', 'id');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');

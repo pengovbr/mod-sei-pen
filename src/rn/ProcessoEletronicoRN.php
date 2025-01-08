@@ -1632,8 +1632,14 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
 
         if(isset($objDocumento->especie)){
+          if (is_array($objDocumento->especie)){  
+            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie['codigo']));
+            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie['nomeNoProdutor']));
+          }
+          else{
             $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
             $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
+          }
         }
 
           $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
@@ -2315,8 +2321,15 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static function comparacaoOrdemAjustadaDocumentos($parDocumento1, $parDocumento2)
     {
-      $numOrdemDocumento1 = isset($parDocumento1->ordemAjustada) ? intval($parDocumento1->ordemAjustada) : intval($parDocumento1->ordem);
-      $numOrdemDocumento2 = isset($parDocumento2->ordemAjustada) ? intval($parDocumento2->ordemAjustada) : intval($parDocumento2->ordem);
+      if (is_array($parDocumento1)){
+        $numOrdemDocumento1 = isset($parDocumento1['ordemAjustada']) ? intval($parDocumento1['ordemAjustada']) : intval($parDocumento1['ordem']);
+        $numOrdemDocumento2 = isset($parDocumento2['ordemAjustada']) ? intval($parDocumento2['ordemAjustada']) : intval($parDocumento2['ordem']);
+      }
+      else{
+        $numOrdemDocumento1 = isset($parDocumento1->ordemAjustada) ? intval($parDocumento1->ordemAjustada) : intval($parDocumento1->ordem);
+        $numOrdemDocumento2 = isset($parDocumento2->ordemAjustada) ? intval($parDocumento2->ordemAjustada) : intval($parDocumento2->ordem);
+      }
+
       return $numOrdemDocumento1 - $numOrdemDocumento2;
   }
 

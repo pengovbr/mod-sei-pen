@@ -6,7 +6,9 @@ define("DIR_SEI_VENDOR", __DIR__ . '/vendor');
 
 require_once __DIR__ . '/sei/src/sei/web/SEI.php';
 
-define("DIR_SEI_WEB", __DIR__ . '/sei/src/sei/web/');
+if (!defined("DIR_SEI_WEB")){
+    define("DIR_SEI_WEB", __DIR__ . '/sei/src/sei/web/');
+}
 define("DIR_TEST", __DIR__ );
 define("DIR_PROJECT", __DIR__ . '/..' );
 define("DIR_INFRA", __DIR__ . '/../src/infra/infra_php' );
