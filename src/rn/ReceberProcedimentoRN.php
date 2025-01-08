@@ -681,10 +681,10 @@ class ReceberProcedimentoRN extends InfraRN
 
       $arrObjDocumento = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo, true);
     foreach($arrObjDocumento as $key => $objDocumento){
-      if (is_array($objDocumento->componentesDigitais[$key])) {
-        $objDocumento->componentesDigitais[$key] = (object) $objDocumento->componentesDigitais[$key];
+      if (is_array($objDocumento->componentesDigitais[0])) {
+        $objDocumento->componentesDigitais[0] = (object) $objDocumento->componentesDigitais[0];
       } 
-        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componentesDigitais[$key]->hash);
+        $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objDocumento->componentesDigitais[0]->hash);
         $objMapDTO = new PenRelTipoDocMapRecebidoDTO(true);
         $objMapDTO->setNumMaxRegistrosRetorno(1);
         $objMapDTO->setNumCodigoEspecie($objDocumento->especie->codigo);
@@ -1332,15 +1332,13 @@ class ReceberProcedimentoRN extends InfraRN
         $objAtributoAndamentoDTO->setStrIdOrigem($objUnidadesDestinoDTO->getNumIdUnidade());
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
     }
-
-          $dados=ProcessoEletronicoINT::formatarHierarquia($objEstrutura);
-          $nome=$dados['nome'];
-          $objNivel=$dados['objNivel'];
+          $nome=$objEstrutura->nome;
+          $numeroDeIdentificacaoDaEstrutura=$objEstrutura->numeroDeIdentificacaoDaEstrutura;
 
           $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
           $objAtributoAndamentoDTO->setStrNome('ENTIDADE_ORIGEM_HIRARQUIA');
           $objAtributoAndamentoDTO->setStrValor($nome);
-          $objAtributoAndamentoDTO->setStrIdOrigem($objNivel->numeroDeIdentificacaoDaEstrutura);
+          $objAtributoAndamentoDTO->setStrIdOrigem($numeroDeIdentificacaoDaEstrutura);
           $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
 
 
