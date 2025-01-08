@@ -16,11 +16,11 @@ require_once DIR_SEI_WEB.'/SEI.php';
  */
 class PenUnidadeDTO extends UnidadeDTO {
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela(): string {
       return 'md_pen_unidade';
   }
     
-  public function montar() {
+  public function montar(): void {
         
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
     $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');

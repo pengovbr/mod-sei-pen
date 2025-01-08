@@ -386,8 +386,9 @@ class PendenciasTramiteRN extends InfraRN
             break;
 
         default:
+            $numIDT = $objPendencia->getNumIdentificacaoTramite();
             $strStatus = $objPendencia->getStrStatus();
-            $this->gravarLogDebug("Situação do trâmite ($strStatus) não pode ser tratada.");
+            $this->gravarLogDebug("Situação do trâmite ($numIDT) com status: $strStatus não pode ser tratada.");
             break;
       }
     }
