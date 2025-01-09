@@ -37,7 +37,7 @@ class PaginaPenHipoteseLegalListar extends PaginaTeste
     {
     try {
         $trTh = $this->test->byXPath('//*[@id="divInfraAreaTabela"]/table/tbody/tr[1]/th[2]')->text();
-        return !empty($trTh) && !is_null($trTh) && count($trTh) >= 1;
+        return !empty($trTh) && !is_null($trTh);
     } catch (Exception $ex) {
         return false;
     }
