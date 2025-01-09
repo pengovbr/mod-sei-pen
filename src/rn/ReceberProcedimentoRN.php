@@ -977,7 +977,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->registrarAndamentoRecebimentoProcesso($objProcedimentoDTO, $objMetadadosProcedimento);
 
       //Cadastro das atividades para quando o destinatário é desviado pelo receptor (!3!)
-    if ($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura) {
+    if (isset($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura) && !empty($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura)) {
         $this->gerarAndamentoUnidadeReceptora($parDblIdProcedimento);
     }
 
@@ -2844,7 +2844,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
       $arrObjObservacoes = array();
-      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor->numeroDeIdentificacao;
+      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor['numeroDeIdentificacao'];
     if(!empty($strNumeroDocumentoOrigem)){
         $objObservacaoDTO = new ObservacaoDTO();
         $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
