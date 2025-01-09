@@ -124,7 +124,7 @@ services:
   ### CONTAINERS DO AMBIENTE DO ÓRGÃO 1 ###
 
   org1-database:
-    image: ${ORG1_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
+    image: ${ORG1_DATABASE_IMAGE}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: P@ssword
@@ -184,7 +184,7 @@ services:
   ### CONTAINERS DO AMBIENTE DO ÓRGÃO 2 ###
 
   org2-database:
-    image: ${ORG2_DATABASE_IMAGE}:${ENVIRONMENT_VERSION}
+    image: ${ORG2_DATABASE_IMAGE}
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: P@ssword

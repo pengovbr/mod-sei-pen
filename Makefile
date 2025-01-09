@@ -2,7 +2,7 @@
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
-sistema=super
+sistema=sei41
 base=mysql
 teste=
 
@@ -159,7 +159,6 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
-	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
 
 
 .env:
