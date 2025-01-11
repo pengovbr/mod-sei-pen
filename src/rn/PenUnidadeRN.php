@@ -54,7 +54,7 @@ class PenUnidadeRN extends InfraRN {
         $objPenUnidadeBD = new PenUnidadeBD($this->getObjInfraIBanco());
         return $objPenUnidadeBD->listar($objPenUnidadeDTO);            
     }catch(Exception $e){
-        throw new InfraException('Erro listando Unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro listando Unidades.', $e);
     }
   }
     
@@ -70,7 +70,7 @@ class PenUnidadeRN extends InfraRN {
         return $objPenUnidadeBD->alterar($objPenUnidadeDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro alterando mapeamento de unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro alterando mapeamento de unidades.', $e);
     }
   }
     
@@ -86,7 +86,7 @@ class PenUnidadeRN extends InfraRN {
         return $objBD->cadastrar($objDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro cadastrando mapeamento de unidades.', $e);
     }
   }
     
@@ -102,7 +102,7 @@ class PenUnidadeRN extends InfraRN {
         return $objBD->excluir($objDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de unidades.', $e);
     }
   }
 
@@ -119,7 +119,7 @@ class PenUnidadeRN extends InfraRN {
         return $objPenUnidadeBD->contar($objPenUnidadeDTO);
     }
     catch(Exception $e){
-        throw new InfraException('Erro contando mapeamento de unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro contando mapeamento de unidades.', $e);
     }
   }  
   
@@ -135,7 +135,7 @@ class PenUnidadeRN extends InfraRN {
         return $objBD->consultar($objDTO);
     } 
     catch (Exception $e) {
-        throw new InfraException('Erro consultar mapeamento de unidades.', $e);
+        throw new InfraException('Módulo do Tramita: Erro consultar mapeamento de unidades.', $e);
     }
   }
 }

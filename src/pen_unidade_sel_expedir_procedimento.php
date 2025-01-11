@@ -29,7 +29,7 @@ try {
         break;
 
     default:
-        throw new InfraException("Ação '" . htmlspecialchars($_GET['acao']) . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . htmlspecialchars($_GET['acao']) . "' não reconhecida.");
   }
 
     $arrComandos = array();

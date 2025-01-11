@@ -179,11 +179,11 @@ try {
       $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstruturaOrigem=1');
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 } catch (Exception $e) {
   $objPaginaSEI->adicionarMensagem('Falha no cadastro do relacionamento. Consulte o log do SEI para mais informações.', InfraPagina::$TIPO_MSG_ERRO);
-  throw new InfraException("Erro processando requisição de envio externo de processo", $e);
+  throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
 }
 
 $objPaginaSEI->montarDocType();

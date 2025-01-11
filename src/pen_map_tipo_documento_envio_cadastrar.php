@@ -37,7 +37,7 @@ try {
         break;        
         
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }  
     
     //--------------------------------------------------------------------------
@@ -45,11 +45,11 @@ try {
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
         
     if(!array_key_exists('codigo_especie', $_POST) || empty($_POST['codigo_especie'])) {
-        throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
+        throw new InfraException('Módulo do Tramita: Nenhuma "Espécie Documental" foi selecionada');
     }
         
     if(!array_key_exists('id_serie', $_POST) || empty($_POST['id_serie'])) {
-        throw new InfraException('Nenhum "Tipo de Documento" foi selecionado');
+        throw new InfraException('Módulo do Tramita: Nenhum "Tipo de Documento" foi selecionado');
     }
         
       $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();

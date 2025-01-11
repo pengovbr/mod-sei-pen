@@ -31,7 +31,7 @@ class PenUnidadeRestricaoRN extends InfraRN
       $objPenUnidadeRestricaoBD = new PenUnidadeRestricaoBD($this->getObjInfraIBanco());
       return $objPenUnidadeRestricaoBD->listar($objPenUnidadeRestricaoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando Unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando Unidades.', $e);
     }
   }
 
@@ -96,7 +96,7 @@ class PenUnidadeRestricaoRN extends InfraRN
       }
       return $retArrayObjDTO;
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando restrição de tramite no mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando restrição de tramite no mapeamento de unidades.', $e);
     }
   }
 
@@ -119,7 +119,7 @@ class PenUnidadeRestricaoRN extends InfraRN
       }
       return $arrayObjPenUnidadeRestricaoDTO;
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de unidades.', $e);
     }
   }
 
@@ -135,7 +135,7 @@ class PenUnidadeRestricaoRN extends InfraRN
       $objBD = new PenUnidadeRestricaoBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de unidades.', $e);
     }
   }
 
@@ -152,7 +152,7 @@ class PenUnidadeRestricaoRN extends InfraRN
       $objPenUnidadeBD = new PenUnidadeRestricaoBD($this->getObjInfraIBanco());
       return $objPenUnidadeBD->contar($objPenUnidadeDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro contando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro contando mapeamento de unidades.', $e);
     }
   }
 }

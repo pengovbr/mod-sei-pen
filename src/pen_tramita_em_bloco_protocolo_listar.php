@@ -79,7 +79,7 @@ try {
       $strTitulo = 'Processos do Bloco ' . $blocoResultado->getNumOrdem() . ':';
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
   $arrComandos = array();
   $arrComandos[] = '<button type="button" accesskey="T" id="sbmTramitarBloco" value="Tramitar processos selecionados" onclick="onClickBtnTramitarProcessos();" class="infraButton"><span class="infraTeclaAtalho">T</span>ramitar processo(s) selecionado(s)</button>';

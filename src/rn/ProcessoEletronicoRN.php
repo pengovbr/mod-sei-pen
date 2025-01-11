@@ -147,11 +147,11 @@ class ProcessoEletronicoRN extends InfraRN
     if($this->objPenWs == null) {
 
       if (InfraString::isBolVazia($this->strEnderecoWebService)) {
-        throw new InfraException('Endereço do serviço de integração do Tramita GOV.BR não informado.');
+        throw new InfraException('Módulo do Tramita: Endereço do serviço de integração do Tramita GOV.BR não informado.');
       }
 
       if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-          throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+          throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
       }
 
         $this->validarDisponibilidade();
@@ -447,7 +447,7 @@ class ProcessoEletronicoRN extends InfraRN
     try{
         $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
       if(!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
+        throw new InfraException("Módulo do Tramita: Repositório de Estruturas inválido");
       }
 
         $parametros = new stdClass();
@@ -545,7 +545,7 @@ class ProcessoEletronicoRN extends InfraRN
     try {
       $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
       if (!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
+        throw new InfraException("Módulo do Tramita: Repositório de Estruturas inválido");
       }
 
       $totalDeRegistros = 0;
@@ -671,7 +671,7 @@ class ProcessoEletronicoRN extends InfraRN
     try {
       $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
       if (!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
+        throw new InfraException("Módulo do Tramita: Repositório de Estruturas inválido");
       }
 
       $parametros = new stdClass();
@@ -836,7 +836,7 @@ class ProcessoEletronicoRN extends InfraRN
         $entries = $xpath->query('/x:schema/x:complexType[@name="especie"]/x:sequence/x:element[@name="codigo"]/x:simpleType/x:restriction/x:enumeration');
       if (count($entries) == 0){
         $erro_curl = empty(curl_error($curl))?'Não houve':curl_error($curl);
-        throw new InfraException("Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
+        throw new InfraException("Módulo do Tramita: Não foi achado nenhuma espécie documental. Favor checar a configuração. Possível erro do curl: ".$erro_curl);
       }
         $resultado = array();
       foreach ($entries as $entry) {
@@ -1002,7 +1002,7 @@ class ProcessoEletronicoRN extends InfraRN
 
 
       if(!isset($dblIdProcedimento)){
-          throw new InfraException('Parâmetro $dblIdProcedimento não informado.');
+          throw new InfraException('Módulo do Tramita: Parâmetro $dblIdProcedimento não informado.');
       }
 
       $objRelProtocoloAssuntoDTO = new RelProtocoloAssuntoDTO();
@@ -1191,39 +1191,39 @@ class ProcessoEletronicoRN extends InfraRN
     {
 
     if(!isset($parDblIdProcedimento) || $parDblIdProcedimento == 0) {
-        throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parDblIdProcedimento não informado.');
     }
 
     if(!isset($parStrNumeroRegistro)) {
-        throw new InfraException('Parâmetro $parStrNumeroRegistro não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parStrNumeroRegistro não informado.');
     }
 
     if(!isset($parNumIdentificacaoTramite) || $parNumIdentificacaoTramite == 0) {
-        throw new InfraException('Parâmetro $parStrNumeroRegistro não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parStrNumeroRegistro não informado.');
     }
 
     if(!isset($parStrStaTipoTramite) || !in_array($parStrStaTipoTramite, array(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO))) {
-        throw new InfraException('Parâmetro $parStrStaTipoTramite inválio');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parStrStaTipoTramite inválio');
     }
 
     if(!isset($parNumIdRepositorioOrigem) || $parNumIdRepositorioOrigem == 0) {
-        throw new InfraException('Parâmetro $parNumIdRepositorioOrigem não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdRepositorioOrigem não informado.');
     }
 
     if(!isset($parNumIdEstruturaOrigem) || $parNumIdEstruturaOrigem == 0) {
-        throw new InfraException('Parâmetro $parNumIdEstruturaOrigem não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdEstruturaOrigem não informado.');
     }
 
     if(!isset($parNumIdRepositorioDestino) || $parNumIdRepositorioDestino == 0) {
-        throw new InfraException('Parâmetro $parNumIdRepositorioDestino não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdRepositorioDestino não informado.');
     }
 
     if(!isset($parNumIdEstruturaDestino) || $parNumIdEstruturaDestino == 0) {
-        throw new InfraException('Parâmetro $parNumIdEstruturaDestino não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdEstruturaDestino não informado.');
     }
 
     if(!isset($parObjProtocolo)) {
-        throw new InfraException('Parâmetro $objProcesso não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objProcesso não informado.');
     }
 
       //Monta dados do processo eletrônico
@@ -1285,7 +1285,7 @@ class ProcessoEletronicoRN extends InfraRN
   protected function cadastrarTramiteDeProcessoInternoControlado(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO)
     {
     if(!isset($parObjProcessoEletronicoDTO)) {
-        throw new InfraException('Parâmetro $parObjProcessoEletronicoDTO não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parObjProcessoEletronicoDTO não informado.');
     }
 
       $idProcedimento = $parObjProcessoEletronicoDTO->getDblIdProcedimento();
@@ -1491,7 +1491,7 @@ class ProcessoEletronicoRN extends InfraRN
 
           //Por enquanto, considera que o documento possui apenas um componente digital
         if(is_array($objDocumento->componenteDigital) && count($objDocumento->componenteDigital) != 1) {
-            throw new InfraException("Erro processando componentes digitais do processo " . $parObjProtocolo->protocolo . "\n Somente é permitido o recebimento de documentos com apenas um Componente Digital.");
+            throw new InfraException("Módulo do Tramita: Erro processando componentes digitais do processo " . $parObjProtocolo->protocolo . "\n Somente é permitido o recebimento de documentos com apenas um Componente Digital.");
         }
 
           $objComponenteDigital = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital[0] : $objDocumento->componenteDigital;
@@ -1565,7 +1565,7 @@ class ProcessoEletronicoRN extends InfraRN
         $mensagem = $this->tratarFalhaWebService($fault);
         throw new InfraException(InfraString::formatarJavaScript($mensagem), $fault);
     } catch (\Exception $e) {
-        throw new InfraException("Error Processing Request", $e);
+        throw new InfraException("Módulo do Tramita: Error Processing Request", $e);
     }
   }
 
@@ -1703,7 +1703,7 @@ class ProcessoEletronicoRN extends InfraRN
       $arrObjTramiteDTO = $objTramiteBD->listar($objTramiteDTO);
 
     if(!$arrObjTramiteDTO){
-        throw new InfraException('Trâmite não encontrado');
+        throw new InfraException('Módulo do Tramita: Trâmite não encontrado');
     }
 
       $objTramiteDTO = $arrObjTramiteDTO[0];
@@ -1793,7 +1793,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objPrivatekey = openssl_pkey_get_private("file://".$this->strLocalCert, $this->strLocalCertPassword);
 
       if ($objPrivatekey === false) {
-        throw new InfraException("Erro ao obter chave privada do certificado digital.");
+        throw new InfraException("Módulo do Tramita: Erro ao obter chave privada do certificado digital.");
       }
 
         openssl_sign($parStrReciboTramite, $strHashAssinatura, $objPrivatekey, 'sha256');
@@ -1866,7 +1866,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function converterOperacaoDTO($objOperacaoPEN)
     {
     if(!isset($objOperacaoPEN)) {
-        throw new InfraException('Parâmetro $objOperacaoPEN não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objOperacaoPEN não informado.');
     }
 
       $objOperacaoDTO = new OperacaoDTO();
@@ -2434,7 +2434,7 @@ class ProcessoEletronicoRN extends InfraRN
         $objVerificadorInstalacaoRN = new VerificadorInstalacaoRN();
         $objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN();
     } catch (\Exception $e) {
-        throw new InfraException("Falha de comunicação com o Tramita GOV.BR. Por favor, tente novamente mais tarde.", $e);
+        throw new InfraException("Módulo do Tramita: Falha de comunicação com o Tramita GOV.BR. Por favor, tente novamente mais tarde.", $e);
     }
   }
 
@@ -2517,7 +2517,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static function descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital){
 
     if(!is_readable($strCaminhoAnexoCompactado)) {
-        throw new InfraException("Anexo de documento não pode ser localizado");
+        throw new InfraException("Módulo do Tramita: Anexo de documento não pode ser localizado");
     }
 
       $objAnexoRN = new AnexoRN();
@@ -2538,7 +2538,7 @@ class ProcessoEletronicoRN extends InfraRN
           $zipArchive->close();
       }
     } else {
-        throw new InfraException("Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
+        throw new InfraException("Módulo do Tramita: Falha na leitura dos componentes digitais compactados em $strCaminhoAnexoCompactado");
     }
 
       return [$strNomeArquivoTemporario, $strNomeComponenteDigital];
@@ -2556,7 +2556,7 @@ class ProcessoEletronicoRN extends InfraRN
   public function listarAssociacoesDocumentos($idProcedimento)
     {
     if(!isset($idProcedimento)){
-        throw new InfraException('Parâmetro $idProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $idProcedimento não informado.');
     }
 
       //Recupera toda a lista de documentos vinculados ao processo, considerando a ordenação definida pelo usuário

@@ -92,7 +92,7 @@ try {
       $objTramiteEmBlocoDTO = $objTramiteEmBlocoRN->consultar($objTramiteEmBlocoDTO);
 
       if ($objTramiteEmBlocoDTO == null) {
-        throw new InfraException("Registro não encontrado.");
+        throw new InfraException("Módulo do Tramita: Registro não encontrado.");
       }
 
       $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . PaginaSEI::getInstance()->montarAncora($objTramiteEmBlocoDTO->getNumId())) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
@@ -116,7 +116,7 @@ try {
       }
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 } catch (Exception $e) {
   PaginaSEI::getInstance()->processarExcecao($e);

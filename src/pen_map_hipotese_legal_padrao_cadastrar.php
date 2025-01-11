@@ -44,7 +44,7 @@ try {
 
 
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
     //--------------------------------------------------------------------------
@@ -55,7 +55,7 @@ try {
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
     if(!array_key_exists('id_hipotese_legal', $_POST) || empty($_POST['id_hipotese_legal'])) {
-        throw new InfraException('Nenhuma "Espécie Documental" foi selecionada');
+        throw new InfraException('Módulo do Tramita: Nenhuma "Espécie Documental" foi selecionada');
     }
 
       $objPenParametroDTO = new PenParametroDTO();

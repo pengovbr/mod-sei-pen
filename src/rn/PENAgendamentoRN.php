@@ -31,7 +31,7 @@ class PENAgendamentoRN extends InfraRN
       }
 
       if(empty($hipoteses)){
-        throw new InfraException('Não foi possível obter as hipóteses legais dos serviços de integração');
+        throw new InfraException('Módulo do Tramita: Não foi possível obter as hipóteses legais dos serviços de integração');
       }
 
         //Para cada hipótese vinda do PEN será verificado a existencia.
@@ -70,7 +70,7 @@ class PENAgendamentoRN extends InfraRN
 
         LogSEI::getInstance()->gravar("Hipóteses Legais do Tramita GOV.BR atualizadas com sucesso.", LogSEI::$INFORMACAO);
     } catch (Exception $e) {
-        throw new InfraException('Erro no agendamento das Hipóteses Legais', $e);
+        throw new InfraException('Módulo do Tramita: Erro no agendamento das Hipóteses Legais', $e);
     }
   }
 
@@ -144,7 +144,7 @@ class PENAgendamentoRN extends InfraRN
 
         LogSEI::getInstance()->gravar("Espécies Documentais do Tramita GOV.BR atualizadas com sucesso.", LogSEI::$INFORMACAO);
     } catch (Exception $e) {
-        throw new InfraException('Erro no agendamento de atualização de Hipóteses Legais', $e);
+        throw new InfraException('Módulo do Tramita: Erro no agendamento de atualização de Hipóteses Legais', $e);
     }
   }
 
@@ -179,7 +179,7 @@ class PENAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
 
-        throw new InfraException('Erro processamento atualização de informações do Barramento de Serviços do PEN.', $e);
+        throw new InfraException('Módulo do Tramita: Erro processamento atualização de informações do Barramento de Serviços do PEN.', $e);
     }
   }
 
@@ -226,7 +226,7 @@ class PENAgendamentoRN extends InfraRN
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
 
-        throw new InfraException('Erro processando pendências de trâmites do Barramento de Serviços do PEN.', $e);
+        throw new InfraException('Módulo do Tramita: Erro processando pendências de trâmites do Barramento de Serviços do PEN.', $e);
     }
   }
 
@@ -272,7 +272,7 @@ class PENAgendamentoRN extends InfraRN
       InfraDebug::getInstance()->setBolDebugInfra(false);
       InfraDebug::getInstance()->setBolEcho(false);
 
-      throw new InfraException('Erro processando pendências de trâmites do Barramento de Serviços do PEN.', $e);
+      throw new InfraException('Módulo do Tramita: Erro processando pendências de trâmites do Barramento de Serviços do PEN.', $e);
     }
   }
 

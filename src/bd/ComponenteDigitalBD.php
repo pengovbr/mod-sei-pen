@@ -17,7 +17,7 @@ class ComponenteDigitalBD extends InfraBD {
   public function listarComponentesDigitaisPeloTramite($numIdTramite, $dblIdDocumento = null)
     {
     if(is_null($numIdTramite)){
-        throw new InfraException('Parâmetro [parObjTramiteDTO] não informado');
+        throw new InfraException('Módulo do Tramita: Parâmetro [parObjTramiteDTO] não informado');
     }
 
       $objComponenteDigitalPesquisaDTO = new ComponenteDigitalDTO();
@@ -54,7 +54,7 @@ class ComponenteDigitalBD extends InfraBD {
   public function possuiComponentesComDocumentoReferenciado(TramiteDTO $parObjTramiteDTO)
     {
     if(is_null($parObjTramiteDTO)){
-        throw new InfraException('Parâmetro [parObjTramiteDTO] não informado');
+        throw new InfraException('Módulo do Tramita: Parâmetro [parObjTramiteDTO] não informado');
     }
 
       $objComponenteDigitalPesquisaDTO = new ComponenteDigitalDTO();

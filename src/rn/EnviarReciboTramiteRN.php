@@ -97,13 +97,13 @@ class EnviarReciboTramiteRN extends InfraRN
         date_default_timezone_set('America/Sao_Paulo');
 
       if(!isset($parNumIdTramite) || $parNumIdTramite == 0) {
-        throw new InfraException('Parâmetro $parNumIdTramite não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdTramite não informado.');
       }
 
         //Verifica se todos os componentes digitais já foram devidamente recebido
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
       if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-        throw new InfraException("Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
+        throw new InfraException("Módulo do Tramita: Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
       }
 
         $objTramite = $arrObjTramite[0];
@@ -149,7 +149,7 @@ class EnviarReciboTramiteRN extends InfraRN
   private function obterDataRecebimentoComponentesDigitais($parObjTramite){
 
     if(!isset($parObjTramite)) {
-      throw new InfraException('Parâmetro $parObjTramite não informado.');
+      throw new InfraException('Módulo do Tramita: Parâmetro $parObjTramite não informado.');
     }
 
     if(!is_array($parObjTramite->historico->operacao)) {

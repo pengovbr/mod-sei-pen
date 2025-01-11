@@ -128,7 +128,7 @@ class PenExpedirBlocoRN extends InfraRN
         }
       }
     } catch (\Exception $e) {
-        throw new InfraException('Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
+        throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
     }
   }
 

@@ -15,7 +15,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         return $objBD->listar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao listar mapeamento de hipóteses legais', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao listar mapeamento de hipóteses legais', $e);
     }
   }
 
@@ -26,7 +26,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         return $objBD->consultar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao consultar mapeamento de hipóteses legais', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao consultar mapeamento de hipóteses legais', $e);
     }
   }
 
@@ -37,7 +37,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         return $objBD->alterar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao alterar mapeamento de hipótese legal', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao alterar mapeamento de hipótese legal', $e);
     }
   }
 
@@ -48,7 +48,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         return $objBD->cadastrar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao cadastrar mapeamento de hipótese legal', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao cadastrar mapeamento de hipótese legal', $e);
     }
   }
 
@@ -59,7 +59,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
         return $objBD->excluir($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao excluir mapeamento de hipóteses legais', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao excluir mapeamento de hipóteses legais', $e);
     }
   }
 

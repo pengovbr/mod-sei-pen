@@ -176,7 +176,7 @@ try {
       );
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
   $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
@@ -185,7 +185,7 @@ try {
     'Falha no cadastro do relacionamento. Consulte o log do SEI para mais informações.',
     InfraPagina::$TIPO_MSG_ERRO
   );
-  throw new InfraException("Erro processando requisição de envio externo de processo", $e);
+  throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
 }
 
 $objPaginaSEI->montarDocType();

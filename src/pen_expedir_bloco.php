@@ -49,7 +49,7 @@ try {
   }
 
   if (count($arrProtocolosOrigem) == 0) {
-    throw new InfraException('Processo não informado.');
+    throw new InfraException('Módulo do Tramita: Processo não informado.');
   }
 
   $strItensSelProcedimentos = ProcedimentoINT::conjuntoCompletoFormatadoRI0903($arrProtocolosOrigem);
@@ -123,7 +123,7 @@ try {
       $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
       if (!$objUnidadeDTO) {
-        throw new InfraException("A unidade atual não foi mapeada.");
+        throw new InfraException("Módulo do Tramita: A unidade atual não foi mapeada.");
       }
 
       $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
@@ -203,10 +203,10 @@ try {
 
         break;
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 } catch (Exception $e) {
-  throw new InfraException("Erro processando requisição de envio externo de processo", $e);
+  throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
 }
 
 $objPaginaSEI->montarDocType();

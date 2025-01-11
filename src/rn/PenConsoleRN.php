@@ -21,11 +21,11 @@ class PenConsoleRN extends InfraRN {
         parent::__construct();
             
       if(!is_object($objRN)) {
-        throw new InfraException('Requerido objeto Infra');
+        throw new InfraException('Módulo do Tramita: Requerido objeto Infra');
       }
 
       if(get_parent_class($objRN) !== 'InfraRN') {
-          throw new InfraException('Requerido objeto Infra que seja extendido de InfraRN');
+          throw new InfraException('Módulo do Tramita: Requerido objeto Infra que seja extendido de InfraRN');
       }
 
         $this->objRN = $objRN;
@@ -57,7 +57,7 @@ class PenConsoleRN extends InfraRN {
   protected function criarTokens($arguments = array()){
         
     if(empty($arguments)) {
-        throw new InfraException('Script não pode ser executado pela web');
+        throw new InfraException('Módulo do Tramita: Script não pode ser executado pela web');
     }
         
       $strScript = array_shift($arguments);
@@ -67,7 +67,7 @@ class PenConsoleRN extends InfraRN {
         $strAction = array_shift($arguments);
         
       if(substr($strAction, 0, 2) == '--') {
-          throw new InfraException('O primeiro paramêtro deve ser uma action da RN');
+          throw new InfraException('Módulo do Tramita: O primeiro paramêtro deve ser uma action da RN');
       }
         
         $this->strAction = $strAction;
@@ -98,7 +98,7 @@ class PenConsoleRN extends InfraRN {
   public function run(){
         
     if(empty($this->objRN)) {
-        throw new InfraException('Nenhuma RN foi adicionada ao console');
+        throw new InfraException('Módulo do Tramita: Nenhuma RN foi adicionada ao console');
     }
         
     if(!method_exists($this->objRN, $this->strAction)) {

@@ -33,7 +33,7 @@ class PenHipoteseLegalRN extends InfraRN
       $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
       return $objBD->listar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando hipotese legal.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando hipotese legal.', $e);
     }
   }
 
@@ -44,7 +44,7 @@ class PenHipoteseLegalRN extends InfraRN
       $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro ao consultar Hipotese Legal.', $e);
+      throw new InfraException('Módulo do Tramita: Erro ao consultar Hipotese Legal.', $e);
     }
   }
 }

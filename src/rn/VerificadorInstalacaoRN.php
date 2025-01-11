@@ -77,20 +77,20 @@ class VerificadorInstalacaoRN extends InfraRN
         global $SEI_MODULOS;
 
       if(!array_key_exists("PENIntegracao", $SEI_MODULOS)){
-          throw new InfraException("Chave de ativação do módulo mod-sei-pen (PENIntegracao) não definido nas configurações de módulos do SEI");
+          throw new InfraException("Módulo do Tramita: Chave de ativação do módulo mod-sei-pen (PENIntegracao) não definido nas configurações de módulos do SEI");
       }
 
       if(is_null($SEI_MODULOS['PENIntegracao'])){
           $objConfiguracaoSEI = ConfiguracaoSEI::getInstance();
 
         if (!$objConfiguracaoSEI->isSetValor('SEI', 'Modulos')){
-            throw new InfraException("Chave de configuração de Módulos não definida nas configurações do sistema. (ConfiguracaoSEI.php | SEI > Modulos)");
+            throw new InfraException("Módulo do Tramita: Chave de configuração de Módulos não definida nas configurações do sistema. (ConfiguracaoSEI.php | SEI > Modulos)");
         }
 
           $arrModulos = $objConfiguracaoSEI->getValor('SEI', 'Modulos');
           $strDiretorioModPEN = basename($arrModulos['PENIntegracao']);
           $strDiretorioModulos = dirname ($arrModulos['PENIntegracao']);
-          throw new InfraException("Diretório do módulo ($strDiretorioModPEN) não pode ser localizado em $strDiretorioModulos");
+          throw new InfraException("Módulo do Tramita: Diretório do módulo ($strDiretorioModPEN) não pode ser localizado em $strDiretorioModulos");
       }
 
         return true;
@@ -203,18 +203,18 @@ class VerificadorInstalacaoRN extends InfraRN
       if(!file_exists($strLocalizacaoCertificadoDigital)){
           $strNomeCertificado = basename($parStrLocalizacaoArquivo);
           $strDiretorioCertificado = dirname($parStrLocalizacaoArquivo);
-          throw new InfraException("Certificado digital $strNomeCertificado não pode ser localizado em $strDiretorioCertificado");
+          throw new InfraException("Módulo do Tramita: Certificado digital $strNomeCertificado não pode ser localizado em $strDiretorioCertificado");
       }
 
         $strLocalizacaoAjustada = 'file://' . $strLocalizacaoCertificadoDigital;
         $strPublicKey = openssl_pkey_get_public($strLocalizacaoAjustada);
       if(empty($strPublicKey)){
-          throw new InfraException("Chave pública do certificado digital de autenticação no Tramita GOV.BR não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
+          throw new InfraException("Módulo do Tramita: Chave pública do certificado digital de autenticação no Tramita GOV.BR não pode ser localizada em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         $strPrivateKey = openssl_pkey_get_private($strLocalizacaoAjustada, $strSenhaCertificadoDigital);
       if(empty($strPrivateKey)){
-          throw new InfraException("Chave privada do certificado digital de autenticação no Tramita GOV.BR não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
+          throw new InfraException("Módulo do Tramita: Chave privada do certificado digital de autenticação no Tramita GOV.BR não pode ser extraída em $strLocalizacaoCertificadoDigital. Erro detalhado: " . openssl_error_string());
       }
 
         return true;
@@ -284,7 +284,7 @@ class VerificadorInstalacaoRN extends InfraRN
           $objProcessoEletronicoRN->listarPendencias(false);
           return true;
       } catch(Exception $e){
-          throw new InfraException("Falha no acesso aos serviços de integração do Tramita GOV.BR: $e");
+          throw new InfraException("Módulo do Tramita: Falha no acesso aos serviços de integração do Tramita GOV.BR: $e");
       }
     }
 
@@ -306,7 +306,7 @@ class VerificadorInstalacaoRN extends InfraRN
       }
 
       if(!class_exists("GearmanClient")){
-          throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN." .
+          throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN." .
               "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
       }
 
@@ -329,7 +329,7 @@ class VerificadorInstalacaoRN extends InfraRN
       if(!file_exists($parStrLocalizacaoArquivo)){
           $strNomeArquivo = basename($parStrLocalizacaoArquivo);
           $strDiretorioArquivo = dirname($parStrLocalizacaoArquivo);
-          throw new InfraException("Arquivo do $strNomeArquivo não pode ser localizado em $strDiretorioArquivo");
+          throw new InfraException("Módulo do Tramita: Arquivo do $strNomeArquivo não pode ser localizado em $strDiretorioArquivo");
       }
     }
 }

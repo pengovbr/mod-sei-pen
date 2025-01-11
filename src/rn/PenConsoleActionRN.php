@@ -199,15 +199,15 @@ class PenConsoleActionRN extends InfraRN {
   public function assinarDocumento($args = array()){
 
     if(!array_key_exists('doc-id', $args)) {
-        throw new InfraException('Paramêtro "doc-id" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "doc-id" é obrigatório');
     }
         
     if(!array_key_exists('auth-user', $args)) {
-        throw new InfraException('Paramêtro "doc-id" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "doc-id" é obrigatório');
     }
         
     if(!array_key_exists('auth-pass', $args)) {
-        throw new InfraException('Paramêtro "doc-id" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "doc-id" é obrigatório');
     }
         
       $objDocumentoRN = new DocumentoRN();
@@ -221,7 +221,7 @@ class PenConsoleActionRN extends InfraRN {
       $objDocumentoDTO = $objDocumentoBD->consultar($objDocumentoDTO);
         
     if(empty($objDocumentoDTO)) {
-        throw new InfraException('Nenhum documento foi localizado pela ID '.$args['doc-id']);
+        throw new InfraException('Módulo do Tramita: Nenhum documento foi localizado pela ID '.$args['doc-id']);
     }
       $this->inicializarUnidade($args['sigla']);
         
@@ -235,7 +235,7 @@ class PenConsoleActionRN extends InfraRN {
       $objUsuarioDTO = $objUsuarioBD->consultar($objUsuarioDTO);
         
     if(empty($objUsuarioDTO)) {
-        throw new InfraException('Usuário TESTE não foi localizado');
+        throw new InfraException('Módulo do Tramita: Usuário TESTE não foi localizado');
     }
         
       $objAssinaturaDTO = new AssinaturaDTO();
@@ -262,15 +262,15 @@ class PenConsoleActionRN extends InfraRN {
   public function criarDocumento($args = array()){
         
     if(!array_key_exists('desc', $args)) {
-        throw new InfraException('Paramêtro "desc" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "desc" é obrigatório');
     }
         
     if(!array_key_exists('subject', $args)) {
-        throw new InfraException('Paramêtro código do "subject" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro código do "subject" é obrigatório');
     }
         
     if(!array_key_exists('proc-id', $args)) {
-        throw new InfraException('Paramêtro "proc-id" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "proc-id" é obrigatório');
     }
       $objUnidadeDTO = $this->inicializarUnidade($args['sigla']);
       $objSerieDTO = $this->getSerie();
@@ -325,15 +325,15 @@ class PenConsoleActionRN extends InfraRN {
   public function criarProcedimento($args = array()){
         
     if(!array_key_exists('desc', $args)) {
-        throw new InfraException('Paramêtro "desc" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "desc" é obrigatório');
     }
         
     if(!array_key_exists('stakeholder', $args)) {
-        throw new InfraException('Paramêtro "interessado" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "interessado" é obrigatório');
     }
         
     if(!array_key_exists('subject', $args)) {
-        throw new InfraException('Paramêtro código do "subject" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro código do "subject" é obrigatório');
     }
       
       $objUnidadeDTO = $this->inicializarUnidade($args['sigla']);
@@ -388,7 +388,7 @@ class PenConsoleActionRN extends InfraRN {
   public function removerProcedimento($args = array()){
         
     if(!array_key_exists('proc-id', $args)) {
-        throw new InfraException('Paramêtro "proc-id" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "proc-id" é obrigatório');
     }
         
       $objDTO = new ProcedimentoDTO();
@@ -409,7 +409,7 @@ class PenConsoleActionRN extends InfraRN {
   public function log($args = array()){
         
     if(!array_key_exists('msg', $args)) {
-        throw new InfraException('Paramêtro "msg" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "msg" é obrigatório');
     }
         
       LogSEI::getInstance()->gravar($args['msg']);
@@ -426,11 +426,11 @@ class PenConsoleActionRN extends InfraRN {
   public function syncProcedimento($args = array()){
         
     if(!array_key_exists('protocolo', $args)) {
-        throw new InfraException('Paramêtro "protocolo" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "protocolo" é obrigatório');
     }
         
     if(!array_key_exists('sigla', $args)) {
-        throw new InfraException('Paramêtro "sigla" é obrigatório');
+        throw new InfraException('Módulo do Tramita: Paramêtro "sigla" é obrigatório');
     }
         
       $this->inicializarUnidade($args['sigla']);        

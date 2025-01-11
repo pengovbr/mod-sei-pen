@@ -50,14 +50,14 @@ try {
           header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
           exit(0);
         } else {
-          throw new InfraException('Nenhum registro foi selecionado para executar esta ação');
+          throw new InfraException('Módulo do Tramita: Nenhum registro foi selecionado para executar esta ação');
         }
           break;
       case 'pen_map_envio_parcial_listar':
         // Ação padrão desta tela
           break;
       default:
-          throw new InfraException('Ação não permitida nesta tela');
+          throw new InfraException('Módulo do Tramita: Ação não permitida nesta tela');
     }
   }
   //--------------------------------------------------------------------------

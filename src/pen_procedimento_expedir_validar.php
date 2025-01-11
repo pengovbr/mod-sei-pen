@@ -11,7 +11,7 @@ $objInfraException = new InfraException();
 try {
 
   if(!array_key_exists('id_procedimento', $_GET) || empty($_GET['id_procedimento'])) {
-      throw new InfraException('Nenhum procedimento foi informado', 'Desconhecido');
+      throw new InfraException('Módulo do Tramita: Nenhum procedimento foi informado', 'Desconhecido');
   }
 
     $dblIdProcedimento = $_GET['id_procedimento'];
@@ -20,7 +20,7 @@ try {
     $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
 
   if(empty($objProcedimentoDTO)) {
-      throw new InfraException('Procedimento não foi localizado', 'Desconhecido');
+      throw new InfraException('Módulo do Tramita: Procedimento não foi localizado', 'Desconhecido');
   }
 
     // Utilizamos o protocolo para criar um indice para separar os erros entre o

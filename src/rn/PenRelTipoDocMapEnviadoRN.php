@@ -26,7 +26,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
         return $objPenRelTipoDocMapEnviadoBD->listar($parObjPenRelTipoDocMapEnviadoDTO);
     }catch(Exception $e){
-        throw new InfraException('Erro listando mapeamento de Tipos de Documento para envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro listando mapeamento de Tipos de Documento para envio.', $e);
     }
   }
 
@@ -36,7 +36,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
         return $objPenRelTipoDocMapEnviadoBD->consultar($objPenRelTipoDocMapEnviadoDTO);
     }catch(Exception $e){
-        throw new InfraException('Erro consultando mapeamento de documentos para envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro consultando mapeamento de documentos para envio.', $e);
     }
   }
 
@@ -116,7 +116,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objPenRelTipoDocMapEnviadoBD->excluir($objPenRelTipoDocMapEnviadoDTO);
       }
     }catch(Exception $e){
-        throw new InfraException('Erro excluindo Mapeamento de Tipos de Documento para envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro excluindo Mapeamento de Tipos de Documento para envio.', $e);
     }
   }
 
@@ -142,7 +142,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       }
 
     }catch(Exception $e){
-      throw new InfraException('Erro removendo Mapeamento de Tipos de Documento para envio pelo código de espécie.', $e);
+      throw new InfraException('Módulo do Tramita: Erro removendo Mapeamento de Tipos de Documento para envio pelo código de espécie.', $e);
     }
   }
 
@@ -152,7 +152,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
       return $objPenRelTipoDocMapEnviadoBD->contar($parObjPenRelTipoDocMapEnviadoDTO);
     }catch(Exception $e){
-      throw new InfraException('Erro contando Mapeamento de Tipos de Documento para Envio.', $e);
+      throw new InfraException('Módulo do Tramita: Erro contando Mapeamento de Tipos de Documento para Envio.', $e);
     }
   }
 
@@ -264,7 +264,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objPenParametroRN = new PenParametroRN();
         $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
     }catch(Exception $e){
-        throw new InfraException('Erro atribuindo Espécie Documental padrão para envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro atribuindo Espécie Documental padrão para envio.', $e);
     }
   }
 

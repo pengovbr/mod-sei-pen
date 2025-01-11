@@ -40,7 +40,7 @@ try {
             exit(0);
         }
         else {                    
-            throw new InfraException('Nenhum Registro foi selecionado para executar esta ação');
+            throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
         }
           break;            
                 
@@ -49,7 +49,7 @@ try {
           break;
                 
       default:
-          throw new InfraException('Ação não permitida nesta tela');
+          throw new InfraException('Módulo do Tramita: Ação não permitida nesta tela');
             
     }
   }

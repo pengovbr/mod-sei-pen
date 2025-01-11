@@ -15,7 +15,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       }
 
       if (empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)) {
-        throw new InfraException("Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
+        throw new InfraException("Módulo do Tramita: Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
       }
 
       ModPenUtilsRN::simularLoginUnidadeRecebimento();

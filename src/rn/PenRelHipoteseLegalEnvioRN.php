@@ -71,7 +71,7 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
         return $objGenericoBD->contar($objDTO);
     }
     catch(Exception $e){
-        throw new InfraException('Erro contando HipoteseLegal.', $e);
+        throw new InfraException('Módulo do Tramita: Erro contando HipoteseLegal.', $e);
     }
   }
 }

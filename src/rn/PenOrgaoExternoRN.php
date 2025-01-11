@@ -31,7 +31,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->getObjInfraIBanco());
       return $objBD->listar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando orgãos externos.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando orgãos externos.', $e);
     }
   }
 
@@ -49,7 +49,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro consultando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro consultando mapeamento de unidades.', $e);
     }
   }
 
@@ -67,7 +67,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->alterar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro alterando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro alterando mapeamento de unidades.', $e);
     }
   }
 
@@ -85,7 +85,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->cadastrar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando mapeamento de unidades.', $e);
     }
   }
 
@@ -103,7 +103,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de unidades.', $e);
     }
   }
 
@@ -121,7 +121,7 @@ class PenOrgaoExternoRN extends InfraRN
       $objBD = new PenOrgaoExternoBD($this->getObjInfraIBanco());
       return $objBD->contar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro contando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro contando mapeamento de unidades.', $e);
     }
   }
 }

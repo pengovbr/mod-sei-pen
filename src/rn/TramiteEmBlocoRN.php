@@ -101,7 +101,7 @@ class TramiteEmBlocoRN extends InfraRN
 
       return $arrObjTipoDTO;
     } catch (Exception $e) {
-      throw new InfraException('Erro listando valores de Tipo.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando valores de Tipo.', $e);
     }
   }
 
@@ -119,7 +119,7 @@ class TramiteEmBlocoRN extends InfraRN
 
       return $objArrEstadoBlocoDTO;
     } catch (Exception $e) {
-      throw new InfraException('Erro listando valores de Estado.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando valores de Estado.', $e);
     }
   }
 
@@ -136,7 +136,7 @@ class TramiteEmBlocoRN extends InfraRN
 
       return $estado ? $arrEstadoBloco[$estado] : $arrEstadoBloco;
     } catch (Exception $e) {
-      throw new InfraException('Estado nâo encontrado.', $e);
+      throw new InfraException('Módulo do Tramita: Estado nâo encontrado.', $e);
     }
   }
 
@@ -182,7 +182,7 @@ class TramiteEmBlocoRN extends InfraRN
       }
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro listando Tramite em Blocos.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando Tramite em Blocos.', $e);
     }
   }
 
@@ -217,7 +217,7 @@ class TramiteEmBlocoRN extends InfraRN
         $objTramiteEmBlocoBD->alterar($objTramiteEmBlocoDTOIdx);
       }
     } catch (Exception $e) {
-      throw new InfraException('Erro montando indexação de bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando indexação de bloco.', $e);
     }
   }
 
@@ -247,7 +247,7 @@ class TramiteEmBlocoRN extends InfraRN
 
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando Bloco.', $e);
     }
   }
 
@@ -280,7 +280,7 @@ class TramiteEmBlocoRN extends InfraRN
 
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro consultando Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro consultando Bloco.', $e);
     }
   }
 
@@ -332,7 +332,7 @@ class TramiteEmBlocoRN extends InfraRN
       //Auditoria
 
     } catch (Exception $e) {
-      throw new InfraException('Erro alterando Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro alterando Bloco.', $e);
     }
   }
 
@@ -355,7 +355,7 @@ class TramiteEmBlocoRN extends InfraRN
       }
       return $arrayExcluido;
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo Bloco.', $e);
     }
   }
 
@@ -374,7 +374,7 @@ class TramiteEmBlocoRN extends InfraRN
         }
       }
     } catch (Exception $e) {
-      throw new InfraException('Erro cancelando Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cancelando Bloco.', $e);
     }
   }
 }

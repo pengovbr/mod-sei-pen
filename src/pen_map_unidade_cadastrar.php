@@ -52,7 +52,7 @@ try {
 
 
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
     $objPenUnidadeRN = new PenUnidadeRN();

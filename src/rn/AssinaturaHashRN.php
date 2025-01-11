@@ -51,7 +51,7 @@ class AssinaturaHashRN extends AssinaturaRN {
         foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
 
           if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-            throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
+            throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
           }
 
           $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -99,7 +99,7 @@ class AssinaturaHashRN extends AssinaturaRN {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -164,7 +164,7 @@ class AssinaturaHashRN extends AssinaturaRN {
           if ($objAssinaturaDTO->getStrSinAtivo()=='S' || $objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
 
             if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-              throw new InfraException('Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
+              throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
             }
 
             $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -215,7 +215,7 @@ class AssinaturaHashRN extends AssinaturaRN {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -267,7 +267,7 @@ class AssinaturaHashRN extends AssinaturaRN {
           if ($objAssinaturaDTO->getStrSinAtivo()=='S' || $objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
 
             if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-              throw new InfraException('Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
+              throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
             }
 
             $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -318,7 +318,7 @@ class AssinaturaHashRN extends AssinaturaRN {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
@@ -360,7 +360,7 @@ class AssinaturaHashRN extends AssinaturaRN {
         foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
 
           if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-            throw new InfraException('Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
+            throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
           }
 
           $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -407,7 +407,7 @@ class AssinaturaHashRN extends AssinaturaRN {
       return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Erro montando tarja de assinatura.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 

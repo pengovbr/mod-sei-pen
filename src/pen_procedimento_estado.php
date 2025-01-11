@@ -40,7 +40,7 @@ try {
             $arrObjReciboTramiteDTO = $objReciboTramiteRN->downloadReciboEnvio($_GET['id_tramite']);
 
             if(empty($arrObjReciboTramiteDTO)) {
-                        throw new InfraException('O recibo ainda não foi recebido.');
+                        throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
             }
 
             $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
@@ -100,7 +100,7 @@ try {
               $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($arrParametros);
 
               if(empty($arrObjReciboTramiteDTO)) {
-                  throw new InfraException('O recibo ainda não foi recebido.');
+                  throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
               }
 
               $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
@@ -163,7 +163,7 @@ try {
 
   if(!array_key_exists('id_procedimento', $_GET) || empty($_GET['id_procedimento'])) {
 
-      throw new InfraException('Código do procedimento não foi informado');
+      throw new InfraException('Módulo do Tramita: Código do procedimento não foi informado');
   }
 
     $objProcedimentoAndamentoDTO = new ProcedimentoAndamentoDTO();

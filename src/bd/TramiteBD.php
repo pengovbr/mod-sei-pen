@@ -17,11 +17,11 @@ class TramiteBD extends InfraBD {
   public function consultarUltimoTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite = null)
     {
     if(is_null($parObjProcessoEletronicoDTO)){
-        throw new InfraException('Parâmetro [parObjProcessoEletronicoDTO] não informado');
+        throw new InfraException('Módulo do Tramita: Parâmetro [parObjProcessoEletronicoDTO] não informado');
     }
 
     if(!$parObjProcessoEletronicoDTO->isSetDblIdProcedimento() && !$parObjProcessoEletronicoDTO->isSetStrNumeroRegistro()){
-        throw new InfraException('Nenhuma das chaves de localização do processo eletrônico foi atribuído. Informe o IdProcedimento ou NumeroRegistro.');
+        throw new InfraException('Módulo do Tramita: Nenhuma das chaves de localização do processo eletrônico foi atribuído. Informe o IdProcedimento ou NumeroRegistro.');
     }
 
       $objTramiteDTOPesquisa = new TramiteDTO();

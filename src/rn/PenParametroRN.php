@@ -19,7 +19,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->contar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao contar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao contar parâmetro.', $e);
     }
   }
 
@@ -30,7 +30,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->consultar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao listar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao listar parâmetro.', $e);
     }
   }
 
@@ -42,7 +42,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->listar($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao listar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao listar parâmetro.', $e);
     }
   }
 
@@ -58,7 +58,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->cadastrar($objPenParametroDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao cadastrar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao cadastrar parâmetro.', $e);
     }
   }
 
@@ -75,7 +75,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->alterar($objPenParametroDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao alterar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao alterar parâmetro.', $e);
     }
   }
 
@@ -86,7 +86,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->excluir($objDTO);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao excluir parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao excluir parâmetro.', $e);
     }
   }
 
@@ -97,7 +97,7 @@ class PenParametroRN extends InfraRN {
         return $objBD->setValor($strNome, $strValor);
     }
     catch (Exception $e) {
-        throw new InfraException('Erro ao reativar parâmetro.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao reativar parâmetro.', $e);
     }
   }
 
@@ -144,7 +144,7 @@ class PenParametroRN extends InfraRN {
       }
     }
     catch (Exception $e) {
-        throw new InfraException("Erro ao persistir parâmetro $parStrNome", $e);
+        throw new InfraException("Módulo do Tramita: Erro ao persistir parâmetro $parStrNome", $e);
     }
   }
 

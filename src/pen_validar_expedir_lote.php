@@ -13,7 +13,7 @@ try {
     $arrProtocolosOrigem = $_POST['selProcedimentos'];
 
   if(count($arrProtocolosOrigem) == 0) {
-      throw new InfraException('Nenhum procedimento foi informado', 'Desconhecido');
+      throw new InfraException('Módulo do Tramita: Nenhum procedimento foi informado', 'Desconhecido');
   }    
 
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
@@ -43,7 +43,7 @@ try {
       $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
 
     if(empty($objProcedimentoDTO)) {
-        throw new InfraException('Procedimento '.$strProtocoloFormatado.' não foi localizado', 'Desconhecido');
+        throw new InfraException('Módulo do Tramita: Procedimento '.$strProtocoloFormatado.' não foi localizado', 'Desconhecido');
     }        
         
     if(!array_key_exists('selProcedimentos', $_POST) || empty($_POST['selProcedimentos'])) {

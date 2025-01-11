@@ -61,7 +61,7 @@ try {
     $arrObjUnidade = $objUnidadeRN->listarRN0127($objUnidadeDTO);
 
   if ($objPenParametroDTO===null){
-      throw new InfraException("Registros não encontrados.");
+      throw new InfraException("Módulo do Tramita: Registros não encontrados.");
   }
 
   switch ($_GET['acao']) {
@@ -95,7 +95,7 @@ try {
         break;
 
     default:
-        throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
+        throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
 } catch (Exception $e) {

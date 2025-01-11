@@ -316,7 +316,7 @@ class PenAtualizarSipRN extends InfraRN
         InfraDebug::getInstance()->setBolLigado(false);
         InfraDebug::getInstance()->setBolDebugInfra(false);
         InfraDebug::getInstance()->setBolEcho(false);
-        throw new InfraException('Erro atualizando VERSAO.', $e);
+        throw new InfraException('Módulo do Tramita: Erro atualizando VERSAO.', $e);
     }
   }
 
@@ -391,7 +391,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objRN->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu ' . $strMenu . ' não encontrado.');
+        throw new InfraException('Módulo do Tramita: Menu ' . $strMenu . ' não encontrado.');
     }
 
       return $objDTO->getNumIdMenu();
@@ -463,7 +463,7 @@ class PenAtualizarSipRN extends InfraRN
       $objRecursoDTO = $objRecursoRN->consultar($objRecursoDTO);
 
     if ($objRecursoDTO == null) {
-        throw new InfraException("Recurso com nome {$strNomeRecurso} não pode ser localizado.");
+        throw new InfraException("Módulo do Tramita: Recurso com nome {$strNomeRecurso} não pode ser localizado.");
     }
 
       return $objRecursoDTO->getNumIdRecurso();
@@ -484,7 +484,7 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
 
     if ($objItemMenuDTO == null){
-      throw new InfraException("Item de menu não pode ser localizado.");
+      throw new InfraException("Módulo do Tramita: Item de menu não pode ser localizado.");
     }
 
     return array($objItemMenuDTO->getNumIdItemMenu(), $objItemMenuDTO->getNumIdMenu(), $numIdRecurso);
@@ -645,12 +645,12 @@ class PenAtualizarSipRN extends InfraRN
         $objItemMenuRN = new ItemMenuRN();
         $objItemMenuDTO = $objItemMenuRN->consultar($objItemMenuDTO);
       if ($objItemMenuDTO == null) {
-        throw new InfraException('Item de menu ' . $strRotulo . ' não encontrado.');
+        throw new InfraException('Módulo do Tramita: Item de menu ' . $strRotulo . ' não encontrado.');
       }
 
         return $objItemMenuDTO->getNumIdItemMenu();
     } catch (Exception $e) {
-        throw new InfraException('Erro obtendo ID do item de menu.', $e);
+        throw new InfraException('Módulo do Tramita: Erro obtendo ID do item de menu.', $e);
     }
   }
 
@@ -686,7 +686,7 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-        throw new InfraException('Menu "Tipo de Documentos" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Tipo de Documentos" não foi localizado');
     }
 
       $numIdItemMenuPai = $objItemMenuDTO->getNumIdItemMenu();
@@ -736,7 +736,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Administração" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Administração" não foi localizado');
     }
 
       $numIdItemMenuRoot = $objDTO->getNumIdItemMenu();
@@ -801,7 +801,7 @@ class PenAtualizarSipRN extends InfraRN
       $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio
@@ -843,7 +843,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
@@ -878,7 +878,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       $numIdRecurso = $this->criarRecurso('pen_map_hipotese_legal_padrao_cadastrar', 'Acesso ao formulário de cadastro de mapeamento de Hipóteses Legais Padrão', $numIdSistema);
@@ -913,7 +913,7 @@ class PenAtualizarSipRN extends InfraRN
       $objDTO = $objBD->consultar($objDTO);
 
     if (empty($objDTO)) {
-        throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+        throw new InfraException('Módulo do Tramita: Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
       // Administrao > Mapeamento de Hipóteses Legais de Envio > Envio
@@ -1181,7 +1181,7 @@ class PenAtualizarSipRN extends InfraRN
       $objPerfilDTO->setStrNome('Administrador');
       $objPerfilDTO = $objPerfilRN->consultar($objPerfilDTO);
     if ($objPerfilDTO == null) {
-        throw new InfraException('Perfil Administrador do sistema SEI não encontrado.');
+        throw new InfraException('Módulo do Tramita: Perfil Administrador do sistema SEI não encontrado.');
     }
 
       $numIdPerfilSeiAdministrador = $objPerfilDTO->getNumIdPerfil();
@@ -1889,7 +1889,7 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-      throw new InfraException('Menu "Processo Eletrônico Nacional" não foi localizado');
+      throw new InfraException('Módulo do Tramita: Menu "Processo Eletrônico Nacional" não foi localizado');
     }
 
     // Adicionar submenu
@@ -2055,7 +2055,7 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) { 
-      throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
+      throw new InfraException('Módulo do Tramita: Menu "Tramita GOV.BR" não foi localizado');
     }
 
     // Adicionar item de menu Mapeamento de Envio Parcial
@@ -2139,7 +2139,7 @@ class PenAtualizarSipRN extends InfraRN
     $objItemMenuDTO = $objItemMenuBD->consultar($objItemMenuDTO);
 
     if (empty($objItemMenuDTO)) {
-      throw new InfraException('Menu "Tramita GOV.BR" não foi localizado');
+      throw new InfraException('Módulo do Tramita: Menu "Tramita GOV.BR" não foi localizado');
     }
 
     $idMenuTramita = $objItemMenuDTO->getNumIdItemMenu();
@@ -2257,19 +2257,19 @@ try {
       BancoSip::getInstance()->setBolScript(true);
 
     if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'UsuarioScript')) {
-        throw new InfraException('Chave BancoSip/UsuarioScript não encontrada.');
+        throw new InfraException('Módulo do Tramita: Chave BancoSip/UsuarioScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'UsuarioScript'))) {
-        throw new InfraException('Chave BancoSip/UsuarioScript não possui valor.');
+        throw new InfraException('Módulo do Tramita: Chave BancoSip/UsuarioScript não possui valor.');
     }
 
     if (!ConfiguracaoSip::getInstance()->isSetValor('BancoSip', 'SenhaScript')) {
-        throw new InfraException('Chave BancoSip/SenhaScript não encontrada.');
+        throw new InfraException('Módulo do Tramita: Chave BancoSip/SenhaScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSip::getInstance()->getValor('BancoSip', 'SenhaScript'))) {
-        throw new InfraException('Chave BancoSip/SenhaScript não possui valor.');
+        throw new InfraException('Módulo do Tramita: Chave BancoSip/SenhaScript não possui valor.');
     }
 
       $objAtualizarRN = new PenAtualizarSipRN();

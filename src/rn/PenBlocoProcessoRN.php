@@ -74,7 +74,7 @@ class PenBlocoProcessoRN extends InfraRN
         yield $objPendenciasBlocoDTO;
       }
     } catch (\Exception $e) {
-      throw new InfraException('Falha em obter pendências de trâmite de processos em bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Falha em obter pendências de trâmite de processos em bloco.', $e);
     }
   }
 
@@ -134,7 +134,7 @@ class PenBlocoProcessoRN extends InfraRN
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
     } catch (\Exception $e) {
-      throw new InfraException('Falha em obter pendências de trâmite de processos em bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Falha em obter pendências de trâmite de processos em bloco.', $e);
     }
   }
 
@@ -226,7 +226,7 @@ class PenBlocoProcessoRN extends InfraRN
 
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro listando protocolos do bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando protocolos do bloco.', $e);
     }
   }
 
@@ -236,7 +236,7 @@ class PenBlocoProcessoRN extends InfraRN
       $objTramitaEmBlocoProtocoloBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
       return $objTramitaEmBlocoProtocoloBD->consultar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro consutando blocos.', $e);
+      throw new InfraException('Módulo do Tramita: Erro consutando blocos.', $e);
     }
   }
 
@@ -257,7 +257,7 @@ class PenBlocoProcessoRN extends InfraRN
 
       return $arrObjPenBlocoProcessoDTO;
     } catch (\Exception $e) {
-      throw new InfraException('Falha na listagem de pendências de trâmite de processos em bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Falha na listagem de pendências de trâmite de processos em bloco.', $e);
     }
   }
 
@@ -304,7 +304,7 @@ class PenBlocoProcessoRN extends InfraRN
 
       return $arrExcluido;
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo Bloco.', $e);
     }
   }
 
@@ -330,7 +330,7 @@ class PenBlocoProcessoRN extends InfraRN
         $objPenBlocoProcessoDTOIdx->setNumBlocoProcesso($dto->getNumIdBlocoProcesso());
       }
     } catch (Exception $e) {
-      throw new InfraException('Erro montando indexação de processos em bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro montando indexação de processos em bloco.', $e);
     }
   }
 
@@ -349,7 +349,7 @@ class PenBlocoProcessoRN extends InfraRN
 
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando Processo em Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando Processo em Bloco.', $e);
     }
   }
 
@@ -361,7 +361,7 @@ class PenBlocoProcessoRN extends InfraRN
 
       return $ret;
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando Processo em Bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando Processo em Bloco.', $e);
     }
   }
 

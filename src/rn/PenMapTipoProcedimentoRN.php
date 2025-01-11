@@ -29,7 +29,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->getObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->listar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando mapeamento externos.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando mapeamento externos.', $e);
     }
   }
 
@@ -45,7 +45,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->getObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->consultar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando mapeamento externos.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando mapeamento externos.', $e);
     }
   }
 
@@ -61,7 +61,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->alterar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro alterando mapeamento de procedimento.', $e);
+      throw new InfraException('Módulo do Tramita: Erro alterando mapeamento de procedimento.', $e);
     }
   }
 
@@ -77,7 +77,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->cadastrar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando mapeamento de procedimento.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando mapeamento de procedimento.', $e);
     }
   }
 
@@ -93,7 +93,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->excluir($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo mapeamento de procedimento.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de procedimento.', $e);
     }
   }
 
@@ -109,7 +109,7 @@ class PenMapTipoProcedimentoRN extends InfraRN
       $objPenMapTipoProcedimentoBD = new PenMapTipoProcedimentoBD($this->inicializarObjInfraIBanco());
       return $objPenMapTipoProcedimentoBD->contar($objPenMapTipoProcedimentoDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro contando mapeamento de procedimento.', $e);
+      throw new InfraException('Módulo do Tramita: Erro contando mapeamento de procedimento.', $e);
     }
   }
 

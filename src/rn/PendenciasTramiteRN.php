@@ -79,7 +79,7 @@ class PendenciasTramiteRN extends InfraRN
       }
 
       if(empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)){
-        throw new InfraException("Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
+        throw new InfraException("Módulo do Tramita: Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
       }
 
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
@@ -151,15 +151,15 @@ class PendenciasTramiteRN extends InfraRN
   private function validarCertificado()
     {
     if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException('Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
+        throw new InfraException('Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
     }
 
     if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
+        throw new InfraException("Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
     }
 
     if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+        throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
     }
   }
 
@@ -245,7 +245,7 @@ class PendenciasTramiteRN extends InfraRN
           $strResultadoJSON = curl_exec($curl);
           if (curl_errno($curl)) {
             if (curl_errno($curl) != 28) {
-              throw new InfraException("Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_error($curl));
+              throw new InfraException("Módulo do Tramita: Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_error($curl));
             }
 
             $bolEncontrouPendencia = false;
@@ -287,7 +287,7 @@ class PendenciasTramiteRN extends InfraRN
           }
         } catch (Exception $e) {
           $bolEncontrouPendencia = false;
-          throw new InfraException("Erro processando monitoramento de pendências de trâmite de processos", $e);
+          throw new InfraException("Módulo do Tramita: Erro processando monitoramento de pendências de trâmite de processos", $e);
         } finally {
           curl_close($curl);
         }
@@ -307,7 +307,7 @@ class PendenciasTramiteRN extends InfraRN
     try {
       if(!empty($this->strGearmanServidor)) {
         if(!class_exists("GearmanClient")){
-            throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN. " .
+            throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN. " .
                 "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
         }
 

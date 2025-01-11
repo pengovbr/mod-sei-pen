@@ -27,14 +27,14 @@ class ReceberReciboTramiteRN extends InfraRN
   {
     try {
       if (!isset($parNumIdTramite)) {
-        throw new InfraException('Parâmetro $parNumIdTramite não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdTramite não informado.');
       }
 
       $this->objPenDebug->gravar("Solicitando recibo de conclusão do trâmite $parNumIdTramite");
       $objReciboTramite = $this->objProcessoEletronicoRN->receberReciboDeTramite($parNumIdTramite);
 
       if (!$objReciboTramite) {
-        throw new InfraException("Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
+        throw new InfraException("Módulo do Tramita: Não foi possível obter recibo de conclusão do trâmite '$parNumIdTramite'");
       }
 
       $objReciboTramite = $objReciboTramite->conteudoDoReciboDeTramite;

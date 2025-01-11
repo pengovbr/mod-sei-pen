@@ -56,13 +56,13 @@ class ReceberProcedimentoRN extends InfraRN
   public function receberProcedimento($parNumIdentificacaoTramite)
     {
     if (!isset($parNumIdentificacaoTramite)) {
-        throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdentificacaoTramite não informado.');
     }
 
       $this->gravarLogDebug("Solicitando metadados do trâmite " . $parNumIdentificacaoTramite, 1);
       $objMetadadosProcedimento = $this->objProcessoEletronicoRN->solicitarMetadados($parNumIdentificacaoTramite);
     if (!isset($objMetadadosProcedimento)) {
-        throw new InfraException("Metadados do trâmite não pode recuperado do PEN.");
+        throw new InfraException("Módulo do Tramita: Metadados do trâmite não pode recuperado do PEN.");
     }
 
     try{
@@ -135,7 +135,7 @@ class ReceberProcedimentoRN extends InfraRN
 
         //Verifica se o trâmite está recusado
       if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
-          throw new InfraException("Trâmite $numIdTramite já se encontra recusado. Cancelando o recebimento do processo");
+          throw new InfraException("Módulo do Tramita: Trâmite $numIdTramite já se encontra recusado. Cancelando o recebimento do processo");
       }
 
       if($objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO){
@@ -170,12 +170,12 @@ class ReceberProcedimentoRN extends InfraRN
         //Verifica se o tramite se encontra na situação correta
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($numIdTramite);
       if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-        throw new InfraException("Trâmite não pode ser localizado pelo identificado $numIdTramite.");
+        throw new InfraException("Módulo do Tramita: Trâmite não pode ser localizado pelo identificado $numIdTramite.");
       }
 
         $objTramite = $arrObjTramite[0];
       if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-        throw new InfraException("Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual);
+        throw new InfraException("Módulo do Tramita: Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual);
       }
 
         $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrHashComponenteBaixados, $objProtocolo);
@@ -321,7 +321,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function consultarTramite($parNumIdTramite)
     {
     if(is_null($parNumIdTramite)){
-        throw new InfraException("Número de identificação do trâmite não pode ser nulo");
+        throw new InfraException("Módulo do Tramita: Número de identificação do trâmite não pode ser nulo");
     }
 
       $objTramite = null;
@@ -329,7 +329,7 @@ class ReceberProcedimentoRN extends InfraRN
 
     if(!empty($arrObjTramite)){
       if(count($arrObjTramite) > 1){
-          throw new InfraException("Identificado mais de um registro de trâmite para o IDT $parNumIdTramite .");
+          throw new InfraException("Módulo do Tramita: Identificado mais de um registro de trâmite para o IDT $parNumIdTramite .");
       }
 
         $objTramite = $arrObjTramite[0];
@@ -351,7 +351,7 @@ class ReceberProcedimentoRN extends InfraRN
   public function receberTramitesRecusados($parNumIdentificacaoTramite)
     {
     if (empty($parNumIdentificacaoTramite)) {
-        throw new InfraException('Parâmetro $parNumIdentificacaoTramite não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parNumIdentificacaoTramite não informado.');
     }
 
       //SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $this->objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO'));
@@ -360,7 +360,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->gravarLogDebug("Solicitando dados do trâmite " . $parNumIdentificacaoTramite, 1);
       $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdentificacaoTramite);
     if(!isset($arrObjTramite) || !array_key_exists(0, $arrObjTramite)){
-        throw new InfraException("Não foi encontrado no Tramita GOV.BR o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
+        throw new InfraException("Módulo do Tramita: Não foi encontrado no Tramita GOV.BR o trâmite de número {$parNumIdentificacaoTramite} para realizar a ciência da recusa");
     }
 
       $objTramite = $arrObjTramite[0];
@@ -647,7 +647,7 @@ class ReceberProcedimentoRN extends InfraRN
         //Desconsidera os componendes digitais de documentos cancelados
       if(!isset($objDocumento->retirado) || $objDocumento->retirado == false) {
         if(!isset($objDocumento->componenteDigital)){
-            throw new InfraException("Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
+            throw new InfraException("Módulo do Tramita: Metadados do componente digital do documento de ordem {$objDocumento->ordem} não informado.");
         }
 
         $arrObjComponentesDigitais = is_array($objDocumento->componenteDigital) ? $objDocumento->componenteDigital : array($objDocumento->componenteDigital);
@@ -746,7 +746,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function validaTamanhoComponenteDigital($objComponenteDigital)
     {
     if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0){
-        throw new InfraException('Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+        throw new InfraException('Módulo do Tramita: Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
     }
   }
 
@@ -892,11 +892,11 @@ class ReceberProcedimentoRN extends InfraRN
   private function atualizarProcedimento($parDblIdProcedimento, $objMetadadosProcedimento, $parObjProtocolo, $parNumeroRegistroAnterior = null)
     {
     if(!isset($parDblIdProcedimento)){
-        throw new InfraException('Parâmetro $parDblIdProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parDblIdProcedimento não informado.');
     }
 
     if(!isset($objMetadadosProcedimento)){
-        throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objMetadadosProcedimento não informado.');
     }
 
     if ($this->destinatarioReal) {
@@ -1014,7 +1014,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function gerarProcedimento($objMetadadosProcedimento, $parObjProtocolo)
     {
     if(!isset($objMetadadosProcedimento)){
-        throw new InfraException('Parâmetro $objMetadadosProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objMetadadosProcedimento não informado.');
     }
 
       //TODO: Usar dados do destinatário em outro método específico para envio
@@ -1403,7 +1403,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function obterTipoProcessoPadrao($numIdTipoProcedimento) {
 
     if(!isset($numIdTipoProcedimento)){
-        throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $numIdTipoProcedimento não informado.');
     }
 
       $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
@@ -1432,7 +1432,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function obterTipoProcessoPeloNomeOrgaoUnidade($strNomeTipoProcesso, $numIdOrgao, $numIdUnidade){
 
     if(empty($strNomeTipoProcesso)){
-        throw new InfraException('Parâmetro $strNomeTipoProcesso não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $strNomeTipoProcesso não informado.');
     }
 
     $objTipoProcedimentoDTOFiltro = new TipoProcedimentoDTO();
@@ -1512,7 +1512,7 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
     if (is_null($objTipoProcedimentoDTO)){
-        throw new InfraException('Tipo de processo não encontrado.');
+        throw new InfraException('Módulo do Tramita: Tipo de processo não encontrado.');
     }
 
       $objProcedimentoDTO->setNumIdTipoProcedimento($objTipoProcedimentoDTO->getNumIdTipoProcedimento());
@@ -1586,13 +1586,13 @@ class ReceberProcedimentoRN extends InfraRN
     {
 
     if(!isset($objDestinatario)){
-        throw new InfraException('Parâmetro $objDestinatario não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objDestinatario não informado.');
     }
 
       $objUnidadeDTOEnvio = $this->obterUnidadeMapeada($objDestinatario->numeroDeIdentificacaoDaEstrutura);
 
     if(!isset($objUnidadeDTOEnvio)){
-        throw new InfraException('Unidade de destino não pode ser encontrada. Repositório: ' . $objDestinatario->identificacaoDoRepositorioDeEstruturas .
+        throw new InfraException('Módulo do Tramita: Unidade de destino não pode ser encontrada. Repositório: ' . $objDestinatario->identificacaoDoRepositorioDeEstruturas .
         ', Número: ' . $objDestinatario->numeroDeIdentificacaoDaEstrutura);
     }
 
@@ -1607,16 +1607,16 @@ class ReceberProcedimentoRN extends InfraRN
   private function atribuirDocumentos($parObjProcedimentoDTO, $parObjProtocolo, $objUnidadeDTO, $parObjMetadadosProcedimento, $parStrNumeroRegistro, $parDblIdProcedimentoAnexado = null)
     {
     if(!isset($parObjProtocolo)) {
-        throw new InfraException('Parâmetro [parObjProtocolo] não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro [parObjProtocolo] não informado.');
     }
 
     if(!isset($objUnidadeDTO)) {
-        throw new InfraException('Unidade responsável pelo documento não informada.');
+        throw new InfraException('Módulo do Tramita: Unidade responsável pelo documento não informada.');
     }
 
       $arrObjDocumentos = ProcessoEletronicoRN::obterDocumentosProtocolo($parObjProtocolo);
     if(!isset($arrObjDocumentos) || count($arrObjDocumentos) == 0) {
-        throw new InfraException('Lista de documentos do processo não informada.');
+        throw new InfraException('Módulo do Tramita: Lista de documentos do processo não informada.');
     }
 
       $strNumeroRegistro = $parStrNumeroRegistro;
@@ -1699,7 +1699,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           //Validação dos dados dos documentos
         if(!isset($objDocumento->especie)){
-            throw new InfraException('Espécie do documento ['.$objDocumento->descricao.'] não informada.');
+            throw new InfraException('Módulo do Tramita: Espécie do documento ['.$objDocumento->descricao.'] não informada.');
         }
 
           $objDocumentoDTO = new DocumentoDTO();
@@ -1709,11 +1709,11 @@ class ReceberProcedimentoRN extends InfraRN
           $objSerieDTO = $this->obterSerieMapeada($objDocumento);
 
         if ($objSerieDTO==null){
-            throw new InfraException('Tipo de documento [Espécie '.$objDocumento->especie->codigo.'] não encontrado.');
+            throw new InfraException('Módulo do Tramita: Tipo de documento [Espécie '.$objDocumento->especie->codigo.'] não encontrado.');
         }
 
         if (InfraString::isBolVazia($objDocumento->dataHoraDeProducao)) {
-            throw new InfraException('Data do documento não informada.');
+            throw new InfraException('Módulo do Tramita: Data do documento não informada.');
         }
 
           $objProcedimentoDTO2 = new ProcedimentoDTO();
@@ -1735,7 +1735,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objProcedimentoDTO2 = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO2);
 
         if ($objProcedimentoDTO2==null){
-          throw new InfraException('Processo ['.$objDocumentoDTO->getDblIdProcedimento().'] não encontrado.');
+          throw new InfraException('Módulo do Tramita: Processo ['.$objDocumentoDTO->getDblIdProcedimento().'] não encontrado.');
         }
 
           $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO2->getDblIdProcedimento());
@@ -2050,7 +2050,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function atribuirComponentesDigitais(DocumentoDTO $objDocumentoDTO, $parArrObjComponentesDigitais, $arrDocumentosExistentesPorHash, $arrHashComponenteBaixados)
     {
     if(!isset($parArrObjComponentesDigitais)) {
-        throw new InfraException('Componentes digitais do documento não informado.');
+        throw new InfraException('Módulo do Tramita: Componentes digitais do documento não informado.');
     }
 
     // Atribui componentes digitais já presentes no processo e não reenviados pelo Tramita.gov.br
@@ -2190,7 +2190,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objDestinatario = $parObjMetadadosProcedimento->metadados->destinatario;
 
     if(!isset($objDestinatario)){
-        throw new InfraException("Parâmetro $objDestinatario não informado.");
+        throw new InfraException("Módulo do Tramita: Parâmetro $objDestinatario não informado.");
     }
 
       $numIdRepositorioOrigem = $this->objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
@@ -2282,7 +2282,7 @@ class ReceberProcedimentoRN extends InfraRN
   private function relacionarProcedimentos($objProcedimentoDTO1, $objProcedimentoDTO2)
     {
     if(!isset($objProcedimentoDTO1) || !isset($objProcedimentoDTO1)) {
-        throw new InfraException('Parâmetro $objProcedimentoDTO não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $objProcedimentoDTO não informado.');
     }
 
       $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
@@ -2317,13 +2317,13 @@ class ReceberProcedimentoRN extends InfraRN
           $objContatoDTO->setStrNome($objParticipanteDTO->getStrNomeContato());
       } else {
         if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_INTERESSADO) {
-            throw new InfraException('Interessado vazio ou nulo.');
+            throw new InfraException('Módulo do Tramita: Interessado vazio ou nulo.');
         }
         else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_REMETENTE) {
-            throw new InfraException('Remetente vazio ou nulo.');
+            throw new InfraException('Módulo do Tramita: Remetente vazio ou nulo.');
         }
         else if ($objParticipanteDTO->getStrStaParticipacao()==ParticipanteRN::$TP_DESTINATARIO) {
-            throw new InfraException('Destinatário vazio ou nulo.');
+            throw new InfraException('Módulo do Tramita: Destinatário vazio ou nulo.');
         }
       }
 
@@ -2559,13 +2559,13 @@ class ReceberProcedimentoRN extends InfraRN
       //Verifica se o usuário possui permissões de escrita no repositório de arquivos externos
     if(!is_writable(ConfiguracaoSEI::getInstance()->getValor('SEI', 'RepositorioArquivos'))) {
         $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, 'O sistema não possui permissão de escrita no diretório de armazenamento de documentos externos', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
-        throw new InfraException('O sistema não possui permissão de escrita no diretório de armazenamento de documentos externos');
+        throw new InfraException('Módulo do Tramita: O sistema não possui permissão de escrita no diretório de armazenamento de documentos externos');
     }
 
       //Verifica se o usuário possui permissões de escrita no diretório temporário de arquivos
     if(!is_writable(DIR_SEI_TEMP)){
         $this->objProcessoEletronicoRN->recusarTramite($parIdTramite, 'O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.', ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
-        throw new InfraException('O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.');
+        throw new InfraException('Módulo do Tramita: O sistema não possui permissão de escrita no diretório de armazenamento de arquivos temporários do sistema.');
 
     }
   }
@@ -2797,7 +2797,7 @@ class ReceberProcedimentoRN extends InfraRN
     if (is_dir($strDiretorio) === false){
         umask(0);
       if (mkdir($strDiretorio, 0777, true) === false){
-        throw new InfraException('Erro criando diretório "' .$strDiretorio.'".');
+        throw new InfraException('Módulo do Tramita: Erro criando diretório "' .$strDiretorio.'".');
       }
     }
   }

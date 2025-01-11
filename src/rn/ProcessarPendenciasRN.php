@@ -43,11 +43,11 @@ class ProcessarPendenciasRN extends InfraRN
       $this->strGearmanPorta = trim(@$arrObjGearman["Porta"] ?: null);
 
     if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
+        throw new InfraException("Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
     }
 
     if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+        throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
     }
   }
 
@@ -59,7 +59,7 @@ class ProcessarPendenciasRN extends InfraRN
   private function inicializarGearman()
     {
     if(!class_exists("GearmanWorker")){
-        throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
+        throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN./n" .
                                  "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
     }
 
@@ -317,7 +317,7 @@ class ProcessarPendenciasRN extends InfraRN
         }
       }
     } catch (\Exception $e) {
-      throw new InfraException('Falha ao expedir processso em bloco.', $e);
+      throw new InfraException('Módulo do Tramita: Falha ao expedir processso em bloco.', $e);
     }
   }
 
@@ -374,12 +374,12 @@ class ProcessarPendenciasRN extends InfraRN
 
     try {
       if(!class_exists("GearmanClient")){
-        throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " .
+        throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " .
             "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
       }
 
       if(!class_exists("GearmanWorker")){
-          throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanWorker). " .
+          throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanWorker). " .
               "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
       }
 

@@ -35,7 +35,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->getObjInfraIBanco());
       return $objBD->listar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro listando Unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro listando Unidades.', $e);
     }
   }
 
@@ -57,7 +57,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->consultar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro consultar mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro consultar mapeamento de unidades.', $e);
     }
   }
 
@@ -79,7 +79,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->alterar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro alterando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro alterando mapeamento de unidades.', $e);
     }
   }
 
@@ -101,7 +101,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->cadastrar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro cadastrando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro cadastrando mapeamento de unidades.', $e);
     }
   }
 
@@ -123,7 +123,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->inicializarObjInfraIBanco());
       return $objBD->excluir($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro excluindo mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro excluindo mapeamento de unidades.', $e);
     }
   }
 
@@ -140,7 +140,7 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
       $objBD = new PenRestricaoEnvioComponentesDigitaisBD($this->getObjInfraIBanco());
       return $objBD->contar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Erro contando mapeamento de unidades.', $e);
+      throw new InfraException('Módulo do Tramita: Erro contando mapeamento de unidades.', $e);
     }
   }
 }

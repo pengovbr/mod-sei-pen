@@ -95,7 +95,7 @@ class PenMetaBD extends InfraMetaBD {
           break;
 
       default:
-          throw new InfraException('BANCO DE DADOS NAO SUPORTADO: ' . $strTableDrive);
+          throw new InfraException('Módulo do Tramita: BANCO DE DADOS NAO SUPORTADO: ' . $strTableDrive);
 
     }
 
@@ -114,7 +114,7 @@ class PenMetaBD extends InfraMetaBD {
       $numVersaoSistema = intval(preg_replace('/\D+/', '', $strRegexVersaoSistema));
 
     if($numVersaoRequerida > $numVersaoSistema){
-        throw new InfraException('VERSAO DO FRAMEWORK PHP INCOMPATIVEL (VERSAO ATUAL '.$strRegexVersaoSistema.', VERSAO REQUERIDA '.$strVerMinRequirida.')');
+        throw new InfraException('Módulo do Tramita: VERSAO DO FRAMEWORK PHP INCOMPATIVEL (VERSAO ATUAL '.$strRegexVersaoSistema.', VERSAO REQUERIDA '.$strVerMinRequirida.')');
     }
 
       return $this;

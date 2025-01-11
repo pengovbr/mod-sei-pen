@@ -50,7 +50,7 @@ class ProcedimentoAndamentoRN extends InfraRN
   protected function cadastrarControlado($parProcedimentoAndamentoDTO)
     {
     if($this->isSetOpts === false) {
-        throw new InfraException('Log do cadastro de procedimento não foi configurado');
+        throw new InfraException('Módulo do Tramita: Log do cadastro de procedimento não foi configurado');
     }
 
       $strMensagem = ($parProcedimentoAndamentoDTO->isSetStrMensagem()) ? $parProcedimentoAndamentoDTO->getStrMensagem() : 'Não informado';

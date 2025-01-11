@@ -296,7 +296,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       InfraDebug::getInstance()->setBolLigado(false);
       InfraDebug::getInstance()->setBolDebugInfra(false);
       InfraDebug::getInstance()->setBolEcho(false);
-      throw new InfraException("Erro atualizando VERSAO: $e", $e);
+      throw new InfraException("Módulo do Tramita: Erro atualizando VERSAO: $e", $e);
     }
   }
 
@@ -2776,7 +2776,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
               }
             }
           } catch (Exception $e) {
-            throw new InfraException("Erro na parametrização EnviarApenasComponentesDigitaisPendentes em ConfiguraçãoModPEN.php");
+            throw new InfraException("Módulo do Tramita: Erro na parametrização EnviarApenasComponentesDigitaisPendentes em ConfiguraçãoModPEN.php");
             try {
               LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
             } catch (Exception $e) {
@@ -3104,19 +3104,19 @@ try {
     BancoSEI::getInstance()->setBolScript(true);
 
     if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI', 'UsuarioScript')) {
-      throw new InfraException('Chave BancoSEI/UsuarioScript não encontrada.');
+      throw new InfraException('Módulo do Tramita: Chave BancoSEI/UsuarioScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI', 'UsuarioScript'))) {
-      throw new InfraException('Chave BancoSEI/UsuarioScript não possui valor.');
+      throw new InfraException('Módulo do Tramita: Chave BancoSEI/UsuarioScript não possui valor.');
     }
 
     if (!ConfiguracaoSEI::getInstance()->isSetValor('BancoSEI', 'SenhaScript')) {
-      throw new InfraException('Chave BancoSEI/SenhaScript não encontrada.');
+      throw new InfraException('Módulo do Tramita: Chave BancoSEI/SenhaScript não encontrada.');
     }
 
     if (InfraString::isBolVazia(ConfiguracaoSEI::getInstance()->getValor('BancoSEI', 'SenhaScript'))) {
-      throw new InfraException('Chave BancoSEI/SenhaScript não possui valor.');
+      throw new InfraException('Módulo do Tramita: Chave BancoSEI/SenhaScript não possui valor.');
     }
 
     $objAtualizarRN = new PenAtualizarSeiRN();
