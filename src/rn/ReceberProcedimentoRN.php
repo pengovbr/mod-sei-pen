@@ -2844,12 +2844,16 @@ class ReceberProcedimentoRN extends InfraRN
   private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
       $arrObjObservacoes = array();
-      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor['numeroDeIdentificacao'];
-    if(!empty($strNumeroDocumentoOrigem)){
-        $objObservacaoDTO = new ObservacaoDTO();
-        $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
-        $arrObjObservacoes[] = $objObservacaoDTO;
-    }
+      if (is_array($parObjDocumento->produtor)) {
+        $parObjDocumento->produtor = (object) $parObjDocumento->produtor; 
+      }
+
+      $strNumeroDocumentoOrigem = isset($parObjDocumento->protocolo) ? $parObjDocumento->protocolo : $parObjDocumento->produtor->numeroDeIdentificacao;
+      if(!empty($strNumeroDocumentoOrigem)){
+          $objObservacaoDTO = new ObservacaoDTO();
+          $objObservacaoDTO->setStrDescricao("Número do Documento na Origem: " . $strNumeroDocumentoOrigem);
+          $arrObjObservacoes[] = $objObservacaoDTO;
+      }
 
       return $arrObjObservacoes;
   }
