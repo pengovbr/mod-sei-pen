@@ -123,14 +123,12 @@ class ProcessoEletronicoRN extends InfraRN
     $this->strLocalCertPassword = $strSenhaCertificadoDigital;
     $this->numTentativasErro = $numTentativasErro;
 
-  
-    // TODO: lembrar de pegar url dinamicamente quando SOAP for removido
     $this->strBaseUri = $strEnderecoWebService;
     $this->arrheaders = [
       'Accept' => '*/*',
       'Content-Type' => 'application/json',
-    ];
-    
+      ];
+      
     $this->strClientGuzzle = new Client([
       'base_uri' => $this->strBaseUri,
       'timeout'  => self::WS_TIMEOUT_CONEXAO,
@@ -224,7 +222,7 @@ class ProcessoEletronicoRN extends InfraRN
     
     try {
         $parametros = [
-            'ativos' => $ativo
+                'ativos' => $ativo
         ];
     
         $arrResultado = $this->get($endpoint, $parametros);
@@ -2667,7 +2665,7 @@ class ProcessoEletronicoRN extends InfraRN
       return (
         isset($parObjDocumento->protocoloDoProcessoAnexado) &&
         !empty($parObjDocumento->protocoloDoProcessoAnexado) &&
-        $parObjProtocolo->protocolo != $parObjDocumento->protocoloDoProcessoAnexado
+        $parObjProtocolo?->protocolo != $parObjDocumento?->protocoloDoProcessoAnexado
     );
   }
 
