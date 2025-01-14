@@ -16,7 +16,7 @@
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei" />
     <const name="PEN_ENDERECO_WEBSERVICE"
       value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/" />
-
+ 
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
@@ -24,7 +24,7 @@
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
     <const name="ENVIO_PARCIAL" value="true" />
-
+ 
     <!-- Chaves de configuração dos diferentes ambientes envolvidos no teste do Barramento de
     Serviços do PEN -->
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 1 -->
@@ -68,12 +68,14 @@
       value="Situação Econômico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nº 5.172/1966 - CTN)" />
     <const name="CONTEXTO_ORGAO_A_HIPOTESE_SIGILOSO"
       value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />
+      <const name="CONTEXTO_ORGAO_A_HIPOTESE_RESTRICAO_ID"
+      value="3" />
 
     <!-- CONFIGURAÇÕES DE TESTE ÓRGÃO 2 -->
     <const name="CONTEXTO_ORGAO_B" value="CONTEXTO_ORGAO_B" />
     <const name="CONTEXTO_ORGAO_B_URL" value="http://org2-http:8000/sei" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
-    <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />
+    <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
@@ -108,6 +110,7 @@
     <const name="CONTEXTO_ORGAO_B_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_PADRAO"
       value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+      <const name="CONTEXTO_ORGAO_B_HIPOTESE_RESTRICAO_ID" value="3" />
 
 
     <!-- CONFIGURAÇÕES DE TESTE Órgão 3, caso de sem hierarquia pai -->
@@ -136,6 +139,7 @@
     <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO"
       value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
+      <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_ID" value="3" />
   </php>
 
   <testsuites>
