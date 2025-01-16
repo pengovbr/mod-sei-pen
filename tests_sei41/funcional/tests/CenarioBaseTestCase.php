@@ -97,6 +97,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         putenv("DATABASE_HOST=org1-database");
         $penMapUnidadesFixture = new \PenMapUnidadesFixture();
         $penMapUnidadesFixture->carregar([
+            'IdUnidade' => 110000001,
             'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA,
             'Sigla' => CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA,
             'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE,
@@ -105,7 +106,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $penMapUnidadesFixture->carregar([
                 'IdUnidade' => 110000002,
                 'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA,
-                'Sigla' => CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA,
+                'Sigla' => CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA,
                 'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA,
             ]);
         }
@@ -139,6 +140,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         putenv("DATABASE_HOST=org2-database");
         $penMapUnidadesFixture = new \PenMapUnidadesFixture();
         $penMapUnidadesFixture->carregar([
+            'IdUnidade' => 110000001,
             'Id' => CONTEXTO_ORGAO_B_ID_ESTRUTURA,
             'Sigla' => CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA,
             'Nome' => CONTEXTO_ORGAO_B_NOME_UNIDADE,
@@ -149,7 +151,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $penMapUnidadesFixture->carregar([
                 'IdUnidade' => 110000002,
                 'Id' => CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA,
-                'Sigla' => CONTEXTO_ORGAO_B_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA,
+                'Sigla' => CONTEXTO_ORGAO_B_NOME_UNIDADE_SECUNDARIA,
                 'Nome' => CONTEXTO_ORGAO_B_NOME_UNIDADE_SECUNDARIA,
             ]);
         }
