@@ -214,6 +214,13 @@ a.processoNaoVisualizado{
     position: absolute;
     opacity: 0;
   }
+  #frmProcedimentoExpedido th.infraTh {
+    color: #ECF0F1;    
+    background: #155f9b;
+  }
+  #frmProcedimentoExpedido #tblBlocos_wrapper label:first-of-type{font-size: 12px;}
+  #frmProcedimentoExpedido #tblBlocos_wrapper select:first-of-type{font-size: 11px;}
+  #frmProcedimentoExpedido #tblBlocos{border-collapse: collapse;}
   
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
