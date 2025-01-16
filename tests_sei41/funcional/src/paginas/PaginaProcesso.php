@@ -66,7 +66,7 @@ class PaginaProcesso extends PaginaTeste
     $this->test->frame("ifrVisualizacao");
     $this->test->byXPath("//*[@id='selRelProtocoloProtocolo']/option[1]")->click();
     sleep(1);
-    $this->test->byXPath("//*[@id='imgRelProtocoloProtocoloAbaixo']")->click();
+    $this->test->byXPath("//a[@onclick='objLupaRelProtocoloProtocolo.moverAbaixo();']")->click();
     sleep(1);
     $this->test->byXPath("//*[@id='divInfraBarraComandosSuperior']/button[@value='Salvar']")->click();
   }
