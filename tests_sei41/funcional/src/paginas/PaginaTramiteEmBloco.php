@@ -53,10 +53,44 @@ class PaginaTramiteEmBloco extends PaginaTeste
    *
    * @return void
    */
+  public function visualizacaoDetalhadaAberta()
+  {
+    try {
+        $btnVisualizacaoDetalhada = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'R\');"]');  
+        if($btnVisualizacaoDetalhada){
+          return true;
+        }           
+      } catch (Exception $e) {
+        return false;
+      }  
+  }
+
+  /**
+   * Seleciona a visualização detalhada do processo.
+   *
+   * Este método simula o clique no botão que troca a visualização para
+   * a opção detalhada. Ele utiliza o XPath para encontrar o botão
+   * correspondente na interface da aplicação.
+   *
+   * @return void
+   */
   public function selecionarVisualizacaoDetalhada()
   {
-    $btnTramiteEmBloco = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'D\');"]');
-    $btnTramiteEmBloco->click();
+    $btnVisualizacaoDetalhada = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'D\');"]');      
+    $btnVisualizacaoDetalhada->click();
+  }
+
+  /**
+   * Fecha o visualização detalhada do processo.
+   *
+   * Este método simula o clique no botão que troca a visualização para
+   * a opção resumida.    *
+   * @return void
+   */
+  public function fecharVisualizacaoDetalhada()
+  {    
+      $btnVisualizacaoResumida = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'R\');"]');      
+      $btnVisualizacaoResumida->click();
   }
 
   /**
