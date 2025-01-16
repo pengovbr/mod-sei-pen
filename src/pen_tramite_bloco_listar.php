@@ -349,6 +349,13 @@ $objPaginaSEI->montarStyle();
     position: absolute;
     opacity: 0;
   }
+  #frmBlocoLista th.infraTh {
+    color: #ECF0F1;    
+    background: #155f9b;
+  }
+  #frmBlocoLista #tblBlocos_wrapper label:first-of-type{font-size: 12px;}
+  #frmBlocoLista #tblBlocos_wrapper select:first-of-type{font-size: 11px;}
+  #frmBlocoLista #tblBlocos{border-collapse: collapse;}
 </style>
 <?php $objPaginaSEI->montarJavaScript();
 $acaoOrigem=$_GET['acao_origem']; ?>
