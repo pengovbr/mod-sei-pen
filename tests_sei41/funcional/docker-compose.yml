@@ -51,6 +51,7 @@ services:
       - ${SEI_PATH}/sei:/opt/sei
       - ${SEI_PATH}/sip:/opt/sip
       - ${SEI_PATH}/infra:/opt/infra
+      - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
       - .:/tests
       - ${SEI_PATH}/../tests:/tests/sei
       - ${SEI_PATH}/../src:/tests/sei/src
@@ -82,6 +83,7 @@ services:
       - DATABASE_PORT=${ORG1_DATABASE_GUEST_PORT}
       - SEI_CHAVE_ACESSO=${ORG1_APP_SEI_CHAVE_ACESSO}
       - SEI_DATABASE_NAME=${SEI_DATABASE_NAME}
+      - APP_SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_CHAVE_ACESSO=${ORG1_APP_SIP_CHAVE_ACESSO}
       - SIP_DATABASE_NAME=${SIP_DATABASE_NAME}
       - SIP_DATABASE_USER=${SIP_DATABASE_USER}
