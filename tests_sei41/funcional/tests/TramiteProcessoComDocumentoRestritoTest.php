@@ -44,6 +44,7 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
       self::$remetente['SENHA']
     );
 
+    
     self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);  // Cadastrar novo processo de teste
     self::$documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito
     self::$documentoTeste["HIPOTESE_LEGAL"] = self::$remetente["HIPOTESE_RESTRICAO"]; // Configurar Hipotese legal
@@ -60,6 +61,10 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
       false
     );
+
+    // A partir da versão SEI 5.0 ao criar um documento restrito o processo torna-se restrito também
+    self::$processoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito
+
   }
 
   /**
@@ -110,6 +115,8 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
 
   /**
    * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
+   * 
+   * A partir da versão SEI 5.0 ao criar um documento restrito o processo torna-se restrito também
    *
    * @group verificacao_recebimento
    * @large
