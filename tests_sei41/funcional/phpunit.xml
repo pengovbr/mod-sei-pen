@@ -121,11 +121,16 @@
     <const name="CONTEXTO_ORGAO_C_ID_REP_ESTRUTURAS" value="5" />
     <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="RE CGPRO" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE" value="TESTE" />
+    <const name="CONTEXTO_ORGAO_C_SIGLA_ESTRUTURA" value="TESTE" />    
     <const name="CONTEXTO_ORGAO_C_ID_ESTRUTURA" value="121390" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE" value="SEGES TESTE SEM PAI" />
     <const name="CONTEXTO_ORGAO_C_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_C_USUARIO_SENHA" value="teste" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_INATIVA" value="Situação Econômico-Financeira de Sujeito Passivo (Art. 198, caput, da Lei nº 5.172/1966 - CTN)" />
+    <const name="CONTEXTO_ORGAO_C_TIPO_PROCESSO_SIGILOSO" value="Acesso à Informação: Demanda do e-SIC" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_SIGILOSO"
+      value="Sigilo do Inquérito Policial (Art. 20 do Código de Processo Penal)" />       
     <const name="CONTEXTO_ORGAO_C_NOME_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA" value="" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
@@ -134,12 +139,12 @@
     <const name="CONTEXTO_ORGAO_C_TIPO_DOCUMENTO_NAO_MAPEADO" value="Nota" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO"
       value="Documento Preparatório (Art. 7º, § 3º, da Lei nº 12.527/2011)" />
+    <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_ID" value="3" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_NAO_MAPEADO"
       value="Informação Pessoal (Art. 31 da Lei nº 12.527/2011)" />
     <const name="CONTEXTO_ORGAO_C_CARGO_ASSINATURA" value="Assessor(a)" />
     <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_PADRAO"
       value="Controle Interno (Art. 26, § 3º, da Lei nº 10.180/2001)" />
-      <const name="CONTEXTO_ORGAO_C_HIPOTESE_RESTRICAO_ID" value="3" />
   </php>
 
   <testsuites>
