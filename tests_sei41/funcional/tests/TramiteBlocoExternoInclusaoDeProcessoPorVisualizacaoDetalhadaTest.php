@@ -11,7 +11,7 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
 {
     public static $remetente;
     public static $destinatario;
-
+    
     /**
      * Método que testa a inclusão de um processo por meio da visualização detalhada.
      *
@@ -50,8 +50,15 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
 
         // Navegação para controle de processo e seleção de visualização detalhada
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
 
+        $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
+        if($visualizacaoDetalhadaAberta){
+            $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
+            $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
+        }else{
+            $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
+        }
+        
         // Seleção do processo e do bloco de trâmite
         $protocoloFormatado = $objProtocoloDTO->getStrProtocoloFormatado();
         $this->paginaTramiteEmBloco->selecionarProcesso($protocoloFormatado);
@@ -74,7 +81,15 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
             $mensagem
         );
 
+        $this->paginaBase->navegarParaControleProcesso();       
+        
+        $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
+        if($visualizacaoDetalhadaAberta){
+            $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
+        }
+
         // Saída do sistema
         $this->sairSistema();
-    }
+    }    
+    
 }
