@@ -189,10 +189,9 @@ down: .env
 	$(CMD_COMPOSE_FUNC) stop
 
 
-# make teste=TramiteProcessoComDevolucaoTest test-functional
+# make test-functional teste=TramiteProcessoComDevolucaoTest 
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml $(textdox) /tests/tests/$(addsuffix .php,$(teste)) ;
-
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste));
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
