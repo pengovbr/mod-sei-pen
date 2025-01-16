@@ -36,6 +36,9 @@ class TramiteProcessoComDocumentoRestritoHipotesePadraoTest extends FixtureCenar
       
         $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, self::$documentoTeste, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+
+        // A partir da versão SEI 5.0 ao criar um documento restrito o processo torna-se restrito também
+        self::$processoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito
     }
 
 
