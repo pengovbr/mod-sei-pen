@@ -2962,10 +2962,14 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function atribuirTipoProcedimentoRelacinado($numIdTipoProcedimento, $numIdProcedimento, $strProcessoNegocio) {
 
+    $origem = null;
+    if (isset($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura) && !empty($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura)) { 
+      $origem = $this->destinatarioReal->numeroDeIdentificacaoDaEstrutura;
+    }
     $objAtributoAndamentoDTOAnterior = new AtributoAndamentoDTO();
     $objAtributoAndamentoDTOAnterior->setStrNome('TIPO_PROCESSO_ANTERIOR');
     $objAtributoAndamentoDTOAnterior->setStrValor($strProcessoNegocio);
-    $objAtributoAndamentoDTOAnterior->setStrIdOrigem($this->destinatarioReal->numeroDeIdentificacaoDaEstrutura);
+    $objAtributoAndamentoDTOAnterior->setStrIdOrigem($origem );
     $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTOAnterior;
 
     $objTipoProcedimentoRN = new TipoProcedimentoRN();
