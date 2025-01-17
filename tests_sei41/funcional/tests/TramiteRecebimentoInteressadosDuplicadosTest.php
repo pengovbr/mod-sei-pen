@@ -118,6 +118,14 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
         return $this->receberReciboDeEnvioAPI($idt);
     }
 
+    private function receberReciboTramite($servicoPEN, $novoTramite)
+    {
+        $dadosTramite = $novoTramite->dadosTramiteDeProcessoCriado;
+        $parametros = new StdClass();
+        $parametros->IDT = $dadosTramite->IDT;
+        return $servicoPEN->receberReciboDeTramite($parametros);
+    }
+
     private function construirCabecalhoTeste($remetente, $destinatario)
     {
         $cabecalho = [
@@ -267,6 +275,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
     
         } catch (\Exception $e) {
             $mensagem = "Falha no envio de processo";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 
@@ -307,6 +316,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
     
         } catch (\Exception $e) {
             $mensagem = "Falha no envio de de componentes no documento";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 
@@ -325,6 +335,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
             return json_decode($response->getBody(), true);
         } catch (\Exception $e) {
             $mensagem = "Falha no recebimento de recibo de trâmite de envio.";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 }

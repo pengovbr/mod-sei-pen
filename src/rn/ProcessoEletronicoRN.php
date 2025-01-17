@@ -1622,12 +1622,17 @@ class ProcessoEletronicoRN extends InfraRN
 
   private function montarDadosMaisDeUmComponenteDigital($objDocumento, $parStrNumeroRegistro, $parNumIdentificacaoTramite, $parObjProtocolo, $parObjComponentesDigitaisSolicitados)
     {
-      $arrayComponentesDigitais = $objDocumento->componenteDigital;
+      $arrayComponentesDigitais = $objDocumento->componentesDigitais;
       $arrObjComponenteDigitalDTO = array();
       $arrayTeste = array();
       $contComponentes = 0;
 
     foreach ($arrayComponentesDigitais as $indice => $objComponenteDigital){
+
+        if (is_array($objComponenteDigital)) {
+          $objComponenteDigital = (object) $objComponenteDigital;
+        } 
+
         $contComponentes++;
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
         $objComponenteDigitalDTO->setStrNumeroRegistro($parStrNumeroRegistro);
@@ -1646,8 +1651,8 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
 
-        $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
-        $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
+      $objComponenteDigitalDTO->setStrNome($objComponenteDigital->nome);
+      $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
 
         $objComponenteDigitalDTO->setStrHashConteudo($strHashConteudo);
         $objComponenteDigitalDTO->setStrAlgoritmoHash(self::ALGORITMO_HASH_DOCUMENTO);
@@ -1656,19 +1661,18 @@ class ProcessoEletronicoRN extends InfraRN
         $objComponenteDigitalDTO->setStrDadosComplementares($objComponenteDigital->dadosComplementaresDoTipoDeArquivo);
 
         //Registrar componente digital necessita ser enviado pelo trâmite específico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui
-      if(isset($parObjComponentesDigitaisSolicitados)){
-          $arrObjItensSolicitados = is_array($parObjComponentesDigitaisSolicitados->processo) ? $parObjComponentesDigitaisSolicitados->processo : array($parObjComponentesDigitaisSolicitados->processo);
-
-        foreach ($arrObjItensSolicitados as $objItemSolicitado) {
-          if(!is_null($objItemSolicitado)){
-              $objItemSolicitado->hash = is_array($objItemSolicitado->hash) ? $objItemSolicitado->hash : array($objItemSolicitado->hash);
-
-            if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hash) && !$objDocumento->retirado) {
-              $objComponenteDigitalDTO->setStrSinEnviar("S");
+        if(isset($parObjComponentesDigitaisSolicitados)) {
+            $arrObjItensSolicitados = isset($parObjComponentesDigitaisSolicitados) ? $parObjComponentesDigitaisSolicitados : array($parObjComponentesDigitaisSolicitados);
+            foreach ($arrObjItensSolicitados as $objItemSolicitado) {
+            if(!is_null($objItemSolicitado)){
+              $objItemSolicitado['hashes'] = is_array($objItemSolicitado['hashes']) ? $objItemSolicitado['hashes'] : array($objItemSolicitado['hashes']);
+    
+              if($objItemSolicitado['protocolo'] == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado['hashes']) && !$objDocumento->retirado) {
+                      $objComponenteDigitalDTO->setStrSinEnviar("S");
+              }
             }
           }
         }
-      }
 
         //TODO: Avaliar dados do tamanho do documento em bytes salvo na base de dados
         $objComponenteDigitalDTO->setNumTamanho($objComponenteDigital->tamanhoEmBytes);
@@ -1736,7 +1740,7 @@ class ProcessoEletronicoRN extends InfraRN
 
           //Registrar componente digital necessita ser enviado pelo trâmite específico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui
         if(isset($parObjComponentesDigitaisSolicitados)){
-            $arrObjItensSolicitados = is_array($parObjComponentesDigitaisSolicitados) ? $parObjComponentesDigitaisSolicitados : array($parObjComponentesDigitaisSolicitados);
+            $arrObjItensSolicitados = isset($parObjComponentesDigitaisSolicitados) ? $parObjComponentesDigitaisSolicitados : array($parObjComponentesDigitaisSolicitados);
           foreach ($arrObjItensSolicitados as $objItemSolicitado) {
             if(!is_null($objItemSolicitado)){
               $objItemSolicitado['hashes'] = is_array($objItemSolicitado['hashes']) ? $objItemSolicitado['hashes'] : array($objItemSolicitado['hashes']);
@@ -2413,6 +2417,15 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
     {
+
+      if (is_array($parDocumento1))  {
+        $parDocumento1 = (object) $parDocumento1;
+      }
+
+      if (is_array($parDocumento2))  {
+        $parDocumento2 = (object) $parDocumento2;
+      }
+
       $numOrdemDocumento1 = intval($parDocumento1->ordem);
       $numOrdemDocumento2 = intval($parDocumento2->ordem);
       return $numOrdemDocumento1 - $numOrdemDocumento2;
@@ -2420,6 +2433,14 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static function comparacaoOrdemComponenteDigitais($parComponenteDigital1, $parComponenteDigital2)
     {
+      if (is_array($parComponenteDigital1))  {
+        $parComponenteDigital1 = (object) $parComponenteDigital1;
+      }
+
+      if (is_array($parComponenteDigital2))  {
+        $parComponenteDigital2 = (object) $parComponenteDigital2;
+      }
+
       $numOrdemComponenteDigital1 = intval($parComponenteDigital1->ordem);
       $numOrdemComponenteDigital2 = intval($parComponenteDigital2->ordem);
       return $numOrdemComponenteDigital1 - $numOrdemComponenteDigital2;
