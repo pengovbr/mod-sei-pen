@@ -1078,6 +1078,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
           //Atribui espécie documental definida pelo produtor do documento e registrado no PEN, caso exista
           if(count($arrMetaDocumentosAnteriorIndexado) > 0 && array_key_exists($parMetaDocumento['ordem'], $arrMetaDocumentosAnteriorIndexado)){
+            if (is_array($arrMetaDocumentosAnteriorIndexado[$parMetaDocumento['ordem']]->especie))  {
+              $arrMetaDocumentosAnteriorIndexado[$parMetaDocumento['ordem']]->especie  = (object) $arrMetaDocumentosAnteriorIndexado[$parMetaDocumento['ordem']]->especie;
+            }
             $numCodigoEspecie = $arrMetaDocumentosAnteriorIndexado[$parMetaDocumento['ordem']]->especie->codigo;
             $strNomeEspecieProdutor = mb_convert_encoding($arrMetaDocumentosAnteriorIndexado[$parMetaDocumento['ordem']]->especie->nomeNoProdutor, 'UTF-8', 'ISO-8859-1');
           }
@@ -1447,12 +1450,12 @@ class ExpedirProcedimentoRN extends InfraRN {
           } else {
             $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
             $strNomeComponenteDigital = $objAnexoDTO->getStrNome();
-          }
+          } 
 
           $strConteudoAssinatura = null;
 
-          $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
-          list($strDadosComplementares, $strMimeType) = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
+           $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
+           list($strDadosComplementares, $strMimeType) = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
 
           $objInformacaoArquivo['NOME'] = $strNomeComponenteDigital;
           $objInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
