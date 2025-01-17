@@ -284,6 +284,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     
         } catch (\Exception $e) {
             $mensagem = "Falha no envio de documento avulso";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 
@@ -324,6 +325,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     
         } catch (\Exception $e) {
             $mensagem = "Falha no envio de de componentes no documento";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 
@@ -343,6 +345,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
             return json_decode($response->getBody(), true);
         } catch (\Exception $e) {
             $mensagem = "Falha no recebimento de recibo de trâmite de envio.";
+            $this->fail($mensagem . " - " . $e->getMessage());
         }
     }
 
@@ -355,7 +358,6 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
         
         $strClientGuzzle = new GuzzleHttp\Client([
             'base_uri' => PEN_ENDERECO_WEBSERVICE,
-            'handler' => GuzzleHttp\HandlerStack::create(),
             'timeout'  => 5.0,
             'headers'  => $arrheaders,
             'cert'     => [$localCertificado, $senhaCertificado],
