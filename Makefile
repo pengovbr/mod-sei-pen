@@ -101,6 +101,7 @@ dist:
 	@mkdir -p $(SEI_BIN_DIR)
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
+	@php composer.phar install --no-dev
 	@cp -R src/* $(SEI_MODULO_DIR)/
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
@@ -159,8 +160,6 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
-	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
-
 
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
@@ -192,7 +191,7 @@ down: .env
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml $(textdox) /tests/tests/$(addsuffix .php,$(teste)) ;
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste)) ;
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
