@@ -36,13 +36,18 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
         putenv("DATABASE_HOST=org1-database");
         $penMapUnidadesFixture = new \PenMapUnidadesFixture();
         $penMapUnidadesFixture->carregar([
+            'IdUnidade' => 110000001,
             'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA,
             'Sigla' => CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA,
             'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE,
         ]);
-
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $bancoOrgaoA->execute("insert into md_pen_unidade(id_unidade, id_unidade_rh) values (?, ?)", array('110000002', CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA));
+    
+        $penMapUnidadesFixture->carregar([
+            'IdUnidade' => 110000002,
+            'Id' => CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA,
+            'Sigla' => CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA,
+            'Nome' => CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA,
+        ]);
     }   
 
     /**
