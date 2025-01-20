@@ -166,7 +166,7 @@ try {
   $strSumarioTabela = 'Tabela de Blocos Tramitados.';
   $strCaptionTabela = 'Blocos';
 
-  $strResultado = "<table width='99%' id='tblBlocos' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
+  $strResultado = '<table width="99%" id="tblBlocos" class="infraTable infraTableResponsiva" summary="'.$strSumarioTabela.'">' . "\n";
   $strResultado .= '<caption class="infraCaption">' . PaginaSEI::getInstance()->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
   $strResultado .= "<thead>";
   $strResultado .= '<th class="infraTh" width="1%">' . PaginaSEI::getInstance()->getThCheck() . '</th>' . "\n";
@@ -340,7 +340,7 @@ $objPaginaSEI->montarStyle();
   }
 
   .dataTables_paginate .paginate_button.current {
-    background-color: var(--color-primary-default);
+    background-color: var(--infra-esquema-cor-clara);
     color: #fff;
   }
 
@@ -348,14 +348,10 @@ $objPaginaSEI->montarStyle();
   #tblBlocos_filter {
     position: absolute;
     opacity: 0;
-  }
-  #frmBlocoLista th.infraTh {
-    color: #ECF0F1;    
-    background: #155f9b;
-  }
+  }  
+  
   #frmBlocoLista #tblBlocos_wrapper label:first-of-type{font-size: 12px;}
   #frmBlocoLista #tblBlocos_wrapper select:first-of-type{font-size: 11px;}
-  #frmBlocoLista #tblBlocos{border-collapse: collapse;}
 </style>
 <?php $objPaginaSEI->montarJavaScript();
 $acaoOrigem=$_GET['acao_origem']; ?>
