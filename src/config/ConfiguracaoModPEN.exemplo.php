@@ -36,8 +36,8 @@ class ConfiguracaoModPEN extends InfraConfiguracao  {
           "PEN" => array(
               // Endereço do Web Service principal de integração com o Barramento de Serviços do PEN
               // Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-              //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
-              //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/
+              //    - Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/
+              //    - Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v3/
               "WebService" => "",
 
               // Localização completa do certificado digital utilizado para autenticação nos serviços do Barramento de Serviços do PEN.

@@ -281,9 +281,8 @@ Altere o arquivo de configuração específico do módulo em **<DIRETÓRIO RAIZ 
 
 * **WebService**  
 Endereço do Web Service principal de integração com o Tramita.GOV.BR. Os endereços disponíveis são os seguintes (verifique se houve atualizações durante o procedimento de instalação):
-    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/
-    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v2/
-    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/soap/v3/ (novo - quem usa SEI já pode apontar pra cá. Quem usa rest é importante testar antes em homologação)
+    * Homologação: https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/
+    * Produção: https://api.conectagov.processoeletronico.gov.br/interoperabilidade/rest/v3/ (novo - quem usa SEI já pode apontar pra cá. Quem usa rest é importante testar antes em homologação)
 
 
 * **LocalizacaoCertificado**  

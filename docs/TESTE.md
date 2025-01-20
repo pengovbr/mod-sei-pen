@@ -129,7 +129,7 @@ Abaixo um arquivo inteiro de um orgao que tramita em homologação, serve para e
     <const name="PHPUNIT_PORT" value="4444"/>  
     <const name="PHPUNIT_BROWSER" value="chrome"/>
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei"/>
-    <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/soap/v3/?wsdl"/>
+    <const name="PEN_ENDERECO_WEBSERVICE" value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/"/>
 
     <!-- Chaves de configurações gerais do teste do Tramita.GOV.BR -->
     <const name="PEN_WAIT_TIMEOUT" value="40000" /> 
