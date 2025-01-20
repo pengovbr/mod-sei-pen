@@ -23,6 +23,7 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
 
     $penMapUnidadesFixture = new \PenMapUnidadesFixture();
     $this->penMapUnidadesFixture = $penMapUnidadesFixture->carregar([
+      'IdUnidade' => 110000001,
       'Id' => self::$remetente['ID_ESTRUTURA'],
       'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
       'Nome' => self::$remetente['NOME_UNIDADE']
