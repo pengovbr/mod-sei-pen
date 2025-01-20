@@ -115,7 +115,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
             'Content-Type' => 'application/json',
         ];
         
-        $strClientGuzzle = new GuzzleHttp\Client([
+        $strClientGuzzle = new \GuzzleHttp\Client([
             'base_uri' => $strBaseUri,
             'timeout'  => 5.0,
             'headers'  => $arrheaders,

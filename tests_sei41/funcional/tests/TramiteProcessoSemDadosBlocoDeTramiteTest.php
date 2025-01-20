@@ -29,7 +29,7 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
 
         // Cadastrar novo processo de teste
         $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste, false);
-        $this->atualizarProcessoFixture($objProtocoloDTO, ['DESCRICAO' => '']);
+        $this->atualizarProcessoFixture($objProtocoloDTO, ['DESCRICAO' => ' ']);
 
         // Incluir e assinar documento no processo
         $this->cadastrarDocumentoInternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
@@ -49,7 +49,6 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
         sleep(2);
 
         $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
-        
         $this->assertStringContainsString(
             utf8_encode('Descrição do processo '.$objProtocoloDTO->getStrProtocoloFormatado().' não informado.'),
             $mensagem
@@ -58,5 +57,6 @@ class TramiteProcessoSemDadosBlocoDeTramiteTest extends FixtureCenarioBaseTestCa
             utf8_encode('Interessados do processo '.$objProtocoloDTO->getStrProtocoloFormatado().' não informados.'),
             $mensagem
         );
+
     }
 }
