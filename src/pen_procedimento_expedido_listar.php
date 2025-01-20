@@ -47,7 +47,7 @@ try {
        $strSumarioTabela = 'Tabela de Processos';
        $strCaptionTabela = 'Processos';
 
-       $strResultado .= "<table width='99%' id='tblBlocos' class='infraTable' summary='{$strSumarioTabela}'>" . "\n";
+       $strResultado .= '<table width="99%" id="tblBlocos" class="infraTable infraTableResponsiva" summary="'.$strSumarioTabela.'">' . "\n";
        $strResultado .= '<caption class="infraCaption">' . $objPaginaSEI->gerarCaptionTabela($strCaptionTabela, $numRegistros) . '</caption>';
       
        $strResultado .= "<thead>";
@@ -205,7 +205,7 @@ a.processoNaoVisualizado{
   }
 
   .dataTables_paginate .paginate_button.current {
-    background-color: var(--color-primary-default);
+    background-color: var(--infra-esquema-cor-clara);
     color: #fff;
   }
 
@@ -214,13 +214,9 @@ a.processoNaoVisualizado{
     position: absolute;
     opacity: 0;
   }
-  #frmProcedimentoExpedido th.infraTh {
-    color: #ECF0F1;    
-    background: #155f9b;
-  }
+  
   #frmProcedimentoExpedido #tblBlocos_wrapper label:first-of-type{font-size: 12px;}
   #frmProcedimentoExpedido #tblBlocos_wrapper select:first-of-type{font-size: 11px;}
-  #frmProcedimentoExpedido #tblBlocos{border-collapse: collapse;}
   
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>

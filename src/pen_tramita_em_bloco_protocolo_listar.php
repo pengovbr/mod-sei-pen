@@ -269,7 +269,7 @@ input.infraText {
 }
 
 .dataTables_paginate .paginate_button.current {
-  background-color: var(--color-primary-default);
+  background-color: var(--infra-esquema-cor-clara);
   color: #fff;
 }
 
