@@ -43,7 +43,6 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
       self::$remetente['LOGIN'],
       self::$remetente['SENHA']
     );
-
     
     self::$protocoloTeste = $this->cadastrarProcessoFixture(self::$processoTeste);  // Cadastrar novo processo de teste
     self::$documentoTeste["RESTRICAO"] = \ProtocoloRN::$NA_RESTRITO; // Configuração de documento restrito

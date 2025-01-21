@@ -24,8 +24,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
 
         // Carregar contexto de testes e dados sobre certificado digital
         $this->destinatarioWs = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-
-        // Instanciar objeto de teste utilizando o BeSimpleSoap
+        
         $localCertificado = $this->destinatarioWs['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = $this->destinatarioWs['SENHA_CERTIFICADO_DIGITAL'];
         $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
@@ -99,7 +98,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();
         $parametros->recusaDeTramite->IDT = $id_tramite;
-        $parametros->recusaDeTramite->justificativa = utf8_encode($justificativa);
+        $parametros->recusaDeTramite->justificativa = mb_convert_encoding($justificativa, 'UTF-8', 'ISO-8859-1');
         $parametros->recusaDeTramite->motivo = "99";
         
         return $this->recusarTramiteAPI($parametros);
@@ -117,7 +116,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         
         $strClientGuzzle = new GuzzleHttp\Client([
             'base_uri' => $strBaseUri,
-            'timeout'  => 5.0,
+            'timeout'  => ProcessoEletronicoRN::WS_TIMEOUT_CONEXAO,
             'headers'  => $arrheaders,
             'cert'     => [$localCertificado, $senhaCertificado],
         ]);
