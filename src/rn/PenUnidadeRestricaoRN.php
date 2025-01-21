@@ -21,7 +21,6 @@ class PenUnidadeRestricaoRN extends InfraRN
 
   /**
    * Método utilizado para listagem de dados.
-   * @param PenUnidadeRestricaoDTO $objPenUnidadeRestricaoDTO
    * @return array
    * @throws InfraException
    */
@@ -45,8 +44,8 @@ class PenUnidadeRestricaoRN extends InfraRN
    */
   public function prepararRepoEstruturas($IdUnidade, $IdUnidadeRH, $hdnRepoEstruturas)
   {
-    $arrUnidadesSelecionadas = array();
-    $arrayObjPenUnidadeRestricaoDTO = array();
+    $arrUnidadesSelecionadas = [];
+    $arrayObjPenUnidadeRestricaoDTO = [];
     $arrOpcoes = PaginaSEI::getInstance()->getArrOptionsSelect($hdnRepoEstruturas);
     foreach ($arrOpcoes as $opcoes) {
       $hdnRepoEstruturasUnidades = 'hdnRepoEstruturas' . $opcoes[0];
@@ -89,7 +88,7 @@ class PenUnidadeRestricaoRN extends InfraRN
   protected function cadastrarConectado($arrayObjDTO)
   {
     try {
-      $retArrayObjDTO = array();
+      $retArrayObjDTO = [];
       $objBD = new PenUnidadeRestricaoBD($this->inicializarObjInfraIBanco());
       foreach ($arrayObjDTO as $objDTO) {
         $retArrayObjDTO[] = $objBD->cadastrar($objDTO);
@@ -102,14 +101,13 @@ class PenUnidadeRestricaoRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param PenUnidadeRestricaoDTO $objDTO
    * @return array
    * @throws InfraException
    */
   protected function prepararExcluirControlado(PenUnidadeRestricaoDTO $objDTO)
   {
     try {
-      $arrayObjPenUnidadeRestricaoDTO = array();
+      $arrayObjPenUnidadeRestricaoDTO = [];
       $objDTO->retTodos();
       $objPenUnidadeRestricaoDTO = $this->listar($objDTO);
       if ($objPenUnidadeRestricaoDTO != null) {
@@ -125,7 +123,6 @@ class PenUnidadeRestricaoRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param PenUnidadeRestricaoDTO $objDTO
    * @return array
    * @throws InfraException
    */

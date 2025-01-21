@@ -52,7 +52,6 @@ try {
         } else {
           throw new InfraException('Nenhum registro foi selecionado para executar esta ação');
         }
-          break;
 
       case 'pen_map_restricao_envio_comp_digitais_listar':
         // Ação padrão desta tela
@@ -75,14 +74,14 @@ try {
     $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_restricao_envio_comp_digitais_padrao_atribuir&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\'" id="btnAtribuirPadrao" title="' . $strAltPendencia . '" class="infraButton"><span class="' . $strClassePendencia . '"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
   }
 
-  $arrComandos = array();
+  $arrComandos = [];
   $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
   $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
   $btnExcluir = '<button type="button" id="btnExcluir" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
   $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
-  $arrComandos = array($btnPesquisar, $strBotaoEspeciePadrao, $btnNovo, $btnExcluir, $btnImprimir);
-  $arrComandosFinal = array($btnPesquisar, $btnNovo, $btnExcluir, $btnImprimir);
+  $arrComandos = [$btnPesquisar, $strBotaoEspeciePadrao, $btnNovo, $btnExcluir, $btnImprimir];
+  $arrComandosFinal = [$btnPesquisar, $btnNovo, $btnExcluir, $btnImprimir];
 
   $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
   $objPenRestricaoEnvioComponentesDigitaisDTO->retTodos(true);

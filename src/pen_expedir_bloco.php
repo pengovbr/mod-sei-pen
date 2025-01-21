@@ -13,12 +13,12 @@ try {
   $strParametros = '';
   $bolErrosValidacao = false;
   $executarExpedicao = false;
-  $arrComandos = array();
+  $arrComandos = [];
 
   $strDiretorioModulo = PENIntegracao::getDiretorio();
 
-  $arrProtocolosOrigem = array();
-  $tramiteEmBloco = isset($_GET['tramite_em_bloco']) ? $_GET['tramite_em_bloco'] : null;
+  $arrProtocolosOrigem = [];
+  $tramiteEmBloco = $_GET['tramite_em_bloco'] ?? null;
   if ($tramiteEmBloco == 1) {
     $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
     $objPenBlocoProcessoDTO->retDblIdProtocolo();
@@ -35,7 +35,7 @@ try {
     $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
     $idTramiteEmBloco = $arrPenBlocoProcesso[0]->getNumIdBloco();
     $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
-    foreach ($arrPenBlocoProcesso as $i => $PenBlocoProcesso) {
+    foreach ($arrPenBlocoProcesso as $PenBlocoProcesso) {
       $arrProtocolosOrigem[] = $PenBlocoProcesso->getDblIdProtocolo();
     }
   } else {
@@ -98,7 +98,7 @@ try {
 
         //Preparação dos dados para montagem da tela de expedição de processos
         if ($arrIdUnidadeRestricao != null) {
-          $repositorios = array();
+          $repositorios = [];
           foreach ($arrIdUnidadeRestricao as $value) {
             $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
           }
@@ -109,7 +109,7 @@ try {
         $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
       }
 
-      $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
+      $idRepositorioSelecionado = $numIdRepositorio ?? '';
       $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
       $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
@@ -151,7 +151,7 @@ try {
 
           $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
           $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-          $arrProcedimentos = array();
+          $arrProcedimentos = [];
           foreach ($arrPenBlocoProcesso as $objDTO) {
             $objDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
             $objDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);

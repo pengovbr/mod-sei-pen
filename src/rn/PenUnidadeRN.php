@@ -18,10 +18,9 @@ class PenUnidadeRN extends InfraRN {
   }
     
     /**
-     * Método para buscar apenas as unidades que já estão em uso
-     * @param PenUnidadeDTO $objFiltroDTO
-     * @return arrayDTO
-     */
+   * Método para buscar apenas as unidades que já estão em uso
+   * @return arrayDTO
+   */
   protected function getIdUnidadeEmUsoConectado(PenUnidadeDTO $objFiltroDTO){
       $objDTO = new PenUnidadeDTO();
       $objDTO->setDistinct(true);
@@ -33,7 +32,7 @@ class PenUnidadeRN extends InfraRN {
 
       $arrObjDTO = $this->listar($objDTO);
         
-      $arrIdUnidade = array();
+      $arrIdUnidade = [];
         
     if(!empty($arrObjDTO)) {
         $arrIdUnidade = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdUnidade');
@@ -75,11 +74,10 @@ class PenUnidadeRN extends InfraRN {
   }
     
     /**
-     * Método utilizado para cadastro de dados.
-     * @param UnidadeDTO $objDTO
-     * @return array
-     * @throws InfraException
-     */
+   * Método utilizado para cadastro de dados.
+   * @return array
+   * @throws InfraException
+   */
   protected function cadastrarConectado(UnidadeDTO $objDTO){
     try {
         $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());
@@ -91,11 +89,10 @@ class PenUnidadeRN extends InfraRN {
   }
     
     /**
-     * Método utilizado para exclusão de dados.
-     * @param UnidadeDTO $objDTO
-     * @return array
-     * @throws InfraException
-     */
+   * Método utilizado para exclusão de dados.
+   * @return array
+   * @throws InfraException
+   */
   protected function excluirControlado(UnidadeDTO $objDTO){
     try {
         $objBD = new PenUnidadeBD($this->inicializarObjInfraIBanco());

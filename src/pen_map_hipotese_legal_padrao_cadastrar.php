@@ -25,7 +25,7 @@ try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
-    $arrComandos = array();
+    $arrComandos = [];
 
     $bolSomenteLeitura = false;
 
@@ -104,10 +104,7 @@ try {
     $objHipoteseLegalRN = new HipoteseLegalRN();
     $arrMapIdHipoteseLegal = InfraArray::converterArrInfraDTO($objHipoteseLegalRN->listar($objHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
 }
-catch (InfraException $e) {
-    $objPagina->processarExcecao($e);
-}
-catch(Exception $e) {
+catch(InfraException|Exception $e) {
     $objPagina->processarExcecao($e);
 }
 

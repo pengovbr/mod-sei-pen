@@ -23,12 +23,12 @@ class PendenciasTramiteRN extends InfraRN
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
 
-    protected $objPenDebug = null;
-    protected $strEnderecoServico = null;
-    protected $strEnderecoServicoPendencias = null;
-    protected $strLocalizacaoCertificadoDigital = null;
-    protected $strSenhaCertificadoDigital = null;
-    protected $arrStrUltimasMensagensErro = array();
+    protected $objPenDebug;
+    protected $strEnderecoServico;
+    protected $strEnderecoServicoPendencias;
+    protected $strLocalizacaoCertificadoDigital;
+    protected $strSenhaCertificadoDigital;
+    protected $arrStrUltimasMensagensErro = [];
 
   public function __construct($parStrLogTag = null)
     {
@@ -144,26 +144,6 @@ class PendenciasTramiteRN extends InfraRN
   }
 
     /**
-     * Valida a correta parametrização do certificado digital
-     *
-     * @return void
-     */
-  private function validarCertificado()
-    {
-    if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException('Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
-    }
-
-    if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
-    }
-
-    if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
-    }
-  }
-
-    /**
      * Grava log de debug nas tabelas de log do SEI, caso o debug esteja habilitado
      *
      * @return void
@@ -206,15 +186,13 @@ class PendenciasTramiteRN extends InfraRN
   private function obterPendenciasRecebimentoTramite($parBolMonitorarPendencias)
   {
     //Obter todos os trâmites pendentes antes de iniciar o monitoramento
-    $arrPendenciasRetornadas = array();
+    $arrPendenciasRetornadas = [];
     $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
+    $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: [];
     shuffle($arrObjPendenciasDTO);
 
-    if (isset($arrObjPendenciasDTO)) {
-      if (!is_array($arrObjPendenciasDTO)) {
-        $arrObjPendenciasDTO = array();
-      }
+    if (!is_array($arrObjPendenciasDTO)) {
+      $arrObjPendenciasDTO = [];
     }
 
     $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
@@ -230,7 +208,7 @@ class PendenciasTramiteRN extends InfraRN
       $bolEncontrouPendencia = false;
       $numUltimoIdTramiteRecebido = 0;
 
-      $arrObjPendenciasDTONovas = array();
+      $arrObjPendenciasDTONovas = [];
       $this->gravarLogDebug("Iniciando monitoramento no serviço de pendências (long polling)", 2);
 
       do {
@@ -337,8 +315,7 @@ class PendenciasTramiteRN extends InfraRN
      */
   protected function servicoMonitoramentoPendenciasAtivo()
     {
-      $bolMonitoramentoAtivo = !empty($this->strEnderecoServicoPendencias);
-      return $bolMonitoramentoAtivo;
+      return !empty($this->strEnderecoServicoPendencias);
   }
 
 

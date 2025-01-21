@@ -18,7 +18,7 @@ $objSessao = SessaoSEI::getInstance();
 try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
-    $arrComandos = array();
+    $arrComandos = [];
     $bolSomenteLeitura = false;
 
   switch ($_GET['acao']) {
@@ -131,10 +131,7 @@ try {
     $arrMapIdBarramento = InfraArray::converterArrInfraDTO($objPenHipoteseLegalRN->listar($objPenHipoteseLegalDTO), 'Nome', 'IdHipoteseLegal');
     //--------------------------------------------------------------------------
 }
-catch (InfraException $e) {
-    $objPagina->processarExcecao($e);
-}
-catch(Exception $e) {
+catch(InfraException|Exception $e) {
     $objPagina->processarExcecao($e);
 }
 

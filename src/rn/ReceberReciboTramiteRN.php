@@ -6,7 +6,6 @@ class ReceberReciboTramiteRN extends InfraRN
   private $objProcessoEletronicoRN;
   private $objProcedimentoAndamentoRN;
   private $objPenDebug;
-  private $objPenParametroRN;
 
   public function __construct()
   {
@@ -14,7 +13,6 @@ class ReceberReciboTramiteRN extends InfraRN
     $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
     $this->objProcedimentoAndamentoRN = new ProcedimentoAndamentoRN();
     $this->objPenDebug = DebugPen::getInstance("PROCESSAMENTO");
-    $this->objPenParametroRN = new PenParametroRN();
   }
 
   protected function inicializarObjInfraIBanco()
@@ -40,11 +38,7 @@ class ReceberReciboTramiteRN extends InfraRN
 
       // Inicialização do recebimento do processo, abrindo nova transação e controle de concorrência,
       // evitando processamento simultâneo de cadastramento do mesmo processo
-      $arrChavesSincronizacao = array(
-        "NumeroRegistro" => $objReciboTramite->recibo->NRE,
-        "IdTramite" => $objReciboTramite->recibo->IDT,
-        "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)
-      );
+      $arrChavesSincronizacao = ["NumeroRegistro" => $objReciboTramite->recibo->NRE, "IdTramite" => $objReciboTramite->recibo->IDT, "IdTarefa" => ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)];
 
       if ($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)) {
         $this->receberReciboDeTramiteInterno($objReciboTramite);
@@ -143,12 +137,7 @@ class ReceberReciboTramiteRN extends InfraRN
           $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
           $objPenBlocoProcessoDTO->setDblIdProtocolo($objProtocoloDTO->getDblIdProtocolo());
           $objPenBlocoProcessoDTO->setNumIdAndamento(
-            array(
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-              ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO
-            ),
+            [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO],
             InfraDTO::$OPER_NOT_IN
           );
           $objPenBlocoProcessoDTO->setOrdNumIdBlocoProcesso(InfraDTO::$TIPO_ORDENACAO_DESC);
@@ -158,7 +147,7 @@ class ReceberReciboTramiteRN extends InfraRN
           $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
 
           if ($arrPenBlocoProcesso != null) {
-            $blocos = array();
+            $blocos = [];
             foreach ($arrPenBlocoProcesso as $PenBlocoProcesso) {
               $PenBlocoProcesso->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE);
               $objPenBlocoProcessoRN->alterar($PenBlocoProcesso);
@@ -200,7 +189,7 @@ class ReceberReciboTramiteRN extends InfraRN
       $this->objPenDebug->gravar("Processo $strProtocoloFormatado não está aberto na unidade.");
     }
 
-    $arrObjAtributoAndamentoDTO = array();
+    $arrObjAtributoAndamentoDTO = [];
 
     $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
     $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
@@ -229,7 +218,7 @@ class ReceberReciboTramiteRN extends InfraRN
       $arrObjNivel = $objEstrutura->hierarquia;
 
       $nome = "";
-      $siglasUnidades = array();
+      $siglasUnidades = [];
       $siglasUnidades[] = $objEstrutura->sigla;
 
       foreach ($arrObjNivel as $key => $objNivel) {

@@ -36,9 +36,7 @@ class PenParametroBD extends InfraBD {
         $sql .= ' WHERE nome = ' . $this->getObjInfraIBanco()->formatarGravacaoStr($strNome);
     }
 
-      $ret = $this->getObjInfraIBanco()->executarSql($sql);
-
-      return $ret;
+      return $this->getObjInfraIBanco()->executarSql($sql);
   }
 
   public function isSetValor($strNome) {
