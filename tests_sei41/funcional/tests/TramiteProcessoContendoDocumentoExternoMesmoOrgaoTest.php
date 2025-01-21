@@ -30,7 +30,6 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends FixtureCenar
 
         //Configuração da unidade destinatário como outra unidade do mesmo órgão
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario['SIGLA_UNIDADE'] = self::$remetente['SIGLA_UNIDADE_SECUNDARIA'];
         self::$destinatario['NOME_UNIDADE'] = self::$remetente['NOME_UNIDADE_SECUNDARIA'];
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'] = self::$remetente['SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'];
 
@@ -79,6 +78,8 @@ class TramiteProcessoContendoDocumentoExternoMesmoOrgaoTest extends FixtureCenar
      */
     public function test_verificar_destino_processo_contendo_documento_gerado()
     {
+
+        self::$destinatario['SIGLA_UNIDADE'] = self::$remetente['SIGLA_UNIDADE_SECUNDARIA'];
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$documentoTeste, self::$destinatario);
     }
 }
