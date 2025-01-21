@@ -44,7 +44,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
         // Atribui dois interessados utilizando o mesmo nome
         self::$processoTeste['INTERESSADOS'] = array("Interessado com mesmo nome", "Interessado com mesmo nome");
 
-        // Instanciar objeto de teste utilizando o BeSimpleSoap
+        // Instanciar objeto de teste utilizando o Guzzle
         $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
         self::$servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
@@ -76,8 +76,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
         
         $strClientGuzzle = new GuzzleHttp\Client([
             'base_uri' => PEN_ENDERECO_WEBSERVICE,
-            'handler' => GuzzleHttp\HandlerStack::create(),
-            'timeout'  => 5.0,
+            'timeout'  => ProcessoEletronicoRN::WS_TIMEOUT_CONEXAO,
             'headers'  => $arrheaders,
             'cert'     => [$localCertificado, $senhaCertificado],
         ]);
