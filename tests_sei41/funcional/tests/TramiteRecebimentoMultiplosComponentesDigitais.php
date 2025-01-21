@@ -41,7 +41,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         self::$contextoOrgaoA = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$contextoOrgaoB = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        // Instanciar objeto de teste utilizando o BeSimpleSoap
+        // Instanciar objeto de teste utilizando o Guzzle
         $localCertificado = self::$contextoOrgaoB['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$contextoOrgaoB['SENHA_CERTIFICADO_DIGITAL'];
         self::$servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
@@ -211,8 +211,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         
         $strClientGuzzle = new GuzzleHttp\Client([
             'base_uri' => PEN_ENDERECO_WEBSERVICE,
-            'handler' => GuzzleHttp\HandlerStack::create(),
-            'timeout'  => 40,
+            'timeout'  => ProcessoEletronicoRN::WS_TIMEOUT_CONEXAO,
             'headers'  => $arrheaders,
             'cert'     => [$localCertificado, $senhaCertificado],
         ]);
