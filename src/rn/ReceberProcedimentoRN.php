@@ -1344,10 +1344,10 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
 
-  private function obterTipoProcessoPadrao($numIdTipoProcedimento) {
+  private function obterTipoProcessoPadrao($numIdTipoProcedimento, $strTipoProcedimento) {
 
     if(!isset($numIdTipoProcedimento)){
-        throw new InfraException('Parâmetro $numIdTipoProcedimento não informado.');
+      throw new InfraException("Módulo do Tramita: O Tipo de Processo '{$strTipoProcedimento}' não existe no sistema de destino. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro");
     }
 
       $objTipoProcedimentoDTO = new TipoProcedimentoDTO();
@@ -1450,7 +1450,7 @@ class ReceberProcedimentoRN extends InfraRN
     if(is_null($objTipoProcedimentoDTO)){
       // Verifica tipo de processo padrão cadastrado
       $dblAlterouTipoProcesso = true;
-      $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento);
+      $objTipoProcedimentoDTO = $this->obterTipoProcessoPadrao($numIdTipoProcedimento, $strProcessoNegocio);
     }
 
     if (is_null($objTipoProcedimentoDTO)){
@@ -1508,7 +1508,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
       $objMapeamentoTipoProcedimentoDTO->setStrNomeTipoProcesso($strProcessoNegocio);
       $objMapeamentoTipoProcedimentoDTO->setStrAtivo('S');
-
+      
       $objMapeamentoTipoProcedimentoDTO->retNumIdTipoProcessoDestino();
 
       $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
@@ -1517,7 +1517,7 @@ class ReceberProcedimentoRN extends InfraRN
       if (!is_null($objMapeamentoTipoProcedimentoDTO) && !is_null($objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino())) {
         $idTipoProcessoDestino = $objMapeamentoTipoProcedimentoDTO->getNumIdTipoProcessoDestino();
 
-        return $this->obterTipoProcessoPadrao($idTipoProcessoDestino);
+        return $this->obterTipoProcessoPadrao($idTipoProcessoDestino, $strProcessoNegocio);
       }
     }
 
