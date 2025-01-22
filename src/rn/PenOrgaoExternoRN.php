@@ -19,7 +19,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para listagem de dados.
-   * @param PenOrgaoExternoDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -37,7 +36,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para consulta de dados.
-   * @param PenOrgaoExternoDTO $objDTO
    * @return PenOrgaoExternoDTO
    * @throws InfraException
    */
@@ -55,7 +53,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para alteração de dados.
-   * @param PenOrgaoExternoDTO $objDTO
    * @return PenOrgaoExternoDTO
    * @throws InfraException
    */
@@ -73,7 +70,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para cadastro de dados.
-   * @param PenOrgaoExternoDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -91,7 +87,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param PenOrgaoExternoDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -109,7 +104,6 @@ class PenOrgaoExternoRN extends InfraRN
 
   /**
    * Método utilizado para contagem de unidades mapeadas
-   * @param PenOrgaoExternoDTO $objDTO
    * @return array
    * @throws InfraException
    */

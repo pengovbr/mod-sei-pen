@@ -120,7 +120,7 @@ class PenMetaBD extends InfraMetaBD {
       return $this;
   }
 
-  public function adicionarChaveUnica($strNomeTabela = '', $arrNomeChave = array()){
+  public function adicionarChaveUnica($strNomeTabela = '', $arrNomeChave = []){
 
       $this->getObjInfraIBanco()
               ->executarSql('ALTER TABLE '.$strNomeTabela.' ADD CONSTRAINT UK_'.$strNomeTabela.' UNIQUE('.implode(', ', $arrNomeChave).')');
@@ -255,7 +255,7 @@ class PenMetaBD extends InfraMetaBD {
      * @throws InfraException
      * @return PenMetaBD
      */
-  public function criarTabela($arrSchema = array()){
+  public function criarTabela($arrSchema = []){
 
       $strNomeTabela = $arrSchema['tabela'];
 
@@ -264,12 +264,12 @@ class PenMetaBD extends InfraMetaBD {
     }
 
       $objInfraBanco = $this->getObjInfraIBanco();
-      $arrColunas = array();
-      $arrStrQuery = array();
+      $arrColunas = [];
+      $arrStrQuery = [];
 
     foreach($arrSchema['cols'] as $strNomeColuna => $arrColunaConfig) {
 
-        list($strTipoDado, $strValorPadrao) = $arrColunaConfig;
+        [$strTipoDado, $strValorPadrao] = $arrColunaConfig;
 
       if($strValorPadrao != self::SNULLO && $strValorPadrao != self::NNULLO) {
 
@@ -315,11 +315,8 @@ class PenMetaBD extends InfraMetaBD {
       }
     }
 
-    if(!empty($arrStrQuery)) {
-
-      foreach($arrStrQuery as $strQuery) {
-          $objInfraBanco->executarSql($strQuery);
-      }
+    foreach($arrStrQuery as $strQuery) {
+        $objInfraBanco->executarSql($strQuery);
     }
 
       return $this;

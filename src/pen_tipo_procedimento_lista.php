@@ -36,14 +36,11 @@ try {
             $arrObjTipoProcedimentoDTO = $objTipoProcedimentoRN->listarRN0244($objTipoProcedimentoDTO);
           }
 
-          $dados = array();
+          $dados = [];
           $dados[] = ['ID', 'Nome'];
 
-          foreach ($arrObjTipoProcedimentoDTO as $key => $value) {
-            $dados[] = array(
-              $value->getNumIdTipoProcedimento(),
-              $value->getStrNome(),
-            );
+          foreach ($arrObjTipoProcedimentoDTO as $value) {
+            $dados[] = [$value->getNumIdTipoProcedimento(), $value->getStrNome()];
           }
 
           $nomeArquivo = 'tipos_processos.csv';
@@ -65,10 +62,10 @@ try {
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
-  $arrComandosModal = array();
+  $arrComandosModal = [];
   $arrComandosModal[] = '<button type="button" accesskey="E" id="btnExportarModal" value="Exportar" class="infraButton"><span class="infraTeclaAtalho">E</span>xportar</button>';
   $arrComandosModal[] = '<button type="button" accesskey="Fechar" id="btnFecharModal" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  $arrComandosModalFinal = array();
+  $arrComandosModalFinal = [];
   $arrComandosModalFinal[] = '<button type="button" accesskey="E" id="btnExportarModalFinal" onclick="$(\'#btnExportarModal\').click();" value="Exportar" class="infraButton"><span class="infraTeclaAtalho">E</span>xportar</button>';
   $arrComandosModalFinal[] = '<button type="button" accesskey="Fechar" id="btnFecharModalFinal" value="Fechar" onclick="$(\'#btnFecharModal\').click();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
 
@@ -83,7 +80,7 @@ try {
   $strResultadoExportar .= '</tr>' . "\n";
   $strResultadoExportar .= '</table>';
 
-  $arrComandos = array();
+  $arrComandos = [];
 
   $arrComandos[] = '<button type="submit" accesskey="P" id="sbmPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
   $arrComandos[] = '<button type="button" accesskey="E" onclick="exportarTiposProcessos();" id="btnExportar" value="Exportar" class="infraButton"><span class="infraTeclaAtalho">E</span>xportar</button>';

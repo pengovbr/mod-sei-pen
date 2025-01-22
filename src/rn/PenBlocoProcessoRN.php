@@ -19,7 +19,6 @@ class PenBlocoProcessoRN extends InfraRN
   /**
    * Verifica se o bloco pode ser excluído
    *
-   * @param array $arrObjDTO
    * @return string|null
    */
   public function verificarExclusaoBloco(array $arrObjDTO)
@@ -60,7 +59,7 @@ class PenBlocoProcessoRN extends InfraRN
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_expedir_bloco', __METHOD__, $objPenBlocoProcessoDTO);
 
       //Obter todos os processos pendentes antes de iniciar o monitoramento
-      $arrObjPendenciasBlocoDTO = $this->listar($objPenBlocoProcessoDTO) ?: array();
+      $arrObjPendenciasBlocoDTO = $this->listar($objPenBlocoProcessoDTO) ?: [];
       shuffle($arrObjPendenciasBlocoDTO);
 
       $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
@@ -84,7 +83,7 @@ class PenBlocoProcessoRN extends InfraRN
       $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
       $objPenBlocoProcessoDTO->retTodos();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-      $objPenBlocoProcessoDTO->setNumIdAndamento(array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO), InfraDTO::$OPER_IN);
+      $objPenBlocoProcessoDTO->setNumIdAndamento([ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO], InfraDTO::$OPER_IN);
 
       $objPenBlocoProcessoDTO = $this->consultar($objPenBlocoProcessoDTO);
 
@@ -129,7 +128,7 @@ class PenBlocoProcessoRN extends InfraRN
       $objAtributoAndamentoDTOUser->setStrIdOrigem(null);
       $objAtributoAndamentoDTOUser->setStrValor($objUsuario->getStrNome());
 
-      $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array($objAtributoAndamentoDTOHora, $objAtributoAndamentoDTOUser));
+      $objAtividadeDTO->setArrObjAtributoAndamentoDTO([$objAtributoAndamentoDTOHora, $objAtributoAndamentoDTOUser]);
 
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
@@ -141,7 +140,6 @@ class PenBlocoProcessoRN extends InfraRN
   /**
    * Registra a tentativa de trâmite do processo em bloco para posterior verificação de estouro do limite de envios
    *
-   * @param PenBlocoProcessoDTO $objPenBlocoProcessoDTO
    * @return void
    */
   protected function registrarTentativaEnvioControlado(PenBlocoProcessoDTO $objPenBlocoProcessoDTO)
@@ -158,7 +156,7 @@ class PenBlocoProcessoRN extends InfraRN
   {
     try {
 
-      $ret = array();
+      $ret = [];
 
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $parObjTramitaEmBlocoProtocoloDTO);
@@ -253,9 +251,8 @@ class PenBlocoProcessoRN extends InfraRN
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_listar', __METHOD__, $objDTO);
 
       $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
-      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoBD->listar($objDTO);
 
-      return $arrObjPenBlocoProcessoDTO;
+      return $objPenBlocoProcessoBD->listar($objDTO);
     } catch (\Exception $e) {
       throw new InfraException('Módulo do Tramita: Falha na listagem de pendências de trâmite de processos em bloco.', $e);
     }
@@ -267,7 +264,7 @@ class PenBlocoProcessoRN extends InfraRN
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_tramita_em_bloco_protocolo_excluir', __METHOD__, $arrayObjDTO);
 
-      $arrExcluido = array();
+      $arrExcluido = [];
 
       foreach ($arrayObjDTO as $objDTO) {
 
@@ -345,9 +342,8 @@ class PenBlocoProcessoRN extends InfraRN
       $objInfraException = new InfraException();
 
       $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
-      $ret = $objPenBlocoProcessoBD->cadastrar($objPenBlocoProcessoDTO);
 
-      return $ret;
+      return $objPenBlocoProcessoBD->cadastrar($objPenBlocoProcessoDTO);
     } catch (Exception $e) {
       throw new InfraException('Módulo do Tramita: Erro cadastrando Processo em Bloco.', $e);
     }
@@ -357,9 +353,8 @@ class PenBlocoProcessoRN extends InfraRN
   {
     try {
       $objPenBlocoProcessoBD = new PenBlocoProcessoBD($this->getObjInfraIBanco());
-      $ret = $objPenBlocoProcessoBD->alterar($objPenBlocoProcessoDTO);
 
-      return $ret;
+      return $objPenBlocoProcessoBD->alterar($objPenBlocoProcessoDTO);
     } catch (Exception $e) {
       throw new InfraException('Módulo do Tramita: Erro cadastrando Processo em Bloco.', $e);
     }
@@ -375,12 +370,7 @@ class PenBlocoProcessoRN extends InfraRN
     $objPenBlocoProcessoDTO->retNumIdAndamento();
     $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
 
-    $concluidos = array(
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
-    );
+    $concluidos = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE];
 
     $arrTramitaEmBloco = $this->listar($objPenBlocoProcessoDTO);
     if (!is_null($arrTramitaEmBloco) && count($arrTramitaEmBloco) > 0) {
@@ -408,10 +398,7 @@ class PenBlocoProcessoRN extends InfraRN
     $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
     $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProtocolo);
 
-    $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), array(
-      ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO,
-      ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO
-    ));
+    $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), [ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO]);
     if (!$bolProcessoEstadoNormal) {
       return "Prezado(a) usuário(a), o processo {$objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()} encontra-se bloqueado."
         . " Dessa forma, não foi possível realizar a sua inserção no bloco selecionado.";
@@ -526,24 +513,12 @@ class PenBlocoProcessoRN extends InfraRN
    */
   private function validarStatusProcessoParaBloco($arrObjTramiteEmBlocoProtocoloDTO, $idAndamentoBloco)
   {
-    $concluido = array(
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-    );
-    $emAndamento = array(
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
-      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO
-    );
+    $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
+    $emAndamento = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO];
     
     $qtdProcesos = count($arrObjTramiteEmBlocoProtocoloDTO);
-    $arrayConcluidos = array();
-    $arrayEmAndamento = array();
+    $arrayConcluidos = [];
+    $arrayEmAndamento = [];
     foreach ($arrObjTramiteEmBlocoProtocoloDTO as $objDTO) {
       if (in_array($objDTO->getNumIdAndamento(), $concluido)) {
         $arrayConcluidos[] = $objDTO;

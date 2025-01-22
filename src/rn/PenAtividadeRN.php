@@ -9,11 +9,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class PenAtividadeRN extends AtividadeRN {
 
-    private $statusPesquisa = true;
-
-  public function setStatusPesquisa($statusPesquisa) {
-
-      $this->statusPesquisa = $statusPesquisa;
+    public function setStatusPesquisa($statusPesquisa)
+  {
   }
 
     /**
@@ -25,10 +22,7 @@ class PenAtividadeRN extends AtividadeRN {
      */
   public static function retornaAtividadeDoTramiteFormatado($numIdTramite, $numIdEstrutura, $numIdTarefa){
 
-      $objReturn = (object)array(
-          'strMensagem' => '',
-          'bolReciboExiste' => false
-      );
+      $objReturn = (object)['strMensagem' => '', 'bolReciboExiste' => false];
 
       $objBancoSEI = BancoSEI::getInstance();
 

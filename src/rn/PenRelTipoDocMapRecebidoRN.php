@@ -14,7 +14,7 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
 
   protected function listarEmUsoConectado($dblCodigoEspecie)
     {
-      $arrNumCodigoEspecie = array();
+      $arrNumCodigoEspecie = [];
 
       $objDTO = new PenRelTipoDocMapRecebidoDTO();
       $objDTO->retNumCodigoEspecie();
@@ -72,11 +72,10 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
 
 
     /**
-     * Consulta os mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN para recebimento
-     *
-     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
-     * @return void
-     */
+   * Consulta os mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN para recebimento
+   *
+   * @return void
+   */
   protected function consultarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
     try {
@@ -112,11 +111,10 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
   }
 
     /**
-     * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
-     *
-     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
-     * @return array
-     */
+   * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
+   *
+   * @return array
+   */
   protected function listarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
     try {
@@ -129,11 +127,10 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
   }
 
     /**
-     * Conta a lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
-     *
-     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
-     * @return int
-     */
+   * Conta a lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+   *
+   * @return int
+   */
   protected function contarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
     {
     try {
@@ -184,11 +181,11 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
 
       // Obter todas as espécies documentais do Barramento de Serviços do PEN
       // Antes separa as espécies com nomes separados por '/' em itens diferentes
-      $arrEspeciesDocumentais = array();
+      $arrEspeciesDocumentais = [];
       $arrEspecies = $objTipoDocMapRN->listarParesEspecie($this->listarEmUso(null));
     foreach ($arrEspecies as $numCodigo => $strItem) {
       foreach (preg_split('/\//', $strItem) as $strNomeEspecie) {
-        $arrEspeciesDocumentais[] = array("codigo" => $numCodigo, "nome" => $strNomeEspecie);
+        $arrEspeciesDocumentais[] = ["codigo" => $numCodigo, "nome" => $strNomeEspecie];
       }
     }
 

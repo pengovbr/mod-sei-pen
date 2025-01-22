@@ -87,7 +87,6 @@ try {
         } else {
           throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
         }
-          break;
 
       case 'pen_map_orgaos_externos_listar':
         // Ação padrão desta tela
@@ -96,7 +95,7 @@ try {
         try {
           $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
           $arrProcedimentoDTO = [];
-          $tipoDeProcedimentos = array();
+          $tipoDeProcedimentos = [];
           $procedimentos = explode(',', $_POST['dados']);
           for ($i = 0; $i < count($procedimentos); $i += 2) {
             $key = trim($procedimentos[$i]);
@@ -122,7 +121,6 @@ try {
         } catch (Exception $e) {
           throw new InfraException($e->getMessage());
         }
-          break;
 
       case 'pen_map_orgaos_externos_reativar':
         if ((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
@@ -246,8 +244,8 @@ try {
   } elseif ($btnReativarAdicionado == 'S') {
     $btnDesativarReativar = $btnReativar;
   }
-  $arrComandos = array($btnPesquisar, $btnTipoProcessoPadrao, $btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar);
-  $arrComandosFinal = array($btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar);
+  $arrComandos = [$btnPesquisar, $btnTipoProcessoPadrao, $btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar];
+  $arrComandosFinal = [$btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar];
 
   //--------------------------------------------------------------------------
 
@@ -380,8 +378,8 @@ try {
 
   $btnImportar = '<button type="button" accesskey="F" id="btnImportar" value="Fechar" onclick="" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
   $btnFecharModal = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  $arrComandosModal = array($btnImportar, $btnFecharModal);
-  $arrComandosModalFinal = array($btnImportar, $btnFecharModal);
+  $arrComandosModal = [$btnImportar, $btnFecharModal];
+  $arrComandosModalFinal = [$btnImportar, $btnFecharModal];
 } catch (InfraException $e) {
   $objPagina->processarExcecao($e);
 }
@@ -684,10 +682,10 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   <?php $objPagina->abrirAreaDados('8em'); ?>
 
   <?php
-  $txtSiglaOrigem = isset($_POST['txtSiglaOrigem']) ? $_POST['txtSiglaOrigem'] : '';
-  $txtSiglaDestino = isset($_POST['txtSiglaDestino']) ? $_POST['txtSiglaDestino'] : '';
+  $txtSiglaOrigem = $_POST['txtSiglaOrigem'] ?? '';
+  $txtSiglaDestino = $_POST['txtSiglaDestino'] ?? '';
   $txtEstado = isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : '';
-  $idTxtEstado = isset($_POST['txtEstado']) ? $_POST['txtEstado'] : '';
+  $idTxtEstado = $_POST['txtEstado'] ?? '';
   ?>
   <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Unidade Origem:</label>
   <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />

@@ -19,7 +19,6 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 
   /**
    * Método utilizado para listagem de dados.
-   * @param PenRestricaoEnvioComponentesDigitaisDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -41,7 +40,6 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 
   /**
    * Método utilizado para consulta de dados.
-   * @param PenRestricaoEnvioComponentesDigitaisDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -63,7 +61,6 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 
   /**
    * Método utilizado para alteração de dados.
-   * @param PenRestricaoEnvioComponentesDigitaisDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -85,7 +82,6 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 
   /**
    * Método utilizado para cadastro de dados.
-   * @param PenRestricaoEnvioComponentesDigitaisDTO $objDTO
    * @return array
    * @throws InfraException
    */
@@ -107,7 +103,6 @@ class PenRestricaoEnvioComponentesDigitaisRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param PenRestricaoEnvioComponentesDigitaisDTO $objDTO
    * @return array
    * @throws InfraException
    */

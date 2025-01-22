@@ -8,7 +8,7 @@ try {
   $objSessaoSEI = SessaoSEI::getInstance();
   $objPaginaSEI = PaginaSEI::getInstance();
 
-  $objPaginaSEI->salvarCamposPost(array('txtDescricao', 'hdnIdBloco'));
+  $objPaginaSEI->salvarCamposPost(['txtDescricao', 'hdnIdBloco']);
 
   $strParametros = '';
   if (isset($_GET['arvore'])) {
@@ -27,7 +27,7 @@ try {
   $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
 
   $strDesabilitar = '';
-  $arrComandos = array();
+  $arrComandos = [];
   
   switch ($_GET['acao']) {
     case 'pen_tramite_em_bloco_cadastrar':

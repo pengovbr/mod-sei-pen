@@ -19,7 +19,7 @@ try {
     $strParametros = '';
     $bolErrosValidacao = false;
     $executarExpedicao = false;
-    $arrComandos = array();
+    $arrComandos = [];
     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
 
     $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
@@ -75,7 +75,7 @@ try {
 
         //Preparação dos dados para montagem da tela de expedição de processos
         if ($arrIdUnidadeRestricao != null) {
-          $repositorios = array();
+          $repositorios = [];
           foreach ($arrIdUnidadeRestricao as $value) {
             $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
           }
@@ -88,10 +88,10 @@ try {
 
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 
-        $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
+        $idRepositorioSelecionado = $numIdRepositorio ?? '';
         $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
-        $idMotivosUrgenciaSelecionado = (isset($idMotivosUrgenciaSelecionado)) ? $idMotivosUrgenciaSelecionado : '';
+        $idMotivosUrgenciaSelecionado = $idMotivosUrgenciaSelecionado ?? '';
         $strItensSelMotivosUrgencia = InfraINT::montarSelectArray('', 'Selecione', $idMotivosUrgenciaSelecionado, $motivosDeUrgencia);
 
         $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
@@ -149,7 +149,7 @@ try {
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
 
         try {
-            $objExpedirProcedimentosRN->setEventoEnvioMetadados(function($parNumIdTramite) use ($strLinkProcedimento){
+            $objExpedirProcedimentosRN->setEventoEnvioMetadados(function($parNumIdTramite) use ($strLinkProcedimento): void{
                 $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
                 echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
             });

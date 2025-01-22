@@ -22,24 +22,19 @@ class TipoDocMapRN extends InfraRN {
      * conjunto com o primeiro paramêtro
      * @return array
      */
-  protected function listarParesEspecieConectado($arrNumCodigoEspecie = array())
-    {
-    try {
-        $objInfraIBanco = $this->inicializarObjInfraIBanco();
-        $objGenericoBD = new GenericoBD($objInfraIBanco);
-
-        $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
-        $objEspecieDocumentalDTO->retDblIdEspecie();
-        $objEspecieDocumentalDTO->retStrNomeEspecie();
-        $objEspecieDocumentalDTO->setOrdStrNomeEspecie(InfraDTO::$TIPO_ORDENACAO_ASC);
-
+  protected function listarParesEspecieConectado($arrNumCodigoEspecie = [])
+  {
+      $objInfraIBanco = $this->inicializarObjInfraIBanco();
+      $objGenericoBD = new GenericoBD($objInfraIBanco);
+      $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+      $objEspecieDocumentalDTO->retDblIdEspecie();
+      $objEspecieDocumentalDTO->retStrNomeEspecie();
+      $objEspecieDocumentalDTO->setOrdStrNomeEspecie(InfraDTO::$TIPO_ORDENACAO_ASC);
       if (!empty($arrNumCodigoEspecie)) {
         $objEspecieDocumentalDTO->setDblIdEspecie($arrNumCodigoEspecie, InfraDTO::$OPER_NOT_IN);
       }
-
-        $arrEspecieDocumentalDTO = $objGenericoBD->listar($objEspecieDocumentalDTO);
-        $arrRetorno = array();
-
+      $arrEspecieDocumentalDTO = $objGenericoBD->listar($objEspecieDocumentalDTO);
+      $arrRetorno = [];
       if (!empty($arrEspecieDocumentalDTO)) {
         foreach ($arrEspecieDocumentalDTO as $objEspecieDocumentalDTO) {
 
@@ -48,10 +43,7 @@ class TipoDocMapRN extends InfraRN {
           $arrRetorno[$strChave] = $strValor;
         }
       }
-        return $arrRetorno;
-    } catch (InfraException $e) {
-        throw $e;
-    }
+      return $arrRetorno;
   }
 
     /**
@@ -63,28 +55,22 @@ class TipoDocMapRN extends InfraRN {
      * Só funciona em conjunto com o primeiro paramêtro
      * @return array
      */
-  public function listarParesSerie($arrNumIdSerie = array(), $bolListarTodos = false)
-    {
-    try {
-        $arrRetorno = array();
-        $objInfraIBanco = $this->inicializarObjInfraIBanco();
-
-        $objSerieDTO = new SerieDTO();
-        $objSerieDTO->retNumIdSerie();
-        $objSerieDTO->retStrNome();
-
+  public function listarParesSerie($arrNumIdSerie = [], $bolListarTodos = false)
+  {
+      $arrRetorno = [];
+      $objInfraIBanco = $this->inicializarObjInfraIBanco();
+      $objSerieDTO = new SerieDTO();
+      $objSerieDTO->retNumIdSerie();
+      $objSerieDTO->retStrNome();
       if($bolListarTodos === false) {
         $objSerieDTO->setStrStaAplicabilidade('I', InfraDTO::$OPER_DIFERENTE);
       }
-        $objSerieDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
-
+      $objSerieDTO->setOrdStrNome(InfraDTO::$TIPO_ORDENACAO_ASC);
       if(!empty($arrNumIdSerie)) {
           $objSerieDTO->setNumIdSerie($arrNumIdSerie, InfraDTO::$OPER_NOT_IN);
       }
-
-        $objSerieRN = new SerieRN($objInfraIBanco);
-        $arrObjSerieDTO = $objSerieRN->listarRN0646($objSerieDTO);
-
+      $objSerieRN = new SerieRN($objInfraIBanco);
+      $arrObjSerieDTO = $objSerieRN->listarRN0646($objSerieDTO);
       if(!empty($arrObjSerieDTO)) {
         foreach($arrObjSerieDTO as $objSerieDTO) {
             $strChave = strval($objSerieDTO->getNumIdSerie());
@@ -92,11 +78,7 @@ class TipoDocMapRN extends InfraRN {
             $arrRetorno[$strChave] = $strValor;
         }
       }
-        return $arrRetorno;
-    }
-    catch (InfraException $e) {
-        throw $e;
-    }
+      return $arrRetorno;
   }
 
 }

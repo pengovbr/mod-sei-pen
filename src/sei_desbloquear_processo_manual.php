@@ -14,29 +14,29 @@
 try {
 
   require_once DIR_SEI_WEB.'/SEI.php';
-        
+
     $objPenConsoleRN = new PenConsoleRN();
     $arrArgs = $objPenConsoleRN->getTokens();
-    
+
     $objAtualizarRN = new PenAtualizarSeiRN($arrArgs);
     $objAtualizarRN->atualizarVersao();
 
     exit(0);
 }
 catch(InfraException $e){
-    
+
     print $e->getStrDescricao().PHP_EOL;
 }
 catch(Exception $e) {
-    
+
     print InfraException::inspecionar($e);
-    
+
   try {
       LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
   } catch (Exception $e) {
-        
+
   }
-    
+
     exit(1);
 }
 

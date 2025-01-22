@@ -61,7 +61,7 @@ try {
       $objDTO->setNumIdEstrutura($numIdRepositorio);
       $objDTO->setNumIdUnidadePen($numIdUnidadePen);
       if (!empty($id)) {
-        $objDTO->setDblId(array($id), InfraDTO::$OPER_NOT_IN);
+        $objDTO->setDblId([$id], InfraDTO::$OPER_NOT_IN);
       }
       $objDTO->setNumMaxRegistrosRetorno(1);
 
@@ -96,7 +96,6 @@ try {
         'controlador.php?acao=pen_map_restricao_envio_comp_digitais_listar&acao_=' . $_GET['acao_']
       ));
         exit(0);
-      break;
     case 'pen_map_restricao_envio_comp_digitais_visualizar':
     case 'pen_map_restricao_envio_comp_digitais_atualizar':
     case 'pen_map_restricao_envio_comp_digitais_cadastrar':
@@ -154,7 +153,7 @@ try {
         }
       }
 
-      $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
+      $idRepositorioSelecionado = $numIdRepositorio ?? '';
       $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray(
         '',
         'Selecione',

@@ -91,7 +91,7 @@ class TramiteEmBlocoRN extends InfraRN
   {
     try {
 
-      $arrObjTipoDTO = array();
+      $arrObjTipoDTO = [];
 
       $objTipoDTO = new TipoDTO();
       $objTipoDTO->setStrStaTipo(self::$TB_INTERNO);
@@ -109,7 +109,7 @@ class TramiteEmBlocoRN extends InfraRN
   {
     try {
       $arrEstadoBlocoDescricao = $this->retornarEstadoDescricao();
-      $objArrEstadoBlocoDTO = array();
+      $objArrEstadoBlocoDTO = [];
       foreach ($arrEstadoBlocoDescricao as $TE_Estado => $estadoDescricao) {
         $objEstadoBlocoDTO = new EstadoBlocoDTO();
         $objEstadoBlocoDTO->setStrStaEstado($TE_Estado);
@@ -338,7 +338,6 @@ class TramiteEmBlocoRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param array $arrayObjDTO
    * @return array
    * @throws InfraException
    */
@@ -348,7 +347,7 @@ class TramiteEmBlocoRN extends InfraRN
       //Valida Permissao
       SessaoSEI::getInstance()->validarAuditarPermissao('md_pen_tramita_em_bloco_excluir', __METHOD__, $arrayObjDTO);
 
-      $arrayExcluido = array();
+      $arrayExcluido = [];
       foreach ($arrayObjDTO as $objDTO) {
         $objBD = new TramiteEmBlocoBD(BancoSEI::getInstance());
         $arrayExcluido[] = $objBD->excluir($objDTO);

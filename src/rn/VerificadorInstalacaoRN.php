@@ -29,9 +29,7 @@ require_once DIR_SEI_WEB . '/SEI.php';
  */
 class VerificadorInstalacaoRN extends InfraRN
 {
-    const COMPATIBILIDADE_MODULO_SEI = array(
-        '5.0.0'
-    );
+    const COMPATIBILIDADE_MODULO_SEI = ['5.0.0'];
 
     public function __construct() {
         parent::__construct();
@@ -126,7 +124,7 @@ class VerificadorInstalacaoRN extends InfraRN
 
         // Valida se todas as chaves de configuração obrigatórias foram atribuídas
         $arrStrChavesConfiguracao = $arrStrChavesConfiguracao["PEN"];
-        $arrStrParametrosExperados = array("WebService", "LocalizacaoCertificado", "SenhaCertificado");
+        $arrStrParametrosExperados = ["WebService", "LocalizacaoCertificado", "SenhaCertificado"];
       foreach ($arrStrParametrosExperados as $strChaveConfiguracao) {
         if(!array_key_exists($strChaveConfiguracao, $arrStrChavesConfiguracao)){
             $strMensagem = "Parâmetro 'PEN > $strChaveConfiguracao' não pode ser localizado no arquivo de configuração do módulo de integração do SEI com o Tramita GOV.BR";

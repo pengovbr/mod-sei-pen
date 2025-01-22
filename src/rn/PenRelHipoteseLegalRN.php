@@ -76,7 +76,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
 
       $arrObjDTO = $this->listar($objDTO);
 
-      $arrIdBarramento = array();
+      $arrIdBarramento = [];
 
     if(!empty($arrObjDTO)) {
         $arrIdBarramento = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdBarramento');
@@ -97,7 +97,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
 
       $arrObjDTO = $this->listar($objDTO);
 
-      $arrIdBarramento = array();
+      $arrIdBarramento = [];
 
     if(!empty($arrObjDTO)) {
         $arrIdBarramento = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdHipoteseLegal');
