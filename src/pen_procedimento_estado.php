@@ -93,10 +93,7 @@ try {
           if(array_key_exists('id_tramite', $_GET) && array_key_exists('id_tarefa', $_GET)) {
 
               $objReciboTramiteRN = new ReciboTramiteRN();
-              $arrParametros = array(
-                  "id_tramite" => $_GET['id_tramite'],
-                  "id_tarefa" => $_GET['id_tarefa']
-              );
+              $arrParametros = ["id_tramite" => $_GET['id_tramite'], "id_tarefa" => $_GET['id_tarefa']];
               $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($arrParametros);
 
               if(empty($arrObjReciboTramiteDTO)) {
@@ -191,7 +188,7 @@ try {
 
   if(!empty($arrObjProcedimentoAndamentoDTO)){
 
-      $arrAgruparProcedimentoAndamentoDTO = array();
+      $arrAgruparProcedimentoAndamentoDTO = [];
     foreach($arrObjProcedimentoAndamentoDTO as &$objProcedimentoAndamentoDTO){
       if(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) == $objProcedimentoAndamentoDTO->getNumTarefa()) {
           $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaDestino();
@@ -217,7 +214,7 @@ try {
 
       $idCount = 1;
     foreach($arrAgruparProcedimentoAndamentoDTO as $key => $arrObjProcedimentoAndamentoDTO) {
-        list($dblIdTramite, $numIdEstrutura, $numTarefa) = explode('-', $key);
+        [$dblIdTramite, $numIdEstrutura, $numTarefa] = explode('-', $key);
         $objReturn = PenAtividadeRN::retornaAtividadeDoTramiteFormatado($dblIdTramite, $numIdEstrutura, $numTarefa);
         $strResultado .= '<tr>';
         $strResultado .= '<td valign="middle" colspan="2">'

@@ -16,6 +16,7 @@
     "squizlabs/php_codesniffer": "*",
     "mockery/mockery": "^1.5",
     "phpcompatibility/php-compatibility": "^9.3",
-    "pheromone/phpcs-security-audit": "*"
+    "pheromone/phpcs-security-audit": "*",
+    "rector/rector": "^1.2"
   }
 }

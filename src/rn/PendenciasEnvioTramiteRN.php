@@ -25,7 +25,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       do {
         try {
           $this->gravarLogDebug('Recuperando lista de pendências de envio do Tramita GOV.BR', 1);
-          $arrObjPendenciasDTO = $this->obterPendenciasEnvioTramite($parBolMonitorarPendencias);
+          $arrObjPendenciasDTO = $this->obterPendenciasEnvioTramite();
 
 
           foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
@@ -63,9 +63,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
     }
 
     // Caso não esteja sendo realizado o monitoramente de pendências, lança exceção diretamente na página para apresentação ao usuário
-    if (!$parBolMonitorarPendencias) {
-      $this->salvarLogDebug($parBolDebug);
-    }
+    $this->salvarLogDebug($parBolDebug);
 
     return self::CODIGO_EXECUCAO_SUCESSO;
   }
@@ -75,45 +73,40 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
    * @param  num $parNumIdTramiteRecebido
    * @return [type]                          [description]
    */
-  private function obterPendenciasEnvioTramite($parBolMonitorarPendencias)
+  private function obterPendenciasEnvioTramite()
   {
-    //Obter todos os trâmites pendentes antes de iniciar o monitoramento
-    $arrPendenciasRetornadas = array();
-    $arrObjPendenciasDTO = array();
-
-    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-    $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
-    $objPenBlocoProcessoDTO->retDblIdProtocolo();
-    $objPenBlocoProcessoDTO->retNumIdAndamento();
-    $objPenBlocoProcessoDTO->retNumIdAtividade();
-    $objPenBlocoProcessoDTO->retNumIdRepositorioDestino();
-    $objPenBlocoProcessoDTO->retStrRepositorioDestino();
-    $objPenBlocoProcessoDTO->retNumIdRepositorioOrigem();
-    $objPenBlocoProcessoDTO->retNumIdUnidadeDestino();
-    $objPenBlocoProcessoDTO->retStrUnidadeDestino();
-    $objPenBlocoProcessoDTO->retNumIdUnidadeOrigem();
-    $objPenBlocoProcessoDTO->retNumIdBloco();
-    $objPenBlocoProcessoDTO->retNumIdUsuario();
-    $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
-    $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
-
-    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-    $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->obterPendenciasBloco($objPenBlocoProcessoDTO);
-
-    foreach ($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO) {
-        $objPendenciaDTO = new PendenciaDTO();
-        $objPendenciaDTO->setNumIdentificacaoTramite($objPenBlocoProcessoDTO->getDblIdProtocolo());
-        $objPendenciaDTO->setStrStatus($objPenBlocoProcessoDTO->getNumIdAndamento());
-        $arrObjPendenciasDTO[] = $objPendenciaDTO;
-    }
-
-    $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
-
-    foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-      //Captura todas as pendências e status retornadas para impedir duplicidade
-      $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
-      yield $objPendenciaDTO;
-    }
+      //Obter todos os trâmites pendentes antes de iniciar o monitoramento
+      $arrPendenciasRetornadas = [];
+      $arrObjPendenciasDTO = [];
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
+      $objPenBlocoProcessoDTO->retDblIdProtocolo();
+      $objPenBlocoProcessoDTO->retNumIdAndamento();
+      $objPenBlocoProcessoDTO->retNumIdAtividade();
+      $objPenBlocoProcessoDTO->retNumIdRepositorioDestino();
+      $objPenBlocoProcessoDTO->retStrRepositorioDestino();
+      $objPenBlocoProcessoDTO->retNumIdRepositorioOrigem();
+      $objPenBlocoProcessoDTO->retNumIdUnidadeDestino();
+      $objPenBlocoProcessoDTO->retStrUnidadeDestino();
+      $objPenBlocoProcessoDTO->retNumIdUnidadeOrigem();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
+      $objPenBlocoProcessoDTO->retNumIdUsuario();
+      $objPenBlocoProcessoDTO->retStrProtocoloFormatadoProtocolo();
+      $objPenBlocoProcessoDTO->setNumIdAndamento(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO);
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->obterPendenciasBloco($objPenBlocoProcessoDTO);
+      foreach ($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO) {
+          $objPendenciaDTO = new PendenciaDTO();
+          $objPendenciaDTO->setNumIdentificacaoTramite($objPenBlocoProcessoDTO->getDblIdProtocolo());
+          $objPendenciaDTO->setStrStatus($objPenBlocoProcessoDTO->getNumIdAndamento());
+          $arrObjPendenciasDTO[] = $objPendenciaDTO;
+      }
+      $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
+      foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
+        //Captura todas as pendências e status retornadas para impedir duplicidade
+        $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
+        yield $objPendenciaDTO;
+      }
   }
 
   /**
@@ -146,10 +139,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
 
       if (!in_array(
           $numStatus,
-          array(
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE
-          )
+          [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE]
       )) {
         $strStatus = $objPendencia->getStrStatus();
         $this->gravarLogDebug("Situação do trâmite ($strStatus) não pode ser tratada para expedir pendências.");

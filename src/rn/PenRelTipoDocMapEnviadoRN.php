@@ -14,11 +14,10 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
 
     /**
-     * Lista mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
-     *
-     * @param PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO
-     * @return array
-     */
+   * Lista mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+   *
+   * @return array
+   */
   protected function listarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
     {
     try {
@@ -43,7 +42,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
   protected function listarEmUsoConectado($dblIdSerie)
     {
-      $arrNumIdSerie = array();
+      $arrNumIdSerie = [];
       $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapEnviadoDTO();
       $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
       $objPenRelTipoDocMapRecebidoDTO->setDistinct(true);
@@ -174,11 +173,11 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       $numPercentualSimilaridadeValido = 85;
 
       // Obter todas as espécies documentais do Barramento de Serviços do PEN
-      $arrEspeciesDocumentais = array();
+      $arrEspeciesDocumentais = [];
       $arrEspecies = $objTipoDocMapRN->listarParesEspecie();
     foreach ($arrEspecies as $numCodigo => $strItem) {
       foreach (preg_split('/\//', $strItem) as $strNomeEspecie) {
-        $arrEspeciesDocumentais[] = array("codigo" => $numCodigo, "nome" => $strNomeEspecie);
+        $arrEspeciesDocumentais[] = ["codigo" => $numCodigo, "nome" => $strNomeEspecie];
       }
     }
 

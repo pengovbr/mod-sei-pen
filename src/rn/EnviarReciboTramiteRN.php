@@ -5,16 +5,11 @@ require_once DIR_SEI_WEB.'/SEI.php';
 class EnviarReciboTramiteRN extends InfraRN
 {
   private $objProcessoEletronicoRN;
-  private $objInfraParametro;
-  private $objPenParametroRN;
 
   public function __construct()
   {
     parent::__construct();
-
-    $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
     $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $this->objPenParametroRN = new PenParametroRN();
   }
 
   protected function inicializarObjInfraIBanco()
@@ -31,13 +26,13 @@ class EnviarReciboTramiteRN extends InfraRN
      */
   protected function gerarReciboTramite($numIdTramite){
 
-      $arrStrHashConteudo = array();
+      $arrStrHashConteudo = [];
 
       $objMetaRetorno = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
 
       $objMetaProcesso = $objMetaRetorno->metadados->processo;
 
-      $arrObjMetaDocumento = is_array($objMetaProcesso->documentos) ? $objMetaProcesso->documentos : array($objMetaProcesso->documentos);
+      $arrObjMetaDocumento = is_array($objMetaProcesso->documentos) ? $objMetaProcesso->documentos : [$objMetaProcesso->documentos];
 
       $objDTO = new ComponenteDigitalDTO();
       $objBD = new ComponenteDigitalBD($this->inicializarObjInfraIBanco());
@@ -57,7 +52,7 @@ class EnviarReciboTramiteRN extends InfraRN
       return $arrStrHashConteudo;
   }
 
-  protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = array())
+  protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = [])
     {
     try {
       $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
@@ -153,7 +148,7 @@ class EnviarReciboTramiteRN extends InfraRN
     }
 
     if(!is_array($parObjTramite->itensHistorico->operacao)) {
-      $parObjTramite->itensHistorico->operacao = array($parObjTramite->itensHistorico->operacao);
+      $parObjTramite->itensHistorico->operacao = [$parObjTramite->itensHistorico->operacao];
     }
 
     foreach ($parObjTramite->itensHistorico->operacao as $operacao) {

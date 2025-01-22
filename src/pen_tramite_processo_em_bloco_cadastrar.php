@@ -9,7 +9,7 @@ try {
 
   $objSessaoSEI->validarLink();
 
-  $objPaginaSEI->salvarCamposPost(array('hdnIdProtocolo', 'selBlocos'));
+  $objPaginaSEI->salvarCamposPost(['hdnIdProtocolo', 'selBlocos']);
   $strIdItensSelecionados = $objPaginaSEI->recuperarCampo('hdnIdProtocolo');
   $idBlocoExterno = $objPaginaSEI->recuperarCampo('selBlocos');
 
@@ -55,14 +55,9 @@ try {
         $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
         $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
         foreach($arrObjPenBlocoProcessoDTO as $objPenBlocoProcessoDTO){
-          $concluido = array(
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-          );
+          $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
           if ($objPenBlocoProcessoDTO->getNumIdAndamento() === null || !in_array($objPenBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
-            $objPenBlocoProcessoRN->excluir(array($objPenBlocoProcessoDTO));
+            $objPenBlocoProcessoRN->excluir([$objPenBlocoProcessoDTO]);
            
             $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
             $objPenBlocoProcessoRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
@@ -81,7 +76,6 @@ try {
       </script>
       <?php
         exit(0);
-      break;
     case 'pen_incluir_processo_em_bloco_tramite':
       $objSessaoSEI->validarPermissao($_GET['acao']);
 
@@ -133,7 +127,7 @@ try {
           //Verifica processo aberto em outra unidade.
           $objInfraException = new InfraException();
           $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($_GET['id_procedimento']));
+          $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, [$_GET['id_procedimento']]);
           $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
           if (!is_null($mensagemDeErro)) {
             $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
@@ -141,7 +135,7 @@ try {
             exit(0);
           }
 
-          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($_GET['id_procedimento']));
+          $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, [$_GET['id_procedimento']]);
           $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
           if (!is_null($mensagemDeErro)) {
             $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
@@ -212,14 +206,14 @@ try {
             }else{
               $objInfraException = new InfraException();
               $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-              $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, array($idItensSelecionados));
+              $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, [$idItensSelecionados]);
               $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
               if (!is_null($mensagemDeErro)) {
                 $bolInclusaoErro = true;
                 $arrMensagensErros[] = $mensagemDeErro;
               }
   
-              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, array($idItensSelecionados));
+              $objExpedirProcedimentosRN->validarProcessoAbertoEmOutraUnidade($objInfraException, [$idItensSelecionados]);
               $mensagemDeErro = $objExpedirProcedimentosRN->trazerTextoSeContemValidacoes($objInfraException);
               if (!is_null($mensagemDeErro)) {
                 $bolInclusaoErro = true;
@@ -234,10 +228,8 @@ try {
             }
           }
 
-          if (!empty($arrMensagensErros)) {
-            foreach ($arrMensagensErros as $mensagemErro) {
-              $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
-            }
+          foreach ($arrMensagensErros as $mensagemErro) {
+            $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
           }
             
           $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
@@ -265,7 +257,7 @@ try {
   }
 
   //Monta o select dos blocos
-  $arrMapIdBloco = array();
+  $arrMapIdBloco = [];
 
   $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
   $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO); //($objSessaoSEI->getNumIdUnidadeAtual());

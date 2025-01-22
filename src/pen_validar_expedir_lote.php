@@ -4,7 +4,7 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 session_start();
 
-$arrResponse = array('sucesso' => false, 'mensagem' => '', 'erros' => array());
+$arrResponse = ['sucesso' => false, 'mensagem' => '', 'erros' => []];
 $objInfraException = new InfraException();
 
 
@@ -19,11 +19,11 @@ try {
   $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
   $objExpedirProcedimentosRN->verificarProcessosAbertoNaUnidade($objInfraException, $arrProtocolosOrigem);
   if ($objInfraException->contemValidacoes()) {
-    $arrErros = array();
+    $arrErros = [];
     foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
       $strAtributo = $objInfraValidacao->getStrAtributo();
       if (!array_key_exists($strAtributo, $arrErros)) {
-        $arrErros[$strAtributo] = array();
+        $arrErros[$strAtributo] = [];
       }
       $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
     }
@@ -71,11 +71,11 @@ catch(\InfraException $e) {
 
 if ($objInfraException->contemValidacoes()) {
 
-  $arrErros = array();
+  $arrErros = [];
   foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
     $strAtributo = $objInfraValidacao->getStrAtributo();
     if (!array_key_exists($strAtributo, $arrErros)) {
-      $arrErros[$strAtributo] = array();
+      $arrErros[$strAtributo] = [];
     }
     $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
   }

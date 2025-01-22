@@ -57,19 +57,15 @@ abstract class PenAtualizadorRN extends InfraRN {
   }
 
     /**
-     * Adiciona uma mensagem ao output para o usuário
-     *
-     * @return null
-     */
+   * Adiciona uma mensagem ao output para o usuário
+   */
   protected function logar($strMsg) {
       $this->objDebug->gravar($strMsg);
   }
 
     /**
-     * Inicia o script criando um contator interno do tempo de execução
-     *
-     * @return null
-     */
+   * Inicia o script criando um contator interno do tempo de execução
+   */
   protected function inicializar($strTitulo) {
 
       $this->numSeg = InfraUtil::verificarTempoProcessamento();
@@ -78,10 +74,8 @@ abstract class PenAtualizadorRN extends InfraRN {
   }
 
     /**
-     * Finaliza o script informando o tempo de execução.
-     *
-     * @return null
-     */
+   * Finaliza o script informando o tempo de execução.
+   */
   protected function finalizar($strMsg = null, $bolErro = false){
     if (!$bolErro) {
       $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);

@@ -11,10 +11,10 @@ class PenConsoleRN extends InfraRN {
         
     protected $objRN;
     protected $strAction;
-    protected $arrTokens = array();
+    protected $arrTokens = [];
     protected $objInfraBanco;
 
-  public function __construct($objRN = null, $tokens = array()) {
+  public function __construct($objRN = null, $tokens = []) {
         
     if(!is_null($objRN)) {
             
@@ -23,12 +23,7 @@ class PenConsoleRN extends InfraRN {
       if(!is_object($objRN)) {
         throw new InfraException('Requerido objeto Infra');
       }
-
-      if(get_parent_class($objRN) !== 'InfraRN') {
-          throw new InfraException('Requerido objeto Infra que seja extendido de InfraRN');
-      }
-
-        $this->objRN = $objRN;
+      throw new InfraException('Requerido objeto Infra que seja extendido de InfraRN');
     }
         
     if(empty($tokens)) {
@@ -49,18 +44,17 @@ class PenConsoleRN extends InfraRN {
   }
     
     /**
-     * Processa os parâmetros passados ao script pelo cli
-     * 
-     * @param array $arguments
-     * @return null
-     */
-  protected function criarTokens($arguments = array()){
+   * Processa os parâmetros passados ao script pelo cli
+   *
+   * @param array $arguments
+   */
+  protected function criarTokens($arguments = []){
         
     if(empty($arguments)) {
         throw new InfraException('Script não pode ser executado pela web');
     }
         
-      $strScript = array_shift($arguments);
+      array_shift($arguments);
 
     if(!empty($this->objRN)) {
             
@@ -112,7 +106,7 @@ class PenConsoleRN extends InfraRN {
         return true;
     }
         
-      return call_user_func(array($this->objRN, $this->strAction), $this->getTokens());
+      return call_user_func([$this->objRN, $this->strAction], $this->getTokens());
   }
     
   public static function format($strMensagem = '', $strFonte = '', $bolBold = false){

@@ -4,10 +4,10 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class ProcessarPendenciasRN extends InfraRN
 {
-    private $objGearmanWorker = null;
-    private $objPenDebug = null;
-    private $strGearmanServidor = null;
-    private $strGearmanPorta = null;
+    private $objGearmanWorker;
+    private $objPenDebug;
+    private $strGearmanServidor;
+    private $strGearmanPorta;
 
     const TIMEOUT_PROCESSAMENTO_JOB = 5400; // valores em segundos, 5400 = 90 minutos
     const TIMEOUT_PROCESSAMENTO_EVENTOS = 300000; // valores em milisegundos, 300000 = 5 minutos
@@ -93,7 +93,6 @@ class ProcessarPendenciasRN extends InfraRN
 
           switch ($numReturnCode) {
             case GEARMAN_SUCCESS:
-                break;
 
             case GEARMAN_TIMEOUT:
                     //Nenhuma ação necessário, sendo que timeout é utilizado apenas para avaliação de sinal pcntl_signal de interrupção
@@ -323,35 +322,35 @@ class ProcessarPendenciasRN extends InfraRN
 
   private function configurarCallbacks()
     {
-      $this->objGearmanWorker->addFunction("enviarProcesso", function($job) {
+      $this->objGearmanWorker->addFunction("enviarProcesso", function($job): void {
           $this->enviarProcesso($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("enviarComponenteDigital", function($job) {
+      $this->objGearmanWorker->addFunction("enviarComponenteDigital", function($job): void {
           $this->enviarComponenteDigital($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("receberReciboTramite", function($job) {
+      $this->objGearmanWorker->addFunction("receberReciboTramite", function($job): void {
           $this->receberReciboTramite($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("receberProcedimento", function($job) {
+      $this->objGearmanWorker->addFunction("receberProcedimento", function($job): void {
           $this->receberProcedimento($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("receberTramitesRecusados", function($job) {
+      $this->objGearmanWorker->addFunction("receberTramitesRecusados", function($job): void {
           $this->receberTramitesRecusados($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("receberComponenteDigital", function($job) {
+      $this->objGearmanWorker->addFunction("receberComponenteDigital", function($job): void {
           $this->receberComponenteDigital($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function($job) {
+      $this->objGearmanWorker->addFunction("enviarReciboTramiteProcesso", function($job): void {
           $this->enviarReciboTramiteProcesso($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
-      $this->objGearmanWorker->addFunction("expedirBloco", function($job) {
+      $this->objGearmanWorker->addFunction("expedirBloco", function($job): void {
           $this->expedirBloco($job->workload());
       }, null, self::TIMEOUT_PROCESSAMENTO_JOB);
 
@@ -369,10 +368,7 @@ class ProcessarPendenciasRN extends InfraRN
      */
   private static function verificarGearmanAtivo($parStrServidor, $parStrPorta)
     {
-      // Verifica se existe um servidor do Gearman ativo para conexão
-      $bolAtivo = false;
-
-    try {
+      try {
       if(!class_exists("GearmanClient")){
         throw new InfraException("Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN (GearmanClient). " .
             "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");

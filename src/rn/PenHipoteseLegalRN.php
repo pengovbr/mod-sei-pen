@@ -23,7 +23,6 @@ class PenHipoteseLegalRN extends InfraRN
   /**
    * Listar hipoteses legais
    *
-   * @param PenHipoteseLegalDTO $objDTO
    * @return array
    * @throws InfraException
    */

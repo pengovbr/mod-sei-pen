@@ -18,7 +18,7 @@ class ProcessoEletronicoINT extends InfraINT {
      * @param array(EstruturaDTO) $estruturas
      * @return array
      */
-  public static function gerarHierarquiaEstruturas($estruturas = array()){
+  public static function gerarHierarquiaEstruturas($estruturas = []){
 
     if(empty($estruturas)) {
         return $estruturas;
@@ -29,9 +29,9 @@ class ProcessoEletronicoINT extends InfraINT {
           $nome  = $estrutura->getStrNome();
           $nome .= ' - ';
 
-          $array = array($estrutura->getStrSigla());
+          $array = [$estrutura->getStrSigla()];
         foreach($estrutura->getArrHierarquia() as $sigla) {
-          if(trim($sigla) !== '' && !in_array($sigla, array('PR', 'PE', 'UNIAO'))) {
+          if(trim($sigla) !== '' && !in_array($sigla, ['PR', 'PE', 'UNIAO'])) {
                 $array[] = $sigla;
           }
         }
@@ -50,7 +50,7 @@ class ProcessoEletronicoINT extends InfraINT {
    * @param array(EstruturaDTO) $estruturas
    * @return array
    */
-  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = array())
+  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = [])
   {
 
     if (empty($estruturas['itens'])) {
@@ -62,11 +62,9 @@ class ProcessoEletronicoINT extends InfraINT {
         $nome  = $estrutura->getStrNome();
         $nome .= ' - ';
 
-        $array = array($estrutura->getStrSigla());
+        $array = [$estrutura->getStrSigla()];
         foreach ($estrutura->getArrHierarquia() as $sigla) {
-          if (trim($sigla) !== '' && !in_array($sigla, array(
-            'PR', 'PE', 'UNIAO'
-          ))) {
+          if (trim($sigla) !== '' && !in_array($sigla, ['PR', 'PE', 'UNIAO'])) {
             $array[] = $sigla;
           }
         }
@@ -121,7 +119,7 @@ class ProcessoEletronicoINT extends InfraINT {
   {
     $objProcessoEletronicoRN = new ProcessoEletronicoRN();
     $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
-    $arrayRepositorioEstruturas = array();
+    $arrayRepositorioEstruturas = [];
     foreach ($arrObjRepositorioDTO as $value) {
       if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
         $arrayRepositorioEstruturas[] = $value;
@@ -144,7 +142,7 @@ class ProcessoEletronicoINT extends InfraINT {
 
       $arrObjNivel = $ObjEstrutura->hierarquia;
 
-        $siglasUnidades = array();
+        $siglasUnidades = [];
         $siglasUnidades[] = $ObjEstrutura->sigla;
 
       foreach($arrObjNivel as $key => $objNivel){
@@ -168,9 +166,8 @@ class ProcessoEletronicoINT extends InfraINT {
         $objNivel=current($arrObjNivel);
 
     }
-      $dados=["nome"=>$nome,"objNivel"=>$objNivel];
 
-      return $dados;
+      return ["nome"=>$nome,"objNivel"=>$objNivel];
 
   }
 
@@ -184,40 +181,29 @@ class ProcessoEletronicoINT extends InfraINT {
       switch ($imagem) {
         case 'imagens/consultar.gif':
             return '/infra_css/svg/consultar.svg';
-            break;
         case 'imagens/alterar.gif':
             return '/infra_css/svg/alterar.svg';
-            break;
         case 'imagens/excluir.gif':
             return '/infra_css/svg/excluir.svg';
-            break;
         case '/pen_expedir_procedimento.gif':
             return 'modulos/' . $strModulo . '/imagens/pen_expedir_procedimento.png';
-            break;
         case '/pen_consultar_recibos.png':
             return 'modulos/' . $strModulo . '/imagens/consultar_recibo.png';
-            break;
         case '/pen_cancelar_tramite.gif':
             return 'modulos/' . $strModulo . '/imagens/pen_cancelar_envio.svg';
-            break;
         case '/infra_js/arvore/plus.gif':
             return '/infra_css/svg/mais.svg';
-            break;
         case '/infra_js/arvore/minus.gif':
             return '/infra_css/svg/menos.svg';
-            break;
         case 'imagens/anexos.gif':
             return '/infra_css/imagens/anexos.gif';
-            break;
         case 'imagens/sei_erro.png':
             return 'modulos/' . $strModulo . '/imagens/sei_erro.png';
-          break;
         default:
           if($relPath==null){
                 return $imagem;
           }
             return $relPath . $imagem;
-            break;
       }
     }
 
@@ -235,22 +221,18 @@ class ProcessoEletronicoINT extends InfraINT {
       switch ($arquivo) {
         case 'pen_procedimento_expedir.css':
             return 'pen_procedimento_expedir_sei4.css';
-            break;
 
         default:
             return $arquivo;
-            break;
       }
     }elseif (InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1")) {
 
       switch ($arquivo) {
         case 'pen_procedimento_expedir.css':
             return 'pen_procedimento_expedir_sei402.css';
-              break;
 
         default:
             return $arquivo;
-              break;
       }
     }
 
@@ -276,22 +258,22 @@ class ProcessoEletronicoINT extends InfraINT {
 
       $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
       $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-      $items = array();
-      $arrayKeys = array();
-      $arrObjPenUnidadeDTO = array();
-      $itemsUnidades = array();
-      $hdnRepoEstruturas = array();
+      $items = [];
+      $arrayKeys = [];
+      $arrObjPenUnidadeDTO = [];
+      $itemsUnidades = [];
+      $hdnRepoEstruturas = [];
       $strHtmlRepoEstruturasUnidades = "";
       foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
         if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
           //IdUnidadeRestricao NomeUnidadeRestricao
           $arrayKeys[] = $item->getNumIdUnidadeRestricao();
-          $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
-          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+          $items[] = [$item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao()];
+          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = [];
         }
         if ($item->getNumIdUnidadeRHRestricao() != null) {
           $arrObjPenUnidadeDTO[] = $item;
-          $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
+          $itemsUnidades[] = [$item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao()];
           $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
         }
       }

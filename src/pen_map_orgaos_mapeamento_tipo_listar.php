@@ -16,7 +16,7 @@ $objDebug = InfraDebug::getInstance();
 
 $acaoOrigem = $_GET['acao_origem'];
 
-PaginaSEI::getInstance()->salvarCamposPost(array('txtPalavrasPesquisaMapeamento'));
+PaginaSEI::getInstance()->salvarCamposPost(['txtPalavrasPesquisaMapeamento']);
 $palavrasPesquisa = PaginaSEI::getInstance()->recuperarCampo('txtPalavrasPesquisaMapeamento');
 
 try {
@@ -101,7 +101,7 @@ try {
         try {
           $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
           $arrProcedimentoDTO = [];
-          $tipoDeProcedimentos = array();
+          $tipoDeProcedimentos = [];
           $procedimentos = explode(',', $_POST['dados']);
           for ($i = 0; $i < count($procedimentos); $i += 2) {
             $key = trim($procedimentos[$i]);
@@ -159,13 +159,12 @@ try {
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_mapeamento&acao_origem=' . $_GET['acao'] . '&id=' . $idOrgaoExterno));
         exit(0);
       }
-        break;
     default:
         throw new InfraException("Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
-  $arrComandos = array();
-  $arrComandosFinal = array();
+  $arrComandos = [];
+  $arrComandosFinal = [];
 
   $arrComandos[] = '<button type="submit" accesskey="P" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
@@ -342,8 +341,8 @@ try {
   $btnFecharModal = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
   $btnImportarFinal = '<button type="button" accesskey="F" id="btnImportarFinal" value="Fechar" onclick="" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
   $btnFecharModalFinal = '<button type="button" accesskey="F" id="btnFecharSelecaoFinal" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  $arrComandosModal = array($btnImportar, $btnFecharModal);
-  $arrComandosModalFinal = array($btnImportarFinal, $btnFecharModalFinal);
+  $arrComandosModal = [$btnImportar, $btnFecharModal];
+  $arrComandosModalFinal = [$btnImportarFinal, $btnFecharModalFinal];
 
   $arrComandos[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao'] . $strParametros . PaginaSEI::getInstance()->montarAncora($idOrgaoExterno)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
   $arrComandosFinal[] = '<button type="button" accesskey="F" id="btnFechar" value="Fechar" onclick="location.href=\'' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_orgaos_externos_listar&acao_origem=' . $_GET['acao'] . $strParametros . PaginaSEI::getInstance()->montarAncora($idOrgaoExterno)) . '\'" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';

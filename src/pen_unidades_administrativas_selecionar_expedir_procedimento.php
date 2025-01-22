@@ -20,7 +20,7 @@ try {
     $bolVersaoSuperior4 = InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0");
     $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
     $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
-    $arrComandos   = array();
+    $arrComandos   = [];
     $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisa Textual" onclick="abrirTelaDePesquisaTextual()" class="infraButton" disabled="disabled"><span class="infraTeclaAtalho">P</span>esquisa Textual</button>';
     $arrComandos[] = '<button type="button" accesskey="T" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
     $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';

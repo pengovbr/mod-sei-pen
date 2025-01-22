@@ -19,7 +19,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
   /**
    * Método utilizado para listagem de dados.
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -35,7 +34,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
     /**
    * Método utilizado para listagem de dados.
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -51,7 +49,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
   /**
    * Método utilizado para alteração de dados.
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -67,7 +64,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
   /**
    * Método utilizado para cadastro de dados.
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -83,7 +79,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
   /**
    * Método utilizado para exclusão de dados.
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -99,7 +94,6 @@ class PenMapTipoProcedimentoRN extends InfraRN
 
   /**
    * Método utilizado para contagem de procedimento mapeadas
-   * @param PenMapTipoProcedimentoDTO $objPenMapTipoProcedimentoDTO
    * @return array
    * @throws InfraException
    */
@@ -120,8 +114,8 @@ class PenMapTipoProcedimentoRN extends InfraRN
    */
   public function validarAcaoTipoProcesso($arrObjTipoProcedimentoDTO, $mensagem)
   {
-    $arrTipoProcedimento = array();
-    $mapeamentos = array();
+    $arrTipoProcedimento = [];
+    $mapeamentos = [];
     foreach ($arrObjTipoProcedimentoDTO as $objTipoProcedimentoDTO) {
       $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
       $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();

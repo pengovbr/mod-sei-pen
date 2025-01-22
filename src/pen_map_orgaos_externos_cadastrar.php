@@ -45,7 +45,7 @@ try {
   $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
   $strLinkAjaxUnidadeDestino = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_mapeados&acao=' . $_GET['acao']);
 
-  $id = isset($_GET['id']) ? $_GET['id'] : null;
+  $id = $_GET['id'] ?? null;
   if (!is_null($id)) {
     $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
     $objPenOrgaoExternoDTO->setDblId($id);
@@ -106,7 +106,7 @@ try {
       $objPenOrgaoExternoDTO->setNumIdEstrutaOrganizacionalOrigem($numIdRepositorioOrigem);
       $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($numIdOrgaoDestino);
       if (!is_null($id)) {
-        $objPenOrgaoExternoDTO->setDblId(array($id), InfraDTO::$OPER_NOT_IN);
+        $objPenOrgaoExternoDTO->setDblId([$id], InfraDTO::$OPER_NOT_IN);
       }
       $objPenOrgaoExternoDTO->setNumMaxRegistrosRetorno(1);
 
@@ -147,7 +147,6 @@ try {
         .'&id='.$numId.PaginaSEI::getInstance()->montarAncora($numId.';S')
       ));
         exit(0);
-        break;
     case 'pen_map_orgaos_externos_visualizar':
     case 'pen_map_orgaos_externos_atualizar':
     case 'pen_map_orgaos_externos_cadastrar':
@@ -172,7 +171,7 @@ try {
 
       //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
       $objPenParametroRN = new PenParametroRN();
-      $idRepositorioSelecionado = (isset($numIdRepositorioOrigem)) ? $numIdRepositorioOrigem : '';
+      $idRepositorioSelecionado = $numIdRepositorioOrigem ?? '';
       $strItensSelRepositorioEstruturasOrigem = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
       $strLinkAjaxProcedimentoApensado = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_apensados_auto_completar_expedir_procedimento');

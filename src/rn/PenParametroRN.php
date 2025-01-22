@@ -197,7 +197,7 @@ class PenParametroRN extends InfraRN {
    */
   public function validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem)
   {
-    $mapeamentos = array();
+    $mapeamentos = [];
     foreach ($arrObjTipoProcedimentoDTO as $objTipoProcedimentoDTO) {
       $objPenParametroDTO = new PenParametroDTO();
       $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
