@@ -1,6 +1,6 @@
 {
   "config": {
-    "vendor-dir": "./vendor",
+    "vendor-dir": "./src/vendor",
     "platform": {
       "php": "7.3.12"
     }
@@ -9,14 +9,9 @@
     "psr-4": {
       "Tests\\": "sei/"
     }
-  },
-  "require-dev": {
+  }, 
+  "require": {
     "php": "7.3.12",
-    "phpunit/phpunit": "*",
-    "squizlabs/php_codesniffer": "*",
-    "mockery/mockery": "^1.5",
-    "phpcompatibility/php-compatibility": "^9.3",
-    "pheromone/phpcs-security-audit": "*",
-    "rector/rector": "^1.2"
+    "guzzlehttp/guzzle": "^7.0"
   }
 }
