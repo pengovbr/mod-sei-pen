@@ -101,6 +101,7 @@ dist:
 	@mkdir -p $(SEI_BIN_DIR)
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
+	@php composer.phar install --no-dev
 	@cp -R src/* $(SEI_MODULO_DIR)/
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
