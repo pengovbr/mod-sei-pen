@@ -19,7 +19,7 @@ try {
         SessaoSEI::getInstance()->validarLink();
 
         $strTitulo = 'Seleção de Unidade Externa (Pesquisa Textual)';
-        $arrComandos = array();
+        $arrComandos = [];
         $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisar" class="infraButton" onclick="recuperarEstruturaDeFilhosDeUnidadeExterna(1);"><span class="infraTeclaAtalho">P</span>esquisar</button>';
         $arrComandos[] = '<button type="button" accesskey="S" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
         $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';

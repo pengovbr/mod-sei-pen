@@ -61,7 +61,6 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
   /**
    * Contar HipoteseLegal
    *
-   * @param PenRelHipoteseLegalDTO $objDTO
    * @return int
    * @throws InfraException
    */

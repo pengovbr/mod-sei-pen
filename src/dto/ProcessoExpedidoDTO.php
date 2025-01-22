@@ -6,7 +6,8 @@ require_once DIR_SEI_WEB.'/SEI.php';
  */
 class ProcessoExpedidoDTO extends InfraDTO {
 
-  public function __construct($bolComposto = false) {
+  public function __construct()
+  {
       // Força o JOIN com todas as tabelas
       parent::__construct(true);
   }

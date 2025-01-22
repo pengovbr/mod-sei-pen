@@ -13,7 +13,7 @@ try {
 
     $objSessaoSEI->validarLink();
     $objSessaoSEI->validarPermissao($_GET['acao']);
-    $arrComandos = array();
+    $arrComandos = [];
 
     $strTitulo = 'Processos em Tramitação Externa';
 

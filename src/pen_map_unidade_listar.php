@@ -71,7 +71,6 @@ try {
 
             throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
         }
-          break;
 
       case PEN_RECURSO_BASE.'_listar':
           // Ação padrão desta tela
@@ -84,7 +83,7 @@ try {
   }
     //--------------------------------------------------------------------------
 
-    $arrComandos = array();
+    $arrComandos = [];
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
     $arrComandos[] = '<button type="button" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
@@ -318,7 +317,7 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php if($numRegistros > 0): ?>
         <?php $objPagina->montarAreaTabela($strResultado, $numRegistros); ?>
         <?php //$objPagina->montarAreaDebug(); ?>
-    <?php else: ?>
+<?php else: ?>
         <div style="clear:both;margin:2em"></div>
         <p>Nenhum mapeamento foi encontrado</p>
     <?php endif; ?>

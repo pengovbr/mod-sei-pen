@@ -41,8 +41,7 @@ try {
         }
         else {                    
             throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
-        }
-          break;            
+        }            
                 
       case 'pen_map_tipo_documento_envio_listar':
           // Ação padrão desta tela
@@ -69,7 +68,7 @@ try {
       $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
   }
 
-    $arrComandos = array();
+    $arrComandos = [];
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
     $arrComandos[] = $strBotaoEspeciePadrao;
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';

@@ -52,35 +52,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     private $objProcedimentoAndamentoRN;
     private $fnEventoEnvioMetadados;
     private $objPenDebug;
-    private $objCacheMetadadosProtocolo=array();
+    private $objCacheMetadadosProtocolo=[];
 
-    private $arrPenMimeTypes = array(
-        "application/pdf",
-        "application/vnd.oasis.opendocument.text",
-        "application/vnd.oasis.opendocument.formula",
-        "application/vnd.oasis.opendocument.spreadsheet",
-        "application/vnd.oasis.opendocument.presentation",
-        "text/xml",
-        "text/rtf",
-        "text/html",
-        "text/plain",
-        "text/csv",
-        "image/gif",
-        "image/jpeg",
-        "image/png",
-        "image/svg+xml",
-        "image/tiff",
-        "image/bmp",
-        "audio/mp4",
-        "audio/midi",
-        "audio/ogg",
-        "audio/vnd.wave",
-        "video/avi",
-        "video/mpeg",
-        "video/mp4",
-        "video/ogg",
-        "video/webm"
-    );
+    private $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
 
 
     private $contadorDaBarraDeProgresso;
@@ -167,11 +141,11 @@ class ExpedirProcedimentoRN extends InfraRN {
               $objInfraException->lancarValidacoes();
           }else{
 
-              $arrErros = array();
+              $arrErros = [];
             foreach($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
                 $strAtributo = $objInfraValidacao->getStrAtributo();
               if(!array_key_exists($strAtributo, $arrErros)){
-                $arrErros[$strAtributo] = array();
+                $arrErros[$strAtributo] = [];
               }
                 $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
             }
@@ -390,14 +364,14 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function obterTamanhoTotalDaBarraDeProgressoREST($parObjProcesso) {
 
       $nrTamanhoMegasMaximo = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
-      $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
+      $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * 1024 ** 2); //Qtd de MB definido como parametro
 
       $totalBarraProgresso = 2;
       $this->contadorDaBarraDeProgresso = 2;
-      $arrHashIndexados = array();
+      $arrHashIndexados = [];
       foreach ($parObjProcesso['documentos'] as $objDoc)
       {
-        $arrComponentesDigitais = is_array($objDoc['componentesDigitais']) ? $objDoc['componentesDigitais'] : array($objDoc['componentesDigitais']);       
+        $arrComponentesDigitais = is_array($objDoc['componentesDigitais']) ? $objDoc['componentesDigitais'] : [$objDoc['componentesDigitais']];       
         foreach ($arrComponentesDigitais as $objComponenteDigital) {
           $strHashComponente = ProcessoEletronicoRN::getHashFromMetaDadosREST($objComponenteDigital['hash']);
           if(!in_array($strHashComponente, $arrHashIndexados)){
@@ -418,7 +392,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function listarRepositoriosDeEstruturas()
         {
-        $dadosArray = array();
+        $dadosArray = [];
         $arrObjRepositorioDTO = $this->objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
       foreach ($arrObjRepositorioDTO as $repositorio) {
             $dadosArray[$repositorio->getNumId()] = $repositorio->getStrNome();
@@ -476,7 +450,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       if (!is_null($arrObjEnvioParcialDTO) && count($arrObjEnvioParcialDTO) > 0) {
         if (count($arrObjEnvioParcialDTO) > 1) {
-          $arrIdUnidadesParaEnvioPendentes = array();
+          $arrIdUnidadesParaEnvioPendentes = [];
           foreach ($arrObjEnvioParcialDTO as $value) {
             $arrIdUnidadesParaEnvioPendentes[] = $value->getNumIdUnidadePen();
           }
@@ -519,7 +493,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         ];
       }
 
-      $objProcesso = $this->atribuirProdutorProcessoREST($objProcesso, $objProcedimentoDTO->getNumIdUsuarioGeradorProtocolo(), $objProcedimentoDTO->getNumIdUnidadeGeradoraProtocolo());
+      $objProcesso = $this->atribuirProdutorProcessoREST($objProcesso, $objProcedimentoDTO->getNumIdUsuarioGeradorProtocolo());
     
       $objProcesso = $this->atribuirDataHoraDeRegistroREST($objProcesso, $objProcedimentoDTO->getDblIdProcedimento());
     
@@ -552,7 +526,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException("Módulo do Tramita: Não foi possível obter andamentos do processo {$objProcesso['protocolo']}");
       }
 
-      $arrObjOperacao = array();
+      $arrObjOperacao = [];
       foreach ($arrObjAtividadeDTO as $objAtividadeDTO) {
 
         $objOperacao = [
@@ -577,13 +551,12 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Muda o estado de um procedimento
-    *
-    * @param object $objProcesso
-    * @param string $strStaEstado
-    * @throws InfraException
-    * @return null
-    */
+     * Muda o estado de um procedimento
+     *
+     * @param object $objProcesso
+     * @param string $strStaEstado
+     * @throws InfraException
+     */
     public static function mudarEstadoProcedimento($objProcesso, $strStaEstado)
       {
       if(!isset($objProcesso)) {
@@ -609,7 +582,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAtributoAndamentoDTO->setStrNome('MOTIVO');
         $objAtributoAndamentoDTO->setStrIdOrigem(null);
         $objAtributoAndamentoDTO->setStrValor('Processo está em processamento devido ao seu trâmite externo para outra unidade.');
-        $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array($objAtributoAndamentoDTO));
+        $objAtividadeDTO->setArrObjAtributoAndamentoDTO([$objAtributoAndamentoDTO]);
 
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
@@ -626,13 +599,12 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Muda o estado de um procedimento
-    *
-    * @param object $objProcesso
-    * @param string $strStaEstado
-    * @throws InfraException
-    * @return null
-    */
+     * Muda o estado de um procedimento
+     *
+     * @param object $objProcesso
+     * @param string $strStaEstado
+     * @throws InfraException
+     */
     public static function mudarEstadoProcedimentoNormal($objProcesso, $strStaEstado)
       {
       //Muda o estado do Protocolo para normal
@@ -655,7 +627,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objSeiRN = new SeiRN();
       $objSeiRN->bloquearProcesso($objEntradaBloquearProcessoAPI);
 
-      $arrObjAtributoAndamentoDTO = array();
+      $arrObjAtributoAndamentoDTO = [];
 
       //Seta o repositrio de destino para constar no histrico
       $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
@@ -716,7 +688,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
       $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO));
-      $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array());
+      $objAtividadeDTO->setArrObjAtributoAndamentoDTO([]);
 
       //Gera o andamento de expedio abortada
       $objAtividadeRN = new AtividadeRN();
@@ -727,7 +699,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       {
       try{
         //Muda o status do protocolo para "Normal"
-        $arrObjAtributoAndamentoDTO = array();
+        $arrObjAtributoAndamentoDTO = [];
 
         $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
         $objAtributoAndamentoDTO->setStrNome('MOTIVO');
@@ -781,14 +753,14 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objProcedimentoHistoricoDTO = new ProcedimentoHistoricoDTO();
       $objProcedimentoHistoricoDTO->setDblIdProcedimento($dblIdProcedimento);
       $objProcedimentoHistoricoDTO->setStrStaHistorico(ProcedimentoRN::$TH_TOTAL);
-      $objProcedimentoHistoricoDTO->adicionarCriterio(array('IdTarefa','IdTarefa'), array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL), array(TarefaRN::$TI_GERACAO_PROCEDIMENTO, ProcessoeletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), InfraDTO::$OPER_LOGICO_OR);
+      $objProcedimentoHistoricoDTO->adicionarCriterio(['IdTarefa', 'IdTarefa'], [InfraDTO::$OPER_IGUAL, InfraDTO::$OPER_IGUAL], [TarefaRN::$TI_GERACAO_PROCEDIMENTO, ProcessoeletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO], InfraDTO::$OPER_LOGICO_OR);
       $objProcedimentoHistoricoDTO->setStrSinGerarLinksHistorico('N');
       $objProcedimentoHistoricoDTO->setNumMaxRegistrosRetorno(1);
       $objProcedimentoHistoricoDTO->setOrdNumIdTarefa(InfraDTO::$TIPO_ORDENACAO_ASC);
 
       if(isset($dblIdDocumento)){
         $objProcedimentoHistoricoDTO->setDblIdDocumento($dblIdDocumento);
-        $objProcedimentoHistoricoDTO->setNumIdTarefa(array(TarefaRN::$TI_GERACAO_DOCUMENTO, TarefaRN::$TI_RECEBIMENTO_DOCUMENTO, TarefaRN::$TI_DOCUMENTO_MOVIDO_DO_PROCESSO), InfraDTO::$OPER_IN);
+        $objProcedimentoHistoricoDTO->setNumIdTarefa([TarefaRN::$TI_GERACAO_DOCUMENTO, TarefaRN::$TI_RECEBIMENTO_DOCUMENTO, TarefaRN::$TI_DOCUMENTO_MOVIDO_DO_PROCESSO], InfraDTO::$OPER_IN);
       }
 
       $objProcedimentoDTOHistorico = $this->objProcedimentoRN->consultarHistoricoRN1025($objProcedimentoHistoricoDTO);
@@ -801,7 +773,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       return $objContexto;
     }
     
-    private function atribuirProdutorProcessoREST($objProcesso, $dblIdProcedimento, $numIdUnidadeGeradora)
+    private function atribuirProdutorProcessoREST($objProcesso, $dblIdProcedimento)
       {
       if(!isset($objProcesso)){
         throw new InfraException('Módulo do Tramita: Parâmetro $objProcesso não informado.');
@@ -843,7 +815,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrParticipantesDTO = $this->listarInteressados($dblIdProcedimento);
     
       if (isset($arrParticipantesDTO) && count($arrParticipantesDTO) > 0) {
-        $objProcesso['interessados'] = array();
+        $objProcesso['interessados'] = [];
     
         foreach ($arrParticipantesDTO as $participanteDTO) {
             $interessado = [
@@ -870,7 +842,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException('Módulo do Tramita: Documentos não encontrados.');
       }
 
-      $arrObjCompIndexadoPorIdDocumentoDTO = array();
+      $arrObjCompIndexadoPorIdDocumentoDTO = [];
       $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
       $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
@@ -881,7 +853,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
       }
       
-      $objProcesso['documentos'] = array();
+      $objProcesso['documentos'] = [];
       foreach ($arrDocumentosRelacionados as $ordem => $objDocumentosRelacionados) {
         $documentoDTO = $objDocumentosRelacionados["Documento"];
         $staAssociacao = $objDocumentosRelacionados["StaAssociacao"];
@@ -914,13 +886,13 @@ class ExpedirProcedimentoRN extends InfraRN {
           $documento['retirado'] = true;
         }
         if($documentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO){
-          $documento['hipoteseLegal'] = array(); // Inicializando a chave 'hipoteseLegal' como um array
+          $documento['hipoteseLegal'] = []; // Inicializando a chave 'hipoteseLegal' como um array
           $documento['hipoteseLegal']['identificacao'] = $objPenRelHipoteseLegalRN->getIdHipoteseLegalPEN($documentoDTO->getNumIdHipoteseLegalProtocolo());          
           //TODO: Adicionar nome da hipótese legal atribuida ao documento
         }
         $documento['dataHoraDeProducao'] = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
         $documento['dataHoraDeRegistro'] = $this->objProcessoEletronicoRN->converterDataWebService($documentoDTO->getDtaGeracaoProtocolo());
-        $documento['produtor'] = array(); // Inicializando a chave 'produtor' como um array        
+        $documento['produtor'] = []; // Inicializando a chave 'produtor' como um array        
         $usuarioDTO = $this->consultarUsuario($documentoDTO->getNumIdUsuarioGeradorProtocolo());
         if(isset($usuarioDTO)) {
           $documento['produtor']['nome'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($usuarioDTO->getStrNome(), 150), 'UTF-8', 'ISO-8859-1');
@@ -934,7 +906,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $documento['produtor']['unidade'] = []; // Inicializando a chave 'unidade' como um array
           $documento['produtor']['unidade']['nome'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($unidadeDTO->getStrDescricao(), 150), 'UTF-8', 'ISO-8859-1');
           $documento['produtor']['unidade']['tipo'] = self::STA_TIPO_PESSOA_ORGAOPUBLICO;
-          
+
           //TODO: Informar dados da estrutura organizacional (estruturaOrganizacional)
         }
         if(array_key_exists($documentoDTO->getDblIdDocumento(), $arrObjCompIndexadoPorIdDocumentoDTO)){
@@ -1058,20 +1030,20 @@ class ExpedirProcedimentoRN extends InfraRN {
     //a espécie documental e o nome do produtor serão obtidos para atribuição ao documento
       if($objComponenteDigitalDTO != null && $numCodigoEspecie == null) {
         if(isset($parObjMetadadosTramiteAnterior)){
-          $arrObjMetaDocumentosTramiteAnterior = array();
+          $arrObjMetaDocumentosTramiteAnterior = [];
 
           //Obtenção de lista de documentos do processo
           $objProcesso = $parObjMetadadosTramiteAnterior->processo;
           $objDocumento = $parObjMetadadosTramiteAnterior->documento;
-          $objProtocolo = isset($objProcesso) ? $objProcesso : $objDocumento;
+          $objProtocolo = $objProcesso ?? $objDocumento;
 
           $arrObjMetaDocumentosTramiteAnterior = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
           if(isset($arrObjMetaDocumentosTramiteAnterior) && !is_array($arrObjMetaDocumentosTramiteAnterior)){
-            $arrObjMetaDocumentosTramiteAnterior = array($arrObjMetaDocumentosTramiteAnterior);
+            $arrObjMetaDocumentosTramiteAnterior = [$arrObjMetaDocumentosTramiteAnterior];
           }
 
           //Indexação dos documentos pela sua ordem
-          $arrMetaDocumentosAnteriorIndexado = array();
+          $arrMetaDocumentosAnteriorIndexado = [];
           foreach ($arrObjMetaDocumentosTramiteAnterior as $objMetaDoc) {
             $arrMetaDocumentosAnteriorIndexado[$objMetaDoc->ordem] = $objMetaDoc;
           }
@@ -1092,10 +1064,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $strNomeEspecieProdutor = mb_convert_encoding($parDocumentoDTO->getStrNomeSerie(), 'UTF-8', 'ISO-8859-1');
       }
 
-      $parMetaDocumento['especie'] = array(
-        'codigo' => $numCodigoEspecie,
-        'nomeNoProdutor' => $strNomeEspecieProdutor
-      );
+      $parMetaDocumento['especie'] = ['codigo' => $numCodigoEspecie, 'nomeNoProdutor' => $strNomeEspecieProdutor];
   
 
       return $parMetaDocumento;
@@ -1161,7 +1130,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $arrObjDocumentoDTOAssociacao = $this->listarDocumentosRelacionados($dblIdProcedimento, $objDocumentoDTO->getDblIdDocumento());
       $strStaAssociacao = count($arrObjDocumentoDTOAssociacao) == 1 ? $arrObjDocumentoDTOAssociacao[0]['StaAssociacao'] : null;
       $arrObjDadosArquivos = $this->listarDadosArquivos($objDocumentoDTO, $strStaAssociacao);
-      $objDocumento['componentesDigitais'] = array();
+      $objDocumento['componentesDigitais'] = [];
       foreach ($arrObjDadosArquivos as $numOrdemComponente => $objDadosArquivos) {
 
         if(!isset($objDadosArquivos) || count($objDadosArquivos) == 0){
@@ -1173,7 +1142,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $strAlgoritmoHash = $objDadosArquivos['ALGORITMO_HASH_CONTEUDO'];
 
         //TODO: Revisar tal implementação para atender a gerao de hash de arquivos grandes
-        $objComponenteDigital = array();
+        $objComponenteDigital = [];
         $objComponenteDigital['ordem'] = $numOrdemComponente;
         $objComponenteDigital['nome'] = mb_convert_encoding($objDadosArquivos["NOME"], 'UTF-8', 'ISO-8859-1');
         $objComponenteDigital['hash'] = [
@@ -1236,7 +1205,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objDocumentoRN = new DocumentoRN();
       $objDocumentoDTOTarjas = $objDocumentoRN->consultarRN0005($objDocumentoDTOTarjas);
 
-      $dataTarjas = array();
+      $dataTarjas = [];
       $arrObjTarjas = $this->listarTarjasHTML($objDocumentoDTOTarjas);
       foreach ($arrObjTarjas as $strConteudoTarja) {
         $strConteudoTarja = trim(strip_tags($strConteudoTarja));
@@ -1255,13 +1224,13 @@ class ExpedirProcedimentoRN extends InfraRN {
       foreach ($resAssinatura as $keyOrder => $assinatura) {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade()); //7
-        $objAtividadeDTO->setNumIdTarefa(array(TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO), InfraDTO::$OPER_IN); // 5, 115
+        $objAtividadeDTO->setNumIdTarefa([TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO], InfraDTO::$OPER_IN); // 5, 115
         $objAtividadeDTO->retDthAbertura();
         $objAtividadeDTO->retNumIdAtividade();
         $objAtividadeRN = new AtividadeRN();
         $objAtividade = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
-        $objAssinaturaDigital = array();
+        $objAssinaturaDigital = [];
         $objAssinaturaDigital['razao'] = mb_convert_encoding($dataTarjas[$keyOrder], 'UTF-8', 'ISO-8859-1');
         $objAssinaturaDigital['observacao'] = mb_convert_encoding($dataTarjas[count($dataTarjas) - 1], 'UTF-8', 'ISO-8859-1');
         $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());      
@@ -1273,7 +1242,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           ];
           $objAssinaturaDigital['cadeiaDoCertificado'] = [
           'formato' => 'PKCS7',
-          'conteudo' => $assinatura->getStrP7sBase64() ? $assinatura->getStrP7sBase64() : 'vazio'
+          'conteudo' => $assinatura->getStrP7sBase64() ?: 'vazio'
           ];
         } else {
           $objAssinaturaDigital['hash'] = [
@@ -1317,7 +1286,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException('Módulo do Tramita: Parâmetro $objDocumentoDTO não informado.');
       }
 
-      $objInformacaoArquivo = array();
+      $objInformacaoArquivo = [];
       $objInformacaoArquivo['ALGORITMO_HASH_CONTEUDO'] = self::ALGORITMO_HASH_DOCUMENTO;
       $strProtocoloDocumentoFormatado = $objDocumentoDTO->getStrProtocoloDocumentoFormatado();
 
@@ -1401,7 +1370,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           // e verificar se a sigla do sistema mudou para SUPER
           $hashDoComponenteDigital = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $strConteudoAssinatura, true));
           if(InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && isset($hashDoComponenteDigitalAnterior) && $hashDoComponenteDigital <> $hashDoComponenteDigitalAnterior){
-            $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false, false, null, true, true, true, true);
+            $strConteudoAssinatura = $this->obterConteudoInternoAssinatura($objDocumentoDTO, false, false, null, true, true, true);
           }
 
           //Caso o hash ainda esteja inconsistente testaremos o caso de uso envio SEI3 e atualizado pra SEI4.0.3
@@ -1445,7 +1414,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $strNomeComponenteDigital = "";
           if($bolMultiplosComponentes){
             $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-            list($strCaminhoAnexoTemporario, $strNomeComponenteDigital) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+            [$strCaminhoAnexoTemporario, $strNomeComponenteDigital] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
             $strCaminhoAnexo = $strCaminhoAnexoTemporario;
           } else {
             $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
@@ -1455,7 +1424,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $strConteudoAssinatura = null;
 
            $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
-           list($strDadosComplementares, $strMimeType) = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
+           [$strDadosComplementares, $strMimeType] = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
 
           $objInformacaoArquivo['NOME'] = $strNomeComponenteDigital;
           $objInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
@@ -1488,7 +1457,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         } else {
           throw new InfraException("Módulo do Tramita: Componente digital do documento {$strProtocoloDocumentoFormatado} não pode ser localizado.");
         }
-      } elseif(in_array($objDocumentoDTO->getStrStaDocumento(), array(DocumentoRN::$TD_FORMULARIO_GERADO, DocumentoRN::$TD_FORMULARIO_AUTOMATICO))) {
+      } elseif(in_array($objDocumentoDTO->getStrStaDocumento(), [DocumentoRN::$TD_FORMULARIO_GERADO, DocumentoRN::$TD_FORMULARIO_AUTOMATICO])) {
         $strConteudoAssinatura = null;
         $strConteudoFS = $this->recuperarConteudoComponenteImutavel($objDocumentoDTO);
         if(!empty($strConteudoFS)){
@@ -1541,7 +1510,6 @@ class ExpedirProcedimentoRN extends InfraRN {
      * Tramita.gov.br, garantindo o envio da versão correta enviado originalmente e impedindo erros de hash por conta de
      * mudança na forma dinâmica de recuperação do conteúdo do documento
      *
-     * @param DocumentoDTO $objDocumentoDTO
      * @return str String contendo o conteúdo do documento
      */
     private function recuperarConteudoComponenteImutavel(DocumentoDTO $objDocumentoDTO){
@@ -1584,7 +1552,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     private function listarDadosArquivos($objDocumentoDTO, $strStaAssociacao){
       $numOrdemComponenteInicial = 1;
-      $arrObjInformacaoArquivo = array();
+      $arrObjInformacaoArquivo = [];
       $arrObjComponentesDigitaisDTO = $this->listarComponentesDigitaisUltimoTramite($objDocumentoDTO);
 
       if(empty($arrObjComponentesDigitaisDTO)){
@@ -1815,7 +1783,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function adicionarProcessosApensadosREST($objProcesso, $arrIdProcessoApensado)
       {
       if (isset($arrIdProcessoApensado) && is_array($arrIdProcessoApensado) && count($arrIdProcessoApensado) > 0) {
-        $objProcesso['processoApensado'] = array();
+        $objProcesso['processoApensado'] = [];
   
         foreach ($arrIdProcessoApensado as $idProcedimentoApensado) {
             $objProcesso['processoApensado'][] = $this->construirProcessoREST($idProcedimentoApensado);
@@ -1903,19 +1871,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       return $this->objParticipanteRN->listarRN0189($objParticipanteDTO);
     }
 
-    private function consultarProtocoloDocumento($numIdProcedimento)
-      {
-      $objProtocoloDTO = new ProtocoloDTO();
-
-      $objProtocoloDTO->setStrStaProtocolo(array(ProtocoloRN::$TP_DOCUMENTO_GERADO,ProtocoloRN::$TP_DOCUMENTO_RECEBIDO), InfraDTO::$OPER_IN);
-      $objProtocoloDTO->setStrStaProtocolo($staProtocolo);
-      $objProtocoloDTO->setDblIdProtocolo($numIdProcedimento);
-      $objProtocoloDTO->retTodos();
-      $objProtocoloDTO->retNumIdSerie();
-
-      return $this->objProtocoloRN->consultarRN0186($objProtocoloDTO); //TODO: Verificar regra de busca
-    }
-
     private function consultarAnexo($dblIdDocumento)
       {
       if(!isset($dblIdDocumento)){
@@ -1976,7 +1931,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         throw new InfraException('Módulo do Tramita: Parâmetro $idProcedimento não informado.');
       }
 
-      $arrObjDocumentoDTO = array();
+      $arrObjDocumentoDTO = [];
       $arrAssociacaoDocumentos = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($idProcedimento);
       $arrIdDocumentos = array_map(function($item){ return $item["IdProtocolo"];
       }, $arrAssociacaoDocumentos);
@@ -2010,17 +1965,14 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrObjDocumentoDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjDocumentoDTOBanco, 'IdDocumento');
 
         //Mantem ordenação definida pelo usuário, indicando qual a sua associação com o processo
-        $arrObjDocumentoDTO = array();
+        $arrObjDocumentoDTO = [];
         foreach($arrAssociacaoDocumentos as $objAssociacaoDocumento){
           $dblIdDocumento = $objAssociacaoDocumento["IdProtocolo"];
           $bolIdDocumentoExiste = array_key_exists($dblIdDocumento, $arrObjDocumentoDTOIndexado) && isset($arrObjDocumentoDTOIndexado[$dblIdDocumento]);
           $bolIdDocumentoFiltrado = is_null($idDblDocumentoFiltro) || ($dblIdDocumento == $idDblDocumentoFiltro);
 
           if ($bolIdDocumentoExiste && $bolIdDocumentoFiltrado){
-            $arrObjDocumentoDTO[] = array(
-              "Documento" => $arrObjDocumentoDTOIndexado[$dblIdDocumento],
-              "StaAssociacao" => $objAssociacaoDocumento["StaAssociacao"]
-            );
+            $arrObjDocumentoDTO[] = ["Documento" => $arrObjDocumentoDTOIndexado[$dblIdDocumento], "StaAssociacao" => $objAssociacaoDocumento["StaAssociacao"]];
           }
         }
       }
@@ -2115,9 +2067,9 @@ class ExpedirProcedimentoRN extends InfraRN {
         $arrComponentesDigitaisIndexadosDTO = InfraArray::indexarArrInfraDTO($arrComponentesDigitaisDTOBanco, "IdDocumento", true);
 
         //Construir objeto Componentes digitais
-        $arrHashComponentesEnviados = array();
+        $arrHashComponentesEnviados = [];
 
-        foreach ($arrComponentesDigitaisIndexadosDTO as $numIdDocumento => $arrComponentesDigitaisDTO) {
+        foreach ($arrComponentesDigitaisIndexadosDTO as $arrComponentesDigitaisDTO) {
           $bolMultiplosComponentes = count($arrComponentesDigitaisDTO) > 1;
           $this->corrigirNumeroOrdemComponentes($arrComponentesDigitaisDTO, $arrComponentesDigitaisDTO[0]->getStrProtocoloDocumentoFormatado());
           foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
@@ -2150,7 +2102,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $nrTamanhoArquivoMb = 0;
             $nrTamanhoBytesArquivo = 0;
             $nrTamanhoMegasMaximo = ProcessoEletronicoRN::obterTamanhoBlocoTransferencia();
-            $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
+            $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * 1024 ** 2); //Qtd de MB definido como parametro
 
             try {
                 //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
@@ -2166,19 +2118,19 @@ class ExpedirProcedimentoRN extends InfraRN {
                   if($bolMultiplosComponentes){
                       $numOrdemComponenteDigital = $objComponenteDigitalDTO->getNumOrdem();
                       $strCaminhoAnexoCompactado = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
-                      list($strCaminhoAnexoTemporario, ) = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
+                      [$strCaminhoAnexoTemporario, ] = ProcessoEletronicoRN::descompactarComponenteDigital($strCaminhoAnexoCompactado, $numOrdemComponenteDigital);
                       $strCaminhoAnexo = $strCaminhoAnexoTemporario;
                   } else {
                       $strCaminhoAnexo = $this->objAnexoRN->obterLocalizacao($objAnexoDTO);
                   }
 
                     $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo); //Tamanho total do arquivo
-                    $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / pow(1024, 2));
+                    $nrTamanhoArquivoMb = ($nrTamanhoBytesArquivo / 1024 ** 2);
 
                     //Método que irá particionar o arquivo em partes para realizar o envio
                     $this->particionarComponenteDigitalParaEnvio(
                     $strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
-                    $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmBloco
+                    $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco
                   );
 
                   //Finalizar o envio das partes do componente digital
@@ -2244,9 +2196,8 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objComponenteDigitalDTO->retTodos();
 
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-      $arrComponenteDigital=$objComponenteDigitalBD->listar($objComponenteDigitalDTO);
 
-      return $arrComponenteDigital;
+      return $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
 
 
     }
@@ -2324,55 +2275,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $arrOrdensAtualizadas = InfraArray::converterArrInfraDTO($arrComponentesDigitaisDTO, "Ordem");
       if(count($arrOrdensAtualizadas) != count(array_unique($arrOrdensAtualizadas))){
-        throw new InfraException("Módulo do Tramita: Falha identificada na definição da ordem dos componentes digitais do documento $strProtocoloDocumento");
-      }
-    }
-
-    /**
-    * Método responsável por realizar o particionamento do componente digital a ser enviado, de acordo com o parametro (TamanhoBlocoArquivoTransferencia)
-    * @author Josinaldo Júnior <josinaldo.junior@basis.com.br>
-    * @param $strCaminhoAnexo
-    * @param $dadosDoComponenteDigital
-    * @param $nrTamanhoArquivoMb
-    * @param $nrTamanhoMegasMaximo
-    * @param $nrTamanhoBytesMaximo
-    * @param $objComponenteDigitalDTO
-    * @throws InfraException
-    */
-    private function enviarComponenteDigitalParticionado($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo, $nrTamanhoBytesMaximo, $objComponenteDigitalDTO)
-      {
-      $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
-
-      //Abre o arquivo para leitura
-      $fp = fopen($strCaminhoAnexo, "rb");
-
-      try{
-        $inicio = 0;
-        //Lê o arquivo em partes para realizar o envio
-        for ($i = 1; $i <= $qtdPartes; $i++)
-        {
-          $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado())." (Componente digital: parte $i de $qtdPartes)");
-          $parteDoArquivo      = stream_get_contents($fp, $nrTamanhoBytesMaximo, $inicio);
-          $tamanhoParteArquivo = strlen($parteDoArquivo);
-
-          //Cria um objeto com as informa<E7><F5>es da parte do componente digital
-          $identificacaoDaParte = new stdClass();
-          $identificacaoDaParte->inicio = $inicio;
-          $identificacaoDaParte->fim = ($inicio + $tamanhoParteArquivo);
-
-          $dadosDoComponenteDigital->identificacaoDaParte = $identificacaoDaParte;
-          $dadosDoComponenteDigital->conteudoDaParteDeComponenteDigital = $parteDoArquivo;
-
-          $parametros = new stdClass();
-          $parametros->dadosDaParteDeComponenteDigital = $dadosDoComponenteDigital;
-
-          //Envia uma parte de um componente digital
-          $resultado = $this->objProcessoEletronicoRN->enviarParteDeComponenteDigital($parametros);
-          $inicio = ($nrTamanhoBytesMaximo * $i);
-        }
-      }
-      finally{
-        fclose($fp);
+        throw new InfraException("Falha identificada na definição da ordem dos componentes digitais do documento $strProtocoloDocumento");
       }
     }
 
@@ -2496,12 +2399,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function validarProcessoIncluidoBlocoEmAndamento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
-      $concluido = array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
-      );
+      $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
 
       $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
@@ -2539,11 +2437,9 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Valida existncia da Hiptese legal de Envio
-    * @param InfraException $objInfraException
-    * @param ProcedimentoDTO $objProcedimentoDTO
-    * @param string $strAtributoValidacao
-    */
+     * Valida existncia da Hiptese legal de Envio
+     * @param string $strAtributoValidacao
+     */
     private function validarHipoteseLegalEnvio(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
       {
       if ($objProcedimentoDTO->getStrStaNivelAcessoLocalProtocolo() == ProtocoloRN::$NA_RESTRITO) {
@@ -2642,7 +2538,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objProtocoloDTOBanco = new ProcedimentoDTO();
       $objProtocoloDTOBanco->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
       $objProtocoloDTOBanco->retStrStaEstadoProtocolo();
-      $objProtocoloDTOBanco = $objProcedimentoRN->consultarRN0201($objProtocoloDTOBanco);
+      $objProcedimentoRN->consultarRN0201($objProtocoloDTOBanco);
       $objProcedimentoRN->desbloquear([$objProcedimentoDTO]);
     }
 
@@ -2729,12 +2625,12 @@ class ExpedirProcedimentoRN extends InfraRN {
     public function trazerTextoSeContemValidacoes($objInfraException)
     {
       if ($objInfraException->contemValidacoes()) {
-        $arrErros = array();
+        $arrErros = [];
         $message = "";
         foreach ($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
           $strAtributo = $objInfraValidacao->getStrAtributo();
           if (!array_key_exists($strAtributo, $arrErros)) {
-            $arrErros[$strAtributo] = array();
+            $arrErros[$strAtributo] = [];
           }
           $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');
           $message .= $objInfraValidacao->getStrDescricao() . "\n";
@@ -2751,13 +2647,10 @@ class ExpedirProcedimentoRN extends InfraRN {
       switch ($strNivelSigilo) {
         case ProtocoloRN::$NA_PUBLICO:
             return self::STA_SIGILO_PUBLICO;
-        break;
         case ProtocoloRN::$NA_RESTRITO:
             return self::STA_SIGILO_RESTRITO;
-        break;
         case ProtocoloRN::$NA_SIGILOSO:
             return self::STA_SIGILO_SIGILOSO;
-        break;
       }
     }
 
@@ -2765,7 +2658,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     public function listarProcessosApensados($dblIdProcedimentoAtual, $idUnidadeAtual, $strPalavrasPesquisa = '', $numRegistros = 15)
       {
 
-      $arrObjProcessosApensados = array();
+      $arrObjProcessosApensados = [];
 
       try{
         $objInfraException = new InfraException();
@@ -2803,11 +2696,11 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objAtividadeDTO->adicionarCriterio($a, $b, $arrPalavrasPesquisa, $d);
         }
 
-        $arrResultado = array();
+        $arrResultado = [];
         $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
         $arrObjAtividadeDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjAtividadeDTO, 'ProtocoloFormatadoProtocolo', true);
 
-        foreach ($arrObjAtividadeDTOIndexado as $key => $value) {
+        foreach ($arrObjAtividadeDTOIndexado as $value) {
 
           if(is_array($value) && count($value) == 1) {
             $arrResultado[] = $value[0];
@@ -2835,7 +2728,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
 
-      $arrayProcedimentos = array();
+      $arrayProcedimentos = [];
 
       foreach($arrObjAtividadeDTO as $atividade){
         $arrayProcedimentos[$atividade->getDblIdProtocolo()][$atividade->getNumIdUnidade()] = 1;
@@ -2846,7 +2739,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function listarProcessosApensadosAvancado(AtividadeDTO $objAtividadeDTO, $dblIdProcedimentoAtual, $idUnidadeAtual, $strPalavrasPesquisa = '', $strDescricaoPesquisa = '', $numRegistros = 15) {
 
-      $arrObjProcessosApensados = array();
+      $arrObjProcessosApensados = [];
 
       try {
         $objInfraException = new InfraException();
@@ -2884,11 +2777,11 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objAtividadeDTO->adicionarCriterio($a, $b, $arrPalavrasPesquisa, $d);
         }
 
-        $arrResultado = array();
+        $arrResultado = [];
         $arrObjAtividadeDTO = $this->objAtividadeRN->listarRN0036($objAtividadeDTO);
         $arrObjAtividadeDTOIndexado = InfraArray::indexarArrInfraDTO($arrObjAtividadeDTO, 'ProtocoloFormatadoProtocolo', true);
 
-        foreach ($arrObjAtividadeDTOIndexado as $key => $value) {
+        foreach ($arrObjAtividadeDTOIndexado as $value) {
 
           if(is_array($value) && count($value) == 1) {
             $arrResultado[] = $value[0];
@@ -2916,7 +2809,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     * @throws InfraException
     */
     private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
-      $nrTamanhoBytesMaximo, $objComponenteDigitalDTO, $numIdTramite, $bolSinProcessamentoEmBloco = false)
+      $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco = false)
       {
       //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
       $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
@@ -2953,11 +2846,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           {
             $conteudoDaParteNaoEnviadaDoArquivo = stream_get_contents($fp, $nrTamanhoBytesMaximo, $parteComponenteNaoEnviada);
             $fim = ($parteComponenteNaoEnviada + strlen($conteudoDaParteNaoEnviadaDoArquivo));
-            try{
-              $this->enviarParteDoComponenteDigital($parteComponenteNaoEnviada, $fim, $conteudoDaParteNaoEnviadaDoArquivo, $dadosDoComponenteDigital);
-            }catch (Exception $e){
-              throw $e;
-            }
+            $this->enviarParteDoComponenteDigital($parteComponenteNaoEnviada, $fim, $conteudoDaParteNaoEnviadaDoArquivo, $dadosDoComponenteDigital);
             $i++;
           }
         }
@@ -3062,7 +2951,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objGenericoBD->cadastrar($objReciboTramiteDTO);
 
         if(isset($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)) {
-          $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
+          $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital = !is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital) ? [$objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital] : $objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital;
           if($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital && is_array($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital)){
             foreach($objReciboEnvio->reciboDeEnvio->hashDoComponenteDigital as $strHashComponenteDigital){
               $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
@@ -3085,11 +2974,10 @@ class ExpedirProcedimentoRN extends InfraRN {
     }
 
     /**
-    * Atualiza os dados do protocolo somente para o modulo PEN
-    *
-    * @param int $dblIdProtocolo
-    * @return null
-    */
+     * Atualiza os dados do protocolo somente para o modulo PEN
+     *
+     * @param int $dblIdProtocolo
+     */
     private function atualizarPenProtocolo($dblIdProtocolo = 0){
 
       $objProtocoloDTO = new PenProtocoloDTO();
@@ -3156,11 +3044,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objPenBlocoProcessoDTO->retTodos();
       $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
       $objPenBlocoProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-      $objPenBlocoProcessoDTO->setNumIdAndamento(array(
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
-        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE
-      ), InfraDTO::$OPER_IN);
+      $objPenBlocoProcessoDTO->setNumIdAndamento([ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE], InfraDTO::$OPER_IN);
       $objPenBlocoProcessoDTO->setNumMaxRegistrosRetorno(1);
 
       $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
@@ -3222,7 +3106,6 @@ class ExpedirProcedimentoRN extends InfraRN {
         switch ($numSituacaoAtual) {
           case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO:
               throw new InfraException("Módulo do Tramita: O sistema destinatário já iniciou o recebimento desse processo, portanto não é possível realizar o cancelamento");
-          break;
           case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE:
               throw new InfraException("Módulo do Tramita: O sistema destinatário já recebeu esse processo, portanto não é possivel realizar o cancelamento");
           break;
@@ -3233,7 +3116,7 @@ class ExpedirProcedimentoRN extends InfraRN {
 
 // Solicitação de cancelamento de tramite de processo ao TramitaGOV.br
         // Somente solicita cancelamento ao PEN se processo ainda não estiver cancelado
-        if(!in_array($numSituacaoAtual, array(ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO))) {
+        if(!in_array($numSituacaoAtual, [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO])) {
           $this->objProcessoEletronicoRN->cancelarTramite($tramite->IDT);
         }
       }
@@ -3283,7 +3166,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objAtributoAndamentoDTOUser->setStrIdOrigem(null);
       $objAtributoAndamentoDTOUser->setStrValor(SessaoSEI::getInstance()->getStrNomeUsuario());
 
-      $objAtividadeDTO->setArrObjAtributoAndamentoDTO(array($objAtributoAndamentoDTOHora, $objAtributoAndamentoDTOUser));
+      $objAtividadeDTO->setArrObjAtributoAndamentoDTO([$objAtributoAndamentoDTOHora, $objAtributoAndamentoDTOUser]);
 
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
@@ -3311,13 +3194,7 @@ class ExpedirProcedimentoRN extends InfraRN {
           $objAtividadeDTO = new AtividadeDTO();
           $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
           $objAtividadeDTO->setNumIdTarefa(
-              array(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO),
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO),
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO),
-              ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO),
-          ),
+              [ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO), ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO)],
           InfraDTO::$OPER_IN);
           $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
           $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
@@ -3345,9 +3222,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objUnidadeDTO->setNumIdUnidade($idUnidade);
       $objUnidadeDTO->retTodos();
 
-      $objUnidadeDTO = $this->objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
-      return $objUnidadeDTO;
+      return $this->objUnidadeRN->consultarRN0125($objUnidadeDTO);
     }
 
     public function consultaUsuarioPk($idUsuario)
@@ -3357,9 +3232,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objUsuarioDTO->setNumIdUsuario($idUsuario);
       $objUsuarioDTO->retTodos();
 
-      $objUsuarioDTO = $this->objUsuarioRN->consultarRN0489($objUsuarioDTO);
-
-      return $objUsuarioDTO;
+      return $this->objUsuarioRN->consultarRN0489($objUsuarioDTO);
     }
 
     public function consultarProtocoloPk($idPrtocedimento)
@@ -3381,12 +3254,10 @@ class ExpedirProcedimentoRN extends InfraRN {
 
     public function consultaDocumentosProcesso($idPrtocedimento)
       {
-      $documentoRespArray = array();
       $documentoDTO = new DocumentoDTO();
       $documentoDTO->setDblIdProcedimento($idPrtocedimento);
       $documentoDTO->retTodos();
-      $documentoDTO = $this->objDocumentoRN->listarRN0008($documentoDTO);
-      return $documentoDTO;
+      return $this->objDocumentoRN->listarRN0008($documentoDTO);
     }
 
 
@@ -3414,13 +3285,12 @@ class ExpedirProcedimentoRN extends InfraRN {
      * Devido a estrutura interna do SEI, não existe uma forma de reaproveitar as regras de montagem de tarjas
      * de forma individual, restando como última alternativa a reprodução das regras até que esta seja encapsulado pelo core do SEI
      *
-     * @param DocumentoDTO $objDocumentoDTO
      * @return array
      */
     protected function listarTarjasHTMLConectado(DocumentoDTO $objDocumentoDTO) {
       try {
 
-        $arrResposta = array();
+        $arrResposta = [];
 
         $objAssinaturaDTO = new AssinaturaDTO();
         $objAssinaturaDTO->retStrNome();

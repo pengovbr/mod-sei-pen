@@ -21,7 +21,7 @@ class PENAgendamentoRN extends InfraRN
         $hipotesesPen = $processoEletronicoRN->consultarHipotesesLegais();
         $hipotesesPenDesativadas = $processoEletronicoRN->consultarHipotesesLegais(false);
 
-      $hipoteses = array();
+      $hipoteses = [];
       if (!empty($hipotesesPen) && !empty($hipotesesPen['hipotesesLegais'])) {
         $hipoteses = $hipotesesPen['hipotesesLegais'];
       }

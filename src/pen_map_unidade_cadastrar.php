@@ -22,7 +22,7 @@ try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
-    $arrComandos = array();
+    $arrComandos = [];
 
     //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
     $objPenParametroRN = new PenParametroRN();
@@ -181,7 +181,7 @@ try {
     $objUnidadeDTO->retNumIdUnidade();
     $objUnidadeDTO->retStrSigla();
     $objUnidadeDTO->retStrDescricao();
-    $arrMapIdUnidade = array();
+    $arrMapIdUnidade = [];
     $objPenUnidadeRN = new PenUnidadeRN();
   foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
       $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
@@ -210,10 +210,7 @@ try {
   $strJsInicializarRestricao = "";
   ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
-catch (InfraException $e) {
-    $objPagina->processarExcecao($e);
-}
-catch(Exception $e) {
+catch(InfraException|Exception $e) {
     $objPagina->processarExcecao($e);
 }
 
@@ -254,7 +251,7 @@ if ($objPenUnidadeDTO!= null)
       $objUnidadeDTO->retNumIdUnidade();
       $objUnidadeDTO->retStrSigla();
       $objUnidadeDTO->retStrDescricao();
-      $arrMapIdUnidade = array();
+      $arrMapIdUnidade = [];
       $objPenUnidadeRN = new PenUnidadeRN();
   foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
       $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();

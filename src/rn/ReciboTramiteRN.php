@@ -25,7 +25,7 @@ class ReciboTramiteRN extends InfraRN {
       $numIdTramite = $parArrParametros['id_tramite'];
       $numIdTarefa = $parArrParametros['id_tarefa'];
 
-      $arrObjDTO = array();
+      $arrObjDTO = [];
     switch ($numIdTarefa) {
       case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
         $objReciboTramiteDTO = new ReciboTramiteDTO();
@@ -69,9 +69,8 @@ class ReciboTramiteRN extends InfraRN {
       $objReciboTramiteDTO->retStrCadeiaCertificado();
 
       $objReciboTramiteBD = new ReciboTramiteRecebidoBD($this->getObjInfraIBanco());
-      $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
 
-      return $arrObjDTO;
+      return $objReciboTramiteBD->listar($objReciboTramiteDTO);
   }
 
 }

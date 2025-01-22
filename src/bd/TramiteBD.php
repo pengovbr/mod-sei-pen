@@ -9,11 +9,10 @@ class TramiteBD extends InfraBD {
   }
 
     /**
-     * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
-     *
-     * @param ProcessoEletronicoDTO $parObjProcessoEletronicoDTO
-     * @return void
-     */
+   * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
+   *
+   * @return void
+   */
   public function consultarUltimoTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite = null)
     {
     if(is_null($parObjProcessoEletronicoDTO)){
@@ -29,10 +28,7 @@ class TramiteBD extends InfraBD {
       $objTramiteDTOPesquisa->setNumMaxRegistrosRetorno(1);
       $objTramiteDTOPesquisa->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
       $objTramiteDTOPesquisa->setStrStaTipoProtocolo(
-          array(
-              ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO,
-              ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO
-          ),
+          [ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO, ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO],
           InfraDTO::$OPER_IN
       );
 

@@ -16,7 +16,7 @@ $objDebug = InfraDebug::getInstance();
 
 $acaoOrigem = $_GET['acao_origem'];
 
-PaginaSEI::getInstance()->salvarCamposPost(array('txtTipoOrigem'));
+PaginaSEI::getInstance()->salvarCamposPost(['txtTipoOrigem']);
 $txtTipoOrigem = PaginaSEI::getInstance()->recuperarCampo('txtTipoOrigem');
 
 try {
@@ -46,7 +46,6 @@ try {
           $objPenMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
           $objPenMapTipoProcedimentoRN->alterar($objPenMapTipoProcedimentoDTO);
         }
-        isset($_POST['hdnInfraItensSelecionados']);
         $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', 'Mapeamento de Tipo de Processo'), 5);
         header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_reativar&acao_origem=' . $_GET['acao'] . $strParametros));
         exit(0);
@@ -68,8 +67,8 @@ try {
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
-  $arrComandos = array();
-  $arrComandosFinal = array();
+  $arrComandos = [];
+  $arrComandosFinal = [];
 
   $arrComandos[] = '<button type="submit" accesskey="P" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
 
