@@ -20,7 +20,17 @@ class PenMapUnidadesFixture extends \FixtureBase
   public function cadastrar($dados = [])
     {
       $objPenUnidadeDTO = $this->consultar($dados);
+      $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
+
     if ($objPenUnidadeDTO) {
+      if ($objPenUnidadeDTO->getNumIdUnidadeRH() != $dados['Id'] ||
+        $objPenUnidadeDTO->getStrNomeUnidadeRH() != $dados['Nome'] ||
+        $objPenUnidadeDTO->getStrSiglaUnidadeRH() != $dados['Sigla']) {
+          $objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
+          $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
+          $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
+          $objPenUnidadeDTO = $objPenUnidadeBD->alterar($objPenUnidadeDTO);
+      }
         return $objPenUnidadeDTO;
     }
 
@@ -29,7 +39,6 @@ class PenMapUnidadesFixture extends \FixtureBase
       $this->objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
       $this->objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
 
-      $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
       return $objPenUnidadeBD->cadastrar($this->objPenUnidadeDTO);
   }
     
@@ -37,12 +46,35 @@ class PenMapUnidadesFixture extends \FixtureBase
     {
       $objPenUnidadeDTO = new \PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
-      $objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
-      $objPenUnidadeDTO->setStrNomeUnidadeRH($dados['Nome']);
-      $objPenUnidadeDTO->setStrSiglaUnidadeRH($dados['Sigla']);
       $objPenUnidadeDTO->retTodos();
 
       $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
       return $objPenUnidadeBD->consultar($objPenUnidadeDTO);
   }
+  
+  protected function listar($dados = [])
+  { 
+    $this->objPenUnidadeDTO->setNumIdUnidade($dados['IdUnidade']);
+    $this->objPenUnidadeDTO->retTodos();
+
+    $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
+    return $objPenUnidadeBD->listar($this->objPenUnidadeDTO);
+  }
+
+  public function excluir($dados = [])
+  {
+    if (is_numeric($dados['Id'])){
+      $objPenUnidadeDTO = new \PenUnidadeDTO();
+      $objPenUnidadeDTO->setNumIdUnidadeRH($dados['Id']);
+      $objPenUnidadeDTO->retTodos();
+      
+      $objPenUnidadeBD = new \PenUnidadeBD($this->inicializarObjInfraIBanco());
+      $objPenUnidadeDTO = $objPenUnidadeBD->consultar($objPenUnidadeDTO);
+      if ($objPenUnidadeDTO != null) {
+        return $objPenUnidadeBD->excluir($objPenUnidadeDTO);
+      }
+    }
+    return false;
+  }
+
 }
