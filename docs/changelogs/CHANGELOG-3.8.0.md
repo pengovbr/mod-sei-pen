@@ -23,7 +23,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 #### Nesta versão, foram corrigidos os seguintes erros:
 
 
-* **Bloqueio de tramitação à processos compartilhados via SEI FEDERAÇÃO:** Bloqueio de tramitação à processos compartilhados via SEI FEDERAÇÃO [#758](https://github.com/pengovbr/mod-sei-pen/issues/758);
+* **Altera a mensagem quando o tipo de processo não existe no sistema de destino:** Altera a mensagem quando o tipo de processo não existe no sistema de destino  [#781](https://github.com/pengovbr/mod-sei-pen/issues/781);
 
 
 #### **MELHORIAS**
