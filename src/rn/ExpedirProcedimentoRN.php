@@ -1799,7 +1799,6 @@ class ExpedirProcedimentoRN extends InfraRN {
       $objProcedimentoDTO->retDblIdProcedimento();
       $objProcedimentoDTO->retNumIdHipoteseLegalProtocolo();
       $objProcedimentoDTO->retStrProtocoloProcedimentoFormatadoPesquisa();
-      $objProcedimentoDTO->retStrIdProtocoloFederacaoProtocolo();
 
       return $this->objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
     }
@@ -2429,7 +2428,7 @@ class ExpedirProcedimentoRN extends InfraRN {
     private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao) {
       $bolProcedimentoCompartilhado = false;
       $objProtocoloFederacaoDTO = new ProtocoloFederacaoDTO();
-      $objProtocoloFederacaoDTO->setStrIdProtocoloFederacao($objProcedimentoDTO->getStrIdProtocoloFederacaoProtocolo());
+      $objProtocoloFederacaoDTO->setStrProtocoloFormatadoPesquisa($objProcedimentoDTO->getStrProtocoloProcedimentoFormatadoPesquisa());
       $objProtocoloFederacaoDTO->retStrProtocoloFormatado();
 
       $objProtocoloFederacaoRN = new ProtocoloFederacaoRN();
