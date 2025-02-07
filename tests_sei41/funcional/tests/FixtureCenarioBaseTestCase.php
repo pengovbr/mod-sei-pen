@@ -61,7 +61,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $objProtocoloAssuntoFixture = new RelProtocoloAssuntoFixture();
         $objProtocoloAssuntoFixture->carregar([
             'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-            'IdAssunto' => 377
+            'IdAssunto' => 393
         ]);
 
         $objAtributoAndamentoFixture = new AtributoAndamentoFixture();

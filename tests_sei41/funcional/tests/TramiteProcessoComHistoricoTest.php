@@ -62,12 +62,12 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
 
         if (array_key_exists("id_tramite", $idtEnviado[0])) {
             $idtEnviado=$idtEnviado[0]["id_tramite"];
-        } else {
+        }else{
             $idtEnviado=$idtEnviado[0]["ID_TRAMITE"];
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, PEN_ENDERECO_WEBSERVICE ."tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
@@ -81,11 +81,11 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
             switch($propriedades->chave){
  
                 case "CLASSIFICACAO_PrazoIntermediario_1":
-                     $this->assertEquals('15', $propriedades->valor );
+                     $this->assertEquals('5', $propriedades->valor );
                      break;
                    
                 case "CLASSIFICACAO_PrazoCorrente_1":
-                     $this->assertEquals('5', $propriedades->valor );
+                    $this->assertEquals('NA', $propriedades->valor );
                      break;
  
                 case "MODULO_PEN_VERSAO":
@@ -97,22 +97,20 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
                      break;
  
                 case "CLASSIFICACAO_Destinacao_1":
-                     $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
+                     $this->assertEquals('E', substr($propriedades->valor,0,1));
                      break;
  
                 case "CLASSIFICACAO_Observacao_1":
-                    $this->assertEquals('Quanto ao estabelecimento', substr($propriedades->valor,0,25) );
+                    $this->assertEquals('Incluem-se documentos referentes', substr($propriedades->valor,0,32));
                      break;
  
                 case "CLASSIFICACAO_Descricao_1":
-                     $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
+                     $this->assertEquals('RECEITA CORRENTE', $propriedades->valor);
                      break;                
                      
             }
         }
-
-        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
-
+        $this->assertEquals(9, count($saida->processo->itensHistorico) );
     }
 
 }
