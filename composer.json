@@ -2,7 +2,7 @@
   "config": {
     "vendor-dir": "./src/vendor",
     "platform": {
-      "php": "7.3.12"
+      "php": "8.2"
     }
   },
   "autoload-dev": {
@@ -11,7 +11,11 @@
     }
   }, 
   "require": {
-    "php": "7.3.12",
     "guzzlehttp/guzzle": "^7.0"
-  }
+  },
+      
+  "require-dev": {
+    "pheromone/phpcs-security-audit": "*" ,
+    "phpcompatibility/php-compatibility": "^9.3"
+}
 }

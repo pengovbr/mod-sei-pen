@@ -4,7 +4,7 @@
     <description>Padrão de codificação para o projeto SEI, SIP e INFRA</description>
 
     <config name="installed_paths"
-        value="vendor/pheromone/phpcs-security-audit,vendor/phpcompatibility/php-compatibility" />
+        value="src/vendor/pheromone/phpcs-security-audit,src/vendor/phpcompatibility/php-compatibility" />
     <config name="minimum_supported_wp_version" value="4.4.0" />
     <config name="testVersion" value="8.2-" />
 
@@ -23,7 +23,7 @@
     <arg value="np" />
 
     <!-- Configuração de regras de auditoria de segurança -->
-    <rule ref="vendor/pheromone/phpcs-security-audit/example_base_ruleset.xml" />
+    <rule ref="src/vendor/pheromone/phpcs-security-audit/example_base_ruleset.xml" />
 
     <!-- Configuração de regras de compatibilidade do código PHP, versão 5.4.x -->
     <rule ref="PHPCompatibility" />
