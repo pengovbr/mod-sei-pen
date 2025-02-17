@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- * 
- *
  */
 
 session_start();
@@ -56,14 +54,14 @@ try {
 
             foreach($arrParam['hdnInfraItensSelecionados'] as $dblIdMap) {
 
-                  $objPenRelHipoteseLegalDTO->setDblIdMap($dblIdMap);
-                  $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+                $objPenRelHipoteseLegalDTO->setDblIdMap($dblIdMap);
+                $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
             }
           }
           else {
 
-                $objPenRelHipoteseLegalDTO->setDblIdMap($arrParam['hdnInfraItensSelecionados']);
-                $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
+              $objPenRelHipoteseLegalDTO->setDblIdMap($arrParam['hdnInfraItensSelecionados']);
+              $objPenRelHipoteseLegalRN->excluir($objPenRelHipoteseLegalDTO);
           }
 
             $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
@@ -79,12 +77,12 @@ try {
       case PEN_RECURSO_BASE.'_desativar':
         if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
 
-          PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
+            PenRelHipoteseLegalRN::mudarEstado(explode(',', $arrParam['hdnInfraItensSelecionados']), 'N');
 
-          $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
+            $objPagina->adicionarMensagem('Desativado com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
 
-          header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao_retorno']).'&acao_origem='.htmlspecialchars($_GET['acao_origem'])));
-          exit(0);
+            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao_retorno']).'&acao_origem='.htmlspecialchars($_GET['acao_origem'])));
+            exit(0);
         }
         else {
                     
@@ -178,7 +176,7 @@ try {
 
     $numRegistros = count($arrObjPenRelHipoteseLegalDTO);
 
-  if(!empty($arrObjPenRelHipoteseLegalDTO)){
+  if(!empty($arrObjPenRelHipoteseLegalDTO)) {
 
       $strResultado = '';
 
@@ -357,24 +355,26 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('5em'); ?>
 
         <label for="id_barramento" class="infraLabelObrigatorio input-label-first">Hipótese Legal Tramita GOV.BR:</label>
-        <select name="id_barramento" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+        <select name="id_barramento" class="infraSelect input-field-first"<?php if($bolSomenteLeitura) : ?> disabled="disabled" readonly="readonly"<?php 
+       endif; ?>>
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
         </select> 
 
         <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-second">Hipótese Legal SEI - <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-        <select name="id_hipotese_legal" class="infraSelect input-field-second"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+        <select name="id_hipotese_legal" class="infraSelect input-field-second"<?php if($bolSomenteLeitura) : ?>  disabled="disabled" readonly="readonly"<?php 
+       endif; ?>>
             <?php print InfraINT::montarSelectArray('', 'Selecione', $objFiltroDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
         </select>        
 
     <?php $objPagina->fecharAreaDados(); ?>
 
-    <?php if($numRegistros > 0): ?>
+    <?php if($numRegistros > 0) : ?>
         <?php $objPagina->montarAreaTabela($strResultado, $numRegistros); ?>
         <?php //$objPagina->montarAreaDebug(); ?>
 <?php else: ?>
         <div style="clear:both;margin:2em"></div>
         <p>Nenhum mapeamento foi encontrado</p>
-    <?php endif; ?>
+<?php endif; ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>

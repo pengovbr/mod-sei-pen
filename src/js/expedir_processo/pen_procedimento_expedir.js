@@ -4,15 +4,16 @@
  * 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function sinalizarStatusConclusao(linkProcedimento,versao402=false){
+function sinalizarStatusConclusao(linkProcedimento,versao402=false)
+{
     let componente = document.querySelector('div.infraBarraProgresso');
-    if(componente){
+    if(componente) {
         componente.querySelector('.infraBarraProgressoMiolo').style.display = "none";
         componente.querySelector(".infraBarraProgressoBorda").style.backgroundColor = "green";
 
         let btnFechar = _criarBotaoFechar(linkProcedimento);
         btnFechar.classList.add('acaoBarraProgresso');
-        if(!versao402){
+        if(!versao402) {
             btnFechar.classList.remove('infraButton');
         }
         document.getElementById('divInfraAreaDadosDinamica').appendChild(btnFechar);
@@ -26,7 +27,8 @@ function sinalizarStatusConclusao(linkProcedimento,versao402=false){
  * @param {string} linkCancelarEnvioAjax 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcedimento){    
+function cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcedimento)
+{    
     let btnCancelarEnvio = document.getElementById('btnCancelarEnvio');
     btnCancelarEnvio.disabled = true;
     btnCancelarEnvio.value = 'Cancelando...';    
@@ -34,15 +36,17 @@ function cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcediment
     window.stop();
 
     // Executa o procedimento de cancelamento do trâmite
-    $.ajax({
-        type:"POST",
-        url: linkCancelarEnvioAjax,
-        dataType: "json",
-        data: "id_tramite="+idTramite,
-        success: function(result){
-            window.top.location = linkProcedimento;
+    $.ajax(
+        {
+            type:"POST",
+            url: linkCancelarEnvioAjax,
+            dataType: "json",
+            data: "id_tramite="+idTramite,
+            success: function (result) {
+                window.top.location = linkProcedimento;
+            }
         }
-    });
+    );
 }
 
 /**
@@ -50,9 +54,10 @@ function cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcediment
  * 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function adicionarBotaoFecharErro(linkProcedimento){
+function adicionarBotaoFecharErro(linkProcedimento)
+{
     let barraComandos = document.getElementById('divInfraBarraComandosSuperior')
-    if(barraComandos){
+    if(barraComandos) {
         barraComandos.appendChild(_criarBotaoFechar(linkProcedimento));
     }
 }
@@ -64,18 +69,21 @@ function adicionarBotaoFecharErro(linkProcedimento){
  * @param {string} linkCancelarEnvioAjax 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function adicionarBotaoCancelarEnvio(idTramite, linkCancelarEnvioAjax, linkProcedimento){
+function adicionarBotaoCancelarEnvio(idTramite, linkCancelarEnvioAjax, linkProcedimento)
+{
     let btnCancelar = document.createElement('input');
     btnCancelar.id = 'btnCancelarEnvio';
     btnCancelar.type = 'button';
     btnCancelar.value = 'Cancelar';
     btnCancelar.classList.add('infraButton', 'acaoBarraProgresso');
-    btnCancelar.addEventListener("click", function(event){
-        cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcedimento);
-    });
+    btnCancelar.addEventListener(
+        "click", function (event) {
+            cancelarEnvioProcesso(idTramite, linkCancelarEnvioAjax, linkProcedimento);
+        }
+    );
 
     let barraComandos = document.getElementById('divInfraAreaDadosDinamica')
-    if(barraComandos){
+    if(barraComandos) {
         barraComandos.appendChild(btnCancelar);
     }
 }
@@ -85,15 +93,18 @@ function adicionarBotaoCancelarEnvio(idTramite, linkCancelarEnvioAjax, linkProce
  * 
  * @param {string} linkProcedimento Link para visualização do procedimento
  */
-function _criarBotaoFechar(linkProcedimento){
+function _criarBotaoFechar(linkProcedimento)
+{
     let btnFechar = document.createElement('input');
     btnFechar.id = 'btnFechar';
     btnFechar.type = 'button';
     btnFechar.value = 'Fechar';
     btnFechar.className = 'infraButton';
-    btnFechar.addEventListener("click", function(event){
-        window.top.location = linkProcedimento;
-    });
+    btnFechar.addEventListener(
+        "click", function (event) {
+            window.top.location = linkProcedimento;
+        }
+    );
 
     return btnFechar;
 }

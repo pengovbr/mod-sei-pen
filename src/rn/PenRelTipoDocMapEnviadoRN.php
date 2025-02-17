@@ -4,20 +4,22 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class PenRelTipoDocMapEnviadoRN extends InfraRN
 {
-  public function __construct() {
+  public function __construct()
+    {
       parent::__construct();
   }
 
-  protected function inicializarObjInfraIBanco() {
+  protected function inicializarObjInfraIBanco()
+    {
       return BancoSEI::getInstance();
   }
 
 
     /**
-   * Lista mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
-   *
-   * @return array
-   */
+     * Lista mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
+     *
+     * @return array
+     */
   protected function listarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
     {
     try {
@@ -100,7 +102,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     /**
      * Exclui lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
      *
-     * @param PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO
+     * @param  PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO
      * @return void
      */
   protected function excluirControlado($parArrObjPenRelTipoDocMapEnviadoDTO)
@@ -125,7 +127,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     /**
      * Remove uma espécie documental da base de dados do SEI baseado em um código de espécie do Barramento
      *
-     * @param int $parNumIdEspecieDocumentla
+     * @param  int $parNumIdEspecieDocumentla
      * @return void
      */
   protected function excluirPorEspecieDocumentalControlado($parNumIdEspecieDocumental)
@@ -141,17 +143,17 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       }
 
     }catch(Exception $e){
-      throw new InfraException('Módulo do Tramita: Erro removendo Mapeamento de Tipos de Documento para envio pelo código de espécie.', $e);
+        throw new InfraException('Módulo do Tramita: Erro removendo Mapeamento de Tipos de Documento para envio pelo código de espécie.', $e);
     }
   }
 
   protected function contarConectado(PenRelTipoDocMapEnviadoDTO $parObjPenRelTipoDocMapEnviadoDTO)
     {
     try {
-      $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
-      return $objPenRelTipoDocMapEnviadoBD->contar($parObjPenRelTipoDocMapEnviadoDTO);
+        $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+        return $objPenRelTipoDocMapEnviadoBD->contar($parObjPenRelTipoDocMapEnviadoDTO);
     }catch(Exception $e){
-      throw new InfraException('Módulo do Tramita: Erro contando Mapeamento de Tipos de Documento para Envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro contando Mapeamento de Tipos de Documento para Envio.', $e);
     }
   }
 
@@ -197,7 +199,7 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
           $numTamNomeEspecie = strlen($strNomeEspecieDocumental);
           $numPosEspacoAdicional = strpos($strNomeTipoDocumento, ' ', min($numTamNomeEspecie, $numTamNomeTipoDoc));
-        if($numPosEspacoAdicional){
+        if($numPosEspacoAdicional) {
           // Avaliação com tamanho reduzido, caso seja um termo composto
           $numTamanhoReducao = max($numTamNomeEspecie, $numPosEspacoAdicional);
           $strNomeTipoDocReduzido = substr($strNomeTipoDocumento, 0, $numTamanhoReducao);
@@ -216,11 +218,11 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         }
       }
 
-      if(isset($numMelhorSimilaridade)){
+      if(isset($numMelhorSimilaridade)) {
           // Realiza o mapeamento do tipo de documento com a espécie documental similar
           $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapEnviadoDTO();
           $objPenRelTipoDocMapEnviadoDTO->setNumIdSerie($numIdTipoDocumento);
-        if($objPenRelTipoDocMapEnviadoRN->contar($objPenRelTipoDocMapEnviadoDTO) == 0){
+        if($objPenRelTipoDocMapEnviadoRN->contar($objPenRelTipoDocMapEnviadoDTO) == 0) {
             $objPenRelTipoDocMapEnviadoDTO->setNumCodigoEspecie($numIdEspecieSimilar);
             $objPenRelTipoDocMapEnviadoRN->cadastrar($objPenRelTipoDocMapEnviadoDTO);
         }

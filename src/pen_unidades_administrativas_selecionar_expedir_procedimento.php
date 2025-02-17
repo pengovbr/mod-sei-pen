@@ -1,10 +1,10 @@
 <?php
 /**
-* 04/04/2019 - criado por Josinaldo Júnior
-*/
+ * 04/04/2019 - criado por Josinaldo Júnior
+ */
 
 try {
-    require_once DIR_SEI_WEB.'/SEI.php';
+    include_once DIR_SEI_WEB.'/SEI.php';
 
     session_start();
     $objSessaoSEI = SessaoSEI::getInstance();
@@ -87,7 +87,7 @@ try {
     var nivelEstrutura = 1;
     var mais  = '/infra_css/imagens/seta_abaixo.gif';
     var menos = '/infra_css/imagens/seta_acima.gif';
-    var dirImagensArvore = '<?= $strImagensArvore ?>';
+    var dirImagensArvore = '<?php echo $strImagensArvore ?>';
     var vazio = `/infra_js/arvore/${dirImagensArvore}empty.gif`;
     var joinBottonImg = `/infra_js/arvore/${dirImagensArvore}joinbottom.gif`;
     var joinImg = `/infra_js/arvore/${dirImagensArvore}join.gif`;

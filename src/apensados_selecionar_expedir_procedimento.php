@@ -134,17 +134,17 @@ PaginaSEI::getInstance()->fecharJavaScript();
 PaginaSEI::getInstance()->fecharHead();
 PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmApensadosLista" method="post" action="<?=PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_procedimento='.htmlspecialchars($_GET['id_procedimento'])))?>">
+<form id="frmApensadosLista" method="post" action="<?php echo PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_procedimento='.htmlspecialchars($_GET['id_procedimento'])))?>">
   <?
   //PaginaSEI::getInstance()->montarBarraLocalizacao($strTitulo);
   PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
   PaginaSEI::getInstance()->abrirAreaDados('5em');
   ?>
   <label id="lblNumeroProcesso" for="txtNumeroProcesso" class="infraLabelOpcional">Nº do Processo:</label>
-  <input type="text" id="txtNumeroProcesso" name="txtNumeroProcesso" class="infraText" value="<?=$strSiglaPesquisa?>"  tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+  <input type="text" id="txtNumeroProcesso" name="txtNumeroProcesso" class="infraText" value="<?php echo $strSiglaPesquisa?>"  tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados()?>" />
   
   <label id="lblDescricaoProcesso" for="txtDescricaoProcesso" class="infraLabelOpcional">Descrição do Procesoo:</label>
-  <input type="text" id="txtDescricaoProcesso" name="txtDescricaoProcesso" class="infraText" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="<?=$strDescricaoPesquisa?>" />
+  <input type="text" id="txtDescricaoProcesso" name="txtDescricaoProcesso" class="infraText" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados()?>" value="<?php echo $strDescricaoPesquisa?>" />
   
   <?
   PaginaSEI::getInstance()->fecharAreaDados();  

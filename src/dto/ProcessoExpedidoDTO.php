@@ -4,19 +4,22 @@ require_once DIR_SEI_WEB.'/SEI.php';
 /**
  *
  */
-class ProcessoExpedidoDTO extends InfraDTO {
+class ProcessoExpedidoDTO extends InfraDTO
+{
 
   public function __construct()
-  {
+    {
       // Força o JOIN com todas as tabelas
       parent::__construct(true);
   }
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'protocolo';
   }
 
-  public function montar() {
+  public function montar()
+    {
 
       // Protocolo
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProtocolo', 'id_protocolo');

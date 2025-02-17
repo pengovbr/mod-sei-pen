@@ -26,8 +26,8 @@ try {
         $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
         $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
-      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
-        $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
+      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+          $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
       }
       else {
           $strTitulo =  sprintf('Novo %s', PEN_PAGINA_TITULO);
@@ -37,7 +37,7 @@ try {
     case PEN_RECURSO_BASE.'_visualizar':
         $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
         $bolSomenteLeitura = true;
-       $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
+        $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
         break;
 
 
@@ -80,7 +80,7 @@ try {
       exit(0);
   }
     // Ao por GET + ID esta carregando o formulrio
-  else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
+  else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
 
       $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
       $objPenRelHipoteseLegalDTO->setDblIdMap($_GET[PEN_PAGINA_GET_ID]);
@@ -90,7 +90,7 @@ try {
       $objPenRelHipoteseLegalDTO = $objPenRelHipoteseLegalRN->consultar($objPenRelHipoteseLegalDTO);
   }
 
-  if(empty($objPenRelHipoteseLegalDTO)){
+  if(empty($objPenRelHipoteseLegalDTO)) {
       $objPenRelHipoteseLegalDTO = new PenRelHipoteseLegalDTO();
       $objPenRelHipoteseLegalDTO->setNumIdHipoteseLegal(0);
       $objPenRelHipoteseLegalDTO->setNumIdBarramento(0);
@@ -193,12 +193,14 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('12em'); ?>
 
     <label for="id_barramento" class="infraLabelObrigatorio input-label-third">Hipótese Legal Tramita GOV.BR:</label>
-    <select name="id_barramento" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <select name="id_barramento" class="infraSelect input-field-third"<?php if($bolSomenteLeitura) : ?> disabled="disabled" readonly="readonly"<?php 
+   endif; ?>>
         <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdBarramento(), $arrMapIdBarramento); ?>
     </select>
 
     <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal SEI - <?php print $objSessao->getStrSiglaOrgaoUnidadeAtual(); ?>:</label>
-    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura) : ?>  disabled="disabled" readonly="readonly"<?php 
+   endif; ?>>
         <?php print InfraINT::montarSelectArray('null', '', $objPenRelHipoteseLegalDTO->getNumIdHipoteseLegal(), $arrMapIdHipoteseLegal); ?>
     </select>
 

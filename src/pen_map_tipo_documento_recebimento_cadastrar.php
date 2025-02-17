@@ -28,8 +28,8 @@ try {
         $arrComandos[] = '<button type="button" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_documento_recebimento_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';   
         $bolDesativarCampos = false;
 
-      if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])){
-        $strTitulo = 'Editar Mapeamento de Tipo de Documento para Recebimento';
+      if(array_key_exists('codigo_especie', $_GET) && !empty($_GET['codigo_especie'])) {
+          $strTitulo = 'Editar Mapeamento de Tipo de Documento para Recebimento';
       }
       else {
           $strTitulo = 'Novo Mapeamento de Tipo de Documento para Recebimento';
@@ -73,7 +73,7 @@ try {
       exit(0);
   }
     // Ação por GET + ID esta carregando o formulário
-  else if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])){
+  else if(array_key_exists('id_mapeamento', $_GET) && !empty($_GET['id_mapeamento'])) {
 
       $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
       $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($_GET['id_mapeamento']);
@@ -82,7 +82,7 @@ try {
       $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->consultar($objPenRelTipoDocMapRecebidoDTO);
   }
 
-  if(empty($objPenRelTipoDocMapRecebidoDTO)){
+  if(empty($objPenRelTipoDocMapRecebidoDTO)) {
       $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
       $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie(0);
       $objPenRelTipoDocMapRecebidoDTO->setNumIdSerie(0);
@@ -95,7 +95,7 @@ try {
 } 
 catch (InfraException $e) {
 
-  if(preg_match('/Duplicate/', $e->getStrDescricao())){
+  if(preg_match('/Duplicate/', $e->getStrDescricao())) {
       $objPaginaSEI->adicionarMensagem('Nenhuma das duas chaves pode estar sendo utilizada em outra relação', InfraPagina::$TIPO_MSG_INFORMACAO);
   }
   else {        
@@ -168,12 +168,14 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
     <?php $objPaginaSEI->abrirAreaDados('12em'); ?>
 
     <label for="codigo_especie" class="infraLabelObrigatorio input-label-first">Espécie Documental Tramita GOV.BR:</label>
-    <select name="codigo_especie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <select name="codigo_especie" class="infraSelect input-field-first"<?php if($bolSomenteLeitura) : ?> disabled="disabled" readonly="readonly"<?php 
+   endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumCodigoEspecie(), $arrEspecieDocumental); ?>
     </select>
 
-    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento SEI - <?=PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?>:</label>
-    <select name="id_serie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura): ?> disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <label for="id_serie" class="infraLabelObrigatorio input-label-third">Tipo de Documento SEI - <?php echo PaginaSEI::tratarHTML($objSessao->getStrSiglaOrgaoUnidadeAtual())?>:</label>
+    <select name="id_serie" class="infraSelect input-field-third"<?php if($bolSomenteLeitura) : ?> disabled="disabled" readonly="readonly"<?php 
+   endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenRelTipoDocMapRecebidoDTO->getNumIdSerie(), $objTipoDocMapRN->listarParesSerie()); ?>
     </select>
 

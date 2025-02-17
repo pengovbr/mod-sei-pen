@@ -119,7 +119,7 @@ PaginaSEI::getInstance()->abrirBody($strTitulo, 'onload="inicializar();"');
 $acao_origem = $_GET['acao_origem'];
 ?>
 <form id="frmEspeciePadraoAtribuir" method="post" onsubmit="return OnSubmitForm();" 
-  action="<?= SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_padrao_salvar&acao_origem=' . $acao_origem) ?>"
+  action="<?php echo SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_padrao_salvar&acao_origem=' . $acao_origem) ?>"
 >
   <?
   PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
@@ -137,9 +137,9 @@ $acao_origem = $_GET['acao_origem'];
 
     <?php if ($parametro != null) { ?>
       <label id="lblTipoDocumentoPadrao" for="selTipoDocumentoPadrao" accesskey="P" class="infraLabelObrigatorio"><span class="infraTeclaAtalho">Tipo de Processo Padrão:</span></label>
-      <select id="PEN_TIPO_PROCESSO_EXTERNO" name="PEN_TIPO_PROCESSO_EXTERNO" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
-      <?php $strItensSelTiposDocumentos = InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome') ?>
-        <?= $strItensSelTiposDocumentos ?>
+      <select id="PEN_TIPO_PROCESSO_EXTERNO" name="PEN_TIPO_PROCESSO_EXTERNO" class="infraSelect" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>">
+        <?php $strItensSelTiposDocumentos = InfraINT::montarSelectArrInfraDTO('null', '&nbsp;', $parametro->getStrValor(), $arrObjTipoProcedimentoDTO, 'IdTipoProcedimento', 'Nome') ?>
+        <?php echo $strItensSelTiposDocumentos ?>
       </select>
     <?php } ?>
 

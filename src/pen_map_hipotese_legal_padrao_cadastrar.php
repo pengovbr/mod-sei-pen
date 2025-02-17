@@ -39,7 +39,7 @@ try {
     case PEN_RECURSO_BASE.'_visualizar':
         $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao=principal&acao_origem=' . $_GET['acao'])) . '\';"><span class="infraTeclaAtalho">F</span>echar</button>';
         $bolSomenteLeitura = true;
-       $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
+        $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
         break;
 
 
@@ -159,7 +159,8 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
     <label for="id_hipotese_legal" class="infraLabelObrigatorio input-label-first">Hipótese Legal:</label>
 
-    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura): ?>  disabled="disabled" readonly="readonly"<?php endif; ?>>
+    <select name="id_hipotese_legal" class="infraSelect input-field-first"<?php if($bolSomenteLeitura) : ?>  disabled="disabled" readonly="readonly"<?php 
+   endif; ?>>
         <?php print InfraINT::montarSelectArray('', 'Selecione', $objPenParametroDTO->getStrValor(), $arrMapIdHipoteseLegal); ?>
     </select>
 

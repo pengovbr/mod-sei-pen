@@ -2,13 +2,16 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class ReceberTramiteRecusadoDTO extends InfraDTO {
+class ReceberTramiteRecusadoDTO extends InfraDTO
+{
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return null;
   }
 
-  public function montar() {
+  public function montar()
+    {
 
       $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'id_tramite');
       $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdProtocolo', 'id_protocolo');

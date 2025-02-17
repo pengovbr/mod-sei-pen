@@ -2,24 +2,26 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class TramiteBD extends InfraBD {
+class TramiteBD extends InfraBD
+{
 
-  public function __construct(InfraIBanco $objInfraIBanco){
+  public function __construct(InfraIBanco $objInfraIBanco)
+    {
       parent::__construct($objInfraIBanco);
   }
 
     /**
-   * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
-   *
-   * @return void
-   */
+     * Recupera os dados do último trâmite válido realizado para determinado número de processo eletrônico
+     *
+     * @return void
+     */
   public function consultarUltimoTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite = null)
     {
-    if(is_null($parObjProcessoEletronicoDTO)){
+    if(is_null($parObjProcessoEletronicoDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro [parObjProcessoEletronicoDTO] não informado');
     }
 
-    if(!$parObjProcessoEletronicoDTO->isSetDblIdProcedimento() && !$parObjProcessoEletronicoDTO->isSetStrNumeroRegistro()){
+    if(!$parObjProcessoEletronicoDTO->isSetDblIdProcedimento() && !$parObjProcessoEletronicoDTO->isSetStrNumeroRegistro()) {
         throw new InfraException('Módulo do Tramita: Nenhuma das chaves de localização do processo eletrônico foi atribuído. Informe o IdProcedimento ou NumeroRegistro.');
     }
 
@@ -32,15 +34,15 @@ class TramiteBD extends InfraBD {
           InfraDTO::$OPER_IN
       );
 
-    if(!is_null($parStrStaTipoTramite)){
+    if(!is_null($parStrStaTipoTramite)) {
         $objTramiteDTOPesquisa->setStrStaTipoTramite($parStrStaTipoTramite);
     }
 
-    if($parObjProcessoEletronicoDTO->isSetDblIdProcedimento()){
+    if($parObjProcessoEletronicoDTO->isSetDblIdProcedimento()) {
         $objTramiteDTOPesquisa->setNumIdProcedimento($parObjProcessoEletronicoDTO->getDblIdProcedimento());
     }
 
-    if($parObjProcessoEletronicoDTO->isSetStrNumeroRegistro()){
+    if($parObjProcessoEletronicoDTO->isSetStrNumeroRegistro()) {
         $objTramiteDTOPesquisa->setStrNumeroRegistro($parObjProcessoEletronicoDTO->getStrNumeroRegistro());
     }
 

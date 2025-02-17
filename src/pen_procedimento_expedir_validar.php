@@ -46,7 +46,7 @@ try {
       $objExpedirProcedimentosRN->validarProcessoIncluidoBlocoEmAndamento($objInfraException, $objProcedimentoDTO, $strProtocoloFormatado);
 
       // Processos apensados
-    if(array_key_exists('selProcedimentosApensados', $_POST) && is_array($_POST['selProcedimentosApensados'])){
+    if(array_key_exists('selProcedimentosApensados', $_POST) && is_array($_POST['selProcedimentosApensados'])) {
       foreach($_POST['selProcedimentosApensados'] as $dblIdProcedimento) {
         $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($dblIdProcedimento);
         $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
@@ -69,7 +69,7 @@ if($objInfraException->contemValidacoes()) {
     $arrErros = [];
   foreach($objInfraException->getArrObjInfraValidacao() as $objInfraValidacao) {
       $strAtributo = $objInfraValidacao->getStrAtributo();
-    if(!array_key_exists($strAtributo, $arrErros)){
+    if(!array_key_exists($strAtributo, $arrErros)) {
         $arrErros[$strAtributo] = [];
     }
       $arrErros[$strAtributo][] = mb_convert_encoding($objInfraValidacao->getStrDescricao(), 'UTF-8', 'ISO-8859-1');

@@ -145,7 +145,7 @@ $objPagina->abrirJavaScript();
 ?>
 
 function inicializar(){
-    if ('<?= htmlspecialchars($_GET['acao'])?>'=='pen_parametros_configuracao_selecionar'){
+    if ('<?php echo htmlspecialchars($_GET['acao'])?>'=='pen_parametros_configuracao_selecionar'){
         infraReceberSelecao();
         document.getElementById('btnFecharSelecao').focus();
     }else{
@@ -183,7 +183,7 @@ $objPagina->fecharHead();
 $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 
-<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?=$objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'_salvar&acao_origem='.htmlspecialchars($_GET['acao']))?>">
+<form id="frmInfraParametroCadastro" method="post" onsubmit="return OnSubmitForm();" action="<?php echo $objSessao->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'_salvar&acao_origem='.htmlspecialchars($_GET['acao']))?>">
     <?
     $objPagina->montarBarraComandosSuperior($arrComandos);
     $objPagina->getInstance()->abrirAreaDados('30em');
@@ -191,7 +191,7 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
 
        //Esse parâmetro não aparece, por já existencia de uma tela só para alteração do próprio.
         if ($parametro->getStrNome() != 'HIPOTESE_LEGAL_PADRAO' && $parametro->getStrNome() != 'PEN_TIPO_PROCESSO_EXTERNO') {
-        ?> <label id="lbl<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?= PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?=  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?
+        ?> <label id="lbl<?php echo PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" for="txt<?php echo PaginaSEI::tratarHTML($parametro->getStrNome()); ?>" accesskey="N" class="infraLabelObrigatorio"><?php echo  PaginaSEI::tratarHTML($parametro->getStrDescricao()); ?>:</label> <?
         }
 
         //Constrói o campo de valor

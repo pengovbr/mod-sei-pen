@@ -4,27 +4,28 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 class EnviarReciboTramiteRN extends InfraRN
 {
-  private $objProcessoEletronicoRN;
+    private $objProcessoEletronicoRN;
 
   public function __construct()
-  {
-    parent::__construct();
-    $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
+    {
+      parent::__construct();
+      $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
   }
 
   protected function inicializarObjInfraIBanco()
-  {
-    return BancoSEI::getInstance();
+    {
+      return BancoSEI::getInstance();
   }
 
     /**
      * Gera o recibo do tramite para o destinário informando o recebimento
      * do procedimento.
      *
-     * @param int $numIdTramite
+     * @param  int $numIdTramite
      * @return array
      */
-  protected function gerarReciboTramite($numIdTramite){
+  protected function gerarReciboTramite($numIdTramite)
+    {
 
       $arrStrHashConteudo = [];
 
@@ -55,11 +56,11 @@ class EnviarReciboTramiteRN extends InfraRN
   protected function cadastrarReciboTramiteRecebimento($strNumeroRegistro = '', $parNumIdTramite = 0, $strHashConteudo = '', $parArrayHash = [])
     {
     try {
-      $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
+        $objBD = new ReciboTramiteRecebidoBD($this->inicializarObjInfraIBanco());
 
-      $objDTO = new ReciboTramiteRecebidoDTO();
-      $objDTO->setStrNumeroRegistro($strNumeroRegistro);
-      $objDTO->setNumIdTramite($parNumIdTramite);
+        $objDTO = new ReciboTramiteRecebidoDTO();
+        $objDTO->setStrNumeroRegistro($strNumeroRegistro);
+        $objDTO->setNumIdTramite($parNumIdTramite);
 
       if(!empty($strHashConteudo)) { $objDTO->setStrHashAssinatura($strHashConteudo);
       }
@@ -80,13 +81,13 @@ class EnviarReciboTramiteRN extends InfraRN
           $objBD->cadastrar($objReciboTramiteHashDTO);
       }
     } catch (Exception $e) {
-      $strMensagem = "Falha na obtenção do recibo de recebimento de protocolo do trâmite $parNumIdTramite. $e";
-      LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
+        $strMensagem = "Falha na obtenção do recibo de recebimento de protocolo do trâmite $parNumIdTramite. $e";
+        LogSEI::getInstance()->gravar($strMensagem, InfraLog::$ERRO);
     } 
   }
 
   public function enviarReciboTramiteProcesso($parNumIdTramite, $parArrayHash, $parDthRecebimento = null)
-  {
+    {
     try{
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
         date_default_timezone_set('America/Sao_Paulo');
@@ -98,14 +99,14 @@ class EnviarReciboTramiteRN extends InfraRN
         //Verifica se todos os componentes digitais já foram devidamente recebido
         $arrObjTramite = $this->objProcessoEletronicoRN->consultarTramites($parNumIdTramite);
       if(!isset($arrObjTramite) || count($arrObjTramite) != 1) {
-        throw new InfraException("Módulo do Tramita: Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
+          throw new InfraException("Módulo do Tramita: Trâmite não pode ser localizado pelo identificador $parNumIdTramite.");
       }
 
         $objTramite = $arrObjTramite[0];
         $strNumeroRegistro = $objTramite->NRE;
 
       if($objTramite->situacaoAtual != ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-        throw new InfraException(sprintf('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite (%s).', $objTramite->situacaoAtual));
+          throw new InfraException(sprintf('Situação do Trâmite diferente da permitida para o envio do recibo de conclusão de trâmite (%s).', $objTramite->situacaoAtual));
       }
 
         $dthRecebimentoComponentesDigitais = $this->obterDataRecebimentoComponentesDigitais($objTramite);
@@ -119,8 +120,8 @@ class EnviarReciboTramiteRN extends InfraRN
         sort($parArrayHash);
 
       foreach ($parArrayHash as $strHashConteudo) {
-        if(!empty($strHashConteudo)){
-              $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
+        if(!empty($strHashConteudo)) {
+            $strReciboTramite .= "<hashDoComponenteDigital>$strHashConteudo</hashDoComponenteDigital>";
         }
       }
         $strReciboTramite  .= "</recibo>";
@@ -133,7 +134,7 @@ class EnviarReciboTramiteRN extends InfraRN
         $detalhes = null;
         $mensagem = InfraException::inspecionar($e);
 
-      if(isset($strReciboTramite)){
+      if(isset($strReciboTramite)) {
           $detalhes = "Falha na validação do recibo de conclusão do trâmite do processo. Recibo: \n" . $strReciboTramite;
       }
 
@@ -141,22 +142,23 @@ class EnviarReciboTramiteRN extends InfraRN
     }
   }
 
-  private function obterDataRecebimentoComponentesDigitais($parObjTramite){
+  private function obterDataRecebimentoComponentesDigitais($parObjTramite)
+    {
 
     if(!isset($parObjTramite)) {
-      throw new InfraException('Módulo do Tramita: Parâmetro $parObjTramite não informado.');
+        throw new InfraException('Módulo do Tramita: Parâmetro $parObjTramite não informado.');
     }
 
     if(!is_array($parObjTramite->itensHistorico->operacao)) {
-      $parObjTramite->itensHistorico->operacao = [$parObjTramite->itensHistorico->operacao];
+        $parObjTramite->itensHistorico->operacao = [$parObjTramite->itensHistorico->operacao];
     }
 
     foreach ($parObjTramite->itensHistorico->operacao as $operacao) {
       if($operacao['situacao'] == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-        return ProcessoEletronicoRN::converterDataSEI($operacao['dataHora']);
+          return ProcessoEletronicoRN::converterDataSEI($operacao['dataHora']);
       }
     }
 
-    return null;
+      return null;
   }
 }

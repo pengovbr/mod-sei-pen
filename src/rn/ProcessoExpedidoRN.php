@@ -2,7 +2,8 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class ProcessoExpedidoRN extends InfraRN {
+class ProcessoExpedidoRN extends InfraRN
+{
 
   public function __construct()
     {

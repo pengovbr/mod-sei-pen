@@ -3,13 +3,16 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class PenProtocoloDTO extends InfraDTO {
+class PenProtocoloDTO extends InfraDTO
+{
     
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'md_pen_protocolo';
   }
 
-  public function montar() {
+  public function montar()
+    {
              
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProtocolo', 'id_protocolo'); 
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SinObteveRecusa', 'sin_obteve_recusa');        

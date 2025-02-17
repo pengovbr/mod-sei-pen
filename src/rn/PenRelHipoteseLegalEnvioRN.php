@@ -4,32 +4,36 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Description of PenRelHipoteseLegalEnvioRN
- *
- *
  */
-class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
+class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN
+{
 
-  protected function listarConectado(PenRelHipoteseLegalDTO $objDTO){
+  protected function listarConectado(PenRelHipoteseLegalDTO $objDTO)
+    {
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_listar', __METHOD__, $objDTO);
       return parent::listarInterno($objDTO);
   }
 
-  protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO){
+  protected function consultarConectado(PenRelHipoteseLegalDTO $objDTO)
+    {
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_consultar', __METHOD__, $objDTO);
       return parent::consultarInterno($objDTO);
   }
 
-  protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO){
+  protected function alterarControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_alterar', __METHOD__, $objDTO);
       return parent::alterarInterno($objDTO);
   }
 
-  protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO){
+  protected function cadastrarControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_cadastrar', __METHOD__, $objDTO);
       return parent::cadastrarInterno($objDTO);
   }
 
-  protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO){
+  protected function excluirControlado(PenRelHipoteseLegalDTO $objDTO)
+    {
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_hipotese_legal_envio_excluir', __METHOD__, $objDTO);
       return parent::excluirInterno($objDTO);
   }
@@ -37,10 +41,12 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
 
     /**
      * Pega o ID hipotese sei para buscar o ID do barramento
-     * @param integer $numIdHipoteseSEI
+     *
+     * @param  integer $numIdHipoteseSEI
      * @return integer
      */
-  protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI) {
+  protected function getIdHipoteseLegalPENConectado($numIdHipoteseSEI)
+    {
       $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
 
       // Mapeamento da hipotese legal remota
@@ -58,13 +64,14 @@ class PenRelHipoteseLegalEnvioRN extends PenRelHipoteseLegalRN {
     }
   }
 
-  /**
-   * Contar HipoteseLegal
-   *
-   * @return int
-   * @throws InfraException
-   */
-  protected function contarConectado(PenRelHipoteseLegalDTO $objDTO) {
+    /**
+     * Contar HipoteseLegal
+     *
+     * @return int
+     * @throws InfraException
+     */
+  protected function contarConectado(PenRelHipoteseLegalDTO $objDTO)
+    {
     try {
         $objGenericoBD = new GenericoBD($this->inicializarObjInfraIBanco());
         return $objGenericoBD->contar($objDTO);
