@@ -26,7 +26,7 @@ try {
 
   if(empty($_SERVER['argv'])) {
 
-    print PenConsoleRN::format('Sucesso: ', 'blue', true);
+      print PenConsoleRN::format('Sucesso: ', 'blue', true);
   }
     print $strRetorno.PHP_EOL;
 }

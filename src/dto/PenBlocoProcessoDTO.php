@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB . '/SEI.php';
 
 /**
  * Data Transfer Object de parâmetros do módulo PEN
- *
- *
  */
 class PenBlocoProcessoDTO extends InfraDTO
 {
@@ -15,7 +13,8 @@ class PenBlocoProcessoDTO extends InfraDTO
       return 'md_pen_bloco_processo';
   }
 
-  public function getStrNomeSequenciaNativa() {
+  public function getStrNomeSequenciaNativa()
+    {
       return 'md_pen_seq_bloco_processo';
   }
 

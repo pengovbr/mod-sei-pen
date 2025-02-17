@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- * 
- *
  */
 
 session_start();
@@ -57,12 +55,12 @@ try {
     $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Envio';
 
     $strBotaoEspeciePadrao = "";
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_consultar')){
+  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_consultar')) {
       $strBotaoEspeciePadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Espécie Documental padrão do Tramita GOV.BR" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Espécie Padrão</button>';
   }
         
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_atribuir')){
-      $bolPadraoNaoAtribuido = empty((new PenParametroRN())->getParametro( "PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
+  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_documento_envio_padrao_atribuir')) {
+      $bolPadraoNaoAtribuido = empty((new PenParametroRN())->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
       $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
       $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de espécie documental padrão para envio de processos" : "";
       $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_documento_envio_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
@@ -101,7 +99,7 @@ try {
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapEnviadoDTO);
     $numRegistros = count($arrObjPenRelTipoDocMapEnviadoDTO);
 
-  if(!empty($arrObjPenRelTipoDocMapEnviadoDTO)){
+  if(!empty($arrObjPenRelTipoDocMapEnviadoDTO)) {
         
       $strResultado = '';
       $strResultado .= '<table width="99%" class="infraTable">'."\n";
@@ -258,7 +256,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 
     <?php $objPaginaSEI->fecharAreaDados(); ?>
     
-    <?php if($numRegistros > 0): ?>
+    <?php if($numRegistros > 0) : ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
     <?php else: ?>
         <div style="clear:both"></div>

@@ -4,12 +4,12 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Classe gererica de persistncia com o banco de dados
- *
- *
  */
-class PenParametroBD extends InfraBD {
+class PenParametroBD extends InfraBD
+{
 
-  public function setValor($strNome, $strValor) {
+  public function setValor($strNome, $strValor)
+    {
 
       $sql = '';
       $sql .= ' SELECT count(*) as existe';
@@ -39,7 +39,8 @@ class PenParametroBD extends InfraBD {
       return $this->getObjInfraIBanco()->executarSql($sql);
   }
 
-  public function isSetValor($strNome) {
+  public function isSetValor($strNome)
+    {
 
       $sql = '';
       $sql .= ' SELECT valor';

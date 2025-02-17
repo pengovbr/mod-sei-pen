@@ -5,13 +5,16 @@ require_once DIR_SEI_WEB.'/SEI.php';
 /**
  * Repostório da entidade ReciboTramite
  */
-class ReciboTramiteRN extends InfraRN {
+class ReciboTramiteRN extends InfraRN
+{
 
-  public function __construct() {
+  public function __construct()
+    {
       parent::__construct();
   }
 
-  protected function inicializarObjInfraIBanco() {
+  protected function inicializarObjInfraIBanco()
+    {
       return BancoSEI::getInstance();
   }
 
@@ -28,16 +31,16 @@ class ReciboTramiteRN extends InfraRN {
       $arrObjDTO = [];
     switch ($numIdTarefa) {
       case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO):
-        $objReciboTramiteDTO = new ReciboTramiteDTO();
-        $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
-        $objReciboTramiteDTO->retStrNumeroRegistro();
-        $objReciboTramiteDTO->retNumIdTramite();
-        $objReciboTramiteDTO->retDthRecebimento();
-        $objReciboTramiteDTO->retStrHashAssinatura();
-        $objReciboTramiteDTO->retStrCadeiaCertificado();
+          $objReciboTramiteDTO = new ReciboTramiteDTO();
+          $objReciboTramiteDTO->setNumIdTramite($numIdTramite);
+          $objReciboTramiteDTO->retStrNumeroRegistro();
+          $objReciboTramiteDTO->retNumIdTramite();
+          $objReciboTramiteDTO->retDthRecebimento();
+          $objReciboTramiteDTO->retStrHashAssinatura();
+          $objReciboTramiteDTO->retStrCadeiaCertificado();
 
-        $objReciboTramiteBD = new ReciboTramiteBD($this->getObjInfraIBanco());
-        $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
+          $objReciboTramiteBD = new ReciboTramiteBD($this->getObjInfraIBanco());
+          $arrObjDTO = $objReciboTramiteBD->listar($objReciboTramiteDTO);
           break;
 
       case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO):
@@ -58,7 +61,8 @@ class ReciboTramiteRN extends InfraRN {
       return $arrObjDTO;
   }
 
-  protected function downloadReciboEnvioConectado($numIdTramite) {
+  protected function downloadReciboEnvioConectado($numIdTramite)
+    {
 
       $objReciboTramiteDTO = new ReciboTramiteEnviadoDTO();
       $objReciboTramiteDTO->setNumIdTramite($numIdTramite);

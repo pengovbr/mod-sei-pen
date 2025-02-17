@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- *
- *
  */
 try {
     session_start();
@@ -27,9 +25,9 @@ try {
 
     switch ($_GET['metodo']){
 
-        // @join_tec US008.02 (#23092)
+      // @join_tec US008.02 (#23092)
       case 'baixarReciboEnvio':
-        header('Content-Disposition: attachment; filename="recibo_de_envio_do_tramite.xml"');
+          header('Content-Disposition: attachment; filename="recibo_de_envio_do_tramite.xml"');
 
         try {
 
@@ -40,7 +38,7 @@ try {
             $arrObjReciboTramiteDTO = $objReciboTramiteRN->downloadReciboEnvio($_GET['id_tramite']);
 
             if(empty($arrObjReciboTramiteDTO)) {
-                        throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
+                throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
             }
 
             $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
@@ -52,24 +50,24 @@ try {
 
             foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
-                      $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
+                $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
 
-                      print '<reciboDeEnvio>';
-                      print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
-                      print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
-                      print '<dataDeRecebimentoDoUltimoComponenteDigital>'.date('c', $dthTimeStamp).'</dataDeRecebimentoDoUltimoComponenteDigital>';
+                print '<reciboDeEnvio>';
+                print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
+                print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
+                print '<dataDeRecebimentoDoUltimoComponenteDigital>'.date('c', $dthTimeStamp).'</dataDeRecebimentoDoUltimoComponenteDigital>';
 
-              if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)){
-                  $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
-                  ksort($arrObjReciboTramiteHashDTO);
+              if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)) {
+                    $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
+                    ksort($arrObjReciboTramiteHashDTO);
 
                 foreach($arrObjReciboTramiteHashDTO as $hash){
-                            print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
+                  print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
                 }
               }
-                      print '</reciboDeEnvio>';
-                      print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
-                      print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
+                print '</reciboDeEnvio>';
+                print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
+                print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
             }
 
           }
@@ -92,52 +90,52 @@ try {
 
           if(array_key_exists('id_tramite', $_GET) && array_key_exists('id_tarefa', $_GET)) {
 
-              $objReciboTramiteRN = new ReciboTramiteRN();
-              $arrParametros = ["id_tramite" => $_GET['id_tramite'], "id_tarefa" => $_GET['id_tarefa']];
-              $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($arrParametros);
+            $objReciboTramiteRN = new ReciboTramiteRN();
+            $arrParametros = ["id_tramite" => $_GET['id_tramite'], "id_tarefa" => $_GET['id_tarefa']];
+            $arrObjReciboTramiteDTO = $objReciboTramiteRN->listarPorAtividade($arrParametros);
 
-              if(empty($arrObjReciboTramiteDTO)) {
-                  throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
-              }
+            if(empty($arrObjReciboTramiteDTO)) {
+                throw new InfraException('Módulo do Tramita: O recibo ainda não foi recebido.');
+            }
 
-              $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
-              $objReciboTramiteHashDTO->setNumIdTramite($_GET['id_tramite']);
-              $objReciboTramiteHashDTO->retStrHashComponenteDigital();
+            $objReciboTramiteHashDTO = new ReciboTramiteHashDTO();
+            $objReciboTramiteHashDTO->setNumIdTramite($_GET['id_tramite']);
+            $objReciboTramiteHashDTO->retStrHashComponenteDigital();
 
-              if($_GET['id_tarefa'] == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
-                  $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO);
+            if($_GET['id_tarefa'] == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
+                $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_RECEBIDO);
 
-              }else{
-                  $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
+            }else{
+                $objReciboTramiteHashDTO->setStrTipoRecibo(ProcessoEletronicoRN::$STA_TIPO_RECIBO_CONCLUSAO_ENVIADO);
 
-              }
+            }
 
-              $arrObjReciboTramiteHashDTO = $objGenericoBD->listar($objReciboTramiteHashDTO);
+            $arrObjReciboTramiteHashDTO = $objGenericoBD->listar($objReciboTramiteHashDTO);
 
-              foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
+            foreach($arrObjReciboTramiteDTO as $objReciboTramiteDTO) {
 
-                  $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
+                        $dthTimeStamp = InfraData::getTimestamp($objReciboTramiteDTO->getDthRecebimento());
 
-                  print '<recibo>';
-                  print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
-                  print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
-                  print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
+                        print '<recibo>';
+                        print '<IDT>'.$objReciboTramiteDTO->getNumIdTramite().'</IDT>';
+                        print '<NRE>'.$objReciboTramiteDTO->getStrNumeroRegistro().'</NRE>';
+                        print '<dataDeRecebimento>'.date('c', $dthTimeStamp).'</dataDeRecebimento>';
 
-                  $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
+                        $strHashAssinatura = $objReciboTramiteDTO->getStrHashAssinatura();
 
-                if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)){
-                      $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
-                      ksort($arrObjReciboTramiteHashDTO);
+              if($arrObjReciboTramiteHashDTO && is_array($arrObjReciboTramiteHashDTO)) {
+                    $arrObjReciboTramiteHashDTO = InfraArray::converterArrInfraDTO($arrObjReciboTramiteHashDTO, 'HashComponenteDigital');
+                    ksort($arrObjReciboTramiteHashDTO);
 
-                  foreach($arrObjReciboTramiteHashDTO as $hash){
-                    print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
-                  }
+                foreach($arrObjReciboTramiteHashDTO as $hash){
+                  print '<hashDoComponenteDigital>'.$hash.'</hashDoComponenteDigital>';
                 }
-
-                  print '</recibo>';
-                  print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
-                  print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
               }
+
+                print '</recibo>';
+                print '<cadeiaDoCertificado>'.$objReciboTramiteDTO->getStrCadeiaCertificado().'</cadeiaDoCertificado>';
+                print '<hashDaAssinatura>'.$objReciboTramiteDTO->getStrHashAssinatura().'</hashDaAssinatura>';
+            }
 
           }
         }
@@ -186,12 +184,12 @@ try {
 
     $numRegistros = count($arrObjProcedimentoAndamentoDTO);
 
-  if(!empty($arrObjProcedimentoAndamentoDTO)){
+  if(!empty($arrObjProcedimentoAndamentoDTO)) {
 
       $arrAgruparProcedimentoAndamentoDTO = [];
     foreach($arrObjProcedimentoAndamentoDTO as &$objProcedimentoAndamentoDTO){
       if(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO) == $objProcedimentoAndamentoDTO->getNumTarefa()) {
-          $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaDestino();
+        $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaDestino();
       } elseif (ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO) == $objProcedimentoAndamentoDTO->getNumTarefa()) {
           $numIdEstrutura = $objProcedimentoAndamentoDTO->getNumIdEstruturaOrigem();
       } elseif (ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO) == $objProcedimentoAndamentoDTO->getNumTarefa()) {
@@ -200,7 +198,7 @@ try {
 
 
         $key = $objProcedimentoAndamentoDTO->getDblIdTramite() . '-' . $numIdEstrutura . '-' . $objProcedimentoAndamentoDTO->getNumTarefa();
-          $arrAgruparProcedimentoAndamentoDTO[$key][] = $objProcedimentoAndamentoDTO;
+        $arrAgruparProcedimentoAndamentoDTO[$key][] = $objProcedimentoAndamentoDTO;
     }
 
       $strResultado = '';
@@ -218,11 +216,11 @@ try {
         $objReturn = PenAtividadeRN::retornaAtividadeDoTramiteFormatado($dblIdTramite, $numIdEstrutura, $numTarefa);
         $strResultado .= '<tr>';
         $strResultado .= '<td valign="middle" colspan="2">'
-            . '<img class="imagPlus" align="absbottom" src=' . ProcessoEletronicoINT::getCaminhoIcone("/infra_js/arvore/plus.gif") . ' onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
-            . ''.$objReturn->strMensagem.'</td>';
+        . '<img class="imagPlus" align="absbottom" src=' . ProcessoEletronicoINT::getCaminhoIcone("/infra_js/arvore/plus.gif") . ' onclick="toggleTr('.$idCount.', this)" title="Maximizar" />'
+        . ''.$objReturn->strMensagem.'</td>';
         $strResultado .= '<td valign="middle" align="center">';
 
-      if($numTarefa == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)){
+      if($numTarefa == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO)) {
           $strResultado .= '<a href="'.$objSessaoSEI->assinarLink($strProprioLink.'&metodo=baixarReciboEnvio&id_tarefa='.$numTarefa.'&id_tramite='.$dblIdTramite).'"><img class="infraImg" src="'.PENIntegracao::getDiretorio().'/imagens/page_red.png" alt="Recibo de Confirmação de Envio" title="Recibo de Confirmação de Envio" /></a>';
       }
 
@@ -244,7 +242,7 @@ try {
             $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_sucesso.png" title="Concluído" alt="Concluído" />';
         }
         else {
-           $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Falhou" alt="Falhou" />';
+            $strResultado .= '<img src="'.PENIntegracao::getDiretorio().'/imagens/estado_falhou.png" title="Falhou" alt="Falhou" />';
         }
 
           $strResultado .= '</td>';
@@ -316,7 +314,7 @@ $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
 <form id="frmAcompanharEstadoProcesso" method="post" action="<?php print $objSessaoSEI->assinarLink($strProprioLink); ?>">
-  <?php if($numRegistros > 0): ?>
+  <?php if($numRegistros > 0) : ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
     <?php else: ?>
         <div style="clear:both"></div>

@@ -2,17 +2,21 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class PenRelTipoDocMapRecebidoDTO extends InfraDTO {
+class PenRelTipoDocMapRecebidoDTO extends InfraDTO
+{
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'md_pen_rel_doc_map_recebido';
   }
 
-  public function getStrNomeSequenciaNativa() {
+  public function getStrNomeSequenciaNativa()
+    {
       return 'md_pen_seq_rel_doc_map_recebid';
   }
 
-  public function montar() {
+  public function montar()
+    {
 
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdMap', 'id_mapeamento');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'CodigoEspecie', 'codigo_especie');

@@ -4,10 +4,9 @@
  *
  * Adicionar no arquivo ConfiguracaoSEI.php [SEI][LogPenWs] um array com a lista
  * de métodos, do api-pen.wsdl, que serão logados
- *
- *
  */
-class LogPenWs {
+class LogPenWs
+{
 
     /**
      * Instância do webservice

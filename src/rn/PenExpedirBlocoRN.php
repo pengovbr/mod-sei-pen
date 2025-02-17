@@ -35,37 +35,37 @@ class PenExpedirBlocoRN extends InfraRN
     
   private function validarParametrosBloco(InfraException $objInfraException, PenBlocoProcessoDTO $objBlocoDTO)
     {
-    if(!isset($objBlocoDTO)){
+    if(!isset($objBlocoDTO)) {
         $objInfraException->adicionarValidacao('Parâmetro $objBlocoDTO não informado.');
     }
 
       //TODO: Validar se repositrio de origem foi informado
-    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioOrigem())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioOrigem())) {
         $objInfraException->adicionarValidacao('Identificação do repositório de estruturas da unidade atual não informado.');
     }
 
       //TODO: Validar se unidade de origem foi informado
-    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeOrigem())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeOrigem())) {
         $objInfraException->adicionarValidacao('Identificação da unidade atual no repositório de estruturas organizacionais não informado.');
     }
 
       //TODO: Validar se repositrio foi devidamente informado
-    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioDestino())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdRepositorioDestino())) {
         $objInfraException->adicionarValidacao('Repositório de estruturas organizacionais não informado.');
     }
 
       //TODO: Validar se unidade foi devidamente informada
-    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeDestino()) || InfraString::isBolVazia($objBlocoDTO->getStrUnidadeDestino())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUnidadeDestino()) || InfraString::isBolVazia($objBlocoDTO->getStrUnidadeDestino())) {
         $objInfraException->adicionarValidacao('Unidade de destino não informado.');
     }
 
       //TODO: Validar se usuário foi devidamente informada
-    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUsuario())){
+    if (InfraString::isBolVazia($objBlocoDTO->getNumIdUsuario())) {
         $objInfraException->adicionarValidacao('Usuário não informado.');
     }
         
       //TODO: Validar se usuário foi devidamente informada
-    if (InfraString::isBolVazia($objBlocoDTO->getDthRegistro())){
+    if (InfraString::isBolVazia($objBlocoDTO->getDthRegistro())) {
         $objInfraException->adicionarValidacao('Data do registro não informada.');
     }
 

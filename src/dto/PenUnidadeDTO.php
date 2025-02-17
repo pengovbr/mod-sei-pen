@@ -10,32 +10,34 @@ require_once DIR_SEI_WEB.'/SEI.php';
  * Crio a classe com extendida de UnidadeDTO em função dos métodos de UnidadeRN,
  * que força o hinting para UnidadeDTO, então não gera erro usar PenUnidadeDTO
  * com o UnidadeBD e UnidadeRN
- * 
  *
  * @see http://php.net/manual/pt_BR/language.oop5.typehinting.php
  */
-class PenUnidadeDTO extends UnidadeDTO {
+class PenUnidadeDTO extends UnidadeDTO
+{
 
-  public function getStrNomeTabela(): string {
+  public function getStrNomeTabela(): string
+    {
       return 'md_pen_unidade';
   }
     
-  public function montar(): void {
+  public function montar(): void
+    {
         
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeUnidadeRH', 'nome_unidade_rh');
-    $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SiglaUnidadeRH', 'sigla_unidade_rh');
-    $this->configurarPK('IdUnidade', InfraDTO::$TIPO_PK_INFORMADO);
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidade', 'id_unidade');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdUnidadeRH', 'id_unidade_rh');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NomeUnidadeRH', 'nome_unidade_rh');
+      $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'SiglaUnidadeRH', 'sigla_unidade_rh');
+      $this->configurarPK('IdUnidade', InfraDTO::$TIPO_PK_INFORMADO);
 
-    $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidadeMap');
-    $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'DescricaoMap');
+      $this->adicionarAtributo(InfraDTO::$PREFIXO_NUM, 'IdUnidadeMap');
+      $this->adicionarAtributo(InfraDTO::$PREFIXO_STR, 'DescricaoMap');
         
-    // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
-    // esta na InfraDTO e ela confunde em função do extends, então tenho que 
-    // criar uma nova instância
-    $objUnidadeDTO = new UnidadeDTO();
-    $objUnidadeDTO->retTodos();
+      // Infelizmente não funciona com parent::getArrAtributos(), pois o arrAtributos
+      // esta na InfraDTO e ela confunde em função do extends, então tenho que 
+      // criar uma nova instância
+      $objUnidadeDTO = new UnidadeDTO();
+      $objUnidadeDTO->retTodos();
         
     foreach($objUnidadeDTO->getArrAtributos() as $arrAtrib) {
             

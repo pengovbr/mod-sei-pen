@@ -1,85 +1,120 @@
 <?php
 try {
-  require_once DIR_SEI_WEB . '/SEI.php';
+    include_once DIR_SEI_WEB . '/SEI.php';
 
-  session_start();
+    session_start();
 
-  $objSessaoSEI = SessaoSEI::getInstance();
-  $objPaginaSEI = PaginaSEI::getInstance();
+    $objSessaoSEI = SessaoSEI::getInstance();
+    $objPaginaSEI = PaginaSEI::getInstance();
 
-  $objSessaoSEI->validarLink();
-  $objSessaoSEI->validarPermissao($_GET['acao']);
+    $objSessaoSEI->validarLink();
+    $objSessaoSEI->validarPermissao($_GET['acao']);
 
-  $strParametros = '';
-  $bolErrosValidacao = false;
-  $executarExpedicao = false;
-  $arrComandos = [];
+    $strParametros = '';
+    $bolErrosValidacao = false;
+    $executarExpedicao = false;
+    $arrComandos = [];
 
-  $strDiretorioModulo = PENIntegracao::getDiretorio();
+    $strDiretorioModulo = PENIntegracao::getDiretorio();
 
-  $arrProtocolosOrigem = [];
-  $tramiteEmBloco = $_GET['tramite_em_bloco'] ?? null;
+    $arrProtocolosOrigem = [];
+    $tramiteEmBloco = $_GET['tramite_em_bloco'] ?? null;
   if ($tramiteEmBloco == 1) {
-    $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-    $objPenBlocoProcessoDTO->retDblIdProtocolo();
-    $objPenBlocoProcessoDTO->retNumIdBloco();
+      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+      $objPenBlocoProcessoDTO->retDblIdProtocolo();
+      $objPenBlocoProcessoDTO->retNumIdBloco();
 
     if (isset($_GET['id_tramita_em_bloco'])) {
-      $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_tramita_em_bloco']);
+        $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_tramita_em_bloco']);
     } else {
-      $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
-      $objPenBlocoProcessoDTO->setNumIdBloco($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
+        $arrIdRelBlocoProtocoloSelecionado = $objPaginaSEI->getArrStrItensSelecionados();
+        $objPenBlocoProcessoDTO->setNumIdBloco($arrIdRelBlocoProtocoloSelecionado, InfraDTO::$OPER_IN);
     }
 
-    $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-    $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-    $idTramiteEmBloco = $arrPenBlocoProcesso[0]->getNumIdBloco();
-    $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
+      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+      $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+      $idTramiteEmBloco = $arrPenBlocoProcesso[0]->getNumIdBloco();
+      $strParametros .= '&id_bloco=' . $idTramiteEmBloco;
     foreach ($arrPenBlocoProcesso as $PenBlocoProcesso) {
-      $arrProtocolosOrigem[] = $PenBlocoProcesso->getDblIdProtocolo();
+        $arrProtocolosOrigem[] = $PenBlocoProcesso->getDblIdProtocolo();
     }
   } else {
-    $idTramiteEmBloco = null;
-    $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
+      $idTramiteEmBloco = null;
+      $arrProtocolosOrigem = array_merge($objPaginaSEI->getArrStrItensSelecionados('Gerados'), $objPaginaSEI->getArrStrItensSelecionados('Recebidos'), $objPaginaSEI->getArrStrItensSelecionados('Detalhado'));
   }
 
 
   if (count($arrProtocolosOrigem) == 0) {
-    $arrProtocolosOrigem = explode(',', $_POST['hdnIdProcedimento']);
+      $arrProtocolosOrigem = explode(',', $_POST['hdnIdProcedimento']);
   }
 
   if (count($arrProtocolosOrigem) == 0) {
-    throw new InfraException('Módulo do Tramita: Processo não informado.');
+      throw new InfraException('Módulo do Tramita: Processo não informado.');
   }
 
-  $strItensSelProcedimentos = ProcedimentoINT::conjuntoCompletoFormatadoRI0903($arrProtocolosOrigem);
+    $strItensSelProcedimentos = ProcedimentoINT::conjuntoCompletoFormatadoRI0903($arrProtocolosOrigem);
 
   if (isset($_GET['arvore'])) {
-    $objPaginaSEI->setBolArvore($_GET['arvore']);
-    $strParametros .= '&arvore=' . $_GET['arvore'];
+      $objPaginaSEI->setBolArvore($_GET['arvore']);
+      $strParametros .= '&arvore=' . $_GET['arvore'];
   }
 
   if (isset($_GET['executar'])) {
-    $executarExpedicao = filter_var($_GET['executar'], FILTER_VALIDATE_BOOLEAN);
+      $executarExpedicao = filter_var($_GET['executar'], FILTER_VALIDATE_BOOLEAN);
   }
 
-  $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
-  $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
+    $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
+    $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
 
   switch ($_GET['acao']) {
 
     case 'pen_expedir_bloco':
-      $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processos do Bloco de Trâmite' : 'Envio Externo de Processo em Lote';
-      $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
-      $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+        $strTitulo = $tramiteEmBloco == 1 ? 'Envio Externo de Processos do Bloco de Trâmite' : 'Envio Externo de Processo em Lote';
+        $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
+        $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
-      //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
-      $objPenParametroRN = new PenParametroRN();
-      $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
+        //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
+        $objPenParametroRN = new PenParametroRN();
+        $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
-      //Preparação dos dados para montagem da tela de expedição de processos
-      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        //Preparação dos dados para montagem da tela de expedição de processos
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       try {
+          $objUnidadeDTO = new PenUnidadeDTO();
+          $objUnidadeDTO->retNumIdUnidadeRH();
+          $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+
+          $objUnidadeRN = new UnidadeRN();
+          $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+
+          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+          $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+
+          //Preparação dos dados para montagem da tela de expedição de processos
+        if ($arrIdUnidadeRestricao != null) {
+            $repositorios = [];
+          foreach ($arrIdUnidadeRestricao as $value) {
+            $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
+          }
+        } else {
+            $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+        }
+      } catch (Exception $e) {
+          $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
+      }
+
+        $idRepositorioSelecionado = $numIdRepositorio ?? '';
+        $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
+
+        $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
+        $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
+
         $objUnidadeDTO = new PenUnidadeDTO();
         $objUnidadeDTO->retNumIdUnidadeRH();
         $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
@@ -87,71 +122,36 @@ try {
         $objUnidadeRN = new UnidadeRN();
         $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
-        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
-
-        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-
-        //Preparação dos dados para montagem da tela de expedição de processos
-        if ($arrIdUnidadeRestricao != null) {
-          $repositorios = [];
-          foreach ($arrIdUnidadeRestricao as $value) {
-            $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
-          }
-        } else {
-          $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
-        }
-      } catch (Exception $e) {
-        $repositorios = $objExpedirProcedimentoRN->listarRepositoriosDeEstruturas();
-      }
-
-      $idRepositorioSelecionado = $numIdRepositorio ?? '';
-      $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
-
-      $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento');
-      $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1');
-
-      $objUnidadeDTO = new PenUnidadeDTO();
-      $objUnidadeDTO->retNumIdUnidadeRH();
-      $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-
-      $objUnidadeRN = new UnidadeRN();
-      $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
-
       if (!$objUnidadeDTO) {
-        throw new InfraException("Módulo do Tramita: A unidade atual não foi mapeada.");
+          throw new InfraException("Módulo do Tramita: A unidade atual não foi mapeada.");
       }
 
-      $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
-      $numIdRepositorio = $_POST['selRepositorioEstruturas'];
-      $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
-      $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
-      $strNomeUnidadeDestino = $_POST['txtUnidade'];
-      $numIdUsuario = $objSessaoSEI->getNumIdUsuario();
+        $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
+        $numIdRepositorio = $_POST['selRepositorioEstruturas'];
+        $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+        $numIdUnidadeDestino = $_POST['hdnIdUnidade'];
+        $strNomeUnidadeDestino = $_POST['txtUnidade'];
+        $numIdUsuario = $objSessaoSEI->getNumIdUsuario();
 
       if (isset($_POST['sbmExpedir'])) {
-        $numVersao = $objPaginaSEI->getNumVersao();
-        echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
-        echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
+          $numVersao = $objPaginaSEI->getNumVersao();
+          echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+          echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
-        $strTituloPagina = "Cadastro de processos em Bloco";
-        $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
+          $strTituloPagina = "Cadastro de processos em Bloco";
+          $objPaginaSEI->prepararBarraProgresso($strTitulo, $strTituloPagina);
 
         try {
-          $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-          $objPenBlocoProcessoDTO->retDblIdProtocolo();
-          $objPenBlocoProcessoDTO->retNumIdBloco();
-          $objPenBlocoProcessoDTO->retDthRegistro();
-          $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
-          $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
+            $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+            $objPenBlocoProcessoDTO->retDblIdProtocolo();
+            $objPenBlocoProcessoDTO->retNumIdBloco();
+            $objPenBlocoProcessoDTO->retDthRegistro();
+            $objPenBlocoProcessoDTO->retNumIdBlocoProcesso();
+            $objPenBlocoProcessoDTO->setNumIdBloco($_GET['id_bloco']);
 
-          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-          $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-          $arrProcedimentos = [];
+            $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+            $arrPenBlocoProcesso = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+            $arrProcedimentos = [];
           foreach ($arrPenBlocoProcesso as $objDTO) {
             $objDTO->setNumIdRepositorioOrigem($numIdRepositorioOrigem);
             $objDTO->setNumIdUnidadeOrigem($numIdUnidadeOrigem);
@@ -172,33 +172,33 @@ try {
             $arrProcedimentos[] = $objDTO->getDblIdProtocolo();
           }
 
-          $arrPenBlocoProcesso[0]->setArrListaProcedimento($arrProcedimentos);
-          $objPenExpedirBlocoRN = new PenExpedirBlocoRN();
-          $ret = $objPenExpedirBlocoRN->cadastrarBloco($arrPenBlocoProcesso[0]);
+            $arrPenBlocoProcesso[0]->setArrListaProcedimento($arrProcedimentos);
+            $objPenExpedirBlocoRN = new PenExpedirBlocoRN();
+            $ret = $objPenExpedirBlocoRN->cadastrarBloco($arrPenBlocoProcesso[0]);
           
-          $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
+            $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 
-          // Atualiza estado do bloco em tramite para em processamento
+            // Atualiza estado do bloco em tramite para em processamento
           if (isset($_POST['hdIdTramiteEmBloco']) && ($_POST['hdIdTramiteEmBloco'] != null &&  $_POST['hdIdTramiteEmBloco'] != '')) {
-            $strParametros .= '&id_bloco=' . $_POST['hdIdTramiteEmBloco'];
-            $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
+              $strParametros .= '&id_bloco=' . $_POST['hdIdTramiteEmBloco'];
+              $strLinkProcedimento = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros));
 
-            $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-            $objTramiteEmBlocoDTO->setNumId($_POST['hdIdTramiteEmBloco']);
-            $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
+              $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+              $objTramiteEmBlocoDTO->setNumId($_POST['hdIdTramiteEmBloco']);
+              $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_DISPONIBILIZADO);
 
-            $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-            $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
+              $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+              $objTramiteEmBlocoRN->alterar($objTramiteEmBlocoDTO);
           }
 
-          // Muda situação da barra de progresso para Concluído
-          echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
+            // Muda situação da barra de progresso para Concluído
+            echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
         } catch (\Exception $e) {
-          $objPaginaSEI->processarExcecao($e);
-          echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
+            $objPaginaSEI->processarExcecao($e);
+            echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
         }
 
-        $objPaginaSEI->finalizarBarraProgresso(null, false);
+          $objPaginaSEI->finalizarBarraProgresso(null, false);
       }
 
         break;
@@ -206,7 +206,7 @@ try {
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 } catch (Exception $e) {
-  throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
+    throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
 }
 
 $objPaginaSEI->montarDocType();
@@ -255,9 +255,9 @@ $objPaginaSEI->montarJavaScript();
 
   function inicializar() {
 
-    objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas', 'hdnUnidadesAdministrativas', '<?= $strLinkUnidadesAdministrativasSelecao ?>');
+    objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas', 'hdnUnidadesAdministrativas', '<?php echo $strLinkUnidadesAdministrativasSelecao ?>');
 
-    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade', 'txtUnidade', '<?= $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade', 'txtUnidade', '<?php echo $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
     objAutoCompletarEstrutura.limparCampo = false;
@@ -405,7 +405,7 @@ $objPaginaSEI->montarJavaScript();
       alert(strRespMensagem);
       return false;
     }
-    var strAction = '<?= $strLinkValidacao ?>';
+    var strAction = '<?php echo $strLinkValidacao ?>';
     abrirBarraProgresso(document.forms['frmLote'], strAction, 600, 200);
   }
 
@@ -443,42 +443,42 @@ $objPaginaSEI->montarJavaScript();
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmLote" name="frmLote" method="post" action="<?= $strLinkValidacao ?>">
+<form id="frmLote" name="frmLote" method="post" action="<?php echo $strLinkValidacao ?>">
   <input type="hidden" id="sbmExpedir" name="sbmExpedir" value="1" />
   <input type="hidden" id="sbmPesquisa" name="sbmPesquisa" value="1" />
   <?php
-  $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
+    $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
   ?>
 
   <div id="divProcedimentos" class="infraAreaDados" style="height:8em;">
     <label id="lblProcedimentos" for="selProcedimentos" class="infraLabelObrigatorio">Protocolo:</label>
-    <select id="selProcedimentos" name="selProcedimentos" size="3" class="infraSelect infraReadOnly" readonly="readonly" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
-      <?= $strItensSelProcedimentos ?>
+    <select id="selProcedimentos" name="selProcedimentos" size="3" class="infraSelect infraReadOnly" readonly="readonly" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>">
+      <?php echo $strItensSelProcedimentos ?>
     </select>
   </div>
 
   <div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
     <label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
-    <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
-      <?= $strItensSelRepositorioEstruturas ?>
+    <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>">
+      <?php echo $strItensSelRepositorioEstruturas ?>
     </select>
   </div>
 
   <div id="divUnidades" class="infraAreaDados" style="height: 4.5em;">
     <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Unidade:</label>
     <div class="alinhamentoBotaoImput">
-      <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= $strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+      <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled" placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?php echo $strNomeUnidadeDestino ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" value="" />
       <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
       <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
     </div>
 
-    <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?= $numIdUnidadeDestino; ?>" />
+    <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?php echo $numIdUnidadeDestino; ?>" />
   </div>
 
-  <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?= implode(',', $arrProtocolosOrigem) ?>" />
-  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?= $bolErrosValidacao ?>" />
+  <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?php echo implode(',', $arrProtocolosOrigem) ?>" />
+  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
   <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
-  <input type="hidden" id="hdIdTramiteEmBloco" name="hdIdTramiteEmBloco" value="<?= $idTramiteEmBloco ?>" />
+  <input type="hidden" id="hdIdTramiteEmBloco" name="hdIdTramiteEmBloco" value="<?php echo $idTramiteEmBloco ?>" />
 
 </form>
 <?php

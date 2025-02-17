@@ -6,13 +6,16 @@ require_once DIR_SEI_WEB.'/SEI.php';
  *
  *
  */
-class PenTramiteProcessadoDTO extends InfraDTO {
+class PenTramiteProcessadoDTO extends InfraDTO
+{
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'md_pen_tramite_processado';
   }
 
-  public function montar() {
+  public function montar()
+    {
 
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdTramite', 'id_tramite');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DTH, 'Ultimo', 'dth_ultimo_processamento');

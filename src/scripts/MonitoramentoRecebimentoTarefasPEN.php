@@ -22,7 +22,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
       $parBoldebug = array_key_exists("debug", $arrParametros);
       $parStrWsdlCacheDir = array_key_exists("wsdl-cache", $arrParametros) ? $arrParametros["wsdl-cache"] : null;
 
-    if(is_dir($parStrWsdlCacheDir)){
+    if(is_dir($parStrWsdlCacheDir)) {
         ini_set('soap.wsdl_cache_dir', $parStrWsdlCacheDir);
     }
 

@@ -17,174 +17,183 @@ $objInfraException = new InfraException();
 define('TITULO_PAGINA', 'Mapeamento de Envio Parcial');
 
 try {
-  $objSessaoSEI->validarLink();
-  $objSessaoSEI->validarPermissao($_GET['acao']);
+    $objSessaoSEI->validarLink();
+    $objSessaoSEI->validarPermissao($_GET['acao']);
 
-  $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
+    $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
 
-  $id = null;
+    $id = null;
   if (array_key_exists('Id', $_GET) && !empty($_GET['Id'])) {
-    $id = $_GET['Id'];
-    $strParametros .= "&Id=" . $id;
+      $id = $_GET['Id'];
+      $strParametros .= "&Id=" . $id;
   }
-  $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink(
-    'controlador.php?acao=pen_map_envio_parcial_salvar&acao_='
-      . $_GET['acao']
-      . $strParametros
-  ));
+    $strLinkValidacao = $objPaginaSEI->formatarXHTML(
+        $objSessaoSEI->assinarLink(
+            'controlador.php?acao=pen_map_envio_parcial_salvar&acao_='
+            . $_GET['acao']
+            . $strParametros
+        )
+    );
 
-  $disabilitarVisualizar = "";
+    $disabilitarVisualizar = "";
   switch ($_GET['acao']) {
     case 'pen_map_envio_parcial_salvar':
-      $acao = !empty($id) ?
+        $acao = !empty($id) ?
         'pen_map_envio_parcial_atualizar' :
         'pen_map_envio_parcial_cadastrar';
 
       if (empty($_POST['selRepositorioEstruturas']) || empty($_POST['txtRepositorioEstruturas']) || $_POST['txtRepositorioEstruturas'] == "0") {
-        $objPaginaSEI->adicionarMensagem('O Repositório de Estruturas Organizacionais não foi selecionado', InfraPagina::$TIPO_MSG_ERRO);
-        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
-        exit(0);
+          $objPaginaSEI->adicionarMensagem('O Repositório de Estruturas Organizacionais não foi selecionado', InfraPagina::$TIPO_MSG_ERRO);
+          header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
+          exit(0);
       }
 
       if (empty($_POST['hdnIdUnidade']) || empty($_POST['txtUnidade']) || $_POST['txtUnidade'] == "0") {
-        $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_ERRO);
-        header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
-        exit(0);
-      }
-
-      $numIdUnidadePen = $_POST['hdnIdUnidade'];
-      $strUnidadePen = $_POST['txtUnidade'];
-      $numIdRepositorio = $_POST['selRepositorioEstruturas'];
-      $txtRepositorioEstruturas = $_POST['txtRepositorioEstruturas'];
-
-      $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objDTO->setNumIdEstrutura($numIdRepositorio);
-      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
-      if (!empty($id)) {
-        $objDTO->setDblId([$id], InfraDTO::$OPER_NOT_IN);
-      }
-      $objDTO->setNumMaxRegistrosRetorno(1);
-
-      $objDTO = $objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO);
-      if ($objDTO > 0) {
-        $objPaginaSEI->adicionarMensagem(
-          TITULO_PAGINA . ' já existente.',
-          InfraPagina::$TIPO_MSG_ERRO
-        );
-        header('Location: ' . $objSessaoSEI->assinarLink(
-          'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_=' . $_GET['acao_']
-        ));
-        exit(0);
-      }
-
-      $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objDTO->setNumIdEstrutura($numIdRepositorio);
-      $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
-      $objDTO->setNumIdUnidadePen($numIdUnidadePen);
-      $objDTO->setStrStrUnidadePen($strUnidadePen);
-
-      $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
-      if (!empty($_GET['Id'])) {
-        $objDTO->setDblId($id);
-        $objPenRestricaoEnvioComponentesDigitaisRN->alterar($objDTO);
-        $messagem = TITULO_PAGINA . " atualizado com sucesso.";
-      } else {
-        if ($objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO) > 0) {
-          $objPaginaSEI->adicionarMensagem( 'Já existe um registro cadastrado para a estrutura selecionada.', InfraPagina::$TIPO_MSG_ERRO);
+          $objPaginaSEI->adicionarMensagem('O Órgao não foi selecionado.', InfraPagina::$TIPO_MSG_ERRO);
           header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
           exit(0);
-        }
-        $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objDTO);
       }
-      $objPaginaSEI->adicionarMensagem($messagem, 5);
-      header('Location: ' . $objSessaoSEI->assinarLink(
-        'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao_']
-      ));
+
+        $numIdUnidadePen = $_POST['hdnIdUnidade'];
+        $strUnidadePen = $_POST['txtUnidade'];
+        $numIdRepositorio = $_POST['selRepositorioEstruturas'];
+        $txtRepositorioEstruturas = $_POST['txtRepositorioEstruturas'];
+
+        $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objDTO->setNumIdEstrutura($numIdRepositorio);
+        $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+      if (!empty($id)) {
+          $objDTO->setDblId([$id], InfraDTO::$OPER_NOT_IN);
+      }
+        $objDTO->setNumMaxRegistrosRetorno(1);
+
+        $objDTO = $objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO);
+      if ($objDTO > 0) {
+          $objPaginaSEI->adicionarMensagem(
+              TITULO_PAGINA . ' já existente.',
+              InfraPagina::$TIPO_MSG_ERRO
+          );
+          header(
+              'Location: ' . $objSessaoSEI->assinarLink(
+                  'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_=' . $_GET['acao_']
+              )
+          );
+          exit(0);
+      }
+
+        $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objDTO->setNumIdEstrutura($numIdRepositorio);
+        $objDTO->setStrStrEstrutura($txtRepositorioEstruturas);
+        $objDTO->setNumIdUnidadePen($numIdUnidadePen);
+        $objDTO->setStrStrUnidadePen($strUnidadePen);
+
+        $messagem = TITULO_PAGINA . " cadastrado com sucesso.";
+      if (!empty($_GET['Id'])) {
+          $objDTO->setDblId($id);
+          $objPenRestricaoEnvioComponentesDigitaisRN->alterar($objDTO);
+          $messagem = TITULO_PAGINA . " atualizado com sucesso.";
+      } else {
+        if ($objPenRestricaoEnvioComponentesDigitaisRN->contar($objDTO) > 0) {
+            $objPaginaSEI->adicionarMensagem('Já existe um registro cadastrado para a estrutura selecionada.', InfraPagina::$TIPO_MSG_ERRO);
+            header('Location: ' . $objSessaoSEI->assinarLink('controlador.php?acao=' . $acao . '&acao_=' . $_GET['acao_']));
+            exit(0);
+        }
+          $objPenRestricaoEnvioComponentesDigitaisRN->cadastrar($objDTO);
+      }
+        $objPaginaSEI->adicionarMensagem($messagem, 5);
+        header(
+            'Location: ' . $objSessaoSEI->assinarLink(
+                'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao_']
+            )
+        );
         exit(0);
     case 'pen_map_envio_parcial_visualizar':
     case 'pen_map_envio_parcial_atualizar':
     case 'pen_map_envio_parcial_cadastrar':
       if (array_key_exists('Id', $_GET) && !empty($_GET['Id'])) {
-        $nomeTitle = 'Editar';
+          $nomeTitle = 'Editar';
         if ($_GET['acao'] == 'pen_map_envio_parcial_visualizar') {
-          $nomeTitle = 'Visualizar';
+            $nomeTitle = 'Visualizar';
         }
-        $strTitulo = $nomeTitle . ' Mapeamento de Envio Parcial';
+          $strTitulo = $nomeTitle . ' Mapeamento de Envio Parcial';
       } else {
-        $strTitulo = 'Novo Mapeamento de Envio Parcial';
+          $strTitulo = 'Novo Mapeamento de Envio Parcial';
       }
 
-      //Monta os botões do topo
-      if (
-        $_GET['acao'] != 'pen_map_envio_parcial_visualizar'
-        && $objSessaoSEI->verificarPermissao('pen_map_envio_parcial_cadastrar')
-        && $objSessaoSEI->verificarPermissao('pen_map_envio_parcial_atualizar')
-      ) {
-        $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton">'
+        //Monta os botões do topo
+      if ($_GET['acao'] != 'pen_map_envio_parcial_visualizar'
+            && $objSessaoSEI->verificarPermissao('pen_map_envio_parcial_cadastrar')
+            && $objSessaoSEI->verificarPermissao('pen_map_envio_parcial_atualizar')
+        ) {
+          $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton">'
           . '<span class="infraTeclaAtalho">S</span>alvar</button>';
-        $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\''
-          . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink(
-            'controlador.php?acao=pen_map_envio_parcial_listar&acao_='
-              . $_GET['acao']
-          )) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
+          $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\''
+          . $objPaginaSEI->formatarXHTML(
+              $objSessaoSEI->assinarLink(
+                  'controlador.php?acao=pen_map_envio_parcial_listar&acao_='
+                  . $_GET['acao']
+              )
+          ) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
       } else {
-        $disabilitarVisualizar = " disabled='disabled' ";
-        $arrComandos[] = '<button type="button" id="btnCancelar" value="Voltar" onclick="location.href=\''
-          . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink(
-            'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao']
-          )) . '\';" class="infraButton"><span class="infraTeclaAtalho">V</span>oltar</button>';
+          $disabilitarVisualizar = " disabled='disabled' ";
+          $arrComandos[] = '<button type="button" id="btnCancelar" value="Voltar" onclick="location.href=\''
+          . $objPaginaSEI->formatarXHTML(
+              $objSessaoSEI->assinarLink(
+                  'controlador.php?acao=pen_map_envio_parcial_listar&acao_=' . $_GET['acao']
+              )
+          ) . '\';" class="infraButton"><span class="infraTeclaAtalho">V</span>oltar</button>';
       }
 
-      //Preparação dos dados para montagem da tela de expedição de processos
-      $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
-      $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+        //Preparação dos dados para montagem da tela de expedição de processos
+        $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
+        $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
 
       if (array_key_exists('Id', $_GET) && !empty($_GET['Id'])) {
-        $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadePen();
-        $objPenRestricaoEnvioComponentesDigitaisDTO->setDblId($_GET['Id']);
+          $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retDblId();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdEstrutura();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrEstrutura();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retNumIdUnidadePen();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->retStrStrUnidadePen();
+          $objPenRestricaoEnvioComponentesDigitaisDTO->setDblId($_GET['Id']);
 
-        $objPenRestricaoEnvioComponentesDigitaisDTO =
+          $objPenRestricaoEnvioComponentesDigitaisDTO =
           $objPenRestricaoEnvioComponentesDigitaisRN->consultar($objPenRestricaoEnvioComponentesDigitaisDTO);
 
         if (!is_null($objPenRestricaoEnvioComponentesDigitaisDTO)) {
-          $numIdRepositorio = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura();
-          $hdnIdUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen();
-          $strNomeUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen();
+            $numIdRepositorio = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura();
+            $hdnIdUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen();
+            $strNomeUnidade = $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen();
         }
       }
 
-      $idRepositorioSelecionado = $numIdRepositorio ?? '';
-      $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray(
-        '',
-        'Selecione',
-        $idRepositorioSelecionado,
-        $repositorios
-      );
+        $idRepositorioSelecionado = $numIdRepositorio ?? '';
+        $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray(
+            '',
+            'Selecione',
+            $idRepositorioSelecionado,
+            $repositorios
+        );
 
-      $strLinkAjaxProcedimentoApensado = $objSessaoSEI->assinarLink(
-        'controlador_ajax.php?acao_ajax=pen_apensados_auto_completar_expedir_procedimento'
-      );
-      $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink(
-        'controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento'
-          . '&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1'
-      );
+        $strLinkAjaxProcedimentoApensado = $objSessaoSEI->assinarLink(
+            'controlador_ajax.php?acao_ajax=pen_apensados_auto_completar_expedir_procedimento'
+        );
+        $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink(
+            'controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento'
+            . '&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1'
+        );
         break;
     default:
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
   }
 
-  $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
+    $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
 } catch (Exception $e) {
-  $objPaginaSEI->adicionarMensagem(
-    'Falha no cadastro do relacionamento. Consulte o log do SEI para mais informações.',
-    InfraPagina::$TIPO_MSG_ERRO
-  );
-  throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
+    $objPaginaSEI->adicionarMensagem(
+        'Falha no cadastro do relacionamento. Consulte o log do SEI para mais informações.',
+        InfraPagina::$TIPO_MSG_ERRO
+    );
+    throw new InfraException("Módulo do Tramita: Erro processando requisição de envio externo de processo", $e);
 }
 
 $objPaginaSEI->montarDocType();
@@ -330,11 +339,11 @@ $objPaginaSEI->montarJavaScript();
     objLupaUnidadesAdministrativas = new infraLupaSelect(
       'selRepositorioEstruturas',
       'hdnUnidadesAdministrativas',
-      '<?= $strLinkUnidadesAdministrativasSelecao ?>'
+      '<?php echo $strLinkUnidadesAdministrativasSelecao ?>'
     );
 
     objAutoCompletarEstrutura = new infraAjaxAutoCompletar(
-      'hdnIdUnidade', 'txtUnidade', '<?= $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada"
+      'hdnIdUnidade', 'txtUnidade', '<?php echo $strLinkAjaxUnidade ?>', "Nenhuma unidade foi encontrada"
     );
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
@@ -382,10 +391,10 @@ $objPaginaSEI->montarJavaScript();
     <?php if ($_GET['acao'] != 'pen_map_envio_parcial_visualizar') { ?>
       var txtUnidadeEnabled = selRepositorioEstruturas.val() > 0;
       txtUnidade.prop('disabled', !txtUnidadeEnabled);
-      <?php if (empty($strNomeUnidade)) { ?>
+        <?php if (empty($strNomeUnidade)) { ?>
         $('#hdnIdUnidade').val('');
         txtUnidade.val('');
-      <?php } ?>
+        <?php } ?>
 
       if (!txtUnidadeEnabled) {
         txtUnidade.addClass('infraReadOnly');
@@ -462,32 +471,32 @@ $objPaginaSEI->montarJavaScript();
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar();"');
 ?>
-<form id="frmGravarOrgaoExterno" name="frmGravarOrgaoExterno" method="post" action="<?= $strLinkValidacao ?>">
+<form id="frmGravarOrgaoExterno" name="frmGravarOrgaoExterno" method="post" action="<?php echo $strLinkValidacao ?>">
   <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandos); ?>
 
   <div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
     <label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
-    <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" <?= $disabilitarVisualizar ?> tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
-      <?= $strItensSelRepositorioEstruturas ?>
+    <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" <?php echo $disabilitarVisualizar ?> tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>">
+      <?php echo $strItensSelRepositorioEstruturas ?>
     </select>
 
-    <input type="hidden" id="txtRepositorioEstruturas" name="txtRepositorioEstruturas" <?= $disabilitarVisualizar ?> class="infraText" value="<?= $txtRepositorioEstruturas; ?>" />
+    <input type="hidden" id="txtRepositorioEstruturas" name="txtRepositorioEstruturas" <?php echo $disabilitarVisualizar ?> class="infraText" value="<?php echo $txtRepositorioEstruturas; ?>" />
   </div>
 
   <div id="divUnidadesUnidades" class="infraAreaDados" style="height: 4.5em;">
     <label id="lblUnidades" for="selUnidades" class="infraLabelObrigatorio">Órgão :</label>
     <div class="alinhamentoBotaoImput">
-      <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" <?= $disabilitarVisualizar ?> placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?= PaginaSEI::tratarHTML($strNomeUnidade); ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+      <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" <?php echo $disabilitarVisualizar ?> placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida" value="<?php echo PaginaSEI::tratarHTML($strNomeUnidade); ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
       <?php if ($_GET['acao'] != 'pen_map_envio_parcial_visualizar') { ?>
         <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
         <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
       <?php } ?>
     </div>
 
-    <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?= $hdnIdUnidade; ?>" />
+    <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?php echo $hdnIdUnidade; ?>" />
   </div>
 
-  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?= $bolErrosValidacao ?>" />
+  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
   <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
 
 </form>

@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- *
- *
  */
 
 session_start();
@@ -52,14 +50,14 @@ try {
 
             foreach($arrParam['hdnInfraItensSelecionados'] as $NumIdUnidade) {
 
-                  $objPenUnidadeDTO->setNumIdUnidade($NumIdUnidade);
-                  $objPenUnidadeRN->excluir($objPenUnidadeDTO);
+                $objPenUnidadeDTO->setNumIdUnidade($NumIdUnidade);
+                $objPenUnidadeRN->excluir($objPenUnidadeDTO);
             }
           }
           else {
 
-                $objPenUnidadeDTO->setNumIdUnidade($arrParam['hdnInfraItensSelecionados']);
-                $objPenUnidadeRN->excluir($objPenUnidadeDTO);
+              $objPenUnidadeDTO->setNumIdUnidade($arrParam['hdnInfraItensSelecionados']);
+              $objPenUnidadeRN->excluir($objPenUnidadeDTO);
           }
 
             $objPagina->adicionarMensagem(sprintf('%s foi excluido com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
@@ -139,7 +137,7 @@ try {
     $objPagina->processarPaginacao($objPenUnidadeDTOFiltro);
 
     $numRegistros = count($arrObjPenUnidadeDTO);
-  if(!empty($arrObjPenUnidadeDTO)){
+  if(!empty($arrObjPenUnidadeDTO)) {
 
       $strResultado = '';
 
@@ -307,20 +305,20 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
     <?php $objPagina->abrirAreaDados('5em'); ?>
 
         <label for="txtSiglaUnidade" id="lblSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?= PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['sigla'])) ? htmlspecialchars($_POST['sigla']) : ''); ?>">
+        <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText"  value="<?php echo PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['sigla'])) ? htmlspecialchars($_POST['sigla']) : ''); ?>">
 
         <label for="txtDescricaoUnidade" id="lblDescricaoUnidade" class="infraLabelOpcional">Descrição:</label>
-        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?= PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['descricao'])) ? htmlspecialchars($_POST['descricao']) : ''); ?>">
+        <input type="text" id="txtDescricaoUnidade" name="txtDescricaoUnidade" class="infraText" value="<?php echo PaginaSEI::tratarHTML(htmlspecialchars(isset($_POST['descricao'])) ? htmlspecialchars($_POST['descricao']) : ''); ?>">
 
     <?php $objPagina->fecharAreaDados(); ?>
 
-    <?php if($numRegistros > 0): ?>
+    <?php if($numRegistros > 0) : ?>
         <?php $objPagina->montarAreaTabela($strResultado, $numRegistros); ?>
         <?php //$objPagina->montarAreaDebug(); ?>
 <?php else: ?>
         <div style="clear:both;margin:2em"></div>
         <p>Nenhum mapeamento foi encontrado</p>
-    <?php endif; ?>
+<?php endif; ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->fecharHtml(); ?>

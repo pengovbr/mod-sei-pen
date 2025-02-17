@@ -12,7 +12,7 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
     $resultado = 0;
 
-    $fnPrint = function($strMensagem, $numIdentacao = 0): void {
+    $fnPrint = function ($strMensagem, $numIdentacao = 0): void {
         DebugPen::getInstance()->gravar($strMensagem, $numIdentacao, false, false);
     };
 
@@ -25,47 +25,47 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
       $fnPrint("INICIANDO VERIFICAÇÃO DA INSTALAÇÃO DO MÓDULO MOD-SEI-PEN:", 0);
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarPosicionamentoScripts()){
+    if($objVerificadorInstalacaoRN->verificarPosicionamentoScripts()) {
         $fnPrint("- Arquivos do módulo posicionados corretamente", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarAtivacaoModulo()){
+    if($objVerificadorInstalacaoRN->verificarAtivacaoModulo()) {
         $fnPrint("- Módulo corretamente ativado no arquivo de configuracao do sistema", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarArquivoConfiguracao()){
+    if($objVerificadorInstalacaoRN->verificarArquivoConfiguracao()) {
         $fnPrint("- Parâmetros técnicos obrigatórios de integração atribuídos em ConfiguracaoModPEN.php", 1);
     }        
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarCertificadoDigital()){
+    if($objVerificadorInstalacaoRN->verificarCertificadoDigital()) {
         $fnPrint("- Certificado digital localizado e corretamente configurado", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN()){
+    if($objVerificadorInstalacaoRN->verificarConexaoBarramentoPEN()) {
         $fnPrint("- Conexão com o Tramita GOV.BR realizada com sucesso", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarAcessoPendenciasTramitePEN()){
+    if($objVerificadorInstalacaoRN->verificarAcessoPendenciasTramitePEN()) {
         $fnPrint("- Acesso aos dados do Comitê de Protocolo vinculado ao certificado realizado com sucesso", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarConfiguracaoGearman()){
+    if($objVerificadorInstalacaoRN->verificarConfiguracaoGearman()) {
         $fnPrint("- Conexão com o servidor de processamento de tarefas Gearman realizada com sucesso", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarCompatibilidadeModulo()){
+    if($objVerificadorInstalacaoRN->verificarCompatibilidadeModulo()) {
         $fnPrint("- Verificada a compatibilidade do mod-sei-pen com a atual versão do SEI", 1);
     }
 
       sleep(1);
-    if($objVerificadorInstalacaoRN->verificarCompatibilidadeBanco()){
+    if($objVerificadorInstalacaoRN->verificarCompatibilidadeBanco()) {
         $fnPrint("- Base de dados do SEI corretamente atualizada com a versão atual do mod-sei-pen", 1);
     }
 
