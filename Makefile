@@ -1,8 +1,10 @@
 .PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # Parâmetros de execução do comando MAKE
-# Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
-sistema=sei41
+# Opções possíveis para spe (sistema de proc eletronico): sei5
+sistema=sei5
+
+#Opções possívei para BD (mysql, sqlserver, oracle, postgresql)
 base=mysql
 teste=
 
