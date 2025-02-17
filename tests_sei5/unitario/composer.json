@@ -1,0 +1,25 @@
+{
+    "config": {
+        "platform": {
+          "php": "7.3.12"
+        } 
+    },    
+
+    "autoload-dev": {
+        "files": [
+            "/opt/sei/web/SEI.php",
+            "/opt/sip/web/Sip.php"
+        ]
+    },
+    
+    "include-path": [
+        "/opt/infra/infra_php"
+    ],
+
+    "require-dev": {
+        "phpunit/phpunit": "9.*",
+        "phpunit/php-code-coverage": "*",
+        "phpunit/phpunit-selenium": "dev-master",
+        "guzzlehttp/guzzle": "^7.0"
+    }
+}
