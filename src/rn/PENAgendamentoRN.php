@@ -23,12 +23,12 @@ class PENAgendamentoRN extends InfraRN
         $hipotesesPenDesativadas = $processoEletronicoRN->consultarHipotesesLegais(false);
 
         $hipoteses = [];
-      if (!empty($hipotesesPen) && !empty($hipotesesPen['hipotesesLegais'])) {
-        $hipoteses = $hipotesesPen['hipotesesLegais'];
+      if (!empty($hipotesesPen) && !empty($hipotesesPen->hipotesesLegais)) {
+        $hipoteses = $hipotesesPen->hipotesesLegais;
       }
 
-      if (!empty($hipotesesPenDesativadas) && !empty($hipotesesPenDesativadas['hipotesesLegais'])) {
-          $hipoteses = array_merge($hipoteses, $hipotesesPenDesativadas['hipotesesLegais']);
+      if (!empty($hipotesesPenDesativadas) && !empty($hipotesesPenDesativadas->hipotesesLegais)) {
+          $hipoteses = array_merge($hipoteses, $hipotesesPenDesativadas->hipotesesLegais);
       }
 
       if(empty($hipoteses)) {
@@ -39,20 +39,20 @@ class PENAgendamentoRN extends InfraRN
       foreach ($hipoteses as $hipotese) {
 
           $objDTO = new PenHipoteseLegalDTO();
-          $objDTO->setNumIdentificacao($hipotese['identificacao']);
+          $objDTO->setNumIdentificacao($hipotese->identificacao);
           $objDTO->setNumMaxRegistrosRetorno(1);
           $objDTO->retStrNome();
           $objDTO->retNumIdHipoteseLegal();
           $objConsulta = $objBD->consultar($objDTO);
 
           //Caso não haja um nome para a hipótese legal, ele pula para a próxima.
-        if (empty($hipotese['nome'])) {
+        if (empty($hipotese->nome)) {
             continue;
         }
 
-          $objDTO->setStrNome(mb_convert_encoding($hipotese['nome'], 'ISO-8859-1', 'UTF-8'));
+          $objDTO->setStrNome(mb_convert_encoding($hipotese->nome, 'ISO-8859-1', 'UTF-8'));
 
-        if ($hipotese['status']) {
+        if ($hipotese->status) {
             $objDTO->setStrAtivo('S');
         } else {
             $objDTO->setStrAtivo('N');

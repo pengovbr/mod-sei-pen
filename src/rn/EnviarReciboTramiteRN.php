@@ -154,8 +154,8 @@ class EnviarReciboTramiteRN extends InfraRN
     }
 
     foreach ($parObjTramite->itensHistorico->operacao as $operacao) {
-      if($operacao['situacao'] == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
-          return ProcessoEletronicoRN::converterDataSEI($operacao['dataHora']);
+      if($operacao->situacao == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO) {
+          return ProcessoEletronicoRN::converterDataSEI($operacao->dataHora);
       }
     }
 
