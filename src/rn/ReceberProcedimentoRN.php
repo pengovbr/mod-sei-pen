@@ -643,11 +643,7 @@ class ReceberProcedimentoRN extends InfraRN
         }
 
         $arrObjComponentesDigitais = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais : [$objDocumento->componentesDigitais];
-        foreach ($arrObjComponentesDigitais as $objComponenteDigital) {
-          
-          if (is_array($objComponenteDigital)) {
-                $objComponenteDigital = (object) $objComponenteDigital;
-          }
+        foreach ($arrObjComponentesDigitais as $objComponenteDigital) {    
 
             $arrHashsComponentesDigitais[] = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         }
@@ -714,10 +710,7 @@ class ReceberProcedimentoRN extends InfraRN
     if(!isset($numIdTipoDocumentoPadrao)) {
       foreach($arrObjDocumentos as $objDocument){
 
-        $especie = $objDocument->especie;
-        if (is_array($especie)) {
-            $objDocument->especie = (object) $objDocument->especie;
-        }
+        $especie = $objDocument->especie;      
 
         $objPenRelTipoDocMapEnviadoDTO = new PenRelTipoDocMapRecebidoDTO();
         $objPenRelTipoDocMapEnviadoDTO->retTodos();
@@ -745,10 +738,7 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
   private function validaTamanhoComponenteDigital($objComponenteDigital)
-    {
-    if (is_array($objComponenteDigital)) {
-        $objComponenteDigital = (object) $objComponenteDigital;
-    }
+    { 
 
     if (is_null($objComponenteDigital->tamanhoEmBytes) || $objComponenteDigital->tamanhoEmBytes == 0) {
         throw new InfraException('Módulo do Tramita: Tamanho de componente digital não informado.', null, 'RECUSA: '.ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
@@ -1613,11 +1603,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->gravarLogDebug("Quantidade de documentos para recebimento: $count", 2);
 
     foreach($arrObjDocumentos as $objDocumento) {
-
-      if (is_array($objDocumento)) {
-          $objDocumento = (object) $objDocumento;
-      }
-
+    
       if(!isset($objDocumento->staTipoProtocolo) || $bolDocumentoAvulso) {
 
           // Definição da ordem do documento para avaliação do posicionamento
@@ -1866,10 +1852,7 @@ class ReceberProcedimentoRN extends InfraRN
     {
       $arrObjAnexosDTO = [];
       $arrObjAnexoDTO = [];
-    foreach ($objComponentesDigitais as $objComponenteDigital) {
-      if (is_array($objComponenteDigital)) {
-        $objComponenteDigital = (object) $objComponenteDigital;
-      }
+    foreach ($objComponentesDigitais as $objComponenteDigital) {    
       
         $strHashComponenteDigital = ProcessoEletronicoRN::getHashFromMetaDados($objComponenteDigital->hash);
         $bolComponenteDigitalBaixado = in_array($strHashComponenteDigital, $arrHashComponenteBaixados);
@@ -2477,10 +2460,7 @@ class ReceberProcedimentoRN extends InfraRN
         $arrComponentesDigitais = $objDocumento->componentesDigitais;
 
         foreach ($arrComponentesDigitais as $componenteDigital) {
-
-          if (is_array($componenteDigital)) {
-            $componenteDigital = (object) $componenteDigital;
-          }
+       
             //Busca o nome do documento
             $nomeDocumento = $componenteDigital->nome;
 
@@ -2598,11 +2578,7 @@ class ReceberProcedimentoRN extends InfraRN
       //Percorre os documentos e compoenntes para pegar o tamanho em bytes do componente
     foreach ($arrObjDocumentos as $objDocumento) {
         $arrObjComponentesDigitais = ProcessoEletronicoRN::obterComponentesDigitaisDocumento($objDocumento);
-      foreach ($arrObjComponentesDigitais as $objComponentesDigital) {
-
-        if (is_array($objComponentesDigital)) {
-            $objComponentesDigital = (object) $objComponentesDigital;
-        }
+      foreach ($arrObjComponentesDigitais as $objComponentesDigital) {      
 
         if (ProcessoEletronicoRN::getHashFromMetaDados($objComponentesDigital->hash) == $parComponentePendente) {
             $tamanhoComponentePendende = $objComponentesDigital->tamanhoEmBytes;
@@ -2683,12 +2659,8 @@ class ReceberProcedimentoRN extends InfraRN
       if(isset($arrDocumento->componentesDigitais) && !is_array($arrDocumento->componentesDigitais)) {
         $arrDocumento->componentesDigitais = [$arrDocumento->componentesDigitais];
       }
-      foreach ($arrDocumento->componentesDigitais as $objComponente) {
-          
-        if (is_array($objComponente)) {
-          $objComponente = (object) $objComponente;
-        }
-
+      foreach ($arrDocumento->componentesDigitais as $objComponente) {          
+      
           $strHash = ProcessoEletronicoRN::getHashFromMetaDados($objComponente->hash);
           $resultado[$strHash] = $objComponente;
       }
@@ -2773,10 +2745,7 @@ class ReceberProcedimentoRN extends InfraRN
 
   private function adicionarObservacoesSobreNumeroDocumento($parObjDocumento)
     {
-      $arrObjObservacoes = [];
-    if (is_array($parObjDocumento->produtor)) {
-        $parObjDocumento->produtor = (object) $parObjDocumento->produtor; 
-    }
+      $arrObjObservacoes = []; 
 
       $strNumeroDocumentoOrigem = $parObjDocumento->protocolo ?? $parObjDocumento->produtor->numeroDeIdentificacao;
     if(!empty($strNumeroDocumentoOrigem)) {

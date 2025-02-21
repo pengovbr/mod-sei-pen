@@ -209,14 +209,14 @@ class ExpedirProcedimentoRN extends InfraRN
 
         $novoTramite = $this->objProcessoEletronicoRN->enviarProcessoREST($param);
 
-        $numIdTramite = $novoTramite['IDT'];
+        $numIdTramite = $novoTramite->IDT;
         $this->lancarEventoEnvioMetadados($numIdTramite);
 
         $this->atualizarPenProtocolo($dblIdProcedimento);
 
         if (isset($novoTramite)) {
             $objTramite = $novoTramite;
-            $this->objProcedimentoAndamentoRN->setOpts($objTramite['NRE'], $objTramite['IDT'], ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $dblIdProcedimento);
+            $this->objProcedimentoAndamentoRN->setOpts($objTramite->NRE, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $dblIdProcedimento);
 
           try {
               $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
@@ -232,23 +232,23 @@ class ExpedirProcedimentoRN extends InfraRN
 
               $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
                   $arrProcesso['idProcedimentoSEI'],
-                  $objTramite['NRE'],
-                  $objTramite['IDT'],
+                  $objTramite->NRE,
+                  $objTramite->IDT,
                   ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO,
-                  $objTramite['dataHoraDeRegistroDoTramite'],
+                  $objTramite->dataHoraDeRegistroDoTramite,
                   $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
                   $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
                   $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
                   $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
                   $arrProcesso,
-                  $objTramite['ticketParaEnvioDeComponentesDigitais'],
-                  $objTramite['processosComComponentesDigitaisSolicitados'],
+                  $objTramite->ticketParaEnvioDeComponentesDigitais,
+                  $objTramite->processosComComponentesDigitaisSolicitados,
                   $bolSinProcessamentoEmBloco,
                   $numIdUnidade
               );
 
 
-                $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite['IDT'], $idAtividadeExpedicao);
+                $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
 
                 //TODO: Erro no BARRAMENTO: Processo no pode ser enviado se possuir 2 documentos iguais(mesmo hash)
                 //TODO: Melhoria no barramento de servios. O mtodo solicitar metadados no deixa claro quais os componentes digitais que
@@ -257,7 +257,7 @@ class ExpedirProcedimentoRN extends InfraRN
                 //componentes precisam ser baixados, semelhante ao que ocorre no enviarProcesso onde o barramento informa quais os componentes
                 //que precisam ser enviados
 
-                $this->enviarComponentesDigitais($objTramite['NRE'], $objTramite['IDT'], $arrProcesso['protocolo'], $bolSinProcessamentoEmBloco);
+                $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $arrProcesso['protocolo'], $bolSinProcessamentoEmBloco);
 
                 //TODO: Ao enviar o processo e seus documentos, necessrio bloquear os documentos para alterao
                 //pois eles j foram visualizados
@@ -280,7 +280,7 @@ class ExpedirProcedimentoRN extends InfraRN
 
               $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
-              $this->receberReciboDeEnvio($objTramite['IDT']);
+              $this->receberReciboDeEnvio($objTramite->IDT);
 
               $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
 

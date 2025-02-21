@@ -186,11 +186,11 @@ class ProcessoEletronicoRN extends InfraRN
 
         if (isset($arrResultado)) {
           foreach ($arrResultado as $repositorio) {
-            if ($repositorio['id'] == $numIdentificacaoDoRepositorioDeEstruturas) {
+            if ($repositorio->id == $numIdentificacaoDoRepositorioDeEstruturas) {
               $objRepositorioDTO = new RepositorioDTO();
-              $objRepositorioDTO->setNumId($repositorio['id']);
-              $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio['nome'], 'ISO-8859-1', 'UTF-8'));
-              $objRepositorioDTO->setBolAtivo($repositorio['ativo']);
+              $objRepositorioDTO->setNumId($repositorio->id);
+              $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio->nome, 'ISO-8859-1', 'UTF-8'));
+              $objRepositorioDTO->setBolAtivo($repositorio->ativo);
             }
           }
         }
@@ -223,9 +223,9 @@ class ProcessoEletronicoRN extends InfraRN
         if (isset($arrResultado)) {
           foreach ($arrResultado as $repositorio) {
               $objRepositorioDTO = new RepositorioDTO();
-              $objRepositorioDTO->setNumId($repositorio['id']);
-              $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio['nome'], 'ISO-8859-1', 'UTF-8'));
-              $objRepositorioDTO->setBolAtivo($repositorio['ativo']);
+              $objRepositorioDTO->setNumId($repositorio->id);
+              $objRepositorioDTO->setStrNome(mb_convert_encoding($repositorio->nome, 'ISO-8859-1', 'UTF-8'));
+              $objRepositorioDTO->setBolAtivo($repositorio->ativo);
               $arrObjRepositorioDTO[] = $objRepositorioDTO;
           }
         }
@@ -255,12 +255,12 @@ class ProcessoEletronicoRN extends InfraRN
         $arrResultado = $this->get($endpoint, $parametros);
 
       if ($bolRetornoRaw !== false) {
-        $arrResultado['nome'] = mb_convert_encoding($arrResultado['nome'], 'ISO-8859-1', 'UTF-8');
-        $arrResultado['sigla'] = mb_convert_encoding($arrResultado['sigla'], 'ISO-8859-1', 'UTF-8');
+        $arrResultado->nome = mb_convert_encoding($arrResultado->nome, 'ISO-8859-1', 'UTF-8');
+        $arrResultado->sigla = mb_convert_encoding($arrResultado->sigla, 'ISO-8859-1', 'UTF-8');
 
-        if (isset($arrResultado['hierarquia']) && is_array($arrResultado['hierarquia'])) {
-          foreach ($arrResultado['hierarquia'] as &$arrHierarquia) {
-            $arrHierarquia['nome'] = mb_convert_encoding($arrHierarquia['nome'], 'ISO-8859-1', 'UTF-8');
+        if (isset($arrResultado->hierarquia) && is_array($arrResultado->hierarquia)) {
+          foreach ($arrResultado->hierarquia as &$arrHierarquia) {
+            $arrHierarquia->nome = mb_convert_encoding($arrHierarquia->nome, 'ISO-8859-1', 'UTF-8');
           }
         }
 
@@ -268,12 +268,12 @@ class ProcessoEletronicoRN extends InfraRN
       }
 
         $objEstruturaDTO = new EstruturaDTO();
-        $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($arrResultado['numeroDeIdentificacaoDaEstrutura']);
-        $objEstruturaDTO->setStrNome(mb_convert_encoding($arrResultado['nome'], 'ISO-8859-1', 'UTF-8'));
-        $objEstruturaDTO->setStrSigla(mb_convert_encoding($arrResultado['sigla'], 'ISO-8859-1', 'UTF-8'));
-        $objEstruturaDTO->setBolAtivo($arrResultado['ativo']);
-        $objEstruturaDTO->setBolAptoParaReceberTramites($arrResultado['aptoParaReceberTramites']);
-        $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($arrResultado['codigoNoOrgaoEntidade']);
+        $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($arrResultado->numeroDeIdentificacaoDaEstrutura);
+        $objEstruturaDTO->setStrNome(mb_convert_encoding($arrResultado->nome, 'ISO-8859-1', 'UTF-8'));
+        $objEstruturaDTO->setStrSigla(mb_convert_encoding($arrResultado->sigla, 'ISO-8859-1', 'UTF-8'));
+        $objEstruturaDTO->setBolAtivo($arrResultado->ativo);
+        $objEstruturaDTO->setBolAptoParaReceberTramites($arrResultado->aptoParaReceberTramites);
+        $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($arrResultado->codigoNoOrgaoEntidade);
 
         return $objEstruturaDTO;
     } catch (Exception $e) {
@@ -440,17 +440,17 @@ class ProcessoEletronicoRN extends InfraRN
       if ($estrutura !== null) {
 
           $objEstruturaDTO = new EstruturaDTO();
-          $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($estrutura['numeroDeIdentificacaoDaEstrutura']);
-          $objEstruturaDTO->setStrNome(mb_convert_encoding($estrutura['nome'], 'ISO-8859-1', 'UTF-8'));
-          $objEstruturaDTO->setStrSigla(mb_convert_encoding($estrutura['sigla'], 'ISO-8859-1', 'UTF-8'));
-          $objEstruturaDTO->setBolAtivo($estrutura['ativo']);
-          $objEstruturaDTO->setBolAptoParaReceberTramites($estrutura['aptoParaReceberTramites']);
-          $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura['codigoNoOrgaoEntidade']);
+          $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+          $objEstruturaDTO->setStrNome(mb_convert_encoding($estrutura->nome, 'ISO-8859-1', 'UTF-8'));
+          $objEstruturaDTO->setStrSigla(mb_convert_encoding($estrutura->sigla, 'ISO-8859-1', 'UTF-8'));
+          $objEstruturaDTO->setBolAtivo($estrutura->ativo);
+          $objEstruturaDTO->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+          $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
 
           $arrHerarquia = array_map(
               function ($nivel) {
-                  return mb_convert_encoding($nivel['sigla'], 'ISO-8859-1', 'UTF-8');
-              }, $estrutura['hierarquia'] ?: []
+                  return mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
+              }, $estrutura->hierarquia ?: []
           );
 
           $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -754,22 +754,22 @@ class ProcessoEletronicoRN extends InfraRN
     
         $arrResultado = $this->consultarEstruturas($idRepositorioEstrutura, $parametros);
 
-      if ($arrResultado['totalDeRegistros'] > 0) {
-        foreach ($arrResultado['estruturas'] as $estrutura) {
+      if ($arrResultado->totalDeRegistros > 0) {
+        foreach ($arrResultado->estruturas as $estrutura) {
     
             $objEstruturaDTO = new EstruturaDTO();
-            $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($estrutura['numeroDeIdentificacaoDaEstrutura']);
-            $objEstruturaDTO->setStrNome(mb_convert_encoding($estrutura['nome'], 'UTF-8'));
-            $objEstruturaDTO->setStrSigla(mb_convert_encoding($estrutura['sigla'], 'UTF-8'));
-            $objEstruturaDTO->setBolAtivo($estrutura['ativo']);
-            $objEstruturaDTO->setBolAptoParaReceberTramites($estrutura['aptoParaReceberTramites']);
-            $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura['codigoNoOrgaoEntidade']);
-            $objEstruturaDTO->setNumTotalDeRegistros($arrResultado['totalDeRegistros']);
+            $objEstruturaDTO->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
+            $objEstruturaDTO->setStrNome(mb_convert_encoding($estrutura->nome, 'UTF-8'));
+            $objEstruturaDTO->setStrSigla(mb_convert_encoding($estrutura->sigla, 'UTF-8'));
+            $objEstruturaDTO->setBolAtivo($estrutura->ativo);
+            $objEstruturaDTO->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
+            $objEstruturaDTO->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
+            $objEstruturaDTO->setNumTotalDeRegistros($arrResultado->totalDeRegistros);
             
             $arrHerarquia = array_map(
                 function ($nivel) {
-                    return mb_convert_encoding($nivel['sigla'], 'UTF-8');
-                }, $estrutura['hierarquia'] ?: []
+                    return mb_convert_encoding($nivel->sigla, 'UTF-8');
+                }, $estrutura->hierarquia ?: []
             );
                 
             $objEstruturaDTO->setArrHierarquia($arrHerarquia);
@@ -777,7 +777,7 @@ class ProcessoEletronicoRN extends InfraRN
             $arrObjEstruturaDTO["itens"][] = $objEstruturaDTO;
         }
             
-        $totalDeRegistros = $arrResultado['totalDeRegistros'];
+        $totalDeRegistros = $arrResultado->totalDeRegistros;
         $arrObjEstruturaDTO["diferencaDeRegistros"] = $totalDeRegistros > count($arrObjEstruturaDTO["itens"]) ?
         $totalDeRegistros - count($arrObjEstruturaDTO["itens"]) : 0;
       }
@@ -800,10 +800,10 @@ class ProcessoEletronicoRN extends InfraRN
         $arrResultado = $this->get($endpoint, $parametros);
         $arrMotivosUrgencia = [];
       if (isset($arrResultado)) {
-        $count = count($arrResultado['motivosUrgencia']);    
+        $count = count($arrResultado->motivosUrgencia);    
         for ($i = 0; $i < $count; $i++) {
             $codigo = $i + 1; 
-            $arrMotivosUrgencia[$codigo] = mb_convert_encoding($arrResultado['motivosUrgencia'][$i]['descricao'], 'ISO-8859-1', 'UTF-8');
+            $arrMotivosUrgencia[$codigo] = mb_convert_encoding($arrResultado->motivosUrgencia[$i]->descricao, 'ISO-8859-1', 'UTF-8');
         }
       }
   
@@ -832,10 +832,10 @@ class ProcessoEletronicoRN extends InfraRN
         $arrResultado = $this->get($endpoint, $parametros);
         $arrEspecies = [];
       if (isset($arrResultado)) {
-        $count = count($arrResultado['especies']);
+        $count = count($arrResultado->especies);
         for ($i = 0; $i < $count; $i++) {
             $codigo = $i + 1; 
-            $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
+            $arrEspecies[$codigo] = mb_convert_encoding($arrResultado->especies[$i]->nomeNoProdutor, 'ISO-8859-1', 'UTF-8');
         }
       }
 
@@ -881,11 +881,11 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
 
-        if (is_array($arrResultado) && !is_null($arrResultado)) {
+        if (!is_null($arrResultado)) {
           foreach ($arrResultado as $strPendencia) {
               $pendenciaDTO = new PendenciaDTO();
-              $pendenciaDTO->setNumIdentificacaoTramite($strPendencia['IDT']);
-              $pendenciaDTO->setStrStatus($strPendencia['status']);
+              $pendenciaDTO->setNumIdentificacaoTramite($strPendencia->IDT);
+              $pendenciaDTO->setStrStatus($strPendencia->status);
               $arrObjPendenciaDTO[] = $pendenciaDTO;
           }
         } 
@@ -1254,30 +1254,23 @@ class ProcessoEletronicoRN extends InfraRN
         'IDT' => $parNumIdentificacaoTramite
         ];
             
-        $arrResultado = $this->get($endpoint, $parametros);
+        $objResultado = $this->get($endpoint, $parametros);        
 
-        $arrResultado['IDT'] = $parNumIdentificacaoTramite;
-        $arrResultado['NRE'] = $arrResultado['nre'];
-
-        $objResultado = new stdClass();
         $objResultado->IDT = $parNumIdentificacaoTramite;
-        $objResultado->NRE = $arrResultado['nre'];
+        $objResultado->NRE = $objResultado->nre;         
 
         // verificar se é um documento avulso
-        if (!array_key_exists('processo', $arrResultado) || $arrResultado['processo'] == null) {
-            $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
-
+        if (!property_exists($objResultado,'processo') || $objResultado->processo == null) {
+            $objResultado->metadados = $objResultado;
             return $objResultado;
         }
 
         $multivalorado = false;
-        if (count($arrResultado['processo']['documentos']) <= 1) {
-            $arrResultado['processo']['documentos'] =  (object) $arrResultado['processo']['documentos'][0];
-        } else {
+        if (count($objResultado->processo->documentos) > 1) {       
             $multivalorado = true;
-        }
+        }        
 
-        $objResultado->metadados = $this->converterArrayParaObjeto($arrResultado);
+        $objResultado->metadados = $objResultado;
 
         if ($multivalorado) {
             $objResultado->metadados->processo->documentos = (array) $objResultado->metadados->processo->documentos;
@@ -1370,10 +1363,10 @@ class ProcessoEletronicoRN extends InfraRN
         throw new InfraException('Módulo do Tramita: Parâmetro $objProcesso não informado.');
     }
 
-    if (is_array($parObjProtocolo)) {
-        $parObjProtocolo = (object) $parObjProtocolo;
-    }
 
+    $parObjProtocolo = $this->converterArrayParaObjeto($parObjProtocolo);
+
+     
       //Monta dados do processo eletrônico
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
       $objProcessoEletronicoDTO->setStrNumeroRegistro($parStrNumeroRegistro);
@@ -1526,10 +1519,7 @@ class ProcessoEletronicoRN extends InfraRN
      */
   public static function getHashFromMetaDados($objMeta)
     {
-    if (is_array($objMeta)) {
-        $objMeta = (object) $objMeta;
-    }
-
+    
       $strHashConteudo = '';
 
     if (isset($objMeta)) {
@@ -1568,10 +1558,6 @@ class ProcessoEletronicoRN extends InfraRN
       $contComponentes = 0;
 
     foreach ($arrayComponentesDigitais as $objComponenteDigital){
-
-      if (is_array($objComponenteDigital)) {
-        $objComponenteDigital = (object) $objComponenteDigital;
-      } 
 
         $contComponentes++;
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1661,7 +1647,7 @@ class ProcessoEletronicoRN extends InfraRN
         if(is_array($objDocumento->componenteDigital) && count($objDocumento->componenteDigital) != 1) {
             throw new InfraException("Erro processando componentes digitais do processo " . $parObjProtocolo->protocolo . "\n Somente é permitido o recebimento de documentos com apenas um Componente Digital.");
         }
-
+          
           $arrComponenteDigital = is_array($objDocumento->componentesDigitais) ? $objDocumento->componentesDigitais[0] : $objDocumento->componentesDigitais;
           $objComponenteDigital = (object) $arrComponenteDigital;
           $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
@@ -1689,9 +1675,8 @@ class ProcessoEletronicoRN extends InfraRN
             $arrObjItensSolicitados = $parObjComponentesDigitaisSolicitados ?? [$parObjComponentesDigitaisSolicitados];
           foreach ($arrObjItensSolicitados as $objItemSolicitado) {
             if(!is_null($objItemSolicitado)) {
-              $objItemSolicitado['hashes'] = is_array($objItemSolicitado['hashes']) ? $objItemSolicitado['hashes'] : [$objItemSolicitado['hashes']];
 
-              if($objItemSolicitado['protocolo'] == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado['hashes']) && !$objDocumento->retirado) {
+              if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hashes) && !$objDocumento->retirado) {
                       $objComponenteDigitalDTO->setStrSinEnviar("S");
               }
             }
@@ -1782,20 +1767,20 @@ class ProcessoEletronicoRN extends InfraRN
 
         $arrResultado = $this->get($endpoint, $parametros);
 
-        if (isset($arrResultado['tramites']) && !empty($arrResultado['tramites'][0])) {
+        if (isset($arrResultado->tramites) && !empty($arrResultado->tramites[0])) {
 
             $itensHistorico = [];
-          foreach ($arrResultado['tramites'][0]['mudancasDeSituacao'] as $mudancaDeSituacao) {
+          foreach ($arrResultado->tramites[0]->mudancasDeSituacao as $mudancaDeSituacao) {
               $itensHistorico['operacao'][] = $mudancaDeSituacao;
           }
 
-            $arrResultado['tramites'][0] = array_filter(
-                $arrResultado['tramites'][0], function ($value) {
+            $arrResultado->tramites[0] = array_filter(
+              get_object_vars($arrResultado->tramites[0]), function ($value) {
                     return !is_null($value);
                 }
             );
 
-            $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado['tramites'][0]);
+            $arrObjTramite[] = $this->converterArrayParaObjeto($arrResultado->tramites[0]);
             $arrObjTramite[0]->itensHistorico = (object) $itensHistorico;
 
         }
@@ -2003,7 +1988,7 @@ class ProcessoEletronicoRN extends InfraRN
         ];
 
         $arrResultado = $this->get($endpoint, $parametros);
-        $arrResultado['recibo']['hashDoComponenteDigital'] = $arrResultado['recibo']['hashesDosComponentesDigitais'][0];
+        $arrResultado->recibo->hashDoComponenteDigital= $arrResultado->recibo->hashesDosComponentesDigitais[0];
 
         return $this->converterArrayParaObjeto($arrResultado);
 
@@ -2029,7 +2014,7 @@ class ProcessoEletronicoRN extends InfraRN
         ];
 
         $arrResultado = $this->get($endpoint, $parametros);
-        $arrResultado['reciboDeEnvio']['hashDoComponenteDigital'] = $arrResultado['reciboDeEnvio']['hashesDosComponentesDigitais'][0];
+        $arrResultado->reciboDeEnvio->hashDoComponenteDigital = $arrResultado->reciboDeEnvio->hashesDosComponentesDigitais[0];
 
         return $this->converterArrayParaObjeto($arrResultado);
     }
@@ -2361,31 +2346,14 @@ class ProcessoEletronicoRN extends InfraRN
   }
 
   public static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
-    {
-
-    if (is_array($parDocumento1)) {
-        $parDocumento1 = (object) $parDocumento1;
-    }
-
-    if (is_array($parDocumento2)) {
-        $parDocumento2 = (object) $parDocumento2;
-    }
-
+    {   
       $numOrdemDocumento1 = intval($parDocumento1->ordem);
       $numOrdemDocumento2 = intval($parDocumento2->ordem);
       return $numOrdemDocumento1 - $numOrdemDocumento2;
   }
 
   public static function comparacaoOrdemComponenteDigitais($parComponenteDigital1, $parComponenteDigital2)
-    {
-    if (is_array($parComponenteDigital1)) {
-        $parComponenteDigital1 = (object) $parComponenteDigital1;
-    }
-
-    if (is_array($parComponenteDigital2)) {
-        $parComponenteDigital2 = (object) $parComponenteDigital2;
-    }
-
+    {  
       $numOrdemComponenteDigital1 = intval($parComponenteDigital1->ordem);
       $numOrdemComponenteDigital2 = intval($parComponenteDigital2->ordem);
       return $numOrdemComponenteDigital1 - $numOrdemComponenteDigital2;
@@ -2399,10 +2367,7 @@ class ProcessoEletronicoRN extends InfraRN
         usort($arrObjProtocolo, ["ProcessoEletronicoRN", "comparacaoOrdemAjustadaDocumentos"]);
 
         //Tratamento recursivo para processos anexados
-      foreach ($arrObjProtocolo as $objProtocolo) {
-        if (is_array(($objProtocolo))) {
-            $objProtocolo = (object) $objProtocolo;
-        }
+      foreach ($arrObjProtocolo as $objProtocolo) {        
         $bolEhProcessoAnexado = $objProtocolo->staTipoProtocolo == ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO;
         if($parBolExtrairAnexados && $bolEhProcessoAnexado) {
             $arrProtocolosAnexados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo, $parBolExtrairAnexados);
@@ -2431,10 +2396,7 @@ class ProcessoEletronicoRN extends InfraRN
 
       $arrObjDocumentoPadronizados = ($parBolExtrairAnexados) ? $arrObjDocumento : $arrObjProtocolo;
 
-    foreach ($arrObjDocumentoPadronizados as $documento) {
-      if (is_array($documento) && $documento['componentesDigitais']) {
-          $documento = (object) $documento;
-      }
+    foreach ($arrObjDocumentoPadronizados as $documento) {     
         $documento->componentesDigitais = self::obterComponentesDocumentos($documento);
     }
 
@@ -2862,6 +2824,12 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  //Incluída este método isJson porque o endpoint componente-digital-parcial não retorna um Json como os demais endpoints.
+  //TODO: Na versão php 8.3, poderemos usar a função Json_validate
+  function isJson($string) {
+    json_decode($string);
+    return json_last_error() === JSON_ERROR_NONE;
+ }
     /**
      * Iniciar requisição HTTP utilizado para comunicação Webservice REST
      */
@@ -2870,13 +2838,18 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $arrResultado = $this->strClientGuzzle->request($method, $endpoint, $options);
         $base64 = $arrResultado->getBody()->getContents();
+        
+        if($this->isJson($base64)){
+          $foo = json_decode($base64, false);
+        }else{
+          $foo = $base64;
+        }
+        
+        if (is_array($foo)) {
+          return (object) $foo;
+        }
 
-        $foo = json_decode($arrResultado->getBody(), true);
-      if ($foo != null) {
-        return $foo; 
-      }
-
-        return $base64;
+        return $foo;
     } catch (RequestException $e) {
         $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
         
