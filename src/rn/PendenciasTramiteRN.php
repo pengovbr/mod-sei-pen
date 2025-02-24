@@ -469,7 +469,8 @@ class PendenciasTramiteRN extends InfraRN
 
         if ($numCodigoResposta != 0) {
             $strLocalizacaoScript = realpath(self::LOCALIZACAO_SCRIPT_WORKER);
-            $strPhpExec = empty(PHP_BINARY) ? "php" : PHP_BINARY;
+            $strPhpExec = "echo -n $(which php)";
+            $strPhpExec= shell_exec($strPhpExec);
             $strPhpIni = php_ini_loaded_file();
             $strPhpIni = $strPhpIni ? "-c $strPhpIni" : "";
             $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');
