@@ -96,7 +96,7 @@ $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi 
 $(FILE_VENDOR_UNITARIO): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
 	make install-phpunit-vendor
 
-dist: 
+dist: cria_json_compatibilidade
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
 	@mkdir -p $(SEI_SCRIPTS_DIR)
 	@mkdir -p $(SEI_CONFIG_DIR)
@@ -108,12 +108,13 @@ dist:
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
 	@cp docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md dist/NOTAS_VERSAO.md
+	@cp compatibilidade.json dist/compatibilidade.json
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoEnvioTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoRecebimentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
-	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/	
+	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/ConfiguracaoModPEN.exemplo.php $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/supervisor.exemplo.ini $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/bin/verificar-reboot-fila.sh $(SEI_BIN_DIR)/
@@ -122,7 +123,7 @@ dist:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md sei/ sip/	
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md compatibilidade.json sei/ sip/
 	@rm -rf dist/sei dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
@@ -563,3 +564,6 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+
+cria_json_compatibilidade:
+	$(shell ./gerar_json_compatibilidade.sh)

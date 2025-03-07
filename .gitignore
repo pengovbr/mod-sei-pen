@@ -6,6 +6,7 @@ src/config/supervisor.ini
 **/.tmp/
 **/evidencias/
 **/tests_funcional_falsos_positivos_temp/
+compatibilidade.json
 
 .vscode
 
