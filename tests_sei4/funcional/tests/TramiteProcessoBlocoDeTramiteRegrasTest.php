@@ -47,10 +47,12 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
         $this->paginaTramiteEmBloco->clicarSalvar();
         sleep(2);
 
-        $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+        $mensagem = "Prezado(a) usuário(a), o processo " . $objProtocoloDTO->getStrProtocoloFormatado()
+            . " possui documentos gerados não assinados. "
+            . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
         $this->assertStringContainsString(
-            mb_convert_encoding('Não é possível tramitar um processos com documentos gerados e não assinados', 'UTF-8', 'ISO-8859-1'),
-            $mensagem
+            mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1'),
+            $this->paginaTramiteEmBloco->buscarMensagemAlerta()
         );
     }
 
@@ -163,10 +165,11 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
         $this->paginaTramiteEmBloco->clicarSalvar();
         sleep(2);
 
-        $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+        $mensagem = "Prezado(a) usuário(a), o processo " . $objProtocoloDTO->getStrProtocoloFormatado()
+            . " não possui documentos. Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
         $this->assertStringContainsString(
-            mb_convert_encoding('Não é possível tramitar um processo sem documentos', 'UTF-8', 'ISO-8859-1'),
-            $mensagem
+            mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1'),
+            $this->paginaTramiteEmBloco->buscarMensagemAlerta()
         );
     }
 }
