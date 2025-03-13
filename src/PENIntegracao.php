@@ -705,7 +705,8 @@ class PENIntegracao extends SeiIntegracao
         $xml .= ' favor refinar a pesquisa."';
         $xml .= '></item>';
     }
-      return $xml . '</itens>';
+    $xml .= '</itens>';
+    return mb_convert_encoding($xml,'ISO-8859-1', 'UTF-8');
   }
 
     /**
