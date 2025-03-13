@@ -720,7 +720,7 @@ class PENIntegracao extends SeiIntegracao
       $xml .= '></item>';
     }
     $xml .= '</itens>';
-    return $xml;
+    return mb_convert_encoding($xml,'ISO-8859-1', 'UTF-8');
   }
 
   /**
