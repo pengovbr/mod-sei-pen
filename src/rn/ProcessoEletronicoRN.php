@@ -167,6 +167,7 @@ class ProcessoEletronicoRN extends InfraRN
         throw new \Exception($mensagem);
     }
   }
+}
 
 
     /**
@@ -558,96 +559,6 @@ class ProcessoEletronicoRN extends InfraRN
       return is_array($result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura)
       ? $result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura
       : [$result->estruturasEncontradasNoFiltroPorEstruturaPai->estrutura];
-  }
-
-  public function listarEstruturas($idRepositorioEstrutura, $nome = '', $numeroDeIdentificacaoDaEstruturaRaizDaConsulta = null,
-    $nomeUnidade = null, $siglaUnidade = null, $offset = null, $registrosPorPagina = null, $parBolPermiteRecebimento = null, $parBolPermiteEnvio = null)
-    {
-      $arrObjEstruturaDTO = array();
-
-    try{
-        $idRepositorioEstrutura = filter_var($idRepositorioEstrutura, FILTER_SANITIZE_NUMBER_INT);
-      if(!$idRepositorioEstrutura) {
-        throw new InfraException("Repositório de Estruturas inválido");
-      }
-
-        $parametros = new stdClass();
-        $parametros->filtroDeEstruturas = new stdClass();
-        $parametros->filtroDeEstruturas->identificacaoDoRepositorioDeEstruturas = $idRepositorioEstrutura;
-        $parametros->filtroDeEstruturas->apenasAtivas = true;
-
-      if(!is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta)){
-          $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstruturaRaizDaConsulta = $numeroDeIdentificacaoDaEstruturaRaizDaConsulta;
-      }else{
-          $nome = trim($nome);
-        if(is_numeric($nome)) {
-            $parametros->filtroDeEstruturas->numeroDeIdentificacaoDaEstrutura = intval($nome);
-        } else {
-            $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
-        }
-      }
-
-      if(!is_null($siglaUnidade)){
-          $parametros->filtroDeEstruturas->sigla = $siglaUnidade;
-      }
-
-      if(!is_null($nomeUnidade)){
-          $parametros->filtroDeEstruturas->nome = mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1');
-      }
-
-      if(!is_null($registrosPorPagina) && !is_null($offset)){
-          $parametros->filtroDeEstruturas->paginacao = new stdClass();
-          $parametros->filtroDeEstruturas->paginacao->registroInicial = $offset;
-          $parametros->filtroDeEstruturas->paginacao->quantidadeDeRegistros = $registrosPorPagina;
-      }
-
-      if(!is_null($parBolPermiteRecebimento) && $parBolPermiteRecebimento === true){
-          $parametros->filtroDeEstruturas->permiteRecebimento = true;
-      }
-
-      if(!is_null($parBolPermiteEnvio) && $parBolPermiteEnvio === true){
-          $parametros->filtroDeEstruturas->permiteEnvio = true;
-      }
-
-        $result = $this->tentarNovamenteSobErroHTTP(function($objPenWs) use ($parametros) {
-            return $objPenWs->consultarEstruturas($parametros);
-        });
-
-      if($result->estruturasEncontradas->totalDeRegistros > 0) {
-
-        if(!is_array($result->estruturasEncontradas->estrutura)) {
-            $result->estruturasEncontradas->estrutura = array($result->estruturasEncontradas->estrutura);
-        }
-
-        foreach ($result->estruturasEncontradas->estrutura as $estrutura) {
-          $item = new EstruturaDTO();
-          $item->setNumNumeroDeIdentificacaoDaEstrutura($estrutura->numeroDeIdentificacaoDaEstrutura);
-          $item->setStrNome(mb_convert_encoding($estrutura->nome, 'ISO-8859-1', 'UTF-8'));
-          $item->setStrSigla(mb_convert_encoding($estrutura->sigla, 'ISO-8859-1', 'UTF-8'));
-          $item->setBolAtivo($estrutura->ativo);
-          $item->setBolAptoParaReceberTramites($estrutura->aptoParaReceberTramites);
-          $item->setStrCodigoNoOrgaoEntidade($estrutura->codigoNoOrgaoEntidade);
-          $item->setNumTotalDeRegistros($result->estruturasEncontradas->totalDeRegistros);
-
-          if(!empty($estrutura->hierarquia->nivel)) {
-            $array = array();
-            foreach($estrutura->hierarquia->nivel as $nivel) {
-              $array[] = mb_convert_encoding($nivel->sigla, 'ISO-8859-1', 'UTF-8');
-            }
-            $item->setArrHierarquia($array);
-          }
-
-                $arrObjEstruturaDTO[] = $item;
-        }
-      }
-
-    } catch (Exception $e) {
-        $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
-        throw new InfraException($mensagem, $e, $detalhes);
-    }
-
-      return $arrObjEstruturaDTO;
   }
 
   public function listarEstruturasBuscaTextual(
