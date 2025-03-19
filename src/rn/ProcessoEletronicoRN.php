@@ -1636,9 +1636,17 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigital = (object) $arrComponenteDigital;
           $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
 
-        if(isset($objDocumento->especie)){
-            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($objDocumento->especie->codigo));
-            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($objDocumento->especie->nomeNoProdutor));
+          if(isset($objDocumento->especie)){
+            if (is_array($objDocumento->especie)){
+              $numCodigoEspecie = $objDocumento->especie['codigo'];
+              $strNomeEspecieProdutor = $objDocumento->especie['nomeNoProdutor'];
+            }
+            else{
+              $numCodigoEspecie = $objDocumento->especie->codigo;
+              $strNomeEspecieProdutor = $objDocumento->especie->nomeNoProdutor;
+            }
+            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($numCodigoEspecie));
+            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($strNomeEspecieProdutor));
         }
 
           $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);

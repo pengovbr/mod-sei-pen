@@ -1089,7 +1089,7 @@ class ExpedirProcedimentoRN extends InfraRN {
         }
       }
     //Aplica o mapeamento de espécies definida pelo administrador para os novos documentos
-      if($numCodigoEspecie == null) {
+      if($numCodigoEspecie == null || (isset($numCodigoEspecie) && $numCodigoEspecie == 0)) {
         $numCodigoEspecie = $this->obterEspecieMapeada($parDocumentoDTO->getNumIdSerie());
         $strNomeEspecieProdutor = mb_convert_encoding($parDocumentoDTO->getStrNomeSerie(), 'UTF-8', 'ISO-8859-1');
       }
