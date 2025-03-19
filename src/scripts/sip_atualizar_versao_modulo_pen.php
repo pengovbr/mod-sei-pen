@@ -299,7 +299,7 @@ class PenAtualizarSipRN extends InfraRN
             $this->instalarV3070();
         case '3.7.0':
             $this->instalarV3080();
-        case '3.8.0':
+        case (preg_match('/3.8.*/', $strVersaoModuloPen) ? true : false):
             $this->instalarV4000();
         
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões

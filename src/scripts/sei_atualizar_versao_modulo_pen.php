@@ -284,7 +284,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3070();
         case '3.7.0':
             $this->instalarV3080();
-        case (preg_match('/3.8.*/', $name) ? true : false):
+        case (preg_match('/3.8.*/', $strVersaoModuloPen) ? true : false):
             $this->instalarV4000();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
