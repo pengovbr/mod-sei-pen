@@ -17,14 +17,25 @@ Para maiores informações sobre os procedimentos de instalação ou atualizaç�
 
 Todas as atualizações podem incluir itens referentes à segurança, requisito em permanente monitoramento e evolução, motivo pelo qual a atualização com a maior brevidade possível é sempre recomendada.
 
+#### **CORREÇÕES DE PROBLEMAS**
+
+#### Nesta versão, foram corrigidos os seguintes erros:
+
+
+* **Altera a mensagem quando o tipo de processo não existe no sistema de destino:** Altera a mensagem quando o tipo de processo não existe no sistema de destino  [#781](https://github.com/pengovbr/mod-sei-pen/issues/781);
+ 
+ 
 #### **MELHORIAS**
 
 #### As melhorias implementadas nesta versão incluem:
 
 * **Compatibilidade com o SEI v.5.0.0:** Compatibilização do Tramita com o módulo SEI v. 5.0.0 [#764](https://github.com/pengovbr/mod-sei-pen/issues/764);
 
+* **Correção do erro ao tentar enviar para o Tramita:** [41f4fa730317f5452c90a266d92cc5b6f57886df];
+Os seguintes erros de validação de campos foram identificados: - processo.documentos[X].especie.nomeNoProdutor não pode ser vazio processo.documentos[X].especie.codigo deve ser um código de espécie válido
 
-Para obter informações detalhadas sobre cada um dos passos de atualização, vide arquivo **ATUALIZACAO.md**.
+* **Correção dos acentos ao filtrar as unidades:** [028e598746f658752b84e0b48fa58d40fbee8f19]
+Erro de encoding UTF8 que não exibia corretamente a acentuação nos filtros das unidades
 
 #### Instruções
 
