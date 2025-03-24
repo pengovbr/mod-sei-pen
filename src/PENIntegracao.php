@@ -686,7 +686,7 @@ class PENIntegracao extends SeiIntegracao
     if ($arr !== null && $arr['itens']) {
       foreach ($arr['itens'] as $dto) {
         $xml .= '<item id="' . self::formatarXMLAjax($dto->get($strAtributoId)) . '"';
-        $xml .= ' descricao="' . self::formatarXMLAjax($dto->get($strAtributoDescricao)) . '"';
+        $xml .= ' descricao="' . mb_convert_encoding(self::formatarXMLAjax($dto->get($strAtributoDescricao)),'iso-8859-1', 'utf-8') . '"';
 
         if ($strAtributoComplemento !== null) {
             $xml .= ' complemento="' . self::formatarXMLAjax($dto->get($strAtributoComplemento)) . '"';
