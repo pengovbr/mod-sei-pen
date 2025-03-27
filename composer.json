@@ -16,6 +16,7 @@
       
   "require-dev": {
     "pheromone/phpcs-security-audit": "*" ,
-    "phpcompatibility/php-compatibility": "^9.3"
+    "phpcompatibility/php-compatibility": "^9.3",
+    "rector/rector": "^2.0"
 }
 }
