@@ -298,7 +298,7 @@ class ExpedirProcedimentoRN extends InfraRN
               if($numIdTramite != 0) {
                   $this->objProcessoEletronicoRN->cancelarTramite($numIdTramite);
               }
-            } catch (InfraException $ex) { 
+            } catch (InfraException) { 
             }
 
               $this->registrarAndamentoExpedicaoAbortada($arrProcesso['idProcedimentoSEI']);
@@ -349,7 +349,7 @@ class ExpedirProcedimentoRN extends InfraRN
           }
         }
       }
-      catch(Exception $e){
+      catch(Exception){
           //Em caso de falha na comunicação com o barramento neste ponto, o procedimento deve serguir em frente considerando
           //que os metadados do protocolo não pode ser obtida
           LogSEI::getInstance()->gravar("Falha na obtenção dos metadados de trâmites anteriores do processo ($parDblIdProcedimento) durante trâmite externo.", LogSEI::$AVISO);
@@ -662,7 +662,7 @@ class ExpedirProcedimentoRN extends InfraRN
 
 
       //Seta a unidade de destino
-      $arrUnidadeDestino = preg_split('/\s?\/\s?/', $objExpedirProcedimentoDTO->getStrUnidadeDestino());
+      $arrUnidadeDestino = preg_split('/\s?\/\s?/', (string) $objExpedirProcedimentoDTO->getStrUnidadeDestino());
       $arrUnidadeDestino = preg_split('/\s+\-\s+/', current($arrUnidadeDestino));
       $strUnidadeDestino = array_shift($arrUnidadeDestino);
 
@@ -1431,7 +1431,7 @@ class ExpedirProcedimentoRN extends InfraRN
 
         if(file_exists($strCaminhoAnexoTemporario)) {
           try {
-              unlink(DIR_SEI_TEMP . "/" . basename($strCaminhoAnexoTemporario));
+              unlink(DIR_SEI_TEMP . "/" . basename((string) $strCaminhoAnexoTemporario));
           } catch (Exception $e) {
               LogSEI::getInstance()->gravar($e, InfraLog::$ERRO);
           }
@@ -1485,7 +1485,7 @@ class ExpedirProcedimentoRN extends InfraRN
       }
 
         $objInformacaoArquivo['NOME'] = $strProtocoloDocumentoFormatado . ".html";
-        $objInformacaoArquivo['TAMANHO'] = strlen($strConteudoAssinatura);
+        $objInformacaoArquivo['TAMANHO'] = strlen((string) $strConteudoAssinatura);
         $objInformacaoArquivo['MIME_TYPE'] = 'text/html';
         $objInformacaoArquivo['ID_ANEXO'] = null;
         $objInformacaoArquivo['CONTEUDO'] = $strConteudoAssinatura;
@@ -1717,24 +1717,24 @@ class ExpedirProcedimentoRN extends InfraRN
       $strStaNumeracao = $objSerieDTO->getStrStaNumeracao();
 
     if ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
-        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
+        $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
+        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
-        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($objOrgaoDTO->getStrSigla());
-        $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
+        $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
+        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE) {
-        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
+        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
-        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($objOrgaoDTO->getStrSigla());
-        $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
+        $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
+        $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     }
     
@@ -2081,7 +2081,7 @@ class ExpedirProcedimentoRN extends InfraRN
 
                 if(file_exists($strCaminhoAnexoTemporario)) {
                   try {
-                              unlink(DIR_SEI_TEMP . "/" . basename($strCaminhoAnexoTemporario));
+                              unlink(DIR_SEI_TEMP . "/" . basename((string) $strCaminhoAnexoTemporario));
                   } catch (Exception $e) {
                                         LogSEI::getInstance()->gravar($e, InfraLog::$ERRO);
                   }
@@ -2634,7 +2634,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objAtividadeDTO->setDthConclusao(null);
         $objAtividadeDTO->setStrStaEstadoProtocolo(ProtocoloRN::$TE_NORMAL);
 
-        $arrPalavrasPesquisa = explode(' ', $strPalavrasPesquisa);
+        $arrPalavrasPesquisa = explode(' ', (string) $strPalavrasPesquisa);
       for($i=0; $i<count($arrPalavrasPesquisa); $i++) {
           $arrPalavrasPesquisa[$i] = '%'.$arrPalavrasPesquisa[$i].'%';
       }
@@ -2717,7 +2717,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objAtividadeDTO->setDthConclusao(null);
         $objAtividadeDTO->setStrStaEstadoProtocolo(ProtocoloRN::$TE_NORMAL);
 
-        $arrPalavrasPesquisa = explode(' ', $strPalavrasPesquisa);
+        $arrPalavrasPesquisa = explode(' ', (string) $strPalavrasPesquisa);
       for($i=0; $i<count($arrPalavrasPesquisa); $i++) {
           $arrPalavrasPesquisa[$i] = '%'.$arrPalavrasPesquisa[$i].'%';
       }
@@ -2786,7 +2786,7 @@ class ExpedirProcedimentoRN extends InfraRN
             $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
           }
             $this->contadorDaBarraDeProgresso++;
-        }catch (Exception $e){
+        }catch (Exception){
             //Armazena as partes que não foram enviadas para tentativa de reenvio posteriormente
             $arrPartesComponentesDigitaisNaoEnviadas[] = $inicio;
         }
@@ -3286,14 +3286,14 @@ class ExpedirProcedimentoRN extends InfraRN
 
             $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
             $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
-            $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
-            $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
-            $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
+            $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', (string) $strTarja);
+            $strTarja = preg_replace("/@nome_assinante@/s", (string) $objAssinaturaDTO->getStrNome(), $strTarja);
+            $strTarja = preg_replace("/@tratamento_assinante@/s", (string) $objAssinaturaDTO->getStrTratamento(), $strTarja);
             $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
             $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
             $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
             $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-            $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
+            $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", (string) $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
             $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
             $arrResposta[] = EditorRN::converterHTML($strTarja);
         }
@@ -3306,12 +3306,12 @@ class ExpedirProcedimentoRN extends InfraRN
 
         if ($objTarjaAssinaturaDTO != null) {
             $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false) {
+          if (str_contains((string) $objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')) {
                 $objEditorRN = new EditorRN();
                 $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
             $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
-            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
+            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', (string) $strTarja);
             $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
             $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
             $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
