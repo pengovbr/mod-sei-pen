@@ -1790,22 +1790,22 @@ class ExpedirProcedimentoRN extends InfraRN {
       $strStaNumeracao = $objSerieDTO->getStrStaNumeracao();
 
       if ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
+        $objDocumento['identificacao']['numero'] = intval(utf8_encode($parObjDocumentoDTO->getStrNumero()));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
       } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
+        $objDocumento['identificacao']['numero'] = intval(utf8_encode($parObjDocumentoDTO->getStrNumero()));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($objOrgaoDTO->getStrSigla());
         $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
       } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE) {
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100));
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
+        $objDocumento['identificacao']['numero'] = intval(utf8_encode($parObjDocumentoDTO->getStrNumero()));
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
       } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
-        $objDocumento['identificacao']['numero'] = utf8_encode($parObjDocumentoDTO->getStrNumero());
+        $objDocumento['identificacao']['numero'] = intval(utf8_encode($parObjDocumentoDTO->getStrNumero()));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = utf8_encode($objOrgaoDTO->getStrSigla());
         $objDocumento['identificacao']['complemento'] = utf8_encode($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100));
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
