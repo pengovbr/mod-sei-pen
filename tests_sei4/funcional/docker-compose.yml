@@ -64,6 +64,9 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/tests/sei/src/sei/config/ConfiguracaoSEI.php:ro
       - ../../src:/tests/sei/src/sei/web/modulos/pen
       - ./assets/config:/tests/sei/src/sei/config/mod-pen
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-avancada/src/config/ConfiguracaoModAssinaturaAvancada.php:/tests/sei/src/sei/config/mod-assinatura-eletronica/ConfiguracaoModAssinaturaAvancada.php:ro
+      - ../../../mod-sei-assinatura-avancada/src:/tests/sei/src/sei/web/modulos/assinatura-eletronica
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -154,6 +157,11 @@ services:
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ./composer.json:/opt/sei/web/modulos/pen/composer.json
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-avancada/src:/opt/sei/web/modulos/assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/config:/opt/sei/config/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -216,6 +224,11 @@ services:
       - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-avancada/src:/opt/sei/web/modulos/assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/config:/opt/sei/config/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-avancada/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}

@@ -1,4 +1,4 @@
-.PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
+.PHONY: .env .modulo.env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # ParÃ¢metros de execuÃ§Ã£o do comando MAKE
 # OpÃ§Ãµes possÃ­veis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
@@ -20,6 +20,7 @@ endif
 
 MODULO_NOME = pen
 MODULO_PASTAS_CONFIG = mod-$(MODULO_NOME)
+MODULO_PASTAS_CONFIG_ASSINATURA = mod-assinatura-eletronica
 VERSAO_MODULO := $(shell grep 'define."VERSAO_MODULO_PEN"' src/PENIntegracao.php | cut -d'"' -f4)
 SEI_SCRIPTS_DIR = dist/sei/scripts/mod-pen
 SEI_CONFIG_DIR = dist/sei/config/mod-pen
@@ -41,12 +42,15 @@ PEN_TST_FNC_EVD_TFP= $(PEN_TST_FNC_EVD)/teste_funcional_falsos_positivos
 NOME_ARQ_EVDNC_TFP = evidencia-teste_funcional_falsos_positivos
 
 -include $(PEN_TEST_FUNC)/.env
+-include $(PEN_TEST_FUNC)/.modulo.env
 
 CMD_INSTALACAO_SEI = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php atualizar_versao_sei.php
 CMD_INSTALACAO_SIP = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_versao_sip.php
 CMD_INSTALACAO_RECURSOS_SEI = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php atualizar_recursos_sei.php
 CMD_INSTALACAO_SEI_MODULO = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php sei_atualizar_versao_modulo_pen.php
 CMD_INSTALACAO_SIP_MODULO = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php sip_atualizar_versao_modulo_pen.php
+CMD_INSTALACAO_SEI_MODULO_ASSINATURA = echo -ne '$(SEI_DATABASE_USER)\n$(SEI_DATABASE_PASSWORD)\n' | php sei_atualizar_versao_modulo_assinatura.php
+CMD_INSTALACAO_SIP_MODULO_ASSINATURA = echo -ne '$(SIP_DATABASE_USER)\n$(SIP_DATABASE_PASSWORD)\n' | php sip_atualizar_versao_modulo_assinatura.php	
 
 CMD_COMPOSE_UNIT = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_UNIT)/docker-compose.yml --env-file $(PEN_TEST_UNIT)/.env
 CMD_COMPOSE_FUNC = $(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml --env-file $(PEN_TEST_FUNC)/.env
@@ -164,6 +168,9 @@ install: check-isalive
 
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
+
+.modulo.env:
+	@if [ ! -f "$(PEN_TEST_FUNC)/.modulo.env" ]; then cp $(PEN_TEST_FUNC)/env_modulo $(PEN_TEST_FUNC)/.modulo.env; fi
 
 up: .env
 	$(CMD_COMPOSE_FUNC) up -d
@@ -562,6 +569,19 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+
+install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados do sistema
+	@echo ">>>>>>Executando instalação assinatura eletrônica no ORG1 e Org2<<<<<<"
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	@echo ""
+	@echo "==================================================================================================="
+	@echo ""
+	@echo "Fim da instalação do módulo"
 
 cria_json_compatibilidade:
 	$(shell ./gerar_json_compatibilidade.sh)
