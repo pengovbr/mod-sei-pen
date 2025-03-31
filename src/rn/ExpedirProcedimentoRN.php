@@ -1268,30 +1268,15 @@ class ExpedirProcedimentoRN extends InfraRN {
         $objAssinaturaDigital['observacao'] = mb_convert_encoding($dataTarjas[count($dataTarjas) - 1], 'UTF-8', 'ISO-8859-1');
         $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());      
 
-        if($assinatura->getStrStaFormaAutenticacao() == AssinaturaRN::$TA_CERTIFICADO_DIGITAL){
-          $objAssinaturaDigital['hash'] = [
+        $objAssinaturaDigital['hash'] = [
           'algoritmo' => self::ALGORITMO_HASH_ASSINATURA,
-          'conteudo' => $strHashDocumento
-          ];
-          $objAssinaturaDigital['cadeiaDoCertificado'] = [
+          'conteudo' => $assinatura->getStrP7sBase64() ? $strHashDocumento : 'vazio'
+        ];
+        $objAssinaturaDigital['cadeiaDoCertificado'] = [
           'formato' => 'PKCS7',
-          'conteudo' => $assinatura->getStrP7sBase64() ? $assinatura->getStrP7sBase64() : 'vazio'
-          ];
-        } else {
-          $objAssinaturaDigital['hash'] = [
-            'algoritmo' => self::ALGORITMO_HASH_ASSINATURA,
-            'conteudo' => 'vazio'
-          ];
-        
-          $objAssinaturaDigital['cadeiaDoCertificado'] = [
-            'formato' => 'PKCS7',
-            'conteudo' => 'vazio'
-          ];
-        }  
-      }
+          'conteudo' => $assinatura->getStrP7sBase64() ?: 'vazio'
+        ];
 
-      
-      if ($objAssinaturaDigital != null) {
         $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital;
       }
 

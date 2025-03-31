@@ -1871,6 +1871,33 @@ class ReceberProcedimentoRN extends InfraRN
         
         $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
+        foreach ($objDocumento->componentesDigitais as $componentesDigital) {
+          foreach ($componentesDigital->assinaturasDigitais as $assinaturasDigital) {
+            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+            $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura('C');
+            $objTarjaAssinaturaDTO->setNumMaxRegistrosRetorno(1);
+            $objTarjaAssinaturaDTO->retTodos();
+            $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
+            $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+
+            $objAssinaturaDTO = new AssinaturaDTO();
+            $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTOGerado->getDblIdDocumento());
+            $objAssinaturaDTO->setStrProtocoloDocumentoFormatado($objProtocoloDTO->getStrProtocoloFormatado());
+            $objAssinaturaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+            $objAssinaturaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objAssinaturaDTO->setStrNome(SessaoSEI::getInstance()->getStrNomeUsuario());
+            $objAssinaturaDTO->setStrTratamento(SessaoSEI::getInstance()->getStrNomeUsuario());
+            $objAssinaturaDTO->setNumIdTarjaAssinatura($objTarjaAssinaturaDTO->getNumIdTarjaAssinatura());
+            $objAssinaturaDTO->setStrStaFormaAutenticacao('M');
+            $objAssinaturaDTO->setStrModuloOrigem('assinatura-eletronica');
+            $objAssinaturaDTO->setStrP7sBase64($assinaturasDigital->cadeiaDoCertificado->conteudo);
+            $objAssinaturaDTO->setStrSinAtivo('S');
+
+            $objAssinaturaBD = new AssinaturaBD($this->getObjInfraIBanco());
+            $objAssinaturaBD->cadastrar($objAssinaturaDTO);
+          }
+        }
+        
         $objAtividadeDTOVisualizacao = new AtividadeDTO();
         $objAtividadeDTOVisualizacao->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
         $objAtividadeDTOVisualizacao->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
