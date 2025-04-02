@@ -1871,8 +1871,33 @@ class ReceberProcedimentoRN extends InfraRN
         
         $objDocumentoDTOGerado = $objDocumentoRN->cadastrarRN0003($objDocumentoDTO);
 
-        foreach ($objDocumento->componentesDigitais as $componentesDigital) {
-          foreach ($componentesDigital->assinaturasDigitais as $assinaturasDigital) {
+        $arrObjDocumento = (array)$objDocumento;
+        foreach ($arrObjDocumento['componentesDigitais'] as $componentesDigital) {
+          $arrObjComponentesDigital = (array)$componentesDigital;
+          foreach ($arrObjComponentesDigital['assinaturasDigitais'] as $assinaturasDigital) {
+            //lança tarefa de assinatura
+            $arrObjAtributoAndamentoDTO = array();
+            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+            $objAtributoAndamentoDTO->setStrNome('DOCUMENTO');
+            $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO2->getStrProtocoloProcedimentoFormatado());
+            $objAtributoAndamentoDTO->setStrIdOrigem($objDocumentoDTOGerado->getDblIdDocumento());
+            $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+
+            $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+            $objAtributoAndamentoDTO->setStrNome('USUARIO');
+            $objAtributoAndamentoDTO->setStrValor(SessaoSEI::getInstance()->getStrSiglaUsuario().'¥'.SessaoSEI::getInstance()->getStrNomeUsuario());
+            $objAtributoAndamentoDTO->setStrIdOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+            $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($parObjProcedimentoDTO->getDblIdProcedimento());
+            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objAtividadeDTO->setNumIdTarefa(TarefaRN::$TI_AUTENTICACAO_DOCUMENTO);
+            $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividadeDTO = $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+            
             $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
             $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura('C');
             $objTarjaAssinaturaDTO->setNumMaxRegistrosRetorno(1);
@@ -1892,9 +1917,21 @@ class ReceberProcedimentoRN extends InfraRN
             $objAssinaturaDTO->setStrModuloOrigem('assinatura-eletronica');
             $objAssinaturaDTO->setStrP7sBase64($assinaturasDigital->cadeiaDoCertificado->conteudo);
             $objAssinaturaDTO->setStrSinAtivo('S');
+            $objAssinaturaDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
 
             $objAssinaturaBD = new AssinaturaBD($this->getObjInfraIBanco());
             $objAssinaturaBD->cadastrar($objAssinaturaDTO);
+
+            // Gravar hash no modulo de assinatura
+            if (class_exists(ValidarAssinaturaDTO::class) || class_exists(ValidarAssinaturaRN::class)) {
+              $objValidarAssinaturaDTO = new ValidarAssinaturaDTO();
+
+              $objValidarAssinaturaDTO->setNumIdDocumento($objDocumentoDTOGerado->getDblIdDocumento());
+              $objValidarAssinaturaDTO->setStrResultado("Aprovado");
+  
+              $objValidarAssinaturaRN = new ValidarAssinaturaRN();
+              $objValidarAssinaturaRN->cadastrar($objValidarAssinaturaDTO);
+            }
           }
         }
         
