@@ -171,7 +171,7 @@ class ProcessoEletronicoRN extends InfraRN
             throw new \RuntimeException('Falha ao conectar com o serviço REST');
         }
         } catch (RequestException $e) {
-            $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+            $detalhes = $this->tratarFalhaWebService($e); 
             $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
             throw new \Exception($mensagem);
         }
@@ -205,7 +205,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e); 
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
@@ -240,7 +240,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
     }  catch(Exception $e) {
         $mensagem = "Falha na obtenção dos Repositórios de Estruturas Organizacionais";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
     
@@ -287,7 +287,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $objEstruturaDTO;
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -325,7 +325,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
     catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -400,7 +400,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
@@ -620,7 +620,7 @@ class ProcessoEletronicoRN extends InfraRN
         }
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
@@ -738,7 +738,7 @@ class ProcessoEletronicoRN extends InfraRN
       }
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
     
@@ -764,7 +764,7 @@ class ProcessoEletronicoRN extends InfraRN
   
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   
@@ -796,7 +796,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (Exception $e) {
         $mensagem = "Módulo do Tramita: Não foi encontrado nenhuma espécie documental.";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
@@ -818,9 +818,7 @@ class ProcessoEletronicoRN extends InfraRN
       if ($erroRequest != null) {
           $mensagem = "Falha no envio externo do processo. Erro: {$erroRequest->codigoErro} - {$erroRequest->message}";
       }
-        $mensagem = mb_convert_encoding($mensagem, 'ISO-8859-1', 'UTF-8');
-
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
 
     }
@@ -867,7 +865,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (Exception $e) {
         $mensagem = "Falha na listagem de pendências de trâmite de processos";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
 
@@ -1112,7 +1110,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha no envio de componentes digitais";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1178,11 +1176,13 @@ class ProcessoEletronicoRN extends InfraRN
                     
         $strClientGuzzle->request('PUT', $endpoint, $arrOptions);
     } catch (\Exception $e) {
-       $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
-       $mensagem = "Falha de envio do componente digital. Erro: {$erroResposta->codigoErro} - {$erroResposta->mensagem}";
-       $mensagem = mb_convert_encoding($mensagem, 'ISO-8859-1', 'UTF-8');
-       $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
-       throw new InfraException($mensagem, $e, $detalhes);
+      $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
+      $erroResposta->mensagem = mb_convert_encoding($erroResposta->mensagem, 'ISO-8859-1', 'UTF-8'); 
+
+      $mensagem = "Falha de envio do não componente digital. Erro: {$erroResposta->codigoErro} - {$erroResposta->mensagem}";
+      $detalhes = $this->tratarFalhaWebService($e);    
+
+      throw new InfraException($mensagem, $e, $detalhes);
     }
   }
 
@@ -1209,7 +1209,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha em sinalizar o término de envio das partes do componente digital";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1256,7 +1256,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha na solicitação de metadados do processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1719,7 +1719,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
       $mensagem = "Falha no recebimento do componente digital";
-      $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+      $detalhes = $this->tratarFalhaWebService($e);
       throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1774,7 +1774,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha na consulta de trâmites de processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1797,7 +1797,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $arrObjTramite;
     } catch (\Exception $e) {
         $mensagem = "Falha na consulta de trâmites de processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1816,7 +1816,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha no registro de ciência da recusa de trâmite";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -1957,7 +1957,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha no envio de recibo de trâmite de processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     } finally {
       if(isset($objPrivatekey)){
@@ -1981,7 +1981,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha no recebimento de recibo de trâmite. ". $this->tratarFalhaWebService($e);
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2007,7 +2007,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
     catch (\Exception $e) {
         $mensagem = "Falha no recebimento de recibo de trâmite de envio. " . $this->tratarFalhaWebService($e);
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2140,7 +2140,7 @@ class ProcessoEletronicoRN extends InfraRN
             
     } catch(\Exception $e) {
         $mensagem = "Falha no cancelamento de trâmite de processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2169,7 +2169,7 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (Exception $e) {
         $mensagem = "Falha na recusa de trâmite de processo";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2184,7 +2184,7 @@ class ProcessoEletronicoRN extends InfraRN
         $tramitePendenteBD->cadastrar($tramitePendenteDTO);
     } catch (\Exception $e) {
         $mensagem = "Falha no cadastramento de trâmite pendente";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2281,7 +2281,7 @@ class ProcessoEletronicoRN extends InfraRN
  
       } catch(Exception $e){
           $mensagem = "Falha na obtenção de hipóteses legais";
-          $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+          $detalhes = $this->tratarFalhaWebService($e);
           throw new InfraException($mensagem, $e, $detalhes);
       }
   }
@@ -2293,7 +2293,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $objProcessoEletronicoBD->contar($objProcessoEletronicoDTO);
     }catch(Exception $e){
         $mensagem = "Falha na contagem de processos eletrônicos registrados";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2811,7 +2811,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $arrResultado;
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         throw new InfraException($mensagem, $e, $detalhes);
     }
   }
@@ -2832,7 +2832,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $arrResultado;
     } catch (Exception $e) {
         $mensagem = "Falha na obtenção de unidades externas";
-        $detalhes = html_entity_decode(InfraString::formatarJavaScript($this->tratarFalhaWebService($e)));
+        $detalhes = $this->tratarFalhaWebService($e);
         LogSEI::getInstance()->gravar($detalhes, InfraLog::$ERRO);
         throw new InfraException($mensagem, $e, $mensagem);
     }
