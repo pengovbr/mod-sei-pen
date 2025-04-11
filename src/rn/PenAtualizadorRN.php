@@ -2,10 +2,9 @@
 
 /**
  * Atualizador abstrato para sistema do SEI para instalar/atualizar o módulo PEN
- *
- *
  */
-abstract class PenAtualizadorRN extends InfraRN {
+abstract class PenAtualizadorRN extends InfraRN
+{
 
     protected $sei_versao;
 
@@ -36,7 +35,8 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     protected $objInfraBanco ;
 
-  protected function inicializarObjInfraIBanco() {
+  protected function inicializarObjInfraIBanco()
+    {
 
     if (empty($this->objInfraBanco)) {
         $this->objInfraBanco = BancoSEI::getInstance();
@@ -49,7 +49,8 @@ abstract class PenAtualizadorRN extends InfraRN {
     /**
      * Inicia a conexão com o banco de dados
      */
-  protected function inicializarObjMetaBanco() {
+  protected function inicializarObjMetaBanco()
+    {
     if (empty($this->objMeta)) {
         $this->objMeta = new PenMetaBD($this->inicializarObjInfraIBanco());
     }
@@ -58,19 +59,17 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     /**
      * Adiciona uma mensagem ao output para o usuário
-     *
-     * @return null
      */
-  protected function logar($strMsg) {
+  protected function logar($strMsg)
+    {
       $this->objDebug->gravar($strMsg);
   }
 
     /**
      * Inicia o script criando um contator interno do tempo de execução
-     *
-     * @return null
      */
-  protected function inicializar($strTitulo) {
+  protected function inicializar($strTitulo)
+    {
 
       $this->numSeg = InfraUtil::verificarTempoProcessamento();
 
@@ -79,19 +78,18 @@ abstract class PenAtualizadorRN extends InfraRN {
 
     /**
      * Finaliza o script informando o tempo de execução.
-     *
-     * @return null
      */
-  protected function finalizar($strMsg = null, $bolErro = false){
+  protected function finalizar($strMsg = null, $bolErro = false)
+    {
     if (!$bolErro) {
-      $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
-      $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
+        $this->numSeg = InfraUtil::verificarTempoProcessamento($this->numSeg);
+        $this->logar('TEMPO TOTAL DE EXECUCAO: ' . $this->numSeg . ' s');
     }else{
-      $strMsg = 'ERRO: '.$strMsg;
+        $strMsg = 'ERRO: '.$strMsg;
     }
 
-    if ($strMsg!=null){
-      $this->logar($strMsg);
+    if ($strMsg!=null) {
+        $this->logar($strMsg);
     }
 
       InfraDebug::getInstance()->setBolLigado(false);
@@ -105,7 +103,8 @@ abstract class PenAtualizadorRN extends InfraRN {
      *
      * @param array $arrArgs Argumentos enviados pelo script
      */
-  public function __construct() {
+  public function __construct()
+    {
 
       parent::__construct();
       ini_set('max_execution_time', '0');

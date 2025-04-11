@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB . '/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- *
- *
  */
 
 session_start();
@@ -23,81 +21,88 @@ $objDebug = InfraDebug::getInstance();
 
 try {
 
-  $objDebug->setBolLigado(false);
-  $objDebug->setBolDebugInfra(true);
-  $objDebug->limpar();
+    $objDebug->setBolLigado(false);
+    $objDebug->setBolDebugInfra(true);
+    $objDebug->limpar();
 
-  $objSessao->validarLink();
-  $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
+    $objSessao->validarLink();
+    $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
 
-  //--------------------------------------------------------------------------
-  // Ações
+    //--------------------------------------------------------------------------
+    // Ações
   if (array_key_exists('acao', $_GET)) {
 
-    $arrParam = array_merge($_GET, $_POST);
+      $arrParam = array_merge($_GET, $_POST);
 
     switch ($_GET['acao']) {
 
       case 'pen_map_orgaos_externos_excluir':
         if (array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
 
-          $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-          $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-          $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
-          $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
-          $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+            $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+            $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+            $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+            $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
+            $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
 
-          $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
+            $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
 
           if (is_array($arrParam['hdnInfraItensSelecionados'])) {
             foreach ($arrParam['hdnInfraItensSelecionados'] as $arr) {
-              $dblId = explode(";", $arr)[0];
+                $dblId = explode(";", $arr)[0];
 
-              $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($dblId);
+                $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($dblId);
               if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
                 $mensagem = "Relacionamento entre unidades possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
                 $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
-                header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
-                  . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+                header(
+                  'Location: ' . SessaoSEI::getInstance()->assinarLink(
+                      'controlador.php?acao='
+                      . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']
+                  )
+                );
                 exit(0);
               }
 
-              $objPenOrgaoExternoDTO->setDblId($dblId);
-              $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
+                $objPenOrgaoExternoDTO->setDblId($dblId);
+                $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
             }
           } else {
-            $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($arrParam['hdnInfraItensSelecionados']);
+              $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($arrParam['hdnInfraItensSelecionados']);
             if ($objMapeamentoTipoProcedimentoRN->contar($objMapeamentoTipoProcedimentoDTO)) {
-              $mensagem = "Relacionamento entre unidades possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
-              $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
-              header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao='
-                . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-              exit(0);
+                  $mensagem = "Relacionamento entre unidades possuí tipos de processo mapeados. Remova os tipos de processo para realizar a exclusão do relacionamento.";
+                  $objPagina->adicionarMensagem($mensagem, InfraPagina::$TIPO_MSG_ERRO);
+                  header(
+                      'Location: ' . SessaoSEI::getInstance()->assinarLink(
+                          'controlador.php?acao='
+                          . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']
+                      )
+                  );
+                  exit(0);
             }
 
-            $objPenOrgaoExternoDTO->setDblId($arrParam['hdnInfraItensSelecionados']);
-            $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
+              $objPenOrgaoExternoDTO->setDblId($arrParam['hdnInfraItensSelecionados']);
+              $objPenOrgaoExternoRN->excluir($objPenOrgaoExternoDTO);
           }
 
-          $objPagina->adicionarMensagem('Relacionamento entre unidades foi excluído com sucesso.', 5);
+            $objPagina->adicionarMensagem('Relacionamento entre unidades foi excluído com sucesso.', 5);
 
-          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-          exit(0);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+            exit(0);
         } else {
-          throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
+            throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
         }
-          break;
 
       case 'pen_map_orgaos_externos_listar':
-        // Ação padrão desta tela
+          // Ação padrão desta tela
           break;
       case 'pen_map_orgaos_importar_tipos_processos':
         try {
-          $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-          $arrProcedimentoDTO = [];
-          $tipoDeProcedimentos = array();
-          $procedimentos = explode(',', $_POST['dados']);
+            $penMapTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+            $arrProcedimentoDTO = [];
+            $tipoDeProcedimentos = [];
+            $procedimentos = explode(',', $_POST['dados']);
           for ($i = 0; $i < count($procedimentos); $i += 2) {
             $key = trim($procedimentos[$i]);
             $value = trim($procedimentos[$i + 1], '"');
@@ -105,55 +110,54 @@ try {
           }
 
           foreach ($tipoDeProcedimentos as $idProcedimento => $nomeProcedimento) {
-            $procedimentoDTO = new PenMapTipoProcedimentoDTO();
-            $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
-            $procedimentoDTO->setNumIdTipoProcessoOrigem($idProcedimento);
-            $procedimentoDTO->setStrNomeTipoProcesso($nomeProcedimento);
-            $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
+              $procedimentoDTO = new PenMapTipoProcedimentoDTO();
+              $procedimentoDTO->setNumIdMapOrgao($_POST['mapId']);
+              $procedimentoDTO->setNumIdTipoProcessoOrigem($idProcedimento);
+              $procedimentoDTO->setStrNomeTipoProcesso($nomeProcedimento);
+              $procedimentoDTO->setNumIdUnidade($_GET['infra_unidade_atual']);
             if ($penMapTipoProcedimentoRN->contar($procedimentoDTO)) {
               continue;
             }
-            $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
-            $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
+              $procedimentoDTO->setDthRegistro(date('d/m/Y H:i:s'));
+              $penMapTipoProcedimentoRN->cadastrar($procedimentoDTO);
           }
-          $objPagina->adicionarMensagem('Importação realizada com sucesso.', 5);
-          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-          exit(0);
+            $objPagina->adicionarMensagem('Importação realizada com sucesso.', 5);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+            exit(0);
         } catch (Exception $e) {
-          throw new InfraException($e->getMessage());
+            throw new InfraException($e->getMessage());
         }
-          break;
 
       case 'pen_map_orgaos_externos_reativar':
         if ((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoReativar'])) {
-          $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
+            $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
           foreach ($arrHdnInInfraItensSelecionados as $arr) {
-            $id = explode(";", $arr)[0];
+              $id = explode(";", $arr)[0];
+              $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+              $objPenOrgaoExternoDTO->setDblId($id);
+              $objPenOrgaoExternoDTO->setStrAtivo('S');
+
+              $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+              $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
+          }
+            $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), 5);
+        }
+
+        if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
             $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-            $objPenOrgaoExternoDTO->setDblId($id);
+            $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
             $objPenOrgaoExternoDTO->setStrAtivo('S');
 
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
             $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-          }
-          $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), 5);
-        }
-
-        if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
-          $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-          $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
-          $objPenOrgaoExternoDTO->setStrAtivo('S');
-
-          $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-          $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-          $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), 5);
+            $objPagina->adicionarMensagem(sprintf('%s foi reativado com sucesso.', PEN_PAGINA_TITULO), 5);
         }
           break;
 
       case 'pen_map_orgaos_externos_desativar':
         if ((isset($_POST['hdnInfraItensSelecionados']) && !empty($_POST['hdnInfraItensSelecionados'])) && isset($_POST['hdnAcaoDesativar'])) {
-          $btnDesativar = null;
-          $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
+            $btnDesativar = null;
+            $arrHdnInInfraItensSelecionados = explode(",", $_POST['hdnInfraItensSelecionados']);
           foreach ($arrHdnInInfraItensSelecionados as $arr) {
             $id = explode(";", $arr)[0];
             $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
@@ -163,17 +167,17 @@ try {
             $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
             $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
           }
-          $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
+            $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), InfraPagina::$TIPO_MSG_AVISO);
         }
 
         if (isset($_POST['hdnInfraItemId']) && is_numeric($_POST['hdnInfraItemId'])) {
-          $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-          $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
-          $objPenOrgaoExternoDTO->setStrAtivo('N');
+            $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+            $objPenOrgaoExternoDTO->setDblId($_POST['hdnInfraItemId']);
+            $objPenOrgaoExternoDTO->setStrAtivo('N');
 
-          $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-          $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
-          $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), 5);
+            $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+            $objPenOrgaoExternoRN->alterar($objPenOrgaoExternoDTO);
+            $objPagina->adicionarMensagem(sprintf('%s foi desativado com sucesso.', PEN_PAGINA_TITULO), 5);
         }
           break;
 
@@ -181,174 +185,180 @@ try {
           throw new InfraException('Módulo do Tramita: Ação não permitida nesta tela');
     }
   }
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
-  $acao = $_GET['acao'];
-  $acaoOrigem = $_GET['acao_origem'];
-  $acaoRetorno = $_GET['acao_retorno'];
+    $acao = $_GET['acao'];
+    $acaoOrigem = $_GET['acao_origem'];
+    $acaoRetorno = $_GET['acao_retorno'];
 
-  // DTO de paginao
-  $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
-  $objPenOrgaoExternoDTO->setStrAtivo('S');
-  $objPenOrgaoExternoDTO->retDblId();
-  $objPenOrgaoExternoDTO->retNumIdOrgaoOrigem();
-  $objPenOrgaoExternoDTO->retStrOrgaoOrigem();
-  $objPenOrgaoExternoDTO->retNumIdOrgaoDestino();
-  $objPenOrgaoExternoDTO->retStrOrgaoDestino();
-  $objPenOrgaoExternoDTO->retStrAtivo();
+    // DTO de paginao
+    $objPenOrgaoExternoDTO = new PenOrgaoExternoDTO();
+    $objPenOrgaoExternoDTO->setStrAtivo('S');
+    $objPenOrgaoExternoDTO->retDblId();
+    $objPenOrgaoExternoDTO->retNumIdOrgaoOrigem();
+    $objPenOrgaoExternoDTO->retStrOrgaoOrigem();
+    $objPenOrgaoExternoDTO->retNumIdOrgaoDestino();
+    $objPenOrgaoExternoDTO->retStrOrgaoDestino();
+    $objPenOrgaoExternoDTO->retStrAtivo();
 
-  //--------------------------------------------------------------------------
-  // Filtragem
+    //--------------------------------------------------------------------------
+    // Filtragem
   if (array_key_exists('txtSiglaOrigem', $_POST) && ((!empty($_POST['txtSiglaOrigem']) && $_POST['txtSiglaOrigem'] !== 'null') || $_POST['txtSiglaOrigem'] == "0")) {
-    $objPenOrgaoExternoDTO->setStrOrgaoOrigem('%' . $_POST['txtSiglaOrigem'] . '%', InfraDTO::$OPER_LIKE);
+      $objPenOrgaoExternoDTO->setStrOrgaoOrigem('%' . $_POST['txtSiglaOrigem'] . '%', InfraDTO::$OPER_LIKE);
   }
 
   if (array_key_exists('txtSiglaDestino', $_POST) && ((!empty($_POST['txtSiglaDestino']) && $_POST['txtSiglaDestino'] !== 'null') || $_POST['txtSiglaDestino'] == "0")) {
-    $objPenOrgaoExternoDTO->setStrOrgaoDestino('%' . $_POST['txtSiglaDestino'] . '%', InfraDTO::$OPER_LIKE);
+      $objPenOrgaoExternoDTO->setStrOrgaoDestino('%' . $_POST['txtSiglaDestino'] . '%', InfraDTO::$OPER_LIKE);
   }
 
   if (array_key_exists('txtEstado', $_POST) && (!empty($_POST['txtEstado']) && $_POST['txtEstado'] !== 'null')) {
-    $objPenOrgaoExternoDTO->setStrAtivo($_POST['txtEstado']);
+      $objPenOrgaoExternoDTO->setStrAtivo($_POST['txtEstado']);
   }
 
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
-  $btnReativarAdicionado = 'N';
-  $btnDesativarAdicionado = 'N';
-  $btnReativar = '';
-  $btnDesativar = null;
-  $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-  $btnTipoProcessoPadrao = '<button type="button" value="Atribuir Tipo de Processo Padrão" id="btnTipoProcessoPadrao"  onclick="location.href=\''
+    $btnReativarAdicionado = 'N';
+    $btnDesativarAdicionado = 'N';
+    $btnReativar = '';
+    $btnDesativar = null;
+    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnTipoProcessoPadrao = '<button type="button" value="Atribuir Tipo de Processo Padrão" id="btnTipoProcessoPadrao"  onclick="location.href=\''
     . PaginaSEI::getInstance()->formatarXHTML(
-      SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_padrao&acao_origem=' . $_GET['acao'])
+        SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_map_tipo_processo_padrao&acao_origem=' . $_GET['acao'])
     )
     . '\';" class="infraButton"><span class="infraTeclaAtalho">A</span>tribuir Tipo de Processo Padrão</button>';
-  $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
   if (empty($_POST['txtEstado']) || is_null($_POST['txtEstado']) || $_POST['txtEstado'] == 'S') {
-    $btnDesativar = '<button type="button" value="Desativar" id="btnDesativar" onclick="onClickBtnDesativar()" class="infraButton"><span class="infraTeclaAtalho">D</span>esativar</button>';
-    $btnDesativarAdicionado = 'S';
+      $btnDesativar = '<button type="button" value="Desativar" id="btnDesativar" onclick="onClickBtnDesativar()" class="infraButton"><span class="infraTeclaAtalho">D</span>esativar</button>';
+      $btnDesativarAdicionado = 'S';
   }
 
   if (!empty($_POST['txtEstado']) && $_POST['txtEstado'] == 'N') {
-    $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar"><span class="infraTeclaAtalho">R</span>eativar</button>';
-    $btnReativarAdicionado = 'S';
+      $btnReativar = '<button type="button" id="btnReativar" value="Reativar" onclick="onClickBtnReativar()" class="infraButton btnReativar"><span class="infraTeclaAtalho">R</span>eativar</button>';
+      $btnReativarAdicionado = 'S';
   }
 
-  $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-  $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
-  $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
+    $btnExcluir = '<button type="button" value="Excluir" id="btnExcluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $btnFechar = '<button type="button" id="btnCancelar" value="Fechar" onclick="location.href=\''
     . PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=pen_parametros_configuracao&acao_origem=' . $_GET['acao']))
     . '\';" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  $btnDesativarReativar = null;
+    $btnDesativarReativar = null;
 
   if ($btnDesativarAdicionado == 'S') {
-    $btnDesativarReativar = $btnDesativar;
+      $btnDesativarReativar = $btnDesativar;
   } elseif ($btnReativarAdicionado == 'S') {
-    $btnDesativarReativar = $btnReativar;
+      $btnDesativarReativar = $btnReativar;
   }
-  $arrComandos = array($btnPesquisar, $btnTipoProcessoPadrao, $btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar);
-  $arrComandosFinal = array($btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar);
+    $arrComandos = [$btnPesquisar, $btnTipoProcessoPadrao, $btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar];
+    $arrComandosFinal = [$btnNovo, $btnDesativarReativar, $btnExcluir, $btnImprimir, $btnFechar];
 
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
-  $objPagina->prepararOrdenacao($objPenOrgaoExternoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_ASC);
-  $objPagina->prepararPaginacao($objPenOrgaoExternoDTO);
+    $objPagina->prepararOrdenacao($objPenOrgaoExternoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPagina->prepararPaginacao($objPenOrgaoExternoDTO);
 
-  $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
-  $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->listar($objPenOrgaoExternoDTO);
+    $objPenOrgaoExternoRN = new PenOrgaoExternoRN();
+    $respObjPenOrgaoExternoDTO = $objPenOrgaoExternoRN->listar($objPenOrgaoExternoDTO);
 
-  $objPagina->processarPaginacao($objPenOrgaoExternoDTO);
+    $objPagina->processarPaginacao($objPenOrgaoExternoDTO);
 
-  $numRegistros = count($respObjPenOrgaoExternoDTO);
+    $numRegistros = count($respObjPenOrgaoExternoDTO);
   if (!empty($respObjPenOrgaoExternoDTO)) {
 
-    $strResultado = '';
+      $strResultado = '';
 
-    $strResultado .= '<table width="99%" class="infraTable">' . "\n";
-    $strResultado .= '<caption class="infraCaption">' . $objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros) . '</caption>';
+      $strResultado .= '<table width="99%" class="infraTable">' . "\n";
+      $strResultado .= '<caption class="infraCaption">' . $objPagina->gerarCaptionTabela(PEN_PAGINA_TITULO, $numRegistros) . '</caption>';
 
-    $strResultado .= '<tr>';
-    $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="12%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Origem</small>', 'IdOrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="12%" style="text-align: center !important;">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Destino</small>', 'IdOrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="15%">Ações</th>' . "\n";
-    $strResultado .= '</tr>' . "\n";
-    $strCssTr = '';
+      $strResultado .= '<tr>';
+      $strResultado .= '<th class="infraTh" width="1%">' . $objPagina->getThCheck() . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="12%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Origem</small>', 'IdOrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Origem', 'OrgaoOrigem', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="12%" style="text-align: center !important;">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'ID <br><small>Destino</small>', 'IdOrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="25%">' . $objPagina->getThOrdenacao($objPenOrgaoExternoDTO, 'Unidade Destino', 'OrgaoDestino', $respObjPenOrgaoExternoDTO) . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="15%">Ações</th>' . "\n";
+      $strResultado .= '</tr>' . "\n";
+      $strCssTr = '';
 
-    $index = 0;
+      $index = 0;
     foreach ($respObjPenOrgaoExternoDTO as $objPenOrgaoExternoDTO) {
-      $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+        $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
-      $strResultado .= '<tr class="' . $strCssTr . '">';
-      $strResultado .= '<td align="center">' . $objPagina->getTrCheck($index, $objPenOrgaoExternoDTO->getDblId() . ';' . $objPenOrgaoExternoDTO->getStrAtivo(), '') . '</td>';
-      $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoOrigem() . '</td>';
-      $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoOrigem() . '</td>';
-      $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoDestino() . '</td>';
-      $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
-      $strResultado .= '<td align="center">';
+        $strResultado .= '<tr class="' . $strCssTr . '">';
+        $strResultado .= '<td align="center">' . $objPagina->getTrCheck($index, $objPenOrgaoExternoDTO->getDblId() . ';' . $objPenOrgaoExternoDTO->getStrAtivo(), '') . '</td>';
+        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoOrigem() . '</td>';
+        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoOrigem() . '</td>';
+        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getNumIdOrgaoDestino() . '</td>';
+        $strResultado .= '<td align="center">' . $objPenOrgaoExternoDTO->getStrOrgaoDestino() . '</td>';
+        $strResultado .= '<td align="center">';
 
-      $strResultado .= '<a href="'
-        . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
-          . '_visualizar&acao_origem=' . $_GET['acao_origem']
-          . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
+        $strResultado .= '<a href="'
+        . $objSessao->assinarLink(
+            'controlador.php?acao=' . PEN_RECURSO_BASE
+            . '_visualizar&acao_origem=' . $_GET['acao_origem']
+            . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()
+        ) . '"><img src='
         . ProcessoEletronicoINT::getCaminhoIcone("imagens/consultar.gif")
         . ' title="Consultar Mapeamento Entre Unidades" alt="Consultar Mapeamento Entre Unidades" class="infraImg"></a>';
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_atualizar')) {
         $strResultado .= '<a href="'
-          . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
+        . $objSessao->assinarLink(
+            'controlador.php?acao=' . PEN_RECURSO_BASE
             . '_atualizar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao']
-            . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
-          . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
-          . ' title="Alterar Relacionamento" alt="Alterar Relacionamento Entre Unidades" class="infraImg"></a>';
+            . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId()
+        ) . '"><img src='
+        . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
+        . ' title="Alterar Relacionamento" alt="Alterar Relacionamento Entre Unidades" class="infraImg"></a>';
       }
 
-      $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
-      $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
-      $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
-      $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
+        $objMapeamentoTipoProcedimentoDTO = new PenMapTipoProcedimentoDTO();
+        $objMapeamentoTipoProcedimentoDTO->setNumIdMapOrgao($objPenOrgaoExternoDTO->getDblId());
+        $objMapeamentoTipoProcedimentoDTO->retNumIdMapOrgao();
+        $objMapeamentoTipoProcedimentoDTO->retStrAtivo();
 
-      $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
-      $arrPenOrgaoExternoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
+        $objMapeamentoTipoProcedimentoRN = new PenMapTipoProcedimentoRN();
+        $arrPenOrgaoExternoDTO = $objMapeamentoTipoProcedimentoRN->listar($objMapeamentoTipoProcedimentoDTO);
 
-      $strResultado .= ' <input type="hidden" id="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" name="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" value="' . $objPenOrgaoExternoDTO->getDblId() . '" />';
+        $strResultado .= ' <input type="hidden" id="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" name="dblId_' . $objPenOrgaoExternoDTO->getDblId() . '" value="' . $objPenOrgaoExternoDTO->getDblId() . '" />';
 
       if ($arrPenOrgaoExternoDTO == null) {
         $strResultado .= '<a href="#" id="importarCsvButton" onclick="infraImportarCsv('
-          . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao=' . $objPenOrgaoExternoDTO->getDblId())
-          . "'," . $objPenOrgaoExternoDTO->getDblId() . ')">'
-          . '<img src='
-          . ProcessoEletronicoINT::getCaminhoIcone("/importar.svg", $this->getDiretorioImagens())
-          . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px; width: 20px;">'
-          . '</a>';
+        . "'" . $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_tipo_processo_listar&tipo_pesquisa=1&id_object=objInfraTableToTable&idMapOrgao=' . $objPenOrgaoExternoDTO->getDblId())
+        . "'," . $objPenOrgaoExternoDTO->getDblId() . ')">'
+        . '<img src='
+        . ProcessoEletronicoINT::getCaminhoIcone("/importar.svg", $this->getDiretorioImagens())
+        . ' title="Importar CSV" alt="Importar CSV" style="margin-bottom: 2.5px; width: 20px;">'
+        . '</a>';
       } else {
-        $strResultado .= '<a href="'
-          . $objSessao->assinarLink('controlador.php?acao=' . PEN_RECURSO_BASE
-            . '_mapeamento&acao_origem=' . $_GET['acao_origem']
-            . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()) . '"><img src='
+          $strResultado .= '<a href="'
+          . $objSessao->assinarLink(
+              'controlador.php?acao=' . PEN_RECURSO_BASE
+              . '_mapeamento&acao_origem=' . $_GET['acao_origem']
+              . '&acao_retorno=' . $_GET['acao'] . '&id=' . $objPenOrgaoExternoDTO->getDblId()
+          ) . '"><img src='
           . ProcessoEletronicoINT::getCaminhoIcone("svg/arquivo_mapeamento_assunto.svg")
           . ' title="Mapear tipos de processos" alt="Mapear tipos de processos" class="infraImg"></a>';
       }
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_reativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'N') {
-        $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
-        $strId = $objPenOrgaoExternoDTO->getDblId();
-        $strResultado .= '<a class="reativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoReativar(\'' . $strId . '\')"><img src="' . PaginaSEI::getInstance()->getIconeReativar() . '" title="Reativar Relacionamento entre Unidades" alt="Reativar Relacionamento entre Unidades" class="infraImg"></a>';
+          $strLinkReativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_reativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
+          $strId = $objPenOrgaoExternoDTO->getDblId();
+          $strResultado .= '<a class="reativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoReativar(\'' . $strId . '\')"><img src="' . PaginaSEI::getInstance()->getIconeReativar() . '" title="Reativar Relacionamento entre Unidades" alt="Reativar Relacionamento entre Unidades" class="infraImg"></a>';
       }
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_desativar') && $objPenOrgaoExternoDTO->getStrAtivo() == 'S') {
-        $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
-        $strId = $objPenOrgaoExternoDTO->getDblId();
-        $strResultado .= '<a class="desativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoDesativar(\'' . $strId . '\')"><img src="'
+          $strLinkDesativar = $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_externos_desativar&acao_origem=' . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao'] . '&' . PEN_PAGINA_GET_ID . '=' . $objPenOrgaoExternoDTO->getDblId());
+          $strId = $objPenOrgaoExternoDTO->getDblId();
+          $strResultado .= '<a class="desativar" href="' . PaginaSEI::getInstance()->montarAncora($strId) . '" onclick="acaoDesativar(\'' . $strId . '\')"><img src="'
           . PaginaSEI::getInstance()->getIconeDesativar() . '" title="Desativar Relacionamento entre Unidades" alt="Desativar Relacionamento entre Unidades" class="infraImg"></a>';
       }
 
       if ($objSessao->verificarPermissao('pen_map_orgaos_externos_excluir') && $arrPenOrgaoExternoDTO == null) {
-        $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
+          $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\''
           . $objSessao->assinarLink(
-            'controlador.php?acao=pen_map_orgaos_externos_excluir&acao_origem='
+              'controlador.php?acao=pen_map_orgaos_externos_excluir&acao_origem='
               . $_GET['acao_origem']
               . '&acao_retorno=' . $_GET['acao']
               . '&hdnInfraItensSelecionados=' . $objPenOrgaoExternoDTO->getDblId()
@@ -359,31 +369,31 @@ try {
           . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg">'
           . '</a>';
       }
-      $strResultado .= '</td>';
-      $strResultado .= '</tr>';
+        $strResultado .= '</td>';
+        $strResultado .= '</tr>';
 
-      $index++;
+        $index++;
     }
-    $strResultado .= '</table>';
+      $strResultado .= '</table>';
 
-    $strResultadoImportar = '';
+      $strResultadoImportar = '';
 
-    $strResultadoImportar .= '<table width="99%" class="infraTable" id="tableImportar">' . "\n";
-    $strResultadoImportar .= '<caption class="infraCaption" id="tableTotal"></caption>';
+      $strResultadoImportar .= '<table width="99%" class="infraTable" id="tableImportar">' . "\n";
+      $strResultadoImportar .= '<caption class="infraCaption" id="tableTotal"></caption>';
 
-    $strResultadoImportar .= '<tr>';
-    $strResultadoImportar .= '<th class="infraTh" width="30%">ID</th>' . "\n";
-    $strResultadoImportar .= '<th class="infraTh">Tipo de Processo</th>' . "\n";
-    $strResultadoImportar .= '</tr>' . "\n";
-    $strResultadoImportar .= '</table>';
+      $strResultadoImportar .= '<tr>';
+      $strResultadoImportar .= '<th class="infraTh" width="30%">ID</th>' . "\n";
+      $strResultadoImportar .= '<th class="infraTh">Tipo de Processo</th>' . "\n";
+      $strResultadoImportar .= '</tr>' . "\n";
+      $strResultadoImportar .= '</table>';
   }
 
-  $btnImportar = '<button type="button" accesskey="F" id="btnImportar" value="Fechar" onclick="" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
-  $btnFecharModal = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
-  $arrComandosModal = array($btnImportar, $btnFecharModal);
-  $arrComandosModalFinal = array($btnImportar, $btnFecharModal);
+    $btnImportar = '<button type="button" accesskey="F" id="btnImportar" value="Fechar" onclick="" class="infraButton"><span class="infraTeclaAtalho">I</span>mportar</button>';
+    $btnFecharModal = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
+    $arrComandosModal = [$btnImportar, $btnFecharModal];
+    $arrComandosModalFinal = [$btnImportar, $btnFecharModal];
 } catch (InfraException $e) {
-  $objPagina->processarExcecao($e);
+    $objPagina->processarExcecao($e);
 }
 
 
@@ -537,7 +547,7 @@ $objPagina->montarStyle();
   function acaoDesativar(id) {
     if (confirm("Confirma a desativação do relacionamento entre unidades?")) {
       document.getElementById('hdnInfraItemId').value = id;
-      document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkDesativar ?>';
+      document.getElementById('frmAcompanharEstadoProcesso').action = '<?php echo $strLinkDesativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
     }
   }
@@ -564,7 +574,7 @@ $objPagina->montarStyle();
 
     if (confirm("Confirma a reativação do relacionamento entre unidades?")) {
       document.getElementById('hdnInfraItemId').value = id;
-      document.getElementById('frmAcompanharEstadoProcesso').action = '<?= $strLinkReativar ?>';
+      document.getElementById('frmAcompanharEstadoProcesso').action = '<?php echo $strLinkReativar ?>';
       document.getElementById('frmAcompanharEstadoProcesso').submit();
     }
   }
@@ -684,29 +694,29 @@ $objPagina->abrirBody(PEN_PAGINA_TITULO, 'onload="inicializar();"');
   <?php $objPagina->abrirAreaDados('8em'); ?>
 
   <?php
-  $txtSiglaOrigem = isset($_POST['txtSiglaOrigem']) ? $_POST['txtSiglaOrigem'] : '';
-  $txtSiglaDestino = isset($_POST['txtSiglaDestino']) ? $_POST['txtSiglaDestino'] : '';
-  $txtEstado = isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : '';
-  $idTxtEstado = isset($_POST['txtEstado']) ? $_POST['txtEstado'] : '';
+    $txtSiglaOrigem = $_POST['txtSiglaOrigem'] ?? '';
+    $txtSiglaDestino = $_POST['txtSiglaDestino'] ?? '';
+    $txtEstado = isset($_POST['txtEstado']) && $_POST['txtEstado'] != "S" ? 'selected="selected"' : '';
+    $idTxtEstado = $_POST['txtEstado'] ?? '';
   ?>
   <label for="txtSiglaOrigem" id="lblSiglaOrigem" class="lblSigla infraLabelOpcional">Unidade Origem:</label>
-  <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />
+  <input type="text" id="txtSiglaOrigem" name="txtSiglaOrigem" class="infraText" value="<?php echo PaginaSEI::tratarHTML($txtSiglaOrigem); ?>" />
 
   <label for="txtSiglaDestino" id="lblSiglaDestino" class="lblSigla infraLabelOpcional">Unidade Destino:</label>
-  <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?= PaginaSEI::tratarHTML($txtSiglaDestino); ?>" />
+  <input type="text" id="txtSiglaDestino" name="txtSiglaDestino" class="infraText" value="<?php echo PaginaSEI::tratarHTML($txtSiglaDestino); ?>" />
 
   <label for="txtEstado" id="lblEstado" class="infraLabelOpcional">Estado:</label>
-  <input type="hidden" id="txtEstado" name="txtEstado" class="infraText" value="<?= PaginaSEI::tratarHTML($idTxtEstado); ?>" />
-  <select id="txtEstadoSelect" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?= PaginaSEI::getInstance()->getProxTabDados() ?>">
-    <option value="S" <?= PaginaSEI::tratarHTML($txtEstado); ?>>Ativo</option>
-    <option value="N" <?= PaginaSEI::tratarHTML($txtEstado); ?>>Inativo</option>
+  <input type="hidden" id="txtEstado" name="txtEstado" class="infraText" value="<?php echo PaginaSEI::tratarHTML($idTxtEstado); ?>" />
+  <select id="txtEstadoSelect" name="txtEstado" onchange="this.form.submit();" class="infraSelect" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>">
+    <option value="S" <?php echo PaginaSEI::tratarHTML($txtEstado); ?>>Ativo</option>
+    <option value="N" <?php echo PaginaSEI::tratarHTML($txtEstado); ?>>Inativo</option>
   </select>
   <input type="hidden" id="tableTipoProcessos" name="tableTipoProcessos" value="" />
 
   <?php $objPagina->fecharAreaDados(); ?>
   <?php if ($numRegistros > 0) { ?>
-    <?php PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros); ?>
-    <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosFinal, true); ?>
+        <?php PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros); ?>
+        <?php PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandosFinal, true); ?>
   <?php } ?>
 </form>
 <form id="formImportarDados" method="post" action="<?php print $objSessao->assinarLink('controlador.php?acao=pen_map_orgaos_importar_tipos_processos&acao_origem=' . $acaoOrigem . '&acao_retorno=' . PEN_RECURSO_BASE . '_listar'); ?>" style="display: none;">

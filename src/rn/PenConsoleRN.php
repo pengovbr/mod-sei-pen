@@ -4,17 +4,17 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Executa comandos por console do PHP
- * 
- *
  */
-class PenConsoleRN extends InfraRN {
+class PenConsoleRN extends InfraRN
+{
         
     protected $objRN;
     protected $strAction;
-    protected $arrTokens = array();
+    protected $arrTokens = [];
     protected $objInfraBanco;
 
-  public function __construct($objRN = null, $tokens = array()) {
+  public function __construct($objRN = null, $tokens = [])
+    {
         
     if(!is_null($objRN)) {
             
@@ -23,12 +23,7 @@ class PenConsoleRN extends InfraRN {
       if(!is_object($objRN)) {
         throw new InfraException('Módulo do Tramita: Requerido objeto Infra');
       }
-
-      if(get_parent_class($objRN) !== 'InfraRN') {
-          throw new InfraException('Módulo do Tramita: Requerido objeto Infra que seja extendido de InfraRN');
-      }
-
-        $this->objRN = $objRN;
+        throw new InfraException('Módulo do Tramita: Requerido objeto Infra que seja extendido de InfraRN');
     }
         
     if(empty($tokens)) {
@@ -41,8 +36,9 @@ class PenConsoleRN extends InfraRN {
     /**
      * Inicializador o banco de dados
      */
-  protected function inicializarObjInfraIBanco() {
-    if(empty($this->objInfraBanco)){
+  protected function inicializarObjInfraIBanco()
+    {
+    if(empty($this->objInfraBanco)) {
         $this->objInfraBanco = BancoSEI::getInstance();  
     }
       return $this->objInfraBanco;
@@ -50,17 +46,17 @@ class PenConsoleRN extends InfraRN {
     
     /**
      * Processa os parâmetros passados ao script pelo cli
-     * 
+     *
      * @param array $arguments
-     * @return null
      */
-  protected function criarTokens($arguments = array()){
+  protected function criarTokens($arguments = [])
+    {
         
     if(empty($arguments)) {
         throw new InfraException('Módulo do Tramita: Script não pode ser executado pela web');
     }
         
-      $strScript = array_shift($arguments);
+      array_shift($arguments);
 
     if(!empty($this->objRN)) {
             
@@ -75,7 +71,7 @@ class PenConsoleRN extends InfraRN {
         
     foreach($arguments as $key => $argument) {
 
-      if(substr($argument, 0, 2) === '--'){
+      if(substr($argument, 0, 2) === '--') {
 
           $string = preg_replace('/^--/', '', $argument);
           $array = explode('=', $string);
@@ -91,11 +87,13 @@ class PenConsoleRN extends InfraRN {
     /**
      * Retorna os parâmetros
      */
-  public function getTokens(){
+  public function getTokens()
+    {
       return $this->arrTokens;
   }
     
-  public function run(){
+  public function run()
+    {
         
     if(empty($this->objRN)) {
         throw new InfraException('Módulo do Tramita: Nenhuma RN foi adicionada ao console');
@@ -112,23 +110,24 @@ class PenConsoleRN extends InfraRN {
         return true;
     }
         
-      return call_user_func(array($this->objRN, $this->strAction), $this->getTokens());
+      return call_user_func([$this->objRN, $this->strAction], $this->getTokens());
   }
     
-  public static function format($strMensagem = '', $strFonte = '', $bolBold = false){
+  public static function format($strMensagem = '', $strFonte = '', $bolBold = false)
+    {
         
-     $strBold = ($bolBold !== false) ? '1' : '0';
+      $strBold = ($bolBold !== false) ? '1' : '0';
                 
     if(!empty($strFonte)) {
             
       switch($strFonte){
 
         case 'green':  
-                 $strMensagem = "\033[".$strBold.";32m".$strMensagem; 
+             $strMensagem = "\033[".$strBold.";32m".$strMensagem; 
             break;
                 
         case 'red':  
-                $strMensagem = "\033[".$strBold.";31m".$strMensagem; 
+            $strMensagem = "\033[".$strBold.";31m".$strMensagem; 
             break;
                 
         case 'blue':  
@@ -136,7 +135,7 @@ class PenConsoleRN extends InfraRN {
             break;
                 
         case 'yellow':
-                  $strMensagem = "\033[".$strBold.";33m".$strMensagem;
+              $strMensagem = "\033[".$strBold.";33m".$strMensagem;
             break;
 
       }
@@ -144,7 +143,8 @@ class PenConsoleRN extends InfraRN {
       return static::resetAfter($strMensagem);
   }
     
-  public static function resetAfter($strMensagem = ''){
+  public static function resetAfter($strMensagem = '')
+    {
         
       return $strMensagem. "\033[0m";
   }

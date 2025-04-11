@@ -2,9 +2,11 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-abstract class PenRelHipoteseLegalRN extends InfraRN {
+abstract class PenRelHipoteseLegalRN extends InfraRN
+{
 
-  protected function inicializarObjInfraIBanco(){
+  protected function inicializarObjInfraIBanco()
+    {
       return BancoSEI::getInstance();
   }
 
@@ -63,7 +65,8 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
     }
   }
 
-  public function getIdBarramentoEmUso(PenRelHipoteseLegalDTO $objFiltroDTO, $strTipo = 'E'){
+  public function getIdBarramentoEmUso(PenRelHipoteseLegalDTO $objFiltroDTO, $strTipo = 'E')
+    {
 
       $objDTO = new PenRelHipoteseLegalDTO();
       $objDTO->setDistinct(true);
@@ -76,7 +79,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
 
       $arrObjDTO = $this->listar($objDTO);
 
-      $arrIdBarramento = array();
+      $arrIdBarramento = [];
 
     if(!empty($arrObjDTO)) {
         $arrIdBarramento = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdBarramento');
@@ -97,7 +100,7 @@ abstract class PenRelHipoteseLegalRN extends InfraRN {
 
       $arrObjDTO = $this->listar($objDTO);
 
-      $arrIdBarramento = array();
+      $arrIdBarramento = [];
 
     if(!empty($arrObjDTO)) {
         $arrIdBarramento = InfraArray::converterArrInfraDTO($arrObjDTO, 'IdHipoteseLegal');

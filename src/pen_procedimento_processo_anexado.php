@@ -81,7 +81,7 @@ try {
             Protocolo:
         </label><br>
         <label>
-            <?= $objProtocoloDTO->getStrProtocoloFormatado() ?>
+            <?php echo $objProtocoloDTO->getStrProtocoloFormatado() ?>
         </label>
         </div>
         
@@ -90,7 +90,7 @@ try {
             Data Geração:
         </label><br>
         <label>
-            <?= $objProtocoloDTO->getDtaGeracao() ?>
+            <?php echo $objProtocoloDTO->getDtaGeracao() ?>
         </label>
         </div>
         
@@ -104,7 +104,7 @@ try {
             Unidade Geradora:
         </label><br>
         <label>
-            <?= $objProtocoloDTO->UnidadeGeradora->getStrDescricao() ?>
+            <?php echo $objProtocoloDTO->UnidadeGeradora->getStrDescricao() ?>
         </label>
         </div>
         
@@ -113,7 +113,7 @@ try {
             Criado por:
         </label><br>
         <label>
-            <?= $objProtocoloDTO->UsuarioCriador->getStrNome() ?>
+            <?php echo $objProtocoloDTO->UsuarioCriador->getStrNome() ?>
         </label>
         </div>
         
@@ -129,7 +129,7 @@ try {
          Descrição:
         </label><br>
         <label>
-            <?= $objProtocoloDTO->getStrDescricao() ?>
+            <?php echo $objProtocoloDTO->getStrDescricao() ?>
         </label>
         </div>      
   </div>

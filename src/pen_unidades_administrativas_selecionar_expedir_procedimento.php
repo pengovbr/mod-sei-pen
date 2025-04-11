@@ -1,10 +1,10 @@
 <?php
 /**
-* 04/04/2019 - criado por Josinaldo Júnior
-*/
+ * 04/04/2019 - criado por Josinaldo Júnior
+ */
 
 try {
-    require_once DIR_SEI_WEB.'/SEI.php';
+    include_once DIR_SEI_WEB.'/SEI.php';
 
     session_start();
     $objSessaoSEI = SessaoSEI::getInstance();
@@ -20,7 +20,7 @@ try {
     $bolVersaoSuperior4 = InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0");
     $strImagensArvore = ($bolVersaoSuperior4) ? '24/' : '';
     $strTitulo     = "Seleção de Unidade Externa (Pesquisa em Árvore)";
-    $arrComandos   = array();
+    $arrComandos   = [];
     $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisa Textual" onclick="abrirTelaDePesquisaTextual()" class="infraButton" disabled="disabled"><span class="infraTeclaAtalho">P</span>esquisa Textual</button>';
     $arrComandos[] = '<button type="button" accesskey="T" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
     $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
@@ -87,7 +87,7 @@ try {
     var nivelEstrutura = 1;
     var mais  = '/infra_css/imagens/seta_abaixo.gif';
     var menos = '/infra_css/imagens/seta_acima.gif';
-    var dirImagensArvore = '<?= $strImagensArvore ?>';
+    var dirImagensArvore = '<?php echo $strImagensArvore ?>';
     var vazio = `/infra_js/arvore/${dirImagensArvore}empty.gif`;
     var joinBottonImg = `/infra_js/arvore/${dirImagensArvore}joinbottom.gif`;
     var joinImg = `/infra_js/arvore/${dirImagensArvore}join.gif`;

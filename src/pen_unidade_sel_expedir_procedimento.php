@@ -55,7 +55,7 @@ try {
     </header>
     <body>
 
-        <form id="frmUnidadeLista" method="post" action="<?= PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . htmlspecialchars($_GET['acao']) . '&acao_origem=' . htmlspecialchars($_GET['acao']))) ?>">
+        <form id="frmUnidadeLista" method="post" action="<?php echo PaginaSEI::getInstance()->formatarXHTML(SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . htmlspecialchars($_GET['acao']) . '&acao_origem=' . htmlspecialchars($_GET['acao']))) ?>">
 <?
 //PaginaSEI::getInstance()->montarBarraLocalizacao($strTitulo);
 PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);

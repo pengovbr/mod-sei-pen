@@ -7,36 +7,34 @@
  * PHP 5.3.3 (cli) (built: Jul  9 2015 17:39:00) 
  * Copyright (c) 1997-2010 The PHP Group
  * Zend Engine v2.3.0, Copyright (c) 1998-2010 Zend Technologies
- * 
- *
  */
 
 try {
 
-  require_once DIR_SEI_WEB.'/SEI.php';
-        
+    include_once DIR_SEI_WEB.'/SEI.php';
+
     $objPenConsoleRN = new PenConsoleRN();
     $arrArgs = $objPenConsoleRN->getTokens();
-    
+
     $objAtualizarRN = new PenAtualizarSeiRN($arrArgs);
     $objAtualizarRN->atualizarVersao();
 
     exit(0);
 }
 catch(InfraException $e){
-    
+
     print $e->getStrDescricao().PHP_EOL;
 }
 catch(Exception $e) {
-    
+
     print InfraException::inspecionar($e);
-    
+
   try {
       LogSEI::getInstance()->gravar(InfraException::inspecionar($e));
   } catch (Exception $e) {
-        
+
   }
-    
+
     exit(1);
 }
 
@@ -65,6 +63,4 @@ print PHP_EOL;
     DROP TABLE `sei`.`pen_tramite_pendente`;
     ALTER TABLE unidade DROP COLUMN id_unidade_rh;
     SET FOREIGN_KEY_CHECKS = 1;
-
-
  */

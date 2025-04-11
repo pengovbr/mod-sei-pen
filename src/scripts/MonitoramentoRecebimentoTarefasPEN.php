@@ -16,13 +16,13 @@ if ($argv && $argv[0] && realpath($argv[0]) === __FILE__) {
 
   try {
       SessaoSEI::getInstance(false);
-      $arrParametros = getopt("fd", array("monitorar", "segundo-plano", "debug", "wsdl-cache:"));
+      $arrParametros = getopt("fd", ["monitorar", "segundo-plano", "debug", "wsdl-cache:"]);
       $bolMonitorar = array_key_exists("f", $arrParametros) || array_key_exists("monitorar", $arrParametros);
       $parBolSegundoPlano = array_key_exists("d", $arrParametros) || array_key_exists("segundo-plano", $arrParametros);
       $parBoldebug = array_key_exists("debug", $arrParametros);
       $parStrWsdlCacheDir = array_key_exists("wsdl-cache", $arrParametros) ? $arrParametros["wsdl-cache"] : null;
 
-    if(is_dir($parStrWsdlCacheDir)){
+    if(is_dir($parStrWsdlCacheDir)) {
         ini_set('soap.wsdl_cache_dir', $parStrWsdlCacheDir);
     }
 

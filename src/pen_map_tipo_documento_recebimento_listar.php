@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Consulta os logs do estado do procedimento ao ser expedido
- * 
- *
  */
 
 session_start();
@@ -39,11 +37,13 @@ try {
       case 'pen_map_tipo_documento_recebimento_excluir':                
         if(array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {                    
             $arrDblIdMap = explode(',', $arrParam['hdnInfraItensSelecionados']);
-            $arrPenRelTipoDocMapRecebidoDTO = array_map(function($parDblIdMap){
-                $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
-                $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($parDblIdMap);
-                return $objPenRelTipoDocMapRecebidoDTO;
-            }, $arrDblIdMap);
+            $arrPenRelTipoDocMapRecebidoDTO = array_map(
+                function ($parDblIdMap) {
+                    $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+                    $objPenRelTipoDocMapRecebidoDTO->setDblIdMap($parDblIdMap);
+                    return $objPenRelTipoDocMapRecebidoDTO;
+                }, $arrDblIdMap
+            );
 
             $objPenRelTipoDocMapRecebidoRN->excluir($arrPenRelTipoDocMapRecebidoDTO);
             $objPaginaSEI->adicionarMensagem('Excluido com sucesso.', InfraPagina::$TIPO_MSG_INFORMACAO);                    
@@ -53,7 +53,6 @@ try {
         else {                    
             throw new InfraException('Módulo do Tramita: Nenhum Registro foi selecionado para executar esta ação');
         }
-          break;
                 
       case 'pen_map_tipo_documento_recebimento_listar':
           // Ação padrão desta tela
@@ -69,11 +68,11 @@ try {
     $strTitulo = 'Lista dos Mapeamentos de Tipos de Documento para Recebimento';
 
     $strBotaoTipoDocumentoPadrao = "";
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_consultar')){
+  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_consultar')) {
       $strBotaoTipoDocumentoPadrao = '<button type="button" accesskey="C" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebimento_padrao_consultar&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnConsultarPadrao" value="Consultar Tipo de Documento padrão" class="infraButton"><span class="infraTeclaAtalho">C</span>onsultar Tipo de Documento Padrão</button>';
   }
         
-  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_atribuir')){
+  if(SessaoSEI::getInstance()->verificarPermissao('pen_map_tipo_doc_recebimento_padrao_atribuir')) {
       $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
       $bolPadraoNaoAtribuido = empty($objPenRelTipoDocMapRecebidoRN->consultarTipoDocumentoPadrao());
       $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
@@ -81,7 +80,7 @@ try {
       $strBotaoTipoDocumentoPadrao = '<button type="button" accesskey="A" onclick="location.href=\''.$objSessaoSEI->assinarLink('controlador.php?acao=pen_map_tipo_doc_recebimento_padrao_atribuir&acao_origem='.$_GET['acao'].'&acao_retorno='.$_GET['acao']).'\'" id="btnAtribuirPadrao" title="'.$strAltPendencia.'" class="infraButton"><span class="'.$strClassePendencia.'"></span><span class="infraTeclaAtalho">A</span>tribuir Tipo de Documento Padrão</button>';
   }    
 
-    $arrComandos = array();
+    $arrComandos = [];
     $arrComandos[] = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
     $arrComandos[] = $strBotaoTipoDocumentoPadrao;
     $arrComandos[] = '<button type="button" value="Novo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
@@ -114,7 +113,7 @@ try {
     $objPaginaSEI->processarPaginacao($objPenRelTipoDocMapRecebidoDTO);
     $numRegistros = count($arrObjPenRelTipoDocMapRecebidoDTO);
 
-  if(!empty($arrObjPenRelTipoDocMapRecebidoDTO)){
+  if(!empty($arrObjPenRelTipoDocMapRecebidoDTO)) {
         
       $strResultado = '';
 
@@ -272,7 +271,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
         <input type="text" name="nome_serie"  class="infraText input-field-second" onkeyup="return tratarEnter(event)" value="<?php print htmlspecialchars($_POST['nome_serie']); ?>"/>
     <?php $objPaginaSEI->fecharAreaDados(); ?>
     
-    <?php if($numRegistros > 0): ?>
+    <?php if($numRegistros > 0) : ?>
         <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
     <?php else: ?>
         <div style="clear:both"></div>

@@ -1,12 +1,15 @@
 <?php
 
-class RelProcessoEletronicoApensadoDTO extends InfraDTO {
+class RelProcessoEletronicoApensadoDTO extends InfraDTO
+{
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'md_pen_rel_processo_apensado';
   }
 
-  public function montar() {
+  public function montar()
+    {
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_DBL, 'IdProcedimentoApensado', 'id_procedimento_apensado');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'Protocolo', 'protocolo');

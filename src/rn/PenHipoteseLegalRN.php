@@ -10,41 +10,40 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class PenHipoteseLegalRN extends InfraRN
 {
 
-  /**
-   * Inicializador de banco de dados
-   *
-   * @return object
-   */
+    /**
+     * Inicializador de banco de dados
+     *
+     * @return object
+     */
   protected function inicializarObjInfraIBanco()
-  {
-    return BancoSEI::getInstance();
+    {
+      return BancoSEI::getInstance();
   }
 
-  /**
-   * Listar hipoteses legais
-   *
-   * @param PenHipoteseLegalDTO $objDTO
-   * @return array
-   * @throws InfraException
-   */
+    /**
+     * Listar hipoteses legais
+     *
+     * @return array
+     * @throws InfraException
+     */
   protected function listarConectado(PenHipoteseLegalDTO $objDTO)
-  {
+    {
     try {
-      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-      return $objBD->listar($objDTO);
+        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        return $objBD->listar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro listando hipotese legal.', $e);
+        throw new InfraException('Módulo do Tramita: Erro listando hipotese legal.', $e);
     }
   }
 
   protected function consultarConectado(PenHipoteseLegalDTO $objDTO)
-  {
+    {
     try {
-      //Valida Permissao
-      $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
-      return $objBD->consultar($objDTO);
+        //Valida Permissao
+        $objBD = new GenericoBD($this->inicializarObjInfraIBanco());
+        return $objBD->consultar($objDTO);
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro ao consultar Hipotese Legal.', $e);
+        throw new InfraException('Módulo do Tramita: Erro ao consultar Hipotese Legal.', $e);
     }
   }
 }

@@ -4,22 +4,21 @@ require_once DIR_SEI_WEB.'/SEI.php';
 class ReceberComponenteDigitalRN extends InfraRN
 {
     private $objProcessoEletronicoRN;
-    private $objInfraParametro;
-    private $arrAnexos = array();
+    private $arrAnexos = [];
 
   public function __construct()
     {
       parent::__construct();
-
-      $this->objInfraParametro = new InfraParametro(BancoSEI::getInstance());
       $this->objProcessoEletronicoRN = new ProcessoEletronicoRN();
   }
 
-  public function setArrAnexos($arrAnexos){
+  public function setArrAnexos($arrAnexos)
+    {
       $this->arrAnexos = $arrAnexos;
   }
 
-  public function getArrAnexos(){
+  public function getArrAnexos()
+    {
       return $this->arrAnexos;
   }
 
@@ -30,20 +29,20 @@ class ReceberComponenteDigitalRN extends InfraRN
 
   protected function receberComponenteDigitalControlado(ComponenteDigitalDTO $parObjComponenteDigitalDTO)
     {
-    if(!isset($parObjComponenteDigitalDTO) || !isset($parObjComponenteDigitalDTO)) {
+    if(!isset($parObjComponenteDigitalDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $parObjComponenteDigitalDTO não informado.');
     }
 
       $objAnexoDTO = null;
     foreach($this->arrAnexos as $key => $objAnexo){
-      if(array_key_exists($parObjComponenteDigitalDTO->getStrHashConteudo(), $objAnexo) &&  $objAnexo['recebido'] == false){
+      if(array_key_exists($parObjComponenteDigitalDTO->getStrHashConteudo(), $objAnexo) &&  $objAnexo['recebido'] == false) {
           $objAnexoDTO = $objAnexo[$parObjComponenteDigitalDTO->getStrHashConteudo()];
           $this->arrAnexos[$key]['recebido'] = true;
           break;
       }
     }
 
-    if(is_null($objAnexoDTO)){
+    if(is_null($objAnexoDTO)) {
         throw new InfraException('Módulo do Tramita: Anexo '.$parObjComponenteDigitalDTO->getStrHashConteudo().' não encontrado '.var_export($this->arrAnexos, true));
     }
 
@@ -59,8 +58,8 @@ class ReceberComponenteDigitalRN extends InfraRN
      *  Atribui os anexos como recebidos
      *  Chama o método que faz a compactação dos anexos, para caso de mais de um componente
      *
-     * @param $parNumIdDocumento
-     * @param $parArrObjComponenteDigitalDTO
+     * @param  $parNumIdDocumento
+     * @param  $parArrObjComponenteDigitalDTO
      * @return array|mixed|null
      * @throws InfraException
      */
@@ -69,10 +68,10 @@ class ReceberComponenteDigitalRN extends InfraRN
     if(!isset($parArrObjComponenteDigitalDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro parArrObjComponenteDigitalDTO não informado.');
     }
-      $arrObjAnexoDTOParaCompactacao = array();
+      $arrObjAnexoDTOParaCompactacao = [];
     foreach ($parArrObjComponenteDigitalDTO as $objComponenteDigital){
       foreach($this->arrAnexos as $key => $objAnexo){
-        if(array_key_exists($objComponenteDigital->getStrHashConteudo(), $objAnexo) &&  $objAnexo['recebido'] == false){
+        if(array_key_exists($objComponenteDigital->getStrHashConteudo(), $objAnexo) &&  $objAnexo['recebido'] == false) {
           $arrObjAnexoDTOParaCompactacao[] = $objAnexo[$objComponenteDigital->getStrHashConteudo()];
           $this->arrAnexos[$key]['recebido'] = true;
           break;
@@ -84,9 +83,9 @@ class ReceberComponenteDigitalRN extends InfraRN
       // Caso possua, será necessário compactar todos os arquivos em ZIP para vinculação ao documento no SEI que
       // permite apenas um arquivo por documento
       $objAnexoDTODocumento = null;
-    if(count($arrObjAnexoDTOParaCompactacao) == 1){
+    if(count($arrObjAnexoDTOParaCompactacao) == 1) {
         $objAnexoDTODocumento = $arrObjAnexoDTOParaCompactacao[0];
-    }elseif (count($arrObjAnexoDTOParaCompactacao) > 1){
+    }elseif (count($arrObjAnexoDTOParaCompactacao) > 1) {
         $objAnexoDTODocumento = self::compactarAnexosDoDocumento($parNumIdDocumento, $arrObjAnexoDTOParaCompactacao);
     }else{
         throw new InfraException("Módulo do Tramita: Anexo do documento $parNumIdDocumento não pode ser localizado.");
@@ -112,8 +111,8 @@ class ReceberComponenteDigitalRN extends InfraRN
      * Este método recebe um id de documento e um array de anexos DTO, e é responsável por:
      * Buscar o array de documentos
      *
-     * @param $parNumIdDocumento
-     * @param $parArrAnexoDTO
+     * @param  $parNumIdDocumento
+     * @param  $parArrAnexoDTO
      * @return array
      * @throws InfraException
      */
@@ -127,7 +126,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         /**
          * Transforma em array, o id do documento
          */
-        $arrIdDocumentos = array($parNumIdDocumento);
+        $arrIdDocumentos = [$parNumIdDocumento];
 
         $objDocumentoDTO = new DocumentoDTO();
         $objDocumentoDTO->retDblIdDocumento();
@@ -144,13 +143,13 @@ class ReceberComponenteDigitalRN extends InfraRN
         $objDocumentoRN = new DocumentoRN();
         $arrObjDocumentoDTO = $objDocumentoRN->listarRN0008($objDocumentoDTO);
 
-      if (count($arrObjDocumentoDTO)==0){
+      if (count($arrObjDocumentoDTO)==0) {
         throw new InfraException('Módulo do Tramita: Nenhum documento informado.');
       }
 
         $contDocumentosDto = 0;
-        $arrayRetornoObjAnexoDTO = array();
-      foreach ($arrObjDocumentoDTO as $objDocumentoDTO){
+        $arrayRetornoObjAnexoDTO = [];
+      foreach ($arrObjDocumentoDTO as $objDocumentoDTO) {
           $contDocumentosDto++;
           $objAnexoRN = new AnexoRN();
 
@@ -167,13 +166,13 @@ class ReceberComponenteDigitalRN extends InfraRN
         foreach($arrIdDocumentos as $dblIdDocumento){
           $objDocumentoDTO = $arrObjDocumentoDTO[$dblIdDocumento];
           $strDocumento = '';
-          if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
-              $arrayAnexosExcluirFisicamente = array();
+          if ($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO) {
+              $arrayAnexosExcluirFisicamente = [];
             foreach ($parArrAnexoDTO as $objAnexoDTO){
               $numSequencial++;
 
-              if ($objAnexoDTO==null){
-                    $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
+              if ($objAnexoDTO==null) {
+                      $objInfraException->adicionarValidacao('Documento '.$objDocumentoDTO->getStrProtocoloDocumentoFormatado() .' não encontrado.');
               }else{
                       /**
                        * Aqui será atribuído um nome aos anexos
@@ -188,10 +187,10 @@ class ReceberComponenteDigitalRN extends InfraRN
                       /**
                        * Aqui, o anexo será adicionado ao zip
                        */
-                      $strLocalizacaoArquivo = DIR_SEI_TEMP.'/'. $objAnexoDTO->getNumIdAnexo() ;
+                      $strLocalizacaoArquivo = DIR_SEI_TEMP.'/'. $objAnexoDTO->getNumIdAnexo();
                       //if ($zipFile->addFile($strLocalizacaoArquivo,'['.$numComponenteDigital.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
-                if ($zipFile->addFile($strLocalizacaoArquivo, '['.$numSequencial.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false){
-                          throw new InfraException('Módulo do Tramita: Erro adicionando arquivo externo ao zip.');
+                if ($zipFile->addFile($strLocalizacaoArquivo, '['.$numSequencial.']-'.InfraUtil::formatarNomeArquivo($strNomeArquivo)) === false) {
+                            throw new InfraException('Módulo do Tramita: Erro adicionando arquivo externo ao zip.');
                 }
                 else{
                               /**
@@ -208,7 +207,7 @@ class ReceberComponenteDigitalRN extends InfraRN
         }
           $objInfraException->lancarValidacoes();
         if ($zipFile->close() === false) {
-            throw new InfraException('Módulo do Tramita: Não foi possível fechar arquivo zip.');
+              throw new InfraException('Módulo do Tramita: Não foi possível fechar arquivo zip.');
         }
           $objAnexoDTO = new AnexoDTO();
           $arrNomeArquivo = explode('/', $strCaminhoCompletoArquivoZip);
@@ -232,8 +231,8 @@ class ReceberComponenteDigitalRN extends InfraRN
   }
 
     /**
-     * @param $parObjComponenteDigitalDTO
-     * @param $parObjAnexoDTO
+     * @param  $parObjComponenteDigitalDTO
+     * @param  $parObjAnexoDTO
      * @throws InfraException
      */
   private function atualizarAnexoDoComponenteDigital($parObjComponenteDigitalDTO, $parObjAnexoDTO)
@@ -243,21 +242,21 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objComponenteDigitalDTO->setStrNumeroRegistro($parObjComponenteDigitalDTO->getStrNumeroRegistro());
       $objComponenteDigitalDTO->setDblIdDocumento($parObjComponenteDigitalDTO->getDblIdDocumento());
       $objComponenteDigitalDTO->setDblIdProcedimento($parObjComponenteDigitalDTO->getDblIdProcedimento());
+      //$objComponenteDigitalDTO->setNumOrdem($parObjComponenteDigitalDTO->getNumOrdem());
       $objComponenteDigitalDTO->setNumIdAnexo($parObjAnexoDTO->getNumIdAnexo());
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-      $objComponenteDigitalDTO = $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
+      $objComponenteDigitalBD->alterar($objComponenteDigitalDTO);
   }
 
     /**
-     * @param $objComponenteDigital
+     * @param  $objComponenteDigital
      * @return AnexoDTO
-     *
      */
   public function copiarComponenteDigitalPastaTemporaria($parObjComponenteDigital, $parObjConteudo)
     {
-    if(!isset($parObjComponenteDigital)){
+    if (!isset($parObjComponenteDigital)) {
         throw new InfraException("Módulo do Tramita: Componente Digital não informado");
-    }
+    }    
       $objAnexoRN = new AnexoRN();
       $strNomeArquivoUpload = $objAnexoRN->gerarNomeArquivoTemporario();
       $strConteudoCodificado = $parObjConteudo->conteudoDoComponenteDigital;
@@ -298,8 +297,7 @@ class ReceberComponenteDigitalRN extends InfraRN
 
     /**
      * Método para cadastramento do anexo correspondente ao componente digital recebido
-     * @param ComponenteDigitalDTO $parObjComponenteDigitalDTO
-     * @param AnexoDTO $parObjAnexoDTO
+     *
      * @throws InfraException
      */
   public function cadastrarComponenteDigital(ComponenteDigitalDTO $parObjComponenteDigitalDTO, AnexoDTO $parObjAnexoDTO)
@@ -313,8 +311,8 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoRN = new DocumentoRN();
       $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
 
-    if ($objDocumentoDTO==null){
-      throw new InfraException("Módulo do Tramita: Registro n<E3>o encontrado.");
+    if ($objDocumentoDTO==null) {
+        throw new InfraException("Módulo do Tramita: Registro n<E3>o encontrado.");
     }
 
       $objProtocoloDTO = new ProtocoloDTO();
@@ -328,16 +326,15 @@ class ReceberComponenteDigitalRN extends InfraRN
       // Complementa informações do componente digital
       $parObjAnexoDTO->setStrNome($parObjComponenteDigitalDTO->getStrNome());
       $arrStrNome = explode('.', $parObjComponenteDigitalDTO->getStrNome());
-      $strProtocoloFormatado = current($arrStrNome);
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-      $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
+      $objProtocoloDTO->setArrObjAnexoDTO([$parObjAnexoDTO]);
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);
   }
 
     /**
      * Método responsável por cadastrar o anexo correspondente aos componentes digitais recebidos pelo PEN
-     * @param ComponenteDigitalDTO $parObjComponenteDigitalDTO
-     * @param AnexoDTO $parObjAnexoDTO
+     *
+     * @param  ComponenteDigitalDTO $parObjComponenteDigitalDTO
      * @throws InfraException
      */
   public function cadastrarAnexoDoDocumento(AnexoDTO $parObjAnexoDTO)
@@ -352,7 +349,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoRN = new DocumentoRN();
       $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
 
-    if ($objDocumentoDTO == null){
+    if ($objDocumentoDTO == null) {
         throw new InfraException("Módulo do Tramita: Documento (id: $dblIdDocumento) não pode ser localizado.");
     }
 
@@ -369,7 +366,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $parObjAnexoDTO->setStrNome($nomeArquivoZip);
 
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
-      $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
+      $objProtocoloDTO->setArrObjAnexoDTO([$parObjAnexoDTO]);
 
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);
   }

@@ -1,3 +1,0 @@
-SHELL=/bin/bash
-
-* * * * * root . /root/crond_env.sh; /usr/bin/php -c /etc/php.ini /opt/sei/scripts/AgendamentoTarefaSEI.php 2>&1 >> /var/log/sei/agendamento_sei.log

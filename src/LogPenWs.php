@@ -4,10 +4,9 @@
  *
  * Adicionar no arquivo ConfiguracaoSEI.php [SEI][LogPenWs] um array com a lista
  * de métodos, do api-pen.wsdl, que serão logados
- *
- *
  */
-class LogPenWs {
+class LogPenWs
+{
 
     /**
      * Instância do webservice
@@ -23,9 +22,9 @@ class LogPenWs {
      * Construtor
      */
   // phpcs:ignore PEAR.Functions.ValidDefaultValue.NotAtEnd
-  public function __construct($config = array(), $wsdl, $options)
+  public function __construct($wsdl, $options, $config = [])
     {
-      $this->arrListaMetodos = is_array($config) ? $config : array();
+      $this->arrListaMetodos = is_array($config) ? $config : [];
       $this->objSoapClient = new \BeSimple\SoapClient\SoapClient($wsdl, $options);
   }
 
@@ -35,7 +34,7 @@ class LogPenWs {
      */
   public function __call($method, $arguments)
     {
-      $mixResultado = call_user_func_array(array($this->objSoapClient, $method), $arguments);
+      $mixResultado = call_user_func_array([$this->objSoapClient, $method], $arguments);
 
     if(in_array($method, $this->arrListaMetodos)) {
 

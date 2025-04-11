@@ -1,7 +1,5 @@
 <?php
 /**
- *
- *
  * Construção e moldura do arquivo, equivalente a exemplos já existentes no sistema.
  */
 require_once DIR_SEI_WEB.'/SEI.php';
@@ -22,7 +20,7 @@ try {
     $objSessao->validarLink();
     $objSessao->validarPermissao(PEN_RECURSO_ATUAL);
 
-    $arrComandos = array();
+    $arrComandos = [];
 
     //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
     $objPenParametroRN = new PenParametroRN();
@@ -36,8 +34,8 @@ try {
         $arrComandos[] = '<button type="submit" id="btnSalvar" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
         $arrComandos[] = '<button type="button" id="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
-      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
-        $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
+      if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
+          $strTitulo = sprintf('Editar %s', PEN_PAGINA_TITULO);
       }
       else {
           $strTitulo =  sprintf('Novo %s', PEN_PAGINA_TITULO);
@@ -47,7 +45,7 @@ try {
     case PEN_RECURSO_BASE.'_visualizar':
         $arrComandos[] = '<button type="button" name="btnFechar" value="Fechar" class="infraButton" onclick="location.href=\'' . $objPagina->formatarXHTML($objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem=' . $_GET['acao'])) . '\';">Fechar</button>';
         $bolSomenteLeitura = true;
-       $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
+        $strTitulo =  sprintf('Consultar %s', PEN_PAGINA_TITULO);
         break;
 
 
@@ -62,17 +60,17 @@ try {
   if(strtoupper($_SERVER['REQUEST_METHOD']) === 'POST') {
 
     if(!array_key_exists('id_unidade', $_POST) || empty($_POST['id_unidade'])) {
-      $params = http_build_query($_POST);
-      $objPagina->adicionarMensagem('Nenhuma "Unidade" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
-      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
-      exit(0);
+        $params = http_build_query($_POST);
+        $objPagina->adicionarMensagem('Nenhuma "Unidade" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+        exit(0);
     }
 
     if(!array_key_exists('id_unidade_rh', $_POST) || $_POST['id_unidade_rh'] === '' || $_POST['id_unidade_rh'] === null) {
-      $params = http_build_query($_POST);
-      $objPagina->adicionarMensagem('Nenhuma "Unidade RH" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
-      header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
-      exit(0);
+        $params = http_build_query($_POST);
+        $objPagina->adicionarMensagem('Nenhuma "Unidade RH" foi selecionada', InfraPagina::$TIPO_MSG_AVISO);
+        header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_cadastrar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade). '&'.$params));
+        exit(0);
     }
 
       $objGenericoBD = new GenericoBD($objBanco);
@@ -101,13 +99,14 @@ try {
       }
 
         $objInfraException = new InfraException();
-        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' do Portal de Administração.');     }
+        $objInfraException->lancarValidacao('A unidade ' . $mapIdUnidade[$objResultado[0]->getNumIdUnidade()] .' do sistema já está mapeada com a unidade '.$_POST['txtUnidadePen'].' do Portal de Administração.');     
+    }
       // CARREGAR NOME E SIGLA DA ESTRUTURA
       $objProcessoEletronico     = new ProcessoEletronicoRN();
-      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
+      $objProcessoEletronicoDTO  = $objProcessoEletronico->buscarEstrutura($numIdRepositorioOrigem, $_POST['id_unidade_rh']);
 
-      $nomeUnidadeRH = $objProcessoEletronicoDTO[0]->getStrNome();
-      $siglaUnidadeRH = $objProcessoEletronicoDTO[0]->getStrSigla();
+      $nomeUnidadeRH = $objProcessoEletronicoDTO->getStrNome();
+      $siglaUnidadeRH = $objProcessoEletronicoDTO->getStrSigla();
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($_POST['id_unidade']);
       $objPenUnidadeDTO->setNumIdUnidadeRH($_POST['id_unidade_rh']);
@@ -116,13 +115,13 @@ try {
 
       $numIdUnidade = '';
     if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
-      $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
-      $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
-      $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
+        $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
+        $unidade = $objPenUnidadeRN->alterar($objPenUnidadeDTO);
+        $numIdUnidade = $_GET[PEN_PAGINA_GET_ID];
     }
     else {
-      $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
-      $numIdUnidade = $unidade->getNumIdUnidade();
+        $unidade = $objPenUnidadeRN->cadastrar($objPenUnidadeDTO);
+        $numIdUnidade = $unidade->getNumIdUnidade();
     }
 
       $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
@@ -133,22 +132,22 @@ try {
       $objPenUnidadeRestricaoRN->prepararExcluir($objPenUnidadeRestricaoDTO);
 
       $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->prepararRepoEstruturas(
-        $_POST['id_unidade'],
-        $_POST['id_unidade_rh'],
-        !empty($_POST['hdnRepoEstruturas']) ? $_POST['hdnRepoEstruturas'] : ""
+          $_POST['id_unidade'],
+          $_POST['id_unidade_rh'],
+          !empty($_POST['hdnRepoEstruturas']) ? $_POST['hdnRepoEstruturas'] : ""
       );
 
     if (count($arrObjPenUnidadeRestricaoDTO) > 0) {
       $objPenUnidadeRestricaoRN->cadastrar($arrObjPenUnidadeRestricaoDTO);
     }
 
-    $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
+      $objPagina->adicionarMensagem('Mapeamento de Unidade gravado com sucesso.', 5);
 
       header('Location: '.$objSessao->assinarLink('controlador.php?acao='.PEN_RECURSO_BASE.'_listar&acao_origem='.$_GET['acao'].'&id_mapeamento='.$numIdUnidade.PaginaSEI::getInstance()->montarAncora($numIdUnidade)));
       exit(0);
   }
     // Ao por GET + ID esta carregando o formulrio
-  else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])){
+  else if(array_key_exists(PEN_PAGINA_GET_ID, $_GET) && !empty($_GET[PEN_PAGINA_GET_ID])) {
 
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($_GET[PEN_PAGINA_GET_ID]);
@@ -158,7 +157,7 @@ try {
       $objPenUnidadeDTO = $objEspecieDocumentalBD->consultar($objPenUnidadeDTO);
   }
 
-  if(empty($objPenUnidadeDTO)){
+  if(empty($objPenUnidadeDTO)) {
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade('');
       $objPenUnidadeDTO->setNumIdUnidadeRH('');
@@ -181,7 +180,7 @@ try {
     $objUnidadeDTO->retNumIdUnidade();
     $objUnidadeDTO->retStrSigla();
     $objUnidadeDTO->retStrDescricao();
-    $arrMapIdUnidade = array();
+    $arrMapIdUnidade = [];
     $objPenUnidadeRN = new PenUnidadeRN();
   foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
       $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
@@ -189,30 +188,28 @@ try {
 
     //Verifica se o numero da unidade esta vazio, senão estiver busca o nome da unidade para exibição
     $strNomeUnidadeSelecionada = '';
-  if(!empty($objPenUnidadeDTO->getNumIdUnidadeRH())){
-      $objProcessoEletronico     = new ProcessoEletronicoRN();
-      $objProcessoEletronicoDTO  = $objProcessoEletronico->listarEstruturas($numIdRepositorioOrigem, $objPenUnidadeDTO->getNumIdUnidadeRH());
+  if(!empty($objPenUnidadeDTO->getNumIdUnidadeRH())) {
 
-    if(!is_null($objProcessoEletronicoDTO[0])){
-        $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO[0]->getStrNome();
+      $objProcessoEletronico     = new ProcessoEletronicoRN();
+      $objProcessoEletronicoDTO  = $objProcessoEletronico->buscarEstrutura($numIdRepositorioOrigem, $objPenUnidadeDTO->getNumIdUnidadeRH());
+
+    if(!is_null($objProcessoEletronicoDTO)) {
+        $strNomeUnidadeSelecionada = $objProcessoEletronicoDTO->getStrNome();
     }else{
         $strNomeUnidadeSelecionada = 'Unidade não encontrada.';
     }
-  } else if (!empty($_GET['id_unidade_rh']) && !empty($_GET['txtUnidadePen'])){
-    $strNomeUnidadeSelecionada = $_GET['txtUnidadePen'];
-    $objPenUnidadeDTO->setNumIdUnidadeRH($_GET['id_unidade_rh']);
+  } else if (!empty($_GET['id_unidade_rh']) && !empty($_GET['txtUnidadePen'])) {
+      $strNomeUnidadeSelecionada = $_GET['txtUnidadePen'];
+      $objPenUnidadeDTO->setNumIdUnidadeRH($_GET['id_unidade_rh']);
   }
 
-  $strCssRestricao = "";
-  $strHtmlRestricao = "";
-  $strJsGlobalRestricao = "";
-  $strJsInicializarRestricao = "";
-  ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
+    $strCssRestricao = "";
+    $strHtmlRestricao = "";
+    $strJsGlobalRestricao = "";
+    $strJsInicializarRestricao = "";
+    ProcessoEletronicoINT::montarRestricaoTramitaGovBr($objPenUnidadeDTO->getNumIdUnidade(), $strCssRestricao, $strHtmlRestricao, $strJsGlobalRestricao, $strJsInicializarRestricao);
 }
-catch (InfraException $e) {
-    $objPagina->processarExcecao($e);
-}
-catch(Exception $e) {
+catch(InfraException|Exception $e) {
     $objPagina->processarExcecao($e);
 }
 
@@ -225,12 +222,11 @@ $objPagina->abrirHead();
 $objPagina->montarMeta();
 $objPagina->montarTitle(':: ' . $objPagina->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPagina->montarStyle();
-if ($objPenUnidadeDTO!= null)
-{
+if ($objPenUnidadeDTO!= null) {
     $classMarcacao = $objPenUnidadeDTO->getNumIdUnidadeRH() != '' ? 'infraAjaxMarcarSelecao' : '';
 }else
 {
-  if(empty($objPenUnidadeDTO)){
+  if(empty($objPenUnidadeDTO)) {
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade('');
       $objPenUnidadeDTO->setNumIdUnidadeRH('');
@@ -253,7 +249,7 @@ if ($objPenUnidadeDTO!= null)
       $objUnidadeDTO->retNumIdUnidade();
       $objUnidadeDTO->retStrSigla();
       $objUnidadeDTO->retStrDescricao();
-      $arrMapIdUnidade = array();
+      $arrMapIdUnidade = [];
       $objPenUnidadeRN = new PenUnidadeRN();
   foreach ($objPenUnidadeRN->listar($objUnidadeDTO) as $dados) {
       $arrMapIdUnidade[$dados->getNumIdUnidade()] = $dados->getStrSigla() . ' - ' . $dados->getStrDescricao();
@@ -271,7 +267,7 @@ if ($objPenUnidadeDTO!= null)
 #txtUnidadePen{position:absolute;left:0%;top:53%;width:60%;}
 #btnUnidadeRh2{position:absolute;left:61%;top:53%;}
 
-<?=$strCssRestricao?>
+<?php echo $strCssRestricao?>
 
 </style>
 
@@ -289,28 +285,28 @@ $objPagina->abrirBody($strTitulo, 'onload="inicializar();"');
     </select>
 
     <label id="lblUnidadePen" for="txtUnidadePen" class="infraLabelObrigatorio">Unidades do Tramita GOV.BR (Estruturas Organizacionais):</label>
-    <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?= PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
+    <input type="text" id="txtUnidadePen" name="txtUnidadePen" class="infraText infraReadOnly <?php echo $classMarcacao; ?>" value="<?php echo PaginaSEI::tratarHTML($strNomeUnidadeSelecionada); ?>" tabindex=""/>
     <button id="btnUnidadeRh2" type="button" class="infraButton">Pesquisar</button>
     <input type="hidden" id="hdnUnidadeRh" name="id_unidade_rh" value="<?php echo PaginaSEI::tratarHTML($objPenUnidadeDTO->getNumIdUnidadeRH()); ?>" />
 
     <?php print $objPagina->fecharAreaDados(); ?>
 
     <?php $objPagina->abrirAreaDados('15em'); ?>
-    <?=$strHtmlRestricao?>
+    <?php echo $strHtmlRestricao?>
     <?php print $objPagina->fecharAreaDados(); ?>
 </form>
 <?php $objPagina->fecharBody(); ?>
 <?php $objPagina->montarJavaScript(); ?>
 <script type="text/javascript">
 
-<?=$strJsGlobalRestricao?>
+<?php echo $strJsGlobalRestricao?>
 
 var objAutoCompletarEstrutura = null;
 var numIdRepositorioOrigem = '<? echo $numIdRepositorioOrigem; ?>';
 var strNomeUnidadeSelecionada = '<? echo $strNomeUnidadeSelecionada; ?>';
 
 function inicializar(){
-    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnUnidadeRh','txtUnidadePen','<?php echo $strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
     objAutoCompletarEstrutura.limparCampo = false;
@@ -347,7 +343,7 @@ function onSubmit() {
     }
 }
 
-<?=$strJsInicializarRestricao?>
+<?php echo $strJsInicializarRestricao?>
 
 </script>
 <?php $objPagina->fecharHtml(); ?>

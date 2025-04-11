@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<phpunit bootstrap="bootstrap.php" colors="true" verbose="true">  
-  <php>
-    <!-- Localização do diretório onde está contido os arquivos de configuração do SEI -->
-    <const name="DIR_SEI_CONFIG" value="/home/guilhermeadc/dev/sei/sei/config"/>
-  </php>
-</phpunit>

@@ -23,12 +23,12 @@ class PendenciasTramiteRN extends InfraRN
     const COMANDO_IDENTIFICACAO_WORKER = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php' | grep -o '^[ ]*[0-9]*'";
     const COMANDO_IDENTIFICACAO_WORKER_ID = "ps -c ax | grep 'MonitoramentoRecebimentoTarefasPEN\.php.*--worker=%02d' | grep -o '^[ ]*[0-9]*'";
 
-    protected $objPenDebug = null;
-    protected $strEnderecoServico = null;
-    protected $strEnderecoServicoPendencias = null;
-    protected $strLocalizacaoCertificadoDigital = null;
-    protected $strSenhaCertificadoDigital = null;
-    protected $arrStrUltimasMensagensErro = array();
+    protected $objPenDebug;
+    protected $strEnderecoServico;
+    protected $strEnderecoServicoPendencias;
+    protected $strLocalizacaoCertificadoDigital;
+    protected $strSenhaCertificadoDigital;
+    protected $arrStrUltimasMensagensErro = [];
 
   public function __construct($parStrLogTag = null)
     {
@@ -65,7 +65,7 @@ class PendenciasTramiteRN extends InfraRN
      * 1 - Através da API Webservice SOAP, fazendo uma requisição direta para o serviço de consulta de pendências de trâmite
      * 2 - Através da API Rest de Stream, onde o módulo irá conectar ao Barramento e ficar na esculta por qualquer novo evento
      *
-     * @param boolean $parBolMonitorarPendencias Indicador para ativar a esculta de eventos do Barramento
+     * @param  boolean $parBolMonitorarPendencias Indicador para ativar a esculta de eventos do Barramento
      * @return int  Código de resultado do processamento, sendo 0 para sucesso e 1 em caso de erros
      */
   public function receberPendencias($parBolMonitorarPendencias = false, $parBolSegundoPlano = false, $parBolDebug = false)
@@ -74,12 +74,12 @@ class PendenciasTramiteRN extends InfraRN
         ini_set('max_execution_time', '0');
         ini_set('memory_limit', '-1');
 
-      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()){
+      if(!PENIntegracao::verificarCompatibilidadeConfiguracoes()) {
         return false;
       }
 
-      if(empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)){
-        throw new InfraException("Módulo do Tramita: Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
+      if(empty($this->strEnderecoServico) && empty($this->strEnderecoServicoPendencias)) {
+          throw new InfraException("Módulo do Tramita: Serviço de monitoramento de pendências não pode ser iniciado devido falta de configuração de endereços de WebServices");
       }
 
         ModPenUtilsRN::simularLoginUnidadeRecebimento();
@@ -88,20 +88,20 @@ class PendenciasTramiteRN extends InfraRN
 
       do{
         try {
-          $this->gravarLogDebug('Recuperando lista de pendências de recebimento do Tramita GOV.BR', 1);
-          $arrObjPendenciasDTO = $this->obterPendenciasRecebimentoTramite($parBolMonitorarPendencias);
+            $this->gravarLogDebug('Recuperando lista de pendências de recebimento do Tramita GOV.BR', 1);
+            $arrObjPendenciasDTO = $this->obterPendenciasRecebimentoTramite($parBolMonitorarPendencias);
 
           foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-              $numIdTramite = $objPendenciaDTO->getNumIdentificacaoTramite();
-              $strStatusTramite = $objPendenciaDTO->getStrStatus();
-              $mensagemLog = ">>> Enviando pendência $numIdTramite (status $strStatusTramite) para fila de processamento";
-              $this->gravarLogDebug($mensagemLog, 3);
+            $numIdTramite = $objPendenciaDTO->getNumIdentificacaoTramite();
+            $strStatusTramite = $objPendenciaDTO->getStrStatus();
+            $mensagemLog = ">>> Enviando pendência $numIdTramite (status $strStatusTramite) para fila de processamento";
+            $this->gravarLogDebug($mensagemLog, 3);
 
             try {
-              $this->receberPendenciaProcessamento($objPendenciaDTO, $parBolSegundoPlano);
+                  $this->receberPendenciaProcessamento($objPendenciaDTO, $parBolSegundoPlano);
             } catch (\Exception $e) {
-                  $this->gravarAmostraErroLogSEI($e);
-                  $this->gravarLogDebug(InfraException::inspecionar($e));
+                    $this->gravarAmostraErroLogSEI($e);
+                    $this->gravarLogDebug(InfraException::inspecionar($e));
             }
           }
 
@@ -114,7 +114,7 @@ class PendenciasTramiteRN extends InfraRN
             $this->gravarLogDebug(InfraException::inspecionar($e));
         }
 
-        if($parBolMonitorarPendencias){
+        if($parBolMonitorarPendencias) {
             $this->gravarLogDebug(sprintf("Reiniciando monitoramento de pendências em %s segundos", self::TEMPO_ESPERA_REINICIALIZACAO_MONITORAMENTO), 1);
             sleep(self::TEMPO_ESPERA_REINICIALIZACAO_MONITORAMENTO);
             $this->carregarParametrosIntegracao();
@@ -129,38 +129,18 @@ class PendenciasTramiteRN extends InfraRN
     }
 
     try {      
-      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();      
-      $objPenBlocoProcessoRN->validarBlocosEmAndamento();    
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();      
+        $objPenBlocoProcessoRN->validarBlocosEmAndamento();    
     } catch(Exception $e) {        
-      $this->gravarLogDebug(InfraException::inspecionar($e));    
+        $this->gravarLogDebug(InfraException::inspecionar($e));    
     }
     
       // Caso não esteja sendo realizado o monitoramente de pendências, lança exceção diretamente na página para apresentação ao usuário
-    if(!$parBolMonitorarPendencias){
+    if(!$parBolMonitorarPendencias) {
         $this->salvarLogDebug($parBolDebug);
     }
 
       return self::CODIGO_EXECUCAO_SUCESSO;
-  }
-
-    /**
-     * Valida a correta parametrização do certificado digital
-     *
-     * @return void
-     */
-  private function validarCertificado()
-    {
-    if (InfraString::isBolVazia($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException('Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não informado.');
-    }
-
-    if (!@file_get_contents($this->strLocalizacaoCertificadoDigital)) {
-        throw new InfraException("Módulo do Tramita: Certificado digital de autenticação do serviço de integração do Tramita.GOV.BR não encontrado.");
-    }
-
-    if (InfraString::isBolVazia($this->strSenhaCertificadoDigital)) {
-        throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
-    }
   }
 
     /**
@@ -170,9 +150,9 @@ class PendenciasTramiteRN extends InfraRN
      */
   protected function salvarLogDebug($parBolDebugAtivado)
     {
-    if($parBolDebugAtivado){
+    if($parBolDebugAtivado) {
         $strTextoDebug = InfraDebug::getInstance()->getStrDebug();
-      if(!InfraString::isBolVazia($strTextoDebug)){
+      if(!InfraString::isBolVazia($strTextoDebug)) {
         LogSEI::getInstance()->gravar(mb_convert_encoding($strTextoDebug, 'ISO-8859-1', 'UTF-8'), LogSEI::$DEBUG);
       }
     }
@@ -198,43 +178,42 @@ class PendenciasTramiteRN extends InfraRN
   }
 
 
-  /**
-   * Função para recuperar as pendências de trâmite que já foram recebidas pelo serviço de long pulling e não foram processadas com sucesso
-   * @param  num $parNumIdTramiteRecebido
-   * @return [type]                          [description]
-   */
+    /**
+     * Função para recuperar as pendências de trâmite que já foram recebidas pelo serviço de long pulling e não foram processadas com sucesso
+     *
+     * @param  num $parNumIdTramiteRecebido
+     * @return [type]                          [description]
+     */
   private function obterPendenciasRecebimentoTramite($parBolMonitorarPendencias)
-  {
-    //Obter todos os trâmites pendentes antes de iniciar o monitoramento
-    $arrPendenciasRetornadas = array();
-    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: array();
-    shuffle($arrObjPendenciasDTO);
+    {
+      //Obter todos os trâmites pendentes antes de iniciar o monitoramento
+      $arrPendenciasRetornadas = [];
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      $arrObjPendenciasDTO = $objProcessoEletronicoRN->listarPendencias(self::RECUPERAR_TODAS_PENDENCIAS) ?: [];
+      shuffle($arrObjPendenciasDTO);
 
-    if (isset($arrObjPendenciasDTO)) {
-      if (!is_array($arrObjPendenciasDTO)) {
-        $arrObjPendenciasDTO = array();
-      }
+    if (!is_array($arrObjPendenciasDTO)) {
+        $arrObjPendenciasDTO = [];
     }
 
-    $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
+      $this->gravarLogDebug(count($arrObjPendenciasDTO) . " pendências de trâmites identificadas", 2);
 
     foreach ($arrObjPendenciasDTO as $objPendenciaDTO) {
-      //Captura todas as pendências e status retornadas para impedir duplicidade
-      $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
-      yield $objPendenciaDTO;
+        //Captura todas as pendências e status retornadas para impedir duplicidade
+        $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
+        yield $objPendenciaDTO;
     }
 
     if ($parBolMonitorarPendencias && $this->servicoMonitoramentoPendenciasAtivo()) {
-      //Obtém demais pendências do serviço de long polling
-      $bolEncontrouPendencia = false;
-      $numUltimoIdTramiteRecebido = 0;
+        //Obtém demais pendências do serviço de long polling
+        $bolEncontrouPendencia = false;
+        $numUltimoIdTramiteRecebido = 0;
 
-      $arrObjPendenciasDTONovas = array();
-      $this->gravarLogDebug("Iniciando monitoramento no serviço de pendências (long polling)", 2);
+        $arrObjPendenciasDTONovas = [];
+        $this->gravarLogDebug("Iniciando monitoramento no serviço de pendências (long polling)", 2);
 
       do {
-        $curl = $this->configurarRequisicao();
+          $curl = $this->configurarRequisicao();
         try {
           $arrObjPendenciasDTONovas = array_unique($arrObjPendenciasDTONovas);
           curl_setopt($curl, CURLOPT_URL, $this->strEnderecoServicoPendencias . "?idTramiteDaPendenciaRecebida=" . $numUltimoIdTramiteRecebido);
@@ -248,24 +227,24 @@ class PendenciasTramiteRN extends InfraRN
               throw new InfraException("Módulo do Tramita: Erro na requisição do serviço de monitoramento de pendências. Curl: " . curl_error($curl));
             }
 
-            $bolEncontrouPendencia = false;
-            $this->gravarLogDebug(sprintf("Timeout de monitoramento de %d segundos do serviço de pendências alcançado", self::TIMEOUT_SERVICO_PENDENCIAS), 2);
+                $bolEncontrouPendencia = false;
+                $this->gravarLogDebug(sprintf("Timeout de monitoramento de %d segundos do serviço de pendências alcançado", self::TIMEOUT_SERVICO_PENDENCIAS), 2);
           }
 
           if (!InfraString::isBolVazia($strResultadoJSON)) {
-            $strResultadoJSON = json_decode($strResultadoJSON);
+                  $strResultadoJSON = json_decode($strResultadoJSON);
 
             if (isset($strResultadoJSON->encontrou) && $strResultadoJSON->encontrou) {
-              $bolEncontrouPendencia = true;
-              $numUltimoIdTramiteRecebido = $strResultadoJSON->IDT;
-              $strUltimoStatusRecebido = $strResultadoJSON->status;
-              $strChavePendencia = sprintf("%d-%s", $strResultadoJSON->IDT, $strResultadoJSON->status);
-              $objPendenciaDTO = new PendenciaDTO();
-              $objPendenciaDTO->setNumIdentificacaoTramite($strResultadoJSON->IDT);
-              $objPendenciaDTO->setStrStatus($strResultadoJSON->status);
+                  $bolEncontrouPendencia = true;
+                  $numUltimoIdTramiteRecebido = $strResultadoJSON->IDT;
+                  $strUltimoStatusRecebido = $strResultadoJSON->status;
+                  $strChavePendencia = sprintf("%d-%s", $strResultadoJSON->IDT, $strResultadoJSON->status);
+                  $objPendenciaDTO = new PendenciaDTO();
+                  $objPendenciaDTO->setNumIdentificacaoTramite($strResultadoJSON->IDT);
+                  $objPendenciaDTO->setStrStatus($strResultadoJSON->status);
 
-              //Não processo novamente as pendências já capturadas na consulta anterior ($objProcessoEletronicoRN->listarPendencias)
-              //Considera somente as novas identificadas pelo serviço de monitoramento
+                  //Não processo novamente as pendências já capturadas na consulta anterior ($objProcessoEletronicoRN->listarPendencias)
+                  //Considera somente as novas identificadas pelo serviço de monitoramento
               if (!in_array($strChavePendencia, $arrPendenciasRetornadas)) {
                 $arrObjPendenciasDTONovas[] = $strChavePendencia;
                 yield $objPendenciaDTO;
@@ -280,16 +259,16 @@ class PendenciasTramiteRN extends InfraRN
                 $this->gravarLogDebug($mensagemErro, 2);
                 throw new InfraException($mensagemErro);
               } else {
-                $arrObjPendenciasDTONovas[] = $strChavePendencia;
-                $this->gravarLogDebug(sprintf("IDT %d desconsiderado por já ter sido retornado na consulta inicial", $numUltimoIdTramiteRecebido), 2);
+                  $arrObjPendenciasDTONovas[] = $strChavePendencia;
+                  $this->gravarLogDebug(sprintf("IDT %d desconsiderado por já ter sido retornado na consulta inicial", $numUltimoIdTramiteRecebido), 2);
               }
             }
           }
         } catch (Exception $e) {
-          $bolEncontrouPendencia = false;
-          throw new InfraException("Módulo do Tramita: Erro processando monitoramento de pendências de trâmite de processos", $e);
+            $bolEncontrouPendencia = false;
+            throw new InfraException("Módulo do Tramita: Erro processando monitoramento de pendências de trâmite de processos", $e);
         } finally {
-          curl_close($curl);
+            curl_close($curl);
         }
       } while ($bolEncontrouPendencia);
     }
@@ -306,9 +285,11 @@ class PendenciasTramiteRN extends InfraRN
       $strMensagemErro = "Não foi possível conectar ao servidor Gearman (%s, %s). Erro: %s";
     try {
       if(!empty($this->strGearmanServidor)) {
-        if(!class_exists("GearmanClient")){
-            throw new InfraException("Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN. " .
-                "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes");
+        if(!class_exists("GearmanClient")) {
+            throw new InfraException(
+                "Módulo do Tramita: Não foi possível localizar as bibliotecas do PHP para conexão ao GEARMAN. " .
+                "Verifique os procedimentos de instalação do mod-sei-pen para maiores detalhes"
+            );
         }
 
         try{
@@ -337,20 +318,19 @@ class PendenciasTramiteRN extends InfraRN
      */
   protected function servicoMonitoramentoPendenciasAtivo()
     {
-      $bolMonitoramentoAtivo = !empty($this->strEnderecoServicoPendencias);
-      return $bolMonitoramentoAtivo;
+      return !empty($this->strEnderecoServicoPendencias);
   }
 
 
     /**
      * Recebe a pendência de trâmite para a fila de processamento do tarefas de acordo com a estratégia definida
      *
-     * @param stdClass $objPendencia
+     * @param  stdClass $objPendencia
      * @return void
      */
   private function receberPendenciaProcessamento($objPendencia, $parBolSegundoPlano)
     {
-    if($parBolSegundoPlano && $this->servicoGearmanAtivo()){
+    if($parBolSegundoPlano && $this->servicoGearmanAtivo()) {
         $this->receberPendenciaFilaProcessamento($objPendencia);
     } else {
         $this->receberPendenciaProcessamentoDireto($objPendencia);
@@ -360,7 +340,7 @@ class PendenciasTramiteRN extends InfraRN
     /**
      * Processa pendência de recebimento diretamente através da chamada das funções de processamento
      *
-     * @param stclass $objPendencia
+     * @param  stclass $objPendencia
      * @return void
      */
   private function receberPendenciaProcessamentoDireto($objPendencia)
@@ -386,8 +366,9 @@ class PendenciasTramiteRN extends InfraRN
             break;
 
         default:
+            $numIDT = $objPendencia->getNumIdentificacaoTramite();
             $strStatus = $objPendencia->getStrStatus();
-            $this->gravarLogDebug("Situação do trâmite ($strStatus) não pode ser tratada.");
+            $this->gravarLogDebug("Situação do trâmite ($numIDT) com status: $strStatus não pode ser tratada.");
             break;
       }
     }
@@ -396,7 +377,7 @@ class PendenciasTramiteRN extends InfraRN
     /**
      * Envia pendência de recebimento para fila de tarefas do Gearman para processamento futuro
      *
-     * @param stdclass $objPendencia
+     * @param  stdclass $objPendencia
      * @return void
      */
   private function receberPendenciaFilaProcessamento($objPendencia)
@@ -440,25 +421,25 @@ class PendenciasTramiteRN extends InfraRN
     /**
      * Registra log de erro no SEI caso o mesmo já não tenha sido registrado anteriormente em período determinado de tempo
      *
-     * @param string $parObjException Exceção lançada pelo sistema
-     * @param int $numTempoRegistroErro Tempo mínimo para novo registro de erro nos logs do sistema
+     * @param  string $parObjException      Exceção lançada pelo sistema
+     * @param  int    $numTempoRegistroErro Tempo mínimo para novo registro de erro nos logs do sistema
      * @return void
      */
   protected function gravarAmostraErroLogSEI($parObjException, $strTipoLog = "E")
     {
-    if(!is_null($parObjException)){
+    if(!is_null($parObjException)) {
         $strMensagemErro = InfraException::inspecionar($parObjException);
         $strHashMensagem = md5($strMensagemErro);
-      if(array_key_exists($strHashMensagem, $this->arrStrUltimasMensagensErro)){
+      if(array_key_exists($strHashMensagem, $this->arrStrUltimasMensagensErro)) {
         $dthUltimoRegistro = $this->arrStrUltimasMensagensErro[$strHashMensagem];
         $dthDataMinimaParaRegistro = new DateTime(sprintf("-%d seconds", self::TEMPO_MINIMO_REGISTRO_ERRO));
-        if($dthUltimoRegistro > $dthDataMinimaParaRegistro){
+        if($dthUltimoRegistro > $dthDataMinimaParaRegistro) {
             return false;
         }
       }
 
         // Remove registros de logs mais antigos para não sobrecarregar
-      if(count($this->arrStrUltimasMensagensErro) > self::NUMERO_MAXIMO_LOG_ERROS){
+      if(count($this->arrStrUltimasMensagensErro) > self::NUMERO_MAXIMO_LOG_ERROS) {
           array_shift($this->arrStrUltimasMensagensErro);
       }
 
@@ -471,9 +452,9 @@ class PendenciasTramiteRN extends InfraRN
      * Inicia o recebimento de tarefas de Barramento do PEN em novo processo separado,
      * evitando o bloqueio da thread da aplicação
      *
-     * @param int $parNumQtdeWorkers Quantidade de processos paralelos que serão iniciados
-     * @param boolean $parBolMonitorar Indicação se o novo processo ficará monitorando o Barramento do PEN
-     * @param boolean $parBolSegundoPlano Indicação se será utilizado o processamento das tarefas em segundo plano com o Gearman
+     * @param  int     $parNumQtdeWorkers  Quantidade de processos paralelos que serão iniciados
+     * @param  boolean $parBolMonitorar    Indicação se o novo processo ficará monitorando o Barramento do PEN
+     * @param  boolean $parBolSegundoPlano Indicação se será utilizado o processamento das tarefas em segundo plano com o Gearman
      * @return bool Monitoramento iniciado com sucesso
      */
   public static function inicializarMonitoramentoRecebimentoPendencias($parNumQtdeWorkers = null, $parBolMonitorar = false, $parBolSegundoPlano = false, $parBolDebugAtivo = false, $parStrUsuarioProcesso = null)
@@ -488,7 +469,8 @@ class PendenciasTramiteRN extends InfraRN
 
         if ($numCodigoResposta != 0) {
             $strLocalizacaoScript = realpath(self::LOCALIZACAO_SCRIPT_WORKER);
-            $strPhpExec = empty(PHP_BINARY) ? "php" : PHP_BINARY;
+            $strPhpExec = "echo -n $(which php)";
+            $strPhpExec= shell_exec($strPhpExec);
             $strPhpIni = php_ini_loaded_file();
             $strPhpIni = $strPhpIni ? "-c $strPhpIni" : "";
             $strWsdlCacheDir = ini_get('soap.wsdl_cache_dir');

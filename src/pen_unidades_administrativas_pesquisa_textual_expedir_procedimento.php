@@ -1,7 +1,7 @@
 <?php
 /**
-* 10/04/2019 - criado por Josinaldo Júnior <josinaldo.junior@basis.com.br>
-**/
+ * 10/04/2019 - criado por Josinaldo Júnior <josinaldo.junior@basis.com.br>
+ **/
 require_once DIR_SEI_WEB.'/SEI.php';
 
 try {
@@ -19,7 +19,7 @@ try {
         SessaoSEI::getInstance()->validarLink();
 
         $strTitulo = 'Seleção de Unidade Externa (Pesquisa Textual)';
-        $arrComandos = array();
+        $arrComandos = [];
         $arrComandos[] = '<button type="button" accesskey="P" id="btnPesquisar" value="Pesquisar" class="infraButton" onclick="recuperarEstruturaDeFilhosDeUnidadeExterna(1);"><span class="infraTeclaAtalho">P</span>esquisar</button>';
         $arrComandos[] = '<button type="button" accesskey="S" id="btnTransportarSelecao" value="Selecionar" onclick="transportarSelecao();" class="infraButton"><span class="infraTeclaAtalho">S</span>elecionar</button>';
         $arrComandos[] = '<button type="button" accesskey="F" id="btnFecharSelecao" value="Fechar" onclick="window.close();" class="infraButton"><span class="infraTeclaAtalho">F</span>echar</button>';
@@ -339,24 +339,24 @@ try {
 ?>
     <div id="divInfraAreaTela" class="infraAreaTela">
         <div id="divInfraBarraLocalizacao" class="infraBarraLocalizacao" >Pesquisa textual de unidades externas</div> &nbsp;
-        <form id="frmUnidadeLista" method="post" action="<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_orgao='.htmlspecialchars($_GET['id_orgao']))?>">
+        <form id="frmUnidadeLista" method="post" action="<?php echo SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.htmlspecialchars($_GET['acao']).'&acao_origem='.htmlspecialchars($_GET['acao']).'&id_orgao='.htmlspecialchars($_GET['id_orgao']))?>">
             <input type="hidden" id="hdnIdUnidadeRaiz" name="hdnIdUnidadeRaiz" value="" />
             <?php
                 PaginaSEI::getInstance()->montarBarraComandosSuperior($arrComandos);
                 PaginaSEI::getInstance()->abrirAreaDados('10em');
             ?>
                 <label id="lblUnidadeRaiz" for="lblUnidadeRaiz" class="infraLabelOpcional">Unidade raiz da pesquisa:</label>
-                <input type="text" id="txtUnidadeRaiz" name="txtUnidadeRaiz" class="infraText" value="" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" disabled />
+                <input type="text" id="txtUnidadeRaiz" name="txtUnidadeRaiz" class="infraText" value="" maxlength="15" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados()?>" disabled />
 
                 <label id="lblSiglaUnidade" for="txtSiglaUnidade" class="infraLabelOpcional">Sigla:</label>
-                <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText" value="<?=$strSiglaPesquisa?>" maxlength="15" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" />
+                <input type="text" id="txtSiglaUnidade" name="txtSiglaUnidade" class="infraText" value="<?php echo $strSiglaPesquisa?>" maxlength="15" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados()?>" />
                 <label id="lblNomeUnidade" for="txtNomeUnidade" class="infraLabelOpcional">Nome:</label>
-                <input type="text" id="txtNomeUnidade" name="txtNomeUnidade" class="infraText" tabindex="<?=PaginaSEI::getInstance()->getProxTabDados()?>" value="" />
+                <input type="text" id="txtNomeUnidade" name="txtNomeUnidade" class="infraText" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados()?>" value="" />
             <?php
                 PaginaSEI::getInstance()->fecharAreaDados();
                 PaginaSEI::getInstance()->montarAreaTabela($strResultado, $numRegistros);
                 PaginaSEI::getInstance()->montarAreaDebug();
-                #PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
+                // PaginaSEI::getInstance()->montarBarraComandosInferior($arrComandos);
             ?>
             <div id="divInfraAreaPaginacaoInferior" class="infraAreaPaginacao">
                 <input type="hidden" name="nrTotalPaginas" id="nrTotalPaginas" value="">

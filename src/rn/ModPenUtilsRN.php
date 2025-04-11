@@ -8,7 +8,7 @@ class ModPenUtilsRN extends InfraRN
 {
   protected function inicializarObjInfraIBanco()
     {
-    return BancoSEI::getInstance();
+      return BancoSEI::getInstance();
   }
 
   public static function obterUnidadeRecebimento()
@@ -16,7 +16,7 @@ class ModPenUtilsRN extends InfraRN
       $objPenParametroRN = new PenParametroRN();
       $numUnidadeRecebimentoProcessos = $objPenParametroRN->getParametro('PEN_UNIDADE_GERADORA_DOCUMENTO_RECEBIDO');
 
-    if(empty($numUnidadeRecebimentoProcessos)){
+    if(empty($numUnidadeRecebimentoProcessos)) {
         $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
         $numUnidadeRecebimentoProcessos = $objInfraParametro->getValor('ID_UNIDADE_TESTE');
     }

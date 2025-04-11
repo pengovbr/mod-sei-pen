@@ -23,150 +23,149 @@ $strProprioLink = 'controlador.php?acao='
   . $_GET['acao_retorno'];
 
 try {
-  $objSessaoSEI->validarLink();
-  $objSessaoSEI->validarPermissao('pen_map_envio_parcial_listar');
+    $objSessaoSEI->validarLink();
+    $objSessaoSEI->validarPermissao('pen_map_envio_parcial_listar');
 
-  $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
+    $objPenRestricaoEnvioComponentesDigitaisRN = new PenRestricaoEnvioComponentesDigitaisRN();
 
-  //--------------------------------------------------------------------------
-  // Ações
+    //--------------------------------------------------------------------------
+    // Ações
   if (array_key_exists('acao', $_GET)) {
-    $arrParam = array_merge($_GET, $_POST);
+      $arrParam = array_merge($_GET, $_POST);
     switch ($_GET['acao']) {
       case 'pen_map_envio_parcial_excluir':
         if (array_key_exists('hdnInfraItensSelecionados', $arrParam) && !empty($arrParam['hdnInfraItensSelecionados'])) {
-          $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-          $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
+            $objDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+            $arrParam['hdnInfraItensSelecionados'] = explode(',', $arrParam['hdnInfraItensSelecionados']);
           if (is_array($arrParam['hdnInfraItensSelecionados'])) {
             foreach ($arrParam['hdnInfraItensSelecionados'] as $id) {
-              $objDTO->setDblId($id);
-              $objPenRestricaoEnvioComponentesDigitaisRN->excluir($objDTO);
+                $objDTO->setDblId($id);
+                $objPenRestricaoEnvioComponentesDigitaisRN->excluir($objDTO);
             }
           } else {
-            $objDTO->setDblId($arrParam['hdnInfraItensSelecionados']);
-            $objPenRestricaoEnvioComponentesDigitaisRN->excluir($objDTO);
+              $objDTO->setDblId($arrParam['hdnInfraItensSelecionados']);
+              $objPenRestricaoEnvioComponentesDigitaisRN->excluir($objDTO);
           }
-          $objPaginaSEI->adicionarMensagem('Mapeamento excluído com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
-          header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
-          exit(0);
+            $objPaginaSEI->adicionarMensagem('Mapeamento excluído com sucesso.', InfraPagina::$TIPO_MSG_AVISO);
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao_retorno'] . '&acao_origem=' . $_GET['acao_origem']));
+            exit(0);
         } else {
-          throw new InfraException('Módulo do Tramita: Nenhum registro foi selecionado para executar esta ação');
+            throw new InfraException('Módulo do Tramita: Nenhum registro foi selecionado para executar esta ação');
         }
-          break;
       case 'pen_map_envio_parcial_listar':
-        // Ação padrão desta tela
+          // Ação padrão desta tela
           break;
       default:
           throw new InfraException('Módulo do Tramita: Ação não permitida nesta tela');
     }
   }
-  //--------------------------------------------------------------------------
+    //--------------------------------------------------------------------------
 
-  $strTitulo = 'Lista dos Mapeamentos de Envio Parcial';
+    $strTitulo = 'Lista dos Mapeamentos de Envio Parcial';
 
-  $strBotaoEspeciePadrao = "";
+    $strBotaoEspeciePadrao = "";
 
   if (SessaoSEI::getInstance()->verificarPermissao('pen_map_envio_parcial_atribuir')) {
-    $bolPadraoNaoAtribuido = empty((new PenParametroRN())->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
-    $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
-    $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de espécie documental padrão para envio de processos" : "";
-    $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_envio_parcial_padrao_atribuir&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\'" id="btnAtribuirPadrao" title="' . $strAltPendencia . '" class="infraButton"><span class="' . $strClassePendencia . '"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
+      $bolPadraoNaoAtribuido = empty((new PenParametroRN())->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO"));
+      $strClassePendencia = ($bolPadraoNaoAtribuido) ? "pendencia" : "";
+      $strAltPendencia = ($bolPadraoNaoAtribuido) ? "Pendente atribuição de espécie documental padrão para envio de processos" : "";
+      $strBotaoEspeciePadrao = '<button type="button" accesskey="A" onclick="location.href=\'' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_map_envio_parcial_padrao_atribuir&acao_origem=' . $_GET['acao'] . '&acao_retorno=' . $_GET['acao']) . '\'" id="btnAtribuirPadrao" title="' . $strAltPendencia . '" class="infraButton"><span class="' . $strClassePendencia . '"></span><span class="infraTeclaAtalho">A</span>tribuir Espécie Padrão</button>';
   }
 
-  $arrComandos = array();
-  $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
-  $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
-  $btnExcluir = '<button type="button" id="btnExcluir" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
-  $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
+    $arrComandos = [];
+    $btnPesquisar = '<button type="button" accesskey="P" onclick="onClickBtnPesquisar();" id="btnPesquisar" value="Pesquisar" class="infraButton"><span class="infraTeclaAtalho">P</span>esquisar</button>';
+    $btnNovo = '<button type="button" value="Novo" id="btnNovo" onclick="onClickBtnNovo()" class="infraButton"><span class="infraTeclaAtalho">N</span>ovo</button>';
+    $btnExcluir = '<button type="button" id="btnExcluir" value="Excluir" onclick="onClickBtnExcluir()" class="infraButton"><span class="infraTeclaAtalho">E</span>xcluir</button>';
+    $btnImprimir = '<button type="button" accesskey="I" id="btnImprimir" value="Imprimir" onclick="infraImprimirTabela();" class="infraButton"><span class="infraTeclaAtalho">I</span>mprimir</button>';
 
-  $arrComandos = array($btnPesquisar, $strBotaoEspeciePadrao, $btnNovo, $btnExcluir, $btnImprimir);
-  $arrComandosFinal = array($btnPesquisar, $btnNovo, $btnExcluir, $btnImprimir);
+    $arrComandos = [$btnPesquisar, $strBotaoEspeciePadrao, $btnNovo, $btnExcluir, $btnImprimir];
+    $arrComandosFinal = [$btnPesquisar, $btnNovo, $btnExcluir, $btnImprimir];
 
-  $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-  $objPenRestricaoEnvioComponentesDigitaisDTO->retTodos(true);
-  $objPenRestricaoEnvioComponentesDigitaisDTO->setOrdDblId(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objPenRestricaoEnvioComponentesDigitaisDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+    $objPenRestricaoEnvioComponentesDigitaisDTO->retTodos(true);
+    $objPenRestricaoEnvioComponentesDigitaisDTO->setOrdDblId(InfraDTO::$TIPO_ORDENACAO_ASC);
 
   if (array_key_exists('nome_estrutura', $_POST) && ((!empty($_POST['nome_estrutura']) && $_POST['nome_estrutura'] !== 'null') || $_POST['nome_estrutura'] == "0")) {
-    $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrEstrutura('%' . $_POST['nome_estrutura'] . '%', InfraDTO::$OPER_LIKE);
+      $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrEstrutura('%' . $_POST['nome_estrutura'] . '%', InfraDTO::$OPER_LIKE);
   }
 
   if (array_key_exists('nome_unidade', $_POST) && ((!empty($_POST['nome_unidade']) && $_POST['nome_unidade'] !== 'null') || $_POST['nome_unidade'] == "0")) {
-    $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadePen('%' . $_POST['nome_unidade'] . '%', InfraDTO::$OPER_LIKE);
+      $objPenRestricaoEnvioComponentesDigitaisDTO->setStrStrUnidadePen('%' . $_POST['nome_unidade'] . '%', InfraDTO::$OPER_LIKE);
   }
 
-  $objPaginaSEI->prepararOrdenacao(
-    $objPenRestricaoEnvioComponentesDigitaisDTO,
-    'Id',
-    InfraDTO::$TIPO_ORDENACAO_ASC
-  );
-  $objPaginaSEI->prepararPaginacao($objPenRestricaoEnvioComponentesDigitaisDTO);
+    $objPaginaSEI->prepararOrdenacao(
+        $objPenRestricaoEnvioComponentesDigitaisDTO,
+        'Id',
+        InfraDTO::$TIPO_ORDENACAO_ASC
+    );
+    $objPaginaSEI->prepararPaginacao($objPenRestricaoEnvioComponentesDigitaisDTO);
 
-  $arrObjPenRestricaoEnvioComponentesDigitaisDTO = $objPenRestricaoEnvioComponentesDigitaisRN->listar(
-    $objPenRestricaoEnvioComponentesDigitaisDTO
-  );
+    $arrObjPenRestricaoEnvioComponentesDigitaisDTO = $objPenRestricaoEnvioComponentesDigitaisRN->listar(
+        $objPenRestricaoEnvioComponentesDigitaisDTO
+    );
 
-  $objPaginaSEI->processarPaginacao($objPenRestricaoEnvioComponentesDigitaisDTO);
-  $numRegistros = count($arrObjPenRestricaoEnvioComponentesDigitaisDTO);
+    $objPaginaSEI->processarPaginacao($objPenRestricaoEnvioComponentesDigitaisDTO);
+    $numRegistros = count($arrObjPenRestricaoEnvioComponentesDigitaisDTO);
 
   if (!empty($arrObjPenRestricaoEnvioComponentesDigitaisDTO)) {
 
-    $strResultado = '';
-    $strResultado .= '<table width="99%" class="infraTable">' . "\n";
-    $strResultado .= '<caption class="infraCaption">'
+      $strResultado = '';
+      $strResultado .= '<table width="99%" class="infraTable">' . "\n";
+      $strResultado .= '<caption class="infraCaption">'
       . $objPaginaSEI->gerarCaptionTabela('estados do processo', $numRegistros)
       . '</caption>';
-    $strResultado .= '<tr>';
-    $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="18%">ID do Repositório</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="18%">Nome do Repositório</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="18%">ID da Unidade</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="18%">Nome da Unidade</th>' . "\n";
-    $strResultado .= '<th class="infraTh" width="14%">Ações</th>' . "\n";
-    $strResultado .= '</tr>' . "\n";
-    $strCssTr = '';
+      $strResultado .= '<tr>';
+      $strResultado .= '<th class="infraTh" width="1%">' . $objPaginaSEI->getThCheck() . '</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="18%">ID do Repositório</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="18%">Nome do Repositório</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="18%">ID da Unidade</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="18%">Nome da Unidade</th>' . "\n";
+      $strResultado .= '<th class="infraTh" width="14%">Ações</th>' . "\n";
+      $strResultado .= '</tr>' . "\n";
+      $strCssTr = '';
 
-    $index = 0;
+      $index = 0;
     foreach ($arrObjPenRestricaoEnvioComponentesDigitaisDTO as $objPenRestricaoEnvioComponentesDigitaisDTO) {
 
-      $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
+        $strCssTr = ($strCssTr == 'infraTrClara') ? 'infraTrEscura' : 'infraTrClara';
 
-      $strResultado .= '<tr class="' . $strCssTr . '">';
-      $strResultado .= '<td>'
+        $strResultado .= '<tr class="' . $strCssTr . '">';
+        $strResultado .= '<td>'
         . $objPaginaSEI->getTrCheck(
-          $index,
-          $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId(),
-          ''
+            $index,
+            $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId(),
+            ''
         ) . '</td>';
 
-      $strResultado .= '<td style="text-align: center;">'
+        $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdEstrutura()
         . '</td>';
-      $strResultado .= '<td style="text-align: center;">'
+        $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrEstrutura()
         . '</td>';
 
-      $strResultado .= '<td style="text-align: center;">'
+        $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getNumIdUnidadePen()
         . '</td>';
       
-      $strResultado .= '<td style="text-align: center;">'
+        $strResultado .= '<td style="text-align: center;">'
         . $objPenRestricaoEnvioComponentesDigitaisDTO->getStrStrUnidadePen()
         . '</td>';
 
-      $strResultado .= '<td align="center">';
+        $strResultado .= '<td align="center">';
 
       if ($objSessaoSEI->verificarPermissao('pen_map_envio_parcial_atualizar')) {
         $strResultado .= '<a href="' . $objSessaoSEI->assinarLink(
-          'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_origem='
-            . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao']
-            . '&Id=' . $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId()
+        'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_origem='
+        . $_GET['acao_origem'] . '&acao_retorno=' . $_GET['acao']
+        . '&Id=' . $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId()
         )
-          . '"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
-          . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
+        . '"><img src=' . ProcessoEletronicoINT::getCaminhoIcone("imagens/alterar.gif")
+        . ' title="Alterar Mapeamento" alt="Alterar Mapeamento" class="infraImg"></a>';
       }
       if ($objSessaoSEI->verificarPermissao('pen_map_envio_parcial_excluir')) {
         $strResultado .= '<a href="#" onclick="onCLickLinkDelete(\'' . $objSessaoSEI->assinarLink(
-          'controlador.php?acao=pen_map_envio_parcial_excluir&acao_origem='
+            'controlador.php?acao=pen_map_envio_parcial_excluir&acao_origem='
             . $_GET['acao_origem'] . '&acao_retorno='
             . $_GET['acao'] . '&hdnInfraItensSelecionados='
             . $objPenRestricaoEnvioComponentesDigitaisDTO->getDblId()
@@ -175,15 +174,15 @@ try {
           . ' title="Excluir Mapeamento" alt="Excluir Mapeamento" class="infraImg"></a>';
       }
 
-      $strResultado .= '</td>';
-      $strResultado .= '</tr>' . "\n";
+        $strResultado .= '</td>';
+        $strResultado .= '</tr>' . "\n";
 
-      $index++;
+        $index++;
     }
-    $strResultado .= '</table>';
+      $strResultado .= '</table>';
   }
 } catch (InfraException $e) {
-  $objPaginaSEI->processarExcecao($e);
+    $objPaginaSEI->processarExcecao($e);
 }
 
 $objPaginaSEI->montarDocType();
@@ -283,9 +282,9 @@ $acaoOrigem=$_GET['acao_origem']; ?>
   }
 
   function onClickBtnNovo() {
-    window.location = '<?=
+    window.location = '<?php echo
                         $objSessaoSEI->assinarLink(
-                          'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_origem='
+                            'controlador.php?acao=pen_map_envio_parcial_cadastrar&acao_origem='
                             . $acaoOrigem
                             . '&acao_retorno='
                             . $acaoOrigem
@@ -332,10 +331,10 @@ $nomeUnidade=$_POST['nome_unidade'];
   <?php $objPaginaSEI->fecharAreaDados(); ?>
 
   <?php if ($numRegistros > 0) { ?>
-    <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
+        <?php $objPaginaSEI->montarAreaTabela($strResultado, $numRegistros); ?>
   <?php } ?>
 
-  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?= $bolErrosValidacao ?>" />
+  <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
   <?php $objPaginaSEI->montarBarraComandosSuperior($arrComandosFinal); ?>
 </form>
 <?php $objPaginaSEI->fecharBody(); ?>

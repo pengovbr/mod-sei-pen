@@ -1,39 +1,43 @@
 <?php
 
-class AssinaturaHashRN extends AssinaturaRN {
+class AssinaturaHashRN extends AssinaturaRN
+{
 
 
-  public function __construct(){
-    parent::__construct();
+  public function __construct()
+    {
+      parent::__construct();
   }
 
-  protected function inicializarObjInfraIBanco(){
-    return BancoSEI::getInstance();
+  protected function inicializarObjInfraIBanco()
+    {
+      return BancoSEI::getInstance();
   }
 
 
-  protected function montarTarjasURLConectado($dados) {
+  protected function montarTarjasURLConectado($dados)
+    {
     try {
 
-      $objDocumentoDTO=$dados["objDocumentoDTO"];
-      $controleURL=$dados["controleURL"];
+        $objDocumentoDTO=$dados["objDocumentoDTO"];
+        $controleURL=$dados["controleURL"];
 
-      $strRet = '';
+        $strRet = '';
 
-      $objAssinaturaDTO = new AssinaturaDTO();
-      $objAssinaturaDTO->retStrNome();
-      $objAssinaturaDTO->retNumIdAssinatura();
-      $objAssinaturaDTO->retNumIdTarjaAssinatura();
-      $objAssinaturaDTO->retStrTratamento();
-      $objAssinaturaDTO->retStrStaFormaAutenticacao();
-      $objAssinaturaDTO->retStrNumeroSerieCertificado();
-      $objAssinaturaDTO->retDthAberturaAtividade();
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->retStrNome();
+        $objAssinaturaDTO->retNumIdAssinatura();
+        $objAssinaturaDTO->retNumIdTarjaAssinatura();
+        $objAssinaturaDTO->retStrTratamento();
+        $objAssinaturaDTO->retStrStaFormaAutenticacao();
+        $objAssinaturaDTO->retStrNumeroSerieCertificado();
+        $objAssinaturaDTO->retDthAberturaAtividade();
 
-      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
        
-      $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
        
-      $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
+        $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
 
       if (count($arrObjAssinaturaDTO)) {
 
@@ -54,19 +58,19 @@ class AssinaturaHashRN extends AssinaturaRN {
             throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
           }
 
-          $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
+            $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
 
-          $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
-          $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
-          $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
-          $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
-          $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
-          $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
-          $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-          $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-          $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
-          $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
-          $strRet .= $strTarja;
+            $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
+            $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
+            $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
+            $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
+            $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
+            $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
+            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+            $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
+            $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
+            $strRet .= $strTarja;
         }
 
         $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
@@ -75,64 +79,65 @@ class AssinaturaHashRN extends AssinaturaRN {
 
         $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
 
-        if ($objTarjaAssinaturaDTO != null){
+        if ($objTarjaAssinaturaDTO != null) {
 
-          $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false){
-            $objEditorRN = new EditorRN();
-            $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
+            $strLinkAcessoExterno = '';
+          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false) {
+                $objEditorRN = new EditorRN();
+                $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
 
 
-          $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
-          $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
-          $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-          $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-          $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-          $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
-          $strRet .= $strTarja;
+            $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
+            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
+            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+            $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
+            $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
+            $strRet .= $strTarja;
 
         
         }
       }
 
-      return EditorRN::converterHTML($strRet);
+        return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
+        throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
 
 
-  //sei 403
+    //sei 403
 
-  protected function montarTarjasURL403Conectado($dados) {
+  protected function montarTarjasURL403Conectado($dados)
+    {
     try {
 
-      $objDocumentoDTO=$dados["objDocumentoDTO"];
-      $controleURL=$dados["controleURL"];
+        $objDocumentoDTO=$dados["objDocumentoDTO"];
+        $controleURL=$dados["controleURL"];
 
-      $strRet = '';
+        $strRet = '';
 
-      $objAssinaturaDTO = new AssinaturaDTO();
-      $objAssinaturaDTO->setBolExclusaoLogica(false);
-      $objAssinaturaDTO->retStrNome();
-      $objAssinaturaDTO->retNumIdAssinatura();
-      $objAssinaturaDTO->retNumIdTarjaAssinatura();
-      $objAssinaturaDTO->retStrTratamento();
-      $objAssinaturaDTO->retStrStaFormaAutenticacao();
-      $objAssinaturaDTO->retStrNumeroSerieCertificado();
-      $objAssinaturaDTO->retDthAberturaAtividade();
-      $objAssinaturaDTO->retNumIdAtividade();
-      $objAssinaturaDTO->retStrSinAtivo();
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->setBolExclusaoLogica(false);
+        $objAssinaturaDTO->retStrNome();
+        $objAssinaturaDTO->retNumIdAssinatura();
+        $objAssinaturaDTO->retNumIdTarjaAssinatura();
+        $objAssinaturaDTO->retStrTratamento();
+        $objAssinaturaDTO->retStrStaFormaAutenticacao();
+        $objAssinaturaDTO->retStrNumeroSerieCertificado();
+        $objAssinaturaDTO->retDthAberturaAtividade();
+        $objAssinaturaDTO->retNumIdAtividade();
+        $objAssinaturaDTO->retStrSinAtivo();
 
-      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
-      $objAssinaturaDTO->setNumIdAtividade(null, InfraDTO::$OPER_DIFERENTE);
+        $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objAssinaturaDTO->setNumIdAtividade(null, InfraDTO::$OPER_DIFERENTE);
        
-      $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
        
-      $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
+        $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
 
       if (count($arrObjAssinaturaDTO)) {
 
@@ -164,7 +169,7 @@ class AssinaturaHashRN extends AssinaturaRN {
           if ($objAssinaturaDTO->getStrSinAtivo()=='S' || $objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
 
             if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-              throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
+                  throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
             }
 
             $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -186,66 +191,67 @@ class AssinaturaHashRN extends AssinaturaRN {
         }
 
         if ($numAssinaturas) {
-          $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
-          $objTarjaAssinaturaDTO->retStrTexto();
-          $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
+            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+            $objTarjaAssinaturaDTO->retStrTexto();
+            $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
 
-          $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+            $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
 
           if ($objTarjaAssinaturaDTO != null) {
 
-            $strLinkAcessoExterno = '';
+                $strLinkAcessoExterno = '';
             if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@') !== false) {
               $objEditorRN = new EditorRN();
               $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
             }
 
-            $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
-            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,'.$objDocumentoDTO->getStrQrCodeAssinatura().'" />', $strTarja);
-            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-            $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-            $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
-            $strRet .= $strTarja;
+                $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
+                $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,'.$objDocumentoDTO->getStrQrCodeAssinatura().'" />', $strTarja);
+                $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+                $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+                $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
+                $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
+                $strRet .= $strTarja;
           }
         }
         $strRet .= '</div>';
       }
 
-      return EditorRN::converterHTML($strRet);
+        return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
+        throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
 
-  protected function montarTarjasURL404Conectado($dados) {
+  protected function montarTarjasURL404Conectado($dados)
+    {
     try {
 
-      $objDocumentoDTO=$dados["objDocumentoDTO"];
-      $controleURL=$dados["controleURL"];
+        $objDocumentoDTO=$dados["objDocumentoDTO"];
+        $controleURL=$dados["controleURL"];
 
-      $strRet = '';
+        $strRet = '';
 
-      $objAssinaturaDTO = new AssinaturaDTO();
-      $objAssinaturaDTO->setBolExclusaoLogica(false);
-      $objAssinaturaDTO->retStrNome();
-      $objAssinaturaDTO->retNumIdAssinatura();
-      $objAssinaturaDTO->retNumIdTarjaAssinatura();
-      $objAssinaturaDTO->retStrTratamento();
-      $objAssinaturaDTO->retStrStaFormaAutenticacao();
-      $objAssinaturaDTO->retStrNumeroSerieCertificado();
-      $objAssinaturaDTO->retDthAberturaAtividade();
-      $objAssinaturaDTO->retNumIdAtividade();
-      $objAssinaturaDTO->retStrSinAtivo();
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->setBolExclusaoLogica(false);
+        $objAssinaturaDTO->retStrNome();
+        $objAssinaturaDTO->retNumIdAssinatura();
+        $objAssinaturaDTO->retNumIdTarjaAssinatura();
+        $objAssinaturaDTO->retStrTratamento();
+        $objAssinaturaDTO->retStrStaFormaAutenticacao();
+        $objAssinaturaDTO->retStrNumeroSerieCertificado();
+        $objAssinaturaDTO->retDthAberturaAtividade();
+        $objAssinaturaDTO->retNumIdAtividade();
+        $objAssinaturaDTO->retStrSinAtivo();
 
-      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
-      $objAssinaturaDTO->setNumIdAtividade(null, InfraDTO::$OPER_DIFERENTE);
+        $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objAssinaturaDTO->setNumIdAtividade(null, InfraDTO::$OPER_DIFERENTE);
        
-      $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
        
-      $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
+        $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
 
       if (count($arrObjAssinaturaDTO)) {
 
@@ -267,7 +273,7 @@ class AssinaturaHashRN extends AssinaturaRN {
           if ($objAssinaturaDTO->getStrSinAtivo()=='S' || $objDocumentoDTO->getNumIdUnidadeGeradoraProtocolo() == SessaoSEI::getInstance()->getNumIdUnidadeAtual()) {
 
             if (!isset($arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()])) {
-              throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
+                  throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "'.$objAssinaturaDTO->getNumIdAssinatura().'" não encontrada.');
             }
 
             $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
@@ -289,60 +295,61 @@ class AssinaturaHashRN extends AssinaturaRN {
         }
 
         if ($numAssinaturas) {
-          $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
-          $objTarjaAssinaturaDTO->retStrTexto();
-          $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
+            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+            $objTarjaAssinaturaDTO->retStrTexto();
+            $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura(TarjaAssinaturaRN::$TT_INSTRUCOES_VALIDACAO);
 
-          $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+            $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
 
           if ($objTarjaAssinaturaDTO != null) {
 
-            $strLinkAcessoExterno = '';
+                $strLinkAcessoExterno = '';
             if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@') !== false) {
               $objEditorRN = new EditorRN();
               $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
             }
 
-            $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
-            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,'.$objDocumentoDTO->getStrQrCodeAssinatura().'" />', $strTarja);
-            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-            $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-            $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
-            $strRet .= $strTarja;
+                $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
+                $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,'.$objDocumentoDTO->getStrQrCodeAssinatura().'" />', $strTarja);
+                $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+                $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+                $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
+                $strTarja = str_replace($controleURL["atual"], $controleURL["antigo"], $strTarja);
+                $strRet .= $strTarja;
           }
         }
         $strRet = EditorINT::formatarNaoSelecionavel($strRet);
       }
 
-      return EditorRN::converterHTML($strRet);
+        return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
+        throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 
 
-  protected function montarTarjasLegadoConectado($objDocumentoDTO) {
-    //utilizado ate a versao 4.0.2 do SEI, sem alterar URL
+  protected function montarTarjasLegadoConectado($objDocumentoDTO)
+    {
+      //utilizado ate a versao 4.0.2 do SEI, sem alterar URL
     try {
 
-      $strRet = '';
+        $strRet = '';
 
-      $objAssinaturaDTO = new AssinaturaDTO();
-      $objAssinaturaDTO->retStrNome();
-      $objAssinaturaDTO->retNumIdAssinatura();
-      $objAssinaturaDTO->retNumIdTarjaAssinatura();
-      $objAssinaturaDTO->retStrTratamento();
-      $objAssinaturaDTO->retStrStaFormaAutenticacao();
-      $objAssinaturaDTO->retStrNumeroSerieCertificado();
-      $objAssinaturaDTO->retDthAberturaAtividade();
+        $objAssinaturaDTO = new AssinaturaDTO();
+        $objAssinaturaDTO->retStrNome();
+        $objAssinaturaDTO->retNumIdAssinatura();
+        $objAssinaturaDTO->retNumIdTarjaAssinatura();
+        $objAssinaturaDTO->retStrTratamento();
+        $objAssinaturaDTO->retStrStaFormaAutenticacao();
+        $objAssinaturaDTO->retStrNumeroSerieCertificado();
+        $objAssinaturaDTO->retDthAberturaAtividade();
 
-      $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+        $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
        
-      $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
+        $objAssinaturaDTO->setOrdNumIdAssinatura(InfraDTO::$TIPO_ORDENACAO_ASC);
        
-      $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
+        $arrObjAssinaturaDTO = $this->listarRN1323($objAssinaturaDTO);
 
       if (count($arrObjAssinaturaDTO)) {
 
@@ -363,19 +370,19 @@ class AssinaturaHashRN extends AssinaturaRN {
             throw new InfraException('Módulo do Tramita: Tarja associada com a assinatura "' . $objAssinaturaDTO->getNumIdAssinatura() . '" não encontrada.');
           }
 
-          $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
+            $objTarjaAutenticacaoDTOAplicavel = $arrObjTarjaAssinaturaDTO[$objAssinaturaDTO->getNumIdTarjaAssinatura()];
 
-          $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
-          $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
-          $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
-          $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
-          $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
-          $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
-          $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-          $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-          $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
-          $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
-          $strRet .= $strTarja;
+            $strTarja = $objTarjaAutenticacaoDTOAplicavel->getStrTexto();
+            $strTarja = preg_replace("/@logo_assinatura@/s", '<img alt="logotipo" src="data:image/png;base64,' . $objTarjaAutenticacaoDTOAplicavel->getStrLogo() . '" />', $strTarja);
+            $strTarja = preg_replace("/@nome_assinante@/s", $objAssinaturaDTO->getStrNome(), $strTarja);
+            $strTarja = preg_replace("/@tratamento_assinante@/s", $objAssinaturaDTO->getStrTratamento(), $strTarja);
+            $strTarja = preg_replace("/@data_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 0, 10), $strTarja);
+            $strTarja = preg_replace("/@hora_assinatura@/s", substr($objAssinaturaDTO->getDthAberturaAtividade(), 11, 5), $strTarja);
+            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+            $strTarja = preg_replace("/@numero_serie_certificado_digital@/s", $objAssinaturaDTO->getStrNumeroSerieCertificado(), $strTarja);
+            $strTarja = preg_replace("/@tipo_conferencia@/s", InfraString::transformarCaixaBaixa($objDocumentoDTO->getStrDescricaoTipoConferencia()), $strTarja);
+            $strRet .= $strTarja;
         }
 
         $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
@@ -384,30 +391,30 @@ class AssinaturaHashRN extends AssinaturaRN {
 
         $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
 
-        if ($objTarjaAssinaturaDTO != null){
+        if ($objTarjaAssinaturaDTO != null) {
 
-          $strLinkAcessoExterno = '';
-          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false){
-            $objEditorRN = new EditorRN();
-            $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
+            $strLinkAcessoExterno = '';
+          if (strpos($objTarjaAssinaturaDTO->getStrTexto(), '@link_acesso_externo_processo@')!==false) {
+                $objEditorRN = new EditorRN();
+                $strLinkAcessoExterno = $objEditorRN->recuperarLinkAcessoExterno($objDocumentoDTO);
           }
 
 
-          $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
-          $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
-          $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
-          $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
-          $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
-          $strRet .= $strTarja;
+            $strTarja = $objTarjaAssinaturaDTO->getStrTexto();
+            $strTarja = preg_replace("/@qr_code@/s", '<img align="center" alt="QRCode Assinatura" title="QRCode Assinatura" src="data:image/png;base64,' . $objDocumentoDTO->getStrQrCodeAssinatura() . '" />', $strTarja);
+            $strTarja = preg_replace("/@codigo_verificador@/s", $objDocumentoDTO->getStrProtocoloDocumentoFormatado(), $strTarja);
+            $strTarja = preg_replace("/@crc_assinatura@/s", $objDocumentoDTO->getStrCrcAssinatura(), $strTarja);
+            $strTarja = preg_replace("/@link_acesso_externo_processo@/s", $strLinkAcessoExterno, $strTarja);
+            $strRet .= $strTarja;
 
         
         }
       }
 
-      return EditorRN::converterHTML($strRet);
+        return EditorRN::converterHTML($strRet);
 
     } catch (Exception $e) {
-      throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
+        throw new InfraException('Módulo do Tramita: Erro montando tarja de assinatura.', $e);
     }
   }
 

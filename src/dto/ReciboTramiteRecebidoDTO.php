@@ -2,13 +2,16 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class ReciboTramiteRecebidoDTO extends InfraDTO {
+class ReciboTramiteRecebidoDTO extends InfraDTO
+{
 
-  public function getStrNomeTabela() {
+  public function getStrNomeTabela()
+    {
       return 'md_pen_recibo_tramite_recebido';
   }
 
-  public function montar() {
+  public function montar()
+    {
         
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_STR, 'NumeroRegistro', 'numero_registro');
       $this->adicionarAtributoTabela(InfraDTO::$PREFIXO_NUM, 'IdTramite', 'id_tramite');

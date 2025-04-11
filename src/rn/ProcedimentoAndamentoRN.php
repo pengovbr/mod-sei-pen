@@ -4,8 +4,6 @@ require_once DIR_SEI_WEB.'/SEI.php';
 
 /**
  * Controla o log de estados da expadição de um procedimento pelo modulo SEI
- *
- *
  */
 class ProcedimentoAndamentoRN extends InfraRN
 {
@@ -19,8 +17,8 @@ class ProcedimentoAndamentoRN extends InfraRN
 
   public function __construct()
     {
-          parent::__construct();
-          $this->objPenDebug = DebugPen::getInstance("PROCESSAMENTO");
+        parent::__construct();
+        $this->objPenDebug = DebugPen::getInstance("PROCESSAMENTO");
   }
 
     /**
@@ -29,7 +27,8 @@ class ProcedimentoAndamentoRN extends InfraRN
      *
      * @return Infra[Driver]
      */
-  protected function inicializarObjInfraIBanco(){
+  protected function inicializarObjInfraIBanco()
+    {
       return BancoSEI::getInstance();
   }
 
@@ -86,7 +85,7 @@ class ProcedimentoAndamentoRN extends InfraRN
         $objProcedimentoAndamentoBD = new ProcedimentoAndamentoBD($this->getObjInfraIBanco());
         $objProcedimentoAndamentoDTORet = $objProcedimentoAndamentoBD->consultar($objProcedimentoAndamentoDTO);
 
-      if(!is_null($objProcedimentoAndamentoDTORet)){
+      if(!is_null($objProcedimentoAndamentoDTORet)) {
         $this->objPenDebug->gravar("Sincronizando o recebimento de processos concorrentes...", 1);
         $objProcedimentoAndamentoDTO = $objProcedimentoAndamentoBD->bloquear($objProcedimentoAndamentoDTORet);
         $this->objPenDebug->gravar("Liberando processo concorrente de recebimento de processo ...", 1);
@@ -107,7 +106,7 @@ class ProcedimentoAndamentoRN extends InfraRN
      * Esta sinalização é utilizada para sincronizar o processamento concorrente que possa existir entre todos os nós de aplicação do sistema,
      * evitando inconsistências provocadas pelo cadastramentos simultâneos no sistema
      *
-     * @param array $parArrChavesSincronizacao Chaves que serã utilizadas na sincronização do processamento
+     * @param  array $parArrChavesSincronizacao Chaves que serã utilizadas na sincronização do processamento
      * @return void
      */
   protected function sinalizarInicioRecebimentoControlado($parArrChavesSincronizacao)
@@ -116,7 +115,7 @@ class ProcedimentoAndamentoRN extends InfraRN
       $numIdTramite = $parArrChavesSincronizacao["IdTramite"];
       $numIdTarefa = $parArrChavesSincronizacao["IdTarefa"];
 
-    if(!$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $numIdTramite, $numIdTarefa)){
+    if(!$this->sincronizarRecebimentoProcessos($strNumeroRegistro, $numIdTramite, $numIdTarefa)) {
         $this->objPenDebug->gravar("Trâmite de recebimento $numIdTramite já se encontra em processamento", 3, false);
         return false;
     }

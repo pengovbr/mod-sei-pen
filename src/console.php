@@ -2,10 +2,7 @@
 
 set_time_limit(0);
 
-set_include_path(implode(PATH_SEPARATOR, array(
-    realpath(__DIR__.'/../../../infra/infra_php'),
-    get_include_path(),
-)));
+set_include_path(implode(PATH_SEPARATOR, [realpath(__DIR__.'/../../../infra/infra_php'), get_include_path()]));
 
 require_once DIR_SEI_WEB.'/SEI.php';
 require_once DIR_SEI_WEB.'/SEI.php';
@@ -29,7 +26,7 @@ try {
 
   if(empty($_SERVER['argv'])) {
 
-    print PenConsoleRN::format('Sucesso: ', 'blue', true);
+      print PenConsoleRN::format('Sucesso: ', 'blue', true);
   }
     print $strRetorno.PHP_EOL;
 }

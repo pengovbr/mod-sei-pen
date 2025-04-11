@@ -3,7 +3,8 @@
  *
  *
  */
-class PenTramiteProcessadoRN extends InfraRN {
+class PenTramiteProcessadoRN extends InfraRN
+{
 
     const STR_TIPO_PROCESSO = 'RP';
     const STR_TIPO_RECIBO = 'RR';
@@ -13,7 +14,8 @@ class PenTramiteProcessadoRN extends InfraRN {
     protected $objInfraBanco;
     private $strTipo;
 
-  public function __construct($strTipo = self::STR_TIPO_PROCESSO) {
+  public function __construct($strTipo = self::STR_TIPO_PROCESSO)
+    {
       parent::__construct();
       $this->strTipo = $strTipo;
   }
@@ -22,7 +24,8 @@ class PenTramiteProcessadoRN extends InfraRN {
      *
      * @return BancoSEI
      */
-  protected function inicializarObjInfraIBanco() {
+  protected function inicializarObjInfraIBanco()
+    {
 
     if(empty($this->objInfraBanco)) {
 
@@ -36,10 +39,11 @@ class PenTramiteProcessadoRN extends InfraRN {
      *
      * @return bool
      */
-  protected function isProcedimentoRecebidoControlado($dblIdTramite = 0){
+  protected function isProcedimentoRecebidoControlado($dblIdTramite = 0)
+    {
 
       //Verifica se o trâmite não foi cancelado ou recusado
-    if($this->isTramiteRecusadoCancelado($dblIdTramite)){
+    if($this->isTramiteRecusadoCancelado($dblIdTramite)) {
         return true;
     }
 
@@ -92,7 +96,8 @@ class PenTramiteProcessadoRN extends InfraRN {
     }
   }
 
-  public function setRecebido($dblIdTramite = 0){
+  public function setRecebido($dblIdTramite = 0)
+    {
 
       $objDTO = new PenTramiteProcessadoDTO();
       $objDTO->setDblIdTramite($dblIdTramite);
@@ -112,10 +117,11 @@ class PenTramiteProcessadoRN extends InfraRN {
     /**
      * Método que verifica se o trâmite em questão foi cancelado ou recusado
      *
-     * @param integer $parNumIdTramite
+     * @param  integer $parNumIdTramite
      * @return boolean
      */
-  public function isTramiteRecusadoCancelado($parNumIdTramite){
+  public function isTramiteRecusadoCancelado($parNumIdTramite)
+    {
 
       //Instancia a classe processo eletrônico
       $processoEletronicoRN = new ProcessoEletronicoRN();
@@ -125,7 +131,7 @@ class PenTramiteProcessadoRN extends InfraRN {
       $objTramite = $arrObjTramite[0];
 
       //Verifica se o trâmite em questão. foi recusado o cancelado
-    if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO || $objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO){
+    if($objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO || $objTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO) {
         return true;
     }else{
         return false;

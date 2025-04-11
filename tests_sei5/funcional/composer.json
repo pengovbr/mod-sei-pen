@@ -1,0 +1,31 @@
+{
+    "config": {
+        "platform": {
+            "php": "8.2"
+        } 
+    },
+
+    "autoload": {
+      "classmap": [
+          "src/",
+          "sei/modpen/"
+      ]
+    },
+
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "sei/"
+        }
+    },
+    
+    "require-dev": {
+        "phpunit/phpunit": "8.*",
+        "phpunit/php-code-coverage": "*",
+        "phpunit/phpunit-selenium": "*",
+        "besimple/soap": "*", 
+        "brandonwamboldt/utilphp": "1.1.*",
+        "brianium/paratest": "*",
+        "guzzlehttp/guzzle": "^7.0",
+	    "rector/rector": "*"
+    }
+}

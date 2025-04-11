@@ -1,6 +1,6 @@
 <?php
 try {
-    require_once DIR_SEI_WEB.'/SEI.php';
+    include_once DIR_SEI_WEB.'/SEI.php';
 
     session_start();
 
@@ -19,13 +19,13 @@ try {
     $strParametros = '';
     $bolErrosValidacao = false;
     $executarExpedicao = false;
-    $arrComandos = array();
+    $arrComandos = [];
     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
 
     $idProcedimento = filter_var($_GET['id_procedimento'], FILTER_SANITIZE_NUMBER_INT);
     $strDiretorioModulo = PENIntegracao::getDiretorio();
 
-  if(!$idProcedimento){
+  if(!$idProcedimento) {
       throw new InfraException('Módulo do Tramita: Processo não informado.');
   }
 
@@ -57,41 +57,41 @@ try {
         $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_REPOSITORIO_ORIGEM');
 
       try {
-        $objUnidadeDTO = new PenUnidadeDTO();
-        $objUnidadeDTO->retNumIdUnidadeRH();
-        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+          $objUnidadeDTO = new PenUnidadeDTO();
+          $objUnidadeDTO->retNumIdUnidadeRH();
+          $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
 
-        $objUnidadeRN = new UnidadeRN();
-        $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+          $objUnidadeRN = new UnidadeRN();
+          $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
 
-        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-        $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
-        $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
-        $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
+          $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+          $objPenUnidadeRestricaoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+          $objPenUnidadeRestricaoDTO->setNumIdUnidadeRH($objUnidadeDTO->getNumIdUnidadeRH());
+          $objPenUnidadeRestricaoDTO->retNumIdUnidadeRestricao();
+          $objPenUnidadeRestricaoDTO->retStrNomeUnidadeRestricao();
 
-        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-        $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+          $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+          $arrIdUnidadeRestricao = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
 
-        //Preparação dos dados para montagem da tela de expedição de processos
+          //Preparação dos dados para montagem da tela de expedição de processos
         if ($arrIdUnidadeRestricao != null) {
-          $repositorios = array();
+            $repositorios = [];
           foreach ($arrIdUnidadeRestricao as $value) {
             $repositorios[$value->getNumIdUnidadeRestricao()] = $value->getStrNomeUnidadeRestricao();
           }
         } else {
-          $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+            $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
         }
       } catch (Exception $e) {
-        $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
+          $repositorios = $objExpedirProcedimentosRN->listarRepositoriosDeEstruturas();
       }
 
         $motivosDeUrgencia = $objExpedirProcedimentosRN->consultarMotivosUrgencia();
 
-        $idRepositorioSelecionado = (isset($numIdRepositorio)) ? $numIdRepositorio : '';
+        $idRepositorioSelecionado = $numIdRepositorio ?? '';
         $strItensSelRepositorioEstruturas = InfraINT::montarSelectArray('', 'Selecione', $idRepositorioSelecionado, $repositorios);
 
-        $idMotivosUrgenciaSelecionado = (isset($idMotivosUrgenciaSelecionado)) ? $idMotivosUrgenciaSelecionado : '';
+        $idMotivosUrgenciaSelecionado = $idMotivosUrgenciaSelecionado ?? '';
         $strItensSelMotivosUrgencia = InfraINT::montarSelectArray('', 'Selecione', $idMotivosUrgenciaSelecionado, $motivosDeUrgencia);
 
         $strLinkAjaxUnidade = $objSessaoSEI->assinarLink('controlador_ajax.php?acao_ajax=pen_unidade_auto_completar_expedir_procedimento&acao=' . $_GET['acao']);
@@ -101,7 +101,7 @@ try {
         $strLinkUnidadesAdministrativasSelecao = $objSessaoSEI->assinarLink('controlador.php?acao=pen_unidades_administrativas_externas_selecionar_expedir_procedimento&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas');
 
       if (!$objUnidadeDTO) {
-        throw new InfraException("Módulo do Tramita: A unidade atual não foi mapeada.");
+        throw new InfraException("A unidade atual não foi mapeada.");
       }
 
         $numIdUnidadeOrigem = $objUnidadeDTO->getNumIdUnidadeRH();
@@ -117,10 +117,10 @@ try {
 
         //Carregar dados do procedimento na primeiro acesso à página
       if (!isset($_POST['hdnIdProcedimento'])) {
-              $objProcedimentoRN = new ProcedimentoRN();
-              $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
-              $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-              $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+            $objProcedimentoRN = new ProcedimentoRN();
+            $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
+            $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+            $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
       }
 
       if(isset($_POST['sbmExpedir'])) {
@@ -149,10 +149,12 @@ try {
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
 
         try {
-            $objExpedirProcedimentosRN->setEventoEnvioMetadados(function($parNumIdTramite) use ($strLinkProcedimento){
-                $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
-                echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
-            });
+            $objExpedirProcedimentosRN->setEventoEnvioMetadados(
+                function ($parNumIdTramite) use ($strLinkProcedimento): void {
+                    $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
+                    echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
+                }
+            );
 
             $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
             $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
@@ -241,10 +243,10 @@ var evnJanelaExpedir = null;
 
 function inicializar() {
 
-    objLupaProcedimentosApensados = new infraLupaSelect('selProcedimentosApensados','hdnProcedimentosApensados','<?=$strLinkProcedimentosApensadosSelecao ?>');
-    objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas','hdnUnidadesAdministrativas','<?=$strLinkUnidadesAdministrativasSelecao ?>');
+    objLupaProcedimentosApensados = new infraLupaSelect('selProcedimentosApensados','hdnProcedimentosApensados','<?php echo $strLinkProcedimentosApensadosSelecao ?>');
+    objLupaUnidadesAdministrativas = new infraLupaSelect('selRepositorioEstruturas','hdnUnidadesAdministrativas','<?php echo $strLinkUnidadesAdministrativasSelecao ?>');
 
-    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade','txtUnidade','<?=$strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
+    objAutoCompletarEstrutura = new infraAjaxAutoCompletar('hdnIdUnidade','txtUnidade','<?php echo $strLinkAjaxUnidade?>', "Nenhuma unidade foi encontrada");
     objAutoCompletarEstrutura.bolExecucaoAutomatica = false;
     objAutoCompletarEstrutura.mostrarAviso = true;
     objAutoCompletarEstrutura.limparCampo = false;
@@ -282,7 +284,7 @@ function inicializar() {
         return parametros;
     };
 
-    objAutoCompletarApensados = new infraAjaxAutoCompletar('hdnIdProcedimentoApensado','txtProcedimentoApensado','<?=$strLinkAjaxProcedimentoApensado?>');
+    objAutoCompletarApensados = new infraAjaxAutoCompletar('hdnIdProcedimentoApensado','txtProcedimentoApensado','<?php echo $strLinkAjaxProcedimentoApensado?>');
     objAutoCompletarApensados.mostrarAviso = true;
     objAutoCompletarApensados.tamanhoMinimo = 3;
     objAutoCompletarApensados.limparCampo = true;
@@ -466,7 +468,7 @@ function tratarResultadoValidacao(resp, textStatus, jqXHR){
         alert(strRespMensagem);
         return false;
     }
-    var strAction = '<?=$strLinkValidacao ?>';
+    var strAction = '<?php echo $strLinkValidacao ?>';
     abrirBarraProgresso(document.forms['frmExpedirProcedimento'], strAction, 600, 200);
 }
 
@@ -505,7 +507,7 @@ function enviarForm(event){
 $objPaginaSEI->fecharHead();
 $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 ?>
-<form id="frmExpedirProcedimento" name="frmExpedirProcedimento" method="post" action="<?=$strLinkValidacao ?>">
+<form id="frmExpedirProcedimento" name="frmExpedirProcedimento" method="post" action="<?php echo $strLinkValidacao ?>">
     <input type="hidden" id="sbmExpedir" name="sbmExpedir" value="1" />
     <input type="hidden" id="sbmPesquisa" name="sbmPesquisa" value="1" />
 <?php
@@ -513,13 +515,13 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 ?>
     <div id="divProtocoloExibir" class="infraAreaDados" style="height: 4.5em;">
         <label id="lblProtocoloExibir" for="txtProtocoloExibir" accesskey="" class="infraLabelObrigatorio">Protocolo:</label>
-        <input type="text" id="txtProtocoloExibir" name="txtProtocoloExibir" class="infraText infraReadOnly" readonly="readonly" value="<?=$strProtocoloProcedimentoFormatado; ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+        <input type="text" id="txtProtocoloExibir" name="txtProtocoloExibir" class="infraText infraReadOnly" readonly="readonly" value="<?php echo $strProtocoloProcedimentoFormatado; ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
     </div>
 
     <div id="divRepositorioEstruturas" class="infraAreaDados" style="height: 4.5em;">
         <label id="lblRepositorioEstruturas" for="selRepositorioEstruturas" accesskey="" class="infraLabelObrigatorio">Repositório de Estruturas Organizacionais:</label>
-        <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" >
-        <?= $strItensSelRepositorioEstruturas ?>
+        <select id="selRepositorioEstruturas" name="selRepositorioEstruturas" class="infraSelect" onchange="selecionarRepositorio();" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" >
+        <?php echo $strItensSelRepositorioEstruturas ?>
         </select>
     </div>
 
@@ -528,34 +530,34 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
             <div class="alinhamentoBotaoImput">
                 <input type="text" id="txtUnidade" name="txtUnidade" class="infraText infraReadOnly" disabled="disabled"
                     placeholder="Digite o nome/sigla da unidade e pressione ENTER para iniciar a pesquisa rápida"
-                    value="<?=$strNomeUnidadeDestino ?>" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" value="" />
+                    value="<?php echo $strNomeUnidadeDestino ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" value="" />
                 <button id="btnIdUnidade" type="button" class="infraButton">Consultar</button>
                 <!-- <img id="imgPesquisaAvancada" src="imagens/organograma.gif" alt="Consultar organograma" title="Consultar organograma" class="infraImg" /> -->
             </div>
 
-        <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?=$numIdUnidadeDestino; ?>" />
+        <input type="hidden" id="hdnIdUnidade" name="hdnIdUnidade" class="infraText" value="<?php echo $numIdUnidadeDestino; ?>" />
     </div>
 
     <div id="divProcedimentosApensados" class="infraAreaDados" style="height: 12em; display: none; ">
         <label id="lblProcedimentosApensados" for="selProcedimentosApensados" class="infraLabelObrigatorio">Processos Apensados:</label>
-        <input type="text" id="txtProcedimentoApensado" name="txtProcedimentoApensado" class="infraText" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+        <input type="text" id="txtProcedimentoApensado" name="txtProcedimentoApensado" class="infraText" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
         <input type="hidden" id="hdnIdProcedimentoApensado" name="hdnIdProcedimentoApensado" value="" />
-        <select id="selProcedimentosApensados" name="selProcedimentosApensados[ ]" size="4" multiple="multiple" class="infraSelect" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>"></select>
-        <img id="imgLupaProcedimentosApensados" onclick="objLupaProcedimentosApensados.selecionar(700,500);" src="/infra_css/imagens/lupa.gif" alt="Selecionar Processos Apensados" title="Selecionar Processos Apensados" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
-        <img id="imgExcluirProcedimentosApensados" onclick="objLupaProcedimentosApensados.remover();" src="/infra_css/imagens/remover.gif" alt="Remover Processo Apensado" title="Remover Processo Apensado" class="infraImg" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>" />
+        <select id="selProcedimentosApensados" name="selProcedimentosApensados[ ]" size="4" multiple="multiple" class="infraSelect" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>"></select>
+        <img id="imgLupaProcedimentosApensados" onclick="objLupaProcedimentosApensados.selecionar(700,500);" src="/infra_css/imagens/lupa.gif" alt="Selecionar Processos Apensados" title="Selecionar Processos Apensados" class="infraImg" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
+        <img id="imgExcluirProcedimentosApensados" onclick="objLupaProcedimentosApensados.remover();" src="/infra_css/imagens/remover.gif" alt="Remover Processo Apensado" title="Remover Processo Apensado" class="infraImg" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
     </div>
 
 
     <div id="divMotivosUrgencia" class="infraAreaDados" style="height: 4.5em; display:none">
         <label id="lblMotivosUrgencia" for="selMotivosUrgencia" accesskey="" class="infraLabel">Motivo da Urgência:</label>
-        <select id="selMotivosUrgencia" name="selMotivosUrgencia" class="infraSelect infraReadOnly" disabled="disabled" tabindex="<?= $objPaginaSEI->getProxTabDados() ?>">
-        <?= $strItensSelMotivosUrgencia ?>
+        <select id="selMotivosUrgencia" name="selMotivosUrgencia" class="infraSelect infraReadOnly" disabled="disabled" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>">
+        <?php echo $strItensSelMotivosUrgencia ?>
         </select>
     </div>
 
-    <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?=$numIdProcedimento ?>" />
-    <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?=$bolErrosValidacao ?>" />
-    <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?=htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
+    <input type="hidden" id="hdnIdProcedimento" name="hdnIdProcedimento" value="<?php echo $numIdProcedimento ?>" />
+    <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
+    <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?php echo htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
 
 </form>

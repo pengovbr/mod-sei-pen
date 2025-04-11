@@ -1,8 +1,10 @@
 .PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # Parâmetros de execução do comando MAKE
-# Opções possíveis para spe (sistema de proc eletronico): sei3, sei4, sei41, super
-sistema=super
+# Opções possíveis para spe (sistema de proc eletronico): sei5
+sistema=sei5
+
+#Opções possívei para BD (mysql, sqlserver, oracle, postgresql)
 base=mysql
 teste=
 
@@ -94,23 +96,25 @@ $(FILE_VENDOR_FUNCIONAL): ## target de apoio verifica se o build do phpunit foi 
 $(FILE_VENDOR_UNITARIO): ## target de apoio verifica se o build do phpunit foi feito e executa apenas caso n exista
 	make install-phpunit-vendor
 
-dist: 
+dist: cria_json_compatibilidade
 	# ATENÇÃO: AO ADICIONAR UM NOVO ARQUIVO DE DEPLOY, VERIFICAR O MESMO EM VerificadorInstalacaoRN::verificarPosicionamentoScriptsConectado
 	@mkdir -p $(SEI_SCRIPTS_DIR)
 	@mkdir -p $(SEI_CONFIG_DIR)
 	@mkdir -p $(SEI_BIN_DIR)
 	@mkdir -p $(SEI_MODULO_DIR)
 	@mkdir -p $(SIP_SCRIPTS_DIR)
+	@php composer.phar install --no-dev
 	@cp -R src/* $(SEI_MODULO_DIR)/
 	@cp docs/INSTALL.md dist/INSTALACAO.md
 	@cp docs/UPGRADE.md dist/ATUALIZACAO.md
 	@cp docs/changelogs/CHANGELOG-$(VERSAO_MODULO).md dist/NOTAS_VERSAO.md
+	@cp compatibilidade.json dist/compatibilidade.json
 	@mv $(SEI_MODULO_DIR)/scripts/sei_atualizar_versao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/sip_atualizar_versao_modulo_pen.php $(SIP_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/verifica_instalacao_modulo_pen.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoEnvioTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/scripts/MonitoramentoRecebimentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
-	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/	
+	@mv $(SEI_MODULO_DIR)/scripts/ProcessamentoTarefasPEN.php $(SEI_SCRIPTS_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/ConfiguracaoModPEN.exemplo.php $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/config/supervisor.exemplo.ini $(SEI_CONFIG_DIR)/
 	@mv $(SEI_MODULO_DIR)/bin/verificar-reboot-fila.sh $(SEI_BIN_DIR)/
@@ -119,7 +123,7 @@ dist:
 	@rm -rf $(SEI_MODULO_DIR)/config
 	@rm -rf $(SEI_MODULO_DIR)/scripts
 	@rm -rf $(SEI_MODULO_DIR)/bin
-	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md sei/ sip/	
+	@cd dist/ && zip -r $(PEN_MODULO_COMPACTADO) INSTALACAO.md ATUALIZACAO.md NOTAS_VERSAO.md compatibilidade.json sei/ sip/
 	@rm -rf dist/sei dist/sip dist/INSTALACAO.md dist/ATUALIZACAO.md
 	@echo "Construção do pacote de distribuição finalizada com sucesso"
 
@@ -144,6 +148,10 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar update'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar update'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar install'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar install'
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
@@ -153,13 +161,8 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec org2-http chmod 0644 /etc/cron.d/sip
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
-	
-	@if [ -e tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php ]; then rm tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php; fi;
-	@cp tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.exemplo.php tests_$(sistema)/funcional/assets/config/ConfiguracaoModPEN.php
-	@echo "\nArquivo 'ConfiguracaoModPEN.php' restaurado conforme 'ConfiguracaoModPEN.exemplo.php'.\n";
 
 	wget -nc -i $(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt -P $(PEN_TEST_FUNC)/.tmp
-	cp $(PEN_TEST_FUNC)/.tmp/* /tmp
 
 
 .env:
@@ -190,10 +193,9 @@ down: .env
 	$(CMD_COMPOSE_FUNC) stop
 
 
-# make teste=TramiteProcessoComDevolucaoTest test-functional
+# make test-functional teste=TramiteProcessoComDevolucaoTest 
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) ;
-
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste));
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
@@ -203,8 +205,8 @@ test-parallel-otimizado: .env $(FILE_VENDOR_FUNCIONAL) up
 	make -j2 test-functional-parallel tramitar-pendencias-silent
 	
 	
-test-unit: $(FILE_VENDOR_UNITARIO)
-	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'vendor/bin/phpunit rn/ProcessoEletronicoRNTest.php'
+test-unit: .env $(FILE_VENDOR_UNITARIO)
+	$(CMD_DOCKER_COMPOSE) -f $(PEN_TEST_FUNC)/docker-compose.yml run --rm -w /tests php-test-unit bash -c 'XDEBUG_MODE=coverage vendor/bin/phpunit --testdox --coverage-html html rn/$(addsuffix .php,$(teste))'
 
 test: test-unit test-functional
 
@@ -562,3 +564,6 @@ stop-test-container:
 
 vendor: composer.json
 	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+
+cria_json_compatibilidade:
+	$(shell ./gerar_json_compatibilidade.sh)

@@ -2,7 +2,8 @@
 
 require_once DIR_SEI_WEB.'/SEI.php';
 
-class ProcessoEletronicoINT extends InfraINT {
+class ProcessoEletronicoINT extends InfraINT
+{
 
     //Situação de cada uma das etapas da envio externo de processos
     const NEE_EXPEDICAO_ETAPA_PROCEDIMENTO = 1;
@@ -15,10 +16,11 @@ class ProcessoEletronicoINT extends InfraINT {
     /**
      * Concate as siglas das hierarquias no nome da unidade
      *
-     * @param array(EstruturaDTO) $estruturas
+     * @param  array(EstruturaDTO) $estruturas
      * @return array
      */
-  public static function gerarHierarquiaEstruturas($estruturas = array()){
+  public static function gerarHierarquiaEstruturas($estruturas = [])
+    {
 
     if(empty($estruturas)) {
         return $estruturas;
@@ -29,9 +31,9 @@ class ProcessoEletronicoINT extends InfraINT {
           $nome  = $estrutura->getStrNome();
           $nome .= ' - ';
 
-          $array = array($estrutura->getStrSigla());
+          $array = [$estrutura->getStrSigla()];
         foreach($estrutura->getArrHierarquia() as $sigla) {
-          if(trim($sigla) !== '' && !in_array($sigla, array('PR', 'PE', 'UNIAO'))) {
+          if(trim($sigla) !== '' && !in_array($sigla, ['PR', 'PE', 'UNIAO'])) {
                 $array[] = $sigla;
           }
         }
@@ -44,42 +46,41 @@ class ProcessoEletronicoINT extends InfraINT {
       return $estruturas;
   }
 
-  /**
-   * Concate as siglas das hierarquias no nome da unidade
-   *
-   * @param array(EstruturaDTO) $estruturas
-   * @return array
-   */
-  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = array())
-  {
+    /**
+     * Concate as siglas das hierarquias no nome da unidade
+     *
+     * @param  array(EstruturaDTO) $estruturas
+     * @return array
+     */
+  public static function gerarHierarquiaEstruturasAutoCompletar($estruturas = [])
+    {
 
     if (empty($estruturas['itens'])) {
-      return $estruturas;
+        return $estruturas;
     }
 
     foreach ($estruturas['itens'] as &$estrutura) {
       if ($estrutura->isSetArrHierarquia()) {
-        $nome  = $estrutura->getStrNome();
-        $nome .= ' - ';
+          $nome  = $estrutura->getStrNome();
+          $nome .= ' - ';
 
-        $array = array($estrutura->getStrSigla());
+          $array = [$estrutura->getStrSigla()];
         foreach ($estrutura->getArrHierarquia() as $sigla) {
-          if (trim($sigla) !== '' && !in_array($sigla, array(
-            'PR', 'PE', 'UNIAO'
-          ))) {
-            $array[] = $sigla;
+          if (trim($sigla) !== '' && !in_array($sigla, ['PR', 'PE', 'UNIAO'])) {
+                $array[] = $sigla;
           }
         }
 
-        $nome .= implode(' / ', $array);
-        $estrutura->setStrNome($nome);
+          $nome .= implode(' / ', $array);
+          $estrutura->setStrNome($nome);
       }
     }
 
-    return $estruturas;
+      return $estruturas;
   }
 
-  public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false) {
+  public static function autoCompletarEstruturas($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false)
+    {
        
        
       $objConecaoWebServerRN = new ProcessoEletronicoRN();
@@ -93,44 +94,45 @@ class ProcessoEletronicoINT extends InfraINT {
   }
 
   public static function autoCompletarEstruturasAutoCompletar($idRepositorioEstrutura, $strPalavrasPesquisa, $bolPermiteEnvio = false)
-  {
+    {
 
-    $objConecaoWebServerRN = new ProcessoEletronicoRN();
-    $arrObjEstruturas = $objConecaoWebServerRN->listarEstruturasAutoCompletar(
-      $idRepositorioEstrutura,
-      $strPalavrasPesquisa,
-      null,
-      null,
-      null,
-      null,
-      null,
-      true,
-      $bolPermiteEnvio
-    );
+      $objConecaoWebServerRN = new ProcessoEletronicoRN();
+      $arrObjEstruturas = $objConecaoWebServerRN->listarEstruturasAutoCompletar(
+          $idRepositorioEstrutura,
+          $strPalavrasPesquisa,
+          null,
+          null,
+          null,
+          null,
+          null,
+          true,
+          $bolPermiteEnvio
+      );
 
-    return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
+      return static::gerarHierarquiaEstruturasAutoCompletar($arrObjEstruturas);
   }
 
-  /**
-   * Auto completar repositorio de estruturas
-   *
-   * @param string $strPalavrasPesquisa
-   * @return array
-   */
+    /**
+     * Auto completar repositorio de estruturas
+     *
+     * @param  string $strPalavrasPesquisa
+     * @return array
+     */
   public static function autoCompletarRepositorioEstruturas($strPalavrasPesquisa)
-  {
-    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
-    $arrayRepositorioEstruturas = array();
+    {
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      $arrObjRepositorioDTO = (array) $objProcessoEletronicoRN->listarRepositoriosDeEstruturas();
+      $arrayRepositorioEstruturas = [];
     foreach ($arrObjRepositorioDTO as $value) {
       if (strpos(strtoupper($value->getStrNome()), strtoupper($strPalavrasPesquisa)) !== false) {
         $arrayRepositorioEstruturas[] = $value;
       }
     }
-    return $arrayRepositorioEstruturas;
+      return $arrayRepositorioEstruturas;
   }
   
-  public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa) {
+  public static function autoCompletarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa)
+    {
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       return $objExpedirProcedimentoRN->listarProcessosApensados($dblIdProcedimentoAtual, $numIdUnidadeAtual, $strPalavrasPesquisa);
   }
@@ -142,23 +144,23 @@ class ProcessoEletronicoINT extends InfraINT {
 
     if(isset($ObjEstrutura->hierarquia)) {
 
-        $arrObjNivel = $ObjEstrutura->hierarquia->nivel;
+        $arrObjNivel = $ObjEstrutura->hierarquia;
 
-        $siglasUnidades = array();
+        $siglasUnidades = [];
         $siglasUnidades[] = $ObjEstrutura->sigla;
 
       foreach($arrObjNivel as $key => $objNivel){
-        $siglasUnidades[] = $objNivel->sigla  ;
+        $siglasUnidades[] = $objNivel->sigla;
       }
 
       for($i = 1; $i <= 3; $i++){
-        if(isset($siglasUnidades[count($siglasUnidades) - 1])){
+        if(isset($siglasUnidades[count($siglasUnidades) - 1])) {
           unset($siglasUnidades[count($siglasUnidades) - 1]);
         }
       }
 
       foreach($siglasUnidades as $key => $nomeUnidade){
-        if($key == (count($siglasUnidades) - 1)){
+        if($key == (count($siglasUnidades) - 1)) {
             $nome .= $nomeUnidade." ";
         }else{
             $nome .= $nomeUnidade." / ";
@@ -168,60 +170,49 @@ class ProcessoEletronicoINT extends InfraINT {
         $objNivel=current($arrObjNivel);
 
     }
-      $dados=["nome"=>$nome,"objNivel"=>$objNivel];
 
-      return $dados;
+      return ["nome"=>$nome,"objNivel"=>$objNivel];
 
   }
 
 
-  public static function getCaminhoIcone($imagem, $relPath = null) {
+  public static function getCaminhoIcone($imagem, $relPath = null)
+    {
       $arrConfig = ConfiguracaoSEI::getInstance()->getValor('SEI', 'Modulos');
       $strModulo = $arrConfig['PENIntegracao'];
 
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")){
+    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")) {
 
       switch ($imagem) {
         case 'imagens/consultar.gif':
             return '/infra_css/svg/consultar.svg';
-            break;
         case 'imagens/alterar.gif':
             return '/infra_css/svg/alterar.svg';
-            break;
         case 'imagens/excluir.gif':
             return '/infra_css/svg/excluir.svg';
-            break;
         case '/pen_expedir_procedimento.gif':
             return 'modulos/' . $strModulo . '/imagens/pen_expedir_procedimento.png';
-            break;
         case '/pen_consultar_recibos.png':
             return 'modulos/' . $strModulo . '/imagens/consultar_recibo.png';
-            break;
         case '/pen_cancelar_tramite.gif':
             return 'modulos/' . $strModulo . '/imagens/pen_cancelar_envio.svg';
-            break;
         case '/infra_js/arvore/plus.gif':
             return '/infra_css/svg/mais.svg';
-            break;
         case '/infra_js/arvore/minus.gif':
             return '/infra_css/svg/menos.svg';
-            break;
         case 'imagens/anexos.gif':
             return '/infra_css/imagens/anexos.gif';
-            break;
         case 'imagens/sei_erro.png':
             return 'modulos/' . $strModulo . '/imagens/sei_erro.png';
-          break;
         default:
-          if($relPath==null){
+          if($relPath==null) {
                 return $imagem;
           }
             return $relPath . $imagem;
-            break;
       }
     }
 
-    if($relPath==null){
+    if($relPath==null) {
         return $imagem;
     }
 
@@ -235,77 +226,73 @@ class ProcessoEletronicoINT extends InfraINT {
       switch ($arquivo) {
         case 'pen_procedimento_expedir.css':
             return 'pen_procedimento_expedir_sei4.css';
-            break;
 
         default:
             return $arquivo;
-            break;
       }
     }elseif (InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1")) {
 
       switch ($arquivo) {
         case 'pen_procedimento_expedir.css':
             return 'pen_procedimento_expedir_sei402.css';
-              break;
 
         default:
             return $arquivo;
-              break;
       }
     }
 
       return $arquivo;
   }
 
-  /**
-   * Monta a regra de restrição do tramite.gov.br
-   *
-   * @param string $idUnidade
-   * @param string $strCss
-   * @param string $strHtml
-   * @param string $strJsGlobal
-   * @param string $strJsicializar
-   * @return string
-   */
+    /**
+     * Monta a regra de restrição do tramite.gov.br
+     *
+     * @param  string $idUnidade
+     * @param  string $strCss
+     * @param  string $strHtml
+     * @param  string $strJsGlobal
+     * @param  string $strJsicializar
+     * @return string
+     */
   public static function montarRestricaoTramitaGovBr($idUnidade, &$strCss, &$strHtml, &$strJsGlobal, &$strJsInicializar)
-  {
+    {
     try {
-      $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
-      $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
-      $objPenUnidadeRestricaoDTO->retTodos();
+        $objPenUnidadeRestricaoDTO = new PenUnidadeRestricaoDTO();
+        $objPenUnidadeRestricaoDTO->setNumIdUnidade($idUnidade);
+        $objPenUnidadeRestricaoDTO->retTodos();
 
-      $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
-      $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
-      $items = array();
-      $arrayKeys = array();
-      $arrObjPenUnidadeDTO = array();
-      $itemsUnidades = array();
-      $hdnRepoEstruturas = array();
-      $strHtmlRepoEstruturasUnidades = "";
+        $objPenUnidadeRestricaoRN = new PenUnidadeRestricaoRN();
+        $arrObjPenUnidadeRestricaoDTO = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+        $items = [];
+        $arrayKeys = [];
+        $arrObjPenUnidadeDTO = [];
+        $itemsUnidades = [];
+        $hdnRepoEstruturas = [];
+        $strHtmlRepoEstruturasUnidades = "";
       foreach ($arrObjPenUnidadeRestricaoDTO as $item) {
         if (!in_array($item->getNumIdUnidadeRestricao(), $arrayKeys)) {
-          //IdUnidadeRestricao NomeUnidadeRestricao
-          $arrayKeys[] = $item->getNumIdUnidadeRestricao();
-          $items[] = array($item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao());
-          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = array();
+            //IdUnidadeRestricao NomeUnidadeRestricao
+            $arrayKeys[] = $item->getNumIdUnidadeRestricao();
+            $items[] = [$item->getNumIdUnidadeRestricao(), $item->getStrNomeUnidadeRestricao()];
+            $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()] = [];
         }
         if ($item->getNumIdUnidadeRHRestricao() != null) {
-          $arrObjPenUnidadeDTO[] = $item;
-          $itemsUnidades[] = array($item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao());
-          $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
+            $arrObjPenUnidadeDTO[] = $item;
+            $itemsUnidades[] = [$item->getNumIdUnidadeRHRestricao(), $item->getStrNomeUnidadeRHRestricao()];
+            $hdnRepoEstruturas[$item->getNumIdUnidadeRestricao()][] = $item->getNumIdUnidadeRHRestricao() . '±' . $item->getStrNomeUnidadeRHRestricao();
         }
       }
       foreach ($hdnRepoEstruturas as $key => $unidades) {
-        $value = implode('¥', $unidades);
-        $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key
+          $value = implode('¥', $unidades);
+          $strHtmlRepoEstruturasUnidades .= '<input type="hidden" id="hdnRepoEstruturas' . $key
           . '" name="hdnRepoEstruturas' . $key . '" value="' . $value . '" />' . "\n";
       }
-      $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
-      $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
-      $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
-      $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
+        $arrRepoEstruturasSelecionados = PaginaSEI::getInstance()->gerarItensLupa($items);
+        $arrUnidadesSelecionadas = PaginaSEI::getInstance()->gerarItensLupa($itemsUnidades);
+        $strItensSelRepoEstruturasRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeRestricaoDTO, 'IdUnidadeRestricao', 'NomeUnidadeRestricao');
+        $strItensSelUnidadesRestricao = parent::montarSelectArrInfraDTO(null, null, null, $arrObjPenUnidadeDTO, 'IdUnidadeRHRestricao', 'NomeUnidadeRHRestricao');
 
-      $strCss = ''
+        $strCss = ''
         . ' #lblRepoEstruturas {position:absolute;left:0%;top:0%;width:20%;}'
         . ' #txtRepoEstruturas {position:absolute;left:0%;top:13%;width:19.5%;}'
         . ' #selRepoEstruturas {position:absolute;left:0%;top:29%;width:20%;}'
@@ -316,7 +303,7 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' #selUnidades {position:absolute;left:25%;top:29%;width:55%;}'
         . ' #divOpcoesUnidades {position:absolute;left:81%;top:29%;}';
 
-      $strJsGlobal = ''
+        $strJsGlobal = ''
         . ' var objLupaRepositoriosEstruturas = null;'
         . ' var objAutoCompletarOrgao = null;'
         . ' var objLupaUnidades = null;'
@@ -327,7 +314,7 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' objLupaUnidades.montar();'
         . ' };';
 
-      $strJsInicializar = ''
+        $strJsInicializar = ''
         . ' objLupaRepositoriosEstruturas	= new infraLupaSelect(\'selRepoEstruturas\',\'hdnRepoEstruturas\',\'' . /*SessaoSEI::getInstance()->assinarLink('controlador.php?acao=orgao_selecionar&tipo_selecao=2&id_object=objLupaRepositoriosEstruturas') .*/ '\');'
         . ' objLupaRepositoriosEstruturas.processarRemocao = function(itens){'
         . ' 	for(var i=0;i < itens.length;i++){'
@@ -406,7 +393,7 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' };';
 
 
-      $strHtml = ''
+        $strHtml = ''
         . ' <div id="divRestricao" class="infraAreaDados" style="height:16em;">'
         . ' <label id="lblRepoEstruturas" for="selRepoEstruturas" class="infraLabelOpcional">Restringir às Estruturas Organizacionais:</label>'
         . ' <input type="text" id="txtRepoEstruturas" name="txtRepoEstruturas" class="infraText" />'
@@ -431,7 +418,7 @@ class ProcessoEletronicoINT extends InfraINT {
         . ' ' . $strHtmlRepoEstruturasUnidades . ''
         . ' </div>';
     } catch (Exception $e) {
-      // não grava nada e não retorna objeto restrição mapeamento de unidades
+        // não grava nada e não retorna objeto restrição mapeamento de unidades
     }
   }
 }
