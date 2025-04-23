@@ -155,19 +155,19 @@ class ProcessoEletronicoRN extends InfraRN
       // Validar disponibilidade do serviço 
       $endpoint = $this->strEnderecoWebService . 'healthcheck';
 
-    try{
+      try{
         $response = $this->strClientGuzzle->request('GET', $endpoint);
 
-      if ($response->getStatusCode() !== 200) {
+        if ($response->getStatusCode() !== 200) {
           throw new \RuntimeException('Falha ao conectar com o serviço REST');
-      }
-    } catch (RequestException $e) {
+        }
+      } catch (RequestException $e) {
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
         throw new \Exception($mensagem);
+      }
     }
   }
-}
 
 
     /**
