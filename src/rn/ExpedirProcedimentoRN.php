@@ -2260,20 +2260,20 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
-    private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false)
+  private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false)
       {
-      $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
-      if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
-        if ($sinProcessoEmBloco) {
-          $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-          $mensagem = "Prezado(a) usuário(a), o processo $strProtocoloFormatado não possui documentos. "
-            . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
-          $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
-        } else {
-          $objInfraException->adicionarValidacao('Não é possível tramitar um processo sem documentos', $strAtributoValidacao);
-        }
+    $arrObjDocumentoDTO = $objProcedimentoDTO->getArrObjDocumentoDTO();
+    if(!isset($arrObjDocumentoDTO) || count($arrObjDocumentoDTO) == 0) {
+      if ($sinProcessoEmBloco) {
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+        $mensagem = "Prezado(a) usuário(a), o processo $strProtocoloFormatado não possui documentos. "
+          . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
+        $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
+      } else {
+        $objInfraException->adicionarValidacao('Não é possível tramitar um processo sem documentos', $strAtributoValidacao);
       }
     }
+  }
 
   private function validarDadosProcedimento(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao)
     {
@@ -2424,18 +2424,18 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
-    private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false) {
+  private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false) {
 
-      $bolAssinaturaCorretas = true;
+    $bolAssinaturaCorretas = true;
 
-      $objDocumentoDTO = new DocumentoDTO();
-      $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
-      $objDocumentoDTO->retDblIdDocumento();
-      $objDocumentoDTO->retStrStaDocumento();
-      $objDocumentoDTO->retStrStaEstadoProtocolo();
+    $objDocumentoDTO = new DocumentoDTO();
+    $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+    $objDocumentoDTO->retDblIdDocumento();
+    $objDocumentoDTO->retStrStaDocumento();
+    $objDocumentoDTO->retStrStaEstadoProtocolo();
 
-      $objDocumentoRN = new DocumentoRN();
-      $arrObjDocumentoDTO = (array)$objDocumentoRN->listarRN0008($objDocumentoDTO);
+    $objDocumentoRN = new DocumentoRN();
+    $arrObjDocumentoDTO = (array)$objDocumentoRN->listarRN0008($objDocumentoDTO);
 
     if(!empty($arrObjDocumentoDTO)) {
 
@@ -2453,17 +2453,17 @@ class ExpedirProcedimentoRN extends InfraRN
       }
     }
 
-      if($bolAssinaturaCorretas !== true) {
-        if ($sinProcessoEmBloco) {
-          $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-          $mensagem = "Prezado(a) usuário(a), o processo $strProtocoloFormatado possui documentos gerados não assinados. "
-                . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
-          $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
-        } else {
-          $objInfraException->adicionarValidacao('Não é possível tramitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
-        }
+    if($bolAssinaturaCorretas !== true) {
+      if ($sinProcessoEmBloco) {
+        $strProtocoloFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+        $mensagem = "Prezado(a) usuário(a), o processo $strProtocoloFormatado possui documentos gerados não assinados. "
+              . "Dessa forma, não foi possível realizar sua inserção no bloco selecionado.";
+        $objInfraException->adicionarValidacao($mensagem, $strAtributoValidacao);
+      } else {
+        $objInfraException->adicionarValidacao('Não é possível tramitar um processos com documentos gerados e não assinados', $strAtributoValidacao);
       }
     }
+  }
 
   private function validarProcedimentoCompartilhadoSeiFederacao(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao)
     {
@@ -2513,20 +2513,20 @@ class ExpedirProcedimentoRN extends InfraRN
     * @param  ProcedimentoDTO $objProcedimentoDTO Informações sobre o procedimento a ser expedido
     * @param string $strAtributoValidacao índice para o InfraException separar os processos
     */
-    public function validarPreCondicoesExpedirProcedimento(
+  public function validarPreCondicoesExpedirProcedimento(
       InfraException $objInfraException,
       ProcedimentoDTO $objProcedimentoDTO,
       $strAtributoValidacao = null,
       $bolSinProcessamentoEmBloco = false,
       $sinProcessoEmBloco = false
     ) {
-      $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-      $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
-      $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
-      $this->validarProcessoAbertoUnidade($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-      $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-      $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
-      $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
+    $this->validarDadosProcedimento($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarDadosDocumentos($objInfraException, $objProcedimentoDTO->getArrObjDocumentoDTO(), $strAtributoValidacao);
+    $this->validarDocumentacaoExistende($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
+    $this->validarProcessoAbertoUnidade($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarNivelAcessoProcesso($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarHipoteseLegalEnvio($objInfraException, $objProcedimentoDTO, $strAtributoValidacao);
+    $this->validarAssinaturas($objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco);
 
     try{
       if(!$bolSinProcessamentoEmBloco) {
@@ -2573,7 +2573,7 @@ class ExpedirProcedimentoRN extends InfraRN
     }
   }
 
-    public function validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigem, $sinProcessoEmBloco = false)
+  public function validarProcessoAbertoEmOutraUnidade($objInfraException, $arrProtocolosOrigem, $sinProcessoEmBloco = false)
     {
     foreach ($arrProtocolosOrigem as $dblIdProcedimento) {
 
@@ -2589,8 +2589,8 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcedimentoDTO->setArrObjDocumentoDTO($objExpedirProcedimentosRN->listarDocumentos($dblIdProcedimento));
         $objProcedimentoDTO->setArrObjParticipanteDTO($objExpedirProcedimentosRN->listarInteressados($dblIdProcedimento));
         $objExpedirProcedimentosRN->validarPreCondicoesExpedirProcedimento($objInfraException, $objProcedimentoDTO, null, false, $sinProcessoEmBloco);
-      }
     }
+  }
 
   public function trazerTextoSeContemValidacoes($objInfraException)
     {
