@@ -650,7 +650,7 @@ class ProcessoEletronicoRN extends InfraRN
         'apenasAtivas' => true,
         'numeroDeIdentificacaoDaEstruturaRaizDaConsulta' => $numeroDeIdentificacaoDaEstruturaRaizDaConsulta,
         'sigla' => $siglaUnidade ?: null,
-        'nome' => !is_null($nomeUnidade) ? mb_convert_encoding($nomeUnidade, 'UTF-8') : (is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta) && !is_null($nome) ? (is_numeric($nome) ? intval($nome) : mb_convert_encoding($nome, 'UTF-8')) : null),
+        'nome' => !is_null($nomeUnidade) ? mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1') : (is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta) && !is_null($nome) ? (is_numeric($nome) ? intval($nome) : mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1')) : null),
         'registroInicial' => !is_null($registrosPorPagina) && !is_null($offset) ? $offset : null,
         'quantidadeDeRegistros' => !is_null($registrosPorPagina) && !is_null($offset) ? $registrosPorPagina : null,
         'permiteRecebimento' => $parBolPermiteRecebimento ?: null,
@@ -663,7 +663,12 @@ class ProcessoEletronicoRN extends InfraRN
             }
         );
     
+        
+      if (is_numeric($nome)) {
+        $arrResultado = $this->consultarEstruturaSimples($idRepositorioEstrutura, $nome);
+      } else{
         $arrResultado = $this->consultarEstruturas($idRepositorioEstrutura, $parametros);
+      }
 
       if ($arrResultado->totalDeRegistros > 0) {
         foreach ($arrResultado->estruturas as $estrutura) {
@@ -745,7 +750,7 @@ class ProcessoEletronicoRN extends InfraRN
       if (isset($arrResultado)) {
         $count = count($arrResultado->especies);
         for ($i = 0; $i < $count; $i++) {
-            $codigo = $i + 1; 
+            $codigo = intval($arrResultado->especies[$i]->codigo);
             $arrEspecies[$codigo] = mb_convert_encoding($arrResultado->especies[$i]->nomeNoProdutor, 'ISO-8859-1', 'UTF-8');
         }
       }
@@ -2751,16 +2756,16 @@ class ProcessoEletronicoRN extends InfraRN
         $base64 = $arrResultado->getBody()->getContents();
         
       if($this->isJson($base64)){
-        $foo = json_decode($base64, false);
+        $objResposta = json_decode($base64, false);
       }else{
-        $foo = $base64;
+        $objResposta = $base64;
       }
         
-      if (is_array($foo)) {
-        return (object) $foo;
+      if (is_array($objResposta)) {
+        return (object) $objResposta;
       }
 
-        return $foo;
+        return $objResposta;
     } catch (RequestException $e) {
         $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
         
@@ -2776,6 +2781,30 @@ class ProcessoEletronicoRN extends InfraRN
                 ]
             )
         );
+    }
+  }
+
+  public function consultarEstruturaSimples($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura)
+  {
+    $endpoint = "repositorios-de-estruturas/{$idRepositorioEstrutura}/estruturas-organizacionais/$numeroDeIdentificacaoDaEstrutura";
+    try {
+
+      $arrResultado = $this->get($endpoint);
+
+      $objResposta = new stdClass();
+      $objResposta->totalDeRegistros = 0;
+      
+      if (!is_null($arrResultado) && !empty($arrResultado)) {
+          $objResposta->estruturas = new stdClass();
+          $objResposta->estruturas->item = $arrResultado;
+          $objResposta->totalDeRegistros = 1;
+      }
+
+      return $objResposta;
+    } catch (Exception $e) {
+      $mensagem = "Falha na obtenção de unidades externas";
+      $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+      throw new InfraException($mensagem, $e, $detalhes);
     }
   }
   

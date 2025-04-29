@@ -128,6 +128,23 @@ class PenRelTipoDocMapRecebidoRN extends InfraRN
     }
   }
 
+      /**
+     * Lista mapeamentos de tipos de documentos para recebimento de processos pelo Barramento PEN
+     *
+     * @param PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO
+     * @return array
+     */
+  protected function alterarConectado(PenRelTipoDocMapRecebidoDTO $parObjPenRelTipoDocMapRecebidoDTO)
+    {
+    try {
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_recebimento_listar', __METHOD__, $parObjPenRelTipoDocMapRecebidoDTO);
+        $objPenRelTipoDocMapRecebidoBD = new PenRelTipoDocMapRecebidoBD($this->getObjInfraIBanco());
+        return $objPenRelTipoDocMapRecebidoBD->alterar($parObjPenRelTipoDocMapRecebidoDTO);
+    }catch(Exception $e){
+        throw new InfraException('Módulo do Tramita: Erro listando mapeamento de Tipos de Documento para recebimento.', $e);
+    }
+  }
+
     /**
      * Conta a lista de mapeamentos de tipos de documentos para envio de processos pelo Barramento PEN
      *
