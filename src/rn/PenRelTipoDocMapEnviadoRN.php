@@ -262,10 +262,76 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     {
     try{
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_padrao_atribuir', __METHOD__, $parNumEspeciePadrao);
+        $parNumEspeciePadrao = $this->verificarAtribuirEspeciePadrao($parNumEspeciePadrao);
         $objPenParametroRN = new PenParametroRN();
         $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
     }catch(Exception $e){
         throw new InfraException('Módulo do Tramita: Erro atribuindo Espécie Documental padrão para envio.', $e);
+    }
+  }
+
+  protected function verificarAtribuirEspeciePadrao($parNumEspeciePadrao)
+  {
+    try{
+      $processoEletronicoRN = new ProcessoEletronicoRN();
+      $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();
+
+      $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+      $objEspecieDocumentalDTO->setDblIdEspecie($parNumEspeciePadrao);
+      $objEspecieDocumentalDTO->retStrNomeEspecie();
+      $objEspecieDocumentalDTO->retDblIdEspecie();
+
+      $objEspecieDocumentalRN = new EspecieDocumentalRN();
+      $objEspecieDocumentalDTO = $objEspecieDocumentalRN->consultar($objEspecieDocumentalDTO);
+
+      $strNomeEspecie = $objEspecieDocumentalDTO->getStrNomeEspecie();
+
+      $numIdEspecieDocumental = array_search($strNomeEspecie, $arrEspeciesDocumentaisPEN);
+
+      if ($parNumEspeciePadrao != $numIdEspecieDocumental) {
+
+        $this->cadastrarEspeciePadraoNovo($strNomeEspecie, $numIdEspecieDocumental);
+        $this->atualizarMapRecebido($parNumEspeciePadrao, $numIdEspecieDocumental);
+
+        $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+        $objEspecieDocumentalDTO->setDblIdEspecie($parNumEspeciePadrao);
+
+        $objEspecieDocumentalDTO = $objEspecieDocumentalRN->excluir($objEspecieDocumentalDTO);
+
+      }
+
+      return $numIdEspecieDocumental;
+
+    }catch(Exception $e){
+        throw new InfraException('Módulo do Tramita: Erro atribuindo Espécie Documental padrão para envio.', $e);
+    }
+  }
+
+  protected function cadastrarEspeciePadraoNovo($strNomeEspecie, $numIdEspecieDocumental)
+  {
+    $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+    $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+    $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieDocumental);
+    $objEspecieDocumentalRN = new EspecieDocumentalRN();
+
+    $objEspecieDocumentalDTO = $objEspecieDocumentalRN->cadastrar($objEspecieDocumentalDTO);
+  }
+
+  protected function atualizarMapRecebido($numEspeciePadraoAtual, $numEspeciePadraoNovo)
+  {
+
+    $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+    $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoAtual);
+    $objPenRelTipoDocMapRecebidoDTO->retDblIdMap();
+    $objPenRelTipoDocMapRecebidoDTO->retNumCodigoEspecie();
+    $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
+
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+    $registros = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapRecebidoDTO);
+
+    foreach ($registros as $arrPenRelTipoDocMapRecebidoDTO) {
+      $arrPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
+      $objPenRelTipoDocMapRecebidoRN->alterar($arrPenRelTipoDocMapRecebidoDTO);
     }
   }
 
