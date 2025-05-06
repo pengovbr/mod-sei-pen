@@ -151,18 +151,18 @@ class ProcessoEletronicoRN extends InfraRN
      */
   private function getObjPenWs()
     {
-      if($this->objPenWs == null) {
+    if($this->objPenWs == null) {
 
-        if (InfraString::isBolVazia($this->strEnderecoWebService)) {
-          throw new InfraException('Módulo do Tramita: Endereço do serviço de integração do Tramita GOV.BR não informado.');
-        }
+      if (InfraString::isBolVazia($this->strEnderecoWebService)) {
+        throw new InfraException('Módulo do Tramita: Endereço do serviço de integração do Tramita GOV.BR não informado.');
+      }
 
-        if (InfraString::isBolVazia($this->strLocalCertPassword)) {
-            throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
-        }
+      if (InfraString::isBolVazia($this->strLocalCertPassword)) {
+          throw new InfraException('Módulo do Tramita: Dados de autenticação do serviço de integração do Tramita.GOV.BR não informados.');
+      }
 
-        // Validar disponibilidade do serviço 
-        $endpoint = $this->strEnderecoWebService . 'healthcheck';
+      // Validar disponibilidade do serviço 
+      $endpoint = $this->strEnderecoWebService . 'healthcheck';
 
       try{
           $response = $this->strClientGuzzle->request('GET', $endpoint);
@@ -170,13 +170,13 @@ class ProcessoEletronicoRN extends InfraRN
         if ($response->getStatusCode() !== 200) {
             throw new \RuntimeException('Falha ao conectar com o serviço REST');
         }
-        } catch (RequestException $e) {
-            $detalhes = $this->tratarFalhaWebService($e); 
-            $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
-            throw new \Exception($mensagem);
-        }
+      } catch (RequestException $e) {
+          $detalhes = $this->tratarFalhaWebService($e); 
+          $mensagem = "Falha de comunicação com o Tramita GOV.BR: " . $detalhes;
+          throw new \Exception($mensagem);
       }
     }
+  }
 
     /**
      * Consulta a lista de repositório de estruturas disponíveis no Barramento de Serviços do PEN
@@ -698,7 +698,7 @@ class ProcessoEletronicoRN extends InfraRN
         'apenasAtivas' => true,
         'numeroDeIdentificacaoDaEstruturaRaizDaConsulta' => $numeroDeIdentificacaoDaEstruturaRaizDaConsulta,
         'sigla' => $siglaUnidade ?: null,
-        'nome' => !is_null($nomeUnidade) ? mb_convert_encoding($nomeUnidade, 'UTF-8') : (is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta) && !is_null($nome) ? (is_numeric($nome) ? intval($nome) : mb_convert_encoding($nome, 'UTF-8')) : null),
+        'nome' => !is_null($nomeUnidade) ? mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1') : (is_null($numeroDeIdentificacaoDaEstruturaRaizDaConsulta) && !is_null($nome) ? (is_numeric($nome) ? intval($nome) : mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1')) : null),
         'registroInicial' => !is_null($registrosPorPagina) && !is_null($offset) ? $offset : null,
         'quantidadeDeRegistros' => !is_null($registrosPorPagina) && !is_null($offset) ? $registrosPorPagina : null,
         'permiteRecebimento' => $parBolPermiteRecebimento ?: null,
@@ -706,10 +706,14 @@ class ProcessoEletronicoRN extends InfraRN
         ];
           
         $parametros = array_filter($parametros, function($value) {
-              return !is_null($value);
+          return !is_null($value);
         });
-    
+        
+      if (is_numeric($nome)) {
+        $arrResultado = $this->consultarEstruturaSimples($idRepositorioEstrutura, $nome);
+      } else{
         $arrResultado = $this->consultarEstruturas($idRepositorioEstrutura, $parametros);
+      }
 
       if ($arrResultado['totalDeRegistros'] > 0) {
         foreach ($arrResultado['estruturas'] as $estrutura) {
@@ -789,7 +793,7 @@ class ProcessoEletronicoRN extends InfraRN
       if (isset($arrResultado)) {
           $count = count($arrResultado['especies']);
         for ($i = 0; $i < $count; $i++) {
-            $codigo = $i + 1; 
+            $codigo = intval($arrResultado['especies'][$i]['codigo']);
             $arrEspecies[$codigo] = mb_convert_encoding($arrResultado['especies'][$i]['nomeNoProdutor'], 'ISO-8859-1', 'UTF-8');
         }
       }
@@ -1539,9 +1543,9 @@ class ProcessoEletronicoRN extends InfraRN
 
     foreach ($arrayComponentesDigitais as $indice => $objComponenteDigital){
 
-        if (is_array($objComponenteDigital)) {
-          $objComponenteDigital = (object) $objComponenteDigital;
-        } 
+      if (is_array($objComponenteDigital)) {
+        $objComponenteDigital = (object) $objComponenteDigital;
+      } 
 
         $contComponentes++;
         $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1571,18 +1575,18 @@ class ProcessoEletronicoRN extends InfraRN
         $objComponenteDigitalDTO->setStrDadosComplementares($objComponenteDigital->dadosComplementaresDoTipoDeArquivo);
 
         //Registrar componente digital necessita ser enviado pelo trâmite específico      //TODO: Teste $parObjComponentesDigitaisSolicitados aqui
-        if(isset($parObjComponentesDigitaisSolicitados)) {
-            $arrObjItensSolicitados = isset($parObjComponentesDigitaisSolicitados) ? $parObjComponentesDigitaisSolicitados : array($parObjComponentesDigitaisSolicitados);
-            foreach ($arrObjItensSolicitados as $objItemSolicitado) {
-            if(!is_null($objItemSolicitado)){
-              $objItemSolicitado['hashes'] = is_array($objItemSolicitado['hashes']) ? $objItemSolicitado['hashes'] : array($objItemSolicitado['hashes']);
+      if(isset($parObjComponentesDigitaisSolicitados)) {
+          $arrObjItensSolicitados = isset($parObjComponentesDigitaisSolicitados) ? $parObjComponentesDigitaisSolicitados : array($parObjComponentesDigitaisSolicitados);
+        foreach ($arrObjItensSolicitados as $objItemSolicitado) {
+          if(!is_null($objItemSolicitado)){
+            $objItemSolicitado['hashes'] = is_array($objItemSolicitado['hashes']) ? $objItemSolicitado['hashes'] : array($objItemSolicitado['hashes']);
     
-              if($objItemSolicitado['protocolo'] == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado['hashes']) && !$objDocumento->retirado) {
-                      $objComponenteDigitalDTO->setStrSinEnviar("S");
-              }
+            if($objItemSolicitado['protocolo'] == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado['hashes']) && !$objDocumento->retirado) {
+                    $objComponenteDigitalDTO->setStrSinEnviar("S");
             }
           }
         }
+      }
 
         //TODO: Avaliar dados do tamanho do documento em bytes salvo na base de dados
         $objComponenteDigitalDTO->setNumTamanho($objComponenteDigital->tamanhoEmBytes);
@@ -1636,17 +1640,17 @@ class ProcessoEletronicoRN extends InfraRN
           $objComponenteDigital = (object) $arrComponenteDigital;
           $objComponenteDigitalDTO->setStrNome(utf8_decode($objComponenteDigital->nome));
 
-          if(isset($objDocumento->especie)){
-            if (is_array($objDocumento->especie)){
-              $numCodigoEspecie = $objDocumento->especie['codigo'];
-              $strNomeEspecieProdutor = $objDocumento->especie['nomeNoProdutor'];
-            }
-            else{
-              $numCodigoEspecie = $objDocumento->especie->codigo;
-              $strNomeEspecieProdutor = $objDocumento->especie->nomeNoProdutor;
-            }
-            $objComponenteDigitalDTO->setNumCodigoEspecie(intval($numCodigoEspecie));
-            $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($strNomeEspecieProdutor));
+        if(isset($objDocumento->especie)){
+          if (is_array($objDocumento->especie)){
+            $numCodigoEspecie = $objDocumento->especie['codigo'];
+            $strNomeEspecieProdutor = $objDocumento->especie['nomeNoProdutor'];
+          }
+          else{
+            $numCodigoEspecie = $objDocumento->especie->codigo;
+            $strNomeEspecieProdutor = $objDocumento->especie->nomeNoProdutor;
+          }
+          $objComponenteDigitalDTO->setNumCodigoEspecie(intval($numCodigoEspecie));
+          $objComponenteDigitalDTO->setStrNomeEspecieProdutor(utf8_decode($strNomeEspecieProdutor));
         }
 
           $strHashConteudo = static::getHashFromMetaDados($objComponenteDigital->hash);
@@ -2336,13 +2340,13 @@ class ProcessoEletronicoRN extends InfraRN
   public static function comparacaoOrdemDocumentos($parDocumento1, $parDocumento2)
     {
 
-      if (is_array($parDocumento1))  {
-        $parDocumento1 = (object) $parDocumento1;
-      }
+    if (is_array($parDocumento1))  {
+      $parDocumento1 = (object) $parDocumento1;
+    }
 
-      if (is_array($parDocumento2))  {
-        $parDocumento2 = (object) $parDocumento2;
-      }
+    if (is_array($parDocumento2))  {
+      $parDocumento2 = (object) $parDocumento2;
+    }
 
       $numOrdemDocumento1 = intval($parDocumento1->ordem);
       $numOrdemDocumento2 = intval($parDocumento2->ordem);
@@ -2351,13 +2355,13 @@ class ProcessoEletronicoRN extends InfraRN
 
   public static function comparacaoOrdemComponenteDigitais($parComponenteDigital1, $parComponenteDigital2)
     {
-      if (is_array($parComponenteDigital1))  {
-        $parComponenteDigital1 = (object) $parComponenteDigital1;
-      }
+    if (is_array($parComponenteDigital1))  {
+      $parComponenteDigital1 = (object) $parComponenteDigital1;
+    }
 
-      if (is_array($parComponenteDigital2))  {
-        $parComponenteDigital2 = (object) $parComponenteDigital2;
-      }
+    if (is_array($parComponenteDigital2))  {
+      $parComponenteDigital2 = (object) $parComponenteDigital2;
+    }
 
       $numOrdemComponenteDigital1 = intval($parComponenteDigital1->ordem);
       $numOrdemComponenteDigital2 = intval($parComponenteDigital2->ordem);
@@ -2838,6 +2842,27 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  public function consultarEstruturaSimples($idRepositorioEstrutura, $numeroDeIdentificacaoDaEstrutura)
+    {
+    $endpoint = "repositorios-de-estruturas/{$idRepositorioEstrutura}/estruturas-organizacionais/$numeroDeIdentificacaoDaEstrutura";
+    try {
+
+        $arrResultado = $this->get($endpoint);
+        $arrResposta = [];
+        $arrResposta['totalDeRegistros'] = 0;
+      if (!is_null($arrResultado) && !empty($arrResultado)){
+        $arrResposta['estruturas'] = [];
+        $arrResposta['estruturas'][0] = $arrResultado;
+        $arrResposta['totalDeRegistros'] = 1;
+      }
+        return $arrResposta;
+    } catch (Exception $e) {
+        $mensagem = "Falha na obtenção de unidades externas";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
     /**
      * Iniciar requisição HTTP utilizado para comunicação Webservice REST
      *
@@ -2848,9 +2873,9 @@ class ProcessoEletronicoRN extends InfraRN
         $arrResultado = $this->strClientGuzzle->request($method, $endpoint, $options);
         $base64 = $arrResultado->getBody()->getContents();
 
-        $foo = json_decode($arrResultado->getBody(), true);
-      if ($foo != null) {
-        return $foo; 
+        $objResposta = json_decode($arrResultado->getBody(), true);
+      if ($objResposta != null) {
+        return $objResposta; 
       }
 
         return $base64;
