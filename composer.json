@@ -1,6 +1,6 @@
 {
   "config": {
-    "vendor-dir": "./vendor",
+    "vendor-dir": "./src/vendor",
     "platform": {
       "php": "8.2"
     }
@@ -15,10 +15,7 @@
   },
       
   "require-dev": {
-    "phpunit/phpunit": "*",
-    "squizlabs/php_codesniffer": "*",
-    "mockery/mockery": "^1.5",
-    "pheromone/phpcs-security-audit": "*",
+    "pheromone/phpcs-security-audit": "*" ,
     "phpcompatibility/php-compatibility": "^9.3",
     "rector/rector": "^2.0"
   }
