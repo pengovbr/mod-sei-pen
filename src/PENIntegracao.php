@@ -978,8 +978,15 @@ class PENIntegracao extends SeiIntegracao
           $restricaoCadastrada = $restricaoCadastrada > 0;
 
           if ($restricaoCadastrada) {
-                $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
-                $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+            if (is_numeric($_POST['palavras_pesquisa'])) {
+              $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($_POST['palavras_pesquisa']);
+            }
+          
+            if (!is_numeric($_POST['palavras_pesquisa'])) {
+              $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+            }    
+        
+            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
 
             foreach ($arrEstruturas as $unidade) {
               if ($unidade->getNumIdUnidadeRHRestricao() != null) {
