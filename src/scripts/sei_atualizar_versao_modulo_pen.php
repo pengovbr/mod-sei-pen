@@ -287,6 +287,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV3080();
         case '3.8.0':
           $this->instalarV3081();
+        case '3.8.1':
+          $this->instalarV3082();
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
           $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -2997,6 +2999,18 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV3081(){
     $this->atualizarNumeroVersao("3.8.1");
+  }
+
+
+  protected function instalarV3082() {
+    
+    $objEspecieDocumentaoRN = new EspecieDocumentalRN();
+    $objEspecieDocumentaoRNOutra = $objEspecieDocumentaoRN->verificarEspecieOutra();
+
+    $boo = new PenRelTipoDocMapEnviadoRN();
+    $boo->verificarAtribuirEspeciePadrao($objEspecieDocumentaoRNOutra);
+    
+    $this->atualizarNumeroVersao("3.8.2");
   }
 
   /**
