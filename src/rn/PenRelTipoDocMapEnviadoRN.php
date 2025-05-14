@@ -261,7 +261,6 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     {
     try{
         SessaoSEI::getInstance()->validarAuditarPermissao('pen_map_tipo_documento_envio_padrao_atribuir', __METHOD__, $parNumEspeciePadrao);
-        $parNumEspeciePadrao = $this->verificarAtribuirEspeciePadrao($parNumEspeciePadrao);
         $objPenParametroRN = new PenParametroRN();
         $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
     }catch(Exception $e){
@@ -269,40 +268,41 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     }
   }
 
-  protected function verificarAtribuirEspeciePadrao($parNumEspeciePadrao)
+  public function verificarAtribuirEspeciePadrao($objEspecieDocumentalDTO)
   {
     try{
+
       $processoEletronicoRN = new ProcessoEletronicoRN();
-      $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();
+      $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();    
 
-      $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
-      $objEspecieDocumentalDTO->setDblIdEspecie($parNumEspeciePadrao);
-      $objEspecieDocumentalDTO->retStrNomeEspecie();
-      $objEspecieDocumentalDTO->retDblIdEspecie();
+      $strNomeEspecieAtual = $objEspecieDocumentalDTO->getStrNomeEspecie();
+      $numIdEspecieAtual = $objEspecieDocumentalDTO->getDblIdEspecie();
 
-      $objEspecieDocumentalRN = new EspecieDocumentalRN();
-      $objEspecieDocumentalDTO = $objEspecieDocumentalRN->consultar($objEspecieDocumentalDTO);
+      $numIdEspecieDocumentalTramita = array_search($strNomeEspecieAtual, $arrEspeciesDocumentaisPEN);
 
-      $strNomeEspecie = $objEspecieDocumentalDTO->getStrNomeEspecie();
-
-      $numIdEspecieDocumental = array_search($strNomeEspecie, $arrEspeciesDocumentaisPEN);
-
-      if ($parNumEspeciePadrao != $numIdEspecieDocumental) {
-
-        $this->cadastrarEspeciePadraoNovo($strNomeEspecie, $numIdEspecieDocumental);
-        $this->atualizarMapRecebido($parNumEspeciePadrao, $numIdEspecieDocumental);
+      if ($numIdEspecieAtual != $numIdEspecieDocumentalTramita) {
+        $this->cadastrarEspeciePadraoNovo($strNomeEspecieAtual, $numIdEspecieDocumentalTramita);
+        $this->atualizarMapRecebido($numIdEspecieAtual, $numIdEspecieDocumentalTramita);
 
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
-        $objEspecieDocumentalDTO->setDblIdEspecie($parNumEspeciePadrao);
+        $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieAtual);
 
+        $objEspecieDocumentalRN = new EspecieDocumentalRN();
         $objEspecieDocumentalDTO = $objEspecieDocumentalRN->excluir($objEspecieDocumentalDTO);
-
       }
 
-      return $numIdEspecieDocumental;
+      // Caso o ID antigo esteja atribudo como PADRAO DE ENVIO, vai atualizar o registro para o novo ID 
+      $objPenParametroRN = new PenParametroRN();
+      $numPadraoAtribuido = $objPenParametroRN->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
+
+      if ($numIdEspecieAtual == $numPadraoAtribuido) { 
+        $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $numIdEspecieDocumentalTramita);
+      }
+
+      return $numIdEspecieDocumentalTramita;
 
     }catch(Exception $e){
-        throw new InfraException('Módulo do Tramita: Erro atribuindo Espécie Documental padrão para envio.', $e);
+        throw new InfraException('Módulo do Tramita: Erro atualizar Espécie Documental Outra para envio.', $e);
     }
   }
 
@@ -318,7 +318,6 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
   protected function atualizarMapRecebido($numEspeciePadraoAtual, $numEspeciePadraoNovo)
   {
-
     $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
     $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoAtual);
     $objPenRelTipoDocMapRecebidoDTO->retDblIdMap();
@@ -327,6 +326,8 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
 
     $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
     $registros = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapRecebidoDTO);
+
+    
 
     foreach ($registros as $arrPenRelTipoDocMapRecebidoDTO) {
       $arrPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
