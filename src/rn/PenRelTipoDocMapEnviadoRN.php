@@ -229,6 +229,16 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     }
   }
 
+  protected function alterarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO)
+    {
+    try {
+        $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+        return $objPenRelTipoDocMapEnviadoBD->alterar($objPenRelTipoDocMapEnviadoDTO);
+    }catch(Exception $e){
+        throw new InfraException('Módulo do Tramita: Erro alterar mapeamento de Tipos de Documento para envio.', $e);
+    }
+  }
+
     /**
      * Recupera espécie documental padrão para envio de processos, verificando se o mesmo se encontra ativo
      *
@@ -279,11 +289,11 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
       $numIdEspecieAtual = $objEspecieDocumentalDTO->getDblIdEspecie();
 
       $numIdEspecieDocumentalTramita = array_search($strNomeEspecieAtual, $arrEspeciesDocumentaisPEN);
-
       if ($numIdEspecieAtual != $numIdEspecieDocumentalTramita) {
         $this->cadastrarEspeciePadraoNovo($strNomeEspecieAtual, $numIdEspecieDocumentalTramita);
+        $this->atualizarMapEnvio($numIdEspecieAtual, $numIdEspecieDocumentalTramita);
         $this->atualizarMapRecebido($numIdEspecieAtual, $numIdEspecieDocumentalTramita);
-
+        
         $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
         $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieAtual);
 
@@ -332,6 +342,23 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     foreach ($registros as $arrPenRelTipoDocMapRecebidoDTO) {
       $arrPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
       $objPenRelTipoDocMapRecebidoRN->alterar($arrPenRelTipoDocMapRecebidoDTO);
+    }
+  }
+
+  protected function atualizarMapEnvio($numEspeciePadraoAtual, $numEspeciePadraoNovo)
+  {
+    $objPenRelTipoDocMapEnvioDTO = new PenRelTipoDocMapEnviadoDTO();
+    $objPenRelTipoDocMapEnvioDTO->setNumCodigoEspecie($numEspeciePadraoAtual);
+    $objPenRelTipoDocMapEnvioDTO->retDblIdMap();
+    $objPenRelTipoDocMapEnvioDTO->retNumCodigoEspecie();
+    $objPenRelTipoDocMapEnvioDTO->retNumIdSerie();
+
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapEnviadoRN();
+    $registros = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapEnvioDTO);
+
+    foreach ($registros as $arrPenRelTipoDocMapEnvioDTO) {
+      $arrPenRelTipoDocMapEnvioDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
+      $objPenRelTipoDocMapRecebidoRN->alterar($arrPenRelTipoDocMapEnvioDTO);
     }
   }
 
