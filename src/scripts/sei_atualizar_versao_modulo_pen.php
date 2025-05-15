@@ -286,6 +286,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV3080();
         case (preg_match('/3.8.*/', $strVersaoModuloPen) ? true : false):
             $this->instalarV4000();
+        case '4.0.0':
+            $this->instalarV4010();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2559,6 +2561,19 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     {
       $this->atualizarNumeroVersao("4.0.0");
   }
+
+
+  protected function instalarV4010() 
+  {
+    $objEspecieDocumentaoRN = new EspecieDocumentalRN();
+    $objEspecieDocumentaoRNOutra = $objEspecieDocumentaoRN->verificarEspecieOutra();
+
+    $boo = new PenRelTipoDocMapEnviadoRN();
+    $boo->verificarAtribuirEspeciePadrao($objEspecieDocumentaoRNOutra);
+    
+    $this->atualizarNumeroVersao("4.0.1");
+  }
+
 
     /**
      * Remover blocos legados

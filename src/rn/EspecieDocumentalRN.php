@@ -47,4 +47,17 @@ class EspecieDocumentalRN extends InfraRN
         throw new InfraException('Módulo do Tramita: Erro consultando mapeamento de documentos para envio.', $e);
     }
   }
+
+  public function verificarEspecieOutra() {
+
+    $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+    $objEspecieDocumentalDTO->setStrNomeEspecie('Outra');
+    $objEspecieDocumentalDTO->retStrNomeEspecie();
+    $objEspecieDocumentalDTO->retDblIdEspecie();
+
+    $objEspecieDocumentalRN = new EspecieDocumentalRN();
+    $objEspecieDocumentalDTO = $objEspecieDocumentalRN->consultar($objEspecieDocumentalDTO);
+
+    return $objEspecieDocumentalDTO; 
+  }
 }
