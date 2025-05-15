@@ -1008,14 +1008,9 @@ class ProcessoEletronicoRN extends InfraRN
         $objParametros = $parametros->dadosDoComponenteDigital;
         $idTicketDeEnvio = $objParametros->ticketParaEnvioDeComponentesDigitais;
 
-        $protocolo = $objParametros->protocolo;
-        $hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
-        $conteudo = $objParametros->conteudoDoComponenteDigital;
-
-        $queryParams = [
-        'hashDoComponenteDigital' => $hashDoComponenteDigital,
-        'protocolo' => $protocolo
-        ];
+      $protocolo = $objParametros->protocolo;
+      $hashDoComponenteDigital = $objParametros->hashDoComponenteDigital;
+      $conteudo = $objParametros->conteudoDoComponenteDigital;
 
         $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
 
@@ -1039,15 +1034,24 @@ class ProcessoEletronicoRN extends InfraRN
         );
 
     
-        $arrOptions = [
-        'query' => $queryParams,
+      $arrOptions = [
         'multipart' => [
-          [
-            'name'     => 'conteudo',
-            'contents' => $conteudo,
-            'filename' => 'conteudo.html',
-            'headers' => ['Content-Type' => 'text/html']
-          ],              
+            [
+                'name'     => 'conteudo',
+                'contents' => $conteudo,
+                'filename' => 'conteudo.html',
+                'headers' => ['Content-Type' => 'text/html']
+            ],
+            [
+              'name'     => 'hashDoComponenteDigital',
+              'contents' => $hashDoComponenteDigital,
+              'headers' => ['Content-Type' => 'text/plain']
+            ],
+            [
+              'name'     => 'protocolo',
+              'contents' => $protocolo,
+              'headers' => ['Content-Type' => 'text/plain']
+            ],           
         ],
         ];
                 
