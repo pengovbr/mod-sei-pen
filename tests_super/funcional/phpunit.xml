@@ -32,20 +32,20 @@
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="971" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA"
-      value="152259" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_ESTRUTURA"
-      value="ORG1" />
+      value="INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE"
-      value="Unidade de Teste Glaydson ORG1" />
+      value="INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA" value="TESTE_1_1" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA_SECUNDARIA"
-      value="153846" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1" />
     <const name="CONTEXTO_ORGAO_A_NOME_UNIDADE_SECUNDARIA"
-      value="Glaydson ORG1 Filha" />
+      value="INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_1_1" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_A_USUARIO_SENHA" value="teste" />
@@ -74,15 +74,15 @@
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="179" />
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA"
-      value="152260" />
+      value="INFORME_O_ID_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG_2" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_ESTRUTURA"
-      value="ORG2" />
+      value="INFORME_A_SIGLA_DE_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
     <const name="CONTEXTO_ORGAO_B_NOME_UNIDADE"
-      value="Unidade de Teste Glaydson ORG2" />
+      value="INFORME_O_NOME_DA_ESTRUTURA_UTILIZADO_PARA_TESTE_ORG2" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_LOGIN" value="teste" />
     <const name="CONTEXTO_ORGAO_B_USUARIO_SENHA" value="teste" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA_SECUNDARIA" value="XXXXXXXXXXXXXX" />
@@ -115,7 +115,7 @@
     <const name="CONTEXTO_ORGAO_C_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_C_NUMERO_SEI" value="159" />
     <const name="CONTEXTO_ORGAO_C_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_C_ID_ESTRUTURA" value="152007" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_HIERARQUIA" value="" />

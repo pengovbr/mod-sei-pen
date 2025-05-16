@@ -145,7 +145,7 @@ Abaixo um arquivo inteiro de um orgao que tramita em homologação, serve para e
     <const name="CONTEXTO_ORGAO_A_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_A_NUMERO_SEI" value="779" />
     <const name="CONTEXTO_ORGAO_A_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_A_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_A_ID_ESTRUTURA" value="145856" />
     <const name="CONTEXTO_ORGAO_A_SIGLA_UNIDADE_HIERARQUIA" value="" />
@@ -174,7 +174,7 @@ Abaixo um arquivo inteiro de um orgao que tramita em homologação, serve para e
     <const name="CONTEXTO_ORGAO_B_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_B_NUMERO_SEI" value="159" />    
     <const name="CONTEXTO_ORGAO_B_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_B_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_B_ID_ESTRUTURA" value="145857" />
     <const name="CONTEXTO_ORGAO_B_SIGLA_UNIDADE_HIERARQUIA" value="" />
@@ -204,7 +204,7 @@ Abaixo um arquivo inteiro de um orgao que tramita em homologação, serve para e
     <const name="CONTEXTO_ORGAO_C_SIGLA_ORGAO" value="ABC" />
     <const name="CONTEXTO_ORGAO_C_NUMERO_SEI" value="159" />    
     <const name="CONTEXTO_ORGAO_C_ID_REP_ESTRUTURAS" value="5" />
-    <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="RE CGPRO" />
+    <const name="CONTEXTO_ORGAO_C_REP_ESTRUTURAS" value="RE CGSIS" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE" value="TESTE" />
     <const name="CONTEXTO_ORGAO_C_ID_ESTRUTURA" value="121390" />
     <const name="CONTEXTO_ORGAO_C_SIGLA_UNIDADE_HIERARQUIA" value="" />

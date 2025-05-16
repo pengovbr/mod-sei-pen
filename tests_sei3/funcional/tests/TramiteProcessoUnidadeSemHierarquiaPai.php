@@ -28,6 +28,6 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends CenarioBaseTestCase
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $paginaProcesso = new PaginaProcesso($this);
-        $this->assertStringNotContainsString(utf8_encode("externa para SEGES TESTE SEM PAI - - RE CGPRO"), $paginaProcesso->informacao());
+        $this->assertStringNotContainsString(utf8_encode("externa para SEGES TESTE SEM PAI - - RE CGSIS"), $paginaProcesso->informacao());
     }
 }

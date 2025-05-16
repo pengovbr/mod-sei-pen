@@ -31,6 +31,6 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestC
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
         $paginaProcesso = new PaginaProcesso($this);
-        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGPRO", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
+        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGSIS", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
     }
 }
