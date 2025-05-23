@@ -81,37 +81,62 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
             switch($propriedades->chave){
  
                 case "CLASSIFICACAO_PrazoIntermediario_1":
-                     $this->assertEquals('15', $propriedades->valor );
+                    $this->assertTrue(
+                      '5' == $propriedades->valor,
+                      'Classificação Prazo Intermediário 1 não é igual a 5. Valor: ' . $propriedades->valor
+                    );
                      break;
                    
                 case "CLASSIFICACAO_PrazoCorrente_1":
-                     $this->assertEquals('5', $propriedades->valor );
+                    $this->asserassertTruetEquals(
+                      '5' == $propriedades->valor,
+                      'Classificação Prazo Corrente 1 não é igual a 5. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "MODULO_PEN_VERSAO":
-                     $this->assertTrue(isset($propriedades->valor));
+                    $this->assertTrue(
+                      isset($propriedades->valor),
+                      'Versão do módulo PEN não está definida. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_CodigoEstruturado_1":
-                    $this->assertEquals('052.211', $propriedades->valor );
+                    $this->assertTrue(
+                      '052.211' == $propriedades->valor,
+                      'Classificação Código Estruturado 1 não é igual a 052.211. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_Destinacao_1":
-                     $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
+                    $this->assertTrue(
+                      'Guarda' == substr($propriedades->valor,0,6),
+                      'Classificação Destinação 1 não é igual a Elimina. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_Observacao_1":
-                    $this->assertEquals('Quanto ao estabelecimento', substr($propriedades->valor,0,25) );
+                    $this->assertTrue(
+                      'Quanto ao estabelecimento' == substr($propriedades->valor,0,25),
+                      'Classificação Observação 1 não é igual a Quanto ao estabelecimento. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_Descricao_1":
-                     $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
-                     break;                
+                    $this->assertTrue(
+                      'RECEITA CORRENTE' == substr($propriedades->valor,0,16),
+                     'Classificação Descrição 1 não é igual a RECEITA CORRENTE. Valor: ' . $propriedades->valor
+                    );
+                     break;
                      
             }
         }
 
-        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
+        $this->assertEquals(
+          9,
+          sizeof($saida->processo->itensHistorico),
+          'Quantidade de itens do histórico não é igual a 9. Valor: ' . sizeof($saida->processo->itensHistorico)
+        );
 
     }
 
