@@ -977,9 +977,7 @@ class ExpedirProcedimentoRN extends InfraRN {
               $arrComponentesDigitais['dadosComplementaresDoTipoDeArquivo'] = 'outro';
             }
 
-            if($documentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EDITOR_INTERNO){
-              $objComponenteDigital = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $documento['componentesDigitais'], $componenteDigital->getStrHashConteudo());
-            }
+            $objComponenteDigital = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $objComponenteDigital, $componenteDigital->getStrHashConteudo());
             $documento['componentesDigitais'][] = $objComponenteDigital;
             
           }else{
