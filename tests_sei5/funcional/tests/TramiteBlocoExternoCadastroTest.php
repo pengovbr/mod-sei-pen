@@ -1,9 +1,12 @@
 <?php
+
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Cadastrar e editrar bloco
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteBlocoExternoCadastroTest extends FixtureCenarioBaseTestCase
 {

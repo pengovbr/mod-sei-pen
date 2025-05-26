@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Teste de inclusão de processo em bloco
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBaseTestCase
 {
@@ -26,7 +28,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBas
      * Teste de inclusão de processo em bloco
      * @return void
      */
-    public function teste_incluir_processo_em_bloco()
+    public function test_incluir_processo_em_bloco()
     {
         $this->acessarSistema(
             self::$remetente['URL'],
@@ -56,7 +58,7 @@ class TramiteBlocoExternoProcessoJaIncluidoEmBlocoTest extends FixtureCenarioBas
      * Teste de inclusão do mesmo processo em bloco
      * @return void
      */
-    public function teste_mesmo_processo_em_bloco()
+    public function test_mesmo_processo_em_bloco()
     {
 
         $this->acessarSistema(

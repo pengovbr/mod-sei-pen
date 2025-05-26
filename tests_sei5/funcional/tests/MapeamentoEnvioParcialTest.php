@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de mapeamento de envio de envio parcial
  * 
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
 {
@@ -14,7 +16,7 @@ class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
     /**
      * Teste inicial de cadastro de mapeamento de envio parcial
      *
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
@@ -54,7 +56,7 @@ class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
     /**
      * Teste para editar mapeamento de envio parcial
      *
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
@@ -95,7 +97,7 @@ class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
     /**
      * Teste para pesquisar mapeamento de envio parcial
      *
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
@@ -127,7 +129,7 @@ class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
     /**
      * Teste para imprimir mapeamento de envio parcial
      *
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
@@ -153,7 +155,7 @@ class MapeamentoEnvioParcialTest extends FixtureCenarioBaseTestCase
     /**
      * Teste para excluir mapeamento de envio parcial
      *
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */

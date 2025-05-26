@@ -34,7 +34,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
      * - Cadastro de uma hipótese legal não mapeada para o processo.
      * - Inclusão do processo no bloco de trâmite e verificação da mensagem de alerta.
      */
-    public function teste_inclusao_de_processo_em_bloco_restrito_com_hipotese_legal_nao_mapeada()
+    public function test_inclusao_de_processo_em_bloco_restrito_com_hipotese_legal_nao_mapeada()
     {
         // Configuração dos dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -50,7 +50,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
           'HIPOTESE_LEGAL_BASE_LEGAL' => 'Base Hipotese Legal Recusa Processo'
         ]);
         $processoTeste["HIPOTESE_LEGAL"] = $objHipoteseLegalDTO->getStrNome(). '('. $objHipoteseLegalDTO->getStrBaseLegal().')';
-        $processoTeste["RESTRICAO"] = PaginaIniciarProcesso::STA_NIVEL_ACESSO_RESTRITO;
+        $processoTeste["RESTRICAO"] = parent::STA_NIVEL_ACESSO_RESTRITO;
 
         // Cadastro do processo e documento
         $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
@@ -106,7 +106,7 @@ class TramiteBlocoExternoInclusaoDeProcessoEmBlocoComHipoteseLegalNaoMapeadaTest
      * - Cadastro de uma hipótese legal não mapeada para o documento.
      * - Inclusão do documento no bloco de trâmite e verificação da mensagem de alerta.
      */
-    public function teste_inclusao_de_processo_em_bloco_com_documento_restrito_com_hipotese_legal_nao_mapeada()
+    public function test_inclusao_de_processo_em_bloco_com_documento_restrito_com_hipotese_legal_nao_mapeada()
     {
         // Configuração dos dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);

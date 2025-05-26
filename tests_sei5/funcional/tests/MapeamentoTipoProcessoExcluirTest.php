@@ -1,11 +1,13 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Excluir mapeamento entre orgãos
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoTipoProcessoExcluirTest extends FixtureCenarioBaseTestCase
 {
@@ -40,7 +42,7 @@ class MapeamentoTipoProcessoExcluirTest extends FixtureCenarioBaseTestCase
     /**
      * Teste para excluir de mapeamento de orgão exteno
      *
-     * @group MapeamentoOrgaoExterno
+     * #[Group('MapeamentoOrgaoExterno')]
      *
      * @return void
      */

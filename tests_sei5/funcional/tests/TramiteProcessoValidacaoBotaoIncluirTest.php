@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCase
 {
@@ -21,7 +23,7 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
      * @return void
      */
     public static function setUpBeforeClass() :void {
-
+        parent::setUpBeforeClass();
         // Altera status de qualquer Bloco aberto
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $bancoOrgaoA->execute("update md_pen_bloco set sta_estado=? where sta_estado=?", array('C', 'A'));
@@ -31,7 +33,7 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
     }      
         
     public static function tearDownAfterClass() :void {
-
+        parent::tearDownAfterClass();
         // Recadastra os mapeamentos da unidade
         putenv("DATABASE_HOST=org1-database");
         $penMapUnidadesFixture = new \PenMapUnidadesFixture();
@@ -53,8 +55,8 @@ class TramiteProcessoValidacaoBotaoIncluirTest extends FixtureCenarioBaseTestCas
     /**
      * Teste de trâmite externo de processo com restrição de acesso
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
      *
      * @return void

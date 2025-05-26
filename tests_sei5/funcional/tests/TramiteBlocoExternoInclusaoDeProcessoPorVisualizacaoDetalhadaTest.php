@@ -22,7 +22,7 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
      *
      * @return void
      */
-    public function teste_inclusao_de_processo_por_visualizacao_detalhada()
+    public function test_inclusao_de_processo_por_visualizacao_detalhada()
     {
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -65,9 +65,9 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
         $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
         
         // Verificação do título da página
-        $titulo = mb_convert_encoding("Incluir Processo(s) no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1');
+        $titulo = "Incluir Processo(s) no Bloco de Trâmite";
         $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
-        $this->assertEquals($titulo, $tituloRetorno);
+        $this->assertEquals(mb_convert_encoding($titulo, 'UTF-8', 'ISO-8859-1'), $tituloRetorno);
 
         // Inclusão do processo no bloco de trâmite
         $this->paginaTramiteEmBloco->selecionarBloco($objBlocoDeTramiteDTO->getNumId());
@@ -91,5 +91,4 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
         // Saída do sistema
         $this->sairSistema();
     }    
-    
 }

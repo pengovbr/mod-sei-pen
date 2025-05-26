@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
- * @group rodarseparado
- * @group rodarseparado2
- * @group execute_alone_group1
+ * #[Group('rodarseparado')]
+ * #[Group('rodarseparado2')]
+ * #[Group('execute_alone_group1')]
  */
 class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCenarioBaseTestCase
 {
@@ -23,6 +26,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
         
     public static function tearDownAfterClass() :void {
 
+        parent::tearDownAfterClass();
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);    
         $bancoOrgaoA->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
@@ -32,8 +36,8 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
     /**
      * Teste de trâmite externo de processo contendo documento externo particionado acima de 60Mb
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
@@ -42,7 +46,7 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
     public function test_tramitar_processo_contendo_documento_externo_60mb()
     {
         //Aumenta o tempo de timeout devido ao tamanho do arquivo arquivo_060.pdf
-        $this->setSeleniumServerRequestsTimeout(6000);
+        // $this->setSeleniumServerRequestsTimeout(6000);
 
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
@@ -79,31 +83,34 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_contendo_documento_externo_60mb
+     * #[Depends('test_tramitar_processo_contendo_documento_externo_60mb')]
      *
      * @return void
      */
     public function test_verificar_origem_processo_contendo_documento_externo_60mb()
     {
         //Aumenta o tempo de timeout devido ao tamanho do arquivo arquivo_060.pdf
-        $this->setSeleniumServerRequestsTimeout(60000);
+        // $this->setSeleniumServerRequestsTimeout(60000);
 
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-
+        
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->abrirProcesso(self::$protocoloTeste);
 
-        $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
@@ -117,10 +124,10 @@ class TramiteProcessoContendoDocumentoExternoParticionadoTest extends FixtureCen
     /**
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_contendo_documento_externo_60mb
+     * #[Depends('test_verificar_origem_processo_contendo_documento_externo_60mb')]
      *
      * @return void
      */

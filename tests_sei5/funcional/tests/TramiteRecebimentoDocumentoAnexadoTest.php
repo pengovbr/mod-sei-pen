@@ -1,10 +1,11 @@
 <?php
 
 use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 /**
  * Execution Groups
- * @group execute_parallel_group3
+ * #[Group('execute_parallel_group3')]
  */
 class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
 {
@@ -32,10 +33,10 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
      *
      * Inicialmente são enviados 3 documentos, sendo um deles referênciado pelos outros dois documentos
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -77,10 +78,10 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo contendo documento anexado com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_envio_processo_com_documento_anexado
+     * #[Depends('test_envio_processo_com_documento_anexado')]
      *
      * @return void
      */
@@ -97,10 +98,10 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo com documento anexado no destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_com_documento_anexado_para_origem
+     * #[Depends('test_devolucao_processo_com_documento_anexado_para_origem')]
      *
      * @return void
      */

@@ -1,4 +1,8 @@
 <?php
+
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /*
 Escopo do caso de teste:
     Órgão 1:
@@ -30,7 +34,7 @@ Escopo do caso de teste:
 /**
  *
  * Execution Groups
- * @group exxecute_parallel
+ * #[Group('exxecute_parallel')]
  */
 class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBaseTestCase
 {
@@ -61,9 +65,9 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
             4-criar Documento Interno (documentoTeste3) no Processo Principal
             5-tramitar Processo Principal para o Órgão 2 com validação no remetente
 
-    @group TramiteProcessoContendoDocumentoMovidoDestino
-    @large
-    @Depends CenarioBaseTestCase::setUpBeforeClass
+    #[Group('TramiteProcessoContendoDocumentoMovidoDestino')]
+    #[Large]
+    #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
     @return void
     */
     public function test_criar_processo_contendo_documentos_tramitar_remetente()
@@ -102,14 +106,17 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
         // verificar se situação atual do processo está como bloqueado no remetente
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -136,8 +143,8 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
             11-criar documento interno (documentoTeste5) no Processo Principal
             12-tramitar Processo Principal para o Órgão 1 com validação no remetente
     
-    @group TramiteProcessoContendoDocumentoMovidoDestino
-    @large
+    #[Group('TramiteProcessoContendoDocumentoMovidoDestino')]
+    #[Large]
     @depends test_criar_processo_contendo_documentos_tramitar_remetente
     @return void
     */
@@ -190,14 +197,17 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
         // verificar se situação atual do processo está como bloqueado no remetente
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -220,8 +230,8 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
             14-criar documento interno (documentoTeste6) no Processo Principal
             15-tramitar Processo Principal para o Órgão 2 com validação no remetente
         
-    @group TramiteProcessoContendoDocumentoMovidoDestino
-    @large
+    #[Group('TramiteProcessoContendoDocumentoMovidoDestino')]
+    #[Large]
     @depends test_criar_mover_incluir_documentos_devolver_processo_remetente
     @return void
     */
@@ -250,14 +260,17 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
         // verificar se situação atual do processo está como bloqueado no remetente
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -280,8 +293,8 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
             17-criar documento interno (documentoTeste7) no Processo Principal
             18-tramitar Processo Principal para o Órgão 1 com validação no remetente
         
-    @group TramiteProcessoContendoDocumentoMovidoDestino
-    @large
+    #[Group('TramiteProcessoContendoDocumentoMovidoDestino')]
+    #[Large]
     @depends test_incluir_documento_tramitar_destinatario
     @return void
     */
@@ -310,14 +323,17 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
         // verificar se situação atual do processo está como bloqueado no remetente
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -338,8 +354,8 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         Órgão 1:
             19-verificar correto recebimento do processo no destino (Órgão 1)
         
-    @group TramiteProcessoContendoDocumentoMovidoDestino
-    @large
+    #[Group('TramiteProcessoContendoDocumentoMovidoDestino')]
+    #[Large]
     @depends test_incluir_documento_tramitar_remetente
     @return void
     */

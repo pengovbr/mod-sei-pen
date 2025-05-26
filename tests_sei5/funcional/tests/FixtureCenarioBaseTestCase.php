@@ -1,11 +1,11 @@
 <?php
 
 use \utilphp\util;
-use PHPUnit\Extensions\Selenium2TestCase;
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};
 use Tests\Funcional\Sei\Fixtures\{DocumentoFixture,AssinaturaFixture,AnexoFixture,AnexoProcessoFixture};
 use Tests\Funcional\Sei\Fixtures\{HipoteseLegalFixture,TipoProcedimentoFixture};
+use PHPUnit\Framework\AssertionFailedError;
 
 use function PHPSTORM_META\map;
 /**
@@ -23,8 +23,8 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             'Descricao' => $dadosProcesso['DESCRICAO'] ?: util::random_string(20),
             'Interessados' => $dadosProcesso['INTERESSADOS'] ?: util::random_string(40),
             'IdHipoteseLegal' => $dadosProcesso['HIPOTESE_LEGAL'] ? $objHipLegalDTO->getNumIdHipoteseLegal() : null,
-            'StaNivelAcessoLocal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
-            'StaNivelAcessoGlobal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO
+            'StaNivelAcessoLocal' => $dadosProcesso["RESTRICAO"] ?: parent::STA_NIVEL_ACESSO_PUBLICO,
+            'StaNivelAcessoGlobal' => $dadosProcesso["RESTRICAO"] ?: parent::STA_NIVEL_ACESSO_PUBLICO
         ];
         $objProtocoloFixture = new ProtocoloFixture();
         $objProtocoloDTO = $objProtocoloFixture->carregar($parametros);
@@ -216,19 +216,21 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         $this->abrirProcesso($strProtocoloTeste);
         
         // 5 - Trâmitar Externamento processo para órgão/unidade destinatária
-        $paginaTramitar = $this->paginaTramitar;
         $this->tramitarProcessoExternamente($strProtocoloTeste, $destinatario['REP_ESTRUTURAS'], $destinatario['NOME_UNIDADE'], $destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
 
         if ($validarTramite) {
             // 6 - Verificar se situação atual do processo está como bloqueado
-            $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            $this->waitUntil(function() use (&$orgaosDiferentes) {
                 sleep(5);
-                $testCase->refresh();
-                $paginaProcesso = new PaginaProcesso($testCase);
-                $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-                $testCase->assertFalse($paginaProcesso->processoAberto());
-                $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-                return true;
+                $this->paginaProcesso->refresh();
+                try {
+                    $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                    $this->assertFalse($this->paginaProcesso->processoAberto());
+                    $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                    return true;
+                } catch (AssertionFailedError $e) {
+                    return false;
+                }
             }, PEN_WAIT_TIMEOUT);
 
             // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -237,7 +239,7 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             $this->validarRecibosTramite($mensagemRecibo, true, true);
 
             // 8 - Validar histórico de trâmite do processo
-            $this->validarHistoricoTramite(self::$nomeUnidadeDestinatario, true, true);
+            $this->validarHistoricoTramite(mb_convert_encoding($destinatario['NOME_UNIDADE'], "ISO-8859-1"), true, true);
 
             // 9 - Verificar se processo está na lista de Processos Tramitados Externamente
             $deveExistir = $remetente['URL'] != $destinatario['URL'];

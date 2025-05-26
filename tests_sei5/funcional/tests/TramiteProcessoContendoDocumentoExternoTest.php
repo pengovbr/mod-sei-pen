@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTestCase
 {
@@ -16,8 +19,8 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
     /**
      * Teste de trâmite externo de processo contendo apenas um documento externo
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
      * @Depends CenarioBaseTestCase::setUpBeforeClass
      *
@@ -39,10 +42,10 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_contendo_documento_externo
+     * #[Depends('test_tramitar_processo_contendo_documento_externo')]
      *
      * @return void
      */
@@ -55,14 +58,17 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
         $this->abrirProcesso(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -81,10 +87,10 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_contendo_documento_externo
+     * #[Depends('test_verificar_origem_processo_contendo_documento_externo')]
      *
      * @return void
      */

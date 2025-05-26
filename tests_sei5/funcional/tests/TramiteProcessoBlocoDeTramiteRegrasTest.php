@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
 {
@@ -20,8 +22,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -59,8 +61,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
     /**
      * Teste pra validar mensagem de processo bloqueado ao ser inserido em bloco 
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -99,8 +101,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
     /**
      * Teste pra validar a mensagem de processo aberto em mais de uma unidade ao ser inserido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -144,8 +146,8 @@ class TramiteProcessoBlocoDeTramiteRegrasTest extends FixtureCenarioBaseTestCase
     /**
      * Teste pra validar a mensagem de processo sem documentos nao pode ser incluido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */

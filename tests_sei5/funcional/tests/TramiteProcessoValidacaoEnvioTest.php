@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
 {
@@ -26,10 +28,10 @@ class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo com processo não contendo nenhum documento cadastrado
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */

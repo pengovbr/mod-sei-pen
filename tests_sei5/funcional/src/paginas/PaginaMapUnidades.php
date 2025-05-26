@@ -1,147 +1,169 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverSelect;
 
+/**
+ * Página de mapeamento de unidades
+ */
 class PaginaMapUnidades extends PaginaTeste
 {
     /**
-     * Método contrutor
-     * 
-     * @return void
+     * Construtor.
      */
-  public function __construct($test)
+    public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-  }
-
-  public function navegarPenMapeamentoUnidades()
-    {
-      $this->test->byId("txtInfraPesquisarMenu")->value('Listar');
-      $this->test->byXPath("//a[@link='pen_map_unidade_listar']")->click();
-  }
-
-    /**
-     * Lispar campo de pesquisa
-     * Colocar texto para pesquisa
-     * Clicar no bot?o pesquisar
-     *
-     * @param string $textoPesquisa
-     * @return void
-     */
-  public function pesquisarUnidade($textoPesquisa)
-    {
-      $this->test->byId('txtSiglaUnidade')->clear();
-      $this->test->byId('txtSiglaUnidade')->value($textoPesquisa);
-      $this->test->byId("btnPesquisar")->click();
-  }
-
-    /**
-     * Seleciona botão editar da primeira linha de tabela
-     *
-     * @return void
-     */
-  public function selecionarEditar()
-    {
-      $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
-  }
-
-  public function selecionarRepoEstruturas($textoEstruturas)
-    {
-      $this->repoEstruturaInput = $this->test->byId('txtRepoEstruturas');
-      $this->repoEstruturaInput->clear();
-      $this->repoEstruturaInput->value($textoEstruturas);
-      $this->test->keys(Keys::ENTER);
-      $sucesso = $this->test->waitUntil(function($testCase) {
-          $bolExisteAlerta=null;
-          $nomeEstrutura = $testCase->byId('txtRepoEstruturas')->value();
-
-        try{
-            $bolExisteAlerta = $this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){}
-          $testCase->byPartialLinkText($nomeEstrutura)->click();
-          return true;
-      }, PEN_WAIT_TIMEOUT);
-
-      $this->test->assertTrue($sucesso);
-  }
-
-  public function selecionarUnidade($textoUnidade)
-    {
-      $this->repoUnidadeInput = $this->test->byId('txtUnidade');
-      $this->repoUnidadeInput->clear();
-      $this->repoUnidadeInput->value($textoUnidade);
-      $this->test->keys(Keys::ENTER);
-      $sucesso = $this->test->waitUntil(function($testCase) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade')->value();
-
-        try{
-            $bolExisteAlerta = $this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){}
-          $testCase->byPartialLinkText($nomeUnidade)->click();
-          return true;
-      }, PEN_WAIT_TIMEOUT);
-
-      $this->test->assertTrue($sucesso);
-  }
-
-    /**
-     * Selcionar botão salvar da página
-     *
-     * @return void
-     */
-  public function salvar()
-    {
-      $this->test->byId("btnSalvar")->click();
-  }
-
-  public function limparRestricoes()
-    {
-      $options = $this->test->byId('selRepoEstruturas')
-          ->elements($this->test->using('css selector')->value('option'));
-    if (count($options)) {
-        $this->test->byXPath("//img[@title='Remover Estruturas Selecionadas']")->click();
-    }
-  }
-
-    /**
-     * Buscar mensagem de alerta da página
-     *
-     * @return string
-     */
-  public function buscarMensagemAlerta()
-    {
-      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-      return !empty($alerta->text()) ? $alerta->text() : "";
-  }
-
-  public function validarRepositorio($siglaRepositorio)
-    {
-      $repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
-
-      $options = $repositorioSelect
-          ->elements($this->test->using('css selector')->value('option'));
-
-      $contador = 0;
-    foreach ($options as $option) {
-        $value = trim($option->value());
-      if (empty($value) || is_null($value) || $value == "null") {
-        continue;
-      }
-
-        $contador++;
+        parent::__construct($driver, $testcase);
     }
 
-    if(isset($siglaRepositorio)){
-        $repositorioSelect->selectOptionByLabel($siglaRepositorio);
+    /**
+     * Navega até a listagem de mapeamento de unidades.
+     */
+    public function navegarPenMapeamentoUnidades(): void
+    {
+        $input = $this->elById('txtInfraPesquisarMenu');
+        $input->clear();
+        $input->sendKeys('Listar'. WebDriverKeys::ENTER);
+
+        $this->elByXPath("//a[@link='pen_map_unidade_listar']")->click();
     }
 
-      $this->test->assertEquals(1, $contador);
+    /**
+     * Pesquisa unidades pelo texto informado.
+     */
+    public function pesquisarUnidade(string $texto): void
+    {
+        $input = $this->elById('txtSiglaUnidade');
+        $input->clear();
+        $texto = mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($texto);
+        $this->elById('btnPesquisar')->click();
+    }
 
-      return $this->test->byId('selRepositorioEstruturas')->value();
-  }
+    /**
+     * Seleciona o botão de editar do primeiro mapeamento.
+     */
+    public function selecionarEditar(): void
+    {
+        $this->elByXPath("(//img[@title='Alterar Mapeamento'])[1]")
+             ->click();
+    }
+
+    /**
+     * Seleciona repositório de estruturas pelo texto e confirma.
+     */
+    public function selecionarRepoEstruturas(string $texto): void
+    {
+        $input = $this->elById('txtRepoEstruturas');
+        $input->clear();
+        $texto = mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($texto. WebDriverKeys::ENTER);
+
+        // Usa o helper waitUntil da classe base
+        $this->waitUntil(function() {
+            $current = $this->driver->findElement(WebDriverBy::id('txtRepoEstruturas'))
+                              ->getAttribute('value');
+            try {
+                $msg = parent::alertTextAndClose();
+                if ($msg !== null) {
+                    $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+                }
+            } catch (\Exception $e) {
+                // sem alerta
+            }
+            $this->driver->findElement(
+                WebDriverBy::partialLinkText($current)
+            )->click();
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    /**
+     * Seleciona unidade pelo texto e confirma.
+     */
+    public function selecionarUnidade(string $texto): void
+    {
+        $input = $this->elById('txtUnidade');
+        $input->clear();
+        $texto = mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($texto . WebDriverKeys::ENTER);
+
+        // Usa o helper waitUntil da classe base
+        $this->waitUntil(function() {
+            $current = $this->driver->findElement(WebDriverBy::id('txtUnidade'))
+                              ->getAttribute('value');
+            try {
+                $msg = parent::alertTextAndClose();
+                if ($msg !== null) {
+                    $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+                }
+            } catch (\Exception $e) {
+                // sem alerta
+            }
+            $this->driver->findElement(
+                WebDriverBy::partialLinkText($current)
+            )->click();
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    /**
+     * Clica no botão Salvar.
+     */
+    public function salvar(): void
+    {
+        $this->elById('btnSalvar')->click();
+    }
+
+    /**
+     * Remove todas as restrições de repositório se existirem.
+     */
+    public function limparRestricoes(): void
+    {
+        $options = (new WebDriverSelect(
+            $this->elById('selRepoEstruturas')
+        ))->getOptions();
+
+        if (count($options) > 0) {
+            $this->elByXPath("//img[@title='Remover Estruturas Selecionadas']")
+                 ->click();
+        }
+    }
+
+    /**
+     * Busca mensagem de alerta da página.
+     */
+    public function buscarMensagemAlerta(): string
+    {
+        try {
+            return $this->elByXPath("(//div[@id='divInfraMsg0'])[1]")
+                        ->getText();
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * Valida se o repositório possui exatamente uma opção não-vazia e seleciona o informado.
+     */
+    public function validarRepositorio(string $sigla): ?string
+    {
+        $select = new WebDriverSelect(
+            $this->elById('selRepositorioEstruturas')
+        );
+        $options = $select->getOptions();
+        $count = 0;
+        foreach ($options as $opt) {
+            $val = trim($opt->getAttribute('value'));
+            if ($val !== '' && $val !== 'null') {
+                $count++;
+            }
+        }
+        $this->test->assertEquals(1, $count);
+
+        $select->selectByVisibleText($sigla);
+        return $select->getFirstSelectedOption()->getAttribute('value');
+    }
 }

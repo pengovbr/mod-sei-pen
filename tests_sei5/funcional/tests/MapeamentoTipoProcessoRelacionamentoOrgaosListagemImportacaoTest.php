@@ -1,12 +1,14 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Listar mapeamento entre orgãos 
  * Importar tipos de processo para relacionamento
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends FixtureCenarioBaseTestCase
 {
@@ -41,7 +43,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends F
     /**
      * Teste para pesquisar mapeamento entre orgãos
      *
-     * @Depends test_desativacao_mapeamento_orgao_externo
+     * #[Depends('test_desativacao_mapeamento_orgao_externo')]
      *
      * @return void
      */
@@ -58,12 +60,12 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends F
 
         // Buscar pesquisa vazia
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE'] . 'B');
-        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$destinatario['NOME_UNIDADE']);
+        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
         $this->assertNull($nomeRepositorioCadastrado);
 
         // Buscar pesquisa com sucesso
         $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE']);
-        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$destinatario['NOME_UNIDADE']);
+        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
         $this->assertNotNull($nomeRepositorioCadastrado);
         
         $this->sairSistema();

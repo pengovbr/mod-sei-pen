@@ -1,11 +1,14 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+
 /**
  * Testes de mapeamento de tipos de processo e relacionamento entre orgãos
  * Desativar e reativar mapeamento entre orgãos
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTestCase
 {
@@ -40,7 +43,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
     /**
      * Teste de desativação de um Relacionamento entre Órgãos
      *
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -56,20 +59,27 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
 
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamento();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-
+        $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+        $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
+        // ao final garante de fato que a mensagem existe
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
+        );
         $this->sairSistema();
     }
 
     /**
      * Teste de reativação de um Relacionamento entre Órgãos
      * 
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -85,20 +95,29 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
 
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamento();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
+
+        $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+        $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
         
+        // ao final garante de fato que a mensagem existe
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
+        );
         $this->sairSistema();
     }
 
     /**
      * Teste de desativação de um Relacionamento entre Órgãos via checkbox
      *
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -114,12 +133,19 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
 
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Ativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->desativarMapeamentoCheckbox();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
+        $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+        $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi desativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
+        );
         
         $this->sairSistema();
     }
@@ -127,7 +153,7 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
     /**
      * Teste de desativação de um Relacionamento entre Órgãos via checkbox
      *
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -143,13 +169,20 @@ class MapeamentoTipoProcessoDesativarReativarTest extends FixtureCenarioBaseTest
 
         $this->paginaTramiteMapeamentoOrgaoExterno->selectEstado("Inativo");
         $this->paginaTramiteMapeamentoOrgaoExterno->reativarMapeamentoCheckbox();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-        
+        $page = $this->paginaTramiteMapeamentoOrgaoExterno;
+        $mensagemValidacao = mb_convert_encoding('Relacionamento entre Unidades foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
+        // ao final garante de fato que a mensagem existe
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTramiteMapeamentoOrgaoExterno->buscarMensagemAlerta()
+        );
         $this->sairSistema();
     }
 

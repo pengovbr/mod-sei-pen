@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
@@ -11,10 +13,10 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestC
     /**
      * Teste de trâmite externo de processo sem devolução para testar caso de hierarquia sem pai
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -30,7 +32,6 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestC
         $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
         self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
-        $paginaProcesso = new PaginaProcesso($this);
-        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGPRO", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
+        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGSIS", 'UTF-8', 'ISO-8859-1'),  $this->paginaProcesso->informacao());
     }
 }

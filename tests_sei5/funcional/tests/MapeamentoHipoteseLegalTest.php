@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testa a funcionalidade de mapeamento de hipótese legal
  */
@@ -13,7 +15,7 @@ class MapeamentoHipoteseLegalTest extends FixtureCenarioBaseTestCase
     /**
      * Verificar se lista de mapeamento de hipótese legal é exibida
      *
-     * @group hipotese_legal
+     * #[Group('hipotese_legal')]
      *
      * @return void
      */

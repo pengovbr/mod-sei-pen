@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
 {
@@ -16,10 +19,10 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo com restrição de acesso
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -33,7 +36,7 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
 
 
         // Configuração de processo restrito
-        self::$processoTeste["RESTRICAO"] = PaginaIniciarProcesso::STA_NIVEL_ACESSO_RESTRITO;
+        self::$processoTeste["RESTRICAO"] = parent::STA_NIVEL_ACESSO_RESTRITO;
         self::$processoTeste["HIPOTESE_LEGAL"] = self::$remetente["HIPOTESE_RESTRICAO"];
 
         // Acessar sistema do this->REMETENTE do processo
@@ -59,10 +62,10 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_restrito
+     * #[Depends('test_tramitar_processo_restrito')]
      *
      * @return void
      */
@@ -75,14 +78,17 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
         $this->abrirProcesso(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -101,10 +107,10 @@ class TramiteProcessoRestritoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_restrito
+     * #[Depends('test_verificar_origem_processo_restrito')]
      *
      * @return void
      */

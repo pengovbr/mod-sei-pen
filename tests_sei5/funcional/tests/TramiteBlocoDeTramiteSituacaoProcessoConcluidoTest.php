@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioBaseTestCase
 {
@@ -14,8 +16,8 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -46,17 +48,17 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
         self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
-        function ($testCase) {
+        function () {
           try {
-              $testCase->frame('ifrEnvioProcesso');
+              $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
               $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-              $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-              $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+              $this->assertStringContainsString($mensagemSucesso, $this->paginaCadastrarProcessoEmBloco->elByCss('body')->getText());
+              $btnFechar = $this->paginaCadastrarProcessoEmBloco->elByXPath("//input[@id='btnFechar']");
               $btnFechar->click();
           } finally {
               try {
-                  $testCase->frame(null);
-                  $testCase->frame("ifrVisualizacao");
+                  $this->paginaCadastrarProcessoEmBloco->frame(null);
+                  $this->paginaCadastrarProcessoEmBloco->frame("ifrVisualizacao");
               } catch (Exception $e) {
               }
           }
@@ -65,28 +67,28 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         }
       );
 
-      $this->waitUntil(function ($testCase) use ($objProtocoloDTO) {
+      $this->waitUntil(function() use ($objProtocoloDTO) {
         sleep(5);
-        $testCase->refresh();
+        $this->paginaBase->refresh();
+        $colunaEstado = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->getText());
 
-        $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
-
-        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
-        $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
-          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        ]);
-
-        $this->assertEquals(6, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
         return true;
       }, PEN_WAIT_TIMEOUT);
+
+      $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+      $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+      ]);
+
+      $this->assertEquals(6, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
     }
 
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -117,17 +119,17 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
         self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
-        function ($testCase) {
+        function () {
           try {
-              $testCase->frame('ifrEnvioProcesso');
+              $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
               $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-              $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-              $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+              $this->assertStringContainsString($mensagemSucesso, $this->paginaCadastrarProcessoEmBloco->elByCss('body')->getText());
+              $btnFechar = $this->paginaCadastrarProcessoEmBloco->elByXPath("//input[@id='btnFechar']");
               $btnFechar->click();
           } finally {
               try {
-                  $testCase->frame(null);
-                  $testCase->frame("ifrVisualizacao");
+                  $this->paginaCadastrarProcessoEmBloco->frame(null);
+                  $this->paginaCadastrarProcessoEmBloco->frame("ifrVisualizacao");
               } catch (Exception $e) {
               }
           }
@@ -143,28 +145,28 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
 
       $this->paginaBase->navegarParaControleProcesso();
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
-      $this->waitUntil(function ($testCase) use ($objProtocoloDTO) {
+      $this->waitUntil(function() use ($objProtocoloDTO) {
         sleep(5);
-        $testCase->refresh();
-
-        $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
-        
-        $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
-        $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
-          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
-        ]);
-
-        $this->assertEquals(7, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
+        $this->paginaBase->refresh();
+        $colunaEstado = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->getText());
+      
         return true;
       }, PEN_WAIT_TIMEOUT);
+
+      $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+      $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+      ]);
+
+      $this->assertEquals(7, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
     }
 
     /**
      * Teste pra validar mensagem de documento não assinado ao ser inserido em bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -195,17 +197,17 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
         self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
         self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
-        function ($testCase) {
+        function () {
           try {
-              $testCase->frame('ifrEnvioProcesso');
+              $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
               $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-              $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-              $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+              $this->assertStringContainsString($mensagemSucesso, $this->paginaCadastrarProcessoEmBloco->elByCss('body')->getText());
+              $btnFechar = $this->paginaCadastrarProcessoEmBloco->elByXPath("//input[@id='btnFechar']");
               $btnFechar->click();
           } finally {
               try {
-                  $testCase->frame(null);
-                  $testCase->frame("ifrVisualizacao");
+                  $this->paginaCadastrarProcessoEmBloco->frame(null);
+                  $this->paginaCadastrarProcessoEmBloco->frame("ifrVisualizacao");
               } catch (Exception $e) {
               }
           }
@@ -214,21 +216,45 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
         }
       );
 
-      $this->waitUntil(function ($testCase) use ($objProtocoloDTO) {
-        sleep(5);
-        $testCase->refresh();
+      $estadoEsperado = mb_convert_encoding('Concluído', 'UTF-8', 'ISO-8859-1');
 
-        $colunaEstado = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr/td[3]'));
-        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->text());
+      $this->waitUntil(function() use ($objProtocoloDTO, $estadoEsperado) {
+        sleep(5);
+        $this->paginaBase->refresh();
+
+        $colunasEstado = $this->paginaCadastrarProcessoEmBloco->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
+        // se não houver nenhuma célula, continua esperando
+        if (count($colunasEstado) === 0) {
+            return false;
+        }
+        
+         // verifica se o texto da primeira célula contém o estado esperado
+        if (mb_strpos($colunasEstado[0]->getText(), $estadoEsperado) === false) {
+            return false;
+        }
+        $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunasEstado[0]->getText());
         
         $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
         $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
           'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
         ]);
 
-        $this->assertEquals(9, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
+        // precisa ter ao menos um resultado e o numIdAndamento ser 9
+        if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== 9) {
+            return false;
+        }
+
+        // condição satisfeita
         return true;
       }, PEN_WAIT_TIMEOUT);
+
+      // após a espera, reafirma a condição com assert
+      $fixture = new \BlocoDeTramiteProtocoloFixture();
+      $resultSet = $fixture->buscar([
+          'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+      ]);
+      $this->assertEquals(9, $resultSet[0]->getNumIdAndamento());
+
     }
 
 }

@@ -1,253 +1,298 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverSelect;
+use Facebook\WebDriver\WebDriverExpectedCondition;
 
 class PaginaCadastrarProcessoEmBloco extends PaginaTeste
 {
-    /**
-     * Método contrutor
-     * 
-     * @return void
-     */
-  public function __construct($test)
+    public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-  }
-
-  public function navegarListagemBlocoDeTramite()
-    {
-      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Blocos de Trâmite Externo', 'UTF-8', 'ISO-8859-1'));
-      $this->test->byXPath("//a[@link='md_pen_tramita_em_bloco']")->click();
-  }
-
-    /**
-     * Setar parametro para novo mapeamento de orgãos externos
-     * 
-     * @return void
-     */
-  public function setarParametros($estrutura, $origem)
-    {
-      $this->selectRepositorio($estrutura);
-      $this->selectUnidade($origem, 'Origem'); // Seleciona Orgão de Origem
-  }
-
-    /**
-     * Seleciona repositório por sigla
-     * 
-     * @param string $siglaRepositorio
-     * @return string
-     */
-  private function selectRepositorio($siglaRepositorio)
-    {
-      $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
-
-    if(isset($siglaRepositorio)){
-        $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
+        parent::__construct($driver, $testcase);
     }
 
-      return $this->test->byId('selRepositorioEstruturas')->value();
-  }
+    /**
+     * Navega até a listagem de Blocos de Trâmite Externo.
+     */
+    public function navegarListagemBlocoDeTramite(): void
+    {
+        $input = $this->elById('txtInfraPesquisarMenu');
+        $input->clear();
+        $input->sendKeys(mb_convert_encoding('Blocos de Trâmite Externo', 'UTF-8', 'ISO-8859-1'));
+
+        $this->elByXPath("//a[@link='md_pen_tramita_em_bloco']")->click();
+    }
 
     /**
-     * Seleciona unidade por nome
-     * 
-     * @param string $nomeUnidade
-     * @param string $origemDestino
-     * @param ?string $hierarquia
-     * @return string
+     * Configura parâmetros para criação de bloco.
      */
-  private function selectUnidade($nomeUnidade, $origemDestino, $hierarquia = null)
+    public function setarParametros(string $estrutura, string $origem): void
     {
-      $this->unidadeInput = $this->test->byId('txtUnidade');
-      $this->unidadeInput->clear();
-      $this->unidadeInput->value($nomeUnidade);
-      $this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade')->value();
-        if(!empty($hierarquia)){
-            $nomeUnidade .= ' - ' . $hierarquia;
-        }
+        $this->selectRepositorio($estrutura);
+        $this->selectUnidade($origem, 'Origem');
+    }
 
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){
+    /**
+     * Seleciona o repositório pelo label.
+     */
+    private function selectRepositorio(string $sigla): void
+    {
+        $select = new WebDriverSelect(
+            $this->elById('selRepositorioEstruturas')
+        );
+        if ($sigla !== '') {
+            $select->selectByVisibleText($sigla);
         }
-          $testCase->byPartialLinkText($nomeUnidade)->click();
+    }
+
+    /**
+     * Seleciona a unidade origem no campo de busca.
+     */
+    private function selectUnidade(
+      string $nomeUnidade,
+      string $origemDestino,
+      ?string $hierarquia = null
+  ): string {
+      // 1) Prepara o input e já envia ENTER para disparar o autocomplete
+      $input = $this->elById('txtUnidade');
+      $input->clear();
+      $input->sendKeys($nomeUnidade . WebDriverKeys::ENTER);
+  
+      // 2) Monta o texto que esperamos no link (com hierarquia, se houver)
+      $labelEsperado = $nomeUnidade . ($hierarquia ? " - {$hierarquia}" : '');
+  
+      // 3) Aguarda até o link aparecer e clicar nele, lidando com eventual alerta
+      $this->waitUntil(function() use ($labelEsperado, $input) {
+          // Fecha alerta de autocomplete, caso apareça
+          try {
+              if ($this->alertTextAndClose()) {
+                  // re-dispara ENTER para recarregar sugestões
+                  $input->sendKeys(WebDriverKeys::ENTER);
+              }
+          } catch (\Exception $e) {
+              // nenhum alerta => segue
+          }
+  
+          // Clica no link parcial pelo texto completo
+          $this->elByPartialLinkText($labelEsperado)->click();
           return true;
       }, PEN_WAIT_TIMEOUT);
-
-      return $this->unidadeInput->value();
+  
+      // 4) Retorna o valor final do input
+      return $input->getAttribute('value');
   }
 
-  public function novoBlocoDeTramite()
+    /**
+     * Inicia um novo bloco de trâmite.
+     */
+    public function novoBlocoDeTramite(): void
     {
-      $this->test->byId("bntNovo")->click();
-  }
-
-
-  public function criarNovoBloco()
-    {
-      $this->test->byId('txtDescricao')->value('Bloco para teste automatizado');
-  }
-
-  public function editarBlocoDeTramite($descricao = null)
-    {
-      $this->test->byXPath("(//img[@title='Alterar Bloco'])[1]")->click();
-
-    if ($descricao != null) {
-        $this->test->byId('txtDescricao')->clear();
-        $this->test->byId('txtDescricao')->value($descricao);
+        $this->elById('bntNovo')->click();
     }
-  }
 
-  public function selecionarExcluirBloco()
+    /**
+     * Preenche a descrição do novo bloco.
+     */
+    public function criarNovoBloco(string $descricao = 'Bloco para teste automatizado'): void
     {
-      $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
-      $this->test->byId("btnExcluir")->click();
-      $this->test->acceptAlert();
-  }
+        $input = $this->elById('txtDescricao');
+        $input->clear();
+        $descricao = mb_convert_encoding($descricao, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($descricao);
+    }
 
-  public function buscarMensagemAlerta()
+    /**
+     * Edita o primeiro bloco e opcionalmente altera a descrição.
+     */
+    public function editarBlocoDeTramite(string $descricao = null): void
     {
-      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-      return !empty($alerta->text()) ? $alerta->text() : "";
-  }
+        $this->elByXPath("(//img[@title='Alterar Bloco'])[1]")
+             ->click();
+        if ($descricao !== null) {
+            $input = $this->elById('txtDescricao');
+            $input->clear();
+            $descricao = mb_convert_encoding($descricao, 'UTF-8', 'ISO-8859-1');
+            $input->sendKeys($descricao);
+        }
+    }
 
-  public function buscarQuantidadeProcessosRecusados()
-  {
-    $linhasDaTabelaRecusadas = $this->test->elements($this->test->using('xpath')->value("//img[@title='Recusado']"));
-    return count($linhasDaTabelaRecusadas);
-  } 
-
-  public function tramitarProcessoExternamente($repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
+    /**
+     * Seleciona o primeiro bloco e exclui.
+     */
+    public function selecionarExcluirBloco(): void
     {
-      // Preencher parâmetros do trâmite
+        $this->elByXPath("(//label[@for='chkInfraItem0'])[1]")
+             ->click();
+        $this->elById('btnExcluir')->click();
+        $this->acceptAlert();
+    }
+
+    /**
+     * Retorna a mensagem de alerta, se houver.
+     */
+    public function buscarMensagemAlerta(): string
+    {
+        try {
+            return $this->elByXPath("(//div[@id='divInfraMsg0'])[1]")
+                        ->getText();
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
+
+    /**
+     * Conta quantas imagens de 'Recusado' estão na tela.
+     */
+    public function buscarQuantidadeProcessosRecusados(): int
+    {
+        return count($this->driver->findElements(
+            WebDriverBy::xpath("//img[@title='Recusado']")
+        ));
+    }
+
+    /**
+     * Executa o trâmite externo do processo em bloco.
+     */
+    public function tramitarProcessoExternamente(
+      string $repositorio,
+      string $unidadeDestino,
+      string $unidadeDestinoHierarquia,
+      bool $urgente = false,
+      ?callable $callbackEnvio = null,
+      int $timeout = PEN_WAIT_TIMEOUT
+  ): void {
+      // 1) Executa os selects e o botão Enviar
       $this->selectRepositorio($repositorio);
       $this->selectUnidade($unidadeDestino, 'origem', $unidadeDestinoHierarquia);
       $this->btnEnviar();
-
-    if ($callbackEnvio == null) {
-        $mensagemAlerta = null;
+  
+      // 2) Captura (e fecha) o alerta inicial, mas só lança exceção
+      //    se veio texto e não foi passado callback personalizado
       try {
-        $mensagemAlerta = $this->alertTextAndClose(true);
-      } catch (Exception $e) {
+          $mensagemAlerta = $this->alertTextAndClose(true);
+      } catch (\Exception $e) {
+          $mensagemAlerta = null;
       }
-      if ($mensagemAlerta) {
-          throw new Exception($mensagemAlerta);
+      if ($mensagemAlerta && $callbackEnvio === null) {
+          throw new \Exception($mensagemAlerta);
       }
-    }
-
-    try {
-        $mensagemAlerta = $this->alertTextAndClose(true);
-    } catch (Exception $e) {
-    }
-
-    if (isset($mensagemAlerta)) {
-        throw new Exception($mensagemAlerta);
-    }
-
-      $callbackEnvio = $callbackEnvio ?: function ($testCase) {
-        try {
-            $testCase->frame('ifrEnvioProcesso');
-            $mensagemSucesso = mb_convert_encoding('Trâmite externo do processo finalizado com sucesso!', 'UTF-8', 'ISO-8859-1');
-            $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-            $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
-            $btnFechar->click();
-        } finally {
-          try {
-              $this->test->frame(null);
-              $this->test->frame("ifrVisualizacao");
-          } catch (Exception $e) {
-          }
-        }
-
-          return true;
-      };
-
-    try {
-       $this->test->waitUntil($callbackEnvio, $timeout);
-    } finally {
+  
+      // 3) Define o callback padrão, se não vier um por parâmetro
+      if ($callbackEnvio === null) {
+          $sucessoMensagem = mb_convert_encoding(
+              'Trâmite externo do processo finalizado com sucesso!',
+              'UTF-8',
+              'ISO-8859-1'
+          );
+  
+          $callbackEnvio = function (RemoteWebDriver $driver) use ($sucessoMensagem) {
+              // Entra no frame de confirmação
+              $this->frame('ifrEnvioProcesso');
+  
+              // Verifica se a mensagem de sucesso apareceu
+              $texto = $this->buscarMensagemAlerta();
+              if (mb_strpos($texto, $sucessoMensagem) !== false) {
+                  // Fecha a modal
+                  $this->elById('btnFechar')->click();
+                  return true;
+              }
+  
+              return false;
+          };
+      }
+  
+      // 4) Aguarda a condição do callback
       try {
-         $this->test->frame(null);
-         $this->test->frame("ifrVisualizacao");
-      } catch (Exception $e) {
+          $this->waitUntil($callbackEnvio, $timeout);
+      } finally {
+          // Sempre restaura o frame principal e a visualização
+          $this->frame(null);
+          // $this->frame('ifrVisualizacao');
       }
-    }
-
+  
+      // 5) Pausa curta para dar tempo de estabilizar a UI
       sleep(1);
   }
+  
 
-  public function realizarValidacaoRecebimentoProcessoNoDestinatario($processoTeste)
+    /**
+     * Realiza validação de recebimento no destinatário.
+     */
+    public function realizarValidacaoRecebimentoProcessoNoDestinatario(array $processoTeste): void
     {
-      $strProtocoloTeste = $processoTeste['PROTOCOLO'];
+        $protocolo = $processoTeste['PROTOCOLO'];
+        $this->waitUntil(function() use ($protocolo) {
+            sleep(5);
+            $this->paginaBase->navegarParaControleProcesso();
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+            return true;
+        }, PEN_WAIT_TIMEOUT);
 
-      $this->test->waitUntil(function ($testCase) use ($strProtocoloTeste) {
-          sleep(5);
-          $this->paginaBase->navegarParaControleProcesso();
-          $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-          return true;
-      }, PEN_WAIT_TIMEOUT);
+        $this->paginaProcesso->listarDocumentos();
+    }
 
-      $listaDocumentos = $this->paginaProcesso->listarDocumentos();
-  }
-
-  public function retornarTextoColunaDaTabelaDeBlocos() 
+    /**
+     * Retorna o texto da terceira coluna da primeira linha.
+     */
+    public function retornarTextoColunaDaTabelaDeBlocos(): string
     {
-     $tabela = $this->test->byXPath('//tr[@class="infraTrClara odd"]');
-     $terceiraColuna = $tabela->byXPath('./td[3]');
+        $row = $this->elByXPath('//tr[@class="infraTrClara odd"]');
+        return $row->findElement(
+            WebDriverBy::xpath('./td[3]')
+        )->getText();
+    }
 
-     return $terceiraColuna->text();
-  }
-
-  public function retornarQuantidadeDeProcessosNoBloco() 
+    /**
+     * Conta linhas na tabela de blocos.
+     */
+    public function retornarQuantidadeDeProcessosNoBloco(): int
     {
-      // Localiza todas as linhas da tabela com o XPath
-      $linhasDaTabela = $this->test->elements($this->test->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+        return count($this->driver->findElements(
+            WebDriverBy::cssSelector('#tblBlocos tbody tr')
+        ));
+    }
 
-      // Obtém o número de linhas
-      return count($linhasDaTabela);
-  }
-
-    
-  public function bntTramitarBloco()
+    public function bntTramitarBloco(): void
     {
-      $this->test->byXPath("(//img[@title='Tramitar Bloco'])[1]")->click();
-  }
+        $this->elByXPath("(//img[@title='Tramitar Bloco'])[1]")
+             ->click();
+    }
 
-  public function bntVisualizarProcessos()
+    public function bntVisualizarProcessos(): void
     {
-      $this->test->byXPath("(//img[@title='Visualizar Processos'])[1]")->click();
-  }
+        $this->elByXPath("(//img[@title='Visualizar Processos'])[1]")
+             ->click();
+    }
 
-  public function btnSelecionarTodosProcessos()
-  {
-    $this->test->byXPath("//*[@id='imgInfraCheck']")->click();
-  }
-
-  public function btnComandoSuperiorExcluir()
-  {
-    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Excluir"]')->click();
-    $this->test->acceptAlert();
-  }
-
-  public function btnComandoSuperiorFechar()
-  {
-    $this->test->byXPath('//*[@id="divInfraBarraComandosSuperior"]/button[@value="Fechar"]')->click();
-  }
-
-  public function btnSalvar()
+    public function btnSelecionarTodosProcessos(): void
     {
-      $buttonElement = $this->test->byXPath("//button[@type='submit' and @value='Salvar']");
-      $buttonElement->click();
-  }
+        $this->elByXPath("//*[@id='imgInfraCheck']")->click();
+    }
 
-  public function btnEnviar()
+    public function btnComandoSuperiorExcluir(): void
     {
-      $buttonElement = $this->test->byXPath("//button[@type='button' and @value='Enviar']");
-      $buttonElement->click();
-  }
+        $this->elByXPath(
+            "//*[@id='divInfraBarraComandosSuperior']/button[@value='Excluir']"
+        )->click();
+        $this->acceptAlert();
+    }
 
+    public function btnComandoSuperiorFechar(): void
+    {
+        $this->elByXPath(
+            "//*[@id='divInfraBarraComandosSuperior']/button[@value='Fechar']"
+        )->click();
+    }
+
+    public function btnSalvar(): void
+    {
+        $this->elByXPath("//button[@type='submit' and @value='Salvar']")->click();
+    }
+
+    public function btnEnviar(): void
+    {
+        $this->elByXPath("//button[@type='button' and @value='Enviar']")->click();
+    }
 }

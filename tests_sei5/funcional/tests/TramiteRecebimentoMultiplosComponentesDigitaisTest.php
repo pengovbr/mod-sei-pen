@@ -1,12 +1,13 @@
 <?php
 
 use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 /**
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
-class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -29,7 +30,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
     /**
      * Teste de recebimento dedocumento avulso com 2 componentes digitais
      *
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -81,13 +82,14 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         $this->assertNotNull($reciboTramite);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, array(self::$documentoZip), $destinatario);
         $this->receberReciboTramite($novoTramite);
+        $this->sairSistema();
     }
 
 
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @depends test_recebimento_processo_com_3_componentes_digitais
+     * #[Depends('test_recebimento_processo_com_3_componentes_digitais')]
      *
      * @return void
      */
@@ -103,6 +105,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
 
         $novosDocumentos =  array($documentoTeste1, $documentoTeste2);
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        $this->sairSistema();
 
     }
 

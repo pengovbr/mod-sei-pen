@@ -1,5 +1,8 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  * Testes de trâmite de processos anexados considerando cenário específico de trâmites e devoluções sucessivas
  *
@@ -13,7 +16,7 @@
  *  - Adição de novos documentos e devolução para órgão B
  *
  * Execution Groups
- * @group execute_alone_group2
+ * #[Group('execute_alone_group2')]
  */
 class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTestCase
 {
@@ -40,10 +43,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste inicial de trâmite de processo apartado para o órgão B
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -66,10 +69,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto recebimento do processo simples no órgão B
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_simples_para_orgaoB
+     * #[Depends('test_tramitar_processo_simples_para_orgaoB')]
      *
      * @return void
      */
@@ -83,10 +86,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de trâmite externo de processo realizando a devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_recebimento_processo_simples_destino
+     * #[Depends('test_verificar_recebimento_processo_simples_destino')]
      *
      * @return void
      */
@@ -110,10 +113,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação da correta devolução do processo simples para o órgão A
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_simples_para_origem
+     * #[Depends('test_devolucao_processo_simples_para_origem')]
      *
      * @return void
      */
@@ -128,10 +131,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de trâmite de processos contendo o processo simples anexado à outro
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_devolucao_processo_simples_origem
+     * #[Depends('test_verificar_devolucao_processo_simples_origem')]
      *
      * @return void
      */
@@ -176,10 +179,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto envio do processo anexado no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_anexado_para_orgaoB
+     * #[Depends('test_tramitar_processo_anexado_para_orgaoB')]
      *
      * @return void
      */
@@ -189,14 +192,17 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
@@ -211,10 +217,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto recebimento do processo anexado no destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_anexado
+     * #[Depends('test_verificar_origem_processo_anexado')]
      *
      * @return void
      */
@@ -259,10 +265,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de trâmite externo de processo realizando nova devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_destino_processo_anexado
+     * #[Depends('test_verificar_destino_processo_anexado')]
      *
      * @return void
      */
@@ -304,10 +310,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto envio do processo anexado no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem
+     * #[Depends('test_devolucao_processo_para_origem')]
      *
      * @return void
      */
@@ -317,14 +323,17 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
@@ -337,10 +346,10 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação da correta devolução do processo anexado no destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_devolucao_origem_processo_anexado
+     * #[Depends('test_verificar_devolucao_origem_processo_anexado')]
      *
      * @return void
      */

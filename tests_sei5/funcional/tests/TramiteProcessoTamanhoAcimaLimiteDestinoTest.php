@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  * 
  * Execution Groups
- * @group execute_alone_group3
+ * #[Group('execute_alone_group3')]
  */
 class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTestCase
 {
@@ -21,7 +24,7 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
      * @return void
      */
     public static function setUpBeforeClass() :void {
-
+        parent::setUpBeforeClass();
         // Redução de limite máximo de tamanho de documento externo
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
@@ -29,7 +32,7 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
     }      
         
     public static function tearDownAfterClass() :void {
-
+        parent::tearDownAfterClass();
         // Ajuste do tamanho máximo de arquivo externo permitido para padrão
         $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
         $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
@@ -39,10 +42,10 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
     /**
      * Teste de trâmite externo de processo contendo documento com tamanho acima do limite no destinatario
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -67,16 +70,17 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
         $this->tramitarProcessoExternamente(
                 self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+        $this->sairSistema();
     }
 
 
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_tamanho_acima_limite_destino
+     * #[Depends('test_tramitar_processo_tamanho_acima_limite_destino')]
      *
      * @return void
      */
@@ -88,14 +92,19 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
         $this->abrirProcesso(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function($testCase)  {
+        $this->waitUntil(function()  {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertTrue($paginaProcesso->processoAberto());
-            $testCase->assertFalse($paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertTrue($this->paginaProcesso->processoAberto());
+                $this->assertFalse($this->paginaProcesso->processoBloqueado());
+                return true;
+    
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // Validar histórico de trâmite do processo
@@ -117,10 +126,10 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
     /**
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_tamanho_acima_limite_destino
+     * #[Depends('test_verificar_origem_processo_tamanho_acima_limite_destino')]
      *
      * @return void
      */

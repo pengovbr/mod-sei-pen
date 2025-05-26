@@ -1,35 +1,55 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
 
 class PaginaTipoProcessoReativar extends PaginaTeste
 {
-  public function __construct($test)
+    public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-  }
-
-  public function navegarTipoProcessoReativar()
-    {
-      $this->test->byId("txtInfraPesquisarMenu")->value("Reativar Mapeamento de Tipos de Processo");
-
-      $this->test->byXPath("//a[@link='pen_map_tipo_processo_reativar']")->click();
-  }
-
-  public function reativarMapeamento()
-    {
-      $this->test->byXPath("//a[contains(@class, 'reativar')]")->click();
-      $bolExisteAlerta=$this->alertTextAndClose();
-    if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
+        parent::__construct($driver, $testcase);
     }
-  }
 
-  public function reativarMapeamentoCheckbox() 
+    /**
+     * Navega até a página de reativação de mapeamento de tipos de processo.
+     */
+    public function navegarTipoProcessoReativar(): void
     {
-      $this->test->byXPath("//div[contains(@class, 'infraCheckboxDiv')]")->click();
-      $this->test->byId("btnReativar")->click();
-      $bolExisteAlerta=$this->alertTextAndClose();
-    if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
+        $input = $this->elById('txtInfraPesquisarMenu');
+        $input->clear();
+        $input->sendKeys('Reativar Mapeamento de Tipos de Processo');
+
+        $this->elByXPath("//a[@link='pen_map_tipo_processo_reativar']")->click();
     }
-  }
+
+    /**
+     * Reativa o mapeamento através do link de reativação.
+     */
+    public function reativarMapeamento(): void
+    {
+        $this->elByXPath("//a[contains(@class, 'reativar')]")->click();
+        $this->handleAlert();
+    }
+
+    /**
+     * Reativa o mapeamento usando checkbox e botão de reativar.
+     */
+    public function reativarMapeamentoCheckbox(): void
+    {
+        $this->elByXPath("//div[contains(@class, 'infraCheckboxDiv')]")->click();
+        $this->elById('btnReativar')->click();
+        $this->handleAlert();
+    }
+
+    /**
+     * Trata o alerta e confirma com Enter se houver mensagem.
+     */
+    private function handleAlert(): void
+    {
+        $msg = parent::alertTextAndClose();
+        if ($msg !== null) {
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+        }
+    }
 }

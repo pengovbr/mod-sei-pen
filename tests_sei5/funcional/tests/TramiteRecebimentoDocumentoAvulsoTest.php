@@ -1,10 +1,11 @@
 <?php
 
 use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 /**
  * Execution Groups
- * @group execute_alone_group4
+ * #[Group('execute_alone_group4')]
  */
 class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
 {
@@ -29,7 +30,7 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -73,8 +74,8 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      *
      * @return void
@@ -95,10 +96,10 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo no destino
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem
+     * #[Depends('test_devolucao_processo_para_origem')]
      *
      * @return void
      */
@@ -112,10 +113,10 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_recebimento_processo_destino
+     * #[Depends('test_verificar_recebimento_processo_destino')]
      *
      * @return void
      */
@@ -135,10 +136,10 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo no destino
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem_documento_avulso
+     * #[Depends('test_devolucao_processo_para_origem_documento_avulso')]
      *
      * @return void
      */

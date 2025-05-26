@@ -1,16 +1,29 @@
 <?php
 
 use \utilphp\util;
-use PHPUnit\Extensions\Selenium2TestCase;
-
 use function PHPSTORM_META\map;
+
+use PHPUnit\Framework\TestCase;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\Remote\DesiredCapabilities;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverExpectedCondition;
+use Facebook\WebDriver\WebDriverWait;
+use Facebook\WebDriver\Chrome\ChromeOptions;
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Classe base contendo rotinas comuns utilizadas nos casos de teste do módulo
  */
-class CenarioBaseTestCase extends Selenium2TestCase
+class CenarioBaseTestCase extends TestCase
 {
+
     const PASTA_ARQUIVOS_TESTE = "/tmp";
+    const STA_NIVEL_ACESSO_PUBLICO  = 0;
+    const STA_NIVEL_ACESSO_RESTRITO = 1;
+    const STA_NIVEL_ACESSO_SIGILOSO = 2;
+
+    protected static $driver;
 
     //Referência para unidades que serão consideradas no fluxo de trâmite (Remetente -> Destinatário)
     protected static $urlSistemaRemetente = null;
@@ -25,22 +38,20 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     //Referências para as páginas do SEI utilizadas nos cenarios de teste
     protected $paginaBase = null;
-    protected $paginaProcesso = null;
-    protected $paginaTramitar = null;
-    protected $paginaDocumento = null;
-    protected $paginaReciboTramite = null;
+    protected $paginaLogin = null;
     protected $paginaEditarProcesso = null;
     protected $paginaControleProcesso = null;
+    protected $paginaDocumento = null;
+    protected $paginaProcesso = null;
+    protected $paginaTramitar = null;
+    protected $paginaReciboTramite = null;
     protected $paginaConsultarAndamentos = null;
-    protected $paginaAssinaturaDocumento = null;
-    protected $paginaIncluirDocumento = null;
     protected $paginaProcessosTramitadosExternamente = null;
-    protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
-    protected $paginaTramitarProcessoEmLote = null;
     protected $paginaMoverDocumento = null;
-    protected $paginaCadastroOrgaoExterno = null;
     protected $paginaCadastroMapEnvioCompDigitais = null;
+    protected $paginaTramiteMapeamentoOrgaoExterno = null;
+    protected $paginaCadastroOrgaoExterno = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
     protected $paginaCadastrarProcessoEmBloco = null;
@@ -51,37 +62,72 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     public function setUpPage(): void
     {
-        $this->paginaBase = new PaginaTeste($this);
-        $this->paginaDocumento = new PaginaDocumento($this);
-        $this->paginaAssinaturaDocumento = new PaginaAssinaturaDocumento($this);
-        $this->paginaProcesso = new PaginaProcesso($this);
-        $this->paginaTramitar = new PaginaTramitarProcesso($this);
-        $this->paginaReciboTramite = new PaginaReciboTramite($this);
-        $this->paginaConsultarAndamentos = new PaginaConsultarAndamentos($this);
-        $this->paginaProcessosTramitadosExternamente = new PaginaProcessosTramitadosExternamente($this);
-        $this->paginaControleProcesso = new PaginaControleProcesso($this);
-        $this->paginaIncluirDocumento = new PaginaIncluirDocumento($this);
-        $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
-        $this->paginaAnexarProcesso = new PaginaAnexarProcesso($this);
-        $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
-        $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
-        $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
-        $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
-        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
-        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
-        $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
-        $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
-        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
-        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco($this);
-        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
-        $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
-        $this->paginaMapUnidades = new PaginaMapUnidades($this);
-        $this->currentWindow()->maximize();
+        $this->paginaBase = new PaginaTeste(self::$driver, $this);
+        $this->paginaLogin = new PaginaLogin(self::$driver, $this);
+        $this->paginaEditarProcesso = new PaginaEditarProcesso(self::$driver, $this);
+        $this->paginaControleProcesso = new PaginaControleProcesso(self::$driver, $this);
+        $this->paginaDocumento = new PaginaDocumento(self::$driver, $this);
+        $this->paginaProcesso = new PaginaProcesso(self::$driver, $this);
+        $this->paginaTramitar = new PaginaTramitarProcesso(self::$driver, $this);
+        $this->paginaReciboTramite = new PaginaReciboTramite(self::$driver, $this);
+        $this->paginaConsultarAndamentos = new PaginaConsultarAndamentos(self::$driver, $this);
+        $this->paginaProcessosTramitadosExternamente = new PaginaProcessosTramitadosExternamente(self::$driver, $this);
+        $this->paginaCancelarDocumento = new PaginaCancelarDocumento(self::$driver, $this);
+        $this->paginaMoverDocumento = new PaginaMoverDocumento(self::$driver, $this);
+        $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais(self::$driver, $this);
+        $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno(self::$driver, $this);
+        $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno(self::$driver, $this);
+        $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso(self::$driver, $this);
+        $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar(self::$driver, $this);
+        $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco(self::$driver, $this);
+        $this->paginaTramiteEmBloco = new PaginaTramiteEmBloco(self::$driver, $this);
+        $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar(self::$driver, $this);
+        $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar(self::$driver, $this);
+        $this->paginaMapUnidades = new PaginaMapUnidades(self::$driver, $this);
+
     }
 
     public static function setUpBeforeClass(): void
     {
+
+        $seleniumUrl = 'http://'. PHPUNIT_HOST .':'. PHPUNIT_PORT . '/wd/hub';
+        switch (PHPUNIT_BROWSER) {
+            case 'firefox':
+                $browser = DesiredCapabilities::microsoftEdge();
+                break;
+            case 'internetExplorer':
+                $browser = DesiredCapabilities::internetExplorer();
+                break;
+            case 'microsoftEdge':
+                $browser = DesiredCapabilities::firefox();
+                break;
+            case 'safari':
+                $browser = DesiredCapabilities::safari();
+                break;
+            case 'opera':
+                $browser = DesiredCapabilities::opera();
+                break;
+            case 'chrome':
+                $options = new ChromeOptions();
+                $options->addArguments([
+                    'disable-features=AvoidFlashBetweenNavigation,PaintHolding',
+                ]);
+                $options->setExperimentalOption('w3c', false);
+
+                // 2) Gera as capabilities e instância o driver
+                $browser = $options->toCapabilities();
+                // $browser = DesiredCapabilities::chrome();
+                break;
+            default:
+                $browser = DesiredCapabilities::htmlUnitWithJS();
+                break;
+        }
+        self::$driver = RemoteWebDriver::create(
+            $seleniumUrl,
+            $browser
+        );
+
+        self::$driver->manage()->window()->maximize();
         //TODO: Migrar todo o código abaixo para uma classe utilitária de configuração dos testes
         /***************** CONFIGURAÇÃO PRELIMINAR DO ÓRGÃO 1 *****************/
         $parametrosOrgaoA = new ParameterUtils(CONTEXTO_ORGAO_A);
@@ -180,43 +226,32 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     public static function tearDownAfterClass(): void
     {
+        if (self::$driver) {
+            self::$driver->quit();
+        }
     }
 
     public function setUp(): void
     {
-        $this->setHost(PHPUNIT_HOST);
-        $this->setPort(intval(PHPUNIT_PORT));
-        $this->setBrowser(PHPUNIT_BROWSER);
-        $this->setBrowserUrl(PHPUNIT_TESTS_URL);
-        $this->setDesiredCapabilities(
-            array(
-                'platform' => 'LINUX',
-                'chromeOptions' => array(
-                    'w3c' => false,
-                    'args' => [
-                        '--profile-directory=' . uniqid(),
-                        '--disable-features=TranslateUI',
-                        '--disable-translate',
-                    ],
-                )
-            )
-        );
+        self::$driver->manage()->deleteAllCookies();
+        $this->setUpPage();
     }
 
-    protected function definirRemetenteProcesso($urlSistema, $siglaOrgao, $siglaUnidade, $nomeUnidade)
+    /**
+     * Vai para a URL informada
+     */
+    protected function url(string $url): void
     {
-        self::$urlSistemaRemetente = $urlSistema;
-        self::$siglaOrgaoRemetente =  $siglaOrgao;
-        self::$siglaUnidadeRemetente = $siglaUnidade;
-        self::$nomeUnidadeRemetente = $nomeUnidade;
+        self::$driver->get($url);
     }
 
-    protected function definirDestinatarioProcesso($urlSistema, $siglaOrgao, $siglaUnidade, $nomeUnidade)
+    /**
+     * Espera até a condição ser verdadeira
+     */
+    protected function waitUntil(callable $condition, int $timeout = PEN_WAIT_TIMEOUT): void
     {
-        self::$urlSistemaDestinatario = $urlSistema;
-        self::$siglaOrgaoDestinatario =  $siglaOrgao;
-        self::$siglaUnidadeDestinatario = $siglaUnidade;
-        self::$nomeUnidadeDestinatario = $nomeUnidade;
+        $wait = new WebDriverWait(self::$driver, $timeout);
+        $wait->until($condition);
     }
 
     protected function definirContextoTeste($nomeContexto)
@@ -272,14 +307,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function acessarSistema($url, $siglaUnidade, $login, $senha)
     {
         $this->url($url);
-        PaginaLogin::executarAutenticacao($this, $login, $senha);
-        PaginaTeste::selecionarUnidadeContexto($this, $siglaUnidade);
+        $this->paginaLogin->executarAutenticacao($login, $senha);
+        $this->selecionarUnidadeInterna($siglaUnidade);
         $this->url($url);
     }
 
     protected function selecionarUnidadeInterna($unidadeDestino)
     {
-        PaginaTeste::selecionarUnidadeContexto($this, $unidadeDestino);
+        $this->paginaBase->selecionarUnidadeContexto($unidadeDestino);
     }
 
     protected function sairSistema()
@@ -288,6 +323,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
     }
 
     protected function abrirProcesso($protocolo)
+    {
+        $this->paginaBase->navegarParaControleProcesso();
+        try {
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+        } catch (\Exception $e) {
+            $this->paginaBase->pesquisar($protocolo);
+        }
+    }
+
+    protected function abrirProcessoControleProcesso($protocolo)
     {
         $this->paginaBase->navegarParaControleProcesso();
         $this->paginaControleProcesso->abrirProcesso($protocolo);
@@ -303,45 +348,14 @@ class CenarioBaseTestCase extends Selenium2TestCase
         return $protocolo;
     }
 
-
-    protected function assinarDocumento($siglaOrgao, $cargoAssinante, $loginSenha)
-    {
-        // Navegar para página de assinatura
-        $this->paginaDocumento->navegarParaAssinarDocumento();
-        sleep(2);
-
-        // Assinar documento
-        $this->paginaAssinaturaDocumento->selecionarOrgaoAssinante($siglaOrgao);
-        $this->paginaAssinaturaDocumento->selecionarCargoAssinante($cargoAssinante);
-        $this->paginaAssinaturaDocumento->assinarComLoginSenha($loginSenha);
-        $this->window('');
-        sleep(2);
-    }
-
     protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
-        // Acessar funcionalidade de trâmite externo
-        try {
-            $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
-        } catch (Exception $e) {
-            $this->paginaProcesso->navegarParaTramitarProcesso();
-        }
-
+        $this->paginaProcesso->navegarParaTramitarProcesso();
+    
         // Preencher parâmetros do trâmite
         $this->paginaTramitar->repositorio($repositorio);
         $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
         $this->paginaTramitar->tramitar();
-
-        if ($callbackEnvio == null) {
-            $mensagemAlerta = null;
-            try {
-                $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
-            } catch (Exception $e) {
-            }
-            if ($mensagemAlerta) {
-                throw new Exception($mensagemAlerta);
-            }
-        }
 
         try {
             $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
@@ -352,18 +366,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
             throw new Exception($mensagemAlerta);
         }
 
-        $callbackEnvio = $callbackEnvio ?: function ($testCase) {
+        $callbackEnvio = $callbackEnvio ?: function () {
             try {
-                $testCase->frame('ifrEnvioProcesso');
+                $this->paginaTramitar->frame('ifrEnvioProcesso');
                 $mensagemSucesso = mb_convert_encoding('Trâmite externo do processo finalizado com sucesso!', 'UTF-8', 'ISO-8859-1');
-                $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-                $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                $this->assertStringContainsString($mensagemSucesso, $this->paginaTramitar->elByCss('body')->getText());
+                $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {
                 try {
-                    $this->frame(null);
-                    $this->frame("ifrConteudoVisualizacao");
-                    $this->frame("ifrVisualizacao");
+                    $this->paginaTramitar->frame(null);
+                    $this->paginaTramitar->frame("ifrConteudoVisualizacao");
+                    $this->paginaTramitar->frame("ifrVisualizacao");
                 } catch (Exception $e) {
                 }
             }
@@ -375,13 +389,36 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $this->waitUntil($callbackEnvio, $timeout);
         } finally {
             try {
-                $this->frame(null);
-                $this->frame("ifrVisualizacao");
+                $this->paginaTramitar->frame(null);
+                $this->paginaTramitar->frame("ifrVisualizacao");
             } catch (Exception $e) {
             }
         }
 
         sleep(1);
+    }
+
+    protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
+    {
+        $this->tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente, $callbackEnvio, $timeout);
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            try {
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertTrue($this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
+        }, PEN_WAIT_TIMEOUT);
+
+        $unidade = mb_convert_encoding($unidadeDestino, "ISO-8859-1");
+        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", $protocolo, $unidade);
+        $this->validarRecibosTramite($mensagemRecibo, true, true);
+        $this->validarHistoricoTramite($unidadeDestino, true, true);
+        $this->validarProcessosTramitados($protocolo, true);
     }
 
     protected function tramitarProcessoInternamente($unidadeDestino, $manterAbertoNaUnidadeAtual = false)
@@ -432,13 +469,15 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function validarRecibosTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)
     {
         $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
-        $this->waitUntil(function ($testCase) use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
+        $this->waitUntil(function() use ($mensagem, $verificarReciboEnvio, $verificarReciboConclusao) {
             sleep(5);
-            $testCase->refresh();
-            $testCase->paginaProcesso->navegarParaConsultarRecibos();
-            $this->assertTrue($testCase->paginaReciboTramite->contemTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao));
-            return true;
+            $this->paginaProcesso->refresh();
+            $this->paginaProcesso->navegarParaConsultarRecibos();
+            if($this->paginaReciboTramite->contemTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao)) {
+                return true;
+            }
         }, PEN_WAIT_TIMEOUT);
+        $this->assertTrue($this->paginaReciboTramite->contemTramite($mensagem, $verificarReciboEnvio, $verificarReciboConclusao));
     }
 
     protected function validarHistoricoTramite(
@@ -460,14 +499,18 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
         if ($verificarProcessoRejeitado) {
 
-            $motivoRecusa = mb_convert_encoding($motivoRecusa, 'UTF-8', 'ISO-8859-1');
-            $this->waitUntil(function ($testCase) use ($unidadeDestino, $motivoRecusa) {
-                sleep(5);
-                $testCase->refresh();
-                $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-                $this->assertTrue($testCase->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa));
-                return true;
+            $this->waitUntil(function() use ($unidadeDestino, $motivoRecusa) {
+                sleep(2);
+                $this->paginaProcesso->refresh();
+                sleep(2);
+                $this->paginaProcesso->navegarParaConsultarAndamentos();
+                $andamento = $this->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa);
+                if ($andamento){
+                    return true;
+                }
             }, PEN_WAIT_TIMEOUT);
+
+            $this->assertTrue($this->paginaConsultarAndamentos->contemTramiteProcessoRejeitado($unidadeDestino, $motivoRecusa));
         }
     }
 
@@ -477,7 +520,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         sleep(2);
         $this->paginaProcesso->navegarParaEditarProcesso();
-        $this->paginaEditarProcesso = new PaginaEditarProcesso($this);
         $this->assertEquals(mb_convert_encoding($descricao, 'UTF-8', 'ISO-8859-1'), $this->paginaEditarProcesso->descricao());
         $this->assertEquals($restricao, $this->paginaEditarProcesso->restricao());
 
@@ -487,7 +529,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
 
         if ($observacoes) {
-            $this->assertStringContainsString($observacoes, $this->byCssSelector('body')->text());
+            $this->assertStringContainsString($observacoes, $this->paginaBase->elByCss('body')->getText());
         }
 
         if ($hipoteseLegal != null) {
@@ -545,10 +587,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
 
     protected function validarProcessosTramitados($protocolo, $deveExistir)
     {
-        $this->frame(null);
+        $this->paginaBase->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
-        $this->byLinkText(mb_convert_encoding("Processos em Tramitação Externa", 'UTF-8', 'ISO-8859-1'))->click();
+        $this->paginaBase->navegarPara("Processos em Tramitação Externa");
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
 
@@ -566,7 +607,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "DESCRICAO" => util::random_string(100),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
-            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "RESTRICAO" => self::STA_NIVEL_ACESSO_PUBLICO,
             "ORIGEM" => $contextoProducao['URL'],
         );
     }
@@ -580,7 +621,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "DESCRICAO" => trim(str_repeat(util::random_string(9) . ' ', 10)),
             "OBSERVACOES" => null,
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
-            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "RESTRICAO" => self::STA_NIVEL_ACESSO_PUBLICO,
             "ORDEM_DOCUMENTO_REFERENCIADO" => null,
             "ARQUIVO" => ".html",
             "ORIGEM" => $contextoProducao['URL'],
@@ -604,7 +645,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "OBSERVACOES" => util::random_string(500),
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
-            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "RESTRICAO" => self::STA_NIVEL_ACESSO_PUBLICO,
             "ARQUIVO" => $arquivos,
             "ORIGEM" => $contextoProducao['URL'],
         );
@@ -626,7 +667,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
             "OBSERVACOES" => util::random_string(500),
             "INTERESSADOS" => str_repeat(util::random_string(9) . ' ', 25),
             "ORDEM_DOCUMENTO_REFERENCIADO" => $ordemDocumentoReferenciado,
-            "RESTRICAO" => PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
+            "RESTRICAO" => self::STA_NIVEL_ACESSO_PUBLICO,
             "ARQUIVO" => $arquivos,
             "ORIGEM" => $contextoProducao['URL'],
         );
@@ -640,9 +681,9 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // 11 - Abrir protocolo na tela de controle de processos
-        $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
+        $this->waitUntil(function() use ($strProtocoloTeste) {
             sleep(5);
-            $this->abrirProcesso($strProtocoloTeste);
+            $this->abrirProcessoControleProcesso($strProtocoloTeste);
             return true;
         }, PEN_WAIT_TIMEOUT);
 
@@ -676,13 +717,13 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
 
         // Abrir protocolo na tela de controle de processos pelo texto da descrição
-        $this->waitUntil(function ($testCase) use ($strDescricao, &$strProtocoloTeste) {
+        $this->waitUntil(function() use ($strDescricao, &$strProtocoloTeste) {
             sleep(5);
             $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
-            $this->assertNotFalse($strProtocoloTeste);
             return true;
         }, PEN_WAIT_TIMEOUT);
-
+        
+        $this->assertNotFalse($strProtocoloTeste);
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         // Validar dados  do processo
@@ -715,32 +756,6 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
         $this->paginaBase->navegarParaControleProcesso();
         $this->assertFalse($this->paginaControleProcesso->contemProcesso($processoTeste['PROTOCOLO'], false, false));
-    }
-
-    protected function selecionarProcessos($numProtocolo=null)
-    {
-        $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaTramitarProcessoEmLote->selecionarProcessos($numProtocolo);
-        sleep(2);
-    }
-
-    protected function visualizarProcessoTramitadosEmLote($test)
-    {
-        $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos Tramitados em Bloco', 'UTF-8', 'ISO-8859-1'));
-        $this->byLinkText("Processos Tramitados em Bloco")->click();
-    }
-
-    protected function navegarProcessoEmLote($selAndamento, $numProtocolo=null)
-    {
-        if($selAndamento == 0){
-            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_PROCESSAMENTO;
-        }if($selAndamento == 2){
-            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CONCLUIDO;
-        }if($selAndamento == 7){
-            $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
-        }
-        $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
     }
 
 }

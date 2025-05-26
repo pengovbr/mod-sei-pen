@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Teste de tramite de processos em bloco
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
 {
@@ -21,7 +23,7 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
     }
 
-    public function teste_tramite_bloco_externo()
+    public function test_tramite_bloco_externo()
     {
         // Definição de dados de teste do processo principal
         $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -57,17 +59,17 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
             $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
                 self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
                 self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
-                function ($testCase) {
+                function () {
                   try {
-                      $testCase->frame('ifrEnvioProcesso');
+                      $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
                       $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-                      $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-                      $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                      $this->assertStringContainsString($mensagemSucesso, $this->paginaCadastrarProcessoEmBloco->elByCss('body')->getText());
+                      $btnFechar = $this->paginaCadastrarProcessoEmBloco->elByXPath("//input[@id='btnFechar']");
                       $btnFechar->click();
                   } finally {
                       try {
-                          $testCase->frame(null);
-                          $testCase->frame("ifrVisualizacao");
+                          $this->paginaCadastrarProcessoEmBloco->frame(null);
+                          $this->paginaCadastrarProcessoEmBloco->frame("ifrVisualizacao");
                       } catch (Exception $e) {
                       }
                   }
@@ -101,28 +103,34 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
 
         $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
         $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
+        // Define título de status e quantidade esperada
+        $statusTitle  = self::$tramitar ? 'Concluído' : 'Em aberto';
+        $expectedQty  = self::$numQtyProcessos;
+        $cssSelector  = sprintf(
+            '#tblBlocos tbody tr td:nth-child(7) img[title="%s"]',
+            $statusTitle
+        );
 
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
-            sleep(5);
-            $testCase->refresh();
-            $linhasDaTabela = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+        // Aguarda até que apareça exatamente a quantidade esperada de ícones
+        $this->waitUntil(function() use ($cssSelector, $expectedQty) {
+            // Atualiza a tabela
+            $this->paginaBase->refresh();
 
-            $totalConcluidos = 0;
-            foreach ($linhasDaTabela as $linha) {
-                $statusTd = $linha->byXPath('./td[7]');
-                if (self::$tramitar == true) {
-                    $statusImg = $statusTd->byXPath(mb_convert_encoding("(//img[@title='Concluído'])", 'UTF-8', 'ISO-8859-1'));
-                } else {
-                    $statusImg = $statusTd->byXPath(mb_convert_encoding("(//img[@title='Em aberto'])", 'UTF-8', 'ISO-8859-1'));
-                }
-                $totalConcluidos++;
-            }
-            $this->assertEquals($totalConcluidos, self::$numQtyProcessos);
-            return true;
+            // Captura todos os imgs na 7ª coluna com o title correto
+            $imgs = $this->paginaBase->elementsByCss($cssSelector);
+
+            // Continua esperando enquanto a quantidade não bater
+            return count($imgs) === $expectedQty;
         }, PEN_WAIT_TIMEOUT);
-        
-        sleep(5);
 
+        // Depois do wait, reafirma com assert para mensagem de erro clara
+        $imgs = $this->paginaBase->elementsByCss($cssSelector);
+        $this->assertCount(
+            $expectedQty,
+            $imgs,
+            "Esperava {$expectedQty} processos com status \"{$statusTitle}\", mas encontrou " . count($imgs)
+        );
+        
         $this->sairSistema();
     }
 
@@ -144,9 +152,9 @@ class TramiteBlocoExternoLimiteTest extends FixtureCenarioBaseTestCase
       $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
 
       if (self::$tramitar == true) {
-        $this->waitUntil(function ($testCase) {
+        $this->waitUntil(function() {
           sleep(5);
-          $testCase->refresh();
+          $this->paginaBase->refresh();
           $novoStatus = $this->paginaCadastrarProcessoEmBloco->retornarTextoColunaDaTabelaDeBlocos();
           $this->assertNotEquals('Aguardando Processamento', $novoStatus);
           return true;

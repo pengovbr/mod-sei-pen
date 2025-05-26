@@ -1,10 +1,11 @@
 <?php
 
 use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 /**
  * Execution Groups
- * @group execute_alone_group4
+ * #[Group('execute_alone_group4')]
  */
 class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCase
 {
@@ -33,7 +34,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
+     * #[Group('envio')]
      *
      * @return void
      */
@@ -65,9 +66,9 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
     /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
-     * @group verificacao_recebimento
+     * #[Group('verificacao_recebimento')]
      *
-     * @depends test_tramitar_processo_da_origem
+     * #[Depends('test_tramitar_processo_da_origem')]
      *
      * @return void
      */
@@ -85,7 +86,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, sprintf("An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82d ..."));
 
         //Verifica se os í­cones de alerta de recusa foram adicionados e se o processo continua aberto na unidade
-        $this->paginaBase->navegarParaControleProcesso();
+        $this->paginaBase->navegarParaControleProcessoIcone();
         $this->assertTrue($this->paginaControleProcesso->contemProcesso(self::$protocoloTeste));
         $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
     }

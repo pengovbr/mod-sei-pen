@@ -2,7 +2,7 @@
 
 use \utilphp\util;
 
-class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends FixtureCenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -25,7 +25,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Fixt
     /**
      * Teste de recebimento dedocumento avulso com 2 componentes digitais
      *
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -76,13 +76,14 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Fixt
         $this->assertNotNull($reciboTramite);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, array(self::$documentoZip), $destinatario);
         $this->receberReciboTramite($novoTramite);
+        $this->sairSistema();
     }
 
 
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @depends test_recebimento_processo_com_3_componentes_digitais
+     * #[Depends('test_recebimento_processo_com_3_componentes_digitais')]
      *
      * @return void
      */
@@ -97,15 +98,16 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Fixt
         putenv("DATABASE_HOST=org2-database");
         $novosDocumentos =  array($documentoTesteInterno);
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
-
+        $this->sairSistema();
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteInterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
+        $this->sairSistema();
     }
 
 
     /**
      *
-     * @depends test_devolucao_processo_para_origem_1
+     * #[Depends('test_devolucao_processo_para_origem_1')]
      *
      * @return void
      */
@@ -121,7 +123,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Fixt
         putenv("DATABASE_HOST=org1-database");
         $novosDocumentos =  array($documentoTesteExterno);
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
-        
+        $this->sairSistema();
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteExterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
     }

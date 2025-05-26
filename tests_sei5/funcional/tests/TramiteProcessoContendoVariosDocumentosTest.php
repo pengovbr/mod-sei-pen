@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTestCase
 {
@@ -16,17 +19,17 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
     /**
      * Teste de trâmite externo de processo contendo vários documentos
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
     public function test_tramitar_processo_contendo_varios_documentos()
     {
         //Aumenta o tempo de timeout devido à quantidade de arquivos
-        $this->setSeleniumServerRequestsTimeout(6000);
+        // $this->setSeleniumServerRequestsTimeout(6000);
 
         // Configuração do dados para teste do cenário
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
@@ -47,16 +50,16 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_contendo_varios_documentos
+     * #[Depends('test_tramitar_processo_contendo_varios_documentos')]
      *
      * @return void
      */
     public function test_verificar_origem_processo_contendo_varios_documentos()
     {
-        $this->setSeleniumServerRequestsTimeout(6000);
+        // $this->setSeleniumServerRequestsTimeout(6000);
 
         $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
 
@@ -65,14 +68,17 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
         $this->abrirProcesso(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertFalse($this->paginaProcesso->processoAberto());
+                $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES);
 
         // 7 - Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
@@ -91,16 +97,16 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
     /**
      * Teste de verificação do correto recebimento do processo
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_contendo_varios_documentos
+     * #[Depends('test_verificar_origem_processo_contendo_varios_documentos')]
      *
      * @return void
      */
     public function test_verificar_destino_processo_contendo_varios_documentos()
     {
-        $this->setSeleniumServerRequestsTimeout(6000);
+        // $this->setSeleniumServerRequestsTimeout(6000);
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$documentosTeste, self::$destinatario);
     }
 }

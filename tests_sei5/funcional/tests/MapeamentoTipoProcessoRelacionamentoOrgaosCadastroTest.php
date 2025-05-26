@@ -5,7 +5,7 @@
  * Cadastro mapeamento de orgãos
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCenarioBaseTestCase
 {
@@ -46,10 +46,10 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
             self::$remetente['NOME_UNIDADE']
         );
         $this->paginaCadastroOrgaoExterno->salvar();
-
-        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem(self::$destinatario['NOME_UNIDADE']);
-        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino(self::$remetente['NOME_UNIDADE']);
-
+        // sleep(10);
+        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
+        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$remetente['NOME_UNIDADE']);
+        // var_dump($orgaoDestino,$orgaoDestino);
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
         sleep(1);
@@ -65,7 +65,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
     /**
      * Teste para cadastro de mapeamento de orgão exteno já existente
      *
-     * @group MapeamentoOrgaoExterno
+     * #[Group('MapeamentoOrgaoExterno')]
      *
      * @return void
      */
@@ -101,7 +101,7 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
     /**
      * Teste para editar mapeamento de orgão exteno
      *
-     * @group MapeamentoOrgaoExterno
+     * #[Group('MapeamentoOrgaoExterno')]
      *
      * @return void
      */
@@ -125,8 +125,8 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
         );
         $this->paginaCadastroOrgaoExterno->salvar();
 
-        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgaoOrigem(self::$destinatario['NOME_UNIDADE']);
-        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgaoDestino(self::$remetente['NOME_UNIDADE']);
+        $orgaoOrigem = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
+        $orgaoDestino = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$remetente['NOME_UNIDADE']);
 
         $this->assertNotNull($orgaoOrigem);
         $this->assertNotNull($orgaoDestino);
@@ -137,6 +137,37 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
             $mensagem
         );
         
+        $this->sairSistema();
+    }
+
+    /**
+     * Teste para excluir mapeamento de orgão exteno
+     *
+     * #[Group('MapeamentoOrgaoExterno')]
+     *
+     * @return void
+     */
+    public function test_excluir_mapeamento_orgao_externo()
+    {
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(
+            self::$remetente['URL'],
+            self::$remetente['SIGLA_UNIDADE'],
+            self::$remetente['LOGIN'],
+            self::$remetente['SENHA']
+        );
+        $this->paginaCadastroOrgaoExterno->navegarCadastroOrgaoExterno();
+
+        $this->paginaCadastroOrgaoExterno->selecionarExcluirMapOrgao();
+        sleep(1);
+
+        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+        $this->assertStringContainsString(
+            mb_convert_encoding('Relacionamento entre unidades foi excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
+            $mensagem
+        );
+
         $this->sairSistema();
     }
 

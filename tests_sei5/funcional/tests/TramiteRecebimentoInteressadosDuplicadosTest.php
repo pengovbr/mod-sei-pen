@@ -1,10 +1,11 @@
 <?php
 
 use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 /**
  * Execution Groups
- * @group execute_parallel_group3
+ * #[Group('execute_parallel_group3')]
  */
 class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTestCase
 {
@@ -26,9 +27,9 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
      *
      * Inicialmente são enviados 2 interessados com o mesmo nome
      * 
-     * @group envio
+     * #[Group('envio')]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */

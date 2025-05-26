@@ -1,11 +1,13 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de mapeamento de tipos de processo reativar
  * Reativar tipos de processos
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
 {
@@ -49,7 +51,7 @@ class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de reativação de um Relacionamento entre Órgãos
      * 
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -64,20 +66,27 @@ class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
 
         $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
         $this->paginaTipoProcessoReativar->reativarMapeamento();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
 
+        $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTipoProcessoReativar->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
+        // ao final garante de fato que a mensagem existe
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
+        );
         $this->sairSistema();
     }
 
     /**
      * Teste de desativação de um Relacionamento entre Órgãos via checkbox
      *
-     * @large
+     * #[Large]
      *
      * @return void
      */
@@ -92,13 +101,19 @@ class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
 
         $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
         $this->paginaTipoProcessoReativar->reativarMapeamentoCheckbox();
-        $this->waitUntil(function ($testCase)  {
-            $testCase->frame(null);
-            $menssagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-            $this->assertStringContainsString($menssagemValidacao, $testCase->byId('divInfraMsg0')->text());
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-
+        $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+        $this->waitUntil(
+            fn() => mb_strpos(
+                $this->paginaTipoProcessoReativar->buscarMensagemAlerta(),
+                $mensagemValidacao
+            ) !== false,
+            PEN_WAIT_TIMEOUT
+        );
+        // ao final garante de fato que a mensagem existe
+        $this->assertStringContainsString(
+            $mensagemValidacao,
+            $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
+        );
         $this->sairSistema();
     }
 

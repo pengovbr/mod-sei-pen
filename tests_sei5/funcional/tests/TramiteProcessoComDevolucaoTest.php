@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_alone_group6
+ * #[Group('execute_alone_group6')]
  */
 class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
 {
@@ -19,10 +21,10 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      * 
      * @return void
      */
@@ -44,10 +46,10 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_da_origem
+     * #[Depends('test_tramitar_processo_da_origem')]
      *
      * @return void
      */
@@ -61,10 +63,10 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_destino_processo_para_devolucao
+     * #[Depends('test_verificar_destino_processo_para_devolucao')]
      *
      * @return void
      */
@@ -85,10 +87,10 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem
+     * #[Depends('test_devolucao_processo_para_origem')]
      *
      * @return void
      */

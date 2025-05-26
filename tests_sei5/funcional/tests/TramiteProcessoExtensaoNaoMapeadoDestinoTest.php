@@ -1,9 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTestCase
 {
@@ -16,10 +19,10 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTes
     /**
      * Teste de trâmite externo de processo contendo extensão não mapeada no destino
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -39,10 +42,10 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTes
     /**
      * Teste de verificação do correto envio do processo no sistema remetente
      *
-     * @group verificacao_envio
-     * @large
+     * #[Group('verificacao_envio')]
+     * #[Large]
      *
-     * @depends test_tramitar_processo_contendo_extensao_nao_mapeada_destino
+     * #[Depends('test_tramitar_processo_contendo_extensao_nao_mapeada_destino')]
      *
      * @return void
      */
@@ -54,14 +57,17 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTes
         $this->abrirProcesso(self::$protocoloTeste);
 
         // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function($testCase)  {
+        $this->waitUntil(function()  {
             sleep(5);
-            $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertTrue($paginaProcesso->processoAberto());
-            $testCase->assertFalse($paginaProcesso->processoBloqueado());
-            return true;
+            $this->paginaBase->refresh();
+            try { 
+                $this->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+                $this->assertTrue($this->paginaProcesso->processoAberto());
+                $this->assertFalse($this->paginaProcesso->processoBloqueado());
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
+            }
         }, PEN_WAIT_TIMEOUT);
 
         // Validar histórico de trâmite do processo
@@ -83,10 +89,10 @@ class TramiteProcessoExtensaoNaoMapeadoDestinoTest extends FixtureCenarioBaseTes
     /**
      * Teste de verificação do correto recebimento do processo contendo apenas um documento interno (gerado)
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_verificar_origem_processo_contendo_extensao_nao_mapeado_destino
+     * #[Depends('test_verificar_origem_processo_contendo_extensao_nao_mapeado_destino')]
      *
      * @return void
      */

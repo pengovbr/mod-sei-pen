@@ -1,9 +1,12 @@
 <?php
+
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Cadastrar e editrar bloco
  *
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteBlocoExternoInclusaoTest extends FixtureCenarioBaseTestCase
 {
@@ -42,10 +45,10 @@ class TramiteBlocoExternoInclusaoTest extends FixtureCenarioBaseTestCase
         $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
 
         // etapa 1
-        $arrColunaDescricao = $this->elements($this->using('xpath')->value("//td[4]"));
+        $arrColunaDescricao = $this->paginaBase->elementsByXPath('//td[4]');
         $bolEncontrado = false;  
         foreach ($arrColunaDescricao as $elemento) {
-            if (trim($elemento->text()) === self::$objBlocoDeTramiteDTO->getStrDescricao()) {
+            if (trim($elemento->getText()) === self::$objBlocoDeTramiteDTO->getStrDescricao()) {
                 $bolEncontrado = true;
                 break; 
             }
@@ -57,11 +60,11 @@ class TramiteBlocoExternoInclusaoTest extends FixtureCenarioBaseTestCase
         $this->selecionarUnidadeInterna(self::$remetente['SIGLA_UNIDADE']);
         $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
 
-        $arrColunaDescricao = $this->elements($this->using('xpath')->value("//td[4]"));
+        $arrColunaDescricao = $this->paginaBase->elementsByXPath('//td[4]');
 
         $bolEncontrado = false;
         foreach ($arrColunaDescricao as $elemento) {
-            if (trim($elemento->text()) === self::$objBlocoDeTramiteDTO->getStrDescricao()) {
+            if (trim($elemento->getText()) === self::$objBlocoDeTramiteDTO->getStrDescricao()) {
                 $bolEncontrado = true;
                 break; 
             }

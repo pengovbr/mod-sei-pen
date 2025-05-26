@@ -1,9 +1,11 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  *
  * Execution Groups
- * @group execute_parallel_group1
+ * #[Group('execute_parallel_group1')]
  */
 class TramiteProcessoValidacaoBotoesAposIncluirTest extends FixtureCenarioBaseTestCase
 {
@@ -16,8 +18,8 @@ class TramiteProcessoValidacaoBotoesAposIncluirTest extends FixtureCenarioBaseTe
     /**
      * Teste de validar existencia do botão de remover processo do bloco
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      * @return void
      */
@@ -51,7 +53,7 @@ class TramiteProcessoValidacaoBotoesAposIncluirTest extends FixtureCenarioBaseTe
         $this->abrirProcesso(self::$protocoloTeste);
 
         $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste("Envio Externo de Processo"));
-        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste(mb_convert_encoding("Incluir Processo no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1')));
-        $this->assertTrue($this->paginaProcesso->validarBotaoExiste(mb_convert_encoding("Remover Processo do Bloco de Trâmite", 'UTF-8', 'ISO-8859-1')));
+        $this->assertNotTrue($this->paginaProcesso->validarBotaoExiste("Incluir Processo no Bloco de Trâmite"));
+        $this->assertTrue($this->paginaProcesso->validarBotaoExiste("Remover Processo do Bloco de Trâmite"));
     }
 }

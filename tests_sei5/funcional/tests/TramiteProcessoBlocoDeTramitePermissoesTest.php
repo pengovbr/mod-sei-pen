@@ -1,5 +1,8 @@
 <?php
 
+use Facebook\WebDriver\WebDriverBy;
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  * Blocos não tramitados devem possuir estado "Aberto".
  * Blocos tramitados não podem ser mais alterados (processos excluídos).
@@ -61,7 +64,7 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
     /**
      * Troca ordenação de documento para ao tramitar obter status cancelado
-     * @depends test_tramite_contendo_documento_interno
+     * #[Depends('test_tramite_contendo_documento_interno')]
      */
     public function test_trocar_ordenacao_documento()
     {
@@ -113,7 +116,7 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
     /**
      * Inclui processos ao bloco de tramite, excluir e adiciona novamente
-     * @depends test_trocar_ordenacao_documento
+     * #[Depends('test_trocar_ordenacao_documento')]
      */
     public function test_criar_excluir_processos_em_bloco_externo()
     {
@@ -170,11 +173,19 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
         $this->paginaCadastrarProcessoEmBloco->btnComandoSuperiorFechar();
         sleep(1);
 
-        $linhasDaTabela = $this->elements($this->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+        // $linhasDaTabela = $this->elements($this->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+
+        $linhasDaTabela = $this->paginaCadastrarProcessoEmBloco->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr');
         foreach ($linhasDaTabela as $linha) {
-            $numOrdem = $linha->byXPath('./td[2]')->text();
+            // $numOrdem = $linha->byXPath('./td[2]')->text();
+            $numOrdem = $linha->findElement(
+                WebDriverBy::xpath('./td[2]')
+            )->getText();
             if ($numOrdem == $objBlocoDeTramiteDTO->getNumOrdem()) {
-                $status = $linha->byXPath('./td[3]')->text();
+                // $status = $linha->byXPath('./td[3]')->text();
+                $status = $linha->findElement(
+                    WebDriverBy::xpath('./td[3]')
+                )->getText();
                 $this->assertEquals($status, 'Aberto');
                 $this->assertEquals($objBlocoDeTramiteDTO->getStrStaEstado(), 'A');
                 break;
@@ -194,7 +205,8 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
     /**
      * Tramitar bloco externamente
-     * @depends test_criar_excluir_processos_em_bloco_externo
+     * #[Depends('test_criar_excluir_processos_em_bloco_externo')]
+     * 
      */
     public function test_tramite_bloco_externo()
     {
@@ -206,17 +218,17 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
         $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
             self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
             self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false,
-            function ($testCase) {
+            function () {
                 try {
-                    $testCase->frame('ifrEnvioProcesso');
+                    $this->paginaCadastrarProcessoEmBloco->frame('ifrEnvioProcesso');
                     $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-                    $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-                    $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                    $this->assertStringContainsString($mensagemSucesso, $this->paginaCadastrarProcessoEmBloco->elByCss('body')->getText());
+                    $btnFechar = $this->paginaCadastrarProcessoEmBloco->elByXPath("//input[@id='btnFechar']");
                     $btnFechar->click();
                 } finally {
                     try {
-                        $testCase->frame(null);
-                        $testCase->frame("ifrVisualizacao");
+                        $this->paginaCadastrarProcessoEmBloco->frame(null);
+                        $this->paginaCadastrarProcessoEmBloco->frame("ifrVisualizacao");
                     } catch (Exception $e) {
                     }
                 }
@@ -230,7 +242,7 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
 
     /**
      * Verificar se o bloco foi enviado
-     * @depends test_tramite_bloco_externo
+     * #[Depends('test_tramite_bloco_externo')]
      * @return void
      */
     public function test_verificar_envio_processo()
@@ -242,32 +254,32 @@ class TramiteProcessoBlocoDeTramitePermissoesTest extends FixtureCenarioBaseTest
         $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
         $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
 
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->waitUntil(function() use (&$orgaosDiferentes) {
             sleep(5);
-            $testCase->refresh();
-            $linhasDaTabela = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
-
-            $totalConcluidos = 0;
-            foreach ($linhasDaTabela as $linha) {
-                $statusTd = $linha->byXPath('./td[7]');
-                try {
-                    $statusImg = $statusTd->byXPath(mb_convert_encoding(".//img[@title='Concluído']", 'UTF-8', 'ISO-8859-1'));
-                    if ($statusImg){
-                        $totalConcluidos++;
-                    }
-                } catch (Exception $e) {
-                    // Ignora a exceção se a imagem não for encontrada
-                }
+            $this->paginaBase->refresh();
+            $selector = sprintf(
+                '#tblBlocos tbody tr td:nth-child(7) img[title="%s"]',
+                mb_convert_encoding('Concluído', 'UTF-8', 'ISO-8859-1')
+            );
+            
+            // Captura todas as imagens de ?Concluído? na 7ª coluna
+            $imgsConcluidos = $this->paginaBase->elementsByCss($selector);
+            
+            // Total de processos concluídos é simplesmente a quantidade de imgs encontradas
+            $totalConcluidos = count($imgsConcluidos);
+            try {
+                $this->assertEquals($totalConcluidos,self::$numQtyProcessos);
+                return true;
+            } catch (AssertionFailedError $e) {
+		        return false;
             }
-            $this->assertEquals($totalConcluidos,self::$numQtyProcessos);
-            return true;
         }, PEN_WAIT_TIMEOUT);
         
         $this->sairSistema();
     }
     /**
      * Verificar se é possivel excluir processos do bloco após tramite
-     * @depends test_verificar_envio_processo
+     * #[Depends('test_verificar_envio_processo')]
      * @return void
      */
     public function test_verificar_possivel_exclusao_processo_bloco()

@@ -1,10 +1,12 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de trâmite de processos anexado considerando a devolução do mesmo para a entidade de origem
  *
  * Execution Groups
- * @group execute_without_receiving
+ * #[Group('execute_without_receiving')]
  */
 class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
 {
@@ -17,10 +19,10 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de cancelamento de trâmite com processo contendo documento gerado (interno)
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -57,10 +59,10 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação que o processo cancelado não foi efetivamente recebido no sistema destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_cancelamento_tramite_contendo_documento_interno
+     * #[Depends('test_cancelamento_tramite_contendo_documento_interno')]
      *
      * @return void
      */
@@ -73,10 +75,10 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de cancelamento de trâmite com processo contendo documento externo
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      * 
-     * @depends test_verificar_nao_recebimento_processo_destinatario_documento_interno
+     * #[Depends('test_verificar_nao_recebimento_processo_destinatario_documento_interno')]
      *
      * @return void
      */
@@ -113,10 +115,10 @@ class TramiteProcessoComCancelamentoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste de verificação que o processo cancelado não foi efetivamente recebido no sistema destinatário
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_cancelamento_tramite_contendo_documento_externo
+     * #[Depends('test_cancelamento_tramite_contendo_documento_externo')]
      *
      * @return void
      */

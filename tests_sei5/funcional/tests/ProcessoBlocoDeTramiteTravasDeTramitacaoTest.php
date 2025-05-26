@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 /**
  * Testes de mapeamento de envio de envio parcial
  */
@@ -13,7 +15,7 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
    * Teste inicial que gera processsos com documentos assinados e bloco, em seguida move para unidade secundaria mantendo-o aberto na atual
    * e tenta executar o tramite em bloco para receber a mensagem de erro
    *
-   * @group mapeamento
+   * #[Group('mapeamento')]
    *
    * @return void
    */
@@ -46,7 +48,7 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
       $this->abrirProcesso(self::$objProtocoloDTO->getStrProtocoloFormatado());
       $this->tramitarProcessoInternamente(self::$remetente['SIGLA_UNIDADE_SECUNDARIA'], true);
 
-      $this->paginaBase->navegarParaControleProcesso();
+      $this->paginaBase->navegarParaControleProcessoIcone();
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
       $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
       try {
@@ -65,7 +67,7 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
    * Teste seguinte que finaliza o processo na unidade atual deixando-o aberto apenas na unidade secundaria
    * e tenta executar o tramite em bloco para receber a mensagem de erro
    * 
-   * @group mapeamento
+   * #[Group('mapeamento')]
    *
    * @return void
    */
@@ -78,7 +80,7 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
       $this->abrirProcesso(self::$objProtocoloDTO->getStrProtocoloFormatado());
       $this->paginaProcesso->concluirProcesso();
 
-      $this->paginaBase->navegarParaControleProcesso();
+      $this->paginaBase->navegarParaControleProcessoIcone();
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
       $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
       try {
