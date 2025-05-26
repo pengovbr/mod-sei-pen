@@ -9,21 +9,21 @@ use PHPUnit\Framework\Attributes\{Group,Large,Depends};
  */
 class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $processoTeste;
-    public static $documentoTeste;
-    public static $protocoloTeste;
+  public static $remetente;
+  public static $destinatario;
+  public static $processoTeste;
+  public static $documentoTeste;
+  public static $protocoloTeste;
 
-    function setUp(): void
+  function setUp(): void
     {
-        parent::setUp();
-    }
+      parent::setUp();
+  }
 
-    function tearDown(): void
+  function tearDown(): void
     {
-        parent::tearDown();
-    }
+      parent::tearDown();
+  }
 
     /**
      * Teste de trâmite externo com processo não contendo nenhum documento cadastrado
@@ -35,28 +35,28 @@ class TramiteProcessoValidacaoEnvioTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_tramitar_processo_sem_documentos()
+  public function test_tramitar_processo_sem_documentos()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
 
-        // Cadastrar novo processo de teste
-        $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
-        self::$protocoloTeste = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
+      // Cadastrar novo processo de teste
+      $objProtocoloPrincipalDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+      self::$protocoloTeste = $objProtocoloPrincipalDTO->getStrProtocoloFormatado(); 
 
-        // Acessar sistema do this->REMETENTE do processo
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+      // Acessar sistema do this->REMETENTE do processo
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTeste);
+      $this->abrirProcesso(self::$protocoloTeste);
 
-        $this->expectExceptionMessage(mb_convert_encoding("Não é possível tramitar um processo sem documentos", 'UTF-8', 'ISO-8859-1'));
-        $this->tramitarProcessoExternamente(
-            self::$protocoloTeste,
-            self::$destinatario['REP_ESTRUTURAS'],
-            self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
-        );
-    }
+      $this->expectExceptionMessage(mb_convert_encoding("Não é possível tramitar um processo sem documentos", 'UTF-8', 'ISO-8859-1'));
+      $this->tramitarProcessoExternamente(
+          self::$protocoloTeste,
+          self::$destinatario['REP_ESTRUTURAS'],
+          self::$destinatario['NOME_UNIDADE'],
+          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false
+      );
+  }
 }

@@ -9,10 +9,10 @@ use Facebook\WebDriver\WebDriverBy;
 class PaginaControleProcesso extends PaginaTeste
 {
 
-    public function __construct(RemoteWebDriver $driver, $testcase)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-        parent::__construct($driver, $testcase);
-    }
+      parent::__construct($driver, $testcase);
+  }
 
 /**
  * Retorna todas as linhas de processo nos painéis habilitados.
@@ -21,8 +21,8 @@ class PaginaControleProcesso extends PaginaTeste
  * @param  bool  $processosRecebidos
  * @return WebDriverElement[]
  */
-protected function obterLinhasProcessos(bool $processosGerados, bool $processosRecebidos): array
-{
+  protected function obterLinhasProcessos(bool $processosGerados, bool $processosRecebidos): array
+  {
     // 1) Define quais painéis buscar
     $paineis = [];
     if ($processosGerados) {
@@ -36,19 +36,19 @@ protected function obterLinhasProcessos(bool $processosGerados, bool $processosR
 
     // 2) Para cada painel, tenta capturar as <tr> e mescla ao resultado
     foreach ($paineis as $idPainel) {
-        try {
-            // elById() já faz findElement(WebDriverBy::id(...))
-            $painel = $this->elById($idPainel);
-            // findElements retorna [] se não achar nenhum <tr>
-            $linhas = $painel->findElements(WebDriverBy::cssSelector('tr'));
-            $resultado = array_merge($resultado, $linhas);
-        } catch (\Exception $e) {
-            // painel não existe / inacessível ? ignora e continua
-        }
+      try {
+          // elById() já faz findElement(WebDriverBy::id(...))
+          $painel = $this->elById($idPainel);
+          // findElements retorna [] se não achar nenhum <tr>
+          $linhas = $painel->findElements(WebDriverBy::cssSelector('tr'));
+          $resultado = array_merge($resultado, $linhas);
+      } catch (\Exception $e) {
+          // painel não existe / inacessível ? ignora e continua
+      }
     }
 
     return $resultado;
-}
+  }
 
   /**
    * Clica no link correspondente ao protocolo informado
@@ -65,11 +65,11 @@ protected function obterLinhasProcessos(bool $processosGerados, bool $processosR
     {
       $listaProtocolos = [];
       $processosRows = $this->obterLinhasProcessos($processosGerados, $processosRecebidos);
-      if (!empty($processosRows)) {
-          for ($i = 1; $i < count($processosRows); $i++) {
-              $listaProtocolos[] = trim($processosRows[$i]->getText());
-          }
+    if (!empty($processosRows)) {
+      for ($i = 1; $i < count($processosRows); $i++) {
+          $listaProtocolos[] = trim($processosRows[$i]->getText());
       }
+    }
       return $listaProtocolos;
   }
 
@@ -93,18 +93,18 @@ protected function obterLinhasProcessos(bool $processosGerados, bool $processosR
   {
     $processosRows = $this->obterLinhasProcessos(true, true);
     foreach ($processosRows as $row) {
-        try {
-            if (strpos($row->getText(), $numeroProcesso) !== false) {
-                $icones = $row->findElements(WebDriverBy::cssSelector('img'));
-                foreach ($icones as $icone) {
-                    if (strpos($icone->getAttribute('src'), 'pen_tramite_recusado.png') !== false) {
-                        return true;
-                    }
-                }
+      try {
+        if (strpos($row->getText(), $numeroProcesso) !== false) {
+            $icones = $row->findElements(WebDriverBy::cssSelector('img'));
+          foreach ($icones as $icone) {
+            if (strpos($icone->getAttribute('src'), 'pen_tramite_recusado.png') !== false) {
+                return true;
             }
-        } catch (\Exception $e) {
-            return false;
+          }
         }
+      } catch (\Exception $e) {
+          return false;
+      }
     }
     return false;
   }
@@ -115,23 +115,23 @@ protected function obterLinhasProcessos(bool $processosGerados, bool $processosR
      * @param string $descricao
      * @return string|false
      */
-    public function localizarProcessoPelaDescricao(string $descricao)
+  public function localizarProcessoPelaDescricao(string $descricao)
     {
-        $processosRows = $this->obterLinhasProcessos(true, true);
-        foreach ($processosRows as $row) {
-            try {
-                $links = $row->findElements(WebDriverBy::cssSelector('a'));
-                foreach ($links as $link) {
-                    $onmouseover = $link->getAttribute('onmouseover') ?: '';
-                    if (strpos($onmouseover, $descricao) !== false) {
-                        return $link->getText();
-                    }
-                }
-            } catch (\Exception $e) {
-                return false;
-            }
+      $processosRows = $this->obterLinhasProcessos(true, true);
+    foreach ($processosRows as $row) {
+      try {
+        $links = $row->findElements(WebDriverBy::cssSelector('a'));
+        foreach ($links as $link) {
+            $onmouseover = $link->getAttribute('onmouseover') ?: '';
+          if (strpos($onmouseover, $descricao) !== false) {
+            return $link->getText();
+          }
         }
-        return false;
+      } catch (\Exception $e) {
+          return false;
+      }
     }
+      return false;
+  }
 
 }

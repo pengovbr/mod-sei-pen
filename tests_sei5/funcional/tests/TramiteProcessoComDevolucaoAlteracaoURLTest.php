@@ -8,36 +8,36 @@ use PHPUnit\Framework\Attributes\{Group,Large,Depends};
  */
 class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $processoTeste;
-    public static $documentoTeste1;
-    public static $documentoTeste2;
-    public static $documentoTeste3;
-    public static $documentoTeste4;
-    public static $documentoTeste5;
-    public static $protocoloTeste;
+  public static $remetente;
+  public static $destinatario;
+  public static $processoTeste;
+  public static $documentoTeste1;
+  public static $documentoTeste2;
+  public static $documentoTeste3;
+  public static $documentoTeste4;
+  public static $documentoTeste5;
+  public static $protocoloTeste;
 
 
-    public static function tearDownAfterClass() :void {
+  public static function tearDownAfterClass(): void {
 
 
-        $arrControleURL=[
-            "antigo"=>"[servidor_php]",
-            "novo"=>"servidor.gov.br"
-        ];
+      $arrControleURL=[
+          "antigo"=>"[servidor_php]",
+          "novo"=>"servidor.gov.br"
+      ];
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
-        $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
-        if ($bancoOrgaoA->getBdType()!="oci") {
-            $strTarja=$result[0]["texto"];
-        }else{
-            $strTarja=stream_get_contents($result[0]["TEXTO"]);
-        }
-        $strTarja = str_replace($arrControleURL['novo'],$arrControleURL['antigo'], $strTarja);
-        $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
+      $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
+      $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
+      if ($bancoOrgaoA->getBdType()!="oci") {
+          $strTarja=$result[0]["texto"];
+      }else{
+          $strTarja=stream_get_contents($result[0]["TEXTO"]);
+      }
+      $strTarja = str_replace($arrControleURL['novo'], $arrControleURL['antigo'], $strTarja);
+      $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
         
-    }
+  }
 
 
     /**
@@ -50,19 +50,19 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      * 
      * @return void
      */
-    public function test_tramitar_processo_da_origem()
+  public function test_tramitar_processo_da_origem()
     {
 
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste1);
-        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
-    }
+      $documentos = array(self::$documentoTeste1);
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+      self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+  }
 
 
     /**
@@ -75,11 +75,11 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_verificar_destino_processo_para_devolucao()
+  public function test_verificar_destino_processo_para_devolucao()
     {
-        $documentos = array(self::$documentoTeste1);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
-    }
+      $documentos = array(self::$documentoTeste1);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+  }
 
 
     /**
@@ -92,17 +92,17 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_devolucao_processo_para_origem()
+  public function test_devolucao_processo_para_origem()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$documentoTeste3 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste3);
-        putenv("DATABASE_HOST=org2-database");
-        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-    }
+      $documentos = array(self::$documentoTeste3);
+      putenv("DATABASE_HOST=org2-database");
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+  }
 
 
     /**
@@ -115,11 +115,11 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_verificar_processo_apos_devolucao()
+  public function test_verificar_processo_apos_devolucao()
     {
-        $documentos = array(self::$documentoTeste1,self::$documentoTeste3);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
-    }
+      $documentos = array(self::$documentoTeste1,self::$documentoTeste3);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+  }
 
 
      /**
@@ -132,35 +132,35 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_tramitar_processo_da_origem_novo_url()
+  public function test_tramitar_processo_da_origem_novo_url()
     {
         
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        putenv("DATABASE_HOST=org1-database");
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$documentoTeste5 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      putenv("DATABASE_HOST=org1-database");
 
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
-        $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
-        if ($bancoOrgaoA->getBdType()!="oci") {
-            $strTarja=$result[0]["texto"];
-        }else{
-            $strTarja=stream_get_contents($result[0]["TEXTO"]);
-        }
-
-        $arrControleURL=[
-            "antigo"=>"[servidor_php]",
-            "novo"=>"servidor.gov.br"
-        ];
-
-        $strTarja = str_replace($arrControleURL['antigo'],$arrControleURL['novo'], $strTarja);
-        $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
-
-        $documentos = array(self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+      $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);        
+      $result=$bancoOrgaoA->query("SELECT texto FROM tarja_assinatura where sta_tarja_assinatura=? and sin_ativo=?", array("V","S"));
+    if ($bancoOrgaoA->getBdType()!="oci") {
+        $strTarja=$result[0]["texto"];
+    }else{
+        $strTarja=stream_get_contents($result[0]["TEXTO"]);
     }
+
+      $arrControleURL=[
+          "antigo"=>"[servidor_php]",
+          "novo"=>"servidor.gov.br"
+      ];
+
+      $strTarja = str_replace($arrControleURL['antigo'], $arrControleURL['novo'], $strTarja);
+      $bancoOrgaoA->execute("update tarja_assinatura set texto=? where sta_tarja_assinatura=? and sin_ativo=?", array($strTarja,"V","S"));
+
+      $documentos = array(self::$documentoTeste5);
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+      self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+  }
 
 
     /**
@@ -173,11 +173,11 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_verificar_destino_processo_para_devolucao_apos_troca_url()
+  public function test_verificar_destino_processo_para_devolucao_apos_troca_url()
     {
-        $documentos = array(self::$documentoTeste1, self::$documentoTeste3, self::$documentoTeste5);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
-    }
+      $documentos = array(self::$documentoTeste1, self::$documentoTeste3, self::$documentoTeste5);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+  }
 
 
 

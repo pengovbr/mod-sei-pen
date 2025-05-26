@@ -4,11 +4,11 @@ use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $processoTeste;
-    public static $documentoTeste1;
-    public static $protocoloTeste;
+  public static $remetente;
+  public static $destinatario;
+  public static $processoTeste;
+  public static $documentoTeste1;
+  public static $protocoloTeste;
 
     /**
      * Teste de trâmite externo de processo sem devolução para testar caso de hierarquia sem pai
@@ -20,18 +20,18 @@ class TramiteProcessoUnidadeSemHierarquiaPaiTest extends FixtureCenarioBaseTestC
      *
      * @return void
      */
-    public function test_tramitar_processo_da_origem()
+  public function test_tramitar_processo_da_origem()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_C);
-        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_C);
+      self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste1);
-        $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+      $documentos = array(self::$documentoTeste1);
+      $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+      self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
 
-        $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGSIS", 'UTF-8', 'ISO-8859-1'),  $this->paginaProcesso->informacao());
-    }
+      $this->assertStringNotContainsString(mb_convert_encoding("externa para SEGES TESTE SEM PAI - - RE CGSIS", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+  }
 }

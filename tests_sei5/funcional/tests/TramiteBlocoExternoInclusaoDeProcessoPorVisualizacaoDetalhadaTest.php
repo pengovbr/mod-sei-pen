@@ -9,8 +9,8 @@
  */
 class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
+  public static $remetente;
+  public static $destinatario;
     
     /**
      * Método que testa a inclusão de um processo por meio da visualização detalhada.
@@ -22,73 +22,73 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
      *
      * @return void
      */
-    public function test_inclusao_de_processo_por_visualizacao_detalhada()
+  public function test_inclusao_de_processo_por_visualizacao_detalhada()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        // Geração dos dados para o processo e documento de teste
-        $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      // Geração dos dados para o processo e documento de teste
+      $processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      $documentoTeste = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         
-        // Cadastro do processo e documento
-        $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
-        $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+      // Cadastro do processo e documento
+      $objProtocoloDTO = $this->cadastrarProcessoFixture($processoTeste);
+      $this->cadastrarDocumentoInternoFixture($documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
         
-        // Carregar dados do bloco de trâmite
-        $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
-        $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
+      // Carregar dados do bloco de trâmite
+      $objBlocoDeTramiteFixture = new \BlocoDeTramiteFixture();
+      $objBlocoDeTramiteDTO = $objBlocoDeTramiteFixture->carregar();
 
-        // Acesso ao sistema
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
+      // Acesso ao sistema
+      $this->acessarSistema(
+          self::$remetente['URL'],
+          self::$remetente['SIGLA_UNIDADE'],
+          self::$remetente['LOGIN'],
+          self::$remetente['SENHA']
+      );
 
-        // Navegação para controle de processo e seleção de visualização detalhada
-        $this->paginaBase->navegarParaControleProcesso();
+      // Navegação para controle de processo e seleção de visualização detalhada
+      $this->paginaBase->navegarParaControleProcesso();
 
-        $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
-        if($visualizacaoDetalhadaAberta){
-            $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
-            $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
-        }else{
-            $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
-        }
+      $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
+    if($visualizacaoDetalhadaAberta){
+        $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
+        $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
+    }else{
+        $this->paginaTramiteEmBloco->selecionarVisualizacaoDetalhada();
+    }
         
-        // Seleção do processo e do bloco de trâmite
-        $protocoloFormatado = $objProtocoloDTO->getStrProtocoloFormatado();
-        $this->paginaTramiteEmBloco->selecionarProcesso($protocoloFormatado);
-        $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
+      // Seleção do processo e do bloco de trâmite
+      $protocoloFormatado = $objProtocoloDTO->getStrProtocoloFormatado();
+      $this->paginaTramiteEmBloco->selecionarProcesso($protocoloFormatado);
+      $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
         
-        // Verificação do título da página
-        $titulo = "Incluir Processo(s) no Bloco de Trâmite";
-        $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
-        $this->assertEquals(mb_convert_encoding($titulo, 'UTF-8', 'ISO-8859-1'), $tituloRetorno);
+      // Verificação do título da página
+      $titulo = "Incluir Processo(s) no Bloco de Trâmite";
+      $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
+      $this->assertEquals(mb_convert_encoding($titulo, 'UTF-8', 'ISO-8859-1'), $tituloRetorno);
 
-        // Inclusão do processo no bloco de trâmite
-        $this->paginaTramiteEmBloco->selecionarBloco($objBlocoDeTramiteDTO->getNumId());
-        $this->paginaTramiteEmBloco->clicarSalvar();
+      // Inclusão do processo no bloco de trâmite
+      $this->paginaTramiteEmBloco->selecionarBloco($objBlocoDeTramiteDTO->getNumId());
+      $this->paginaTramiteEmBloco->clicarSalvar();
 
-        // Espera para a mensagem de sucesso aparecer
-        sleep(2);
-        $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
-        $this->assertStringContainsString(
-            mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . $objBlocoDeTramiteDTO->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),
-            $mensagem
-        );
+      // Espera para a mensagem de sucesso aparecer
+      sleep(2);
+      $mensagem = $this->paginaTramiteEmBloco->buscarMensagemAlerta();
+      $this->assertStringContainsString(
+          mb_convert_encoding('Processo(s) incluído(s) com sucesso no bloco ' . $objBlocoDeTramiteDTO->getNumOrdem(), 'UTF-8', 'ISO-8859-1'),
+          $mensagem
+      );
 
-        $this->paginaBase->navegarParaControleProcesso();       
+      $this->paginaBase->navegarParaControleProcesso();       
         
-        $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
-        if($visualizacaoDetalhadaAberta){
-            $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
-        }
+      $visualizacaoDetalhadaAberta = $this->paginaTramiteEmBloco->visualizacaoDetalhadaAberta();
+    if($visualizacaoDetalhadaAberta){
+        $this->paginaTramiteEmBloco->fecharVisualizacaoDetalhada();
+    }
 
-        // Saída do sistema
-        $this->sairSistema();
-    }    
+      // Saída do sistema
+      $this->sairSistema();
+  }    
 }

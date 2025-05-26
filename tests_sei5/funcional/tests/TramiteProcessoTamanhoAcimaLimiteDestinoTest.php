@@ -10,11 +10,11 @@ use PHPUnit\Framework\AssertionFailedError;
  */
 class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $processoTeste;
-    public static $documentoTeste;
-    public static $protocoloTeste;
+  public static $remetente;
+  public static $destinatario;
+  public static $processoTeste;
+  public static $documentoTeste;
+  public static $protocoloTeste;
 
 
     /**
@@ -23,21 +23,21 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
      *
      * @return void
      */
-    public static function setUpBeforeClass() :void {
-        parent::setUpBeforeClass();
-        // Redução de limite máximo de tamanho de documento externo
-        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
-        $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
+  public static function setUpBeforeClass(): void {
+      parent::setUpBeforeClass();
+      // Redução de limite máximo de tamanho de documento externo
+      $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+      $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(2, 'SEI_TAM_MB_DOC_EXTERNO'));
 
-    }      
+  }      
         
-    public static function tearDownAfterClass() :void {
-        parent::tearDownAfterClass();
-        // Ajuste do tamanho máximo de arquivo externo permitido para padrão
-        $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
-        $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
+  public static function tearDownAfterClass(): void {
+      parent::tearDownAfterClass();
+      // Ajuste do tamanho máximo de arquivo externo permitido para padrão
+      $bancoOrgaoB = new DatabaseUtils(CONTEXTO_ORGAO_B);
+      $bancoOrgaoB->execute("update infra_parametro set valor = ? where nome = ?", array(50, 'SEI_TAM_MB_DOC_EXTERNO'));
 
-    }   
+  }   
 
     /**
      * Teste de trâmite externo de processo contendo documento com tamanho acima do limite no destinatario
@@ -49,29 +49,29 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
      *
      * @return void
      */
-    public function test_tramitar_processo_tamanho_acima_limite_destino()
+  public function test_tramitar_processo_tamanho_acima_limite_destino()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
-        self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_003.pdf');
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
+      self::$documentoTeste = $this->gerarDadosDocumentoExternoTeste(self::$remetente, 'arquivo_003.pdf');
         
-        // Cadastrar novo processo de teste
-        $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
-        self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado();
+      // Cadastrar novo processo de teste
+      $objProtocoloDTO = $this->cadastrarProcessoFixture(self::$processoTeste);
+      self::$protocoloTeste = $objProtocoloDTO->getStrProtocoloFormatado();
 
-        $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
+      $this->cadastrarDocumentoExternoFixture(self::$documentoTeste, $objProtocoloDTO->getDblIdProtocolo());
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTeste);
+      $this->abrirProcesso(self::$protocoloTeste);
 
-        $this->tramitarProcessoExternamente(
-                self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-                self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
-        $this->sairSistema();
-    }
+      $this->tramitarProcessoExternamente(
+              self::$protocoloTeste, self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
+              self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+      $this->sairSistema();
+  }
 
 
     /**
@@ -84,43 +84,43 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
      *
      * @return void
      */
-    public function test_verificar_origem_processo_tamanho_acima_limite_destino()
+  public function test_verificar_origem_processo_tamanho_acima_limite_destino()
     {
-        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+      $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTeste);
+      $this->abrirProcesso(self::$protocoloTeste);
 
-        // 6 - Verificar se situação atual do processo está como bloqueado
-        $this->waitUntil(function()  {
-            sleep(5);
-            $this->paginaBase->refresh();
-            try { 
-                $this->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
-                $this->assertTrue($this->paginaProcesso->processoAberto());
-                $this->assertFalse($this->paginaProcesso->processoBloqueado());
-                return true;
+      // 6 - Verificar se situação atual do processo está como bloqueado
+      $this->waitUntil(function()  {
+          sleep(5);
+          $this->paginaBase->refresh();
+        try { 
+            $this->assertStringContainsString(mb_convert_encoding("Processo aberto somente na unidade", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+            $this->assertTrue($this->paginaProcesso->processoAberto());
+            $this->assertFalse($this->paginaProcesso->processoBloqueado());
+            return true;
     
-                return true;
-            } catch (AssertionFailedError $e) {
-		        return false;
-            }
-        }, PEN_WAIT_TIMEOUT);
+            return true;
+        } catch (AssertionFailedError $e) {
+            return false;
+        }
+      }, PEN_WAIT_TIMEOUT);
 
-        // Validar histórico de trâmite do processo
-        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, "O tamanho máximo geral permitido para documentos externos");
+      // Validar histórico de trâmite do processo
+      $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, "O tamanho máximo geral permitido para documentos externos");
 
-        // Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
-        $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
-        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTeste, $unidade);
-        $this->validarRecibosTramite($mensagemRecibo, true, false);
-        $this->validarProcessosTramitados(self::$protocoloTeste, false);
+      // Validar se recibo de trâmite foi armazenado para o processo (envio e conclusão)
+      $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
+      $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTeste, $unidade);
+      $this->validarRecibosTramite($mensagemRecibo, true, false);
+      $this->validarProcessosTramitados(self::$protocoloTeste, false);
 
-        //Verifica se os ícones de alerta de recusa foram adicionados e se o processo continua aberto na unidade
-        $this->paginaBase->navegarParaControleProcesso();
-        $this->assertTrue($this->paginaControleProcesso->contemProcesso(self::$protocoloTeste));
-        $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
-    }
+      //Verifica se os ícones de alerta de recusa foram adicionados e se o processo continua aberto na unidade
+      $this->paginaBase->navegarParaControleProcesso();
+      $this->assertTrue($this->paginaControleProcesso->contemProcesso(self::$protocoloTeste));
+      $this->assertTrue($this->paginaControleProcesso->contemAlertaProcessoRecusado(self::$protocoloTeste));
+  }
 
 
     /**
@@ -133,8 +133,8 @@ class TramiteProcessoTamanhoAcimaLimiteDestinoTest extends FixtureCenarioBaseTes
      *
      * @return void
      */
-    public function test_verificar_destino_processo_tamanho_acima_limite_destino()
+  public function test_verificar_destino_processo_tamanho_acima_limite_destino()
     {
-        $this->realizarValidacaoNAORecebimentoProcessoNoDestinatario(self::$destinatario, self::$processoTeste);
-    }
+      $this->realizarValidacaoNAORecebimentoProcessoNoDestinatario(self::$destinatario, self::$processoTeste);
+  }
 }

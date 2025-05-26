@@ -11,42 +11,42 @@ use PHPUnit\Framework\Attributes\{Group,Large,Depends};
  */
 class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $penOrgaoExternoId;
-    public static $arrImportacaoTiposProcessoId;
+  public static $remetente;
+  public static $destinatario;
+  public static $penOrgaoExternoId;
+  public static $arrImportacaoTiposProcessoId;
 
     /**
      * @inheritdoc
      * @return void
      */
-    function setUp(): void
+  function setUp(): void
     {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      parent::setUp();
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         
-        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
-        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
-            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'Id' => self::$remetente['ID_ESTRUTURA'],
-            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'Nome' => self::$remetente['NOME_UNIDADE'],
-            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
+      $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+      $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+          'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+          'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+          'Id' => self::$remetente['ID_ESTRUTURA'],
+          'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+          'Nome' => self::$remetente['NOME_UNIDADE'],
+          'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+          'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
+      ]);
     
-        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
+      self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
 
-        $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
-        $tiposProcessos = $this->getTiposProcessos($objPenOrgaoExternoDTO->getDblId(), 'N');
-        $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->carregarVariados($tiposProcessos);
+      $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
+      $tiposProcessos = $this->getTiposProcessos($objPenOrgaoExternoDTO->getDblId(), 'N');
+      $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->carregarVariados($tiposProcessos);
 
-        foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
-            self::$arrImportacaoTiposProcessoId[] = $objPenMapTipoProcedimentoDTO->getDblId();
-        }
+    foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
+      self::$arrImportacaoTiposProcessoId[] = $objPenMapTipoProcedimentoDTO->getDblId();
     }
+  }
 
     /**
      * Teste de reativação de um Relacionamento entre Órgãos
@@ -55,33 +55,33 @@ class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_reativacao_mapeamento_orgao_externo()
+  public function test_reativacao_mapeamento_orgao_externo()
     {
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
+      $this->acessarSistema(
+          self::$remetente['URL'],
+          self::$remetente['SIGLA_UNIDADE'],
+          self::$remetente['LOGIN'],
+          self::$remetente['SENHA']
+      );
 
-        $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
-        $this->paginaTipoProcessoReativar->reativarMapeamento();
+      $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
+      $this->paginaTipoProcessoReativar->reativarMapeamento();
 
-        $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-        $this->waitUntil(
-            fn() => mb_strpos(
+      $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+      $this->waitUntil(
+          fn() => mb_strpos(
                 $this->paginaTipoProcessoReativar->buscarMensagemAlerta(),
                 $mensagemValidacao
             ) !== false,
-            PEN_WAIT_TIMEOUT
-        );
-        // ao final garante de fato que a mensagem existe
-        $this->assertStringContainsString(
-            $mensagemValidacao,
-            $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
-        );
-        $this->sairSistema();
-    }
+          PEN_WAIT_TIMEOUT
+      );
+      // ao final garante de fato que a mensagem existe
+      $this->assertStringContainsString(
+          $mensagemValidacao,
+          $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
+      );
+      $this->sairSistema();
+  }
 
     /**
      * Teste de desativação de um Relacionamento entre Órgãos via checkbox
@@ -90,69 +90,69 @@ class MapeamentoTipoProcessoReativarTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_reativar_checkbox_mapeamento_orgao_externo()
+  public function test_reativar_checkbox_mapeamento_orgao_externo()
     {
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
+      $this->acessarSistema(
+          self::$remetente['URL'],
+          self::$remetente['SIGLA_UNIDADE'],
+          self::$remetente['LOGIN'],
+          self::$remetente['SENHA']
+      );
 
-        $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
-        $this->paginaTipoProcessoReativar->reativarMapeamentoCheckbox();
-        $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
-        $this->waitUntil(
-            fn() => mb_strpos(
+      $this->paginaTipoProcessoReativar->navegarTipoProcessoReativar();
+      $this->paginaTipoProcessoReativar->reativarMapeamentoCheckbox();
+      $mensagemValidacao = mb_convert_encoding('Mapeamento de Tipo de Processo foi reativado com sucesso.', 'UTF-8', 'ISO-8859-1');
+      $this->waitUntil(
+          fn() => mb_strpos(
                 $this->paginaTipoProcessoReativar->buscarMensagemAlerta(),
                 $mensagemValidacao
             ) !== false,
-            PEN_WAIT_TIMEOUT
-        );
-        // ao final garante de fato que a mensagem existe
-        $this->assertStringContainsString(
-            $mensagemValidacao,
-            $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
-        );
-        $this->sairSistema();
+          PEN_WAIT_TIMEOUT
+      );
+      // ao final garante de fato que a mensagem existe
+      $this->assertStringContainsString(
+          $mensagemValidacao,
+          $this->paginaTipoProcessoReativar->buscarMensagemAlerta()
+      );
+      $this->sairSistema();
+  }
+
+  public static function tearDownAfterClass(): void
+    {
+      $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
+      $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->buscar([
+          'IdMapeamento' => self::$penOrgaoExternoId
+      ]);
+
+    foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
+        $importacaoTiposProcessoFixture->remover([
+            'Id' => $objPenMapTipoProcedimentoDTO->getDblId()
+        ]);
     }
 
-    public static function tearDownAfterClass(): void
-    {
-        $importacaoTiposProcessoFixture = new \ImportacaoTiposProcessoFixture();
-        $arrObjPenMapTipoProcedimentoDTO = $importacaoTiposProcessoFixture->buscar([
-            'IdMapeamento' => self::$penOrgaoExternoId
-        ]);
-
-        foreach ($arrObjPenMapTipoProcedimentoDTO as $objPenMapTipoProcedimentoDTO) {
-            $importacaoTiposProcessoFixture->remover([
-                'Id' => $objPenMapTipoProcedimentoDTO->getDblId()
-            ]);
-        }
-
-        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
-        $penOrgaoExternoFixture->remover([
-            'Id' => self::$penOrgaoExternoId,
-        ]);
+      $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+      $penOrgaoExternoFixture->remover([
+          'Id' => self::$penOrgaoExternoId,
+      ]);
         
-        parent::tearDownAfterClass();
-    }
+      parent::tearDownAfterClass();
+  }
 
-    private function getTiposProcessos(int $idMapeamento, string $sinAtivo = 'S')
+  private function getTiposProcessos(int $idMapeamento, string $sinAtivo = 'S')
     {
-        return array(
-            array(
-                'IdMapeamento' => $idMapeamento,
-                'IdProcedimento' => 100000348,
-                'NomeProcedimento' => mb_convert_encoding('Acompanhamento Legislativo: Congresso Nacional', 'UTF-8', 'ISO-8859-1'),
-                'SinAtivo' => $sinAtivo
-            ),
-            array(
-                'IdMapeamento' => $idMapeamento,
-                'IdProcedimento' => 100000425,
-                'NomeProcedimento' => mb_convert_encoding('mauro teste', 'UTF-8', 'ISO-8859-1'),
-                'SinAtivo' => $sinAtivo
-            )
-        );
-    }
+      return array(
+          array(
+              'IdMapeamento' => $idMapeamento,
+              'IdProcedimento' => 100000348,
+              'NomeProcedimento' => mb_convert_encoding('Acompanhamento Legislativo: Congresso Nacional', 'UTF-8', 'ISO-8859-1'),
+              'SinAtivo' => $sinAtivo
+          ),
+          array(
+              'IdMapeamento' => $idMapeamento,
+              'IdProcedimento' => 100000425,
+              'NomeProcedimento' => mb_convert_encoding('mauro teste', 'UTF-8', 'ISO-8859-1'),
+              'SinAtivo' => $sinAtivo
+          )
+      );
+  }
 }

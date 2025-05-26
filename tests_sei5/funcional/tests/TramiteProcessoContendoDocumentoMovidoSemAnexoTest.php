@@ -124,7 +124,7 @@ class TramiteProcessoContendoDocumentoMovidoSemAnexoTest extends FixtureCenarioB
       } catch (AssertionFailedError $e) {
         return false;
       }
-}, PEN_WAIT_TIMEOUT);
+    }, PEN_WAIT_TIMEOUT);
 
     $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
     $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTeste->getStrProtocoloFormatado(), $unidade);
