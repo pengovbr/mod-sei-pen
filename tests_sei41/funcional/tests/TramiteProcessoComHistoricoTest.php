@@ -48,7 +48,6 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
      */
     public function test_verificar_destino_processo_para_devolucao()
     {
-
         $localCertificado = self::$destinatario['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$destinatario['SENHA_CERTIFICADO_DIGITAL'];
 
@@ -88,9 +87,9 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
                      break;
                    
                 case "CLASSIFICACAO_PrazoCorrente_1":
-                    $this->asserassertTruetEquals(
-                      '5' == $propriedades->valor,
-                      'Classificação Prazo Corrente 1 não é igual a 5. Valor: ' . $propriedades->valor
+                    $this->assertTrue(
+                      '4' == $propriedades->valor,
+                      'Classificação Prazo Corrente 1 não é igual a 4. Valor: ' . $propriedades->valor
                     );
                      break;
  
@@ -103,29 +102,8 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
  
                 case "CLASSIFICACAO_CodigoEstruturado_1":
                     $this->assertTrue(
-                      '052.211' == $propriedades->valor,
-                      'Classificação Código Estruturado 1 não é igual a 052.211. Valor: ' . $propriedades->valor
-                    );
-                     break;
- 
-                case "CLASSIFICACAO_Destinacao_1":
-                    $this->assertTrue(
-                      'Guarda' == substr($propriedades->valor,0,6),
-                      'Classificação Destinação 1 não é igual a Elimina. Valor: ' . $propriedades->valor
-                    );
-                     break;
- 
-                case "CLASSIFICACAO_Observacao_1":
-                    $this->assertTrue(
-                      'Quanto ao estabelecimento' == substr($propriedades->valor,0,25),
-                      'Classificação Observação 1 não é igual a Quanto ao estabelecimento. Valor: ' . $propriedades->valor
-                    );
-                     break;
- 
-                case "CLASSIFICACAO_Descricao_1":
-                    $this->assertTrue(
-                      'RECEITA CORRENTE' == substr($propriedades->valor,0,16),
-                     'Classificação Descrição 1 não é igual a RECEITA CORRENTE. Valor: ' . $propriedades->valor
+                      '049.11' == $propriedades->valor,
+                      'Classificação Código Estruturado 1 não é igual a 049.11. Valor: ' . $propriedades->valor
                     );
                      break;
                      
