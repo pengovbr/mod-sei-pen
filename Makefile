@@ -165,8 +165,32 @@ install: check-isalive
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
 
-up: .env
-	$(CMD_COMPOSE_FUNC) up -d
+up: .env prepare-upload-tmp 
+	$(CMD_COMPOSE_FUNC) up -d 
+	make prepare-files-permissions
+
+prepare-upload-tmp:
+	@if [ ! -d "$(PEN_TEST_FUNC)/.tmp" ]; then \
+		echo "📁 Criando diretório .tmp..."; \
+		mkdir -p "$(PEN_TEST_FUNC)/.tmp"; \
+		chmod -R 777 "$(PEN_TEST_FUNC)/.tmp"; \
+		wget -nc -i "$(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt" -P "$(PEN_TEST_FUNC)/.tmp" || { \
+			echo "\n   ❌ Erro ao baixar arquivos com wget. Verifique o caminho ou a conexão. \n"; \
+			exit 1; \
+		}; \
+		echo "\n   ✅ Arquivos baixados com sucesso.\n"; \
+	else \
+		echo "\n   ℹ️  Diretório .tmp já existe, pulando download.\n"; \
+	fi
+
+prepare-files-permissions:
+	@printf "\n⌛ Aguardando criação do container no org1 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org1-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n⌛ Aguardando criação do container no org2 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org2-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas ajustadas com sucesso.\n\n"
 
 
 update: ## Atualiza banco de dados através dos scripts de atualização do sistema
@@ -192,7 +216,12 @@ down: .env
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste)) ;
+	@printf "\n⌛ Aguardando criação do container no test-functional para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas para testes ajustadas com sucesso.\n\n"
+
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste))
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
