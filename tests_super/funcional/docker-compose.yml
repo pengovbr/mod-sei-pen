@@ -1,5 +1,3 @@
-version: '2'
-
 services:
 
   ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
@@ -39,7 +37,7 @@ services:
     volumes:
       - /dev/shm:/dev/shm
       - ./assets/arquivos/test_files_index.txt:/test_files_index.txt
-      - /tmp:/tmp
+      - .tmp:/tmp
 
   php-test-functional:
     image: processoeletronico/vagrant_super4_httpd:${ENVIRONMENT_VERSION}
@@ -58,9 +56,9 @@ services:
       - ../../src/dto:/tests/sei/modpen/dto
       - ../../src/bd:/tests/sei/modpen/bd
       - ./assets/config:/opt/sei/config/mod-pen
-      - /tmp:/tmp
-      - /tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
-      - /tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
+      - .tmp:/tmp
+      - .tmp/sei_arquivos_1:/var/sei/arquivos/${ORG1_DATABASE_HOST}
+      - .tmp/sei_arquivos_2:/var/sei/arquivos/${ORG2_DATABASE_HOST}
       - ./assets/config/ConfiguracaoSEI.php:/tests/sei/src/sei/config/ConfiguracaoSEI.php:ro
       - ../../src:/tests/sei/src/sei/web/modulos/pen
       - ./assets/config:/tests/sei/src/sei/config/mod-pen
@@ -148,7 +146,8 @@ services:
       - ../../src/scripts:/opt/sip/scripts/mod-pen
       - ../../src/bin:/opt/sei/bin/mod-pen
       - ../../src:/opt/sei/web/modulos/pen
-      - /tmp/sei_arquivos_1:/var/sei/arquivos
+      - .tmp:/tmp
+      - .tmp/sei_arquivos_1:/var/sei/arquivos
       - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
@@ -208,9 +207,9 @@ services:
       - ../../src:/opt/sei/web/modulos/pen
       - ./assets/config/ConfiguracaoSEI.php:/opt/sei/config/ConfiguracaoSEI.php:ro
       - ./assets/config/ConfiguracaoSip.php:/opt/sip/config/ConfiguracaoSip.php:ro
-      - /tmp/sei_arquivos_2:/var/sei/arquivos
-      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
+      - .tmp/sei_arquivos_2:/var/sei/arquivos
       - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
+      - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
     environment:
       - LANG=pt_BR.ISO-8859-1
