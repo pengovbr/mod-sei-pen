@@ -395,8 +395,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $callbackEnvio = function ($testCase) use ($dados) {
             try {
                 $testCase->frame('ifrEnvioProcesso');
-                $mensagemValidacao = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
+                $mensagemValidacao = mb_convert_encoding('Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.', 'UTF-8', 'ISO-8859-1');
                 $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
+                $testCase->byXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
+                $mensagemValidacao2 = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
+                $testCase->assertStringContainsString($mensagemValidacao2, $testCase->byCssSelector('body')->text());
+
                 $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {

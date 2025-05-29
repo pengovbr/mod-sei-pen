@@ -300,7 +300,7 @@ stop-test-container:
 	fi;
 
 vendor: composer.json
-	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+	$(CMD_COMPOSE_FUNC) run --rm -w /tests php-test-functional bash -c './composer.phar install'
 
 cria_json_compatibilidade:
 	$(shell ./gerar_json_compatibilidade.sh)

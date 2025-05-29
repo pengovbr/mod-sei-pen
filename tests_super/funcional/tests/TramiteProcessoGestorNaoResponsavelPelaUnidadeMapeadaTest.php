@@ -10,6 +10,28 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
     protected static $nomeOrgNaoMapeada = 'MELO_SEGES_ORG1';
     protected static $idOrgNaoMapeada = '155043';
 
+    public static function tearDownAfterClass(): void
+    {
+        // Reverte alteração feita em alterarMapeamentoDeUnidadeOrgaoA para evitar quebra de testes subsequentes
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=?, sigla_unidade_rh=?, nome_unidade_rh=? where id_unidade=?", array(self::$remetente['ID_ESTRUTURA'], self::$remetente['SIGLA_ESTRUTURA'], self::$remetente['SIGLA_ESTRUTURA'], 110000001));
+
+        parent::tearDownAfterClass();
+    }
+
+    /**
+     * Set up
+     * Cria pameamento de unidades para o teste por Fixture
+     *
+     * @return void
+     */
+    function setUp(): void
+    {
+        parent::setUp();
+        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
+        $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=?, sigla_unidade_rh=?, nome_unidade_rh=? where id_unidade=?", array(self::$idOrgNaoMapeada, self::$nomeOrgNaoMapeada, self::$nomeOrgNaoMapeada, 110000001));
+    }
+    
     /**
      * Teste de trâmite de processo para organização não-mapeada à unidade corrente
      *
@@ -49,20 +71,12 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
             'idUnidadeMalMapeada' => self::$idOrgNaoMapeada
         ]);
 
-        // Reverte alteração feita em alterarMapeamentoDeUnidadeOrgaoA para evitar quebra de testes subsequentes
-        $this->reverterAlterarMapeamentoDeUnidadeOrgaoA();
     }
 
     private function alterarMapeamentoDeUnidadeOrgaoA()
     {
         $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
         $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=?, sigla_unidade_rh=?, nome_unidade_rh=? where id_unidade=?", array(self::$idOrgNaoMapeada, self::$nomeOrgNaoMapeada, self::$nomeOrgNaoMapeada, 110000001));
-    }
-
-    private function reverterAlterarMapeamentoDeUnidadeOrgaoA()
-    {
-        $bancoOrgaoA = new DatabaseUtils(CONTEXTO_ORGAO_A);
-        $bancoOrgaoA->execute("update md_pen_unidade set id_unidade_rh=?, sigla_unidade_rh=?, nome_unidade_rh=? where id_unidade=?", array(self::$remetente['ID_ESTRUTURA'], self::$remetente['SIGLA_ESTRUTURA'], self::$remetente['SIGLA_ESTRUTURA'], 110000001));
     }
 
 }
