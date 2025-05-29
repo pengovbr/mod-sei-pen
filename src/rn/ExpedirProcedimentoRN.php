@@ -974,7 +974,7 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objComponenteDigital['idAnexo'] = $componenteDigital->getNumIdAnexo();
 
             if($componenteDigital->getStrMimeType() == 'outro'){
-              $arrComponentesDigitais['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+              $objComponenteDigital['dadosComplementaresDoTipoDeArquivo'] = 'outro';
             }
 
             $objComponenteDigital = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $objComponenteDigital, $componenteDigital->getStrHashConteudo());
