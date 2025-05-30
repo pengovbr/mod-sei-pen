@@ -19,6 +19,18 @@ class ComponenteDigitalBD extends InfraBD {
     if(is_null($numIdTramite)){
         throw new InfraException('Módulo do Tramita: Parâmetro [parObjTramiteDTO] não informado');
     }
+      $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+      $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO, InfraDTO::$OPER_DIFERENTE);
+      $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($dblIdDocumento);
+      $objRelProtocoloProtocoloDTO->retNumSequencia();
+
+      $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+      $arrObjRelProtocoloProtocoloDTO = $objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO);
+
+      $arrOrdem = [];
+      foreach ($arrObjRelProtocoloProtocoloDTO as $dto){
+        $arrOrdem[] = $dto->getNumSequencia() + 1;
+      }
 
       $objComponenteDigitalPesquisaDTO = new ComponenteDigitalDTO();
       $objComponenteDigitalPesquisaDTO->retStrNumeroRegistro();
@@ -35,7 +47,7 @@ class ComponenteDigitalBD extends InfraBD {
       $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoAnexado();
       $objComponenteDigitalPesquisaDTO->retNumOrdem();
       $objComponenteDigitalPesquisaDTO->setNumIdTramite($numIdTramite);
-      $objComponenteDigitalPesquisaDTO->setStrStaProtocolo('R', InfraDTO::$OPER_DIFERENTE);
+      $objComponenteDigitalPesquisaDTO->setNumOrdemDocumento($arrOrdem, InfraDTO::$OPER_IN);
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
 
