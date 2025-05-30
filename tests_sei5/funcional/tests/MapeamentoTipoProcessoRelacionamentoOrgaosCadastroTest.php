@@ -172,7 +172,20 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
   }
 
   public static function tearDownAfterClass(): void
-    {
+  {
+      $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+
+      $penOrgaoExternoFixtureDTO = $penOrgaoExternoFixture->buscar([
+          'Id' =>CONTEXTO_ORGAO_A_ID_ESTRUTURA,
+          'IdOrigem' => CONTEXTO_ORGAO_B_ID_ESTRUTURA
+        ]);
+      if (count($penOrgaoExternoFixtureDTO) > 0) {
+          foreach($penOrgaoExternoFixtureDTO as $dto){
+              $penOrgaoExternoFixture->remover([
+                  'Id' => $dto->getDblId(),
+              ]);
+          }
+      }
       parent::tearDownAfterClass();
   }
 }
