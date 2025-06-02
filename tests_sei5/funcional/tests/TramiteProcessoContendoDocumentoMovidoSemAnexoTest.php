@@ -112,12 +112,15 @@ class TramiteProcessoContendoDocumentoMovidoSemAnexoTest extends FixtureCenarioB
 
     $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
       sleep(5);
-      $testCase->refresh();
-      $paginaProcesso = new PaginaProcesso($testCase);
-      $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-      $testCase->assertFalse($paginaProcesso->processoAberto());
-      $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
-      return true;
+      $this->paginaBase->refresh();
+      try { 
+          $this->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $this->paginaProcesso->informacao());
+          $this->assertFalse($this->paginaProcesso->processoAberto());
+          $this->assertEquals($orgaosDiferentes, $this->paginaProcesso->processoBloqueado());
+          return true;
+      } catch (AssertionFailedError $e) {
+        return false;
+      }
     }, PEN_WAIT_TIMEOUT);
 
     $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");

@@ -10,33 +10,33 @@
  */
 class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends FixtureCenarioBaseTestCase
 {
-    public static $remetente;
-    public static $destinatario;
-    public static $penOrgaoExternoId;
+  public static $remetente;
+  public static $destinatario;
+  public static $penOrgaoExternoId;
 
     /**
      * @inheritdoc
      * @return void
      */
-    function setUp(): void
+  function setUp(): void
     {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      parent::setUp();
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         
-        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
-        $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
-            'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
-            'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
-            'Id' => self::$remetente['ID_ESTRUTURA'],
-            'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
-            'Nome' => self::$remetente['NOME_UNIDADE'],
-            'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
-            'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
-        ]);
+      $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+      $objPenOrgaoExternoDTO = $penOrgaoExternoFixture->carregar([
+          'IdRepositorio' => self::$remetente['ID_REP_ESTRUTURAS'],
+          'RepositorioEstruturas' => self::$remetente['REP_ESTRUTURAS'],
+          'Id' => self::$remetente['ID_ESTRUTURA'],
+          'Sigla' => self::$remetente['SIGLA_ESTRUTURA'],
+          'Nome' => self::$remetente['NOME_UNIDADE'],
+          'IdOrigem' => self::$destinatario['ID_ESTRUTURA'],
+          'NomeOrigem' => self::$destinatario['NOME_UNIDADE']
+      ]);
     
-        self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
-    }
+      self::$penOrgaoExternoId = $objPenOrgaoExternoDTO->getDblId();
+  }
 
     /**
      * Teste para pesquisar mapeamento entre orgãos
@@ -45,37 +45,37 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosListagemImportacaoTest extends F
      *
      * @return void
      */
-    public function test_pesquisar_mapeamento_orgao_externo()
+  public function test_pesquisar_mapeamento_orgao_externo()
     {
-        $this->acessarSistema(
-            self::$remetente['URL'],
-            self::$remetente['SIGLA_UNIDADE'],
-            self::$remetente['LOGIN'],
-            self::$remetente['SENHA']
-        );
+      $this->acessarSistema(
+          self::$remetente['URL'],
+          self::$remetente['SIGLA_UNIDADE'],
+          self::$remetente['LOGIN'],
+          self::$remetente['SENHA']
+      );
 
-        $this->paginaCadastroOrgaoExterno->navegarCadastroOrgaoExterno();
+      $this->paginaCadastroOrgaoExterno->navegarCadastroOrgaoExterno();
 
-        // Buscar pesquisa vazia
-        $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE'] . 'B');
-        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$destinatario['NOME_UNIDADE']);
-        $this->assertNull($nomeRepositorioCadastrado);
+      // Buscar pesquisa vazia
+      $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE'] . 'B');
+      $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
+      $this->assertNull($nomeRepositorioCadastrado);
 
-        // Buscar pesquisa com sucesso
-        $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE']);
-        $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarNome(self::$destinatario['NOME_UNIDADE']);
-        $this->assertNotNull($nomeRepositorioCadastrado);
+      // Buscar pesquisa com sucesso
+      $this->paginaCadastroOrgaoExterno->selecionarPesquisa(self::$destinatario['NOME_UNIDADE']);
+      $nomeRepositorioCadastrado = $this->paginaCadastroOrgaoExterno->buscarOrgao(self::$destinatario['NOME_UNIDADE']);
+      $this->assertNotNull($nomeRepositorioCadastrado);
         
-        $this->sairSistema();
-    }
+      $this->sairSistema();
+  }
 
-    public static function tearDownAfterClass(): void
+  public static function tearDownAfterClass(): void
     {
-        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
-        $penOrgaoExternoFixture->remover([
-            'Id' => self::$penOrgaoExternoId,
-        ]);
+      $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+      $penOrgaoExternoFixture->remover([
+          'Id' => self::$penOrgaoExternoId,
+      ]);
 
-        parent::tearDownAfterClass();
-    }
+      parent::tearDownAfterClass();
+  }
 }

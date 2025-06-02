@@ -4,129 +4,147 @@ use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 class PaginaTramitarProcesso extends PaginaTeste
 {
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-
+      parent::__construct($driver, $testcase);
   }
 
-  public function repositorio($siglaRepositorio)
+    /**
+     * Seleciona repositório e retorna o valor atual
+     */
+  public function repositorio(string $siglaRepositorio = null): ?string
     {
-      $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
-
-    if(isset($siglaRepositorio)){
-        $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
+      $select = new WebDriverSelect(
+          $this->elById('selRepositorioEstruturas')
+      );
+    if ($siglaRepositorio !== null) {
+        $select->selectByVisibleText($siglaRepositorio);
     }
-
-      return $this->test->byId('selRepositorioEstruturas')->value();
+      return $select->getFirstSelectedOption()->getAttribute('value');
   }
 
-  public function unidade($nomeUnidade, $hierarquia = null)
+    /**
+     * Escolhe unidade com possível hierarquia e retorna o valor
+     */
+  public function unidade(string $nomeUnidade, string $hierarquia = null): ?string
     {
-    try{
-        $this->test->frame(null);
-        $this->test->frame("ifrConteudoVisualizacao");
-        $this->test->frame("ifrVisualizacao");
-        $this->unidadeInput =$this->test->byId('txtUnidade');
-    }
-    catch (Exception $e){
-        $this->unidadeInput =$this->test->byId('txtUnidade');
-    }
+      // Navega até o campo dentro dos frames
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
 
-      $this->unidadeInput =$this->test->byId('txtUnidade');
-      $this->unidadeInput->value($nomeUnidade);
-      $this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($hierarquia) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade')->value();
-        if(!empty($hierarquia)){
-            $nomeUnidade .= ' - ' . $hierarquia;
-        }
+      $input = $this->elById('txtUnidade');
+      $input->clear();
+      $nomeUnidade = mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($nomeUnidade. WebDriverKeys::ENTER);
 
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
+      // Aguarda link e trata alertas
+      $this->waitUntil(function() use ($nomeUnidade, $hierarquia) {
+          $current = $this->elById('txtUnidade')->getAttribute('value');
+          $label  = $hierarquia ? "{$current} - {$hierarquia}" : $current;
+
+          // Fecha alerta se aparecer
+        try {
+            $msg = parent::alertTextAndClose();
+          if ($msg !== null) {
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
           }
-        }catch(Exception $e){
+        } catch (\Exception $e) {
+            // sem alerta
         }
-          $testCase->byPartialLinkText($nomeUnidade)->click();
+
+          // Clica no link da unidade
+          $this->elByPartialLinkText($label)->click();
           return true;
       }, PEN_WAIT_TIMEOUT);
 
-      return $this->unidadeInput->value();
+      return $this->elById('txtUnidade')->getAttribute('value');
   }
 
-  public function urgente($urgente)
+    /**
+     * Marca/desmarca urgente e retorna estado atual
+     */
+  public function urgente(?bool $urgente): bool
     {
-      $this->urgenteCheck = $this->test->byId('chkSinUrgente');
-    if(isset($urgente) && ((!$urgente && $this->urgenteCheck->selected()) || ($urgente && !$this->urgenteCheck->selected()))) {
-        $this->urgenteCheck->click();
+      $checkbox = $this->elById('chkSinUrgente');
+      $selected = $checkbox->isSelected();
+    if ($urgente !== null && ($urgente !== $selected)) {
+        $checkbox->click();
     }
-
-      return $this->urgenteCheck->selected();
+      return $checkbox->isSelected();
   }
 
-  public function tramitar()
+    /**
+     * Envia para tramitação
+     */
+  public function tramitar(): void
     {
-      $tramitarButton = $this->test->byXPath("//button[@value='Enviar']");
-      $tramitarButton->click();
+      $this->elByXPath("//button[@value='Enviar']")->click();
   }
 
-  public function fecharBarraProgresso()
+    /**
+     * Fecha barra de progresso
+     */
+  public function fecharBarraProgresso(): void
     {
-      $btnFechar = $this->test->byXPath("//input[@id='btnFechar']");
-      $btnFechar->click();
+      $this->elById('btnFechar')->click();
   }
 
-  public function unidadeInterna($nomeUnidade)
+    /**
+     * Seleciona unidade interna e retorna valor
+     */
+  public function unidadeInterna(string $nomeUnidade): ?string
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $this->unidadeInput =$this->test->byId('txtUnidade');
-      $this->unidadeInput->value($nomeUnidade);
-      //$this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($nomeUnidade) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade')->value();
-          sleep(1);
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $input = $this->elById('txtUnidade');
+      $input->clear();
+      $nomeUnidade = mb_convert_encoding($nomeUnidade, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($nomeUnidade);
+
+      $this->waitUntil(function() use ($nomeUnidade) {
+          // Trata alertas se houver
+        try {
+            $msg = parent::alertTextAndClose();
+          if ($msg !== null) {
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
           }
-        }catch(Exception $e){
+        } catch (\Exception $e) {
+            // sem alerta
         }
-          $testCase->byPartialLinkText($nomeUnidade)->click();
+
+          $this->elByPartialLinkText($this->elById('txtUnidade')->getAttribute('value'))->click();
           return true;
       }, PEN_WAIT_TIMEOUT);
 
-        sleep(1);
-        return $this->unidadeInput->value();
+      sleep(1);
+      return $this->elById('txtUnidade')->getAttribute('value');
   }
 
-  public function manterAbertoNaUnidadeAtual()
+    /**
+     * Clica para manter aberto na unidade atual
+     */
+  public function manterAbertoNaUnidadeAtual(): void
     {
-      $manterAbertoCheckBox = $this->test->byXPath("//label[@id='lblSinManterAberto']");
-      $manterAbertoCheckBox->click();
+      $this->elById('lblSinManterAberto')->click();
   }
 
-  public function tramitarInterno()
+    /**
+     * Interna: tramitar sem mudar de contexto
+     */
+  public function tramitarInterno(): void
     {
-      $tramitarButton = $this->test->byXPath("//button[@value='Enviar']");
-      $tramitarButton->click();
-  }   
+      $this->tramitar();
+  }
 
-  public function alertTextAndClose($confirm = true)
+    /**
+     * Sobrescreve alertTextAndClose para aguardar 4s antes de delegar ao pai.
+     */
+  public function alertTextAndClose(bool $confirm = true): ?string
     {
-      sleep(10);
-      $result = $this->test->alertText();
-      $result = (!is_array($result) ? $result : null);
-
-    if(isset($confirm) && $confirm) {
-          $this->test->acceptAlert();
-    } else {
-          $this->dismissAlert();
-    }
-      return $result;
-  } 
+      sleep(4);
+      return parent::alertTextAndClose($confirm);
+  }
 }

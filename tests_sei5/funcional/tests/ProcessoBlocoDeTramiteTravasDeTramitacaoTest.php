@@ -49,16 +49,16 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
       $this->paginaBase->navegarParaControleProcesso();
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
       $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
-      try {
-        $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
-            self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
-      } catch (Exception $ex) {
-        $this->assertStringContainsString(
-            utf8_encode('Não é possível tramitar um processo aberto em mais de uma unidade.'),
-            $ex->getMessage()
-        );
-      }
+    try {
+      $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
+          self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
+          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+    } catch (Exception $ex) {
+      $this->assertStringContainsString(
+          utf8_encode('Não é possível tramitar um processo aberto em mais de uma unidade.'),
+          $ex->getMessage()
+      );
+    }
   }
 
   /**
@@ -81,16 +81,16 @@ class ProcessoBlocoDeTramiteTravasDeTramitacaoTest extends FixtureCenarioBaseTes
       $this->paginaBase->navegarParaControleProcesso();
       $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
       $this->paginaCadastrarProcessoEmBloco->bntTramitarBloco();
-      try {
-        $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
-            self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
-            self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
-      } catch (Exception $ex) {
-        $this->assertStringContainsString(
-            utf8_encode('O processo ' . self::$objProtocoloDTO->getStrProtocoloFormatado() . ' não possui andamento aberto nesta unidade'),
-            $ex->getMessage()
-        );
-      }
+    try {
+      $this->paginaCadastrarProcessoEmBloco->tramitarProcessoExternamente(
+          self::$destinatario['REP_ESTRUTURAS'], self::$destinatario['NOME_UNIDADE'],
+          self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'], false);
+    } catch (Exception $ex) {
+      $this->assertStringContainsString(
+          utf8_encode('O processo ' . self::$objProtocoloDTO->getStrProtocoloFormatado() . ' não possui andamento aberto nesta unidade'),
+          $ex->getMessage()
+      );
+    }
   }
 
 }

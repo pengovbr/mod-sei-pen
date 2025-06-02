@@ -8,88 +8,73 @@ use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
  */
 class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
 {
-    /**
-     * Método contrutor
-     *
-     * @return void
-     */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
     /**
-     * Clicar no botão novo
-     *
-     * @return void
+     * Clica no botão Novo
      */
-  public function novo()
+  public function novo(): void
     {
-      $this->test->byId("btnNovo")->click();
+      $this->elById('btnNovo')->click();
   }
 
     /**
-     * Selecionar repositório
-     * Selecionar unidade
-     *
-     * @param string $estrutura
-     * @param string $unidade
-     * @return void
+     * Configura repositório e unidade para o envio
      */
-  public function setarParametros($estrutura, $unidade)
+  public function setarParametros(string $estrutura, string $unidade): void
     {
       $this->selectRepositorio($estrutura);
       $this->selectUnidade($unidade);
   }
 
     /**
-     * Seleciona repositório por sigla
-     *
-     * @param string $siglaRepositorio
-     * @return string
+     * Seleciona repositório por sigla e retorna o valor selecionado
      */
-  private function selectRepositorio($siglaRepositorio)
+  private function selectRepositorio(string $sigla): ?string
     {
-      $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas'));
-
-    if(isset($siglaRepositorio)){
-        $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
+      $select = new WebDriverSelect(
+          $this->elById('selRepositorioEstruturas')
+      );
+    if ($sigla !== '') {
+        $select->selectByVisibleText($sigla);
     }
-
-      return $this->test->byId('selRepositorioEstruturas')->value();
+      return $select->getFirstSelectedOption()->getAttribute('value');
   }
 
     /**
-     * Seleciona unidade por nome
-     *
-     * @param string $nomeUnidade
-     * @param ?string $hierarquia
-     * @return string
+     * Seleciona unidade por nome e retorna o valor final
      */
-  private function selectUnidade($nomeUnidade, $hierarquia = null)
+  private function selectUnidade(string $nome, ?string $hierarquia = null): ?string
     {
-      $this->unidadeInput = $this->test->byId('txtUnidade');
-      $this->unidadeInput->clear();
-      $this->unidadeInput->value($nomeUnidade);
-      $this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($hierarquia) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade')->value();
-        if(!empty($hierarquia)){
-            $nomeUnidade .= ' - ' . $hierarquia;
+      $input = $this->elById('txtUnidade');
+      $input->clear();
+      $nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($nome. WebDriverKeys::ENTER);
+
+      // Aguarda a listagem aparecer e trata alertas
+      $this->waitUntil(function() use ($hierarquia) {
+          $current = $this->elById('txtUnidade')->getAttribute('value');
+          $label   = $hierarquia ? "{$current} - {$hierarquia}" : $current;
+
+        try {
+            $msg = parent::alertTextAndClose();
+          if ($msg !== null) {
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+          }
+        } catch (\Exception $e) {
+            // sem alerta
         }
 
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){}
-
-          $testCase->byPartialLinkText($nomeUnidade)->click();
+          $this->driver
+               ->findElement(WebDriverBy::partialLinkText($label))
+               ->click();
           return true;
       }, PEN_WAIT_TIMEOUT);
 
-      return $this->unidadeInput->value();
+      return $this->elById('txtUnidade')->getAttribute('value');
   }
 
     /**
@@ -97,9 +82,9 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      *
      * @return void
      */
-  public function salvar()
+  public function salvar(): void
     {
-      $this->test->byId("btnSalvar")->click();
+      $this->elById('btnSalvar')->click();
   }
 
     /**
@@ -107,9 +92,11 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      * 
      * @return void
      */
-  public function editar()
+  public function editar(): void
     {
-      $this->test->byXPath("(//img[@title='Alterar Mapeamento'])[1]")->click();
+      $this->driver
+           ->findElement(WebDriverBy::xpath("(//img[@title='Alterar Mapeamento'])[1]"))
+           ->click();
   }
 
     /**
@@ -117,30 +104,29 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      *  
      * @return void
      */
-  public function excluirMapeamentosExistentes()
+  public function excluirMapeamentosExistentes(): void
     {
-    try{
-        $lnkInfraCheck=$this->test->byXPath('//*[@id="lnkInfraCheck"]');
-        $lnkInfraCheck->click();
+    try {
+        $this->elByXPath('//*[@id="lnkInfraCheck"]')->click();
         $this->excluirSelecionados();
         sleep(1);
+
         $mensagem = $this->buscarMensagemAlerta();
         $this->test->assertStringContainsString(
-            mb_convert_encoding('Mapeamento excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
+            'Mapeamento excluído com sucesso.',
             $mensagem
         );
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
+        // nenhum mapeamento para excluir
     }
   }
 
     /**
-     * Selecionar todos os resultados
-     *  
-     * @return void
+     * Seleciona todos os registros
      */
-  public function selecionarTodos()
+  public function selecionarTodos(): void
     {
-      $this->test->byXPath('//*[@id="lnkInfraCheck"]')->click();
+      $this->elByXPath('//*[@id="lnkInfraCheck"]')->click();
   }
 
     /**
@@ -148,78 +134,67 @@ class PaginaCadastroMapEnvioCompDigitais extends PaginaTeste
      *  
      * @return void
      */
-  public function excluirSelecionados()
+  public function excluirSelecionados(): void
     {
-      $this->test->byId("btnExcluir")->click();
-      $this->test->acceptAlert();
+      $this->elById('btnExcluir')->click();
+      $this->acceptAlert();
   }
 
     /**
-     * Selecionar primeira checkbox de exclusão
-     * Seleciona botão excluir
-     * Seleciona botão de confirmação
-     *  
-     * @return void
+     * Seleciona primeiro checkbox e exclui
      */
-  public function selecionarExcluir()
+  public function selecionarExcluir(): void
     {
-      $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
-      $this->test->byId("btnExcluir")->click();
-      $this->test->acceptAlert();
+      $this->elByXPath("(//label[@for='chkInfraItem0'])[1]")
+           ->click();
+      $this->excluirSelecionados();
   }
 
     /**
-     * Lispar campo de pesquisa
-     * Colocar texto para pesquisa
-     * Clicar no botão pesquisar
-     *
-     * @param string $textoPesquisa
-     * @return void
+     * Efetua pesquisa pelo texto informado
      */
-  public function selecionarPesquisa($textoPesquisa)
+  public function selecionarPesquisa(string $texto): void
     {
-      $this->test->byId('txtNomeEstrutura')->clear();
-      $this->test->byId('txtNomeEstrutura')->value($textoPesquisa);
-      $this->test->byId("btnPesquisar")->click();
+      $input = $this->elById('txtNomeEstrutura');
+      $input->clear();
+      $texto = mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($texto);
+      $this->elById('btnPesquisar')->click();
   }
 
     /**
-     * Selecionar todos os intens para impressão
-     *  
-     * @return void
+     * Marca todos para impressão
      */
-  public function selecionarImprimir()
+  public function selecionarImprimir(): void
     {
-      $this->test->byId("lnkInfraCheck")->click();
-      // $this->test->byId("btnImprimir")->click();
+      $this->elById('lnkInfraCheck')->click();
+      // $this->elById('btnImprimir')->click();
   }
 
     /**
-     * Buscar item de tabela por nome
-     *
-     * @param string $nome
-     * @return string|null
+     * Busca nome em célula da tabela
      */
-  public function buscarNome($nome)
+  public function buscarNome(string $nome): ?string
     {
     try {
-        $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
-        return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
-            $nomeSelecionado : 
-            null;
-    } catch (Exception $ex) {
-          return null;
+        $text = $this->elByXPath("//td[contains(.,'{$nome}')]")->getText();
+        return $text !== '' ? $text : null;
+    } catch (\Exception $e) {
+        return null;
     }
   }
 
     /**
-     * Buscar mensagem de alerta da página
-     *
-     * @return string
+     * Retorna mensagem de alerta da página
      */
-  public function buscarMensagemAlerta()
+  public function buscarMensagemAlerta(): string
     {
-      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-      return !empty($alerta->text()) ? $alerta->text() : "";
+    try {
+        return $this->driver
+                    ->findElement(WebDriverBy::xpath("(//div[@id='divInfraMsg0'])[1]"))
+                    ->getText();
+    } catch (\Exception $e) {
+        return '';
+    }
   }
 }

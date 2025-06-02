@@ -2,42 +2,51 @@
 
 class PaginaConsultarAndamentos extends PaginaTeste
 {
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function contemTramite($mensagemTramite)
+    /**
+     * Verifica se a visualização contém a mensagem de trâmite genérica
+     */
+  public function contemTramite(string $mensagemTramite): bool
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
+      $texto = $this->getConteudoBody();
+      $mensagem = mb_convert_encoding($mensagemTramite, 'UTF-8', 'ISO-8859-1');
+      return strpos($texto, $mensagem) !== false;
   }
 
-  public function contemTramiteProcessoEmTramitacao($strUnidadeDestino)
+    /**
+     * Verifica se processo está em tramitação externa para determinada unidade
+     */
+  public function contemTramiteProcessoEmTramitacao(string $destino): bool
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $mensagemTramite = "Processo em tramitaÃ§Ã£o externa para $strUnidadeDestino";
-      return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
+      $texto = $this->getVisualizacaoBody();
+      $mensagem = "Processo em tramitação externa para {$destino}";
+      $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
+      return strpos($texto, $mensagem) !== false;
   }
 
-  public function contemTramiteProcessoRecebido($strUnidadeDestino)
+    /**
+     * Verifica se processo foi recebido por determinada unidade
+     */
+  public function contemTramiteProcessoRecebido(string $destino): bool
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $mensagemTramite = "Recebido em $strUnidadeDestino";
-      return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
+      $texto = $this->getVisualizacaoBody();
+      $mensagem = "Recebido em {$destino}";
+      $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
+      return strpos($texto, $mensagem) !== false;
   }
 
-  public function contemTramiteProcessoRejeitado($strUnidadeDestino, $strMotivo)
+    /**
+     * Verifica se processo foi rejeitado por unidade e motivo informados
+     */
+  public function contemTramiteProcessoRejeitado(string $destino, string $motivo): bool
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $mensagemTramite = "O processo foi recusado pelo orgÃ£o $strUnidadeDestino pelo seguinte motivo: $strMotivo";
-      return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
+      $texto = $this->getVisualizacaoBody();
+      $mensagem = "O processo foi recusado pelo orgão {$destino} pelo seguinte motivo: {$motivo}";
+      $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
+      return strpos($texto, $mensagem) !== false;
   }
 }
