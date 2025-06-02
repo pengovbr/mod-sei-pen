@@ -29,7 +29,7 @@ class ComponenteDigitalBD extends InfraBD {
 
       $arrOrdem = [];
       foreach ($arrObjRelProtocoloProtocoloDTO as $dto){
-        $arrOrdem[] = $dto->getNumSequencia() - 1;
+        $arrOrdem[] = $dto->getNumSequencia() + 1;
       }
 
       $objComponenteDigitalPesquisaDTO = new ComponenteDigitalDTO();
@@ -47,7 +47,7 @@ class ComponenteDigitalBD extends InfraBD {
       $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoAnexado();
       $objComponenteDigitalPesquisaDTO->retNumOrdem();
       $objComponenteDigitalPesquisaDTO->setNumIdTramite($numIdTramite);
-      $objComponenteDigitalPesquisaDTO->setNumOrdem($arrOrdem, InfraDTO::$OPER_NOT_IN);
+      $objComponenteDigitalPesquisaDTO->setNumOrdemDocumento($arrOrdem, InfraDTO::$OPER_IN);
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
 
