@@ -2,7 +2,7 @@
 
 use \utilphp\util;
 
-class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends CenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
@@ -68,7 +68,6 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
 
         $this->enviarComponentesDigitaisDoProcesso(self::$servicoPEN, $novoTramite, $metadadosProcessoTeste);
         $reciboTramite = $this->receberReciboEnvioProcesso(self::$servicoPEN, $novoTramite);
-        $this->atualizarTramitesPEN(true,false);
 
         //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
         $this->assertNotNull($novoTramite);
@@ -93,8 +92,10 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
 
         $documentoTesteInterno = $this->gerarDadosDocumentoInternoTeste($remetente);
 
+        putenv("DATABASE_HOST=org2-database");
         $novosDocumentos =  array($documentoTesteInterno);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteInterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
     }
@@ -111,14 +112,14 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
         // Configuração do dados para teste do cenário
         $remetente = self::$contextoOrgaoA;
         $destinatario = array_slice(self::$contextoOrgaoB, 0);
-        $destinatario['SIGLA_UNIDADE'] = $destinatario['SIGLA_UNIDADE_SECUNDARIA'];
-        $destinatario['NOME_UNIDADE'] = $destinatario['NOME_UNIDADE_SECUNDARIA'];
-        $destinatario['SIGLA_UNIDADE_HIERARQUIA'] = $destinatario['SIGLA_UNIDADE_SECUNDARIA_HIERARQUIA'];
+        $orgaosDiferentes = $remetente['URL'] != $destinatario['URL'];
 
         $documentoTesteExterno = $this->gerarDadosDocumentoExternoTeste($remetente, self::CONTEUDO_DOCUMENTO_A);
 
+        putenv("DATABASE_HOST=org1-database");
         $novosDocumentos =  array($documentoTesteExterno);
-        $this->realizarTramiteExternoComValidacaoNoRemetente(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $novosDocumentos, $remetente, $destinatario);
+        
         self::$totalDocumentos = array_merge(self::$totalDocumentos, array($documentoTesteExterno));
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$totalDocumentos, $destinatario);
     }
@@ -288,12 +289,12 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -344,13 +345,13 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             'ordem' => $ordemDocumento,
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
                 'numeroDeIdentificacao' => '999999',
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessado' => array(
@@ -383,7 +384,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends Cena
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
             ),
             'interessado' => array(
                 'nome' => $processoTeste['INTERESSADOS'],

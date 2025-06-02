@@ -6,7 +6,7 @@ use \utilphp\util;
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
