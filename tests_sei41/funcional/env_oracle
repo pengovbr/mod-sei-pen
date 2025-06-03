@@ -1,6 +1,6 @@
 ##### Diretório em que está localizada a instalação do SEI #####
 SEI_PATH=../../../../../../
-ENVIRONMENT_VERSION=3.6.5
+ENVIRONMENT_VERSION=3.6.6
 
 HTTPD_IMAGE=processoeletronico/app-dev
 
@@ -13,7 +13,6 @@ SIP_CONFIG=./assets/config/ConfiguracaoSip.php
 SIP_DATABASE_NAME=sip
 SIP_DATABASE_USER=sip
 SIP_DATABASE_PASSWORD=sip_user
-
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 01 ###############
 ORG1_HOSTNAME=org1-http
@@ -33,8 +32,6 @@ ORG1_DATABASE_GUEST_PORT=1521
 ORG1_DATABASE_HOST_PORT=15211
 ORG1_DATABASE_DATA_DIR=/opt/oracle/oradata
 CONTEXTO_ORGAO_A_DB_SEI_DSN="oci:dbname=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=org1-database)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=XE)))"
-
-
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############

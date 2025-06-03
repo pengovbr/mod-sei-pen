@@ -166,7 +166,21 @@ install: check-isalive
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
 
 up: .env prepare-upload-tmp 
+# Em alguns BDs os containers demoram alguns segundos para ficarem estáveis.
 	$(CMD_COMPOSE_FUNC) up -d 
+	@echo "Aguardando os containers org1 e org2 estarem estáveis por 2 segundos..."
+	@success_count=0; \
+	while [ $$success_count -lt 2 ]; do \
+		if docker exec funcional-org1-http-1 true 2>/dev/null && docker exec funcional-org2-http-1 true 2>/dev/null; then \
+			success_count=$$((success_count + 1)); \
+			echo "✓ Containers acessíveis ($$success_count/2)..."; \
+		else \
+			success_count=0; \
+			echo "✗ Containers ainda não estão prontos..."; \
+		fi; \
+		sleep 1; \
+	done
+
 	make prepare-files-permissions
 
 prepare-upload-tmp:
