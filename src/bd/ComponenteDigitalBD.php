@@ -47,7 +47,9 @@ class ComponenteDigitalBD extends InfraBD {
       $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoAnexado();
       $objComponenteDigitalPesquisaDTO->retNumOrdem();
       $objComponenteDigitalPesquisaDTO->setNumIdTramite($numIdTramite);
-      $objComponenteDigitalPesquisaDTO->setNumOrdemDocumento($arrOrdem, InfraDTO::$OPER_IN);
+      if (!empty($arrOrdem)){
+        $objComponenteDigitalPesquisaDTO->setNumOrdemDocumento($arrOrdem, InfraDTO::$OPER_IN);
+      }
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdemDocumento(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objComponenteDigitalPesquisaDTO->setOrdNumOrdem(InfraDTO::$TIPO_ORDENACAO_ASC);
 
