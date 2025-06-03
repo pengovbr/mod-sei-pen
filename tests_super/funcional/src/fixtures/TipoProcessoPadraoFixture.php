@@ -1,7 +1,5 @@
 <?php
 
-use InfraData;
-
 class TipoProcessoPadraoFixture extends \FixtureBase
 {
   protected $objPenParametroDTO;

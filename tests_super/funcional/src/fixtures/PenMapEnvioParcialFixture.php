@@ -1,7 +1,5 @@
 <?php
 
-use InfraData;
-
 class PenMapEnvioParcialFixture extends \FixtureBase
 {
     protected $objMapEnvioParcialDTO;

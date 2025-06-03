@@ -1,7 +1,5 @@
 <?php
 
-use InfraData;
-
 class BlocoDeTramiteFixture extends \FixtureBase
 {
     protected $objBlocoDeTramiteDTO;
@@ -22,7 +20,7 @@ class BlocoDeTramiteFixture extends \FixtureBase
 
       $objBlocoDeTramiteDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
       $objBlocoDeTramiteDTO->setNumIdUsuario($dados['IdUsuario'] ?: 100000001);
-      $objBlocoDeTramiteDTO->setStrDescricao($dados['Descricao'] ?: 'Bloco para envio 12');
+      $objBlocoDeTramiteDTO->setStrDescricao($dados['Descricao'] ?: 'Bloco para envio');
       $objBlocoDeTramiteDTO->setStrIdxBloco($dados['IdxBloco'] ?: 'Bloco para envio');
       $objBlocoDeTramiteDTO->setStrStaTipo($dados['IdxBloco'] ?: 'I');
       $objBlocoDeTramiteDTO->setStrStaEstado($dados['IdxBloco'] ?: 'A');

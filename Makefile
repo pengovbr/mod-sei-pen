@@ -165,8 +165,46 @@ install: check-isalive
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
 
-up: .env
-	$(CMD_COMPOSE_FUNC) up -d
+up: .env prepare-upload-tmp 
+# Em alguns BDs os containers demoram alguns segundos para ficarem estáveis.
+	$(CMD_COMPOSE_FUNC) up -d 
+	@echo "Aguardando os containers org1 e org2 estarem estáveis por 2 segundos..."
+	@success_count=0; \
+	while [ $$success_count -lt 2 ]; do \
+		if docker exec funcional-org1-http-1 true 2>/dev/null && docker exec funcional-org2-http-1 true 2>/dev/null; then \
+			success_count=$$((success_count + 1)); \
+			echo "✓ Containers acessíveis ($$success_count/2)..."; \
+		else \
+			success_count=0; \
+			echo "✗ Containers ainda não estão prontos..."; \
+		fi; \
+		sleep 1; \
+	done
+
+	make prepare-files-permissions
+
+prepare-upload-tmp:
+	@if [ ! -d "$(PEN_TEST_FUNC)/.tmp" ]; then \
+		echo "📁 Criando diretório .tmp..."; \
+		mkdir -p "$(PEN_TEST_FUNC)/.tmp"; \
+		chmod -R 777 "$(PEN_TEST_FUNC)/.tmp"; \
+		wget -nc -i "$(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt" -P "$(PEN_TEST_FUNC)/.tmp" || { \
+			echo "\n   ❌ Erro ao baixar arquivos com wget. Verifique o caminho ou a conexão. \n"; \
+			exit 1; \
+		}; \
+		echo "\n   ✅ Arquivos baixados com sucesso.\n"; \
+	else \
+		echo "\n   ℹ️  Diretório .tmp já existe, pulando download.\n"; \
+	fi
+
+prepare-files-permissions:
+	@printf "\n⌛ Aguardando criação do container no org1 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org1-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n⌛ Aguardando criação do container no org2 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org2-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas ajustadas com sucesso.\n\n"
 
 
 update: ## Atualiza banco de dados através dos scripts de atualização do sistema
@@ -192,7 +230,12 @@ down: .env
 
 # make teste=TramiteProcessoComDevolucaoTest test-functional
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste)) ;
+	@printf "\n⌛ Aguardando criação do container no test-functional para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas para testes ajustadas com sucesso.\n\n"
+
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste))
 
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
@@ -208,296 +251,6 @@ test-unit: .env $(FILE_VENDOR_UNITARIO)
 
 test: test-unit test-functional
 
-# Dependencias necessárias
-# sudo apt-get install xmlstarlet -y; 
-# sudo apt-get install gnome-screenshot -y;
-# sudo apt-get install wmctrl -y;
-
-# Uso do monitorar:
-# Quando o parâmetro monitorar for igual a 1, o script acessa o segundo workspace e realiza o print da janela ativa.
-# Assim sendo, para utilizá-lo corretamente, inicie a execução do script a seguir em uma janela de terminal localizada no segundo workspace.
-
-# As evidências do script de teste a seguir serão geradas na pasta evidências do presente módulo SEI.
-
-# make teste=MapeamentoEnvioParcialTest test-functional-especifico
-# make teste=MapeamentoEnvioParcialTest test-functional-especifico parallel=1
-# make teste=MapeamentoEnvioParcialTest test-functional-especifico parallel=1 monitorar=1
-# make teste=MapeamentoEnvioParcialTest test-functional-especifico parallel=1 monitorar=1 tempo_pausa=3
-test-functional-especifico:
-	@clear; \
-	time_start=$$(date +"%s"); \
-	if [ "${parallel}" = 1 ]; then parallel=1; txt_parallel="parallel"; else parallel=0; fi; \
-	if [ "${monitorar}" = 1 ]; then monitorar=1; else monitorar=0; fi; \
-	if [ "${tempo_pausa}" = 1 ]; then tempo_pausa=1; else tempo_pausa=0; fi; \
-	if [ "${teste}" = "" ]; then \
-		echo "Informe o nome do teste a ser executado!"; \
-		echo "\nEx1: make teste=MapeamentoEnvioParcialTest test-functional-especifico"; \
-		exit 1; \
-	fi; \
-	if [ ! -e $(PEN_TST_FNC_EVD) ]; then mkdir $(PEN_TST_FNC_EVD); else rm -Rf $(PEN_TST_FNC_EVD)/*; fi; \
-	if [ ! -e $(PEN_TST_FNC_EVD_TFE) ]; then mkdir $(PEN_TST_FNC_EVD_TFE); else rm -Rf $(PEN_TST_FNC_EVD_TFE)/*; fi; \
-	echo "##### Classe de teste: test-functional-especifico "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	echo "##### Teste funcional: $(teste)\n"; \
-	if [ "$${parallel}" = 1 ]; then tipo_teste="paratest"; nodes="-p $(PARALLEL_TEST_NODES)"; else tipo_teste="phpunit"; nodes=""; fi; \
-	$(PEN_TEST_FUNC)/.env $(FILE_VENDOR_FUNCIONAL) up vendor; \
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/$${tipo_teste} -c /tests/phpunit.xml /tests/tests/$(addsuffix .php,$(teste)) \
-		--log-junit /tests/evidencias/teste_funcional_especifico/$(NOME_ARQ_EVDNC_TFE).xml $${nodes}; \
-	echo ""; docker ps --format "table {{.Image}}\t{{.Names}}\t{{.Status}}"; \
-	echo "\n##### Classe de teste: test-functional-especifico "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	echo "##### Teste funcional: $(teste)"; \
-	time_end=$$(date +"%s"); \
-	time_elapsed=$$(($$((time_end))-$$((time_start)))); \
-	echo "##### Tempo de processamento: "$$(date -d@$$((time_elapsed)) -u +%H:%M:%S)"\n"; \
-	if [ "$${monitorar}" = 1 ]; then wmctrl -s 1; fi; \
-	sleep "$${tempo_pausa}"; \
-	flag_sucesso=0; flag_erro=0; \
-	if [ -e $(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).xml ]; then \
-		flag_sucesso=1; \
-		qtde_assertions=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@assertions>0]/@assertions" -n $(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).xml); \
-		if [ ! "$${qtde_assertions}" ]; then \
-			flag_erro=1; \
-		else \
-			flag_erro=0; \
-			if [ "$${qtde_assertions}" -gt 0 ]; then flag_sucesso=$$((flag_sucesso + 1)); fi; \
-		fi; \
-		qtde_errors=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@errors>0]/@errors" -n $(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).xml); \
-		if [ "$${qtde_errors}" ]; then if [ "$${qtde_errors}" -gt 0 ]; then flag_erro=1; fi; fi; \
-		qtde_failures=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@failures>0]/@failures" -n $(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).xml); \
-		if [ "$${qtde_failures}" ]; then if [ "$${qtde_failures}" -gt 0 ]; then flag_erro=1; fi; fi; \
-		if [ $$((flag_erro)) -eq 0 -a $$((flag_sucesso)) -ge 2 ]; then \
-			echo "$$(tput setab 2)$$(tput setaf 0)##### Execução do teste funcional específico concluída com sucesso!$$(tput setaf 7)$$(tput setab 0)"; \
-			echo "\n$$(tput setab 2)$$(tput setaf 0)##### Não foram detectados erros ou falsos positivos.$$(tput setab 0)$$(tput setaf 7)\n"; \
-			gnome-screenshot -w --file=$(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).png; \
-		else \
-			flag_erro=1; \
-		fi; \
-	else \
-		flag_erro=1; \
-	fi; \
-	if [ $$((flag_erro)) -gt 0 ]; then \
-		echo "$$(tput setab 1)$$(tput setaf 7)##### Execução do teste funcional específico concluída.$$(tput setaf 7)$$(tput setab 0)"; \
-		echo "\n$$(tput setab 1)$$(tput setaf 7)##### Detectados erros ou falsos positivos!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		gnome-screenshot -w --file=$(PEN_TST_FNC_EVD_TFE)/$(NOME_ARQ_EVDNC_TFE).png; \
-	fi;
-
-# Dependencias necessárias
-# sudo apt-get install xmlstarlet -y; 
-# sudo apt-get install gnome-screenshot -y;
-# sudo apt-get install wmctrl -y;
-
-# Uso do monitorar:
-# Executa os testes em janela de terminal localizada no 2º Workspace do Ubuntu
-# Após gerar a evidência, print da janela ativa do terminal, retorna ao 1º Workspace do Ubuntu
-# Assim sendo, para utilizá-lo corretamente, inicie a execução do script a seguir
-# em uma janela de terminal localizada no segundo workspace.
-
-# Uso do tempo_pausa:
-# Utilizado em conjunto com o parâmetro monitorar.
-# Tempo de espera ao mudar de workspace para que se possa selecionar a janela do terminal de modo que o print da evidência de teste seja realizado corretamente.
-
-# As evidências do script de teste a seguir serão geradas na pasta evidências do presente módulo SEI.
-# Obs importane: não abrir os arquivos de evidências gerados antes da finalização dos testes! (isso pode causar falhas no resultado devido a cache dos arquivos)
-
-# make test-functional-completo
-# make test-functional-completo parallel=1
-# make test-functional-completo parallel=1 monitorar=1
-# make test-functional-completo parallel=1 monitorar=1 tempo_pausa=3
-test-functional-completo:
-	@clear; \
-	time_start=$$(date +"%s"); \
-	if [ "${parallel}" = 1 ]; then parallel=1; txt_parallel="parallel"; else parallel=0;	fi; \
-	if [ "${monitorar}" = 1 ]; then monitorar=1; else monitorar=0; fi; \
-	if [ "${tempo_pausa}" = 1 ]; then tempo_pausa=1; else tempo_pausa=0; fi; \
-	if [ ! -e $(PEN_TST_FNC_EVD) ]; then mkdir $(PEN_TST_FNC_EVD); else rm -Rf $(PEN_TST_FNC_EVD)/*; fi; \
-	if [ ! -e $(PEN_TST_FNC_EVD_TFC) ]; then mkdir $(PEN_TST_FNC_EVD_TFC); else rm -Rf $(PEN_TST_FNC_EVD_TFC)/*; fi; \
-	if [ -e $(PEN_TST_FNC_TESTS_FS) ]; then rm -Rf $(PEN_TST_FNC_TESTS_FS); fi; \
-	echo "##### Classe de teste: test-functional-completo "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	echo "##### Executando teste funcional completo...\n"; \
-	if [ "$${parallel}" = 1 ]; then tipo_teste="paratest"; nodes="-p $(PARALLEL_TEST_NODES)"; else tipo_teste="phpunit"; nodes=""; fi; \
-	$(PEN_TEST_FUNC)/.env $(FILE_VENDOR_FUNCIONAL) up vendor; \
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/$${tipo_teste} -c /tests/phpunit.xml \
-		--log-junit /tests/evidencias/teste_funcional_completo/$(NOME_ARQ_EVDNC_TFC).xml --testsuite funcional $${nodes}; \
-	echo ""; docker ps --format "table {{.Image}}\t{{.Names}}\t{{.Status}}"; \
-	if [ "$${monitorar}" = 1 ]; then wmctrl -s 1; fi; \
-	sleep $${tempo_pausa}; \
-	echo "\n##### Classe de teste: test-functional-completo "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	time_end=$$(date +"%s"); \
-	time_elapsed=$$(($$((time_end))-$$((time_start)))); \
-	echo "##### Tempo de processamento: "$$(date -d@$$((time_elapsed)) -u +%H:%M:%S)"\n"; \
-	if [ ! -s $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml ]; then \
-		qtde_tests=0; \
-	else \
-		qtde_tests=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@tests>0]/@tests" -n $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml); \
-	fi; \
-	if [ $${qtde_tests} -eq 0 ]; then \
-		echo "\n$$(tput setab 1)$$(tput setaf 7)##### Resultado do Teste funcional completo não localizado.$$(tput setab 0)$$(tput setaf 7)\n"; \
-		echo "$$(tput setab 1)$$(tput setaf 7)##### Execute o teste novamente!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		exit 1; \
-	fi; \
-	flag_sucesso=0; flag_erro=0; \
-	if [ -e $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml ]; then flag_sucesso=1; else flag_erro=1; fi; \
-	qtde_assertions=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@assertions>0]/@assertions" -n $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml); \
-	if [ ! "$${qtde_assertions}" ]; then flag_erro=1; else flag_erro=0; if [ "$${qtde_assertions}" -gt 0 ]; then flag_sucesso=$$((flag_sucesso + 1)); fi; fi; \
-	qtde_errors=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@errors>0]/@errors" -n $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml); \
-	if [ "$${qtde_errors}" ]; then if [ "$${qtde_errors}" -gt 0 ]; then flag_erro=1; fi; fi; \
-	qtde_failures=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@failures>0]/@failures" -n $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml); \
-	if [ "$${qtde_failures}" ]; then if [ "$${qtde_failures}" -gt 0 ]; then flag_erro=1; fi; fi; \
-	if [ $$((flag_erro)) -eq 0 -a $$((flag_sucesso)) -ge 2 ]; then \
-		echo "\n$$(tput setab 2)$$(tput setaf 0)##### Execução do teste funcional completo concluída com sucesso!$$(tput setaf 7)$$(tput setab 0)"; \
-		echo "\n$$(tput setab 2)$$(tput setaf 0)##### Não foram detectados erros ou falsos positivos.$$(tput setab 0)$$(tput setaf 7)\n"; \
-		gnome-screenshot -w --file=$(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).png; \
-	else \
-		if [ "$${parallel}" = 1 ]; then xml_path="/testsuites/testsuite/testsuite"; else xml_path="/testsuites/testsuite/testsuite/testsuite"; fi; \
-		xmlstarlet sel -t -v "$${xml_path}[@errors>0]/@file" -n \
-			-t -v "$${xml_path}[@failures>0]/@file" -n \
-			$(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml \
-			| uniq | sed 's,'/tests/tests/',,g' \
-			> $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).txt; \
-		if [ ! -e $(PEN_TST_FNC_TESTS_FS) ]; then mkdir $(PEN_TST_FNC_TESTS_FS); else rm -Rf $(PEN_TST_FNC_TESTS_FS)/*; fi; \
-		cp $(PEN_TEST_FUNC)/tests/CenarioBaseTestCase.php $(PEN_TST_FNC_TESTS_FS)/CenarioBaseTestCase.php; \
-		while read arquivo; do \
-			if [ ! $$arquivo = "" ]; then \
-				cp $(PEN_TEST_FUNC)/tests/$$arquivo $(PEN_TST_FNC_TESTS_FS)/$$arquivo; \
-			fi; \
-		done < $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).txt; \
-		echo "\n$$(tput setab 1)$$(tput setaf 7)##### Execução do teste funcional completo concluída.$$(tput setaf 7)$$(tput setab 0)"; \
-		echo "\n$$(tput setab 1)$$(tput setaf 7)##### Detectados erros ou falsos positivos!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		gnome-screenshot -w --file=$(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).png; \
-		if [ "$${monitorar}" = 1 ]; then wmctrl -s 0; fi; \
-		make -s test-functional-falsos-positivos parallel="$${parallel}" monitorar="$${monitorar}" tempo_pausa="$${tempo_pausa}"; \
-	fi;
-
-# Dependencias necessárias
-# sudo apt-get install xmlstarlet -y; 
-# sudo apt-get install gnome-screenshot -y;
-# sudo apt-get install wmctrl -y;
-
-# Uso do monitorar:
-# Executa os testes em janela de terminal localizada no 2º Workspace do Ubuntu
-# Após gerar a evidência, print da janela ativa do terminal, retorna ao 1º Workspace do Ubuntu
-# Assim sendo, para utilizá-lo corretamente, inicie a execução do script a seguir
-# em uma janela de terminal localizada no segundo workspace.
-
-# Uso do tempo_pausa:
-# Utilizado em conjunto com o parâmetro monitorar.
-# Tempo de espera ao mudar de workspace para que se possa selecionar a janela do terminal de modo que o print da evidência de teste seja realizado corretamente.
-
-# As evidências do script de teste a seguir serão geradas na pasta evidências do presente módulo SEI.
-
-# make test-functional-falsos-positivos
-# make test-functional-falsos-positivos parallel=1
-# make test-functional-falsos-positivos parallel=1 monitorar=1
-# make test-functional-falsos-positivos parallel=1 monitorar=1 tempo_pausa=3
-test-functional-falsos-positivos:
-	@clear; \
-	time_start=$$(date +"%s"); \
-	if [ "${parallel}" = 1 ]; then parallel=1; txt_parallel="parallel"; else parallel=0; fi; \
-	if [ "${monitorar}" = 1 ]; then monitorar=1; else monitorar=0; fi; \
-	if [ "${tempo_pausa}" = 1 ]; then tempo_pausa=1; else tempo_pausa=0; fi; \
-	for i in `seq 1 5`; do if [ ! -e $(PEN_TST_FNC_EVD_TFP)-$$i ]; then ultima_execucao=$$((i - 1)); break; fi;	done; \
-	execucao=$$((ultima_execucao + 1)); \
-	echo "##### Classe de teste: test-functional-falsos-positivos "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	echo "##### Executando teste funcional falsos positivos pela $${execucao}ª vez...\n"; \
-	if [ $${execucao} -eq 1 ]; then \
-		if [ ! -s $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml ]; then \
-			qtde_tests=0; \
-		else \
-			qtde_tests=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@tests>0]/@tests" -n $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).xml); \
-		fi; \
-	else \
-		if [ ! -s $(PEN_TST_FNC_EVD_TFP)-$${ultima_execucao}/$(NOME_ARQ_EVDNC_TFP)-$${ultima_execucao}.xml ]; then \
-			qtde_tests=0; \
-		else \
-			qtde_tests=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@tests>0]/@tests" -n $(PEN_TST_FNC_EVD_TFP)-$${ultima_execucao}/$(NOME_ARQ_EVDNC_TFP)-$${ultima_execucao}.xml); \
-		fi; \
-	fi; \
-	if [ ! "$${qtde_tests}" ]; then qtde_tests=0; fi; \
-	if [ $${qtde_tests} -eq 0 ]; then \
-		if [ $${execucao} -eq 1 ]; then \
-			echo "$$(tput setab 1)$$(tput setaf 7)##### Resultado do Teste funcional completo não localizado.$$(tput setab 0)$$(tput setaf 7)\n"; \
-			echo "$$(tput setab 1)$$(tput setaf 7)##### Execute o teste funcional completo novamente!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		else \
-			echo "$$(tput setab 1)$$(tput setaf 7)##### Resultado do Teste funcional falsos positivos anterior não localizado.$$(tput setab 0)$$(tput setaf 7)\n"; \
-		fi; \
-		exit 1; \
-	fi; \
-	for i in `seq $$((execucao)) 5`; do rm -Rf $(PEN_TST_FNC_EVD_TFP)-$$i; done; \
-	if [ ! -e $(PEN_TST_FNC_TESTS_FS) ]; then mkdir $(PEN_TST_FNC_TESTS_FS); else rm -Rf $(PEN_TST_FNC_TESTS_FS)/*; fi; \
-	cp $(PEN_TEST_FUNC)/tests/CenarioBaseTestCase.php $(PEN_TST_FNC_TESTS_FS)/CenarioBaseTestCase.php; \
-	while read arquivo; do \
-		if [ ! $$arquivo = "" ]; then \
-			cp $(PEN_TEST_FUNC)/tests/$$arquivo $(PEN_TST_FNC_TESTS_FS)/$$arquivo; \
-		fi; \
-	done < $(PEN_TST_FNC_EVD_TFC)/$(NOME_ARQ_EVDNC_TFC).txt; \
-	if [ ! -e $(PEN_TST_FNC_EVD_TFP)-$${execucao} ]; then mkdir $(PEN_TST_FNC_EVD_TFP)-$${execucao}; else rm -Rf $(PEN_TST_FNC_EVD_TFP)-$${execucao}/*; fi; \
-	if [ "$${parallel}" = 1 ]; then tipo_teste="paratest"; nodes="-p$(PARALLEL_TEST_NODES)"; else tipo_teste="phpunit"; nodes=""; fi; \
-	$(PEN_TEST_FUNC)/.env $(FILE_VENDOR_FUNCIONAL) up vendor; \
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/$${tipo_teste} -c /tests/phpunit.xml --testsuite falsos_positivos \
-		--log-junit /tests/evidencias/teste_funcional_falsos_positivos-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml $${nodes}; \
-	echo "\n"; docker ps --format "table {{.Image}}\t{{.Names}}\t{{.Status}}"; \
-	if [ -e $(PEN_TST_FNC_TESTS_FS) ]; then rm -Rf $(PEN_TST_FNC_TESTS_FS)/*; fi; \
-	if [ "$${monitorar}" = 1 ]; then wmctrl -s 1; fi; \
-	sleep "$${tempo_pausa}"; \
-	echo "\n##### Classe de teste: test-functional-falsos-positivos "$${txt_parallel}; \
-	echo -n "##### Branch atual: "; git branch --show-current; \
-	time_end=$$(date +"%s"); \
-	time_elapsed=$$(($$((time_end))-$$((time_start)))); \
-	echo "##### Tempo de processamento: "$$(date -d@$$((time_elapsed)) -u +%H:%M:%S)"\n"; \
-	if [ ! -s $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml ]; then \
-		qtde_tests=0; \
-	else \
-		qtde_tests=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@tests>0]/@tests" -n $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml); \
-	fi; \
-	if [ $${qtde_tests} -eq 0 ]; then \
-		echo "\n$$(tput setab 1)$$(tput setaf 7)##### Resultado do Teste funcional falsos positivos não localizado.$$(tput setab 0)$$(tput setaf 7)\n"; \
-		echo "$$(tput setab 1)$$(tput setaf 7)##### Execute o teste novamente!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		exit 1; \
-	fi; \
-	flag_sucesso=0;	flag_erro=0; \
-	if [ -e $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml ]; then flag_sucesso=1; else flag_erro=1; fi; \
-	qtde_assertions=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@assertions>0]/@assertions" -n $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml); \
-	if [ ! "$${qtde_assertions}" ]; then qtde_assertions=0; fi; \
-	if [ "$${qtde_assertions}" -gt 0 ]; then flag_sucesso=$$((flag_sucesso + 1)); fi; \
-	qtde_errors=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@errors>0]/@errors" -n $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml); \
-	if [ ! "$${qtde_errors}" ]; then qtde_errors=0; fi; \
-	if [ "$${qtde_errors}" -gt 0 ]; then flag_erro=1; fi; \
-	qtde_failures=$$(xmlstarlet sel -t -v "/testsuites/testsuite[@failures>0]/@failures" -n $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml); \
-	if [ ! "$${qtde_failures}" ]; then qtde_failures=0; fi; \
-	if [ "$${qtde_failures}" -gt 0 ]; then flag_erro=1; fi; \
-	if [ $$((flag_erro)) -eq 0 -a $$((flag_sucesso)) -ge 2 ]; then \
-		echo "\n$$(tput setab 2)$$(tput setaf 0)##### $${execucao}ª execução do teste funcional falsos positivos concluída com sucesso!$$(tput setaf 7)$$(tput setab 0)"; \
-		echo "\n$$(tput setab 2)$$(tput setaf 0)##### Não foram detectados erros ou falsos positivos.$$(tput setab 0)$$(tput setaf 7)\n"; \
-		gnome-screenshot -w --file="$(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.png"; \
-	else \
-		if [ "$${parallel}" = 1 ]; then xml_path="/testsuites/testsuite/testsuite"; else xml_path="/testsuites/testsuite/testsuite/testsuite"; fi; \
-		xmlstarlet sel -t -v "$${xml_path}[@errors>0]/@file" -n \
-			-t -v "$${xml_path}[@failures>0]/@file" -n \
-			$(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.xml \
-			| uniq | sed 's,'/tests/tests_funcional_falsos_positivos_temp/',,g' \
-			> $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.txt; \
-		if [ ! -e $(PEN_TST_FNC_TESTS_FS) ]; then mkdir $(PEN_TST_FNC_TESTS_FS); fi; \
-		cp $(PEN_TEST_FUNC)/tests/CenarioBaseTestCase.php $(PEN_TST_FNC_TESTS_FS)/CenarioBaseTestCase.php; \
-		while read arquivo; do \
-			if [ ! $$arquivo = "" ]; then \
-				cp $(PEN_TEST_FUNC)/tests/$$arquivo $(PEN_TST_FNC_TESTS_FS)/$$arquivo; \
-			fi; \
-		done < $(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.txt; \
-			echo "\n$$(tput setab 1)$$(tput setaf 7)##### $${execucao}ª execução do teste funcional falsos positivos concluída.$$(tput setaf 7)$$(tput setab 0)"; \
-			echo "\n$$(tput setab 1)$$(tput setaf 7)##### Detectados erros ou falsos positivos!$$(tput setab 0)$$(tput setaf 7)\n"; \
-		if [ $${execucao} -lt 5 ]; then \
-			gnome-screenshot -w --file="$(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.png"; \
-			if [ "$${monitorar}" = 1 ]; then wmctrl -s 0; fi; \
-			make -s test-functional-falsos-positivos parallel="$${parallel}" monitorar="$${monitorar}" tempo_pausa="$${tempo_pausa}"; \
-		else \
-			echo "$$(tput setab 1)$$(tput setaf 7)##### Limite máximo de 5 tentativas de testes alcançado!$$(tput setab 0)\n"; \
-			gnome-screenshot -w --file="$(PEN_TST_FNC_EVD_TFP)-$${execucao}/$(NOME_ARQ_EVDNC_TFP)-$${execucao}.png"; \
-		fi; \
-	fi;
 
 verify-config:
 	@echo "Verificando configurações do módulo para instância org1"
@@ -561,7 +314,7 @@ stop-test-container:
 	fi;
 
 vendor: composer.json
-	$(CMD_COMPOSE_FUNC) run -w /tests php-test-functional bash -c './composer.phar install'
+	$(CMD_COMPOSE_FUNC) run --rm -w /tests php-test-functional bash -c './composer.phar install'
 
 cria_json_compatibilidade:
 	$(shell ./gerar_json_compatibilidade.sh)

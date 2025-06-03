@@ -1142,12 +1142,7 @@ class ProcessoEletronicoRN extends InfraRN
         $indetificacaoDaParte = $objParametros->identificacaoDaParte;
         $parte = $indetificacaoDaParte->inicio . '-' . $indetificacaoDaParte->fim;
 
-        $conteudo = $objParametros->conteudoDaParteDeComponenteDigital;
-
-        $queryParams = [
-            'hashDoComponenteDigital' => $hashDoComponenteDigital,
-            'protocolo' => $protocolo
-        ];
+        $conteudo = $objParametros->conteudoDaParteDeComponenteDigital;        
 
         $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar/partes/{$parte}";
 
@@ -1171,15 +1166,24 @@ class ProcessoEletronicoRN extends InfraRN
 
 
         $arrOptions = [
-            'query' => $queryParams,
-            'multipart' => [
-                [
-                    'name'     => 'conteudo',
-                    'contents' => $conteudo,
-                    'filename' => 'arquivo_externo.html',
-                    // 'headers' => ['Content-Type' => 'text/html']
-                ],              
-            ],
+          'multipart' => [
+              [
+                  'name'     => 'conteudo',
+                  'contents' => $conteudo,
+                  'filename' => 'arquivo_externo.html',
+                  // 'headers' => ['Content-Type' => 'text/html']
+              ],
+              [
+                'name'     => 'hashDoComponenteDigital',
+                'contents' => $hashDoComponenteDigital,
+                'headers' => ['Content-Type' => 'text/plain']
+              ],
+              [
+                'name'     => 'protocolo',
+                'contents' => $protocolo,
+                'headers' => ['Content-Type' => 'text/plain']
+              ],
+          ],
         ];
                     
         $strClientGuzzle->request('PUT', $endpoint, $arrOptions);

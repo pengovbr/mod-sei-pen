@@ -81,4 +81,5 @@ class BlocoDeTramiteProtocoloFixture extends \FixtureBase
     $objBlocoDeTramiteProtocoloBD = new \PenBlocoProcessoBD($this->inicializarObjInfraIBanco());
     return $objBlocoDeTramiteProtocoloBD->alterar($objBlocoDeTramiteProtocoloDTO);
   }
+
 }

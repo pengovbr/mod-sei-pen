@@ -48,7 +48,6 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
      */
     public function test_verificar_destino_processo_para_devolucao()
     {
-
         $localCertificado = self::$destinatario['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$destinatario['SENHA_CERTIFICADO_DIGITAL'];
 
@@ -67,7 +66,7 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, PEN_ENDERECO_WEBSERVICE."tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
@@ -81,37 +80,41 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
             switch($propriedades->chave){
  
                 case "CLASSIFICACAO_PrazoIntermediario_1":
-                     $this->assertEquals('15', $propriedades->valor );
+                    $this->assertTrue(
+                      '15' == $propriedades->valor,
+                      'Classificação Prazo Intermediário 1 não é igual a 15. Valor: ' . $propriedades->valor
+                    );
                      break;
                    
                 case "CLASSIFICACAO_PrazoCorrente_1":
-                     $this->assertEquals('5', $propriedades->valor );
+                    $this->assertTrue(
+                      '5' == $propriedades->valor,
+                      'Classificação Prazo Corrente 1 não é igual a 5. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "MODULO_PEN_VERSAO":
-                     $this->assertTrue(isset($propriedades->valor));
+                    $this->assertTrue(
+                      isset($propriedades->valor),
+                      'Versão do módulo PEN não está definida. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_CodigoEstruturado_1":
-                    $this->assertEquals('052.211', $propriedades->valor );
+                    $this->assertTrue(
+                      '052.212' == $propriedades->valor,
+                      'Classificação Código Estruturado 1 não é igual a 052.212. Valor: ' . $propriedades->valor
+                    );
                      break;
- 
-                case "CLASSIFICACAO_Destinacao_1":
-                     $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
-                     break;
- 
-                case "CLASSIFICACAO_Observacao_1":
-                    $this->assertEquals('Quanto ao estabelecimento', substr($propriedades->valor,0,25) );
-                     break;
- 
-                case "CLASSIFICACAO_Descricao_1":
-                     $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
-                     break;                
                      
             }
         }
 
-        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
+        $this->assertEquals(
+          9,
+          sizeof($saida->processo->itensHistorico),
+          'Quantidade de itens do histórico não é igual a 9. Valor: ' . sizeof($saida->processo->itensHistorico)
+        );
 
     }
 

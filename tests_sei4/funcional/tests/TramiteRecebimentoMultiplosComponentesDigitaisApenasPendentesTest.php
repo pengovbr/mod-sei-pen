@@ -2,7 +2,7 @@
 
 use \utilphp\util;
 
-class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentes extends FixtureCenarioBaseTestCase
+class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends FixtureCenarioBaseTestCase
 {
     const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
     const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';

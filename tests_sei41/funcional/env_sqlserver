@@ -1,6 +1,8 @@
 ##### Diretório em que está localizada a instalação do SEI #####
 SEI_PATH=../../../../../../
-ENVIRONMENT_VERSION=10.0
+ENVIRONMENT_VERSION=3.6.6
+
+HTTPD_IMAGE=processoeletronico/app-dev
 
 SEI_CONFIG=./assets/config/ConfiguracaoSEI.php
 SEI_DATABASE_NAME=sei
@@ -23,16 +25,13 @@ ORG1_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 ##### BANCO DE DADOS DO ÓRGÃO 1 #####
 # Configurações do banco de dados SQL SERVER do ÓRGÃO 1
-ORG1_DATABASE_IMAGE=processoeletronico/vagrant_sei4_sqlserver
+ORG1_DATABASE_IMAGE=processoeletronico/sqlserver2019-sei41
 ORG1_DATABASE_HOST=org1-database
 ORG1_DATABASE_TYPE=SqlServer
 ORG1_DATABASE_GUEST_PORT=1433
 ORG1_DATABASE_HOST_PORT=14331
 ORG1_DATABASE_DATA_DIR=/var/opt/mssql 
 CONTEXTO_ORGAO_A_DB_SEI_DSN="sqlsrv:server=org1-database,1433; Database=sei"
-
-
-
 
 
 ############### CONFIGURAÇÕES GERAIS DO ÓRGÃO 02 ###############
@@ -46,7 +45,7 @@ ORG2_CERTIFICADO=/opt/sei/config/mod-pen/certificado_org2.pem
 ORG2_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 # Configurações do banco de dados SQL SERVER do ÓRGÃO 2
-ORG2_DATABASE_IMAGE=processoeletronico/vagrant_sei4_sqlserver
+ORG2_DATABASE_IMAGE=processoeletronico/sqlserver2019-sei41
 ORG2_DATABASE_HOST=org2-database
 ORG2_DATABASE_TYPE=SqlServer
 ORG2_DATABASE_GUEST_PORT=1433
