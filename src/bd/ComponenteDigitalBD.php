@@ -19,6 +19,12 @@ class ComponenteDigitalBD extends InfraBD {
     if(is_null($numIdTramite)){
         throw new InfraException('Módulo do Tramita: Parâmetro [parObjTramiteDTO] não informado');
     }
+
+      // Tendo em vista o cenario de um documento movido e devolvido para o mesmo
+      // processo, o codigo abaixo visa evitar um erro no qual no orgão remetente
+      // a busca de componentes digitais traz dois registros do mesmo documento.
+      // Com o código abaixo, o documento movido é filtrado e removido da busca, 
+      // evitando a falha na definição da ordem dos documentos digitais.
       $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
       $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO, InfraDTO::$OPER_DIFERENTE);
       $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($dblIdDocumento);
@@ -27,6 +33,9 @@ class ComponenteDigitalBD extends InfraBD {
       $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
       $arrObjRelProtocoloProtocoloDTO = $objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO);
 
+      // $arrOrdem guarda a ordem/sequencia em que os documentos que são
+      // diferentes da associação de 'movido'
+      // Ordem = Sequencia + 1
       $arrOrdem = [];
       foreach ($arrObjRelProtocoloProtocoloDTO as $dto){
         $arrOrdem[] = $dto->getNumSequencia() + 1;
@@ -47,6 +56,7 @@ class ComponenteDigitalBD extends InfraBD {
       $objComponenteDigitalPesquisaDTO->retNumOrdemDocumentoAnexado();
       $objComponenteDigitalPesquisaDTO->retNumOrdem();
       $objComponenteDigitalPesquisaDTO->setNumIdTramite($numIdTramite);
+      // Caso haja documentos diferente de movidos identificados, eles são filtrados no campo abaixo:
       if (!empty($arrOrdem)){
         $objComponenteDigitalPesquisaDTO->setNumOrdemDocumento($arrOrdem, InfraDTO::$OPER_IN);
       }
