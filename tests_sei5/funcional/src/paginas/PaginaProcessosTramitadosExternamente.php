@@ -1,14 +1,23 @@
 <?php
 
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+
 class PaginaProcessosTramitadosExternamente extends PaginaTeste
 {
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function contemProcesso($numeroProcesso) 
+    /**
+     * Verifica se o número do processo aparece na página de processos tramitados externamente
+     *
+     * @param string $numeroProcesso
+     * @return bool
+     */
+  public function contemProcesso(string $numeroProcesso): bool
     {
-      return strpos($this->test->byCssSelector('body')->text(), $numeroProcesso) !== false;
+      $texto = $this->elByCss('body')->getText();
+      return strpos($texto, $numeroProcesso) !== false;
   }
 }
