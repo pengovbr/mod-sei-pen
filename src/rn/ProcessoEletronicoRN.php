@@ -1086,11 +1086,6 @@ class ProcessoEletronicoRN extends InfraRN
 
         $conteudo = $objParametros->conteudoDaParteDeComponenteDigital;
 
-        $queryParams = [
-        'hashDoComponenteDigital' => $hashDoComponenteDigital,
-        'protocolo' => $protocolo
-        ];
-
         $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar/partes/{$parte}";
 
         $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
@@ -1115,14 +1110,23 @@ class ProcessoEletronicoRN extends InfraRN
 
 
         $arrOptions = [
-          'query' => $queryParams,
           'multipart' => [
-            [
-                'name'     => 'conteudo',
-                'contents' => $conteudo,
-                'filename' => 'arquivo_externo.html',
-                // 'headers' => ['Content-Type' => 'text/html']
-            ],              
+              [
+                  'name'     => 'conteudo',
+                  'contents' => $conteudo,
+                  'filename' => 'arquivo_externo.html',
+                  // 'headers' => ['Content-Type' => 'text/html']
+              ],
+              [
+                'name'     => 'hashDoComponenteDigital',
+                'contents' => $hashDoComponenteDigital,
+                'headers' => ['Content-Type' => 'text/plain']
+              ],
+              [
+                'name'     => 'protocolo',
+                'contents' => $protocolo,
+                'headers' => ['Content-Type' => 'text/plain']
+              ],
           ],
         ];
                     
