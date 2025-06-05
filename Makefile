@@ -168,8 +168,47 @@ install: check-isalive
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
 
-up: .env
-	$(CMD_COMPOSE_FUNC) up -d
+up: .env prepare-upload-tmp 
+# Em alguns BDs os containers demoram alguns segundos para ficarem estáveis.
+	$(CMD_COMPOSE_FUNC) up -d 
+	@echo "Aguardando os containers org1 e org2 estarem estáveis por 2 segundos..."
+	@success_count=0; \
+	while [ $$success_count -lt 2 ]; do \
+		if docker exec funcional-org1-http-1 true 2>/dev/null && docker exec funcional-org2-http-1 true 2>/dev/null; then \
+			success_count=$$((success_count + 1)); \
+			echo "✓ Containers acessíveis ($$success_count/2)..."; \
+		else \
+			success_count=0; \
+			echo "✗ Containers ainda não estão prontos..."; \
+		fi; \
+		sleep 1; \
+	done
+
+	make prepare-files-permissions
+
+prepare-upload-tmp:
+	@if [ ! -d "$(PEN_TEST_FUNC)/.tmp" ]; then \
+		echo "📁 Criando diretório .tmp..."; \
+		mkdir -p "$(PEN_TEST_FUNC)/.tmp"; \
+		chmod -R 777 "$(PEN_TEST_FUNC)/.tmp"; \
+		wget -nc -i "$(PEN_TEST_FUNC)/assets/arquivos/test_files_index.txt" -P "$(PEN_TEST_FUNC)/.tmp" || { \
+			echo "\n   ❌ Erro ao baixar arquivos com wget. Verifique o caminho ou a conexão. \n"; \
+			exit 1; \
+		}; \
+		echo "\n   ✅ Arquivos baixados com sucesso.\n"; \
+	else \
+		echo "\n   ℹ️  Diretório .tmp já existe, pulando download.\n"; \
+	fi
+
+prepare-files-permissions:
+	@printf "\n⌛ Aguardando criação do container no org1 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org1-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n⌛ Aguardando criação do container no org2 para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) exec org2-http sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas ajustadas com sucesso.\n\n"
+
 
 
 update: ## Atualiza banco de dados através dos scripts de atualização do sistema
@@ -195,7 +234,12 @@ down: .env
 
 # make test-functional teste=TramiteProcessoComDevolucaoTest 
 test-functional: .env $(FILE_VENDOR_FUNCIONAL) up vendor
-	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste));
+	@printf "\n⌛ Aguardando criação do container no test-functional para dar permissões de pastas...\n"
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional sh -c 'while [ ! -d /var/sei/arquivos ]; do sleep 1; done; chmod -R 777 /var/sei/arquivos'
+
+	@printf "\n   ✅ Permissões de pastas para testes ajustadas com sucesso.\n\n"
+
+	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/phpunit -c /tests/phpunit.xml --testdox /tests/tests/$(addsuffix .php,$(teste))
 
 test-functional-parallel: .env $(FILE_VENDOR_FUNCIONAL) up
 	$(CMD_COMPOSE_FUNC) run --rm php-test-functional /tests/vendor/bin/paratest -c /tests/phpunit.xml --testsuite $(TEST_SUIT) -p $(PARALLEL_TEST_NODES) $(TEST_GROUP_EXCLUIR) $(TEST_GROUP_INCLUIR)
