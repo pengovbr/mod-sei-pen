@@ -13,16 +13,6 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
     public static $destinatario;
 
     /**
-     * @inheritdoc
-     * @return void
-     */
-    function setUp(): void
-    {
-        parent::setUp();
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-    }
-
-    /**
      * Teste de cadastro de novo mapeamento entre ogrãos
      *
      * @return void
@@ -140,8 +130,52 @@ class MapeamentoTipoProcessoRelacionamentoOrgaosCadastroTest extends FixtureCena
         $this->sairSistema();
     }
 
+    /**
+     * Teste para excluir mapeamento de orgão exteno
+     *
+     * @group MapeamentoOrgaoExterno
+     *
+     * @return void
+     */
+    public function test_excluir_mapeamento_orgao_externo()
+    {
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(
+            self::$remetente['URL'],
+            self::$remetente['SIGLA_UNIDADE'],
+            self::$remetente['LOGIN'],
+            self::$remetente['SENHA']
+        );
+        $this->paginaCadastroOrgaoExterno->navegarCadastroOrgaoExterno();
+
+        $this->paginaCadastroOrgaoExterno->selecionarExcluirMapOrgao();
+        sleep(1);
+
+        $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+        $this->assertStringContainsString(
+            mb_convert_encoding('Relacionamento entre unidades foi excluído com sucesso.', 'UTF-8', 'ISO-8859-1'),
+            $mensagem
+        );
+
+        $this->sairSistema();
+    }
+
     public static function tearDownAfterClass(): void
     {
+        $penOrgaoExternoFixture = new \PenOrgaoExternoFixture();
+
+        $penOrgaoExternoFixtureDTO = $penOrgaoExternoFixture->buscar([
+            'Id' =>CONTEXTO_ORGAO_A_ID_ESTRUTURA,
+            'IdOrigem' => CONTEXTO_ORGAO_B_ID_ESTRUTURA
+          ]);
+        if (count($penOrgaoExternoFixtureDTO) > 0) {
+            foreach($penOrgaoExternoFixtureDTO as $dto){
+                $penOrgaoExternoFixture->remover([
+                    'Id' => $dto->getDblId(),
+                ]);
+            }
+        }
         parent::tearDownAfterClass();
     }
 }
