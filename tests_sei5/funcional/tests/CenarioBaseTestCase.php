@@ -290,7 +290,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function abrirProcesso($protocolo)
     {
         $this->paginaBase->navegarParaControleProcesso();
-        $this->paginaControleProcesso->abrirProcesso($protocolo);
+        try {
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+        } catch (\Exception $e){
+            $this->paginaBase->pesquisar($protocolo);
+        }
     }
 
     protected function abrirProcessoPelaDescricao($descricao)
