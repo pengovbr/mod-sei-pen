@@ -1,6 +1,6 @@
 ##### Diretório em que está localizada a instalação do SEI #####
 SEI_PATH=../../../../../../
-ENVIRONMENT_VERSION=3.6.0
+ENVIRONMENT_VERSION=3.6.6
 
 HTTP_IMAGE=processoeletronico/app-dev-php8
 SOLR_IMAGE=processoeletronico/solr9.6.1
@@ -26,7 +26,7 @@ ORG1_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 ##### BANCO DE DADOS DO ÓRGÃO 1 #####
 # Configurações do banco de dados POSTGRESQL do ÓRGÃO 1
-ORG1_DATABASE_IMAGE=processoeletronico/vagrant_super41_postgresql
+ORG1_DATABASE_IMAGE=processoeletronico/postgres15-sei50
 ORG1_DATABASE_HOST=org1-database
 ORG1_DATABASE_TYPE=PostgreSql
 ORG1_DATABASE_GUEST_PORT=5432
@@ -46,7 +46,7 @@ ORG2_CERTIFICADO=/opt/sei/config/mod-pen/certificado_org2.pem
 ORG2_CERTIFICADO_SENHA=XXXXXXXXXXXXXX
 
 # Configurações do banco de dados POSTGRESQL do ÓRGÃO 2
-ORG2_DATABASE_IMAGE=processoeletronico/vagrant_super41_postgresql
+ORG2_DATABASE_IMAGE=processoeletronico/postgres15-sei50
 ORG2_DATABASE_HOST=org2-database
 ORG2_DATABASE_TYPE=PostgreSql
 ORG2_DATABASE_GUEST_PORT=5432

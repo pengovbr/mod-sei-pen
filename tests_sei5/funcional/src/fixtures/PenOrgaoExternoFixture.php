@@ -40,17 +40,35 @@ class PenOrgaoExternoFixture extends \FixtureBase
       return $this->objPenOrgaoExternoDTO;
   }
 
-  public function consultar($dados = [])
+  public function listar($dados = [])
     {
       $objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+    if ($dados['IdOrigem']) {
       $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($dados['IdOrigem']);
+    }
+    if ($dados['Id']) {
       $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($dados['Id']);
-      $objPenOrgaoExternoDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+    }
+    if ($dados['SinAtivo']) {
+      $objPenOrgaoExternoDTO->setStrAtivo($dados['SinAtivo']);
+    }
       $objPenOrgaoExternoDTO->retTodos();
-
+        
       $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
-      return $objPenOrgaoExternoBD->consultar($objPenOrgaoExternoDTO);
+      return $objPenOrgaoExternoBD->listar($objPenOrgaoExternoDTO);
   }
+
+  public function consultar($dados = [])
+  {
+    $objPenOrgaoExternoDTO = new \PenOrgaoExternoDTO();
+    $objPenOrgaoExternoDTO->setNumIdOrgaoOrigem($dados['IdOrigem']);
+    $objPenOrgaoExternoDTO->setNumIdOrgaoDestino($dados['Id']);
+    $objPenOrgaoExternoDTO->setNumIdUnidade($dados['IdUnidade'] ?: 110000001);
+    $objPenOrgaoExternoDTO->retTodos();
+
+    $objPenOrgaoExternoBD = new \PenOrgaoExternoBD($this->inicializarObjInfraIBanco());
+    return $objPenOrgaoExternoBD->consultar($objPenOrgaoExternoDTO);
+}
 
   public function excluir($dados = [])
     {
