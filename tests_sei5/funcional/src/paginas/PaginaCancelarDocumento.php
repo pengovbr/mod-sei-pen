@@ -1,33 +1,50 @@
 <?php
 
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+
 class PaginaCancelarDocumento extends PaginaTeste
 {
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function cancelar($motivoCancelamento)
+    /**
+     * Cancela o documento inserindo o motivo e salvando.
+     *
+     * @param string $motivoCancelamento
+     */
+  public function cancelar(string $motivoCancelamento): void
     {
-      $this->motivoCancelamento($motivoCancelamento);
+      $this->setMotivoCancelamento($motivoCancelamento);
       $this->salvar();
   }
 
-  private function motivoCancelamento($value)
+    /**
+     * Preenche o motivo de cancelamento no campo apropriado dentro dos frames.
+     *
+     * @param string $valor
+     */
+  private function setMotivoCancelamento(string $valor): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $input = $this->test->byId("txaMotivo");
-    if(isset($value)) {
-        $input->value($value);
-    }
+      // Navega para o frame de visualização
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
 
-      return $input->value();
+      // Localiza e preenche o textarea de motivo
+      $input = $this->elById('txaMotivo');
+      $input->clear();
+      $valor = mb_convert_encoding($valor, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($valor);
   }
 
-  private function salvar()
+    /**
+     * Clica no botão salvar para confirmar o cancelamento.
+     */
+  private function salvar(): void
     {
-      $this->test->byId("sbmSalvar")->click();
+      $this->elById('sbmSalvar')->click();
   }
 }

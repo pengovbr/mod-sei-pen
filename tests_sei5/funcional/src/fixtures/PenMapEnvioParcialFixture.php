@@ -1,7 +1,5 @@
 <?php
 
-use InfraData;
-
 class PenMapEnvioParcialFixture extends \FixtureBase
 {
     protected $objMapEnvioParcialDTO;
@@ -24,7 +22,7 @@ class PenMapEnvioParcialFixture extends \FixtureBase
     }
 
       $this->objMapEnvioParcialDTO->setNumIdEstrutura($dados['IdEstrutura'] ?: 5);
-      $this->objMapEnvioParcialDTO->setStrStrEstrutura($dados['StrEstrutura'] ?: 'RE CGPRO');
+      $this->objMapEnvioParcialDTO->setStrStrEstrutura($dados['StrEstrutura'] ?: 'RE CGSIS');
       $this->objMapEnvioParcialDTO->setNumIdUnidadePen($dados['IdUnidadePen']);
       $this->objMapEnvioParcialDTO->setStrStrUnidadePen($dados['StrUnidadePen']);
         
@@ -38,7 +36,7 @@ class PenMapEnvioParcialFixture extends \FixtureBase
     {
       $objMapEnvioParcialDTO = new \PenRestricaoEnvioComponentesDigitaisDTO();
       $objMapEnvioParcialDTO->setNumIdEstrutura($dados['IdEstrutura'] ?: 5);
-      $objMapEnvioParcialDTO->setStrStrEstrutura($dados['StrEstrutura'] ?: 'RE CGPRO');
+      $objMapEnvioParcialDTO->setStrStrEstrutura($dados['StrEstrutura'] ?: 'RE CGSIS');
       $objMapEnvioParcialDTO->setNumIdUnidadePen($dados['IdUnidadePen']);
       $objMapEnvioParcialDTO->setStrStrUnidadePen($dados['StrUnidadePen']);
       $objMapEnvioParcialDTO->retTodos();
