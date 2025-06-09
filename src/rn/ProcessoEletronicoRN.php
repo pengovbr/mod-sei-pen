@@ -2806,10 +2806,35 @@ class ProcessoEletronicoRN extends InfraRN
 
       return $objResposta;
     } catch (Exception $e) {
-      $mensagem = "Falha na obtenção de unidades externas";
+      $mensagem = $this->tratrarCodigoErro($idRepositorioEstrutura, $e->getMessage(), "Falha na obtenção de unidades externas");
       $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
       throw new InfraException($mensagem, $e, $detalhes);
     }
+  }
+
+  public function tratrarCodigoErro($idRepositorioEstrutura, $stringJson, $mensagem)
+    {
+      try {
+        // Agora volta para UTF-8
+        $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
+        // Decodifica para array
+        $json = json_decode($messageUtf8, true);
+        if (isset($json['codigoErro']) && isset($json['message'])) {
+          switch ($json['codigoErro']) {
+            case '0055':
+              $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
+              $nome = $objRepositorioDTO->getStrNome();
+              $mensagem = "A unidade pesquisada não está vinculada a estrutura organizacional "
+                . $nome . " selecionada. Por favor, verifique se a unidade pertence a outra estrutura.";
+              break;
+          }
+
+        }
+      } catch (Exception $e) {
+        // Não faz nada, pois a mensagem já está definida
+      }
+
+      return $mensagem;
   }
   
   public function get($endpoint, $params = [])
