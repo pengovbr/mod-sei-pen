@@ -89,6 +89,14 @@ class PaginaMapUnidades extends PaginaTeste
       $this->test->assertTrue($sucesso);
   }
 
+  public function selecionarUnidadeComAlert($textoUnidade)
+    {
+      $this->repoUnidadeInput = $this->test->byId('txtUnidade');
+      $this->repoUnidadeInput->clear();
+      $this->repoUnidadeInput->value($textoUnidade);
+      $this->test->keys(Keys::ENTER);
+  }
+
     /**
      * Selcionar botão salvar da página
      *
