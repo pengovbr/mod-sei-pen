@@ -3,7 +3,7 @@
 /**
  * Mapeamento de Unidades com Unidade Não Vinculada a Repositório Selecionado
  */
-class MapeamentoDeUnidadesComUnidadeNaoVinculadaARepositorioSelcionadoTest extends FixtureCenarioBaseTestCase
+class MapeamentoDeUnidadesComUnidadeNaoVinculadaARepositorioSelecionadoTest extends FixtureCenarioBaseTestCase
 {
   public static $remetente;
   public $penMapUnidadesFixture;
