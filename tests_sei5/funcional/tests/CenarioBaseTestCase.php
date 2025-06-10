@@ -290,6 +290,16 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected function abrirProcesso($protocolo)
     {
         $this->paginaBase->navegarParaControleProcesso();
+        try {
+            $this->paginaControleProcesso->abrirProcesso($protocolo);
+        } catch (\Exception $e){
+            $this->paginaBase->pesquisar($protocolo);
+        }
+    }
+
+    protected function abrirProcessoControleProcesso($protocolo)
+    {
+        $this->paginaBase->navegarParaControleProcesso();
         $this->paginaControleProcesso->abrirProcesso($protocolo);
     }
 
@@ -642,7 +652,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // 11 - Abrir protocolo na tela de controle de processos
         $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
             sleep(5);
-            $this->abrirProcesso($strProtocoloTeste);
+            $this->abrirProcessoControleProcesso($strProtocoloTeste);
             return true;
         }, PEN_WAIT_TIMEOUT);
 

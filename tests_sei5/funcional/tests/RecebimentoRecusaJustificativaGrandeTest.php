@@ -82,7 +82,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
         $this->validarRecibosTramite(sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTeste, $unidade) , true, false);
-        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, sprintf("An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82d ..."));
+        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, false, true, sprintf("Lorem Ipsum Dolor Sit Amet"));
 
         //Verifica se os í­cones de alerta de recusa foram adicionados e se o processo continua aberto na unidade
         $this->paginaBase->navegarParaControleProcesso();
@@ -93,7 +93,7 @@ class RecebimentoRecusaJustificativaGrandeTest extends FixtureCenarioBaseTestCas
     
     private function recusarTramite($id_tramite)
     {
-        $justificativa = "An exception occurred while executing 'INSERT INTO juntadas (numeracao_sequencial, movimento, ativo, vinculada, criado_em, atualizado_em, id, uuid, documentos_juntado_id, volumes_id, atividades_id, tarefas_id, comunicacoes_id, origem_dados_id, criado_por, atualizado_por) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)' with params [1, 'DOCUMENTO RECEBIDO VIA INTEGRA\u00c7\u00c3O COM O BARRAMENTO', 1, 0, '2021-12-02 14:21:48', '2021-12-02 14:21:48', 1317074776, '06ba31e8-75ad-4111-82dc-6f451f51825e', 1333864526, null, null, null, null, 3534979787, null, null]: ORA-00001: restrição exclusiva (SAPIENS.UNIQ_867686DHDKJ97876) violada";
+        $justificativa = "Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet Lorem Ipsum Dolor Sit Amet";
 
         $parametros = new stdClass();
         $parametros->recusaDeTramite = new stdClass();

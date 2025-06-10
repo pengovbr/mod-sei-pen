@@ -1,5 +1,3 @@
-version: '2'
-
 services:
 
   ### CONTAINERS COMPARTILHADOS ENTRE OS AMBIENTES DE TESTE ###
