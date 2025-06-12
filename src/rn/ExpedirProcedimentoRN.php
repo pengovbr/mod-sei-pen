@@ -310,7 +310,35 @@ class ExpedirProcedimentoRN extends InfraRN
 
     } catch (\Exception $e) {
         $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
+        // Gravar andamento de erro
       if($bolSinProcessamentoEmBloco) {
+        // Grava erro no infra log
+        LogSEI::getInstance()->gravar("Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde: $e", LogSEI::$ERRO);
+                
+        // Gravar atividade
+        $objAtividadeRN = new AtividadeRN();
+        $objAtualizarAndamentoDTO = new AtualizarAndamentoDTO();
+
+        $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+        $objPesquisaPendenciaDTO->setDblIdProtocolo($arr);
+        $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+        
+        $arrObjAtividadeDTO = array();
+        foreach($arrObjProcedimentoDTO as $objProcedimentoDTO){
+          $arrObjAtividadeDTO = array_merge($arrObjAtividadeDTO,$objProcedimentoDTO->getArrObjAtividadeDTO()); 
+        }
+        
+        $arrStrIdAtividade = implode(',',InfraArray::converterArrInfraDTO($arrObjAtividadeDTO,'IdAtividade'));
+
+        $objAtualizarAndamentoDTO->setStrDescricao('Houve um erro de processamento, favor verificar o motivo na funcionalidade Infra > log, ou contate o administrador do sistema.');
+
+        $objAtualizarAndamentoDTO->setArrObjProtocoloDTO(InfraArray::gerarArrInfraDTO('ProtocoloDTO','IdProtocolo',explode(',',$arrStrIdProtocolo)));
+        $objAtualizarAndamentoDTO->setArrObjAtividadeDTO(InfraArray::gerarArrInfraDTO('AtividadeDTO','IdAtividade',explode(',',$arrStrIdAtividade)));
+      
+        $objAtividadeRN->atualizarAndamento($objAtualizarAndamentoDTO);
+
           $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
       } else {
           throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
@@ -1416,6 +1444,7 @@ class ExpedirProcedimentoRN extends InfraRN
           $strConteudoAssinatura = null;
 
           $nrTamanhoBytesArquivo = filesize($strCaminhoAnexo);
+
           [$strDadosComplementares, $strMimeType] = $this->obterDadosComplementaresDoTipoDeArquivo($strCaminhoAnexo, $this->arrPenMimeTypes, $strProtocoloDocumentoFormatado);
 
           $objInformacaoArquivo['NOME'] = $strNomeComponenteDigital;
