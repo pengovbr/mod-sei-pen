@@ -314,30 +314,34 @@ class ExpedirProcedimentoRN extends InfraRN
       if($bolSinProcessamentoEmBloco) {
         // Grava erro no infra log
         LogSEI::getInstance()->gravar("Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde: $e", LogSEI::$ERRO);
-                
-        // Gravar atividade
-        $objAtividadeRN = new AtividadeRN();
-        $objAtualizarAndamentoDTO = new AtualizarAndamentoDTO();
-
-        $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
-        $objPesquisaPendenciaDTO->setDblIdProtocolo($arr);
-        $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-        $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-        $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
         
-        $arrObjAtividadeDTO = array();
-        foreach($arrObjProcedimentoDTO as $objProcedimentoDTO){
-          $arrObjAtividadeDTO = array_merge($arrObjAtividadeDTO,$objProcedimentoDTO->getArrObjAtividadeDTO()); 
+        try {
+          // Gravar atividade
+          $objAtividadeRN = new AtividadeRN();
+          $objAtualizarAndamentoDTO = new AtualizarAndamentoDTO();
+
+          $objPesquisaPendenciaDTO = new PesquisaPendenciaDTO();
+          $objPesquisaPendenciaDTO->setDblIdProtocolo([$dblIdProcedimento]);
+          $objPesquisaPendenciaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+          $objPesquisaPendenciaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+          $arrObjProcedimentoDTO = $objAtividadeRN->listarPendenciasRN0754($objPesquisaPendenciaDTO);
+          
+          $arrObjAtividadeDTO = array();
+          foreach($arrObjProcedimentoDTO as $objProcedimentoDTO){
+            $arrObjAtividadeDTO = array_merge($arrObjAtividadeDTO,$objProcedimentoDTO->getArrObjAtividadeDTO()); 
+          }
+          
+          $arrStrIdAtividade = implode(',',InfraArray::converterArrInfraDTO($arrObjAtividadeDTO,'IdAtividade'));
+
+          $objAtualizarAndamentoDTO->setStrDescricao('Houve um erro de processamento, favor verificar o motivo na funcionalidade Infra > log, ou contate o administrador do sistema.');
+
+          $objAtualizarAndamentoDTO->setArrObjProtocoloDTO(InfraArray::gerarArrInfraDTO('ProtocoloDTO','IdProtocolo',[$dblIdProcedimento]));
+          $objAtualizarAndamentoDTO->setArrObjAtividadeDTO(InfraArray::gerarArrInfraDTO('AtividadeDTO','IdAtividade',explode(',',$arrStrIdAtividade)));
+        
+          $objAtividadeRN->atualizarAndamento($objAtualizarAndamentoDTO);
+        } catch (\Exception $e) {
+          //throw $th;
         }
-        
-        $arrStrIdAtividade = implode(',',InfraArray::converterArrInfraDTO($arrObjAtividadeDTO,'IdAtividade'));
-
-        $objAtualizarAndamentoDTO->setStrDescricao('Houve um erro de processamento, favor verificar o motivo na funcionalidade Infra > log, ou contate o administrador do sistema.');
-
-        $objAtualizarAndamentoDTO->setArrObjProtocoloDTO(InfraArray::gerarArrInfraDTO('ProtocoloDTO','IdProtocolo',explode(',',$arrStrIdProtocolo)));
-        $objAtualizarAndamentoDTO->setArrObjAtividadeDTO(InfraArray::gerarArrInfraDTO('AtividadeDTO','IdAtividade',explode(',',$arrStrIdAtividade)));
-      
-        $objAtividadeRN->atualizarAndamento($objAtualizarAndamentoDTO);
 
           $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
       } else {
@@ -345,6 +349,37 @@ class ExpedirProcedimentoRN extends InfraRN
       }
     }
   }
+
+   /**
+   * Cadastra uma atividade para um procedimento.
+   *
+   * @param int $idProcedimento ID do procedimento.
+   * @param int $numIdUnidadeProtocolo ID da unidade de protocolo.
+   * @param AtividadeDTO $objAtividadeDTO Dados da atividade.
+   * @return AtividadeDTO Dados da atividade.
+   */
+  protected function cadastrarAtividade($idProcedimento, $numIdUnidadeProtocolo, $objAtividadeDTO)
+  {
+    $objAtividadeDTOGerado = new AtividadeDTO();
+
+    $objAtividadeDTOGerado->setDblIdProtocolo($idProcedimento);
+    $objAtividadeDTOGerado->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTOGerado->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTOGerado->setNumIdUsuario($objAtividadeDTO->getNumIdUsuario());
+    $objAtividadeDTOGerado->setNumIdUsuarioOrigem($objAtividadeDTO->getNumIdUsuarioOrigem());
+    $objAtividadeDTOGerado->setDthAbertura($objAtividadeDTO->getDthAbertura());
+    $objAtividadeDTOGerado->setDthConclusao($objAtividadeDTO->getDthConclusao());
+    $objAtividadeDTOGerado->setNumIdTarefa($objAtividadeDTO->getNumIdTarefa());
+    $objAtividadeDTOGerado->setNumIdUsuarioAtribuicao($objAtividadeDTO->getNumIdUsuarioAtribuicao());
+    $objAtividadeDTOGerado->setNumIdUsuarioConclusao($objAtividadeDTO->getNumIdUsuarioConclusao());
+    $objAtividadeDTOGerado->setStrSinInicial($objAtividadeDTO->getStrSinInicial());
+    $objAtividadeDTOGerado->setNumIdUsuarioVisualizacao($objAtividadeDTO->getNumIdUsuarioVisualizacao());
+    $objAtividadeDTOGerado->setNumTipoVisualizacao($objAtividadeDTO->getNumTipoVisualizacao());
+    $objAtividadeDTOGerado->setDtaPrazo($objAtividadeDTO->getDtaPrazo());
+
+    $objAtividadeBD = new AtividadeBD($this->inicializarObjInfraIBanco());
+    return $objAtividadeBD->cadastrar($objAtividadeDTOGerado);
+  
 
     /**
      * Busca metadados do processo registrado no Barramento de Serviços do PEN em trâmites anteriores
