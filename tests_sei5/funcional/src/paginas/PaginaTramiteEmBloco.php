@@ -1,158 +1,133 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverSelect;
 
 /**
- * Classe de teste da página de tramite em bloco
+ * Classe de teste da página de trâmite em bloco
  */
 class PaginaTramiteEmBloco extends PaginaTeste
 {
-    const STA_ANDAMENTO_PROCESSAMENTO = "Aguardando Processamento";
-    const STA_ANDAMENTO_CANCELADO = "Cancelado";
-    const STA_ANDAMENTO_CONCLUIDO = "Concluído";
+  public const STA_ANDAMENTO_PROCESSAMENTO = 'Aguardando Processamento';
+  public const STA_ANDAMENTO_CANCELADO      = 'Cancelado';
+  public const STA_ANDAMENTO_CONCLUIDO      = 'Concluído';
 
     /**
      * @inheritdoc
      */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
     /**
-     * Selecionar processo
-     * @param array $arrNumProtocolo
-     * @return void
+     * Seleciona múltiplos processos pelo número de protocolo.
+     *
+     * @param string[] $protocolos
      */
-  public function selecionarProcessos($arrNumProtocolo = array())
+  public function selecionarProcessos(array $protocolos): void
     {
-    foreach ($arrNumProtocolo as $numProtocolo) {
-        $chkProtocolo = $this->test->byXPath('//tr[contains(.,"'.$numProtocolo.'")]/td/div/label');
-        $chkProtocolo->click();
+    foreach ($protocolos as $protocolo) {
+        $this->elByXPath("//tr[contains(.,'{$protocolo}')]/td/div/label")
+             ->click();
     }
   }
 
     /**
-     * Selecionar tramite em bloco
-     * @return void
+     * Abre o modal de inclusão de processos no bloco de trâmite.
      */
-  public function selecionarTramiteEmBloco()
+  public function selecionarTramiteEmBloco(): void
     {
-      $btnTramiteEmBloco = $this->test->byXPath(
-          "//img[@alt='". mb_convert_encoding("Incluir Processos no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1') ."']"
-      );
-      $btnTramiteEmBloco->click();
+      $this->elByXPath("//img[@alt='Incluir Processos no Bloco de Trâmite']")
+           ->click();
   }
 
-  /**
-   * Seleciona a visualização detalhada do processo.
-   *
-   * Este método simula o clique no botão que troca a visualização para
-   * a opção detalhada. Ele utiliza o XPath para encontrar o botão
-   * correspondente na interface da aplicação.
-   *
-   * @return void
-   */
-  public function visualizacaoDetalhadaAberta()
-  {
+    /**
+     * Verifica se a visualização detalhada está aberta.
+     *
+     * @return bool
+     */
+  public function visualizacaoDetalhadaAberta(): bool
+    {
     try {
-        $btnVisualizacaoDetalhada = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'R\');"]');  
-        if($btnVisualizacaoDetalhada){
-          return true;
-        }           
-      } catch (Exception $e) {
+        $this->elByXPath("//a[@onclick=\"trocarVisualizacao('R');\"]");
+        return true;
+    } catch (\Exception $e) {
         return false;
-      }  
-  }
-
-  /**
-   * Seleciona a visualização detalhada do processo.
-   *
-   * Este método simula o clique no botão que troca a visualização para
-   * a opção detalhada. Ele utiliza o XPath para encontrar o botão
-   * correspondente na interface da aplicação.
-   *
-   * @return void
-   */
-  public function selecionarVisualizacaoDetalhada()
-  {
-    $btnVisualizacaoDetalhada = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'D\');"]');      
-    $btnVisualizacaoDetalhada->click();
-  }
-
-  /**
-   * Fecha o visualização detalhada do processo.
-   *
-   * Este método simula o clique no botão que troca a visualização para
-   * a opção resumida.    *
-   * @return void
-   */
-  public function fecharVisualizacaoDetalhada()
-  {    
-      $btnVisualizacaoResumida = $this->test->byXPath('//a[@onclick="trocarVisualizacao(\'R\');"]');      
-      $btnVisualizacaoResumida->click();
-  }
-
-  /**
-   * Seleciona um processo específico com base no número do protocolo formatado.
-   *
-   * Este método busca o rótulo que contém o número do protocolo
-   * fornecido e simula um clique sobre ele para selecionar o processo.
-   *
-   * @param string $numProtocoloFormatado O número do protocolo formatado a ser selecionado.
-   * @return void
-   */
-  public function selecionarProcesso($numProtocoloFormatado)
-  {
-    $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
-    $btnTramiteEmBloco->click();
-  }
-
-  /**
-   * Verifica o título da página atual.
-   *
-   * Este método busca e retorna o texto do título da página
-   * atual, comparando-o com o título fornecido. Ele é útil para
-   * garantir que a navegação ocorreu corretamente.
-   *
-   * @param string $titulo O título esperado da página.
-   * @return string O título da página atual.
-   */
-  public function verificarTituloDaPagina($titulo)
-  {
-    $tituloDaPagina = $this->test->byXPath('//div[text()="' . $titulo . '"]');
-    return $tituloDaPagina->text();
+    }
+      return true;
   }
 
     /**
-     * Selecionar bloco
-     * @param string $selAndamento
-     * @return void
+     * Seleciona a visualização detalhada do processo.
      */
-  public function selecionarBloco($selAndamento)
+  public function selecionarVisualizacaoDetalhada(): void
     {
-      $select = $this->test->select($this->test->byId('selBlocos'));
-      $select->selectOptionByValue($selAndamento);
+      $this->elByXPath("//a[@onclick=\"trocarVisualizacao('D');\"]")->click();
   }
 
     /**
-     * Clicar em salvar
-     * @return void
+     * Retorna para a visualização resumida do processo.
      */
-  public function clicarSalvar()
+  public function fecharVisualizacaoDetalhada(): void
     {
-      $btnSalvar = $this->test->byXPath("//button[@name='sbmCadastrarProcessoEmBloco']");
-      $btnSalvar->click();
+      $this->elByXPath("//a[@onclick=\"trocarVisualizacao('R');\"]")->click();
   }
 
     /**
-     * Buscar mensagem de alerta da página
+     * Seleciona um processo específico via rótulo do protocolo.
+     *
+     * @param string $numProtocoloFormatado
+     */
+  public function selecionarProcesso(string $numProtocoloFormatado): void
+    {
+      $this->elByXPath("//label[@title='{$numProtocoloFormatado}']")->click();
+  }
+
+    /**
+     * Retorna o título da página atual.
+     *
+     * @param string $tituloEsperado
+     * @return string
+     */
+  public function verificarTituloDaPagina(string $tituloEsperado): string
+    {
+      return $this->elByXPath("//div[text()='{$tituloEsperado}']")->getText();
+  }
+
+    /**
+     * Seleciona um bloco pelo valor de andamento.
+     *
+     * @param string $andamento
+     */
+  public function selecionarBloco(string $andamento): void
+    {
+      $select = new WebDriverSelect($this->elById('selBlocos'));
+      $select->selectByValue($andamento);
+  }
+
+    /**
+     * Clica em Salvar.
+     */
+  public function clicarSalvar(): void
+    {
+      $this->elByXPath("//button[@name='sbmCadastrarProcessoEmBloco']")->click();
+  }
+
+    /**
+     * Obtém mensagem de alerta da página, se houver.
      *
      * @return string
      */
-  public function buscarMensagemAlerta()
+  public function buscarMensagemAlerta(): string
     {
-      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-      return !empty($alerta->text()) ? $alerta->text() : "";
+    try {
+        return $this->elByXPath("(//div[@id='divInfraMsg0'])[1]")
+                    ->getText();
+    } catch (\Exception $e) {
+        return '';
+    }
   }
 }

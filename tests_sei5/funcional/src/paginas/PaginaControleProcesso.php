@@ -1,40 +1,75 @@
 <?php
 
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+
+/**
+ * Page Object para controle de processos, migrado para php-webdriver
+ */
 class PaginaControleProcesso extends PaginaTeste
 {
-  public function __construct($test)
+
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  protected function obterLinhasProcessos($processosGerados, $processosRecebidos)
-    {
-      $paineisPesquisa = array();
-    if($processosGerados) { $paineisPesquisa[] = 'tblProcessosGerados';
+/**
+ * Retorna todas as linhas de processo nos painéis habilitados.
+ *
+ * @param  bool  $processosGerados
+ * @param  bool  $processosRecebidos
+ * @return WebDriverElement[]
+ */
+  protected function obterLinhasProcessos(bool $processosGerados, bool $processosRecebidos): array
+  {
+    // 1) Define quais painéis buscar
+    $paineis = [];
+    if ($processosGerados) {
+        $paineis[] = 'tblProcessosGerados';
     }
-    if($processosRecebidos) { $paineisPesquisa[] = 'tblProcessosRecebidos';
+    if ($processosRecebidos) {
+        $paineis[] = 'tblProcessosRecebidos';
     }
 
-      $resultado = array();
-    foreach ($paineisPesquisa as $painel) {
+    $resultado = [];
+
+    // 2) Para cada painel, tenta capturar as <tr> e mescla ao resultado
+    foreach ($paineis as $idPainel) {
       try {
-        $resultado = array_merge($resultado, $this->test->byId($painel)->elements($this->test->using('css selector')->value('tr')));
-      } catch (\Exception $th) { }
+          // elById() já faz findElement(WebDriverBy::id(...))
+          $painel = $this->elById($idPainel);
+          // findElements retorna [] se não achar nenhum <tr>
+          $linhas = $painel->findElements(WebDriverBy::cssSelector('tr'));
+          $resultado = array_merge($resultado, $linhas);
+      } catch (\Exception $e) {
+          // painel não existe / inacessível ? ignora e continua
+      }
     }
 
-      return $resultado;
+    return $resultado;
+  }
+
+  /**
+   * Clica no link correspondente ao protocolo informado
+   *
+   * @param string $strProtocolo
+   */
+  public function abrirProcesso(string $strProtocolo): void
+  {
+      sleep(1);
+      $this->elByLinkText($strProtocolo)->click();
   }
 
   protected function listarProcessos($processosGerados, $processosRecebidos)
     {
-      $listaProtocolos = array();
+      $listaProtocolos = [];
       $processosRows = $this->obterLinhasProcessos($processosGerados, $processosRecebidos);
-    if(isset($processosRows) && count($processosRows) > 0){
-      for ($i=1; $i < count($processosRows); $i++) {
-        $listaProtocolos[] = trim($processosRows[$i]->text());
+    if (!empty($processosRows)) {
+      for ($i = 1; $i < count($processosRows); $i++) {
+          $listaProtocolos[] = trim($processosRows[$i]->getText());
       }
     }
-
       return $listaProtocolos;
   }
 
@@ -55,47 +90,48 @@ class PaginaControleProcesso extends PaginaTeste
   }
 
   public function contemAlertaProcessoRecusado($numeroProcesso)
-    {
-      $processosRows = $this->obterLinhasProcessos(true, true);
+  {
+    $processosRows = $this->obterLinhasProcessos(true, true);
     foreach ($processosRows as $row) {
-      try{
-        if(strpos($row->text(), $numeroProcesso) !== false){
-          foreach ($row->elements($this->test->using('css selector')->value('img')) as $icone) {
-            if(strpos($icone->attribute("src"), 'pen_tramite_recusado.png') !== false) {
-                  return true;
+      try {
+        if (strpos($row->getText(), $numeroProcesso) !== false) {
+            $icones = $row->findElements(WebDriverBy::cssSelector('img'));
+          foreach ($icones as $icone) {
+            if (strpos($icone->getAttribute('src'), 'pen_tramite_recusado.png') !== false) {
+                return true;
             }
           }
         }
-      }
-      catch(\Exception $e) {
+      } catch (\Exception $e) {
           return false;
       }
     }
-
-      return false;
+    return false;
   }
 
-  public function localizarProcessoPelaDescricao($descricao)
+/**
+     * Localiza processo pela descrição via atributo onmouseover
+     *
+     * @param string $descricao
+     * @return string|false
+     */
+  public function localizarProcessoPelaDescricao(string $descricao)
     {
       $processosRows = $this->obterLinhasProcessos(true, true);
     foreach ($processosRows as $row) {
-      try{
-        foreach ($row->elements($this->test->using('css selector')->value('a')) as $link) {
-          if(strpos($link->attribute("onmouseover"), $descricao) !== false) {
-            return $link->text();
+      try {
+        $links = $row->findElements(WebDriverBy::cssSelector('a'));
+        foreach ($links as $link) {
+            $onmouseover = $link->getAttribute('onmouseover') ?: '';
+          if (strpos($onmouseover, $descricao) !== false) {
+            return $link->getText();
           }
         }
-      }
-      catch(\Exception $e) {
+      } catch (\Exception $e) {
           return false;
       }
     }
-
       return false;
   }
 
-  public function abrirProcesso($strProtocolo)
-    {
-      $this->test->byLinkText($strProtocolo)->click();
-  }
 }

@@ -1,88 +1,102 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
 
 class PaginaExportarTiposProcesso extends PaginaTeste
 {
-    /**
-     * Método contrutor
-     * 
-     * @return void
-     */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-  }
-
-  public function navegarExportarTiposProcessos()
-    {
-      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Exportação de Tipos de Processo', 'UTF-8', 'ISO-8859-1'));
-      $this->test->byXPath("//a[@link='pen_map_orgaos_exportar_tipos_processos']")->click();
+      parent::__construct($driver, $testcase);
   }
 
     /**
-     * Seleciona botão editar da primeira linha de tabela
-     * 
-     * @return void
+     * Navega até a tela de exportação de tipos de processo.
      */
-  public function selecionarParaExportar()
+  public function navegarExportarTiposProcessos(): void
     {
-      $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
-      $this->test->byXPath("(//label[@for='chkInfraItem2'])[1]")->click();
-      $this->test->byXPath("(//label[@for='chkInfraItem3'])[1]")->click();
-      $this->test->byXPath("(//label[@for='chkInfraItem5'])[1]")->click();
-      $this->test->byId("btnExportar")->click();
+      $input = $this->elById('txtInfraPesquisarMenu');
+      $input->clear();
+      $input->sendKeys(mb_convert_encoding('Exportação de Tipos de Processo', 'UTF-8', 'ISO-8859-1'));
+
+      $this->elByXPath("//a[@link='pen_map_orgaos_exportar_tipos_processos']")->click();
   }
 
-  public function verificarExisteBotao($nomeBtn)
+    /**
+     * Marca as linhas para exportar e clica em Exportar.
+     */
+  public function selecionarParaExportar(array $indices = [0,2,3,5]): void
+    {
+    foreach ($indices as $i) {
+        $this->elByXPath("(//label[@for='chkInfraItem{$i}'])[1]")
+             ->click();
+    }
+      $this->elById('btnExportar')->click();
+  }
+
+    /**
+     * Retorna o texto do botão identificado ou null se não existir.
+     */
+  public function verificarExisteBotao(string $nomeBtn): ?string
     {
     try {
-        return $this->test->byXPath("(//button[@id='".$nomeBtn."'])")->text();
-    } catch (Exception $e) {
+        return $this->elByXPath("//button[@id='{$nomeBtn}']")->getText();
+    } catch (\Exception $e) {
         return null;
     }
   }
 
-  public function verificarQuantidadeDeLinhasSelecionadas()
+    /**
+     * Verifica a quantidade de linhas marcadas na tabela de exportação.
+     */
+  public function verificarQuantidadeDeLinhasSelecionadas(int $esperado = 5): void
     {
-      $this->test->waitUntil(function($testCase) {
-          $trs = $this->test->byId('tableExportar')
-              ->elements($this->test->using('css selector')->value('tr'));
-          $testCase->assertEquals(count($trs), 5);
+      $this->waitUntil(function() use ($esperado) {
+          $rows = $this->elById('tableExportar')
+                       ->findElements(WebDriverBy::cssSelector('tr'));
+          $this->test->assertEquals($esperado, count($rows));
           return true;
-      });
+      }, PEN_WAIT_TIMEOUT);
   }
 
   public function btnExportar()
     {
-      $this->test->byId("btnExportarModal")->click();
+    $this->elById("btnExportarModal")->click();
+    sleep(5);
+  }
+
+    /**
+     * Clica no botão de confirmação de exportação.
+     */
+  public function confirmarExportacao(): void
+    {
+      $this->elById('btnExportarModal')->click();
+      // Opcional: aguardar download ou confirmação
       sleep(5);
   }
 
     /**
-     * Lispar campo de pesquisa
-     * Colocar texto para pesquisa
-     *
-     * @return void
+     * Realiza pesquisa pelo nome de tipo de processo.
      */
-  public function selecionarPesquisa()
+  public function selecionarPesquisa(string $termo = 'Ouvidoria'): void
     {
-      $this->test->byId('txtNomeTipoProcessoPesquisa')->clear();
-      $this->test->byId('txtNomeTipoProcessoPesquisa')->value('Ouvidoria');
-      $this->test->byId("sbmPesquisar")->click();
+      $input = $this->elById('txtNomeTipoProcessoPesquisa');
+      $input->clear();
+      $termo = mb_convert_encoding($termo, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($termo, WebDriverKeys::ENTER);
+      $this->elById('sbmPesquisar')->click();
   }
 
     /**
-     * Buscar se foi pesquisado
-     *
-     * @return void
+     * Retorna se a pesquisa encontrou o termo informado.
      */
-  public function buscarPesquisa()
+  public function buscarPesquisa(string $termo = 'Ouvidoria:'): bool
     {
     try {
-        $elementos = $this->test->byXPath("//td[contains(.,'Ouvidoria:')]")->text();
-        return !empty($elementos) && !is_null($elementos);
-    } catch (Exception $e) {
+        $text = $this->elByXPath("//td[contains(.,'{$termo}')]")->getText();
+        return $text !== '';
+    } catch (\Exception $e) {
         return false;
     }
   }

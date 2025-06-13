@@ -1,44 +1,47 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
 
 /**
- * Pagina de listagem de hipótese legal
+ * Página de listagem de hipótese legal
  */
 class PaginaPenHipoteseLegalListar extends PaginaTeste
 {
     /**
-     * Método contrutor
-     *
-     * @return void
+     * Construtor.
      */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
     /**
-     * Navegar para a página de listagem de hipótese legal
-     *
-     * @return void
+     * Navega até a página de listagem de hipótese legal.
      */
-  public function navegarMapeamentoHipoteseLegalListar()
+  public function navegarMapeamentoHipoteseLegalListar(): void
     {
-      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Listar', 'UTF-8', 'ISO-8859-1'));
-      $this->test->byXPath("//a[@link='pen_map_hipotese_legal_envio_listar']")->click();
+      $input = $this->elById('txtInfraPesquisarMenu');
+      $input->clear();
+      $input->sendKeys('Listar'. WebDriverKeys::ENTER);
+
+      $this->elByXPath("//a[@link='pen_map_hipotese_legal_envio_listar']")->click();
   }
 
     /**
-     * Verificar se a tabela de hipótese legal é exibida
+     * Verifica se a tabela de hipótese legal está presente na página.
      *
      * @return bool
      */
-  public function existeTabela()
+  public function existeTabela(): bool
     {
     try {
-        $trTh = $this->test->byXPath('//*[@id="divInfraAreaTabela"]/table/tbody/tr[1]/th[2]')->text();
-        return !empty($trTh) && !is_null($trTh);
-    } catch (Exception $ex) {
+        $text = $this->elByXPath(
+            "//*[@id='divInfraAreaTabela']/table/tbody/tr[1]/th[2]"
+        )->getText();
+        return $text !== '';
+    } catch (\Exception $ex) {
         return false;
     }
   }
