@@ -346,8 +346,6 @@ class ExpedirProcedimentoRN extends InfraRN {
             $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
 
             $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
-            $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
-            $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
         } else {
             throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
         }
