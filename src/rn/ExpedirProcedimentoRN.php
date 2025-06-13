@@ -331,6 +331,20 @@ class ExpedirProcedimentoRN extends InfraRN {
       } catch (\Exception $e) {
         $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
         if($bolSinProcessamentoEmBloco){
+            // Grava erro no infra log
+            LogSEI::getInstance()->gravar("Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde: $e", LogSEI::$ERRO);
+
+            // Gravar atividade
+            $objAtividadeDTO = new AtividadeDTO();
+            $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+            $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+            $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+            $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_ERRO_PROCESSAMENTO));
+
+            //Registra o andamento no histrico e
+            $objAtividadeRN = new AtividadeRN();
+            $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+
             $objPenBlocoProcessoRN->desbloquearProcessoBloco($dblIdProcedimento);
         } else {
             throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
