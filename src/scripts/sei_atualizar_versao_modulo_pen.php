@@ -3009,6 +3009,37 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
     $boo = new PenRelTipoDocMapEnviadoRN();
     $boo->verificarAtribuirEspeciePadrao($objEspecieDocumentaoRNOutra);
+
+    $objBD = new TarefaBD(BancoSEI::getInstance());
+    $objDTO = new TarefaDTO();
+
+    $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD): void {
+        $objDTO->unSetTodos();
+        $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+
+      if ($objBD->contar($objDTO) == 0) {
+          $objUltimaTarefaDTO = new TarefaDTO();
+          $objUltimaTarefaDTO->retNumIdTarefa();
+          $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+          $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+
+          $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
+          $objDTO->setStrNome($strNome);
+          $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
+          $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
+          $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
+          $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
+          $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+          $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+        }
+          $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+          $objBD->cadastrar($objDTO);
+      }
+    };
+
+    $fnCadastrar('Houve um erro de processamento, favor verificar o motivo na funcionalidade Infra > log, ou contate o administrador do sistema.', 'S', 'S', 'N', 'S', 'N', 'PEN_ERRO_PROCESSAMENTO');
     
     $this->atualizarNumeroVersao("3.8.2");
   }
