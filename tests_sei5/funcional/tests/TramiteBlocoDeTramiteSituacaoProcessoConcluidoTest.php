@@ -70,9 +70,28 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
     $this->waitUntil(function() use ($objProtocoloDTO) {
       sleep(5);
       $this->paginaBase->refresh();
-      $colunaEstado = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
-      $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunaEstado[0]->getText());
 
+      $colunasEstado = $this->paginaCadastrarProcessoEmBloco->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr/td[3]');
+      // se não houver nenhuma célula, continua esperando
+      if (count($colunasEstado) === 0) {
+          return false;
+      }
+        
+       // verifica se o texto da primeira célula contém o estado esperado
+      if (mb_strpos($colunasEstado[0]->getText(), $estadoEsperado) === false) {
+          return false;
+      }
+      $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunasEstado[0]->getText());
+        
+      $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
+      $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
+        'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
+      ]);
+
+      // precisa ter ao menos um resultado e o numIdAndamento ser 9
+      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== '6') {
+          return false;
+      }
       return true;
     }, PEN_WAIT_TIMEOUT);
 
@@ -81,7 +100,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       'IdProtocolo' => $objProtocoloDTO->getDblIdProtocolo(),
     ]);
 
-    $this->assertEquals(6, $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
+    $this->assertEquals('6', $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento());
   }
 
     /**
@@ -232,7 +251,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       if (mb_strpos($colunasEstado[0]->getText(), $estadoEsperado) === false) {
           return false;
       }
-      $this->assertEquals(mb_convert_encoding("Concluído", 'UTF-8', 'ISO-8859-1'), $colunasEstado[0]->getText());
+      $this->assertEquals($estadoEsperado, $colunasEstado[0]->getText());
         
       $objBlocoDeTramiteProtocoloFixture = new \BlocoDeTramiteProtocoloFixture();
       $objBlocoDeTramiteProtocolo = $objBlocoDeTramiteProtocoloFixture->buscar([
@@ -240,7 +259,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       ]);
 
       // precisa ter ao menos um resultado e o numIdAndamento ser 9
-      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== 9) {
+      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== '9') {
           return false;
       }
 

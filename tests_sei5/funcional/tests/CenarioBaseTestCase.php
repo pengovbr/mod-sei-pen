@@ -718,9 +718,16 @@ class CenarioBaseTestCase extends TestCase
 
       // Abrir protocolo na tela de controle de processos pelo texto da descrição
       $this->waitUntil(function() use ($strDescricao, &$strProtocoloTeste) {
-          sleep(5);
-          $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);
-          return true;
+        sleep(5);
+        try {
+            $this->paginaBase->refresh();
+            $strProtocoloTeste = $this->abrirProcessoPelaDescricao($strDescricao);    
+            if ($strProtocoloTeste){
+              return true;
+            }
+        } catch (\Exception $e) {
+            return false;
+        }
       }, PEN_WAIT_TIMEOUT);
         
       $this->assertNotFalse($strProtocoloTeste);

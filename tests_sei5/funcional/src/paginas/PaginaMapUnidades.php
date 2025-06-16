@@ -110,11 +110,9 @@ class PaginaMapUnidades extends PaginaTeste
   }
 
   public function selecionarUnidadeComAlert($textoUnidade)
-    {
-      $this->repoUnidadeInput = $this->test->byId('txtUnidade');
-      $this->repoUnidadeInput->clear();
-      $this->repoUnidadeInput->value($textoUnidade);
-      $this->test->keys(Keys::ENTER);
+  {
+    $input = $this->elById('txtUnidade');
+    $input->sendKeys($textoUnidade . WebDriverKeys::ENTER);
   }
 
     /**

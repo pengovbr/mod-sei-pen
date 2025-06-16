@@ -1,4 +1,5 @@
 <?php
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 
 class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureCenarioBaseTestCase
 {
@@ -35,10 +36,9 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
     /**
      * Teste de trâmite de processo para organização não-mapeada à unidade corrente
      *
-     * @group envio
-     * @large
-     * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Large]
+     * #[Group('envio')]
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -93,19 +93,19 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
         $this->paginaTramitar->unidade($dados['unidadeDestino'], '');
         $this->paginaTramitar->tramitar();
 
-        $callbackEnvio = function ($testCase) use ($dados) {
+        $callbackEnvio = function () use ($dados) {
             try {
-                $testCase->frame(null);
-                $testCase->frame('ifrConteudoVisualizacao');
-                $testCase->frame('ifrVisualizacao');
-                $testCase->frame('ifrEnvioProcesso');
+                $this->paginaTramitar->frame(null);
+                $this->paginaTramitar->frame('ifrConteudoVisualizacao');
+                $this->paginaTramitar->frame('ifrVisualizacao');
+                $this->paginaTramitar->frame('ifrEnvioProcesso');
                 $mensagemValidacao = mb_convert_encoding('Falha no envio externo do processo.', 'UTF-8', 'ISO-8859-1');
-                $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
-                $testCase->byXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
+                $this->assertStringContainsString($mensagemValidacao, $this->paginaTramitar->elByCss('body')->text());
+                $this->paginaTramitar->elByXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
                 $mensagemValidacao2 = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
-                $testCase->assertStringContainsString($mensagemValidacao2, $testCase->byCssSelector('body')->text());
+                $this->assertStringContainsString($mensagemValidacao2, $this->paginaTramitar->elByCss('body')->text());
 
-                $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {
                 try {

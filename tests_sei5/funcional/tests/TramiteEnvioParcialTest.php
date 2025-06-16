@@ -1,6 +1,7 @@
 <?php
 
 use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Teste de trâmite com envio parcial habilitado
@@ -83,9 +84,14 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     $this->paginaBase->navegarParaControleProcesso();
     $this->waitUntil(function() use ($strProtocoloTeste) {
         sleep(5);
-        $this->paginaBase->refresh();
-        $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-        return true;
+        try {
+            $this->paginaBase->refresh();
+            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+
     }, PEN_WAIT_TIMEOUT);
     
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
@@ -167,10 +173,13 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaBase->navegarParaControleProcesso();
     $this->waitUntil(function() use ($strProtocoloTeste) {
-        sleep(5);
-        $this->paginaBase->refresh();
-        $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-        return true;
+        try {
+            $this->paginaBase->refresh();
+            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }, PEN_WAIT_TIMEOUT);
     
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
