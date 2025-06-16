@@ -26,6 +26,9 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * **Erro no retorno de busca "Unidade não encontrada" utilizando caracteres especiais ou ID da unidade** Na tela "Mapeamento de Unidades", "Envio de Trâmite Externo" ou "Envio Externo de Processos do Bloco de Trâmite", ao pesquisar por uma unidade utilizando caracteres especiais ou o ID da unidade no Portal do Tramita GOV.BR, o campo de busca retorna a mensagem "Unidade não encontrada". [#805](https://github.com/pengovbr/mod-sei-pen/issues/805);
 
+
+* **Melhoria de mensagem sobre falha de obtenção das unidades externas. Versão 3.8.2** Atualização de mensagem na tela de mapeamento de unidades, atualizando de "Falha na obtenção de unidades externas" para "A unidade pesquisada não está vinculada a estrutura organizacional, [Nome da Estrutura], selecionada. Por favor, verifique se a unidade pertence a outra estrutura.". [#849](https://github.com/pengovbr/mod-sei-pen/issues/849);
+
 Para obter informações detalhadas sobre cada um dos passos de atualização, vide arquivo **ATUALIZACAO.md**.
 
 #### Instruções
