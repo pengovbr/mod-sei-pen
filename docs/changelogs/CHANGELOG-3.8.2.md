@@ -29,6 +29,8 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * **Melhoria de mensagem sobre falha de obtenção das unidades externas. Versão 3.8.2** Atualização de mensagem na tela de mapeamento de unidades, atualizando de "Falha na obtenção de unidades externas" para "A unidade pesquisada não está vinculada a estrutura organizacional, [Nome da Estrutura], selecionada. Por favor, verifique se a unidade pertence a outra estrutura.". [#849](https://github.com/pengovbr/mod-sei-pen/issues/849);
 
+* **Chamado Nº 22777612 - Falha de envio do componente digital. (IBAMA) / Versão 3.8.2** Correção de erro 404 Not Found no endpoint tickets-de-enviode-componente. [#824](https://github.com/pengovbr/mod-sei-pen/issues/824);
+
 Para obter informações detalhadas sobre cada um dos passos de atualização, vide arquivo **ATUALIZACAO.md**.
 
 #### Instruções
