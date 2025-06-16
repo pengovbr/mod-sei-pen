@@ -1,10 +1,13 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
+
 /**
  * Teste de trâmite com envio parcial habilitado
  * 
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 {
@@ -31,7 +34,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /*
      * Tramitar processo para o Órgão 2 com envio parcial mapeado
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
@@ -61,9 +64,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /*
      * Verificar processo recebido no Órgão 2 com envio parcial mapeado
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
-     * @depends test_criar_processo_contendo_documento_tramitar_remetente_envio_parcial
+     * #[Depends('test_criar_processo_contendo_documento_tramitar_remetente_envio_parcial')]
      * @return void
      */
   public function test_verificar_processo_recebido_tramitar_destinatario_envio_parcial()
@@ -79,11 +82,16 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     );
 
     $this->paginaBase->navegarParaControleProcesso();
-    $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
+    $this->waitUntil(function() use ($strProtocoloTeste) {
         sleep(5);
-        $testCase->refresh();
-        $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-        return true;
+        try {
+            $this->paginaBase->refresh();
+            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+
     }, PEN_WAIT_TIMEOUT);
     
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
@@ -108,9 +116,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /*
      * Devolver processo ao Órgão 1 com envio parcial mapeado
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
-     * @depends test_verificar_processo_recebido_tramitar_destinatario_envio_parcial
+     * #[Depends('test_verificar_processo_recebido_tramitar_destinatario_envio_parcial')]
      * @return void
      */
   public function test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial()
@@ -147,9 +155,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /*
      * Verificar processo recebido no Órgão 1 com envio parcial mapeado
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
-     * @depends test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial
+     * #[Depends('test_criar_documento_processo_recebido_tramitar_destinatario_envio_parcial')]
      * @return void
      */
   public function test_verificar_processo_recebido_tramitar_remetente_envio_parcial()
@@ -164,11 +172,14 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     );
 
     $this->paginaBase->navegarParaControleProcesso();
-    $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
-        sleep(5);
-        $testCase->refresh();
-        $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-        return true;
+    $this->waitUntil(function() use ($strProtocoloTeste) {
+        try {
+            $this->paginaBase->refresh();
+            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }, PEN_WAIT_TIMEOUT);
     
     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
@@ -198,7 +209,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /**
    * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
-   * @group mapeamento
+   * #[Group('mapeamento')]
    */
   public static function tearDownAfterClass(): void
   {
@@ -223,7 +234,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
   /*
      * Criar processo e mapear Envio Parcial no Remetente e Destinatário
-     * @group mapeamento
+     * #[Group('mapeamento')]
      *
      * @return void
      */
