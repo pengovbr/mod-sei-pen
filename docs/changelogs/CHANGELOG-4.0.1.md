@@ -24,7 +24,15 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 * **Erro no envio de processo quando o tipo 'Outros' é definido como padrão:** Ao inserir um novo tipo de documento em um processo e tentar tramitar, mesmo com o mapeamento de tipos de documentos para envio configurado, uma mensagem de erro é exibida e o trâmite é interrompido. [#811](https://github.com/pengovbr/mod-sei-pen/issues/811);
 
 * **Erro no retorno de busca "Unidade não encontrada" utilizando caracteres especiais ou ID da unidade** Na tela "Mapeamento de Unidades", "Envio de Trâmite Externo" ou "Envio Externo de Processos do Bloco de Trâmite", ao pesquisar por uma unidade utilizando caracteres especiais ou o ID da unidade no Portal do Tramita GOV.BR, o campo de busca retorna a mensagem "Unidade não encontrada". [#810](https://github.com/pengovbr/mod-sei-pen/issues/810);
- 
+
+* **Melhoria de mensagem sobre falha de obtenção das unidades externas. Versão 4.0.1** Melhoria de mensagem sobre falha de obtenção das unidades externas. Versão 4.0.1 Atualização de mensagem na tela de mapeamento de unidades, atualizando de "Falha na obtenção de unidades externas" para "A unidade pesquisada não está vinculada a estrutura organizacional, [Nome da Estrutura], selecionada. Por favor, verifique se a unidade pertence a outra estrutura. [#852](https://github.com/pengovbr/mod-sei-pen/issues/852);
+
+* **Chamado Nº 22777612 - Falha de envio do componente digital. (IBAMA) / Versão 4.0.1** Correção de erro 404 Not Found no endpoint tickets-de-enviode-componente. [#850](https://github.com/pengovbr/mod-sei-pen/issues/850);
+
+* **Erro: Módulo do Tramita: Falha identificada na definição da ordem dos componentes digitais do documento** Correção de erro ao tentar reenviar um processo com documento externo removido apresenta o erro: Módulo do Tramita: Falha identificada na definição da ordem dos componentes digitais. [#836](https://github.com/pengovbr/mod-sei-pen/issues/836);
+
+
+
 #### Instruções
 
 1. Baixar a última versão do módulo de instalação do sistema (arquivo `mod-sei-pen-[VERSÃO].zip`) localizado na página de [Releases do projeto MOD-SEI-PEN](https://github.com/spbgovbr/mod-sei-pen/releases), seção **Assets**. _Somente usuários autorizados previamente pela Coordenação-Geral do Processo Eletrônico Nacional podem ter acesso às versões._
