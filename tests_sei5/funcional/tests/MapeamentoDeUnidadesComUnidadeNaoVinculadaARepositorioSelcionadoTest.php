@@ -55,7 +55,7 @@ class MapeamentoDeUnidadesComUnidadeNaoVinculadaARepositorioSelcionadoTest exten
     sleep(2);
     $mensagem = $this->paginaBase->alertTextAndClose();
     $mensagemEsperada = mb_convert_encoding(
-      "A unidade pesquisada não está vinculada a estrutura organizacional ".self::$remetente['REP_ESTRUTURAS']." selecionada. "
+      "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: ".self::$remetente['REP_ESTRUTURAS'].". "
       . "Por favor, verifique se a unidade pertence a outra estrutura.", 
       'UTF-8', 'ISO-8859-1');
 

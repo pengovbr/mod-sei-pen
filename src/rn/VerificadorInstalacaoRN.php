@@ -30,7 +30,8 @@ require_once DIR_SEI_WEB . '/SEI.php';
 class VerificadorInstalacaoRN extends InfraRN
 {
     const COMPATIBILIDADE_MODULO_SEI = [
-      '5.0.0'
+      '5.0.0',
+      '5.0.1'
     ];
 
     public function __construct()
