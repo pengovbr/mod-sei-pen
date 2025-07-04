@@ -41,6 +41,16 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
     }
   }
 
+  protected function alterarConectado(PenRelTipoDocMapEnviadoDTO $objPenRelTipoDocMapEnviadoDTO)
+    {
+    try {
+        $objPenRelTipoDocMapEnviadoBD = new PenRelTipoDocMapEnviadoBD($this->getObjInfraIBanco());
+        return $objPenRelTipoDocMapEnviadoBD->alterar($objPenRelTipoDocMapEnviadoDTO);
+    }catch(Exception $e){
+        throw new InfraException('Módulo do Tramita: Erro alterar mapeamento de Tipos de Documento para envio.', $e);
+    }
+  }
+
 
   protected function listarEmUsoConectado($dblIdSerie)
     {
@@ -266,6 +276,89 @@ class PenRelTipoDocMapEnviadoRN extends InfraRN
         $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $parNumEspeciePadrao);
     }catch(Exception $e){
         throw new InfraException('Módulo do Tramita: Erro atribuindo Espécie Documental padrão para envio.', $e);
+    }
+  }
+
+  public function verificarAtribuirEspeciePadrao($objEspecieDocumentalDTO)
+  {
+    try{
+
+      $processoEletronicoRN = new ProcessoEletronicoRN();
+      $arrEspeciesDocumentaisPEN = $processoEletronicoRN->consultarEspeciesDocumentais();    
+
+      $strNomeEspecieAtual = $objEspecieDocumentalDTO->getStrNomeEspecie();
+      $numIdEspecieAtual = $objEspecieDocumentalDTO->getDblIdEspecie();
+
+      $numIdEspecieDocumentalTramita = array_search($strNomeEspecieAtual, $arrEspeciesDocumentaisPEN);
+
+      if ($numIdEspecieAtual != $numIdEspecieDocumentalTramita) {
+        $this->cadastrarEspeciePadraoNovo($strNomeEspecieAtual, $numIdEspecieDocumentalTramita);
+        $this->atualizarMapEnvio($numIdEspecieAtual, $numIdEspecieDocumentalTramita);
+        $this->atualizarMapRecebido($numIdEspecieAtual, $numIdEspecieDocumentalTramita);
+
+        $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+        $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieAtual);
+
+        $objEspecieDocumentalRN = new EspecieDocumentalRN();
+        $objEspecieDocumentalDTO = $objEspecieDocumentalRN->excluir($objEspecieDocumentalDTO);
+      }
+
+      // Caso o ID antigo esteja atribudo como PADRAO DE ENVIO, vai atualizar o registro para o novo ID 
+      $objPenParametroRN = new PenParametroRN();
+      $numPadraoAtribuido = $objPenParametroRN->getParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO");
+
+      if (!empty($numPadraoAtribuido) && $numIdEspecieAtual == $numPadraoAtribuido) { 
+        $objPenParametroRN->persistirParametro("PEN_ESPECIE_DOCUMENTAL_PADRAO_ENVIO", $numIdEspecieDocumentalTramita);
+      }
+
+      return $numIdEspecieDocumentalTramita;
+
+    }catch(Exception $e){
+        throw new InfraException('Módulo do Tramita: Erro atualizar Espécie Documental Outra para envio.', $e);
+    }
+  }
+
+  protected function cadastrarEspeciePadraoNovo($strNomeEspecie, $numIdEspecieDocumental)
+  {
+    $objEspecieDocumentalDTO = new EspecieDocumentalDTO();
+    $objEspecieDocumentalDTO->setStrNomeEspecie($strNomeEspecie);
+    $objEspecieDocumentalDTO->setDblIdEspecie($numIdEspecieDocumental);
+    $objEspecieDocumentalRN = new EspecieDocumentalRN();
+
+    $objEspecieDocumentalDTO = $objEspecieDocumentalRN->cadastrar($objEspecieDocumentalDTO);
+  }
+
+  protected function atualizarMapRecebido($numEspeciePadraoAtual, $numEspeciePadraoNovo)
+  {
+    $objPenRelTipoDocMapRecebidoDTO = new PenRelTipoDocMapRecebidoDTO();
+    $objPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoAtual);
+    $objPenRelTipoDocMapRecebidoDTO->retDblIdMap();
+    $objPenRelTipoDocMapRecebidoDTO->retNumCodigoEspecie();
+    $objPenRelTipoDocMapRecebidoDTO->retNumIdSerie();
+
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapRecebidoRN();
+    $registros = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapRecebidoDTO);
+
+    foreach ($registros as $arrPenRelTipoDocMapRecebidoDTO) {
+      $arrPenRelTipoDocMapRecebidoDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
+      $objPenRelTipoDocMapRecebidoRN->alterar($arrPenRelTipoDocMapRecebidoDTO);
+    }
+  }
+
+  protected function atualizarMapEnvio($numEspeciePadraoAtual, $numEspeciePadraoNovo)
+  {
+    $objPenRelTipoDocMapEnvioDTO = new PenRelTipoDocMapEnviadoDTO();
+    $objPenRelTipoDocMapEnvioDTO->setNumCodigoEspecie($numEspeciePadraoAtual);
+    $objPenRelTipoDocMapEnvioDTO->retDblIdMap();
+    $objPenRelTipoDocMapEnvioDTO->retNumCodigoEspecie();
+    $objPenRelTipoDocMapEnvioDTO->retNumIdSerie();
+
+    $objPenRelTipoDocMapRecebidoRN = new PenRelTipoDocMapEnviadoRN();
+    $registros = $objPenRelTipoDocMapRecebidoRN->listar($objPenRelTipoDocMapEnvioDTO);
+
+    foreach ($registros as $arrPenRelTipoDocMapEnvioDTO) {
+      $arrPenRelTipoDocMapEnvioDTO->setNumCodigoEspecie($numEspeciePadraoNovo);
+      $objPenRelTipoDocMapRecebidoRN->alterar($arrPenRelTipoDocMapEnvioDTO);
     }
   }
 

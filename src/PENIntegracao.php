@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo. Este deverá ser atualizado e sincronizado com constante VERSAO_MODULO
-define("VERSAO_MODULO_PEN", "4.0.0");
+define("VERSAO_MODULO_PEN", "4.0.1");
 
 class PENIntegracao extends SeiIntegracao
 {
@@ -686,7 +686,7 @@ class PENIntegracao extends SeiIntegracao
     if ($arr !== null && $arr['itens']) {
       foreach ($arr['itens'] as $dto) {
         $xml .= '<item id="' . self::formatarXMLAjax($dto->get($strAtributoId)) . '"';
-        $xml .= ' descricao="' . mb_convert_encoding(self::formatarXMLAjax($dto->get($strAtributoDescricao)),'iso-8859-1', 'utf-8') . '"';
+        $xml .= ' descricao="' . mb_convert_encoding(self::formatarXMLAjax($dto->get($strAtributoDescricao)), 'iso-8859-1', 'utf-8') . '"';
 
         if ($strAtributoComplemento !== null) {
             $xml .= ' complemento="' . self::formatarXMLAjax($dto->get($strAtributoComplemento)) . '"';
@@ -706,7 +706,7 @@ class PENIntegracao extends SeiIntegracao
         $xml .= '></item>';
     }
     $xml .= '</itens>';
-    return mb_convert_encoding($xml,'ISO-8859-1', 'UTF-8');
+    return mb_convert_encoding($xml, 'ISO-8859-1', 'UTF-8');
   }
 
     /**
@@ -978,8 +978,15 @@ class PENIntegracao extends SeiIntegracao
           $restricaoCadastrada = $restricaoCadastrada > 0;
 
           if ($restricaoCadastrada) {
-                $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
-                $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
+            if (is_numeric($_POST['palavras_pesquisa'])) {
+              $objPenUnidadeRestricaoDTO->setNumIdUnidadeRHRestricao($_POST['palavras_pesquisa']);
+            }
+          
+            if (!is_numeric($_POST['palavras_pesquisa'])) {
+              $objPenUnidadeRestricaoDTO->setStrNomeUnidadeRHRestricao('%' . $_POST['palavras_pesquisa'] . '%', InfraDTO::$OPER_LIKE);
+            }    
+        
+            $arrEstruturas = $objPenUnidadeRestricaoRN->listar($objPenUnidadeRestricaoDTO);
 
             foreach ($arrEstruturas as $unidade) {
               if ($unidade->getNumIdUnidadeRHRestricao() != null) {
