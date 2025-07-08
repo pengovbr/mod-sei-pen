@@ -286,4 +286,13 @@ class PaginaProcesso extends PaginaTeste
     }
   }
   
+  public function reproduzirUltimoTramite()
+    {
+      $this->test->frame(null);
+      $this->test->frame("ifrConteudoVisualizacao");
+      $this->test->byXPath(mb_convert_encoding("//img[@alt='Reproduzir Último Trâmite']", 'UTF-8', 'ISO-8859-1'))->click();
+      $this->alertTextAndClose(true);
+      return $this->alertTextAndClose(true);
+  }
+  
 }

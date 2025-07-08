@@ -385,6 +385,12 @@ class PendenciasTramiteRN extends InfraRN
             $objProcessarPendenciaRN->receberTramitesRecusados($numIDT);
             break;
 
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+          $strStatus = $objPendencia->getStrStatus();
+          $this->gravarLogDebug("Situação do trâmite ($strStatus) será tratado em breve.");
+          $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
+            break;
+
         default:
             $strStatus = $objPendencia->getStrStatus();
             $this->gravarLogDebug("Situação do trâmite ($strStatus) não pode ser tratada.");

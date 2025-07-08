@@ -2079,7 +2079,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       return $this->objDocumentoRN->consultarRN0005($documentoDTO);
     }
 
-    private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false)
+    public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false)
       {
       if (!isset($strNumeroRegistro)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $strNumeroRegistro não informado.');
@@ -2153,6 +2153,8 @@ class ExpedirProcedimentoRN extends InfraRN {
             $nrTamanhoBytesMaximo = ($nrTamanhoMegasMaximo * pow(1024, 2)); //Qtd de MB definido como parametro
 
             try {
+                  $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+                  $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($objComponenteDigitalDTO->getDblIdProcedimento(), ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
                 //Verifica se o arquivo é maior que o tamanho máximo definido para envio, se for, realiza o particionamento do arquivo
               if(!in_array($objComponenteDigitalDTO->getStrHashConteudo(), $arrHashComponentesEnviados)){
                 if($objDocumentoDTO->getStrStaProtocoloProtocolo() == ProtocoloRN::$TP_DOCUMENTO_RECEBIDO){
@@ -2209,20 +2211,28 @@ class ExpedirProcedimentoRN extends InfraRN {
                   $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                   $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                  if(!$bolSinProcessamentoEmBloco){
+                  if(!$bolSinProcessamentoEmBloco && !$bolProcessoExpedido){
                     $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                     $this->contadorDaBarraDeProgresso++;
                   }
                 }
 
                     $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
-
-                    //Bloquea documento para atualizao, já que ele foi visualizado
-                    $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
-                    $this->objProcedimentoAndamentoRN->cadastrar(
-                        ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
-                        $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S')
-                    );
+                    //Buscar se expedido (caso reprodução ultimo tramite)
+                    if ($bolProcessoExpedido) {
+                      $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objComponenteDigitalDTO->getDblIdProcedimento());
+                      $this->objProcedimentoAndamentoRN->cadastrar(
+                          ProcedimentoAndamentoDTO::criarAndamento(sprintf('Executando reprodução de último trâmite %s %s', $strNomeDocumento,
+                          $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S')
+                      );
+                    } else {
+                      //Bloquear documento para atualização, já que ele foi visualizado
+                      $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
+                      $this->objProcedimentoAndamentoRN->cadastrar(
+                          ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
+                          $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S')
+                      );
+                    }
               }
             } catch (\Exception $e) {
               $strProtocoloDocumento = $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado();
@@ -2925,6 +2935,9 @@ class ExpedirProcedimentoRN extends InfraRN {
 
       try {
         $inicio = 0;
+
+        $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+        $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($objComponenteDigitalDTO->getDblIdProcedimento(), ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
         //Lê o arquivo em partes para realizar o envio
         for ($i = 1; $i <= $qtdPartes; $i++)
         {
@@ -2933,7 +2946,8 @@ class ExpedirProcedimentoRN extends InfraRN {
           $fim = $inicio + $tamanhoParteArquivo;
           try{
             $this->enviarParteDoComponenteDigital($inicio, $fim, $parteDoArquivo, $dadosDoComponenteDigital);
-            if(!$bolSinProcessamentoEmBloco){
+                 
+            if(!$bolSinProcessamentoEmBloco && !$bolProcessoExpedido){
               $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
             }
             $this->contadorDaBarraDeProgresso++;
