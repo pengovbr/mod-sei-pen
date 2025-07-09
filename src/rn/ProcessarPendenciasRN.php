@@ -145,7 +145,7 @@ class ProcessarPendenciasRN extends InfraRN
      * @return void
      */
   public function enviarComponenteDigital($idTramite)
-    {
+  {
       $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
 
       $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
@@ -155,55 +155,57 @@ class ProcessarPendenciasRN extends InfraRN
       $novoIDT = $objMetadadosProcedimento->IDT;
       $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
       $ticketComponentesDigitais = $objMetadadosProcedimento->metadados->ticketParaReenvioDeComponentesDigitais;
+
       $objProcedimentoDTO = new ProcedimentoDTO();
       $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($protocolo);
       $objProcedimentoDTO->retTodos();
 
       $objProcedimentoRN = new ProcedimentoRN();
       $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+      if ($objProcedimentoDTO != null) {
+        $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
 
-      $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-      $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+        if ($objTramiteDTO != null) {
 
-      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-      $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
-      $idUltimoTramite = $objTramiteDTO->getNumIdTramite();
+            $idUltimoTramite = $objTramiteDTO->getNumIdTramite();
 
-    if ($novoIDT != $objTramiteDTO->getNumIdTramite()) {
-      $objTramiteDTO = new TramiteDTO();
-      $objTramiteDTO->setStrNumeroRegistro($nre);
-      $objTramiteDTO->setNumIdTramite($idUltimoTramite);
-      $objTramiteDTO->retTodos();
+          if ($novoIDT != $objTramiteDTO->getNumIdTramite()) {
+            $objTramiteDTO = new TramiteDTO();
+            $objTramiteDTO->setStrNumeroRegistro($nre);
+            $objTramiteDTO->setNumIdTramite($idUltimoTramite);
+            $objTramiteDTO->retTodos();
 
-      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-      $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+            $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-      $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
-      $objTramiteDTO->setNumIdTramite($novoIDT);
-      $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
-      $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
-        
-      $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-      $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
-      $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
-      $objComponenteDigitalDTO->retTodos();
-      $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
-      $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-      foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
-        $componenteDigital->setNumIdTramite($novoIDT);
-        $componenteDigital->setStrSinEnviar('S');
-        $objComponenteDigitalBD->cadastrar($componenteDigital);
-      }
-    }
-     
-    if ($objProcedimentoDTO != null) {
-      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
-      $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false);
-    } else {
-      $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
-      $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
-    }
+            $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
+            $objTramiteDTO->setNumIdTramite($novoIDT);
+            $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
+            $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
+              
+            $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+            $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
+            $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
+            $objComponenteDigitalDTO->retTodos();
+            $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+            $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+            foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
+              $componenteDigital->setNumIdTramite($novoIDT);
+              $componenteDigital->setStrSinEnviar('S');
+              $objComponenteDigitalBD->cadastrar($componenteDigital);
+            }
+          }
+        }
+          $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
+          $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false);
+        } else {
+          $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
+          $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
+        }
   }
 
 
