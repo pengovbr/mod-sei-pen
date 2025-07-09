@@ -939,27 +939,27 @@ class ExpedirProcedimentoRN extends InfraRN
        
         if($objComponenteDigitalBD->contar($objComponenteDigitalDTO) > 0) {
             $arrobjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-            $componenteDigital = $arrobjComponenteDigitalDTO[0];
+            foreach ($arrobjComponenteDigitalDTO as $key => $componenteDigital) {
+              $objComponenteDigital = array();
+              $objComponenteDigital['ordem'] = $key + 1;
+              $objComponenteDigital['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
+              $objComponenteDigital['hash'] = [
+                'algoritmo' => $componenteDigital->getStrAlgoritmoHash(),
+                'conteudo' => $componenteDigital->getStrHashConteudo()
+              ];
 
-            $objComponenteDigital = array();
-            $objComponenteDigital['ordem'] = 1;
-            $objComponenteDigital['nome'] = mb_convert_encoding($componenteDigital->getStrNome(), 'UTF-8', 'ISO-8859-1');
-            $objComponenteDigital['hash'] = [
-            'algoritmo' => $componenteDigital->getStrAlgoritmoHash(),
-            'conteudo' => $componenteDigital->getStrHashConteudo()
-            ];
+              $objComponenteDigital['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
+              $objComponenteDigital['mimeType'] = $componenteDigital->getStrMimeType();
+              $objComponenteDigital['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
+              $objComponenteDigital['idAnexo'] = $componenteDigital->getNumIdAnexo();
 
-            $objComponenteDigital['tamanhoEmBytes'] = $componenteDigital->getNumTamanho();
-            $objComponenteDigital['mimeType'] = $componenteDigital->getStrMimeType();
-            $objComponenteDigital['tipoDeConteudo'] = $componenteDigital->getStrTipoConteudo();
-            $objComponenteDigital['idAnexo'] = $componenteDigital->getNumIdAnexo();
+              if($componenteDigital->getStrMimeType() == 'outro') {
+                  $objComponenteDigital['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+              }
 
-            if($componenteDigital->getStrMimeType() == 'outro') {
-                $objComponenteDigital['dadosComplementaresDoTipoDeArquivo'] = 'outro';
+              $objComponenteDigital = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $objComponenteDigital, $componenteDigital->getStrHashConteudo());
+              $documento['componentesDigitais'][] = $objComponenteDigital;
             }
-
-            $objComponenteDigital = $this->atribuirDadosAssinaturaDigitalREST($documentoDTO, $objComponenteDigital, $componenteDigital->getStrHashConteudo());
-            $documento['componentesDigitais'][] = $objComponenteDigital;
 
         }else{
             $documento = $this->atribuirComponentesDigitaisREST($documento, $documentoDTO, $dblIdProcedimento);
