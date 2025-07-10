@@ -334,13 +334,46 @@ class TramiteProcessosComDevolucoesEAnexacoesTest extends FixtureCenarioBaseTest
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
+
+     /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_origem_processo_anexado
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTestePrincipal;
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $this->$strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
     /**
      * Teste de verificação da correta devolução do processo anexado no destinatário
      *
      * @group verificacao_recebimento
      * @large
      *
-     * @depends test_verificar_devolucao_origem_processo_anexado
+     * @depends test_realizar_pedido_reproducao_ultimo_tramite
      *
      * @return void
      */

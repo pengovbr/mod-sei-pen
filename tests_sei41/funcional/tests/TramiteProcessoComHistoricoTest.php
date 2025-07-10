@@ -36,13 +36,44 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTeste;
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
 
     /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
      * @group verificacao_recebimento
      *
-     * @depends test_tramitar_processo_da_origem
+     * @depends test_realizar_pedido_reproducao_ultimo_tramite
      *
      * @return void
      */
@@ -66,7 +97,7 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, "https://dev.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
