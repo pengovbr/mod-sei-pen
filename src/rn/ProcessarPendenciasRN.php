@@ -243,8 +243,14 @@ class ProcessarPendenciasRN extends InfraRN
         $this->gravarLogDebug("Finalizado o recebimento de protocolo com IDT $idTramite(Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
     }
     catch(Exception $e){
+
         //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
         $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
+        // ou caso reprodução de ultimo tramite
+        $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
+        $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+        $bolDeveRecusarTramite = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
+
       if($bolDeveRecusarTramite) {
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
           $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();

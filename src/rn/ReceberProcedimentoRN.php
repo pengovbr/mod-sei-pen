@@ -1786,6 +1786,18 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumento->idProcedimentoAnexadoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
           $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
 
+          if (is_null($objDocumento->idProcedimentoAnexadoSEI) && is_null($objDocumento->protocoloProcedimentoSEI) && !is_null($objDocumento->protocoloDoProcessoAnexado)) {
+            $objProtocolo = new ProtocoloDTO();
+            $objProtocolo->setStrProtocoloFormatado($objDocumento->protocoloDoProcessoAnexado);
+            $objProtocolo->retStrProtocoloFormatado();
+            $objProtocolo->retDblIdProcedimento();
+            $objProtocoloRN = new ProtocoloRN();
+            $objProtocolo = $objProtocoloRN->consultarRN0186($objProtocolo);
+            if ($objProtocolo != null) {
+              $objDocumento->protocoloProcedimentoSEI = $objProtocolo->getStrProtocoloFormatado();
+              $objDocumento->idProcedimentoAnexadoSEI = $objProtocolo->getDblIdProcedimento();
+            }
+          }
           foreach ($arrObjComponenteDigitalDTO as $objComponenteDTO) {
               $arrDocumentosExistentesPorHash[$objComponenteDTO->getStrHashConteudo()] = array(
                 "IdDocumento" => $objComponenteDTO->getDblIdDocumento(),
