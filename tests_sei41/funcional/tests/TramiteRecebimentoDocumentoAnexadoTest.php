@@ -24,6 +24,7 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
     public static $documentoTeste3;
     public static $documentoTeste4;
     public static $documentoTeste5;
+    public static $protocoloTeste;
 
     public static $conteudoCompoonenteDigital;
 
@@ -94,13 +95,48 @@ class TramiteRecebimentoDocumentoAnexadoTest extends FixtureCenarioBaseTestCase
         $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $arrDocumentosSegundoEnvio, self::$remetente, self::$destinatario);
     }
 
+
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_com_documento_anexado_para_origem
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $strProtocoloTeste = self::$protocoloTeste;
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+    
+
     /**
      * Teste de verificação do correto recebimento do processo com documento anexado no destinatário
      *
      * @group verificacao_recebimento
      * @large
      *
-     * @depends test_devolucao_processo_com_documento_anexado_para_origem
+     * @depends test_realizar_pedido_reproducao_ultimo_tramite
      *
      * @return void
      */

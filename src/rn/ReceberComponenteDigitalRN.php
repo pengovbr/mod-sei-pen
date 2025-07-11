@@ -352,6 +352,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoDTO = new DocumentoDTO();
       $objDocumentoDTO->retDblIdDocumento();
       $objDocumentoDTO->retDblIdProcedimento();
+      $objDocumentoDTO->retStrStaEstadoProcedimento();
       $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
 
       $objDocumentoRN = new DocumentoRN();
@@ -376,6 +377,31 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
       $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
+      $bolReproducaoUltimoTramite = false;
+    if ($objDocumentoDTO->getStrStaEstadoProcedimento()==ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO) {
+      $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+      $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($objDocumentoDTO->getDblIdProcedimento(), ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
+      $bolReproducaoUltimoTramite = !$bolProcessoExpedido;
+            
+          // $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+    } 
+    if ($bolReproducaoUltimoTramite) { // ou seja anexado e reprodução ultimo tramite
+        $objProtocoloRN = new ProtocoloRN();
+        $objProtocoloRN->alterarRN0203($objProtocoloDTO);
+        $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
+        $objDocumentoBD->alterar($objDocumentoDTO);
+        // $objProtocolo2DTO = new ProtocoloDTO();
+        // $objProtocolo2DTO->setDblIdProtocolo($objDocumentoDTO->getDblIdProcedimento());
+        // $objProtocolo2DTO->setStrStaEstado(ProtocoloRN::$TE_NORMAL);
+        // $objProtocolo2DTO = $objProtocoloRN->alterarRN0203($objProtocolo2DTO);
+        // // $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
+        // // $objDocumentoBD->alterar($objDocumentoDTO);
+        // $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+        // $objProtocolo2DTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO);
+        // $objProtocoloRN->alterarRN0203($objProtocolo2DTO);
+    } else {
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+    }
+
   }
 }

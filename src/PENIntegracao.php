@@ -223,6 +223,18 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
+    $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+    $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+    $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+
+    if ($bolFlagAberto && !is_null($objTramiteDTO)){
+      $strAcoesProcedimento .= '<a onclick="return confirm(\\\'Confirma reproduzir último trâmite deste processo?\\\');" href="' . $objSessaoSEI->assinarLink('controlador.php?acao=pen_reproduzir_ultimo_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_repositorio=' . $objTramiteDTO->getNumIdRepositorioDestino() . '&id_estrutura=' . $objTramiteDTO->getNumIdEstruturaDestino() . '&nre=' . $objTramiteDTO->getStrNumeroRegistro() . '&id_ultimo_tramite=' . $objTramiteDTO->getNumIdTramite() . '&id_procedimento=' . $dblIdProcedimento . '&arvore=1') . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+      $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_reproduzir_ultimo_tramite.svg", $this->getDiretorioImagens()) . ' alt="Reproduzir Último Trâmite" title="Reproduzir Último Trâmite"/>';
+      $strAcoesProcedimento .= '</a>';
+    }
+
     return array($strAcoesProcedimento);
   }
 
@@ -941,6 +953,10 @@ class PENIntegracao extends SeiIntegracao
       case 'pen_map_envio_parcial_visualizar':
           require_once dirname(__FILE__) . '/pen_map_envio_parcial_cadastrar.php';
           break;
+      case 'pen_reproduzir_ultimo_tramite':
+          require_once dirname(__FILE__) . '/pen_reproduzir_ultimo_tramite.php';
+          break;
+      
 
       default:
           return false;

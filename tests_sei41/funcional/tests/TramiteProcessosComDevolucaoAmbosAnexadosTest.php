@@ -59,7 +59,6 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
         self::$protocoloTesteAnexado = self::$processoTesteAnexado["PROTOCOLO"];
     }
 
-
     /**
      * Teste de verificação do correto recebimento dos dois processos separados no destino
      *
@@ -133,12 +132,45 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
 
 
     /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_anexado_para_origem
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTestePrincipal;
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        sleep(5);
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    /**
      * Teste de verificação do correto envio do processo anexado no sistema remetente
      *
      * @group verificacao_envio
      * @large
      *
-     * @depends test_devolucao_processo_anexado_para_origem
+     * @depends test_realizar_pedido_reproducao_ultimo_tramite
      *
      * @return void
      */
@@ -167,6 +199,7 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
+    
     /**
      * Teste de verificação da correta devolução do processo anexado no destinatário
      *
