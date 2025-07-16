@@ -107,6 +107,79 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
     }
 
     /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_para_origem
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $destinatario = self::$contextoOrgaoB;
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();        
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    public function test_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $remetente = self::$contextoOrgaoA;
+
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
+
+        $this->abrirProcesso($strProtocoloTeste);
+       
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $destinatario = self::$contextoOrgaoB;
+
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+        
+    }
+
+    /**
      * Teste de recebimento documento avulso com 2 componentes digitais
      *
      * @return void
@@ -133,41 +206,6 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
         $this->assertNotNull($reciboTramite);
         $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario($documentoTeste, $destinatario);
     }
-
-
-    /**
-     * Teste de realizar reprodução de último tramite
-     *
-     * @group envio
-     * @large
-     *
-     * @depends test_recebimento_documento_avulso_com_2_componentes_digitais
-     *
-     * @return void
-     */
-    public function test_realizar_pedido_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
-        $destinatario = self::$contextoOrgaoB;
-        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
-        
-        // 11 - Reproduzir último trâmite
-        $this->abrirProcesso($strProtocoloTeste);
-        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();        
-        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
-        $this->refresh();
-        $this->waitUntil(function ($testCase) {
-            sleep(5);
-            $testCase->refresh();
-            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-            return true;
-        }, PEN_WAIT_TIMEOUT);
-
-    }
-
-
     private function receberReciboTramite($novoTramite)
     {
         $idt = $novoTramite['IDT'];

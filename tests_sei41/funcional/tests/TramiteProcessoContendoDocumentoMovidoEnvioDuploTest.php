@@ -69,7 +69,6 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
-
         // Movendo documento do processo principal para o processo secundário
         $documentoParaMover = $this->paginaProcesso->listarDocumentos()[0];
         $this->paginaProcesso->selecionarDocumento($documentoParaMover);
@@ -117,7 +116,6 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
     }
 
-    
      /**
      * Teste de devolução do processo recebido no destinatário
      *

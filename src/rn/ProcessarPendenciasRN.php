@@ -191,11 +191,25 @@ class ProcessarPendenciasRN extends InfraRN
             $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
             $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
             $objComponenteDigitalDTO->retTodos();
+            $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
             $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
             $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
             foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
+              
+              $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+              $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($componenteDigital->getDblIdProcedimento());
+              $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($componenteDigital->getDblIdDocumento());
+              $objRelProtocoloProtocoloDTO->setNumSequencia($componenteDigital->getNumOrdemDocumento() - 1);
+              $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+              $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+              $bolDocumentoMovido = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
               $componenteDigital->setNumIdTramite($novoIDT);
               $componenteDigital->setStrSinEnviar('S');
+
+              if ($componenteDigital->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $bolDocumentoMovido) {
+                $componenteDigital->setStrSinEnviar('N');
+              }
               $objComponenteDigitalBD->cadastrar($componenteDigital);
             }
           }

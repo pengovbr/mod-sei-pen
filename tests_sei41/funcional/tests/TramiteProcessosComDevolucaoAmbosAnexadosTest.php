@@ -130,6 +130,40 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
         );
     }
 
+    /**
+     * Teste de verificação do correto envio do processo anexado no sistema remetente
+     *
+     * @group verificacao_envio
+     * @large
+     *
+     * @depends test_devolucao_processo_anexado_para_origem
+     *
+     * @return void
+     */
+    public function test_verificar_devolucao_origem_processo_anexado()
+    {
+        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+
+        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+            sleep(5);
+            $testCase->refresh();
+            $paginaProcesso = new PaginaProcesso($testCase);
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
+            $testCase->assertFalse($paginaProcesso->processoAberto());
+            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
+        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
+        $this->validarRecibosTramite($mensagemRecibo, true, true);
+        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
+        $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
+    }
 
     /**
      * Teste de realizar reprodução de último tramite
@@ -165,40 +199,63 @@ class TramiteProcessosComDevolucaoAmbosAnexadosTest extends FixtureCenarioBaseTe
     }
 
     /**
-     * Teste de verificação do correto envio do processo anexado no sistema remetente
+     * Teste de realizar reprodução de último tramite
      *
-     * @group verificacao_envio
+     * @group envio
      * @large
      *
      * @depends test_realizar_pedido_reproducao_ultimo_tramite
      *
      * @return void
      */
-    public function test_verificar_devolucao_origem_processo_anexado()
+    public function test_reproducao_ultimo_tramite()
     {
-        $orgaosDiferentes = self::$remetente['URL'] != self::$destinatario['URL'];
+        $strProtocoloTeste = self::$protocoloTestePrincipal;
 
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso(self::$protocoloTestePrincipal);
-
-        $this->waitUntil(function ($testCase) use (&$orgaosDiferentes) {
+        $this->abrirProcesso($strProtocoloTeste);
+       
+        $this->waitUntil(function ($testCase) {
             sleep(5);
             $testCase->refresh();
-            $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
-            $testCase->assertFalse($paginaProcesso->processoAberto());
-            $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
 
-        $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
-        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
-        $this->validarRecibosTramite($mensagemRecibo, true, true);
-        $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
-        $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_reproducao_ultimo_tramite
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$protocoloTestePrincipal;
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+        
+    }
     
     /**
      * Teste de verificação da correta devolução do processo anexado no destinatário

@@ -140,8 +140,8 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends 
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
         
         // 11 - Reproduzir último trâmite
         $this->abrirProcesso($strProtocoloTeste);
@@ -157,6 +157,47 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends 
             return true;
         }, PEN_WAIT_TIMEOUT);
 
+    }
+
+    public function test_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+
+        $this->acessarSistema($remetente['URL'], $remetente['SIGLA_UNIDADE'], $remetente['LOGIN'], $remetente['SENHA']);
+
+        $this->abrirProcesso($strProtocoloTeste);
+       
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+        $destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $this->acessarSistema($destinatario['URL'], $destinatario['SIGLA_UNIDADE'], $destinatario['LOGIN'], $destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+        
     }
 
 

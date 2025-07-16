@@ -643,8 +643,7 @@ class ReceberProcedimentoRN extends InfraRN
               if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)){
                 $bolEnviarComponentesDigitais = true;
               } else if($bolReproducaoUltimoTramite){
-                // $this->gravarLogDebug("Recebimento de reprodução de ultimo tramite: aguardando 10s liga o debug!!.");
-                if (!isset($idUltimoTramiteRecebimento)) {
+                if (!isset($idUltimoTramiteRecebimento)) { // busca apenas na primeira vez qual o valor do id de ultimo tramite
                   $objTramiteDTO = new TramiteDTO();
                   $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
                   $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
@@ -662,12 +661,12 @@ class ReceberProcedimentoRN extends InfraRN
                 $objComponenteDigital->setDblIdDocumento($dblIdDocumento);
                 $objComponenteDigital->setStrNumeroRegistro($parStrNumeroRegistro);
                 $objComponenteDigital->setNumIdTramite($idUltimoTramiteRecebimento);
-                $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE);
+                $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE); // garante apenas docs com anexo
                 $objComponenteDigital->retTodos();
                 $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-                $objComponenteDigital = $objComponenteDigitalBD->consultar($objComponenteDigital);
+                $objComponenteDigital = $objComponenteDigitalBD->listar($objComponenteDigital);
 
-                if ($objComponenteDigital != null) {
+                if (count($objComponenteDigital) > 0) {
                   $objDocumentoDTO = new DocumentoDTO();
                   $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
                   $objDocumentoDTO->retTodos();
@@ -688,6 +687,7 @@ class ReceberProcedimentoRN extends InfraRN
                       $objComponenteDigitalPDTO = new ComponenteDigitalDTO();
                       $objComponenteDigitalPDTO->retTodos();
                       $objComponenteDigitalPDTO->setNumIdAnexo($objAnexoDTO->getNumIdAnexo());
+                      $objComponenteDigitalPDTO->setNumMaxRegistrosRetorno(1);
                       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
                       $objComponenteDigitalPDTO = $objComponenteDigitalBD->consultar($objComponenteDigitalPDTO);
                       if ($objComponenteDigitalPDTO != null) {
