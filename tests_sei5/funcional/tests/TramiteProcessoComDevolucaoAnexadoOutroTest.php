@@ -94,6 +94,9 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $objProtocoloAnexadoDTO = $this->consultarProcessoFixture(self::$protocoloTesteAnexado, \ProtocoloRN::$TP_PROCEDIMENTO);
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
+        // Atualiza o estado do processo anexado
+        $this->atualizarProcessoFixture($objProtocoloAnexadoDTO, ['ESTADO' => \ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO]);
+
         // Gerar dados de testes para representar o processo principal
         self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
@@ -109,7 +112,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $this->anexarProcessoFixture($objProtocoloPrincipalDTO->getDblIdProtocolo(), $objProtocoloAnexadoDTO->getDblIdProtocolo());
 
         $this->cadastrarDocumentoExternoFixture(self::$documentoTeste5, $objProtocoloPrincipalDTO->getDblIdProtocolo());
-        
+
         putenv("DATABASE_HOST=org1-database");
 
         // Acessar sistema do this->REMETENTE do processo
