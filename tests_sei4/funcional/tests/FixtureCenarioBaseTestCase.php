@@ -276,6 +276,10 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
             $parametros['Interessados'] = $dadosProcesso['INTERESSADOS'];
         }
 
+        if (!is_null($dadosProcesso['ESTADO'])) {
+            $parametros['StaEstado'] = $dadosProcesso['ESTADO'];
+        }
+
         $parametros['IdProtocolo'] = $objProtocoloDTO->getDblIdProtocolo();
         $objProtocoloFixture = new ProtocoloFixture();
 
