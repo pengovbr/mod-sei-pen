@@ -253,6 +253,8 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
             $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
+        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
         $this->assertTrue(count($listaDocumentos) == 2);
 
