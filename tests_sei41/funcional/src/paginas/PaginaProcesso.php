@@ -92,13 +92,13 @@ class PaginaProcesso extends PaginaTeste
   public function navegarParaConsultarAndamentos()
     {
       $this->test->waitUntil(function($testCase) {
-          $this->test->frame(null);
-          $this->test->frame("ifrArvore");
+          $testCase->frame(null);
+          $testCase->frame("ifrArvore");
           $testCase->byLinkText('Consultar Andamento')->click();
 
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-          $this->test->frame("ifrVisualizacao");
+          $testCase->frame(null);
+          $testCase->frame("ifrConteudoVisualizacao");
+          $testCase->frame("ifrVisualizacao");
           sleep(2);
           $testCase->assertStringContainsString(mb_convert_encoding('Histórico do Processo', 'UTF-8', 'ISO-8859-1'), $testCase->byCssSelector('body')->text());
           return true;
