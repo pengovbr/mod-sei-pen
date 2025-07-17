@@ -387,7 +387,6 @@ class PendenciasTramiteRN extends InfraRN
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
           $strStatus = $objPendencia->getStrStatus();
-          $this->gravarLogDebug("Situação do trâmite ($strStatus) será tratado em breve.");
           $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
             break;
 

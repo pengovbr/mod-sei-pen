@@ -91,16 +91,35 @@ class PaginaProcesso extends PaginaTeste
 
   public function navegarParaConsultarAndamentos()
     {
+      $this->test->frame(null);
+      $this->test->frame("ifrArvore");
       $this->test->waitUntil(function($testCase) {
-          $testCase->frame(null);
-          $testCase->frame("ifrArvore");
-          $testCase->byLinkText('Consultar Andamento')->click();
+          sleep(1);
+          $botaoConsultarAndamento = $testCase->byXPath('(//img[@title="Consultar Andamento"])[1]');
 
-          $testCase->frame(null);
-          $testCase->frame("ifrConteudoVisualizacao");
-          $testCase->frame("ifrVisualizacao");
-          sleep(2);
-          $testCase->assertStringContainsString(mb_convert_encoding('Histórico do Processo', 'UTF-8', 'ISO-8859-1'), $testCase->byCssSelector('body')->text());
+          if (!$botaoConsultarAndamento){
+            return false;
+          }
+          $botaoConsultarAndamento->click();
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+      
+      $this->test->waitUntil(function($testCase) {
+          $this->test->frame(null);
+          $iframe1 = $testCase->byXPath('//iframe[@id="ifrConteudoVisualizacao"]');
+
+          if (!$iframe1){
+            return false;
+          }
+          sleep(1);
+          $this->test->frame("ifrConteudoVisualizacao");
+          $iframe2 = $testCase->byXPath('//iframe[@id="ifrVisualizacao"]');
+
+          if (!$iframe2){
+            return false;
+          }
+          sleep(1);
+          $this->test->frame("ifrVisualizacao");
           return true;
       }, PEN_WAIT_TIMEOUT);
   }

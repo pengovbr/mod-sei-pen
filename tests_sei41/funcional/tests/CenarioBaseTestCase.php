@@ -285,6 +285,8 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaControleProcesso->abrirProcesso($protocolo);
     } catch (\Exception $e) {
         $this->paginaBase->pesquisar($protocolo);
+        sleep(2);
+        $this->byXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
     }
   }
 
