@@ -91,16 +91,35 @@ class PaginaProcesso extends PaginaTeste
 
   public function navegarParaConsultarAndamentos()
     {
+      $this->test->frame(null);
+      $this->test->frame("ifrArvore");
+      $this->test->waitUntil(function($testCase) {
+          sleep(1);
+          $botaoConsultarAndamento = $testCase->byXPath('(//img[@title="Consultar Andamento"])[1]');
+
+          if (!$botaoConsultarAndamento){
+            return false;
+          }
+          $botaoConsultarAndamento->click();
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+      
       $this->test->waitUntil(function($testCase) {
           $this->test->frame(null);
-          $this->test->frame("ifrArvore");
-          $testCase->byLinkText('Consultar Andamento')->click();
+          $iframe1 = $testCase->byXPath('//iframe[@id="ifrConteudoVisualizacao"]');
 
-          $this->test->frame(null);
+          if (!$iframe1){
+            return false;
+          }
+          sleep(1);
           $this->test->frame("ifrConteudoVisualizacao");
+          $iframe2 = $testCase->byXPath('//iframe[@id="ifrVisualizacao"]');
+
+          if (!$iframe2){
+            return false;
+          }
+          sleep(1);
           $this->test->frame("ifrVisualizacao");
-          sleep(2);
-          $testCase->assertStringContainsString(mb_convert_encoding('Histórico do Processo', 'UTF-8', 'ISO-8859-1'), $testCase->byCssSelector('body')->text());
           return true;
       }, PEN_WAIT_TIMEOUT);
   }
@@ -284,6 +303,15 @@ class PaginaProcesso extends PaginaTeste
     } catch (\Exception $e) {
         return false;
     }
+  }
+  
+  public function reproduzirUltimoTramite()
+    {
+      $this->test->frame(null);
+      $this->test->frame("ifrConteudoVisualizacao");
+      $this->test->byXPath(mb_convert_encoding("//img[@alt='Reproduzir Último Trâmite']", 'UTF-8', 'ISO-8859-1'))->click();
+      $this->alertTextAndClose(true);
+      return $this->alertTextAndClose(true);
   }
   
 }

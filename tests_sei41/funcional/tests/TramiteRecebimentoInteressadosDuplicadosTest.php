@@ -18,6 +18,7 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
     public static $destinatario;
     public static $servicoPEN;
     public static $documentoTeste1;
+    public static $protocoloTeste;
 
     public static $conteudoCompoonenteDigital;
 
@@ -65,7 +66,6 @@ class TramiteRecebimentoInteressadosDuplicadosTest extends FixtureCenarioBaseTes
         self::$processoTeste['INTERESSADOS'] = "Interessado com mesmo nome";
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $arrDocumentosPrimeiroEnvio, self::$destinatario);
     }
-
 
     private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado) 
     {

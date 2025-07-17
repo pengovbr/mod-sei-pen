@@ -352,6 +352,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoDTO = new DocumentoDTO();
       $objDocumentoDTO->retDblIdDocumento();
       $objDocumentoDTO->retDblIdProcedimento();
+      $objDocumentoDTO->retStrStaEstadoProcedimento();
       $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
 
       $objDocumentoRN = new DocumentoRN();
@@ -376,6 +377,20 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
       $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
+      $bolReproducaoUltimoTramite = false;
+    if ($objDocumentoDTO->getStrStaEstadoProcedimento()==ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO) {
+      $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+      $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($objDocumentoDTO->getDblIdProcedimento(), ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
+      $bolReproducaoUltimoTramite = !$bolProcessoExpedido;      
+    } 
+    if ($bolReproducaoUltimoTramite) { // ou seja anexado e reprodução ultimo tramite
+        $objProtocoloRN = new ProtocoloRN();
+        $objProtocoloRN->alterarRN0203($objProtocoloDTO);
+        $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
+        $objDocumentoBD->alterar($objDocumentoDTO);
+    } else {
       $objDocumentoRN->alterarRN0004($objDocumentoDTO);
+    }
+
   }
 }

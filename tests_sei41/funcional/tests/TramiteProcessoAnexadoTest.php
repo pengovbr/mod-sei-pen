@@ -159,4 +159,88 @@ class TramiteProcessoAnexadoTest extends FixtureCenarioBaseTestCase
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste3, self::$destinatario);
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
     }
+
+     public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  self::$protocoloTestePrincipal, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    public function test_reproducao_ultimo_tramite()
+    {
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+       
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$protocoloTestePrincipal;
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso(self::$protocoloTestePrincipal);
+
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
+        $strTipoProcesso .= self::$processoTestePrincipal['TIPO_PROCESSO'];
+        $strObservacoes = $orgaosDiferentes ? $strTipoProcesso : null;
+        $this->validarDadosProcesso(
+            self::$processoTestePrincipal['DESCRICAO'],
+            self::$processoTestePrincipal['RESTRICAO'],
+            $strObservacoes,
+            array(self::$processoTestePrincipal['INTERESSADOS'])
+        );
+
+        $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
+
+        // Validação dos dados do processo principal
+        $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
+        $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
+        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste1, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[1], self::$documentoTeste2, self::$destinatario);
+
+        $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
+        $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
+
+        // Validação dos dados do processo anexado
+        $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
+        $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
+        $this->assertEquals(2, count($listaDocumentosProcessoAnexado));
+        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[0], self::$documentoTeste3, self::$destinatario);
+        $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
+    }
 }
