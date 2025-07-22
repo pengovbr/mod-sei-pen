@@ -289,6 +289,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV3081();
         case '3.8.1':
           $this->instalarV3082();
+        case '3.8.2':
+          $this->instalarV3083();
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
           $this->finalizar('VERSAO DO MÓDULO JÁ CONSTA COMO ATUALIZADA');
@@ -3010,48 +3012,52 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
     $boo = new PenRelTipoDocMapEnviadoRN();
     $boo->verificarAtribuirEspeciePadrao($objEspecieDocumentaoRNOutra);
     
-
-    //----------------------------------------------------------------------
-    // Tarefas Reprodução Último Trâmite
-    //----------------------------------------------------------------------
-    $objDTO = new TarefaDTO();
-    $objBD = new TarefaBD(BancoSEI::getInstance());
-
-    $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
-
-      $objDTO->unSetTodos();
-      $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
-
-      if ($objBD->contar($objDTO) == 0) {
-
-        $objUltimaTarefaDTO = new TarefaDTO();
-        $objUltimaTarefaDTO->retNumIdTarefa();
-        $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
-        $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
-        $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
-
-        $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
-        $objDTO->setStrNome($strNome);
-        $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
-        $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
-        $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
-        $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
-        $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
-        if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
-          $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
-        }
-        $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
-        $objBD->cadastrar($objDTO);
-      }
-    };
-
-    //TODO: Corrigir mensagem com português errado
-    $fnCadastrar('Reprodução de último trâmite iniciado para o protocolo @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO');
-    $fnCadastrar('Reprodução de último trâmite recebido na entidade @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO');
-    $fnCadastrar('Reprodução de último trâmite finalizado para o protocolo @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO');
-
     $this->atualizarNumeroVersao("3.8.2");
   }
+
+    protected function instalarV3083() {
+
+      //----------------------------------------------------------------------
+      // Tarefas Reprodução Último Trâmite
+      //----------------------------------------------------------------------
+      $objDTO = new TarefaDTO();
+      $objBD = new TarefaBD(BancoSEI::getInstance());
+
+      $fnCadastrar = function ($strNome = '', $strHistoricoResumido = 'N', $strHistoricoCompleto = 'N', $strFecharAndamentosAbertos = 'N', $strLancarAndamentoFechado = 'N', $strPermiteProcessoFechado = 'N', $strIdTarefaModulo = '', $strSinConsultaProcessual = 'N') use ($objDTO, $objBD) {
+
+        $objDTO->unSetTodos();
+        $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+
+        if ($objBD->contar($objDTO) == 0) {
+
+          $objUltimaTarefaDTO = new TarefaDTO();
+          $objUltimaTarefaDTO->retNumIdTarefa();
+          $objUltimaTarefaDTO->setNumMaxRegistrosRetorno(1);
+          $objUltimaTarefaDTO->setOrd('IdTarefa', InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objUltimaTarefaDTO = $objBD->consultar($objUltimaTarefaDTO);
+
+          $objDTO->setNumIdTarefa($objUltimaTarefaDTO->getNumIdTarefa() + 1);
+          $objDTO->setStrNome($strNome);
+          $objDTO->setStrSinHistoricoResumido($strHistoricoResumido);
+          $objDTO->setStrSinHistoricoCompleto($strHistoricoCompleto);
+          $objDTO->setStrSinFecharAndamentosAbertos($strFecharAndamentosAbertos);
+          $objDTO->setStrSinLancarAndamentoFechado($strLancarAndamentoFechado);
+          $objDTO->setStrSinPermiteProcessoFechado($strPermiteProcessoFechado);
+          if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.1.1")) {
+            $objDTO->setStrSinConsultaProcessual($strSinConsultaProcessual);
+          }
+          $objDTO->setStrIdTarefaModulo($strIdTarefaModulo);
+          $objBD->cadastrar($objDTO);
+        }
+      };
+
+      $fnCadastrar('Reprodução de último trâmite iniciado para o protocolo @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO');
+      $fnCadastrar('Reprodução de último trâmite recebido na entidade @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO');
+      $fnCadastrar('Reprodução de último trâmite finalizado para o protocolo @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO');
+
+      $this->atualizarNumeroVersao("3.8.3");
+    }
+
 
   /**
    * Remover blocos legados
