@@ -599,7 +599,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
+        $txtPesquisaMenu = $this->byId("txtInfraPesquisarMenu");
+        if (!$txtPesquisaMenu->displayed()) {
+            $this->byXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
+        }
+        $txtPesquisaMenu->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
+        
         $this->byLinkText(mb_convert_encoding("Processos em Tramitação Externa", 'UTF-8', 'ISO-8859-1'))->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
