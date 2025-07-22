@@ -31,32 +31,6 @@ try {
           $ticketComponentesDigitais = $result['tramiteDeProcessoCriado']['ticketParaEnvioDeComponentesDigitais'];
           $novoIDT = $result["tramiteDeProcessoCriado"]['IDT'];
           $nre = $result["tramiteDeProcessoCriado"]['NRE'];
-
-        //   //criar entradas em md_pen_componente_digital e md_pen_tramite a partir do id do ultimo tramite
-        //   $objTramiteDTO = new TramiteDTO();
-        //   $objTramiteDTO->setStrNumeroRegistro($nre);
-        //   $objTramiteDTO->setNumIdTramite($_GET['id_ultimo_tramite']);
-        //   $objTramiteDTO->retTodos();
-
-        //   $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-        //   $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-
-        //   $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
-        //   $objTramiteDTO->setNumIdTramite($novoIDT);
-        //   $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
-        //   $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
-          
-        //   $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-        //   $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
-        //   $objComponenteDigitalDTO->setNumIdTramite($_GET['id_ultimo_tramite']);
-        //   $objComponenteDigitalDTO->retTodos();
-        //   $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
-        //   $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
-        //   foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
-        //     $componenteDigital->setNumIdTramite($novoIDT);
-        //     $objComponenteDigitalBD->cadastrar($componenteDigital);
-        //   }
-
           $strProtocoloFormatado = $result["tramiteDeProcessoCriado"]["processosComComponentesDigitaisSolicitados"][0]["protocolo"];
           if ($strProtocoloFormatado == null) {
             $objProtocoloDTO = new ProtocoloDTO();
