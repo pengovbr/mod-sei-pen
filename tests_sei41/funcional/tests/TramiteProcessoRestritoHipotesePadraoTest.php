@@ -129,6 +129,16 @@ class TramiteProcessoRestritoHipotesePadraoTest extends FixtureCenarioBaseTestCa
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_origem_processo_restrito_hipotese_nao_mapeada
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -148,6 +158,16 @@ class TramiteProcessoRestritoHipotesePadraoTest extends FixtureCenarioBaseTestCa
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_origem_processo_restrito_hipotese_nao_mapeada
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTeste;

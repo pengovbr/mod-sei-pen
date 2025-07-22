@@ -273,6 +273,16 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends FixtureCenarioBaseTe
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -292,6 +302,16 @@ class TramiteProcessoContendoDocumentoCanceladoTest extends FixtureCenarioBaseTe
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTeste;

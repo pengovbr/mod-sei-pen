@@ -382,6 +382,16 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_documento_destino
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;
@@ -401,6 +411,16 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_documento_destino
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;

@@ -228,6 +228,16 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramite_novamente_para_org2
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTesteFormatado;
@@ -247,6 +257,16 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramite_novamente_para_org2
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTesteFormatado;

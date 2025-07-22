@@ -134,6 +134,16 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_apos_devolucao
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -153,6 +163,16 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_apos_devolucao
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTeste;

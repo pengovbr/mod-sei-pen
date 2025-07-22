@@ -159,6 +159,16 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends 
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_para_destino_2
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
@@ -179,6 +189,16 @@ class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends 
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_para_destino_2
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];

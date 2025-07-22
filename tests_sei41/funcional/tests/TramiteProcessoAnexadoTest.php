@@ -190,6 +190,16 @@ class TramiteProcessoAnexadoTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_anexado
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
@@ -207,6 +217,16 @@ class TramiteProcessoAnexadoTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_anexado
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;

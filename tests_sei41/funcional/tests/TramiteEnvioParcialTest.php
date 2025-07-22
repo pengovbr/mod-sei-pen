@@ -227,6 +227,16 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_recebido_tramitar_remetente_envio_parcial
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
@@ -246,6 +256,16 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_recebido_tramitar_remetente_envio_parcial
+     *
+     * @return void
+     */
     public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
