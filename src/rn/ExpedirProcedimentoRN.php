@@ -2079,7 +2079,7 @@ class ExpedirProcedimentoRN extends InfraRN {
       return $this->objDocumentoRN->consultarRN0005($documentoDTO);
     }
 
-    public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false)
+    public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false)
       {
       if (!isset($strNumeroRegistro)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $strNumeroRegistro não informado.');

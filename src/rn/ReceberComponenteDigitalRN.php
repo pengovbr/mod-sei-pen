@@ -64,7 +64,7 @@ class ReceberComponenteDigitalRN extends InfraRN
      * @return array|mixed|null
      * @throws InfraException
      */
-  public function atribuirComponentesDigitaisAoDocumento($parNumIdDocumento, $parArrObjComponenteDigitalDTO)
+  public function atribuirComponentesDigitaisAoDocumento($parNumIdDocumento, $parArrObjComponenteDigitalDTO, $bolReproducaoUltimoTramite)
     {
     if(!isset($parArrObjComponenteDigitalDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro parArrObjComponenteDigitalDTO não informado.');
@@ -96,7 +96,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objAnexoDTODocumento->setDblIdProtocolo($parNumIdDocumento);
 
       //Realiza o cadastro do anexo
-      self::cadastrarAnexoDoDocumento($objAnexoDTODocumento);
+      self::cadastrarAnexoDoDocumento($objAnexoDTODocumento, $bolReproducaoUltimoTramite);
 
       //Registrar anexo relacionado com o componente digital
     foreach ($parArrObjComponenteDigitalDTO as $objComponenteDigitalRecebido){
@@ -343,9 +343,10 @@ class ReceberComponenteDigitalRN extends InfraRN
      * Método responsável por cadastrar o anexo correspondente aos componentes digitais recebidos pelo PEN
      * @param ComponenteDigitalDTO $parObjComponenteDigitalDTO
      * @param AnexoDTO $parObjAnexoDTO
+     * @param bool bolReproducaoUltimoTramite
      * @throws InfraException
      */
-  public function cadastrarAnexoDoDocumento(AnexoDTO $parObjAnexoDTO)
+  public function cadastrarAnexoDoDocumento(AnexoDTO $parObjAnexoDTO, bool $bolReproducaoUltimoTramite)
     {
       $dblIdDocumento = $parObjAnexoDTO->getDblIdProtocolo();
       //Obter dados do documento
@@ -377,13 +378,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
       $objProtocoloDTO->setArrObjAnexoDTO(array($parObjAnexoDTO));
 
-      $bolReproducaoUltimoTramite = false;
-    if ($objDocumentoDTO->getStrStaEstadoProcedimento()==ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO) {
-      $objProcessoExpedidoRN = new ProcessoExpedidoRN();
-      $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($objDocumentoDTO->getDblIdProcedimento(), ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
-      $bolReproducaoUltimoTramite = !$bolProcessoExpedido;      
-    } 
-    if ($bolReproducaoUltimoTramite) { // ou seja anexado e reprodução ultimo tramite
+    if ($bolReproducaoUltimoTramite && $objDocumentoDTO->getStrStaEstadoProcedimento()==ProtocoloRN::$TE_PROCEDIMENTO_ANEXADO) { //anexado e reprodução ultimo tramite
         $objProtocoloRN = new ProtocoloRN();
         $objProtocoloRN->alterarRN0203($objProtocoloDTO);
         $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());

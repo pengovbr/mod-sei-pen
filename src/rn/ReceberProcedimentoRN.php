@@ -86,7 +86,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           // Processa o recebimento do processo em uma transação isolada
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
-          $this->receberProcedimentoInterno($objMetadadosProcedimento);
+          $this->receberProcedimentoInternoControlado($objMetadadosProcedimento, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
       }
     } catch(Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -97,7 +97,7 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
   
-  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
+  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento, $bolReproducaoUltimoTramite)
     {
     try {
 
@@ -110,10 +110,6 @@ class ReceberProcedimentoRN extends InfraRN
 
         $objAtividadeRN = new AtividadeRN();
         $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-        $bolReproducaoUltimoTramite = false;
-      if ($objAtividadeDTO != null) {
-        $bolReproducaoUltimoTramite = $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO);
-      }
 
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
@@ -700,7 +696,7 @@ class ReceberProcedimentoRN extends InfraRN
                 }
               }
               if ($bolEnviarComponentesDigitais){
-                  $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO);
+                  $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO, $bolReproducaoUltimoTramite);
                   $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
                   $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
                   $this->gravarLogDebug($strMensagemRecebimento, 3);

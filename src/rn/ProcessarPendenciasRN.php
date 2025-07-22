@@ -218,7 +218,7 @@ class ProcessarPendenciasRN extends InfraRN
             }
           }
             $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
-            $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false);
+            $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
         } else {
           $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
           $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
