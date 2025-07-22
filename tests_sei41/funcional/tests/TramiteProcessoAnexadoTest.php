@@ -160,6 +160,16 @@ class TramiteProcessoAnexadoTest extends FixtureCenarioBaseTestCase
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste4, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_anexado
+     *
+     * @return void
+     */
      public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);

@@ -197,6 +197,16 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramite_novamente_para_org2
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTesteFormatado;

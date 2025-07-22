@@ -177,6 +177,16 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_para_devolucao_apos_troca_url
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -235,7 +245,8 @@ class TramiteProcessoComDevolucaoAlteracaoURLTest extends FixtureCenarioBaseTest
             return true;
         }, PEN_WAIT_TIMEOUT);
 
-         $documentos = array(self::$documentoTeste1, self::$documentoTeste3, self::$documentoTeste5);
+        $documentos = array(self::$documentoTeste1, self::$documentoTeste3, self::$documentoTeste5);
+        $this->sairSistema();
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 }

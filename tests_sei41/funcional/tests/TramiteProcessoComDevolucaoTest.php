@@ -97,6 +97,16 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_devolucao_processo_para_origem
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -154,7 +164,9 @@ class TramiteProcessoComDevolucaoTest extends FixtureCenarioBaseTestCase
             $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
+        
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
+        $this->sairSistema();
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 }

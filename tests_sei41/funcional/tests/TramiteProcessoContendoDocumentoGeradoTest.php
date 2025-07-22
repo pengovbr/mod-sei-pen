@@ -128,6 +128,16 @@ class TramiteProcessoContendoDocumentoGeradoTest extends FixtureCenarioBaseTestC
         $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_contendo_documento_gerado
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;

@@ -350,6 +350,17 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTestePrincipal, $documentos, self::$destinatario);
     }
 
+
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_documento_destino
+     *
+     * @return void
+     */
         public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;
@@ -408,6 +419,7 @@ class TramiteProcessoContendoDocumentoMovidoDestinoTest extends FixtureCenarioBa
             return true;
         }, PEN_WAIT_TIMEOUT);
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4, self::$documentoTeste5, self::$documentoTeste6, self::$documentoTeste7);
+        $this->sairSistema();
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTestePrincipal, $documentos, self::$destinatario);
     }
 

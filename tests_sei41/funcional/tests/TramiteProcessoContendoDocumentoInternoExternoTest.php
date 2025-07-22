@@ -133,6 +133,16 @@ class TramiteProcessoContendoDocumentoInternoExternoTest extends FixtureCenarioB
         $this->validarDadosDocumento($listaDocumentos[1], self::$documentoExternoTeste, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_contendo_documento_interno_externo
+     *
+     * @return void
+     */
         public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;

@@ -309,8 +309,11 @@ class PaginaProcesso extends PaginaTeste
     {
       $this->test->frame(null);
       $this->test->frame("ifrConteudoVisualizacao");
+      sleep(1);
       $this->test->byXPath(mb_convert_encoding("//img[@alt='Reproduzir Último Trâmite']", 'UTF-8', 'ISO-8859-1'))->click();
+      sleep(1);
       $this->alertTextAndClose(true);
+      sleep(1);
       return $this->alertTextAndClose(true);
   }
   

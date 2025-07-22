@@ -154,6 +154,16 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
     $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
   }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_com_documento_restrito
+     *
+     * @return void
+     */
   public function test_realizar_pedido_reproducao_ultimo_tramite()
   {
       $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();

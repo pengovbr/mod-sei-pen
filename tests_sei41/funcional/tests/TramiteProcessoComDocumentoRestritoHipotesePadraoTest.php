@@ -121,6 +121,16 @@ class TramiteProcessoComDocumentoRestritoHipotesePadraoTest extends FixtureCenar
         //$this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario, false, self::$destinatario["HIPOTESE_RESTRICAO_PADRAO"]);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_com_documento_restrito_hipotese_nao_mapeada
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;

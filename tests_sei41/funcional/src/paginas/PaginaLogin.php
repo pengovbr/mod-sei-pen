@@ -8,8 +8,19 @@ class PaginaLogin extends PaginaTeste
     {
         
       parent::__construct($test);
-      $this->usuarioInput = $test->byId('txtUsuario');
-      $this->passwordInput = $test->byId('pwdSenha');
+      $test->frame(null);
+
+      $test->waitUntil(function($testCase) {
+          $this->usuarioInput = $testCase->byId('txtUsuario');
+          $this->passwordInput = $testCase->byId('pwdSenha');
+
+          if ($this->usuarioInput && $this->passwordInput){
+            return true;
+          }
+          
+          $testCase->refresh();
+          return false;
+      }, PEN_WAIT_TIMEOUT);
     try{
         $this->loginButton = $test->byId('Acessar');
     }

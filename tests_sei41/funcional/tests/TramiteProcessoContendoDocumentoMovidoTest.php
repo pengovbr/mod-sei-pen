@@ -267,6 +267,16 @@ class TramiteProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestC
         $this->validarDadosDocumento($listaDocumentosProcesso[3], self::$documentoTeste4, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_origem_processo
+     *
+     * @return void
+     */
      public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;

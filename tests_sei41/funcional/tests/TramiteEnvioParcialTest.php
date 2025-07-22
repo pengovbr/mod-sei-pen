@@ -196,6 +196,16 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     $this->sairSistema();
   }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_recebido_tramitar_remetente_envio_parcial
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();

@@ -103,6 +103,16 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_processo_apos_devolucao
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTeste;
@@ -162,6 +172,7 @@ class TramiteProcessoComDevolucaoUnidadeDiferenteTest extends FixtureCenarioBase
         }, PEN_WAIT_TIMEOUT);
          
         $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
+        $this->sairSistema();
         $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 

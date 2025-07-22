@@ -197,6 +197,16 @@ class TramiteProcessoComDevolucaoContendoOutroAnexadoTest extends FixtureCenario
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste5, self::$destinatario);
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo_anexado
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite()
     {
         $strProtocoloTeste = self::$protocoloTestePrincipal;
