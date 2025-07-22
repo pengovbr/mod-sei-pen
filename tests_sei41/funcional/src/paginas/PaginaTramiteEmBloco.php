@@ -70,7 +70,12 @@ class PaginaTramiteEmBloco extends PaginaTeste
    */
   public function selecionarProcesso($numProtocoloFormatado)
   {
-    $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
+    try {
+      $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
+    } catch (\Exception $e) {
+      $this->test->byXPath("(//img[@title='Ordenar Processo Descendente'])[1]")->click();
+      $btnTramiteEmBloco = $this->test->byXPath('//label[@title="' . $numProtocoloFormatado . '"]');
+    }
     $btnTramiteEmBloco->click();
   }
 
