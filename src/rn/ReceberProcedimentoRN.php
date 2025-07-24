@@ -266,7 +266,7 @@ class ReceberProcedimentoRN extends InfraRN
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
       // Percorre os componentes que precisam ser recebidos
-    foreach($arrHashComponentesProtocolo as $key => $strHashComponentePendente){
+    foreach($arrHashPendentesRecebimento as $key => $strHashComponentePendente){
         $numOrdemComponente = $key + 1;
       if(!is_null($strHashComponentePendente)) {
         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
