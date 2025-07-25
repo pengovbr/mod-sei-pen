@@ -1939,8 +1939,6 @@ class ReceberProcedimentoRN extends InfraRN
   
               $objValidarAssinaturaRN = new ValidarAssinaturaRN();
               $objValidarAssinaturaRN->cadastrar($objValidarAssinaturaDTO);
-
-              $objValidarAssinaturaRN->validarAutenticidade($objDocumentoDTOGerado->getDblIdDocumento());
             }
           }
         }
