@@ -265,9 +265,18 @@ class ReceberProcedimentoRN extends InfraRN
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
+      $arrComponentesDigitaisPresentes = array_diff_key($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
+      $numQtdComponentesPresentes = count($arrComponentesDigitaisPresentes);
+      if ($numQtdComponentesPresentes > 0) {
+        $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
+      }
+  
+      $qtdComponentesEnviadosRecebidos = $numQtdComponentes - $numQtdComponentesPresentes;
+      $this->gravarLogDebug("Serão enviado(s)/recebido(s) {$qtdComponentesEnviadosRecebidos} Componente(s) digital(is)", 2);
+
       // Percorre os componentes que precisam ser recebidos
     foreach($arrHashPendentesRecebimento as $key => $strHashComponentePendente){
-        $numOrdemComponente = $key + 1;
+        $numOrdemComponente = $numQtdComponentesPresentes + $key + 1;
       if(!is_null($strHashComponentePendente)) {
         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
         //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
@@ -293,13 +302,6 @@ class ReceberProcedimentoRN extends InfraRN
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
-          // Caso o erro seja relacionado a falta do hash do documento no Tramita.gov.br e este não esteja
-          // pendente de recebimento, o download deve continuar para os demais documentos do processo
-          if(!in_array($strHashComponentePendente, $arrHashPendentesRecebimento)){
-            $this->gravarLogDebug("Componente digital já presente no processo", 4);
-            continue;
-          }
-
           throw $e;
         }
 
@@ -1757,8 +1759,6 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjDocumentoDTO = array();
       $arrDocumentosExistentesPorHash = array();
       $arrIdDocumentosRetirados = array();
-      $count = count($arrObjDocumentos);
-      $this->gravarLogDebug("Quantidade de documentos para recebimento: $count", 2);
 
     foreach($arrObjDocumentos as $objDocumento) {
 
