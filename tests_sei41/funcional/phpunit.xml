@@ -16,7 +16,10 @@
     <const name="PHPUNIT_TESTS_URL" value="http://localhost/sei" />
     <const name="PEN_ENDERECO_WEBSERVICE"
       value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/" />
-
+    <!-- Webservice Desenvolvimento --> 
+    <!--
+    <const name="PEN_ENDERECO_WEBSERVICE"
+      value="https://dev.api.processoeletronico.gov.br/interoperabilidade/rest/v3/" /> -->
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
     <const name="PEN_WAIT_TIMEOUT" value="360000" />
     <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />

@@ -280,11 +280,23 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaBase->sairSistema();
     }
 
-    protected function abrirProcesso($protocolo)
+  protected function abrirProcesso($protocolo)
     {
-        $this->paginaBase->navegarParaControleProcesso();
+      $this->paginaBase->navegarParaControleProcesso();
+    try {
         $this->paginaControleProcesso->abrirProcesso($protocolo);
+    } catch (\Exception $e) {
+        $this->paginaBase->pesquisar($protocolo);
+        sleep(2);
+        $this->byXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
     }
+  }
+
+  protected function abrirProcessoControleProcesso($protocolo)
+    {
+      $this->paginaBase->navegarParaControleProcesso();
+      $this->paginaControleProcesso->abrirProcesso($protocolo);
+  }
 
     protected function abrirProcessoPelaDescricao($descricao)
     {
@@ -589,7 +601,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
     {
         $this->frame(null);
         $this->paginaBase->navegarParaControleProcesso();
-        $this->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
+        $txtPesquisaMenu = $this->byId("txtInfraPesquisarMenu");
+        if (!$txtPesquisaMenu->displayed()) {
+            $this->byXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
+        }
+        $txtPesquisaMenu->value(mb_convert_encoding('Processos em Tramitação Externa', 'UTF-8', 'ISO-8859-1'));
+        
         $this->byLinkText(mb_convert_encoding("Processos em Tramitação Externa", 'UTF-8', 'ISO-8859-1'))->click();
         $this->assertEquals($deveExistir, $this->paginaProcessosTramitadosExternamente->contemProcesso($protocolo));
     }
@@ -684,7 +701,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         // 11 - Abrir protocolo na tela de controle de processos
         $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
             sleep(5);
-            $this->abrirProcesso($strProtocoloTeste);
+            $this->abrirProcessoControleProcesso($strProtocoloTeste);
             return true;
         }, PEN_WAIT_TIMEOUT);
 

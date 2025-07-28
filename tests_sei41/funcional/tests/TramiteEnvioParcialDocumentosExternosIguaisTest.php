@@ -6,7 +6,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
+class TramiteEnvioParcialDocumentosExternosIguaisTest extends FixtureCenarioBaseTestCase
 {
   private $objProtocoloFixture;
   public static $remetente;
@@ -15,6 +15,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
   public static $protocoloTestePrincipal;
   public static $documentoTeste1;
   public static $documentoTeste2;
+  public static $documentoTeste3;
+  public static $documentoTeste4;
+
   public static $arrIdMapEnvioParcialOrgaoA;
   public static $arrIdMapEnvioParcialOrgaoB;
 
@@ -126,9 +129,13 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaBase->navegarParaControleProcesso();
 
-    self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$destinatario);
+    self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$destinatario);
+    self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$destinatario);
+    self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$destinatario);
     $protocoloTestePrincipalOrg2 = $this->consultarProcessoFixture(self::$protocoloTestePrincipal->getStrProtocoloFormatado(), \ProtocoloRN::$TP_PROCEDIMENTO);
-    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste2, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
 
     $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
@@ -186,9 +193,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
-    $this->assertTrue(count($listaDocumentos) == 2);
+    $this->assertTrue(count($listaDocumentos) == 4);
 
-    $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2);
+    $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
     for ($i = 0; $i < count($listaDocumentos); $i++) {
       $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], self::$remetente, false, null);
     }
@@ -286,7 +293,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
         
         $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
-        $this->assertTrue(count($listaDocumentos) == 2);
+        $this->assertTrue(count($listaDocumentos) == 4);
 
         $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2);
         for ($i = 0; $i < count($listaDocumentos); $i++) {
@@ -328,10 +335,11 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
   private function criarCenarioTramiteEnvioParcialTest()
   {
     self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
-    self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+    self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
     self::$protocoloTestePrincipal = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
-    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste1, self::$protocoloTestePrincipal->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, self::$protocoloTestePrincipal->getDblIdProtocolo());
+
 
     // Mapear Envio Parcial no Remetente
     self::$arrIdMapEnvioParcialOrgaoA = array();

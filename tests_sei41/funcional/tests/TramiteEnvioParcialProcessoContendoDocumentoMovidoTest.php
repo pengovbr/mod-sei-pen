@@ -11,7 +11,6 @@ Org2 recebe o processo, não faz nada, e devolve pro org1;
 Org1 envia novamente pro Org2, sem anexar nada;
 */
 
-
 /**
  * Testes de trâmite de processos contendo um documento movido
  *
@@ -21,7 +20,7 @@ Org1 envia novamente pro Org2, sem anexar nada;
  * Execution Groups
  * @group execute_parallel_group1
  */
-class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenarioBaseTestCase
+class TramiteEnvioParcialProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -33,6 +32,9 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
     public static $protocoloTeste;
     public static $protocoloTesteFormatado;
 
+
+    public static $arrIdMapEnvioParcialOrgaoA;
+    public static $arrIdMapEnvioParcialOrgaoB;
 
     /**
      * Teste inicial de trâmite de um processo contendo um documento movido
@@ -48,6 +50,8 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $this->criarCenarioTramiteEnvioParcialTest();
 
         // Definição de dados de teste do processo principal
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -288,4 +292,65 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
     }
 
 
+    /**
+     * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
+     * @group mapeamento
+     */
+  public static function tearDownAfterClass(): void
+  {
+    $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
+
+    putenv("DATABASE_HOST=org1-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+
+    putenv("DATABASE_HOST=org2-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+    putenv("DATABASE_HOST=org1-database");
+    parent::tearDownAfterClass();
+  }
+
+
+    /*
+    * Criar processo e mapear Envio Parcial no Remetente e Destinatário
+    * @group mapeamento
+    *
+    * @return void
+    */
+  private function criarCenarioTramiteEnvioParcialTest()
+  {
+
+    // Mapear Envio Parcial no Remetente
+    self::$arrIdMapEnvioParcialOrgaoA = array();
+    putenv("DATABASE_HOST=org1-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE']
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
+
+    // Mapear Envio Parcial no Destinatário
+    self::$arrIdMapEnvioParcialOrgaoB = array();
+    putenv("DATABASE_HOST=org2-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$remetente['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$remetente['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$remetente['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$remetente['NOME_UNIDADE']
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
+
+    putenv("DATABASE_HOST=org1-database");
+  }
 }

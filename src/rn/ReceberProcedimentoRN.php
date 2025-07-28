@@ -86,7 +86,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           // Processa o recebimento do processo em uma transação isolada
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
-          $this->receberProcedimentoInterno($objMetadadosProcedimento);
+          $this->receberProcedimentoInternoControlado($objMetadadosProcedimento, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
       }
     } catch(Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -97,7 +97,7 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
   
-  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
+  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento, $bolReproducaoUltimoTramite)
     {
     try {
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
@@ -179,13 +179,17 @@ class ReceberProcedimentoRN extends InfraRN
         throw new InfraException("Módulo do Tramita: Desconsiderando recebimento do processo devido a situação de trâmite inconsistente: " . $objTramite->situacaoAtual);
       }
 
-        $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrHashComponenteBaixados, $objProtocolo);
+        $this->atribuirComponentesDigitaisAosDocumentos($objProcedimentoDTO, $strNumeroRegistro, $numIdTramite, $arrHashComponenteBaixados, $objProtocolo, $bolReproducaoUltimoTramite);
 
         $this->atribuirObservacoesSobreDocumentoReferenciado($objProcedimentoDTO, $objProtocolo);
 
         $this->atribuirProcessosAnexados($objProtocolo);
 
         $this->enviarProcedimentoUnidade($objProcedimentoDTO, null, $bolProcedimentoExistente);
+
+      if ($bolReproducaoUltimoTramite) {
+        $this->adicionarAtividadeReproducaoUltimoTramite($objProcedimentoDTO);
+      }
 
         $this->validarPosCondicoesTramite($parObjMetadadosProcedimento, $objProcedimentoDTO);
 
@@ -250,9 +254,18 @@ class ReceberProcedimentoRN extends InfraRN
       $numQtdComponentes = count($arrHashComponentesProtocolo);
       $this->gravarLogDebug("$numQtdComponentes componentes digitais identificados no protocolo {$objProtocolo->protocolo}", 2);
 
+      $arrComponentesDigitaisPresentes = array_diff_key($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
+      $numQtdComponentesPresentes = count($arrComponentesDigitaisPresentes);
+      if ($numQtdComponentesPresentes > 0) {
+        $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
+      }
+  
+      $qtdComponentesEnviadosRecebidos = $numQtdComponentes - $numQtdComponentesPresentes;
+      $this->gravarLogDebug("Serão enviado(s)/recebido(s) {$qtdComponentesEnviadosRecebidos} Componente(s) digital(is)", 2);
+
       // Percorre os componentes que precisam ser recebidos
-    foreach($arrHashComponentesProtocolo as $key => $strHashComponentePendente){
-        $numOrdemComponente = $key + 1;
+    foreach($arrHashPendentesRecebimento as $key => $strHashComponentePendente){
+        $numOrdemComponente = $numQtdComponentesPresentes + $key + 1;
       if(!is_null($strHashComponentePendente)) {
         //Download do componente digital é realizado, mesmo já existindo na base de dados, devido a comportamento obrigatório do Barramento para mudança de status
         //Ajuste deverá ser feito em versões futuras do Barramento de Serviços para baixar somente aqueles necessários, ou seja,
@@ -278,13 +291,6 @@ class ReceberProcedimentoRN extends InfraRN
           $arrHashComponentesBaixados[] = $strHashComponentePendente;
           $arrAnexosComponentes[$key][$strHashComponentePendente] = $objAnexoDTO;
         } catch(InfraException $e) {
-          // Caso o erro seja relacionado a falta do hash do documento no Tramita.gov.br e este não esteja
-          // pendente de recebimento, o download deve continuar para os demais documentos do processo
-          if(!in_array($strHashComponentePendente, $arrHashPendentesRecebimento)){
-            $this->gravarLogDebug("Componente digital já presente no processo", 4);
-            continue;
-          }
-
           throw $e;
         }
 
@@ -583,7 +589,7 @@ class ReceberProcedimentoRN extends InfraRN
     * Método responsável por atribuir a lista de componentes digitais baixados do PEN aos seus respectivos documentos no SEI
     */
   private function atribuirComponentesDigitaisAosDocumentos(ProcedimentoDTO $parObjProcedimentoDTO, $parStrNumeroRegistro, $parNumIdentificacaoTramite,
-        $parArrHashComponentes, $objProtocolo)
+        $parArrHashComponentes, $objProtocolo, $bolReproducaoUltimoTramite)
     {
     if(count($parArrHashComponentes) > 0){
         //Obter dados dos componetes digitais
@@ -619,12 +625,72 @@ class ReceberProcedimentoRN extends InfraRN
                   $dblIdDocumento = $numIdDocumento;
                   $strHash = $objComponenteDigitalDTO->getStrHashConteudo();
 
+              $bolEnviarComponentesDigitais = false;
               //Verificar se documento já foi recebido anteriormente para poder registrar
               if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)){
-                $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO);
-                $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
-                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
-                $this->gravarLogDebug($strMensagemRecebimento, 3);
+                $bolEnviarComponentesDigitais = true;
+              } else if($bolReproducaoUltimoTramite){
+                if (!isset($idUltimoTramiteRecebimento)) { // busca apenas na primeira vez qual o valor do id de ultimo tramite
+                  $objTramiteDTO = new TramiteDTO();
+                  $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
+                  $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+                  $objTramiteDTO->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
+                  $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+                  $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite, InfraDTO::$OPER_DIFERENTE);
+                  $objTramiteDTO->retNumIdTramite();
+                  $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+                  $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+                  $idUltimoTramiteRecebimento = $objTramiteDTO->getNumIdTramite();
+                }
+
+                $objComponenteDigital = new ComponenteDigitalDTO();
+                $objComponenteDigital->setDblIdProcedimento($dblIdProcedimento);
+                $objComponenteDigital->setDblIdDocumento($dblIdDocumento);
+                $objComponenteDigital->setStrNumeroRegistro($parStrNumeroRegistro);
+                $objComponenteDigital->setNumIdTramite($idUltimoTramiteRecebimento);
+                $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE); // garante apenas docs com anexo
+                $objComponenteDigital->retTodos();
+                $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+                $objComponenteDigital = $objComponenteDigitalBD->listar($objComponenteDigital);
+
+                if (count($objComponenteDigital) > 0) {
+                  $objDocumentoDTO = new DocumentoDTO();
+                  $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
+                  $objDocumentoDTO->retTodos();
+                  $objDocumentoRN = new DocumentoRN();
+                  $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+
+                  if ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
+                    $objDocumentoDTO->setStrSinBloqueado('N');
+                    $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
+                    $objDocumentoBD->alterar($objDocumentoDTO);
+
+                    $objAnexoDTO = new AnexoDTO();
+                    $objAnexoDTO->retTodos();
+                    $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
+                    $objAnexoRN = new AnexoRN();
+                    $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
+                    if ($objAnexoDTO != null) {
+                      $objComponenteDigitalPDTO = new ComponenteDigitalDTO();
+                      $objComponenteDigitalPDTO->retTodos();
+                      $objComponenteDigitalPDTO->setNumIdAnexo($objAnexoDTO->getNumIdAnexo());
+                      $objComponenteDigitalPDTO->setNumMaxRegistrosRetorno(1);
+                      $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+                      $objComponenteDigitalPDTO = $objComponenteDigitalBD->consultar($objComponenteDigitalPDTO);
+                      if ($objComponenteDigitalPDTO != null) {
+                        $objComponenteDigitalBD->excluir($objComponenteDigitalPDTO);
+                      }
+                      $objAnexoRN->excluirRN0226([$objAnexoDTO]); // precisa excluir componente digital primeiro
+                      $bolEnviarComponentesDigitais = true;
+                    }
+                  }
+                }
+              }
+              if ($bolEnviarComponentesDigitais){
+                  $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO, $bolReproducaoUltimoTramite);
+                  $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
+                  $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
+                  $this->gravarLogDebug($strMensagemRecebimento, 3);
               }
             }
           }
@@ -1682,8 +1748,6 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjDocumentoDTO = array();
       $arrDocumentosExistentesPorHash = array();
       $arrIdDocumentosRetirados = array();
-      $count = count($arrObjDocumentos);
-      $this->gravarLogDebug("Quantidade de documentos para recebimento: $count", 2);
 
     foreach($arrObjDocumentos as $objDocumento) {
 
@@ -1707,6 +1771,18 @@ class ReceberProcedimentoRN extends InfraRN
           $objDocumento->idProcedimentoAnexadoSEI = $objComponenteDigitalDTO->getDblIdProcedimentoAnexado();
           $objDocumento->protocoloProcedimentoSEI = $objComponenteDigitalDTO->getStrProtocoloProcedimentoAnexado();
 
+          if (is_null($objDocumento->idProcedimentoAnexadoSEI) && is_null($objDocumento->protocoloProcedimentoSEI) && !is_null($objDocumento->protocoloDoProcessoAnexado)) {
+            $objProtocolo = new ProtocoloDTO();
+            $objProtocolo->setStrProtocoloFormatado($objDocumento->protocoloDoProcessoAnexado);
+            $objProtocolo->retStrProtocoloFormatado();
+            $objProtocolo->retDblIdProcedimento();
+            $objProtocoloRN = new ProtocoloRN();
+            $objProtocolo = $objProtocoloRN->consultarRN0186($objProtocolo);
+            if ($objProtocolo != null) {
+              $objDocumento->protocoloProcedimentoSEI = $objProtocolo->getStrProtocoloFormatado();
+              $objDocumento->idProcedimentoAnexadoSEI = $objProtocolo->getDblIdProcedimento();
+            }
+          }
           foreach ($arrObjComponenteDigitalDTO as $objComponenteDTO) {
               $arrDocumentosExistentesPorHash[$objComponenteDTO->getStrHashConteudo()] = array(
                 "IdDocumento" => $objComponenteDTO->getDblIdDocumento(),
@@ -2394,6 +2470,29 @@ class ReceberProcedimentoRN extends InfraRN
 
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeRN->atualizarVisualizacao($objAtividadeDTOVisualizacao);
+  }
+
+  private function adicionarAtividadeReproducaoUltimoTramite(ProcedimentoDTO $objProcedimentoDTO) 
+  {
+
+    $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+    $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
+    $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+    $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
+    $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
+
+    $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO);
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+    $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+    $objAtividadeDTO->setNumIdTarefa($idTarefa);
+    $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
+
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
+
   }
 
   private function enviarProcedimentoUnidade(ProcedimentoDTO $parObjProcedimentoDTO, $parUnidadeDestino = null, $retransmissao = false)
