@@ -100,17 +100,6 @@ class ReceberProcedimentoRN extends InfraRN
   protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento, $bolReproducaoUltimoTramite)
     {
     try {
-
-        $objAtividadeDTO = new AtividadeDTO();
-        $objAtividadeDTO->setStrProtocoloFormatadoProtocolo($parObjMetadadosProcedimento->metadados->processo->protocolo);
-        $objAtividadeDTO->retNumIdTarefa();
-        $objAtividadeDTO->retNumIdAtividade();
-        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
-        $objAtividadeDTO->setOrdNumIdAtividade(InfraDTO::$TIPO_ORDENACAO_DESC);
-
-        $objAtividadeRN = new AtividadeRN();
-        $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
-
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
         $arrHashComponenteBaixados = $parObjMetadadosProcedimento->arrHashComponenteBaixados;
