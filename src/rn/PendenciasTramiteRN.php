@@ -386,8 +386,7 @@ class PendenciasTramiteRN extends InfraRN
             break;
 
         case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-          $strStatus = $objPendencia->getStrStatus();
-          $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
+            $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
             break;
 
         default:
