@@ -1,53 +1,50 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverSelect;
 
 class PaginaCadastroOrgaoExterno extends PaginaTeste
 {
-    /**
-     * Método contrutor
-     * 
-     * @return void
-     */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
-  }
-
-  public function navegarCadastroOrgaoExterno()
-    {
-      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Relacionamento entre Unidades', 'UTF-8', 'ISO-8859-1'));
-      $this->test->byXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
+      parent::__construct($driver, $testcase);
   }
 
     /**
-     * Setar parametro para novo mapeamento de orgãos externos
-     * 
-     * @return void
+     * Navega até a listagem de órgãos externos.
      */
-  public function setarParametros($estrutura, $origem, $destino)
+  public function navegarCadastroOrgaoExterno(): void
+    {
+      $input = $this->elById('txtInfraPesquisarMenu');
+      $input->clear();
+      $input->sendKeys('Relacionamento entre Unidades');
+
+      $this->elByXPath("//a[@link='pen_map_orgaos_externos_listar']")->click();
+  }
+
+    /**
+     * Configura parâmetros para novo mapeamento de órgão externo.
+     */
+  public function setarParametros(string $estrutura, string $origem, string $destino): void
     {
       $this->selectRepositorio($estrutura, 'Origem');
-      $this->selectUnidade($origem, 'Origem'); // Seleciona Orgão de Origem
-      $this->selectUnidadeDestino($destino, 'Destino'); // Seleciona Orgão de Destino
+      $this->selectUnidade('Origem', $origem);
+      $this->selectUnidade('Destino', $destino);
   }
 
     /**
-     * Seleciona repositório por sigla
-     * 
-     * @param string $siglaRepositorio
-     * @param string $origemDestino
-     * @return string
+     * Seleciona repositório por sigla.
      */
-  private function selectRepositorio($siglaRepositorio, $origemDestino)
+  private function selectRepositorio(string $sigla, string $tipo): void
     {
-      $this->repositorioSelect = $this->test->select($this->test->byId('selRepositorioEstruturas' . $origemDestino));
-
-    if(isset($siglaRepositorio)){
-        $this->repositorioSelect->selectOptionByLabel($siglaRepositorio);
+      $select = new WebDriverSelect(
+          $this->elById('selRepositorioEstruturas' . $tipo)
+      );
+    if ($sigla !== '') {
+        $select->selectByVisibleText($sigla);
     }
-
-      return $this->test->byId('selRepositorioEstruturas' . $origemDestino)->value();
   }
 
     /**
@@ -58,74 +55,39 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * @param ?string $hierarquia
      * @return string
      */
-  private function selectUnidade($nomeUnidade, $origemDestino, $hierarquia = null)
+  private function selectUnidade(string $tipo, string $nome, ?string $hierarquia = null): void
     {
-      $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
-      $this->unidadeInput->clear();
-      $this->unidadeInput->value($nomeUnidade);
-      $this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade' . $origemDestino)->value();
-        if(!empty($hierarquia)){
-            $nomeUnidade .= ' - ' . $hierarquia;
+      $input = $this->elById('txtUnidade' . $tipo);
+      $input->clear();
+      $nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($nome. WebDriverKeys::ENTER);
+
+      $this->waitUntil(function() use ($tipo, $hierarquia) {
+          $current = $this->elById('txtUnidade' . $tipo)->getAttribute('value');
+          $label = $hierarquia ? "{$current} - {$hierarquia}" : $current;
+
+        try {
+            $msg = parent::alertTextAndClose();
+          if ($msg !== null) {
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER);
+          }
+        } catch (\Exception $e) {
+            // sem alerta
         }
 
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){
-        }
-          $testCase->byPartialLinkText($nomeUnidade)->click();
+          $this->driver
+               ->findElement(WebDriverBy::partialLinkText($label))
+               ->click();
           return true;
       }, PEN_WAIT_TIMEOUT);
-
-      return $this->unidadeInput->value();
   }
 
     /**
-     * Seleciona unidade por nome
-     * 
-     * @param string $nomeUnidade
-     * @param string $origemDestino
-     * @param ?string $hierarquia
-     * @return string
+     * Clica no botão Novo.
      */
-  private function selectUnidadeDestino($nomeUnidade, $origemDestino, $hierarquia = null)
+  public function novoMapOrgao(): void
     {
-      $this->unidadeInput = $this->test->byId('txtUnidade' . $origemDestino);
-      $this->unidadeInput->clear();
-      $this->unidadeInput->value($nomeUnidade);
-      $this->test->keys(Keys::ENTER);
-      $this->test->waitUntil(function($testCase) use($origemDestino, $hierarquia) {
-          $bolExisteAlerta=null;
-          $nomeUnidade = $testCase->byId('txtUnidade' . $origemDestino)->value();
-        if(!empty($hierarquia)){
-            $nomeUnidade .= ' - ' . $hierarquia;
-        }
-
-        try{
-            $bolExisteAlerta=$this->alertTextAndClose();
-          if($bolExisteAlerta!=null) { $this->test->keys(Keys::ENTER);
-          }
-        }catch(Exception $e){
-        }
-          $testCase->byPartialLinkText($nomeUnidade)->click();
-          return true;
-      }, PEN_WAIT_TIMEOUT);
-
-      return $this->unidadeInput->value();
-  }
-
-    /**
-     * Seleciona botão novo da página
-     * 
-     * @return void
-     */
-  public function novoMapOrgao()
-    {
-      $this->test->byId("btnNovo")->click();
+      $this->elById('btnNovo')->click();
   }
 
     /**
@@ -133,127 +95,69 @@ class PaginaCadastroOrgaoExterno extends PaginaTeste
      * 
      * @return void
      */
-  public function editarMapOrgao()
+  public function editarMapOrgao(): void
     {
-      $this->test->byXPath("(//img[@title='Alterar Relacionamento'])[1]")->click();
+      $this->elByXPath("(//img[@title='Alterar Relacionamento'])[1]")
+           ->click();
   }
 
     /**
-     * Selecionar primeira checkbox de exclusão
-     * Seleciona botão excluir
-     * Seleciona botão de confirmação
-     *  
-     * @return void
+     * Seleciona e exclui o primeiro órgão mapeado.
      */
-  public function selecionarExcluirMapOrgao()
+  public function selecionarExcluirMapOrgao(): void
     {
-      $this->test->byXPath("(//label[@for='chkInfraItem0'])[1]")->click();
-      $this->test->byId("btnExcluir")->click();
-      $this->test->acceptAlert();
+      $this->elByXPath("(//label[@for='chkInfraItem0'])[1]")
+           ->click();
+      $this->elById('btnExcluir')->click();
+      $this->acceptAlert();
   }
 
     /**
-     * Selcionar botão salvar da página
-     * 
-     * @return void
+     * Clica no botão Salvar.
      */
-  public function salvar()
+  public function salvar(): void
     {
-      $this->test->byId("btnSalvar")->click();
+      $this->elById('btnSalvar')->click();
   }
 
-  public function abrirSelecaoDeArquivoParaImportacao()
+    /**
+     * Abre o seletor de arquivo e faz upload do CSV.
+     */
+  public function abrirSelecaoDeArquivoParaImportacao(string $caminhoCsv): void
     {
-      $this->test->byXPath("(//img[@title='Importar CSV'])[1]")->click();
-      sleep(2);
-      $fileChooser = $this->test->byId('importArquivoCsv');
-      $this->test->waitUntil(function ($testCase) use ($fileChooser) {
-          $fileChooser
-              ->sendKeys('/opt/sei/web/modulos/mod-sei-pen/tests_super/funcional/assets/arquivos/tipos_processos.csv')
-              ->keys(Keys::CLEAR);
-      }, PEN_WAIT_TIMEOUT);
-      $this->test->waitUntil(function($testCase) {
+      $this->elByXPath("(//img[@title='Importar CSV'])[1]")
+           ->click();
+
+      $fileInput = $this->elById('importArquivoCsv');
+      $this->waitUntil(function() use ($fileInput, $caminhoCsv) {
+          $caminhoCsv = mb_convert_encoding($caminhoCsv, 'UTF-8', 'ISO-8859-1');
+          $fileInput->sendKeys($caminhoCsv);
           return true;
-      });
-  }  
+      }, PEN_WAIT_TIMEOUT);
+  }
 
     /**
-     * Buscar orgão de origem por nome
-     *
-     * @param string $origem
-     * @return string|null
+     * Busca nome de órgão na tabela.
      */
-  public function buscarOrgaoOrigem($origem)
+  public function buscarOrgao(string $nome): ?string
     {
     try {
-        $orgaoOrigem = $this->test->byXPath("//td[contains(.,'" . $origem . "')]")->text();
-        return !empty($orgaoOrigem) && !is_null($orgaoOrigem) ?
-            $orgaoOrigem : 
-            null;
-    } catch (Exception $ex) {
+        $text = $this->elByXPath("//td[contains(.,'{$nome}')]")->getText();
+        return $text !== '' ? $text : null;
+    } catch (\Exception $e) {
         return null;
     }
   }
 
     /**
-     * Buscar orgão de destino por nome
-     *
-     * @param string $origem
-     * @return string|null
+     * Pesquisa pelo SIGLA de origem.
      */
-  public function buscarOrgaoDestino($destino)
+  public function selecionarPesquisa(string $texto): void
     {
-    try {
-        $orgaoDestino = $this->test->byXPath("//td[contains(.,'" . $destino . "')]")->text();
-        return !empty($orgaoDestino) && !is_null($orgaoDestino) ?
-            $orgaoDestino : 
-            null;
-    } catch (Exception $ex) {
-        return null;
-    }
-  }
-
-    /**
-     * Buscar mensagem de alerta da página
-     *
-     * @return string
-     */
-  public function buscarMensagemAlerta()
-    {
-      $alerta = $this->test->byXPath("(//div[@id='divInfraMsg0'])[1]");
-      return !empty($alerta->text()) ? $alerta->text() : "";
-  }
-
-    /**
-     * Lispar campo de pesquisa
-     * Colocar texto para pesquisa
-     * Clicar no bot?o pesquisar
-     *
-     * @param string $textoPesquisa
-     * @return void
-     */
-  public function selecionarPesquisa($textoPesquisa)
-    {
-      $this->test->byId('txtSiglaOrigem')->clear();
-      $this->test->byId('txtSiglaOrigem')->value($textoPesquisa);
-      $this->test->byId("btnPesquisar")->click();
-  }
-
-    /**
-     * Buscar item de tabela por nome
-     *
-     * @param string $nome
-     * @return string|null
-     */
-  public function buscarNome($nome)
-    {
-    try {
-        $nomeSelecionado = $this->test->byXPath("//td[contains(.,'" . $nome . "')]")->text();
-        return !empty($nomeSelecionado) && !is_null($nomeSelecionado) ?
-            $nomeSelecionado : 
-            null;
-    } catch (Exception $ex) {
-        return null;
-    }
+      $input = $this->elById('txtSiglaOrigem');
+      $input->clear();
+      $texto = mb_convert_encoding($texto, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($texto);
+      $this->elById('btnPesquisar')->click();
   }
 }

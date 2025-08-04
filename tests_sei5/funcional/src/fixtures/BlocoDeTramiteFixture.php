@@ -1,7 +1,5 @@
 <?php
 
-use InfraData;
-
 class BlocoDeTramiteFixture extends \FixtureBase
 {
     protected $objBlocoDeTramiteDTO;

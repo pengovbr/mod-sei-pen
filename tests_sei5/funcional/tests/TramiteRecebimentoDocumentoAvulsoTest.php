@@ -1,10 +1,11 @@
 <?php
 
-use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Execution Groups
- * @group execute_alone_group4
+ * #[Group('execute_alone_group4')]
  */
 class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
 {
@@ -29,340 +30,447 @@ class TramiteRecebimentoDocumentoAvulsoTest extends FixtureCenarioBaseTestCase
     /**
      * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
      * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
-    public function setUp(): void
+  public function setUp(): void
     {
-        parent::setup();
+      parent::setUp();
 
-        // Carregar contexto de testes e dados sobre certificado digital
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      // Carregar contexto de testes e dados sobre certificado digital
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         
-    }
+  }
 
     /**
      * Teste de verificação do correto recebimento do documento avulso
      *
      * @return void
      */
-    public function test_recebimento_metadados_documento_avulso()
+  public function test_recebimento_metadados_documento_avulso()
     {
 
-        $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
-        $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
+      $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
+      $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
 
-       $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
+      $this->servicoPEN = $this->instanciarApiDeIntegracao($localCertificado, $senhaCertificado);
 
-        // Simular um trâmite chamando a API do Barramento diretamente
-        self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, array(self::CONTEUDO_DOCUMENTO_A));
+      // Simular um trâmite chamando a API do Barramento diretamente
+      self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente, [self::CONTEUDO_DOCUMENTO_A]);
 
-        $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste(self::$documentoTeste1);
-        $novoTramite = $this->enviarMetadadosDocumento(self::$remetente, self::$destinatario, $metadadosDocumentoTeste);
-        $this->enviarComponentesDigitaisDoTramite($novoTramite, $metadadosDocumentoTeste);
-        $reciboTramite = $this->receberReciboEnvio($novoTramite);
+      $metadadosDocumentoTeste = $this->construirMetadadosDocumentoTeste(self::$documentoTeste1);
+      $novoTramite = $this->enviarMetadadosDocumento(self::$remetente, self::$destinatario, $metadadosDocumentoTeste);
+      $this->enviarComponentesDigitaisDoTramite($novoTramite, $metadadosDocumentoTeste);
+      $reciboTramite = $this->receberReciboEnvio($novoTramite);
 
-        //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
-        $this->assertNotNull($novoTramite);
-        $this->assertNotNull($reciboTramite);
-        self::$processoTeste = $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario(self::$documentoTeste1, self::$destinatario);
-    }
+      //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
+      $this->assertNotNull($novoTramite);
+      $this->assertNotNull($reciboTramite);
+      self::$processoTeste = $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario(self::$documentoTeste1, self::$destinatario);
+  }
 
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
      *
      * @return void
      */
-    public function test_devolucao_processo_para_origem()
+  public function test_devolucao_processo_para_origem()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
-        putenv("DATABASE_HOST=org1-database");
-        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-    }
+      $documentos = array(self::$documentoTeste2, self::$documentoTeste3);
+      putenv("DATABASE_HOST=org1-database");
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+  }
 
     /**
      * Teste de verificação do correto recebimento do processo no destino
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem
+     * #[Depends('test_devolucao_processo_para_origem')]
      *
      * @return void
      */
-    public function test_verificar_recebimento_processo_destino()
+  public function test_verificar_recebimento_processo_destino()
     {
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
-    }
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+  }
 
     /**
      * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
      *
-     * @group envio
-     * @large
+     * #[Group('envio')]
+     * #[Large]
      *
-     * @depends test_verificar_recebimento_processo_destino
+     * #[Depends('test_verificar_recebimento_processo_destino')]
      *
      * @return void
      */
-    public function test_devolucao_processo_para_origem_documento_avulso()
+  public function test_devolucao_processo_para_origem_documento_avulso()
     {
-        // Configuração do dados para teste do cenário
-        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
-        self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
+      // Configuração do dados para teste do cenário
+      self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+      self::$documentoTeste5 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
-        putenv("DATABASE_HOST=org2-database");
-        $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
-    }
+      putenv("DATABASE_HOST=org2-database");
+      $documentos = array(self::$documentoTeste4, self::$documentoTeste5);
+      $this->realizarTramiteExternoComValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+  }
 
     /**
      * Teste de verificação do correto recebimento do processo no destino
      *
-     * @group verificacao_recebimento
-     * @large
+     * #[Group('verificacao_recebimento')]
+     * #[Large]
      *
-     * @depends test_devolucao_processo_para_origem_documento_avulso
+     * #[Depends('test_devolucao_processo_para_origem_documento_avulso')]
      *
      * @return void
      */
-    public function test_verificar_recebimento_processo_destino_documento_avulso()
+  public function test_verificar_recebimento_processo_destino_documento_avulso()
     {
-        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4, self::$documentoTeste5);
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+      self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+      $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4, self::$documentoTeste5);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+  }
+
+  	/**
+     * Teste de realizar reprodução de último tramite
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_verificar_recebimento_processo_destino_documento_avulso')]
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
+
+        }, PEN_WAIT_TIMEOUT);
     }
 
-
-    private function receberReciboEnvio($novoTramite)
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_realizar_pedido_reproducao_ultimo_tramite')]
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite()
     {
-        $dadosTramite = $novoTramite['tramites'];
-        $idt = $dadosTramite[0]['IDT'];
-        return $this->receberReciboDeEnvioAPI($idt);
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
+
+        }, PEN_WAIT_TIMEOUT);
+
     }
 
-    private function enviarMetadadosDocumento($remetente, $destinatario, $documentoTeste)
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_reproducao_ultimo_tramite')]
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
     {
-        $parametros = [];
-        $parametros['cabecalho'] = $this->construirCabecalhoTeste($remetente, $destinatario);
-        $parametros['documento'] = $documentoTeste['documentoEnvio'];
+        $strProtocoloTeste = self::$processoTeste["PROTOCOLO"];
 
-        return $this->enviarDocumentoAPI($parametros);
-    }
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
 
-    private function enviarComponentesDigitaisDoTramite($novoTramite, $documentoTeste)
-    {
-        $parametros = [];
-        $dadosDoComponenteDigital['protocolo'] = $documentoTeste['documentoEnvio']['protocolo'];
-        $dadosDoComponenteDigital['hashDoComponenteDigital'] = $documentoTeste['componenteEnvio']['hashDocumento'];
-        $dadosDoComponenteDigital['conteudoDoComponenteDigital'] = $documentoTeste['componenteEnvio']['conteudo'];
-        $dadosDoComponenteDigital['ticketParaEnvioDeComponentesDigitais'] = $novoTramite['ticketParaEnvioDeComponentesDigitais'];
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
         
-        $parametros['dadosDoComponenteDigital'] = $dadosDoComponenteDigital;
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
 
-        $this->enviarComponenteDigitalAPI($parametros);
+        }, PEN_WAIT_TIMEOUT);
+
+      $this->sairSistema();
+      $documentos = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4, self::$documentoTeste5);
+      $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     }
 
-    private function construirCabecalhoTeste($remetente, $destinatario)
+
+  private function receberReciboEnvio($novoTramite)
     {
-        $cabecalho = [
-            'remetente' => [
-                'identificacaoDoRepositorioDeEstruturas' => $remetente['ID_REP_ESTRUTURAS'],
-                'numeroDeIdentificacaoDaEstrutura' => $remetente['ID_ESTRUTURA'],
+      $dadosTramite = $novoTramite['tramites'];
+      $idt = $dadosTramite[0]['IDT'];
+      return $this->receberReciboDeEnvioAPI($idt);
+  }
+
+  private function enviarMetadadosDocumento($remetente, $destinatario, $documentoTeste)
+    {
+      $parametros = [];
+      $parametros['cabecalho'] = $this->construirCabecalhoTeste($remetente, $destinatario);
+      $parametros['documento'] = $documentoTeste['documentoEnvio'];
+
+      return $this->enviarDocumentoAPI($parametros);
+  }
+
+  private function enviarComponentesDigitaisDoTramite($novoTramite, $documentoTeste)
+    {
+      $parametros = [];
+      $dadosDoComponenteDigital['protocolo'] = $documentoTeste['documentoEnvio']['protocolo'];
+      $dadosDoComponenteDigital['hashDoComponenteDigital'] = $documentoTeste['componenteEnvio']['hashDocumento'];
+      $dadosDoComponenteDigital['conteudoDoComponenteDigital'] = $documentoTeste['componenteEnvio']['conteudo'];
+      $dadosDoComponenteDigital['ticketParaEnvioDeComponentesDigitais'] = $novoTramite['ticketParaEnvioDeComponentesDigitais'];
+        
+      $parametros['dadosDoComponenteDigital'] = $dadosDoComponenteDigital;
+
+      $this->enviarComponenteDigitalAPI($parametros);
+  }
+
+  private function construirCabecalhoTeste($remetente, $destinatario)
+    {
+      $cabecalho = [
+          'remetente' => [
+              'identificacaoDoRepositorioDeEstruturas' => $remetente['ID_REP_ESTRUTURAS'],
+              'numeroDeIdentificacaoDaEstrutura' => $remetente['ID_ESTRUTURA'],
+          ],
+          'destinatarios' => [
+              [
+                  'identificacaoDoRepositorioDeEstruturas' => $destinatario['ID_REP_ESTRUTURAS'],
+                  'numeroDeIdentificacaoDaEstrutura' => $destinatario['ID_ESTRUTURA'],
+              ],
+          ]
+      ];
+        
+      return $cabecalho;
+  }
+
+
+  public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos = 'arquivo_pequeno.txt', $ordemDocumentoReferenciado = null)
+    {
+      $dadosDocumentoTest = parent::gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos, $ordemDocumentoReferenciado);
+      $dadosDocumentoTest['INTERESSADOS'] = trim(substr($dadosDocumentoTest['INTERESSADOS'], 0, 15));
+      $dadosDocumentoTest['DESCRICAO'] = trim(substr($dadosDocumentoTest['DESCRICAO'], 0, 10));
+      return $dadosDocumentoTest;
+
+  }
+
+  private function construirMetadadosDocumentoTeste($documentoTeste)
+    {
+      $componentes = array();
+      $listaComponentes = is_array($documentoTeste['ARQUIVO']) ? $documentoTeste['ARQUIVO'] : array($documentoTeste['ARQUIVO']);
+
+    foreach ($listaComponentes as $ordem => $caminhoArquivo) {
+        $caminhoArquivo = realpath($caminhoArquivo);
+        $fp = fopen($caminhoArquivo, "rb");
+      try{
+        $conteudo = fread($fp, filesize($caminhoArquivo));
+        $tamanhoDocumento = strlen($conteudo);
+        $hashDocumento = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $conteudo, true));
+        $nomeArquivo = basename($caminhoArquivo);
+        $componentes[] = array(
+            'nome' => $nomeArquivo,
+            'hash' => [
+                'algoritmo' => 'SHA256',
+                'conteudo' => $hashDocumento
             ],
-            'destinatarios' => [
-                [
-                    'identificacaoDoRepositorioDeEstruturas' => $destinatario['ID_REP_ESTRUTURAS'],
-                    'numeroDeIdentificacaoDaEstrutura' => $destinatario['ID_ESTRUTURA'],
-                ],
-            ]
-        ];
-        
-        return $cabecalho;
-    }
-
-
-    public function gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos='arquivo_pequeno.txt', $ordemDocumentoReferenciado=null)
-    {
-        $dadosDocumentoTest = parent::gerarDadosDocumentoExternoTeste($contextoProducao, $nomesArquivos, $ordemDocumentoReferenciado);
-        $dadosDocumentoTest['INTERESSADOS'] = trim(substr($dadosDocumentoTest['INTERESSADOS'], 0, 15));
-        $dadosDocumentoTest['DESCRICAO'] = trim(substr($dadosDocumentoTest['DESCRICAO'], 0, 10));
-        return $dadosDocumentoTest;
-
-    }
-
-    private function construirMetadadosDocumentoTeste($documentoTeste)
-    {
-        $componentes = array();
-        $listaComponentes = is_array($documentoTeste['ARQUIVO']) ? $documentoTeste['ARQUIVO'] : array($documentoTeste['ARQUIVO']);
-
-        foreach ($listaComponentes as $ordem => $caminhoArquivo) {
-            $caminhoArquivo = realpath($caminhoArquivo);
-            $fp = fopen($caminhoArquivo, "rb");
-            try{
-                $conteudo = fread($fp, filesize($caminhoArquivo));
-                $tamanhoDocumento = strlen($conteudo);
-                $hashDocumento = base64_encode(hash(self::ALGORITMO_HASH_DOCUMENTO, $conteudo, true));
-                $nomeArquivo = basename($caminhoArquivo);
-                $componentes[] = array(
-                    'nome' => $nomeArquivo,
-                    'hash' => [
-                        'algoritmo' => 'SHA256',
-                        'conteudo' => $hashDocumento
-                    ],
-                    'tipoDeConteudo' => 'txt',
-                    "mimeType" => "application/pdf",
-                    'tamanhoEmBytes' => $tamanhoDocumento,
-                    'ordem' => $ordem + 1,
-                );
-            } finally {
-               fclose($fp);
-            }
-        }
-
-        $documentoEnvio = array(
-            'protocolo' => '13990.000185/2024-00',
-            'nivelDeSigilo' => 1,
-            'descricao' => $documentoTeste['DESCRICAO'],
-            'dataHoraDeProducao' => '2017-05-15T03:41:13',
-            'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
-            'produtor' => array(
-                "nome" => "Nome ABC",
-                "tipo" => "orgaopublico"
-            ),
-            'especie' => array(
-                'codigo' => 42,
-                'nomeNoProdutor' => 'Despacho',
-            ),
-            'interessados' => array(
-                [
-                    "nome" => $documentoTeste['INTERESSADOS'],
-                    "tipo" => "fisica"
-                ]
-            ),
-
-            'componentesDigitais' => $componentes,
+            'tipoDeConteudo' => 'txt',
+            "mimeType" => "application/pdf",
+            'tamanhoEmBytes' => $tamanhoDocumento,
+            'ordem' => $ordem + 1,
         );
-
-        $componenteEnvio = array(
-            'hashDocumento' => $hashDocumento,
-            'conteudo' => $conteudo
-        );
-
-        return array(
-            'documentoEnvio' => $documentoEnvio,
-            'componenteEnvio' => $componenteEnvio
-        );
+      } finally {
+         fclose($fp);
+      }
     }
 
-    public function enviarDocumentoAPI($parametros)
+      $documentoEnvio = array(
+          'protocolo' => '13990.000185/2024-00',
+          'nivelDeSigilo' => 1,
+          'descricao' => $documentoTeste['DESCRICAO'],
+          'dataHoraDeProducao' => '2017-05-15T03:41:13',
+          'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
+          'produtor' => array(
+              "nome" => "Nome ABC",
+              "tipo" => "orgaopublico"
+          ),
+          'especie' => array(
+              'codigo' => 42,
+              'nomeNoProdutor' => 'Despacho',
+          ),
+          'interessados' => array(
+              [
+                  "nome" => $documentoTeste['INTERESSADOS'],
+                  "tipo" => "fisica"
+              ]
+          ),
+
+          'componentesDigitais' => $componentes,
+      );
+
+      $componenteEnvio = array(
+          'hashDocumento' => $hashDocumento,
+          'conteudo' => $conteudo
+      );
+
+      return array(
+          'documentoEnvio' => $documentoEnvio,
+          'componenteEnvio' => $componenteEnvio
+      );
+  }
+
+  public function enviarDocumentoAPI($parametros)
     {
-        try {
-            $endpoint = "tramites/documento";
+    try {
+        $endpoint = "tramites/documento";
 
-            $response = $this->servicoPEN->request('POST', $endpoint, [
-                'json' => $parametros
-            ]);
-
-            return  json_decode($response->getBody(), true);
-    
-        } catch (\Exception $e) {
-            $mensagem = "Falha no envio de documento avulso";
-            $this->fail($mensagem . " - " . $e->getMessage());
-        }
-    }
-
-
-    public function enviarComponenteDigitalAPI($parametros) 
-    {
-        try {
-                
-            $arrParametros = $parametros['dadosDoComponenteDigital'];
-            $idTicketDeEnvio = $arrParametros['ticketParaEnvioDeComponentesDigitais'];
-
-            $protocolo = $arrParametros['protocolo'];
-            $hashDoComponenteDigital = $arrParametros['hashDoComponenteDigital'];
-            $conteudo = $arrParametros['conteudoDoComponenteDigital'];
-
-            $queryParams = [
-                'hashDoComponenteDigital' => $hashDoComponenteDigital,
-                'protocolo' => $protocolo
-            ];
-    
-            $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
-    
-            $arrOptions = [
-                'query' => $queryParams,
-                'multipart' => [
-                    [
-                        'name'     => 'conteudo',
-                        'contents' => $conteudo,
-                        'filename' => 'conteudo.html',
-                        'headers' => ['Content-Type' => 'text/html']
-                    ],              
-                ],
-            ];
-                    
-            $response = $this->servicoPEN->request('PUT', $endpoint, $arrOptions);
-
-            return $response;
-    
-        } catch (\Exception $e) {
-            $mensagem = "Falha no envio de de componentes no documento";
-            $this->fail($mensagem . " - " . $e->getMessage());
-        }
-    }
-
-
-    public function receberReciboDeEnvioAPI($parNumIdTramite)
-    {
-        $endpoint = "tramites/{$parNumIdTramite}/recibo-de-envio";
-        try{
-            $parametros = [
-                'IDT' => $parNumIdTramite
-            ];
-
-            $response = $this->servicoPEN->request('GET', $endpoint, [
-                'query' => $parametros
-            ]);
-
-            return json_decode($response->getBody(), true);
-        } catch (\Exception $e) {
-            $mensagem = "Falha no recebimento de recibo de trâmite de envio.";
-            $this->fail($mensagem . " - " . $e->getMessage());
-        }
-    }
-
-    private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado) 
-    {
-        $arrheaders = [
-            'Accept' => '*/*',
-            'Content-Type' => 'application/json',
-        ];
-        
-        $strClientGuzzle = new GuzzleHttp\Client([
-            'base_uri' => PEN_ENDERECO_WEBSERVICE,
-            'timeout'  => ProcessoEletronicoRN::WS_TIMEOUT_CONEXAO,
-            'headers'  => $arrheaders,
-            'cert'     => [$localCertificado, $senhaCertificado],
+        $response = $this->servicoPEN->request('POST', $endpoint, [
+            'json' => $parametros
         ]);
 
-        return $strClientGuzzle;
+        return  json_decode($response->getBody(), true);
+    
+    } catch (\Exception $e) {
+        $mensagem = "Falha no envio de documento avulso";
+        $this->fail($mensagem . " - " . $e->getMessage());
     }
+  }
+
+
+  public function enviarComponenteDigitalAPI($parametros) 
+    {
+    try {
+                
+        $arrParametros = $parametros['dadosDoComponenteDigital'];
+        $idTicketDeEnvio = $arrParametros['ticketParaEnvioDeComponentesDigitais'];
+
+        $protocolo = $arrParametros['protocolo'];
+        $hashDoComponenteDigital = $arrParametros['hashDoComponenteDigital'];
+        $conteudo = $arrParametros['conteudoDoComponenteDigital'];
+
+        $queryParams = [
+            'hashDoComponenteDigital' => $hashDoComponenteDigital,
+            'protocolo' => $protocolo
+        ];
+    
+        $endpoint = "tickets-de-envio-de-componente/{$idTicketDeEnvio}/protocolos/componentes-a-enviar";
+    
+        $arrOptions = [
+            'query' => $queryParams,
+            'multipart' => [
+                [
+                    'name'     => 'conteudo',
+                    'contents' => $conteudo,
+                    'filename' => 'conteudo.html',
+                    'headers' => ['Content-Type' => 'text/html']
+                ],              
+            ],
+        ];
+                    
+        $response = $this->servicoPEN->request('PUT', $endpoint, $arrOptions);
+
+        return $response;
+    
+    } catch (\Exception $e) {
+        $mensagem = "Falha no envio de de componentes no documento";
+        $this->fail($mensagem . " - " . $e->getMessage());
+    }
+  }
+
+
+  public function receberReciboDeEnvioAPI($parNumIdTramite)
+    {
+      $endpoint = "tramites/{$parNumIdTramite}/recibo-de-envio";
+    try{
+        $parametros = [
+            'IDT' => $parNumIdTramite
+        ];
+
+        $response = $this->servicoPEN->request('GET', $endpoint, [
+            'query' => $parametros
+        ]);
+
+        return json_decode($response->getBody(), true);
+    } catch (\Exception $e) {
+        $mensagem = "Falha no recebimento de recibo de trâmite de envio.";
+        $this->fail($mensagem . " - " . $e->getMessage());
+    }
+  }
+
+  private function instanciarApiDeIntegracao($localCertificado, $senhaCertificado) 
+    {
+      $arrheaders = [
+          'Accept' => '*/*',
+          'Content-Type' => 'application/json',
+      ];
+        
+      $strClientGuzzle = new GuzzleHttp\Client([
+          'base_uri' => PEN_ENDERECO_WEBSERVICE,
+          'timeout'  => ProcessoEletronicoRN::WS_TIMEOUT_CONEXAO,
+          'headers'  => $arrheaders,
+          'cert'     => [$localCertificado, $senhaCertificado],
+      ]);
+
+      return $strClientGuzzle;
+  }
 }
