@@ -1,6 +1,8 @@
 <?php
 
 use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
 
 class PaginaAgendamentos extends PaginaTeste
 {
@@ -16,7 +18,7 @@ class PaginaAgendamentos extends PaginaTeste
 
   public function navegarAgendamento()
     {
-      $this->elById("txtInfraPesquisarMenu")->value(mb_convert_encoding('Agendamentos', 'UTF-8', 'ISO-8859-1'));
+      $this->elById("txtInfraPesquisarMenu")->sendKeys('Agendamentos');
       $this->elByXPath("//a[@link='infra_agendamento_tarefa_listar']")->click();
   }
     
@@ -29,11 +31,11 @@ class PaginaAgendamentos extends PaginaTeste
     foreach($linhasAgendamentos as $idx => $linha) {
         $colunaComando = $linha->findElement(WebDriverBy::xpath('./td[2]'));
 
-      if ($colunaComando->text() === $strAgendamento) {
+      if ($colunaComando->getText() === $strAgendamento) {
         $this->elByXPath("(//img[@title='$acao'])[$idx]")->click();
         $bolExisteAlerta = $this->alertTextAndClose();
         if ($bolExisteAlerta != null) { 
-              $this->alertTextAndClose();
+            $this->driver->getKeyboard()->pressKey(WebDriverKeys::ENTER); 
         }
       }
     }
