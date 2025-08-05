@@ -147,6 +147,83 @@ class ProcessarPendenciasRN extends InfraRN
   public function enviarComponenteDigital($idTramite)
     {
       $this->gravarLogDebug("Processando envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
+      
+      $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
+      $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+
+      $nre = $objMetadadosProcedimento->NRE;
+      $novoIDT = $objMetadadosProcedimento->IDT;
+      $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
+      $ticketComponentesDigitais = $objMetadadosProcedimento->metadados->ticketParaReenvioDeComponentesDigitais;
+
+      if ($objMetadadosProcedimento->metadados->reproducaoDeTramite) {
+        $this->gravarLogDebug("Reprodução de último trâmite sendo executado para o IDT $idTramite.");
+
+        $objProcedimentoDTO = new ProcedimentoDTO();
+        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($protocolo);
+        $objProcedimentoDTO->retTodos();
+
+        $objProcedimentoRN = new ProcedimentoRN();
+        $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+        if ($objProcedimentoDTO != null) {
+          $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+          $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+          $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+          $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+          $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+          if ($objTramiteDTO != null) {
+
+              $idUltimoTramite = $objTramiteDTO->getNumIdTramite();
+
+            if ($novoIDT != $objTramiteDTO->getNumIdTramite()) {
+              $objTramiteDTO = new TramiteDTO();
+              $objTramiteDTO->setStrNumeroRegistro($nre);
+              $objTramiteDTO->setNumIdTramite($idUltimoTramite);
+              $objTramiteDTO->retTodos();
+
+              $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+              $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+
+              $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
+              $objTramiteDTO->setNumIdTramite($novoIDT);
+              $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
+              $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
+                
+              $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+              $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
+              $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
+              $objComponenteDigitalDTO->retTodos();
+              $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
+              $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+              $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+
+              foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
+                
+                $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+                $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($componenteDigital->getDblIdProcedimento());
+                $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($componenteDigital->getDblIdDocumento());
+                $objRelProtocoloProtocoloDTO->setNumSequencia($componenteDigital->getNumOrdemDocumento() - 1);
+                $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+                $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+                $bolDocumentoMovido = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+                $componenteDigital->setNumIdTramite($novoIDT);
+                $componenteDigital->setStrSinEnviar('S');
+
+                if ($componenteDigital->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $bolDocumentoMovido) {
+                  $componenteDigital->setStrSinEnviar('N');
+                }
+                $objComponenteDigitalBD->cadastrar($componenteDigital);
+              }
+            }
+          }
+            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
+            $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
+        } else {
+          $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
+          $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
+        }        
+      }
   }
 
 
@@ -186,6 +263,11 @@ class ProcessarPendenciasRN extends InfraRN
     catch(Exception $e){
         //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
         $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
+        // ou caso reprodução de ultimo tramite
+        $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
+        $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+        $bolDeveRecusarTramite = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
+        
       if($bolDeveRecusarTramite) {
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
           $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();

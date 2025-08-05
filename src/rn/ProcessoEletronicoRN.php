@@ -26,6 +26,9 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO = 'PEN_OPERACAO_EXTERNA';
   public static $TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO = 'PEN_EXPEDICAO_PROCESSO_ABORTADA';
   public static $TI_DOCUMENTO_AVULSO_RECEBIDO = 'PEN_DOCUMENTO_AVULSO_RECEBIDO';
+  public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_EXPEDIDO';
+  public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO';
+  public static $TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO = 'PEN_REPRODUCAO_ULTIMO_TRAMITE_FINALIZADO';
 
     /* TIPO DE PROTOCOLO RECEBIDO PELO BARRAMENTO - SE PROCESSO OU DOCUMENTO AVULSO */
   public static $STA_TIPO_PROTOCOLO_PROCESSO = 'P';
@@ -2814,6 +2817,32 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  public function reproduzirUltimoTramite($nre, $idRepositorioDoDestinatario, $idEstruturaDoDestinatario)
+  {
+    try {
+        $endpoint = "NREs/{$nre}/destinatarios/{$idRepositorioDoDestinatario}/{$idEstruturaDoDestinatario}/reproducoes-de-tramite";
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objResposta = $this->post($endpoint);
+      if ($objResposta != null) {
+        return $objResposta; 
+      } else {
+        return false;
+      }
+    } catch (Exception $e) {
+        $mensagem = "Falha na reprodução do último trâmite do processo";
+        $arrayException = json_decode(mb_convert_encoding($e->getMessage(), 'UTF-8', 'ISO-8859-1'), true);
+        $msg_esperada = "NRE, '$nre', já possui trâmite em andamento para este destinatário";
+        // Expressão regular para buscar o texto com o número do processo como coringa
+        $regex = '/Não é possível executar o serviço de reprodução de trâmite do processo \d{5}\.\d{6}\/\d{4}-\d{2}, pois não há componentes digitais válidos a serem reproduzidos/';
+        if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
+          return $arrayException;
+        } else {
+          $detalhes = $this->tratarFalhaWebService($e);
+          throw new InfraException($mensagem, $e, $detalhes);
+        }
+    }
+  }
+  
   public function tratarCodigoErro($idRepositorioEstrutura, $stringJson, $mensagem)
     {
       try {

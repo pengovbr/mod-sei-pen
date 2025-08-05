@@ -1,5 +1,7 @@
 <?php
 
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+
 class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
@@ -35,10 +37,10 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
     /**
      * Teste de trâmite de processo para organização não-mapeada à unidade corrente
      *
-     * @group envio
-     * @large
-     * 
-     * @Depends CenarioBaseTestCase::setUpBeforeClass
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
      *
      * @return void
      */
@@ -82,35 +84,32 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
     private function tramitarProcessoExternamenteGestorNaoResponsavelUnidade ($dados) {
 
         // Acessar funcionalidade de trâmite externo
-        try {
-            $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
-        } catch (Exception $e) {
-            $this->paginaProcesso->navegarParaTramitarProcesso();
-        }
+        $this->paginaProcesso->navegarParaTramitarProcesso();
+
 
         // Preencher parâmetros do trâmite
         $this->paginaTramitar->repositorio($dados['repositorio']);
         $this->paginaTramitar->unidade($dados['unidadeDestino'], '');
         $this->paginaTramitar->tramitar();
 
-        $callbackEnvio = function ($testCase) use ($dados) {
+        $callbackEnvio = function () use ($dados) {
             try {
-                $testCase->frame(null);
-                $testCase->frame('ifrConteudoVisualizacao');
-                $testCase->frame('ifrVisualizacao');
-                $testCase->frame('ifrEnvioProcesso');
+                $this->paginaBase->frame(null);
+                $this->paginaBase->frame('ifrConteudoVisualizacao');
+                $this->paginaBase->frame('ifrVisualizacao');
+                $this->paginaBase->frame('ifrEnvioProcesso');
                 $mensagemValidacao = mb_convert_encoding('Falha no envio externo do processo.', 'UTF-8', 'ISO-8859-1');
-                $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
-                $testCase->byXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
+                $this->assertStringContainsString($mensagemValidacao, $this->paginaBase->elByCss('body')->getText());
+                $this->paginaBase->elByXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
                 $mensagemValidacao2 = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
-                $testCase->assertStringContainsString($mensagemValidacao2, $testCase->byCssSelector('body')->text());
+                $this->assertStringContainsString($mensagemValidacao2, $this->paginaBase->elByCss('body')->getText());
 
-                $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                $btnFechar = $this->paginaBase->elByXPath("//input[@id='btnFechar']");
                 $btnFechar->click();
             } finally {
                 try {
-                    $this->frame(null);
-                    $this->frame("ifrVisualizacao");
+                    $this->paginaBase->frame(null);
+                    $this->paginaBase->frame("ifrVisualizacao");
                 } catch (Exception $e) {
                 }
             }
@@ -122,8 +121,8 @@ class TramiteProcessoGestorNaoResponsavelPelaUnidadeMapeadaTest extends FixtureC
             $this->waitUntil($callbackEnvio, PEN_WAIT_TIMEOUT);
         } finally {
             try {
-                $this->frame(null);
-                $this->frame("ifrVisualizacao");
+                $this->paginaBase->frame(null);
+                $this->paginaBase->frame("ifrVisualizacao");
             } catch (Exception $e) {
             }
         }

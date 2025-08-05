@@ -57,7 +57,7 @@ class MapeamentoDeUnidadesComLimitacaoDeRepositoriosTest extends FixtureCenarioB
 
     $this->paginaMapUnidades->salvar();
     sleep(2);
-    $mensagem = $this->paginaCadastroOrgaoExterno->buscarMensagemAlerta();
+    $mensagem = $this->paginaMapUnidades->buscarMensagemAlerta();
     $this->assertStringContainsString(
       'Mapeamento de Unidade gravado com sucesso.',
       $mensagem
