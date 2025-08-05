@@ -1,6 +1,6 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
 
 class PaginaAgendamentos extends PaginaTeste
 {
@@ -9,30 +9,31 @@ class PaginaAgendamentos extends PaginaTeste
      * 
      * @return void
      */
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
   public function navegarAgendamento()
     {
-      $this->test->byId("txtInfraPesquisarMenu")->value(mb_convert_encoding('Agendamentos', 'UTF-8', 'ISO-8859-1'));
-      $this->test->byXPath("//a[@link='infra_agendamento_tarefa_listar']")->click();
+      $this->elById("txtInfraPesquisarMenu")->value(mb_convert_encoding('Agendamentos', 'UTF-8', 'ISO-8859-1'));
+      $this->elByXPath("//a[@link='infra_agendamento_tarefa_listar']")->click();
   }
     
   public function acaoAgendamento($strAgendamento, $acao)
     {
         
-      $linhasAgendamentos = $this->test->elements($this->test->using('xpath')->value('//table[contains(@class, "infraTable")]/tbody/tr'));
+      $linhasAgendamentos = $this->elementsByXPath('//table[contains(@class, "infraTable")]/tbody/tr');
       unset($linhasAgendamentos[0]);
 
     foreach($linhasAgendamentos as $idx => $linha) {
-        $colunaComando = $linha->byXPath('./td[2]');
+        $colunaComando = $linha->findElement(WebDriverBy::xpath('./td[2]'));
 
       if ($colunaComando->text() === $strAgendamento) {
-        $this->test->byXPath("(//img[@title='$acao'])[$idx]")->click();
+        $this->elByXPath("(//img[@title='$acao'])[$idx]")->click();
         $bolExisteAlerta = $this->alertTextAndClose();
-        if ($bolExisteAlerta != null) { $this->test->keys(Keys::ENTER);
+        if ($bolExisteAlerta != null) { 
+              $this->alertTextAndClose();
         }
       }
     }
