@@ -1970,7 +1970,7 @@ class ExpedirProcedimentoRN extends InfraRN
       return $strNome;
   }
 
-  private function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false)
+  public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false)
     {
     if (!isset($strNumeroRegistro)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $strNumeroRegistro não informado.');
@@ -2069,7 +2069,7 @@ class ExpedirProcedimentoRN extends InfraRN
                         //Método que irá particionar o arquivo em partes para realizar o envio
                                 $this->particionarComponenteDigitalParaEnvio(
                                     $strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
-                                    $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco
+                                    $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco, $bolReproducaoUltimoTramite
                       );
 
                           //Finalizar o envio das partes do componente digital
@@ -2100,24 +2100,27 @@ class ExpedirProcedimentoRN extends InfraRN
                           $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                           $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                if(!$bolSinProcessamentoEmBloco) {
+                if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite) {
                   $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                   $this->contadorDaBarraDeProgresso++;
                 }
               }
 
                         $arrHashComponentesEnviados[] = $objComponenteDigitalDTO->getStrHashConteudo();
-
-                        //Bloquea documento para atualizao, já que ele foi visualizado
+                      if ($bolReproducaoUltimoTramite) {
+                        $this->objProcedimentoAndamentoRN->setOpts($strNumeroRegistro, $numIdTramite, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $objComponenteDigitalDTO->getDblIdProcedimento());
+                        $this->objProcedimentoAndamentoRN->cadastrar(
+                            ProcedimentoAndamentoDTO::criarAndamento(sprintf('Executando reprodução de último trâmite %s %s', $strNomeDocumento,
+                            $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S')
+                        );
+                      } else {
+                        //Bloquear documento para atualização, já que ele foi visualizado
                         $this->objDocumentoRN->bloquearConteudo($objDocumentoDTO);
                         $this->objProcedimentoAndamentoRN->cadastrar(
-                            ProcedimentoAndamentoDTO::criarAndamento(
-                                sprintf(
-                                    'Enviando %s %s', $strNomeDocumento,
-                                    $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()
-                                ), 'S'
-                            )
+                            ProcedimentoAndamentoDTO::criarAndamento(sprintf('Enviando %s %s', $strNomeDocumento,
+                            $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 'S')
                         );
+                      }
             }
           } catch (\Exception $e) {
               $strProtocoloDocumento = $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado();
@@ -2780,7 +2783,7 @@ class ExpedirProcedimentoRN extends InfraRN
      * @throws InfraException
      */
   private function particionarComponenteDigitalParaEnvio($strCaminhoAnexo, $dadosDoComponenteDigital, $nrTamanhoArquivoMb, $nrTamanhoMegasMaximo,
-        $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco = false
+        $nrTamanhoBytesMaximo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false
     ) {
       //Faz o cálculo para obter a quantidade de partes que o arquivo será particionado, sempre arrendondando para cima
       $qtdPartes = ceil($nrTamanhoArquivoMb / $nrTamanhoMegasMaximo);
@@ -2797,7 +2800,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $fim = $inicio + $tamanhoParteArquivo;
         try{
             $this->enviarParteDoComponenteDigital($inicio, $fim, $parteDoArquivo, $dadosDoComponenteDigital);
-          if(!$bolSinProcessamentoEmBloco) {
+          if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite) {
             $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
           }
             $this->contadorDaBarraDeProgresso++;

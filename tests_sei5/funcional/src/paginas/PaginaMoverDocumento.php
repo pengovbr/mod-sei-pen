@@ -1,49 +1,69 @@
 <?php
 
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
 
 class PaginaMoverDocumento extends PaginaTeste
 {
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function moverDocumentoParaProcesso($protocoloDestino, $motivoMovimentacao)
+    /**
+     * Move o documento para outro processo, preenchendo destino e motivo.
+     *
+     * @param string $protocoloDestino
+     * @param string $motivoMovimentacao
+     */
+  public function moverDocumentoParaProcesso(string $protocoloDestino, string $motivoMovimentacao): void
     {
-      $this->processoDestino($protocoloDestino);
-      $this->motivoMovimentacao($motivoMovimentacao);
-      $this->mover();
+      $this->setProcessoDestino($protocoloDestino);
+      $this->setMotivoMovimentacao($motivoMovimentacao);
+      $this->executarMover();
   }
 
-  private function processoDestino($value)
+    /**
+     * Preenche o campo de processo destino e confirma com Enter.
+     */
+  private function setProcessoDestino(string $valor): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $input = $this->test->byId("txtProcedimentoDestino");
-    if(isset($value)) {
-        $input->value($value);
-        sleep(2);
-        $this->test->keys(Keys::ENTER);
-    }
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
 
-      sleep(2);
-      return $input->value();
+      $input = $this->elById('txtProcedimentoDestino');
+      $input->clear();
+      $valor = mb_convert_encoding($valor, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($valor. WebDriverKeys::ENTER);
+
+      // Opcional: aguarda o valor ser aplicado
+      $this->waitUntil(function() use ($valor) {
+          return stripos($this->elById('txtProcedimentoDestino')->getAttribute('value'), $valor) !== false;
+      }, PEN_WAIT_TIMEOUT);
   }
 
-  private function motivoMovimentacao($value)
+    /**
+     * Preenche o motivo de movimentação.
+     */
+  private function setMotivoMovimentacao(string $valor): void
     {
-      $input = $this->test->byId("txaMotivo");
-    if(isset($value)) {
-        $input->value($value);
-    }
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
 
-      return $input->value();
+      $input = $this->elById('txaMotivo');
+      $input->clear();
+      $valor = mb_convert_encoding($valor, 'UTF-8', 'ISO-8859-1');
+      $input->sendKeys($valor);
   }
 
-  private function mover()
+    /**
+     * Executa o clique no botão mover.
+     */
+  private function executarMover(): void
     {
-      $this->test->byId("sbmMover")->click();
+      $this->elById('sbmMover')->click();
   }
 }

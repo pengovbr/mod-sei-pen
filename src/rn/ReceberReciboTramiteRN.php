@@ -180,6 +180,7 @@ class ReceberReciboTramiteRN extends InfraRN
       $objEntradaConcluirProcessoAPI->setIdProcedimento($numIdProcedimento);
 
       $objSeiRN = new SeiRN();
+      $bolReproducaoUltimoTramite = false;
     try {
         $objSeiRN->concluirProcesso($objEntradaConcluirProcessoAPI);
     } catch (Exception $e) {
@@ -187,6 +188,7 @@ class ReceberReciboTramiteRN extends InfraRN
         //O rollback da transação poderia deixar a situação do processo inconsistênte já que o Barramento registrou anteriormente que o
         //recibo já havia sido obtido. O erro no fechamento não provoca impacto no andamento do processo
         $this->objPenDebug->gravar("Processo $strProtocoloFormatado não está aberto na unidade.");
+        $bolReproducaoUltimoTramite = true; // Caso já esteja concluído é reprodução
     }
 
       $arrObjAtributoAndamentoDTO = [];
@@ -259,11 +261,19 @@ class ReceberReciboTramiteRN extends InfraRN
         $arrObjAtributoAndamentoDTO[] = $objAtributoAndamentoDTO;
     }
 
+      $objProcessoExpedidoRN = new ProcessoExpedidoRN();
+      $bolProcessoExpedido = $objProcessoExpedidoRN->existeProcessoExpedidoProtocolo($numIdProcedimento, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
+
+      $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO);
+      if ($bolProcessoExpedido && $bolReproducaoUltimoTramite) { // Reprodução último trâmite
+        $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REPRODUCAO_ULTIMO_TRAMITE_RECEBIDO);
+      }
       $objAtividadeDTO = new AtividadeDTO();
       $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
       $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
       $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
       $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_EXTERNO));
+      $objAtividadeDTO->setNumIdTarefa($idTarefa);
       $objAtividadeDTO->setArrObjAtributoAndamentoDTO($arrObjAtributoAndamentoDTO);
 
       $objAtividadeRN = new AtividadeRN();

@@ -31,7 +31,8 @@ class VerificadorInstalacaoRN extends InfraRN
 {
     const COMPATIBILIDADE_MODULO_SEI = [
       '5.0.0',
-      '5.0.1'
+      '5.0.1',
+      '5.0.2'
     ];
 
     public function __construct()

@@ -1,7 +1,9 @@
 <?php
 
-use utilphp\util;
-use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverSelect;
 
 class PaginaEditarProcesso extends PaginaTeste
 {
@@ -9,132 +11,173 @@ class PaginaEditarProcesso extends PaginaTeste
     const STA_NIVEL_ACESSO_RESTRITO = 1;
     const STA_NIVEL_ACESSO_SIGILOSO = 2;
 
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function descricao($value = null)
+  public function descricao(string $value = null): ?string
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $input = $this->test->byId("txtDescricao");
-    if(isset($value)) { $input->value($value);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $input = $this->elById('txtDescricao');
+    if ($value !== null) {
+        $input->clear();
+        $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($value);
     }
-      return $input->value();
+
+      return $input->getAttribute('value');
   }
 
-  public function observacoes($value = null)
+  public function observacoes(string $value = null): ?string
     {
-      $input = $this->test->byId("txaObservacoes");
-    if(isset($value)) { $input->value($value);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $input = $this->elById('txaObservacoes');
+    if ($value !== null) {
+        $input->clear();
+        $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($value);
     }
-      return $input->value();
+
+      return $input->getAttribute('value');
   }
 
-  public function protocoloInformado($value = null)
+  public function protocoloInformado(string $value = null): ?string
     {
-      $input = $this->test->byId("txtProtocoloInformar");
-    if(isset($value)) { $input->value($value);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $input = $this->elById('txtProtocoloInformar');
+    if ($value !== null) {
+        $input->clear();
+        $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($value);
     }
-      return $input->value();
+
+      return $input->getAttribute('value');
   }
 
-  public function dataGeracaoProtocolo($value = null)
+  public function dataGeracaoProtocolo(string $value = null): ?string
     {
-      $input = $this->test->byId("txtDtaGeracaoInformar");
-    if(isset($value)) { $input->value($value);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $input = $this->elById('txtDtaGeracaoInformar');
+    if ($value !== null) {
+        $input->clear();
+        $value = mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($value);
     }
-      return $input->value();
+
+      return $input->getAttribute('value');
   }
 
-  public function restricao($staNivelRestricao = null)
+  public function restricao(int $nivel = null): ?int
     {
-    if(isset($staNivelRestricao))
-      {
-      if($staNivelRestricao === self::STA_NIVEL_ACESSO_PUBLICO) {
-        $this->test->byId("optPublico")->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+    if ($nivel !== null) {
+      switch ($nivel) {
+        case self::STA_NIVEL_ACESSO_PUBLICO:
+            $this->elById('optPublico')->click();
+            break;
+        case self::STA_NIVEL_ACESSO_RESTRITO:
+            $this->elById('optRestrito')->click();
+            break;
+        case self::STA_NIVEL_ACESSO_SIGILOSO:
+            $this->elById('optSigiloso')->click();
+            break;
       }
-      else if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO) {
-          $this->test->byId("optRestrito")->click();
-      }
-      else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO) {
-          $this->test->byId("optSigiloso")->click();
-      }
     }
 
-    if($this->test->byId("optPublico")->selected()) {
+    if ($this->elById('optPublico')->isSelected()) {
         return self::STA_NIVEL_ACESSO_PUBLICO;
-    } else if($this->test->byId("optRestrito")->selected()) {
+    }
+    if ($this->elById('optRestrito')->isSelected()) {
         return self::STA_NIVEL_ACESSO_RESTRITO;
-    } else if($this->test->byId("optSigiloso")->selected()) {
+    }
+    if ($this->elById('optSigiloso')->isSelected()) {
         return self::STA_NIVEL_ACESSO_SIGILOSO;
     }
 
+      return null;
   }
 
-  public function adicionarInteressado($arrayNomeInteressado)
+  public function adicionarInteressado($nomes): void
     {
-      $arrayNomeInteressado = array($arrayNomeInteressado);
+      $lista = is_array($nomes) ? $nomes : [$nomes];
 
-    if(isset($arrayNomeInteressado)){
-      foreach ($arrayNomeInteressado as $nomeInteressado) {
-        $input = $this->test->byId("txtInteressadoProcedimento");
-        $input->value($nomeInteressado);
-        $this->test->keys(Keys::ENTER);
-        $this->test->acceptAlert();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+    foreach ($lista as $nome) {
+        $input = $this->elById('txtInteressadoProcedimento');
+        $input->clear();
+        $nome = mb_convert_encoding($nome, 'UTF-8', 'ISO-8859-1');
+        $input->sendKeys($nome. WebDriverKeys::ENTER);
+        $this->acceptAlert();
         sleep(2);
-      }
     }
   }
 
-  public function listarInteressados()
+  public function listarInteressados(): array
     {
-      $options = $this->test->byId('selInteressadosProcedimento')->elements($this->test->using('css selector')->value('option'));
-      return array_map(function($opt) {return $opt->text();
-      }, $options);
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $select = new WebDriverSelect($this->elById('selInteressadosProcedimento'));
+      return array_map(function($opt){ return $opt->getText();
+      }, $select->getOptions());
   }
 
-  public function salvarProcesso()
+  public function salvarProcesso(): void
     {
-      $this->test->byId("btnSalvar")->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $this->elById('btnSalvar')->click();
   }
 
-  public function selecionarRestricao($staNivelRestricao, $strHipoteseLegal = '', $strGrauSigilo = '')
+  public function selecionarRestricao(int $nivel, string $hipotese = '', string $grauSigilo = ''): void
     {
-    if(isset($staNivelRestricao))
-      {
-        $this->restricao($staNivelRestricao);
+      $this->restricao($nivel);
 
-      if($staNivelRestricao === self::STA_NIVEL_ACESSO_RESTRITO)
-        {
-        $select = $this->test->select($this->byId('selHipoteseLegal'));
-        $select->selectOptionByLabel($strHipoteseLegal);
-      }
-      else if($staNivelRestricao === self::STA_NIVEL_ACESSO_SIGILOSO)
-        {
-          $select = $this->test->select($this->byId('selHipoteseLegal'));
-          $select->selectOptionByLabel($strHipoteseLegal);
-
-          $select = $this->test->select($this->byId('selGrauSigilo'));
-          $select->selectOptionByLabel($strGrauSigilo);
-      }
+    if ($nivel === self::STA_NIVEL_ACESSO_RESTRITO || $nivel === self::STA_NIVEL_ACESSO_SIGILOSO) {
+        $hipSelect = new WebDriverSelect($this->elById('selHipoteseLegal'));
+        $hipSelect->selectByVisibleText($hipotese);
+    }
+    if ($nivel === self::STA_NIVEL_ACESSO_SIGILOSO) {
+        $sigSelect = new WebDriverSelect($this->elById('selGrauSigilo'));
+        $sigSelect->selectByVisibleText($grauSigilo);
     }
   }
 
-  public function recuperarHipoteseLegal()
+  public function recuperarHipoteseLegal(): string
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->frame("ifrVisualizacao");
-      $select = $this->test->select($this->test->byId('selHipoteseLegal'));
-      return $select->selectedLabel();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+
+      $select = new WebDriverSelect($this->elById('selHipoteseLegal'));
+      return $select->getFirstSelectedOption()->getText();
   }
 
-  public function gerarProtocolo()
+  public function gerarProtocolo(): string
     {
-      $strSequencia = str_pad(rand(1, 999999), 6, "0", STR_PAD_LEFT);
-      return '999990.' . $strSequencia . '/2015-00';
+      $seq = str_pad(random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+      return "999990.{$seq}/2015-00";
   }
 }

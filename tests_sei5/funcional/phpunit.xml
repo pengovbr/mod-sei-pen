@@ -4,10 +4,14 @@
   bootstrap="bootstrap.php"
   backupGlobals="true"
   colors="true"
-  verbose="true"
   cacheResult="false"
   stopOnError="false"
   stopOnFailure="false"
+  displayDetailsOnTestsThatTriggerDeprecations="true"
+  displayDetailsOnTestsThatTriggerErrors="true"
+  displayDetailsOnTestsThatTriggerNotices="true"
+  displayDetailsOnTestsThatTriggerWarnings="true"
+  displayDetailsOnPhpunitDeprecations="true"
 >
   <php>
     <const name="PHPUNIT_HOST" value="selenium" />
@@ -18,9 +22,9 @@
       value="https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/" />
  
     <!-- Chaves de configurações gerais do teste do Barramento de Serviços do PEN -->
-    <const name="PEN_WAIT_TIMEOUT" value="360000" />
-    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200000" />
-    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800000" />
+    <const name="PEN_WAIT_TIMEOUT" value="360" />
+    <const name="PEN_WAIT_TIMEOUT_ARQUIVOS_GRANDES" value="7200" />
+    <const name="PEN_WAIT_TIMEOUT_PROCESSAMENTO_EM_LOTE" value="10800" />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG1" value=" " />
     <const name="PEN_SCRIPT_MONITORAMENTO_ORG2" value=" " />
     <const name="ENVIO_PARCIAL" value="true" />
