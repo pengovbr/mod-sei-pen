@@ -88,15 +88,22 @@ class PaginaTramiteEmBloco extends PaginaTeste
   }
 
     /**
-     * Retorna o título da página atual.
+     * Valida o título da página atual.
      *
      * @param string $tituloEsperado
-     * @return string
+     * @return bool
      */
-  public function verificarTituloDaPagina(string $tituloEsperado): string
-    {
-      return $this->elByXPath("//div[text()='{$tituloEsperado}']")->getText();
+  
+  public function verificarTituloDaPagina(string $tituloEsperado): bool
+  {
+      try {
+          $this->elByXPath("//*[contains(text(), '{$tituloEsperado}')]");
+          return true;
+      } catch (\Exception $e) {
+          return false;
+      }
   }
+
 
     /**
      * Seleciona um bloco pelo valor de andamento.

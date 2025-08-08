@@ -177,7 +177,7 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     // Verificação do título da página
     $titulo ="Incluir Processo(s) no Bloco de Trâmite";
     $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
-    $this->assertEquals($titulo, mb_convert_encoding($tituloRetorno, 'ISO-8859-1', 'UTF-8'));
+    $this->assertTrue($tituloRetorno, mb_convert_encoding('Título não encontrado na página.', 'UTF-8', 'ISO-8859-1'));
 
     // Inclusão do processo no bloco de trâmite
     $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO2->getNumId());

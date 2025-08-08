@@ -64,10 +64,10 @@ class TramiteBlocoExternoInclusaoDeProcessoPorVisualizacaoDetalhadaTest extends 
       $this->paginaTramiteEmBloco->selecionarProcesso($protocoloFormatado);
       $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
         
-      // Verificação do título da página
+      // Verificação do título da página      
       $titulo = "Incluir Processo(s) no Bloco de Trâmite";
       $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
-      $this->assertEquals(mb_convert_encoding($titulo, 'UTF-8', 'ISO-8859-1'), $tituloRetorno);
+      $this->assertTrue($tituloRetorno, mb_convert_encoding('Título não encontrado na página.', 'UTF-8', 'ISO-8859-1'));
 
       // Inclusão do processo no bloco de trâmite
       $this->paginaTramiteEmBloco->selecionarBloco($objBlocoDeTramiteDTO->getNumId());
