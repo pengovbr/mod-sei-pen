@@ -1,6 +1,5 @@
 <?php
 
-use \utilphp\util;
 use PHPUnit\Extensions\Selenium2TestCase\Keys as Keys;
 
 

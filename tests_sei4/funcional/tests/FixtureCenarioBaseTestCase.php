@@ -1,6 +1,5 @@
 <?php
 
-use \utilphp\util;
 use PHPUnit\Extensions\Selenium2TestCase;
 use Tests\Funcional\Sei\Fixtures\{ProtocoloFixture,ProcedimentoFixture,AtividadeFixture,ContatoFixture};
 use Tests\Funcional\Sei\Fixtures\{ParticipanteFixture,RelProtocoloAssuntoFixture,AtributoAndamentoFixture};

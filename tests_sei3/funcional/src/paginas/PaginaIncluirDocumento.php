@@ -1,6 +1,5 @@
 <?php
 
-use \utilphp\util;
 use PHPUnit_Extensions_Selenium2TestCase_Keys as Keys;
 
 class PaginaIncluirDocumento extends PaginaTeste

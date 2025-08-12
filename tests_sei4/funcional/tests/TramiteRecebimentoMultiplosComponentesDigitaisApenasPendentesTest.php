@@ -1,6 +1,5 @@
 <?php
 
-use \utilphp\util;
 
 class TramiteRecebimentoMultiplosComponentesDigitaisApenasPendentesTest extends FixtureCenarioBaseTestCase
 {
