@@ -146,9 +146,9 @@ class PaginaIniciarProcesso extends PaginaTeste
 
         $dadosProcesso = $dadosProcesso ?: array();
         $dadosProcesso["TIPO_PROCESSO"] = @$dadosProcesso["TIPO_PROCESSO"] ?: "Licitação: Pregão Eletrônico";
-        $dadosProcesso["DESCRICAO"] = @$dadosProcesso["DESCRICAO"] ?: util::random_string(20);
-        $dadosProcesso["OBSERVACOES"] = @$dadosProcesso["OBSERVACOES"] ?: util::random_string(100);
-        $dadosProcesso["INTERESSADOS"] = @$dadosProcesso["INTERESSADOS"] ?: util::random_string(40);
+        $dadosProcesso["DESCRICAO"] = @$dadosProcesso["DESCRICAO"] ?: randomString(20);
+        $dadosProcesso["OBSERVACOES"] = @$dadosProcesso["OBSERVACOES"] ?: randomString(100);
+        $dadosProcesso["INTERESSADOS"] = @$dadosProcesso["INTERESSADOS"] ?: randomString(40);
         $dadosProcesso["RESTRICAO"] = @$dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO;
         $dadosProcesso["HIPOTESE_LEGAL"] = @$dadosProcesso["HIPOTESE_LEGAL"] ?: "";
 

@@ -20,8 +20,8 @@ class FixtureCenarioBaseTestCase extends CenarioBaseTestCase
         }
 
         $parametros = [
-            'Descricao' => $dadosProcesso['DESCRICAO'] ?: util::random_string(20),
-            'Interessados' => $dadosProcesso['INTERESSADOS'] ?: util::random_string(40),
+            'Descricao' => $dadosProcesso['DESCRICAO'] ?: randomString(20),
+            'Interessados' => $dadosProcesso['INTERESSADOS'] ?: randomString(40),
             'IdHipoteseLegal' => $dadosProcesso['HIPOTESE_LEGAL'] ? $objHipLegalDTO->getNumIdHipoteseLegal() : null,
             'StaNivelAcessoLocal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO,
             'StaNivelAcessoGlobal' => $dadosProcesso["RESTRICAO"] ?: PaginaIniciarProcesso::STA_NIVEL_ACESSO_PUBLICO

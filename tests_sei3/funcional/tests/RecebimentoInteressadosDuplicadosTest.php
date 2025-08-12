@@ -184,7 +184,7 @@ class RecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => utf8_encode(randomString(20)),
             ),
             'interessado' => $arrInteressados,
             'documento' => $metadadosDocumentos,
@@ -222,7 +222,7 @@ class RecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
         }
 
         $documentoDoProcesso = array(
-            'protocolo' => util::random_string(5),
+            'protocolo' => randomString(5),
             'nivelDeSigilo' => 1,
             'descricao' => $documentoTeste['DESCRICAO'],
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
@@ -230,13 +230,13 @@ class RecebimentoInteressadosDuplicadosTest extends CenarioBaseTestCase
             'ordem' => $ordemDocumento,
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => utf8_encode(randomString(20)),
                 'numeroDeIdentificacao' => '999999',
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => utf8_encode(randomString(20))
             ),
 
             'interessado' => array(

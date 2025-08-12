@@ -193,12 +193,12 @@ class RecebimentoDocumentoAvulsoTest extends CenarioBaseTestCase
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
 
             'produtor' => array(
-                'nome' => utf8_encode(util::random_string(20)),
+                'nome' => utf8_encode(randomString(20)),
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => utf8_encode(util::random_string(20))
+                'nomeNoProdutor' => utf8_encode(randomString(20))
             ),
 
             'interessado' => array(

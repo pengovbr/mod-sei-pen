@@ -124,9 +124,9 @@ class PaginaIncluirDocumento extends PaginaTeste
 
       $dadosDocumento = $dadosDocumento ?: array();
       $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Ofício";
-      $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: util::random_string(20);
-      $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: util::random_string(100);
-      $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: util::random_string(40);
+      $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: randomString(20);
+      $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: randomString(100);
+      $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: randomString(40);
       $dadosDocumento["RESTRICAO"] = @$dadosDocumento["RESTRICAO"] ?: PaginaIncluirDocumento::STA_NIVEL_ACESSO_PUBLICO;
       $dadosDocumento["HIPOTESE_LEGAL"] = @$dadosDocumento["HIPOTESE_LEGAL"] ?: "";
 
@@ -162,11 +162,11 @@ class PaginaIncluirDocumento extends PaginaTeste
 
       $dadosDocumento = $dadosDocumento ?: array();
       $dadosDocumento["TIPO_DOCUMENTO"] = @$dadosDocumento["TIPO_DOCUMENTO"] ?: "Ofício";
-      $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: util::random_string(20);
+      $dadosDocumento["DESCRICAO"] = @$dadosDocumento["DESCRICAO"] ?: randomString(20);
       $dadosDocumento["DATA_ELABORACAO"] = @$dadosDocumento["DATA_ELABORACAO"] ?: date("d/m/Y");
       $dadosDocumento["FORMATO_DOCUMENTO"] = @$dadosDocumento["FORMATO_DOCUMENTO"] ?: self::STA_FORMATO_NATO_DIGITAL;
-      $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: util::random_string(100);
-      $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: util::random_string(40);
+      $dadosDocumento["OBSERVACOES"] = @$dadosDocumento["OBSERVACOES"] ?: randomString(100);
+      $dadosDocumento["INTERESSADOS"] = @$dadosDocumento["INTERESSADOS"] ?: randomString(40);
       $dadosDocumento["RESTRICAO"] = @$dadosDocumento["RESTRICAO"] ?: PaginaIncluirDocumento::STA_NIVEL_ACESSO_PUBLICO;
       $dadosDocumento["HIPOTESE_LEGAL"] = @$dadosDocumento["HIPOTESE_LEGAL"] ?: "";
 

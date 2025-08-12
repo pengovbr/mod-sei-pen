@@ -364,20 +364,20 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
         }
 
         $documentoDoProcesso = array(
-            'protocolo' => util::random_string(5),
+            'protocolo' => randomString(5),
             'nivelDeSigilo' => 1,
             'descricao' => $documentoTeste['DESCRICAO'],
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'ordem' => $ordemDocumento,
             'produtor' => array(
-                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
                 "tipo" => "orgaopublico"
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
+                'nomeNoProdutor' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessados' => array(
@@ -422,7 +422,7 @@ class TramiteRecebimentoMultiplosComponentesDigitais extends FixtureCenarioBaseT
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
                 'tipo' => "orgaopublico",
             ),
             'interessados' => array(
