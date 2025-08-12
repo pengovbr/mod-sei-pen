@@ -19,6 +19,7 @@ ini_set('display_errors', 1); // Garante que os erros serão exibidos no navegado
 //Classes utilitárias para manipulação dos dados do SEI
 require_once __DIR__ . '/src/utils/DatabaseUtils.php';
 require_once __DIR__ . '/src/utils/ParameterUtils.php';
+require_once __DIR__ . '/src/utils/RandomUtils.php';
 
 //Representação das páginas sob teste
 require_once __DIR__ . '/src/paginas/PaginaTeste.php';
