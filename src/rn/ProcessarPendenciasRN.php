@@ -156,8 +156,9 @@ class ProcessarPendenciasRN extends InfraRN
       $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
       $ticketComponentesDigitais = $objMetadadosProcedimento->metadados->ticketParaReenvioDeComponentesDigitais;
 
-      if ($objMetadadosProcedimento->metadados->reproducaoDeTramite) {
-        $this->gravarLogDebug("Reprodução de último trâmite sendo executado para o IDT $idTramite.");
+      if ($objMetadadosProcedimento->metadados->reproducaoDeTramite || $objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
+        $tipoReproducao = $objMetadadosProcedimento->metadados->reproducaoDeTramite ? "Reprodução de último trâmite" : "Reprodução de processo";
+        $this->gravarLogDebug("{$tipoReproducao} sendo executado para o IDT $idTramite.");
 
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($protocolo);
@@ -208,8 +209,9 @@ class ProcessarPendenciasRN extends InfraRN
                 $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
                 $bolDocumentoMovido = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
                 $componenteDigital->setNumIdTramite($novoIDT);
-                $componenteDigital->setStrSinEnviar('S');
-
+                if ($objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
+                  $componenteDigital->setStrSinEnviar('S');
+                }
                 if ($componenteDigital->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $bolDocumentoMovido) {
                   $componenteDigital->setStrSinEnviar('N');
                 }
