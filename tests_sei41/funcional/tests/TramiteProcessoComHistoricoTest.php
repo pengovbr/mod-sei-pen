@@ -69,11 +69,76 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
     }
 
     /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+  public function test_reproducao_ultimo_tramite()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+      $this->abrirProcesso($strProtocoloTeste);
+      
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+  }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+  public function test_reproducao_ultimo_tramite_remetente_finalizado()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+      // 11 - Abrir protocolo na tela de controle de processos
+      $this->abrirProcesso($strProtocoloTeste);
+
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+        // 13 - Verificar recibos de trâmite
+      $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
+
+      $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+      $this->assertTrue(count($listaDocumentos) == 1);
+      $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
+  }
+
+    /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
      * @group verificacao_recebimento
      *
-     * @depends test_realizar_pedido_reproducao_ultimo_tramite
+     * @depends test_reproducao_ultimo_tramite_remetente_finalizado
      *
      * @return void
      */
@@ -97,7 +162,7 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://dev.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, PEN_ENDERECO_WEBSERVICE . "tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
