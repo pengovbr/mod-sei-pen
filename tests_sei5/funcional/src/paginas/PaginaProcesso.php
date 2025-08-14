@@ -266,7 +266,7 @@ class PaginaProcesso extends PaginaTeste
 
   public function reproduzirUltimoTramite()
     {
-      sleep(1);
+      sleep(5);
       $this->frame(null);
       $this->frame("ifrConteudoVisualizacao");
       sleep(1);
