@@ -86,7 +86,6 @@ class ReceberProcedimentoRN extends InfraRN
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
           $bolReproducaoDeTramite = $objMetadadosProcedimento->metadados->reproducaoDeTramite; 
           $this->receberProcedimentoInternoControlado($objMetadadosProcedimento, $bolReproducaoDeTramite);
-          // $this->receberProcedimentoInterno($objMetadadosProcedimento);
 
       }
     } catch(Exception $e) {
@@ -650,9 +649,8 @@ class ReceberProcedimentoRN extends InfraRN
                 $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE); // garante apenas docs com anexo
                 $objComponenteDigital->retTodos();
                 $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-                $objComponenteDigital = $objComponenteDigitalBD->listar($objComponenteDigital);
 
-                if (count($objComponenteDigital) > 0) {
+                if ($objComponenteDigitalBD->contar($objComponenteDigital)) {
                   $objDocumentoDTO = new DocumentoDTO();
                   $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
                   $objDocumentoDTO->retTodos();
