@@ -185,6 +185,16 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
 
   }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_com_documento_restrito
+     *
+     * @return void
+     */
   public function test_reproducao_ultimo_tramite()
   {
       $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
@@ -204,6 +214,16 @@ class TramiteProcessoComDocumentoRestritoTest extends FixtureCenarioBaseTestCase
 
   }
 
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_com_documento_restrito
+     *
+     * @return void
+     */
   public function test_reproducao_ultimo_tramite_remetente_finalizado()
   {
       $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();

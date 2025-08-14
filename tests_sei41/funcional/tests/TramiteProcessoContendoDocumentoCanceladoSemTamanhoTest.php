@@ -150,6 +150,16 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends FixtureCen
 
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite com erro
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
     public function test_realizar_pedido_reproducao_ultimo_tramite_erro()
     {
         $strProtocoloTeste = self::$protocoloTeste;
