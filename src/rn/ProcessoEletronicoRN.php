@@ -1518,8 +1518,12 @@ class ProcessoEletronicoRN extends InfraRN
           $arrObjItensSolicitados = $parObjComponentesDigitaisSolicitados ?? [$parObjComponentesDigitaisSolicitados];
         foreach ($arrObjItensSolicitados as $objItemSolicitado) {
           if(!is_null($objItemSolicitado)) {
-            if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hashes) && !$objDocumento->retirado) {
+            if (!isset($arrayHashes)) {
+              $arrayHashes = $objItemSolicitado->hashes;
+            }
+            if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $arrayHashes) && !$objDocumento->retirado) {
               $objComponenteDigitalDTO->setStrSinEnviar("S");
+              unset($arrayHashes[array_search($strHashConteudo, $arrayHashes)]);
             }
           }
         }
@@ -1541,7 +1545,9 @@ class ProcessoEletronicoRN extends InfraRN
       //Monta dados dos componentes digitais
       $arrObjComponenteDigitalDTO = [];
       $arrObjDocumento = self::obterDocumentosProtocolo($parObjProtocolo, true);
-
+      usort($arrObjDocumento, function($a, $b) {
+          return $b->ordem <=> $a->ordem;
+      }); // ordena $arrObjDocumento de forma decrescente de acordo com o atributo ordem
       $arrObjComponenteDigitalDTOAux = [];
     foreach ($arrObjDocumento as $objDocumento) {
         $quantidadeDeComponentesDigitais = count($objDocumento->componentesDigitais);
@@ -1600,9 +1606,12 @@ class ProcessoEletronicoRN extends InfraRN
             $arrObjItensSolicitados = $parObjComponentesDigitaisSolicitados ?? [$parObjComponentesDigitaisSolicitados];
           foreach ($arrObjItensSolicitados as $objItemSolicitado) {
             if(!is_null($objItemSolicitado)) {
-
-              if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $objItemSolicitado->hashes) && !$objDocumento->retirado) {
-                      $objComponenteDigitalDTO->setStrSinEnviar("S");
+              if (!isset($arrayHashes)) {
+                $arrayHashes = $objItemSolicitado->hashes;
+              }
+              if($objItemSolicitado->protocolo == $objComponenteDigitalDTO->getStrProtocolo() && in_array($strHashConteudo, $arrayHashes) && !$objDocumento->retirado) {
+                $objComponenteDigitalDTO->setStrSinEnviar("S");
+                unset($arrayHashes[array_search($strHashConteudo, $arrayHashes)]);
               }
             }
           }
