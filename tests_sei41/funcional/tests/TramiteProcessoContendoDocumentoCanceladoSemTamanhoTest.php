@@ -156,7 +156,7 @@ class TramiteProcessoContendoDocumentoCanceladoSemTamanhoTest extends FixtureCen
      * @group envio
      * @large
      *
-     * @depends test_tramitar_processo_da_origem
+     * @depends test_verificar_destino_processo
      *
      * @return void
      */

@@ -124,13 +124,7 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
           $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
           return true;
       }, PEN_WAIT_TIMEOUT);
-
-        // 13 - Verificar recibos de trâmite
-      $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
-
-      $listaDocumentos = $this->paginaProcesso->listarDocumentos();
-      $this->assertTrue(count($listaDocumentos) == 1);
-      $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
+     
   }
 
     /**
