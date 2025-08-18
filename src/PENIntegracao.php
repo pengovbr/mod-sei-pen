@@ -643,14 +643,14 @@ class PENIntegracao extends SeiIntegracao
   }
 
   public function desativarTipoDocumento($arrObjSerieAPI) {
-    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI);
+    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI, 'desativar');
   }
 
   public function excluirTipoDocumento($arrObjSerieAPI) {
-    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI);
+    $this->validarExcluirDesativarTipoDocumento($arrObjSerieAPI, 'excluir');
   }
 
-  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI)
+  protected function validarExcluirDesativarTipoDocumento($arrObjSerieAPI,  $strDesativarExcluir)
   {
     $excecao = new InfraException();
     foreach ($arrObjSerieAPI as $objSerieAPI) {
@@ -669,20 +669,21 @@ class PENIntegracao extends SeiIntegracao
       $objPenRelTipoDocMapRecebidoDTO = $objPenRelTipoDocMapRecebidoRN->contar($objPenRelTipoDocMapRecebidoDTO);
       
       if ($objPenRelTipoDocMapRecebidoDTO > 0 || $objPenRelTipoDocMapEnviadoDTO > 0) {
-          $excecao->lancarValidacao('Não é permitido excluir ou desativar o tipo de documento "' . $objSerieAPI->getNome() . '"');
+          $excecao->lancarValidacao('Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' o tipo de documento "'. $objSerieAPI->getNome()
+          . '". Esse tipo de documento está mapeado em Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Documentos -> Envio/Recebimento');
       }
     }
   }
 
   public function desativarUnidade($arrObjUnidadeAPI) {
-    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
+    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI, 'desativar');
   }
 
   public function excluirUnidade($arrObjUnidadeAPI) {
-    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI);
+    $this->validarExcluirDesativarUnidade($arrObjUnidadeAPI, 'excluir');
   }
 
-  protected function validarExcluirDesativarUnidade($arrObjUnidadeAPI)
+  protected function validarExcluirDesativarUnidade($arrObjUnidadeAPI, $strDesativarExcluir)
   {
     $excecao = new InfraException();
     foreach ($arrObjUnidadeAPI as $objUnidadeAPI) {
@@ -693,7 +694,8 @@ class PENIntegracao extends SeiIntegracao
       $objPenUnidadeRN = new PenUnidadeRN();
       $objPenUnidadeDTO = $objPenUnidadeRN->contar($objPenUnidadeDTO);
       if ($objPenUnidadeDTO > 0) {
-        $excecao->lancarValidacao('Não é permitido excluir ou desativar a unidade "' . $objUnidadeAPI->getSigla() . '"');
+        $excecao->lancarValidacao('Prezado(a) usuário(a), você está tentando '.$strDesativarExcluir.' a unidade "'. $objUnidadeAPI->getSigla()
+        . '". Essa unidade está mapeada em Administração -> Tramita GOV.BR -> Mapeamento de Unidades -> Listar' );
       }
     }
   }
@@ -719,7 +721,7 @@ class PENIntegracao extends SeiIntegracao
       . 'que se encontra mapeado para o Tipo de Processo Padrão. '
       . 'Para continuar com essa ação é necessário alterar o Tipo de Processo Padrão. '
       . 'O Tipo de Processo padrão se encontra disponível em: '
-      . 'Administração -> Processo Eletrônico Nacional -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
+      . 'Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Processo -> Relacionamento entre Unidades';
 
     $objPenParametroRN = new PenParametroRN();
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
