@@ -119,7 +119,7 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
         $this->paginaTipoDocumento->desativarTipoDocumento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $mensagemValidacao = utf8_encode('Não é permitido excluir ou desativar o tipo de documento');
+            $mensagemValidacao = utf8_encode('Esse tipo de documento está mapeado em Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Documentos -> Envio/Recebimento');
             $this->assertStringContainsString($mensagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -146,7 +146,7 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
         $this->paginaTipoDocumento->excluirTipoDocumento();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $mensagemValidacao = utf8_encode('Não é permitido excluir ou desativar o tipo de documento');
+            $mensagemValidacao = utf8_encode('Esse tipo de documento está mapeado em Administração -> Tramita GOV.BR -> Mapeamento de Tipos de Documentos -> Envio/Recebimento');
             $this->assertStringContainsString($mensagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -173,7 +173,7 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
         $this->paginaUnidades->desativarUnidades();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $mensagemValidacao = utf8_encode('Não é permitido excluir ou desativar a unidade');
+            $mensagemValidacao = utf8_encode('Essa unidade está mapeada em Administração -> Tramita GOV.BR -> Mapeamento de Unidades -> Listar');
             $this->assertStringContainsString($mensagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -199,7 +199,7 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
         $this->paginaUnidades->excluirUnidades();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $mensagemValidacao = utf8_encode('Não é permitido excluir ou desativar a unidade');
+            $mensagemValidacao = utf8_encode('Essa unidade está mapeada em Administração -> Tramita GOV.BR -> Mapeamento de Unidades -> Listar');
             $this->assertStringContainsString($mensagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
