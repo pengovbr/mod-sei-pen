@@ -270,7 +270,7 @@ input.infraText {
 
 .dataTables_paginate .paginate_button.current {
   background-color: var(--color-primary-default);
-  color: #ccc;
+  color: #ccc; /* Torna o número da página corrente visivel em backgrounds diferentes: sei 4.0.12.15 e sei 4.1.5 */
 }
 
 </style>
