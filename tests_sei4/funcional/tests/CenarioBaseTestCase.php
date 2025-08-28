@@ -37,19 +37,23 @@ class CenarioBaseTestCase extends Selenium2TestCase
     protected $paginaAnexarProcesso = null;
     protected $paginaCancelarDocumento = null;
     protected $paginaTramitarProcessoEmLote = null;
+    protected $paginaMapeamentoUnidade = null;
     protected $paginaMoverDocumento = null;
     protected $paginaCadastroOrgaoExterno = null;
     protected $paginaCadastroMapEnvioCompDigitais = null;
     protected $paginaExportarTiposProcesso = null;
     protected $paginaTipoProcessoReativar = null;
+    protected $paginaConfiguracaoModuloRenomeado = null;
     protected $paginaCadastrarProcessoEmBloco = null;
     protected $paginaTramiteEmBloco = null;
     protected $paginaEnvioParcialListar = null;
     protected $paginaPenHipoteseLegalListar = null;
     protected $paginaMapUnidades = null;
+    protected $paginaAgendamentos = null;
     protected $paginaTipoDocumento = null;
     protected $paginaTipoProcesso = null;
     protected $paginaUnidades = null;
+    
 
     public function setUpPage(): void
     {
@@ -68,9 +72,11 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaCancelarDocumento = new PaginaCancelarDocumento($this);
         $this->paginaMoverDocumento = new PaginaMoverDocumento($this);
         $this->paginaTramitarProcessoEmLote = new PaginaTramitarProcessoEmLote($this);
+        $this->paginaMapeamentoUnidade = new PaginaMapeamentoUnidade($this);
         $this->paginaCadastroMapEnvioCompDigitais = new PaginaCadastroMapEnvioCompDigitais($this);
         $this->paginaTramiteMapeamentoOrgaoExterno = new PaginaTramiteMapeamentoOrgaoExterno($this);
         $this->paginaCadastroOrgaoExterno = new PaginaCadastroOrgaoExterno($this);
+        $this->paginaConfiguracaoModuloRenomeado = new PaginaConfiguracaoModulo($this);
         $this->paginaExportarTiposProcesso = new PaginaExportarTiposProcesso($this);
         $this->paginaTipoProcessoReativar = new PaginaTipoProcessoReativar($this);
         $this->paginaCadastrarProcessoEmBloco = new PaginaCadastrarProcessoEmBloco($this);
@@ -78,6 +84,7 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaEnvioParcialListar = new PaginaEnvioParcialListar($this);
         $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar($this);
         $this->paginaMapUnidades = new PaginaMapUnidades($this);
+        $this->paginaAgendamentos = new PaginaAgendamentos($this);
         $this->paginaTipoDocumento = new PaginaTipoDocumento($this);
         $this->paginaTipoProcesso = new PaginaTipoProcesso($this);
         $this->paginaUnidades = new PaginaUnidades($this);
@@ -376,6 +383,53 @@ class CenarioBaseTestCase extends Selenium2TestCase
         }
 
         sleep(1);
+    }
+
+    protected function tramitarProcessoExternamenteGestorNaoResponsavelUnidade ($dados) {
+
+        // Acessar funcionalidade de trâmite externo
+        try {
+            $this->paginaTramitarProcessoEmLote->navegarControleProcessos();
+        } catch (Exception $e) {
+            $this->paginaProcesso->navegarParaTramitarProcesso();
+        }
+
+        // Preencher parâmetros do trâmite
+        $this->paginaTramitar->repositorio($dados['repositorio']);
+        $this->paginaTramitar->unidade($dados['unidadeDestino'], '');
+        $this->paginaTramitar->tramitar();
+
+        $callbackEnvio = function ($testCase) use ($dados) {
+            try {
+                $testCase->frame('ifrEnvioProcesso');
+                $mensagemValidacao = mb_convert_encoding('Falha no envio externo do processo. Verifique log de erros do sistema para maiores informações.', 'UTF-8', 'ISO-8859-1');
+                $testCase->assertStringContainsString($mensagemValidacao, $testCase->byCssSelector('body')->text());
+                $testCase->byXPath("//input[@id='btnInfraDetalhesExcecao']")->click();
+                $mensagemValidacao2 = mb_convert_encoding('A unidade ' . $dados['nomeUnidadeMalMapeada'] . ' (' . $dados['idUnidadeMalMapeada'] . ') foi mapeada de forma errada. Desse modo, entre em contato com os Gestores do seu órgão e informe que o mapeamento não está correto.', 'UTF-8', 'ISO-8859-1');             
+                $testCase->assertStringContainsString($mensagemValidacao2, $testCase->byCssSelector('body')->text());
+
+                $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+                $btnFechar->click();
+            } finally {
+                try {
+                    $this->frame(null);
+                    $this->frame("ifrVisualizacao");
+                } catch (Exception $e) {
+                }
+            }
+
+            return true;
+        };
+
+        try {
+            $this->waitUntil($callbackEnvio, PEN_WAIT_TIMEOUT);
+        } finally {
+            try {
+                $this->frame(null);
+                $this->frame("ifrVisualizacao");
+            } catch (Exception $e) {
+            }
+        }
     }
 
     protected function tramitarProcessoInternamente($unidadeDestino, $manterAbertoNaUnidadeAtual = false)
@@ -733,6 +787,12 @@ class CenarioBaseTestCase extends Selenium2TestCase
             $selAndamento = PaginaTramitarProcessoEmLote::STA_ANDAMENTO_CANCELADO;
         }
         $this->paginaTramitarProcessoEmLote->navegarProcessoEmLote($selAndamento, $numProtocolo);
+    }
+
+    protected function navegarMapeamentoUnidade() {
+        $this->frame(null);
+        $this->byXPath("//img[contains(@title, 'Controle de Processos')]")->click();
+        $this->paginaMapeamentoUnidade->navegarMapeamentoUnidade();
     }
 
 }

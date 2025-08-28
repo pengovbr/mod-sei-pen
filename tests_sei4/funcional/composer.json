@@ -22,6 +22,7 @@
         "phpunit/phpunit": "8.*",
         "phpunit/php-code-coverage": "*",
         "phpunit/phpunit-selenium": "*",
-        "brianium/paratest": "4.*"
+        "brianium/paratest": "4.*",        
+        "guzzlehttp/guzzle": "^7.0"
     }
 }
