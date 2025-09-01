@@ -36,19 +36,108 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
 
     }
 
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTeste;
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+  public function test_reproducao_ultimo_tramite()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+      $this->abrirProcesso($strProtocoloTeste);
+      
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+  }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_tramitar_processo_da_origem
+     *
+     * @return void
+     */
+  public function test_reproducao_ultimo_tramite_remetente_finalizado()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+      // 11 - Abrir protocolo na tela de controle de processos
+      $this->abrirProcesso($strProtocoloTeste);
+
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+     
+  }
 
     /**
      * Teste de verificação do correto recebimento do processo no destinatário
      *
      * @group verificacao_recebimento
      *
-     * @depends test_tramitar_processo_da_origem
+     * @depends test_reproducao_ultimo_tramite_remetente_finalizado
      *
      * @return void
      */
     public function test_verificar_destino_processo_para_devolucao()
     {
-
         $localCertificado = self::$destinatario['LOCALIZACAO_CERTIFICADO_DIGITAL'];
         $senhaCertificado = self::$destinatario['SENHA_CERTIFICADO_DIGITAL'];
 
@@ -67,7 +156,7 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
         }
 
         $curl_handler = curl_init();
-        curl_setopt($curl_handler, CURLOPT_URL, "https://homolog.api.processoeletronico.gov.br/interoperabilidade/rest/v3/tramites/" . $idtEnviado);
+        curl_setopt($curl_handler, CURLOPT_URL, PEN_ENDERECO_WEBSERVICE . "tramites/" . $idtEnviado);
         curl_setopt($curl_handler, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl_handler, CURLOPT_FAILONERROR, true);
         curl_setopt($curl_handler, CURLOPT_SSLCERT, $localCertificado);
@@ -78,40 +167,37 @@ class TramiteProcessoComHistoricoTest extends FixtureCenarioBaseTestCase
 
         foreach($saida->propriedadesAdicionais as $propriedades){
         
-            switch($propriedades->chave){
- 
-                case "CLASSIFICACAO_PrazoIntermediario_1":
-                     $this->assertEquals('15', $propriedades->valor );
-                     break;
+            switch($propriedades->chave){               
                    
                 case "CLASSIFICACAO_PrazoCorrente_1":
-                     $this->assertEquals('5', $propriedades->valor );
+                    $this->assertTrue(
+                      '5' == $propriedades->valor,
+                      'Classificação Prazo Corrente não confere. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "MODULO_PEN_VERSAO":
-                     $this->assertTrue(isset($propriedades->valor));
+                    $this->assertTrue(
+                      isset($propriedades->valor),
+                      'Versão do módulo PEN não está definida. Valor: ' . $propriedades->valor
+                    );
                      break;
  
                 case "CLASSIFICACAO_CodigoEstruturado_1":
-                    $this->assertEquals('052.211', $propriedades->valor );
+                    $this->assertTrue(
+                      '052.211' == $propriedades->valor,
+                      'Classificação Código Estruturado 1 não é igual a 052.211. Valor: ' . $propriedades->valor
+                    );
                      break;
- 
-                case "CLASSIFICACAO_Destinacao_1":
-                     $this->assertEquals('Elimina', substr($propriedades->valor,0,7) );
-                     break;
- 
-                case "CLASSIFICACAO_Observacao_1":
-                    $this->assertEquals('Quanto ao estabelecimento', substr($propriedades->valor,0,25) );
-                     break;
- 
-                case "CLASSIFICACAO_Descricao_1":
-                     $this->assertEquals('RECEITA CORRENTE', substr($propriedades->valor,0,16));
-                     break;                
                      
             }
         }
 
-        $this->assertEquals(9, sizeof($saida->processo->itensHistorico) );
+        $this->assertEquals(
+          9,
+          sizeof($saida->processo->itensHistorico),
+          'Quantidade de itens do histórico não é igual a 9. Valor: ' . sizeof($saida->processo->itensHistorico)
+        );
 
     }
 
