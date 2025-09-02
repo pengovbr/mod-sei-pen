@@ -317,7 +317,104 @@ class TramiteProcessoContendoDocumentoMovidoSemAnexoTest extends FixtureCenarioB
   }
 
   /**
-   * @inheritDoc
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo_com_dois_documentos_movidos_sem_anexo
+     *
+     * @return void
+     */
+   public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+        
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->refresh();
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo_com_dois_documentos_movidos_sem_anexo
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso($strProtocoloTeste);
+       
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_devolucao_destino_processo_com_dois_documentos_movidos_sem_anexo
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$protocoloTeste->getStrProtocoloFormatado();
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function ($testCase) {
+            sleep(5);
+            $testCase->refresh();
+            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+            return true;
+        }, PEN_WAIT_TIMEOUT);
+          $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
+
+          // Validação dos dados do processo principal
+          $listaDocumentosProcesso = $this->paginaProcesso->listarDocumentos();
+          $this->assertEquals(4, count($listaDocumentosProcesso));
+          $this->validarDocumentoMovido($listaDocumentosProcesso[0]);
+          $this->validarDadosDocumento($listaDocumentosProcesso[1], self::$documentoTeste2, self::$destinatario);
+          $this->validarDocumentoCancelado($listaDocumentosProcesso[2]);
+          $this->validarDadosDocumento($listaDocumentosProcesso[3], self::$documentoTeste4, self::$destinatario);
+    }
+  /**
+  * @inheritDoc
    */
   public static function tearDownAfterClass(): void
   {
