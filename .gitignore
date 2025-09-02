@@ -12,6 +12,7 @@ compatibilidade.json
 
 cobertura.xml
 .env
+.modulo.env
 *.pem
 *.cache
 *.lock
