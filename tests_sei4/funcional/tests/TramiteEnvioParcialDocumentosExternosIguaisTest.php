@@ -6,7 +6,7 @@
  * Execution Groups
  * @group execute_alone_group1
  */
-class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
+class TramiteEnvioParcialDocumentosExternosIguaisTest extends FixtureCenarioBaseTestCase
 {
   private $objProtocoloFixture;
   public static $remetente;
@@ -15,6 +15,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
   public static $protocoloTestePrincipal;
   public static $documentoTeste1;
   public static $documentoTeste2;
+  public static $documentoTeste3;
+  public static $documentoTeste4;
+
   public static $arrIdMapEnvioParcialOrgaoA;
   public static $arrIdMapEnvioParcialOrgaoB;
 
@@ -126,9 +129,13 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->paginaBase->navegarParaControleProcesso();
 
-    self::$documentoTeste2 = $this->gerarDadosDocumentoInternoTeste(self::$destinatario);
+    self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$destinatario);
+    self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$destinatario);
+    self::$documentoTeste4 = $this->gerarDadosDocumentoInternoTeste(self::$destinatario);
     $protocoloTestePrincipalOrg2 = $this->consultarProcessoFixture(self::$protocoloTestePrincipal->getStrProtocoloFormatado(), \ProtocoloRN::$TP_PROCEDIMENTO);
-    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste2, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste2, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste3, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
+    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste4, $protocoloTestePrincipalOrg2->getDblIdProtocolo());
 
     $this->paginaControleProcesso->abrirProcesso(self::$protocoloTestePrincipal->getStrProtocoloFormatado());
 
@@ -186,9 +193,9 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
 
     $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
-    $this->assertTrue(count($listaDocumentos) == 2);
+    $this->assertTrue(count($listaDocumentos) == 4);
 
-    $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2);
+    $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2, self::$documentoTeste3, self::$documentoTeste4);
     for ($i = 0; $i < count($listaDocumentos); $i++) {
       $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], self::$remetente, false, null);
     }
@@ -196,8 +203,7 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
     $this->sairSistema();
   }
 
-
-  /**
+    /**
      * Teste de realizar reprodução de último tramite
      *
      * @group envio
@@ -207,29 +213,29 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_realizar_pedido_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+    // public function test_realizar_pedido_reproducao_ultimo_tramite()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
+    //     $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
         
-        // 11 - Reproduzir ?ltimo tr?mite
-        $this->abrirProcesso($strProtocoloTeste);
-        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
-        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
-        $this->refresh();
-        $this->waitUntil(function ($testCase) {
-            sleep(5);
-            $testCase->refresh();
-            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-            return true;
-        }, PEN_WAIT_TIMEOUT);
+    //     // 11 - Reproduzir último trâmite
+    //     $this->abrirProcesso($strProtocoloTeste);
+    //     $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+    //     $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+    //     $this->refresh();
+    //     $this->waitUntil(function ($testCase) {
+    //         sleep(5);
+    //         $testCase->refresh();
+    //         $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+    //         $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //         return true;
+    //     }, PEN_WAIT_TIMEOUT);
 
-    }
+    // }
 
     /**
-     * Teste para verificar a Reprodução de último trâmite no destinatario
+     * Teste para verificar a reprodução de último tramite no destinatario
      *
      * @group envio
      * @large
@@ -238,27 +244,27 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
+    // public function test_reproducao_ultimo_tramite()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
 
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    //     $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
 
-        $this->abrirProcesso($strProtocoloTeste);
+    //     $this->abrirProcesso($strProtocoloTeste);
        
-        $this->waitUntil(function ($testCase) {
-            sleep(5);
-            $testCase->refresh();
-            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
-            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-            return true;
-        }, PEN_WAIT_TIMEOUT);
+    //     $this->waitUntil(function ($testCase) {
+    //         sleep(5);
+    //         $testCase->refresh();
+    //         $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+    //         $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //         return true;
+    //     }, PEN_WAIT_TIMEOUT);
 
-    }
+    // }
 
     /**
-     * Teste para verificar a Reprodução de último trâmite no remetente
+     * Teste para verificar a reprodução de último tramite no remetente
      *
      * @group envio
      * @large
@@ -267,33 +273,33 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
      *
      * @return void
      */
-    public function test_reproducao_ultimo_tramite_remetente_finalizado()
-    {
-        $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
+    // public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTestePrincipal->getStrProtocoloFormatado();
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+    //     $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        // 11 - Abrir protocolo na tela de controle de processos
-        $this->abrirProcesso($strProtocoloTeste);
+    //     // 11 - Abrir protocolo na tela de controle de processos
+    //     $this->abrirProcesso($strProtocoloTeste);
 
-        $this->waitUntil(function ($testCase) {
-            sleep(5);
-            $testCase->refresh();
-            $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-            $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-            return true;
-        }, PEN_WAIT_TIMEOUT);
+    //     $this->waitUntil(function ($testCase) {
+    //         sleep(5);
+    //         $testCase->refresh();
+    //         $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+    //         $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //         return true;
+    //     }, PEN_WAIT_TIMEOUT);
         
-        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+    //     $listaDocumentos = $this->paginaProcesso->listarDocumentos();
 
-        $this->assertTrue(count($listaDocumentos) == 2);
+    //     $this->assertTrue(count($listaDocumentos) == 4);
 
-        $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2);
-        for ($i = 0; $i < count($listaDocumentos); $i++) {
-          $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], self::$remetente, false, null);
-        }
-    }
+    //     $documentosTeste = array(self::$documentoTeste1, self::$documentoTeste2);
+    //     for ($i = 0; $i < count($listaDocumentos); $i++) {
+    //       $this->validarDadosDocumento($listaDocumentos[$i], $documentosTeste[$i], self::$remetente, false, null);
+    //     }
+    // }
 
   /**
    * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
@@ -329,10 +335,11 @@ class TramiteEnvioParcialTest extends FixtureCenarioBaseTestCase
   private function criarCenarioTramiteEnvioParcialTest()
   {
     self::$processoTestePrincipal = $this->gerarDadosProcessoTeste(self::$remetente);
-    self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
+    self::$documentoTeste1 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
 
     self::$protocoloTestePrincipal = $this->cadastrarProcessoFixture(self::$processoTestePrincipal);
-    $this->cadastrarDocumentoInternoFixture(self::$documentoTeste1, self::$protocoloTestePrincipal->getDblIdProtocolo());
+    $this->cadastrarDocumentoExternoFixture(self::$documentoTeste1, self::$protocoloTestePrincipal->getDblIdProtocolo());
+
 
     // Mapear Envio Parcial no Remetente
     self::$arrIdMapEnvioParcialOrgaoA = array();

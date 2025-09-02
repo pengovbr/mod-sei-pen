@@ -1,10 +1,10 @@
 <?php
 
 /**
- * Testes de trâmite de um processo tendo a sua devolução através de sua anexação à outro processo
- * criado no órgão de destino.
+ * Testes de trÃ¢mite de um processo tendo a sua devoluÃ§Ã£o atravÃ©s de sua anexaÃ§Ã£o Ã  outro processo
+ * criado no Ã³rgÃ£o de destino.
  *
- * O resultado esperado é que o novo processo recebido seja criado no remetente e o processo tramitado anteriormente
+ * O resultado esperado Ã© que o novo processo recebido seja criado no remetente e o processo tramitado anteriormente
  * seja reaberto, atualizado e anexado ao novo processo recem criado
  *
  * Execution Groups
@@ -26,9 +26,9 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
     public static $protocoloTesteAnexado;
 
     /**
-     * Teste inicial de trâmite de dois processos apartados para o sistema de origem
+     * Teste inicial de trÃ¢mite de dois processos apartados para o sistema de origem
      *
-     * Posteriormente os dois serão anexados e enviados de volta
+     * Posteriormente os dois serÃ£o anexados e enviados de volta
      *
      * @group envio
      * @large
@@ -42,7 +42,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
 
-        // Criação e envio do primeiro processo, representando o principal em seu retorno
+        // CriaÃ§Ã£o e envio do primeiro processo, representando o principal em seu retorno
         self::$processoTesteAnexado = $this->gerarDadosProcessoTeste(self::$remetente);
         self::$documentoTeste1 = $this->gerarDadosDocumentoInternoTeste(self::$remetente);
         self::$documentoTeste2 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
@@ -55,7 +55,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
 
 
     /**
-     * Teste de verificação do correto recebimento do processo no destino
+     * Teste de verificaÃ§Ã£o do correto recebimento do processo no destino
      *
      * @group verificacao_recebimento
      * @large
@@ -72,7 +72,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
 
 
     /**
-     * Teste de trâmite externo de processo realizando a anexação e a devolução para a mesma unidade de origem
+     * Teste de trÃ¢mite externo de processo realizando a anexaÃ§Ã£o e a devoluÃ§Ã£o para a mesma unidade de origem
      *
      * @group envio
      * @large
@@ -85,7 +85,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
-        // Selecionar banco do org2 para fazer inserção dos documentos
+        // Selecionar banco do org2 para fazer inserÃ§Ã£o dos documentos
         putenv("DATABASE_HOST=org2-database");
 
         self::$documentoTeste3 = $this->gerarDadosDocumentoExternoTeste(self::$remetente);
@@ -121,7 +121,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         // Abre processo principal para tramitar
         $this->abrirProcesso(self::$protocoloTestePrincipal);
 
-        // Trâmitar Externamento processo para órgão/unidade destinatária
+        // TrÃ¢mitar Externamento processo para Ã³rgÃ£o/unidade destinatÃ¡ria
         $this->tramitarProcessoExternamente(
             self::$protocoloTestePrincipal,
             self::$destinatario['REP_ESTRUTURAS'],
@@ -133,7 +133,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
 
 
     /**
-     * Teste de verificação do correto envio do processo anexado no sistema remetente
+     * Teste de verificaÃ§Ã£o do correto envio do processo anexado no sistema remetente
      *
      * @group verificacao_envio
      * @large
@@ -152,21 +152,21 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
             sleep(5);
             $testCase->refresh();
             $paginaProcesso = new PaginaProcesso($testCase);
-            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trâmite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
+            $testCase->assertStringNotContainsString(mb_convert_encoding("Processo em trÃ¢mite externo para ", 'UTF-8', 'ISO-8859-1'), $paginaProcesso->informacao());
             $testCase->assertFalse($paginaProcesso->processoAberto());
             $testCase->assertEquals($orgaosDiferentes, $paginaProcesso->processoBloqueado());
             return true;
         }, PEN_WAIT_TIMEOUT);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
-        $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
+        $mensagemRecibo = sprintf("TrÃ¢mite externo do Processo %s para %s", self::$protocoloTestePrincipal, $unidade);
         $this->validarRecibosTramite($mensagemRecibo, true, true);
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
         $this->validarProcessosTramitados(self::$protocoloTestePrincipal, $orgaosDiferentes);
     }
 
     /**
-     * Teste de verificação da correta devolução do processo anexado no destinatário
+     * Teste de verificaÃ§Ã£o da correta devoluÃ§Ã£o do processo anexado no destinatÃ¡rio
      *
      * @group verificacao_recebimento
      * @large
@@ -193,7 +193,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
 
         $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
-        // Validação dos dados do processo principal
+        // ValidaÃ§Ã£o dos dados do processo principal
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
         $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste4, self::$destinatario);
@@ -202,7 +202,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
         $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
 
-        // Validação dos dados do processo anexado
+        // ValidaÃ§Ã£o dos dados do processo anexado
         $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
         $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoAnexado));
@@ -210,9 +210,8 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[1], self::$documentoTeste2, self::$destinatario);
         $this->validarDadosDocumento($listaDocumentosProcessoAnexado[2], self::$documentoTeste3, self::$destinatario);
     }
-    
     /**
-     * Teste de realizar reprodução de último tramite
+     * Teste de realizar reproduÃ§Ã£o de Ãºltimo tramite
      *
      * @group envio
      * @large
@@ -226,16 +225,16 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $strProtocoloTeste = self::$protocoloTestePrincipal;
         $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
         
-        // 11 - Reproduzir último trâmite
+        // 11 - Reproduzir Ãºltimo trÃ¢mite
         $this->abrirProcesso($strProtocoloTeste);
         $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
-        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+        $this->assertStringContainsString(mb_convert_encoding("ReproduÃ§Ã£o de Ãºltimo trÃ¢mite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
         $this->refresh();
         $this->waitUntil(function ($testCase) {
             sleep(5);
             $testCase->refresh();
             $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $mensagemTramite = mb_convert_encoding("ReproduÃ§Ã£o de Ãºltimo trÃ¢mite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
             $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -243,7 +242,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
     }
 
     /**
-     * Teste para verificar a reprodução de último tramite no destinatario
+     * Teste para verificar a reproduÃ§Ã£o de Ãºltimo tramite no destinatario
      *
      * @group envio
      * @large
@@ -264,7 +263,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
             sleep(5);
             $testCase->refresh();
             $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+            $mensagemTramite = mb_convert_encoding("ReproduÃ§Ã£o de Ãºltimo trÃ¢mite recebido na entidade", 'UTF-8', 'ISO-8859-1');
             $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
@@ -272,7 +271,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
     }
 
     /**
-     * Teste para verificar a reprodução de último tramite no remetente
+     * Teste para verificar a reproduÃ§Ã£o de Ãºltimo tramite no remetente
      *
      * @group envio
      * @large
@@ -294,14 +293,14 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
             sleep(5);
             $testCase->refresh();
             $testCase->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+            $mensagemTramite = mb_convert_encoding("ReproduÃ§Ã£o de Ãºltimo trÃ¢mite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
             $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
             return true;
         }, PEN_WAIT_TIMEOUT);
 
             $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
 
-        // Validação dos dados do processo principal
+        // ValidaÃ§Ã£o dos dados do processo principal
         $listaDocumentosProcessoPrincipal = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoPrincipal));
         $this->validarDadosDocumento($listaDocumentosProcessoPrincipal[0], self::$documentoTeste4, self::$destinatario);
@@ -310,7 +309,7 @@ class TramiteProcessoComDevolucaoAnexadoOutroTest extends FixtureCenarioBaseTest
         $this->paginaProcesso->selecionarDocumento(self::$protocoloTesteAnexado);
         $this->assertTrue($this->paginaDocumento->ehProcessoAnexado());
 
-        // Validação dos dados do processo anexado
+        // ValidaÃ§Ã£o dos dados do processo anexado
         $this->paginaProcesso->pesquisar(self::$protocoloTesteAnexado);
         $listaDocumentosProcessoAnexado = $this->paginaProcesso->listarDocumentos();
         $this->assertEquals(3, count($listaDocumentosProcessoAnexado));
