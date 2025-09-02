@@ -112,4 +112,91 @@ class TramiteProcessoContendoDocumentoExternoTest extends FixtureCenarioBaseTest
         $this->assertTrue(count($listaDocumentos) == 1);
         $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
     }
+    
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * @group envio
+     * @large
+     *
+     * @depends test_verificar_destino_processo_contendo_documento_externo
+     *
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+      
+      // 11 - Reproduzir último trâmite
+      $this->abrirProcesso($strProtocoloTeste);
+      $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+      $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+      $this->refresh();
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+  }
+
+  public function test_reproducao_ultimo_tramite()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+      $this->abrirProcesso($strProtocoloTeste);
+      
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+  }
+
+  public function test_reproducao_ultimo_tramite_remetente_finalizado()
+  {
+      $strProtocoloTeste = self::$protocoloTeste;
+
+      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+      // 11 - Abrir protocolo na tela de controle de processos
+      $this->abrirProcesso($strProtocoloTeste);
+
+      $this->waitUntil(function ($testCase) {
+          sleep(5);
+          $testCase->refresh();
+          $testCase->paginaProcesso->navegarParaConsultarAndamentos();
+          $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          $testCase->assertTrue($testCase->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+          return true;
+      }, PEN_WAIT_TIMEOUT);
+
+        $listaDocumentos = $this->paginaProcesso->listarDocumentos();
+
+        // 12 - Validar dados  do processo
+        $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
+        $strTipoProcesso .= self::$processoTeste['TIPO_PROCESSO'];
+        self::$processoTeste['OBSERVACOES'] = $orgaosDiferentes ? $strTipoProcesso : null;
+
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->validarDadosProcesso(self::$processoTeste['DESCRICAO'], self::$processoTeste['RESTRICAO'], self::$processoTeste['OBSERVACOES'], array(self::$processoTeste['INTERESSADOS']));
+        
+        // 13 - Verificar recibos de trâmite
+        $this->validarRecibosTramite("Recebimento do Processo $strProtocoloTeste", false, true);
+
+        // 14 - Validar dados do documento
+        $this->assertTrue(count($listaDocumentos) == 1);
+        $this->validarDadosDocumento($listaDocumentos[0], self::$documentoTeste, self::$destinatario);
+  }
 }

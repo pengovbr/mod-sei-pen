@@ -289,11 +289,17 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $this->paginaBase->sairSistema();
     }
 
-    protected function abrirProcesso($protocolo)
+     protected function abrirProcesso($protocolo)
     {
-        $this->paginaBase->navegarParaControleProcesso();
+      $this->paginaBase->navegarParaControleProcesso();
+    try {
         $this->paginaControleProcesso->abrirProcesso($protocolo);
+    } catch (\Exception $e) {
+        $this->paginaBase->pesquisar($protocolo);
+        sleep(2);
+        $this->byXPath('(//a[@id="lnkInfraMenuSistema"])[2]')->click();
     }
+  }
 
     protected function abrirProcessoPelaDescricao($descricao)
     {
@@ -699,6 +705,10 @@ class CenarioBaseTestCase extends Selenium2TestCase
         $strTipoProcesso = mb_convert_encoding("Tipo de processo no órgão de origem: ", 'UTF-8', 'ISO-8859-1');
         $strTipoProcesso .= $processoTeste['TIPO_PROCESSO'];
         $processoTeste['OBSERVACOES'] = (!$devolucao) ? $strTipoProcesso : $processoTeste['OBSERVACOES'];
+       
+        $this->abrirProcesso($strProtocoloTeste);
+
+
         $this->validarDadosProcesso($processoTeste['DESCRICAO'], $processoTeste['RESTRICAO'], $processoTeste['OBSERVACOES'], $processoTeste['INTERESSADOS']);
 
         // 13 - Verificar recibos de trâmite
