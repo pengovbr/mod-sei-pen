@@ -199,7 +199,7 @@ class CriticasDesativarExcluirUnidadeTipoProcDocTest extends CenarioBaseTestCase
         $this->paginaUnidades->excluirUnidades();
         $this->waitUntil(function ($testCase)  {
             $testCase->frame(null);
-            $mensagemValidacao = utf8_encode('Essa unidade está mapeada em Administração -> Tramita GOV.BR -> Mapeamento de Unidades -> Listar');
+            $mensagemValidacao = utf8_encode('Unidade já participou na tramitação de processos.');
             $this->assertStringContainsString($mensagemValidacao, $testCase->byId('divInfraMsg0')->text());
             return true;
         }, PEN_WAIT_TIMEOUT);
