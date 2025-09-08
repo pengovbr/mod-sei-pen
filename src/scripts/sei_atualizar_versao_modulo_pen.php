@@ -2713,7 +2713,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
 try {
     session_start();
-  if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")) {
+  if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.3")) {
       $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
       SessaoSEI::getInstance(false);
