@@ -290,6 +290,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
             $this->instalarV4010();
         case '4.0.1':
           $this->instalarV4020();
+        case '4.0.2':
+          $this->instalarV4030();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2619,6 +2621,11 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("4.0.2");
   }
 
+  protected function instalarV4030()
+    {
+      $this->atualizarNumeroVersao("4.0.3");
+    }
+
 
     /**
      * Remover blocos legados
@@ -2706,7 +2713,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
 try {
     session_start();
-  if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0")) {
+  if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.3")) {
       $objInfraParametro = new InfraParametro(BancoSEI::getInstance());
 
       SessaoSEI::getInstance(false);
