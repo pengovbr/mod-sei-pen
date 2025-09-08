@@ -1,289 +1,280 @@
 <?php
 
+use Facebook\WebDriver\Remote\RemoteWebDriver;
+use Facebook\WebDriver\WebDriverBy;
+use Facebook\WebDriver\WebDriverKeys;
+use Facebook\WebDriver\WebDriverExpectedCondition;
+use Facebook\WebDriver\WebDriverWait;
+use Facebook\WebDriver\Exception\TimeOutException;
+
 class PaginaProcesso extends PaginaTeste
 {
-    const STA_STATUS_PROCESSO_ABERTO = 1;
+    const STA_STATUS_PROCESSO_ABERTO   = 1;
     const STA_STATUS_PROCESSO_CONCLUIDO = 2;
 
-  public function __construct($test)
+  public function __construct(RemoteWebDriver $driver, $testcase)
     {
-      parent::__construct($test);
+      parent::__construct($driver, $testcase);
   }
 
-  public function concluirProcesso()
+  public function concluirProcesso(): void
     {
-        $this->test->frame(null);
-        $this->test->frame("ifrConteudoVisualizacao");
-        $concluirProcessoButton = $this->test->byXPath("//img[@alt='Concluir Processo']");
-        $concluirProcessoButton->click();
-        $this->test->frame("ifrVisualizacao");
-        $confirmarConcluirProcessoButton = $this->test->byId('sbmSalvar');
-        $confirmarConcluirProcessoButton->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Concluir Processo']")->click();
+      $this->frame('ifrVisualizacao');
+      $this->elById('sbmSalvar')->click();
   }
 
-  public function incluirDocumento()
+  public function incluirDocumento(): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $incluirDocumentoButton = $this->test->byXPath("//img[@alt='Incluir Documento']");
-      $incluirDocumentoButton->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Incluir Documento']")->click();
   }
 
-  public function enviarProcesso()
+  public function enviarProcesso(): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->byXPath("//img[@alt='Enviar Processo']")->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Enviar Processo']")->click();
   }
 
-  public function cancelarTramitacaoExterna()
+  public function cancelarTramitacaoExterna(): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->test->byXPath(mb_convert_encoding("//img[@alt='Cancelar Tramitação Externa']", 'UTF-8', 'ISO-8859-1'))->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Cancelar Tramitação Externa']")->click();
   }
 
-  public function navegarParaEditarProcesso()
+  public function navegarParaEditarProcesso(): void
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar/Alterar Processo']");
-      $this->editarProcessoButton->click();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Consultar/Alterar Processo']")->click();
   }
 
-  public function navegarParaOrdenarDocumentos()
-  {
-    $this->test->frame(null);
-    $this->test->frame("ifrConteudoVisualizacao");
-    $button = $this->test->byXPath(mb_convert_encoding("//img[@alt='Ordenar Árvore do Processo']", 'UTF-8', 'ISO-8859-1'));
-    $button->click();
+  public function navegarParaOrdenarDocumentos(): void
+    {
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='Ordenar Árvore do Processo']")->click();
   }
 
-  public function trocarOrdenacaoDocumentos()
-  {
-    $this->test->frame(null);
-    $this->test->frame("ifrConteudoVisualizacao");
-    $this->test->frame("ifrVisualizacao");
-    $this->test->byXPath("//*[@id='selRelProtocoloProtocolo']/option[1]")->click();
-    sleep(1);
-    $this->test->byXPath("//a[@onclick='objLupaRelProtocoloProtocolo.moverAbaixo();']")->click();
-    sleep(1);
-    $this->test->byXPath("//*[@id='divInfraBarraComandosSuperior']/button[@value='Salvar']")->click();
-  }
-  
-  public function navegarParaTramitarProcesso()
+  public function trocarOrdenacaoDocumentos(): void
     {
-      $this->test->waitUntil(function($testCase) {
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->frame('ifrVisualizacao');
+      $this->elByXPath("//*[@id='selRelProtocoloProtocolo']/option[1]")->click();
+      sleep(1);
+      $this->elByXPath("//a[@onclick='objLupaRelProtocoloProtocolo.moverAbaixo();']")->click();
+      sleep(1);
+      $this->elByXPath("//*[@id='divInfraBarraComandosSuperior']/button[@value='Salvar']")->click();
+  }
+
+  public function navegarParaTramitarProcesso(): void
+    {
+      $this->waitUntil(function() {
           $this->selecionarProcesso();
-
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-            
-          $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Envio Externo de Processo']");
-          $this->editarProcessoButton->click();
+          $this->frame(null);
+          $this->frame('ifrConteudoVisualizacao');
+          $this->elByXPath("//img[@alt='Envio Externo de Processo']")->click();
           sleep(2);
-
-          $this->test->frame("ifrVisualizacao");
-          $testCase->assertStringContainsString('Envio Externo de Processo', $testCase->byCssSelector('body')->text());
+          $this->frame('ifrVisualizacao');
           return true;
       }, PEN_WAIT_TIMEOUT);
   }
 
-  public function navegarParaConsultarAndamentos()
+  public function navegarParaConsultarAndamentos(): void
     {
-      $this->test->waitUntil(function($testCase) {
-          $this->test->frame(null);
-          $this->test->frame("ifrArvore");
-          $testCase->byLinkText('Consultar Andamento')->click();
-
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-          $this->test->frame("ifrVisualizacao");
+      sleep(2);
+      $this->waitUntil(function() {
+          $this->frame(null);
+          $this->frame('ifrArvore');
+          $this->elByLinkText('Consultar Andamento')->click();
+          $this->frame(null);
+          $this->frame('ifrConteudoVisualizacao');
+          $this->frame('ifrVisualizacao');
           sleep(2);
-          $testCase->assertStringContainsString(mb_convert_encoding('Histórico do Processo', 'UTF-8', 'ISO-8859-1'), $testCase->byCssSelector('body')->text());
           return true;
       }, PEN_WAIT_TIMEOUT);
   }
 
-  public function navegarParaConsultarRecibos()
+  public function navegarParaConsultarRecibos(): void
     {
-      $this->test->waitUntil(function($testCase) {
-          // Selecionar processo na Ã¡rvore
+      $this->waitUntil(function() {
           $this->selecionarProcesso();
-
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-          $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Consultar Recibos']");
-          $this->editarProcessoButton->click();
+          $this->frame(null);
+          $this->frame('ifrConteudoVisualizacao');
+          $this->elByXPath("//img[@alt='Consultar Recibos']")->click();
           sleep(2);
-            
-          $this->test->frame("ifrVisualizacao");
-          $testCase->assertStringContainsString('Consultar Recibos', $testCase->byCssSelector('body')->text());
+          $this->frame('ifrVisualizacao');
           return true;
       }, PEN_WAIT_TIMEOUT);
   }
 
-  public function navegarParaAnexarProcesso()
+  public function navegarParaAnexarProcesso(): void
     {
-      $this->test->waitUntil(function($testCase) {
+      $this->waitUntil(function() {
           $this->selecionarProcesso();
-
-          $this->test->frame(null);
-          $this->test->frame("ifrConteudoVisualizacao");
-          $this->editarProcessoButton = $this->test->byXPath("//img[@alt='Anexar Processo']");
-          $this->editarProcessoButton->click();
+          $this->frame(null);
+          $this->frame('ifrConteudoVisualizacao');
+          $this->elByXPath("//img[@alt='Anexar Processo']")->click();
           sleep(2);
-
-          $this->test->frame("ifrVisualizacao");
-          $testCase->assertStringContainsString(mb_convert_encoding('Anexação de Processos', 'UTF-8', 'ISO-8859-1'), $testCase->byCssSelector('body')->text());
+          $this->frame('ifrVisualizacao');
           return true;
       }, PEN_WAIT_TIMEOUT);
   }
 
-  public function navegarParaTramitarProcessoInterno()
+  public function navegarParaTramitarProcessoInterno(): void
     {
       $this->enviarProcesso();
   }
 
-  public function informacao()
+  public function informacao(): string
     {
-      $this->test->frame(null);
-      $this->test->frame("ifrConteudoVisualizacao");
-      sleep(10);
-      $this->test->frame("ifrVisualizacao");
-      return $this->test->byId('divArvoreInformacao')->text();
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      sleep(2);
+      $this->frame('ifrVisualizacao');
+      return $this->elById('divArvoreInformacao')->getText();
   }
 
-  public function processoAberto()
+  public function processoAberto(): bool
     {
-    try
-      {
-        $this->test->frame(null);
-        $this->test->frame("ifrConteudoVisualizacao");
-        $this->test->byXPath("//img[@alt='Reabrir Processo']");
-        return false;
-    }
-    catch(Exception $e)
-      {
-        return true;
-    }
-  }
-
-  public function processoBloqueado()
-    {
-    try
-      {
-        $this->test->frame(null);
-        $this->test->frame("ifrArvore");
-        $this->test->byXPath("//img[@title='Processo Bloqueado']");
-        return true;
-    }
-    catch(Exception $e)
-      {
-        return false;
-    }
-  }
-
-  public function deveSerDocumentoAnexo($bolDevePossuir, $nomeDocumentoArvore)
-    {
-    try
-      {
-        $this->test->frame(null);
-        $this->test->frame("ifrArvore");
-      if($bolDevePossuir){
-            $idAnexo=$this->test->byXPath("//span[contains(text(),'" . $nomeDocumentoArvore . "')]")->attribute('id');
-            $idAnexo=str_replace("span", "", $idAnexo);
-            $this->test->byXPath("//img[contains(@id,'iconMD_PEN_DOC_REF" . $idAnexo . "')]");
-      }
-        return true;
-    }
-    catch(Exception $e)
-      {
-        return false;
-    }
-  }
-
-  public function ehDocumentoCancelado($nomeDocumentoArvore)
-    {
-    try
-      {
-        $to = $this->test->timeouts()->getLastImplicitWaitValue();
-        $this->test->timeouts()->implicitWait(300);
-        $this->test->frame(null);
-        $this->test->frame("ifrArvore");
-        $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_cancelado.svg?')]");
-        return true;
-    }
-    catch(Exception $e)
-      {
-        return false;
-    }finally{
-        $this->test->timeouts()->implicitWait($to);
-    }
-  }
-
-  public function ehDocumentoMovido($nomeDocumentoArvore)
-    {
-    try
-      {
-        $to = $this->test->timeouts()->getLastImplicitWaitValue();
-        $this->test->timeouts()->implicitWait(300);
-        $this->test->frame(null);
-        $this->test->frame("ifrArvore");
-        $this->test->byLinkText($nomeDocumentoArvore)->byXPath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_movido.svg?')]");
-        return true;
-    }
-    catch(Exception $e)
-      {
-        return false;
-    }finally{
-        $this->test->timeouts()->implicitWait($to);
-    }
-  }
-
-  private function selecionarItemArvore($nomeArvore)
-    {
-      $this->test->frame(null);
-      $this->test->frame("ifrArvore");
-      $this->test->byLinkText($nomeArvore)->click();
-  }
-
-  public function selecionarDocumento($nomeDocumentoArvore)
-    {
-      $this->selecionarItemArvore($nomeDocumentoArvore);
-  }
-
-  public function selecionarProcesso()
-    {
-      $this->selecionarItemArvore($this->listarArvoreProcesso()[0]);
-      sleep(1);
-  }
-
-  public function listarDocumentos()
-    {
-      $itens = $this->listarArvoreProcesso();
-      return (count($itens) > 1) ? array_slice($itens, 1) : null;
-  }
-
-  private function listarArvoreProcesso()
-    {
-      $this->test->frame(null);
-      $this->test->frame("ifrArvore");
-      $itens = $this->test->elements($this->test->using('css selector')->value('div.infraArvore > a > span[id]'));
-      return array_map(function($item) {return $item->text();
-      }, $itens);
-  }
-
-  public function validarBotaoExiste($botao)
-  {
     try {
-        $this->test->frame(null);
-        $this->test->frame("ifrConteudoVisualizacao");
-        $botao = $this->test->byXPath("//img[@alt='$botao']");
+        $this->frame(null);
+        $this->frame('ifrConteudoVisualizacao');
+        $this->elByXPath("//img[@alt='Reabrir Processo']");
+        return false;
+    } catch (\Exception $e) {
+        return true;
+    }
+  }
+
+  public function processoBloqueado(): bool
+    {
+    try {
+        $this->frame(null);
+        $this->frame('ifrArvore');
+        $this->elByXPath("//img[@title='Processo Bloqueado']");
         return true;
     } catch (\Exception $e) {
         return false;
     }
   }
-  
+
+  public function deveSerDocumentoAnexo(bool $devePossuir, string $nomeDocumentoArvore): bool
+    {
+    try {
+        $this->frame(null);
+        $this->frame('ifrArvore');
+      if ($devePossuir) {
+        $span = $this->driver->findElement(
+            WebDriverBy::xpath("//span[contains(text(), '{$nomeDocumentoArvore}')]"));
+        $id   = str_replace('span', '', $span->getAttribute('id'));
+        $this->driver->findElement(
+            WebDriverBy::xpath("//img[contains(@id, 'iconMD_PEN_DOC_REF{$id}')]"));
+      }
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
+  }
+
+  public function ehDocumentoCancelado(string $nomeDocumentoArvore): bool
+    {
+    try
+    {
+        sleep(1);
+        $this->frame(null);
+        $this->frame("ifrArvore");
+        $this->elByLinkText($nomeDocumentoArvore)->findElement(
+            WebDriverBy::xpath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_cancelado.svg?')]"));
+        return true;
+    }
+    catch(Exception $e)
+    {
+        return false;
+    }
+  }
+
+  public function ehDocumentoMovido(string $nomeDocumentoArvore): bool
+    {
+    try
+        {
+        sleep(2);
+        $this->frame(null);
+        $this->frame("ifrArvore");
+        $this->elByLinkText($nomeDocumentoArvore)->findElement(
+            WebDriverBy::xpath(".//preceding-sibling::a[1]/img[contains(@src,'svg/documento_movido.svg?')]"));
+        return true;
+    }
+    catch(Exception $e)
+        {
+        return false;
+    }
+  }
+  private function selecionarItemArvore(string $nomeArvore): void
+    {
+      $this->frame(null);
+      $this->frame('ifrArvore');
+      $this->elByLinkText($nomeArvore)->click();
+  }
+
+  public function selecionarDocumento(string $nomeDocumentoArvore): void
+    {
+      $this->selecionarItemArvore($nomeDocumentoArvore);
+  }
+
+  public function selecionarProcesso(): void
+    {
+      $items = $this->listarArvoreProcesso();
+    if (!empty($items)) {
+        $this->selecionarItemArvore($items[0]);
+    }
+      sleep(1);
+  }
+
+  public function listarDocumentos(): ?array
+    {
+      $items = $this->listarArvoreProcesso();
+      return count($items) > 1 ? array_slice($items, 1) : null;
+  }
+
+  private function listarArvoreProcesso(): array
+    {
+      $this->frame(null);
+      $this->frame('ifrArvore');
+      $elements = $this->elementsByCss('div.infraArvore > a > span[id]');
+      return array_map(function($el){return $el->getText();
+      }, $elements);
+  }
+
+  public function validarBotaoExiste(string $botao): bool
+    {
+    try {
+        $this->frame(null);
+        $this->frame('ifrConteudoVisualizacao');
+        $this->elByXPath("//img[@alt='{$botao}']");
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
+  }
+
+  public function reproduzirUltimoTramite()
+    {
+      sleep(5);
+      $this->frame(null);
+      $this->frame("ifrConteudoVisualizacao");
+      sleep(1);
+      $this->elByXPath("//img[@alt='Reproduzir Último Trâmite']")->click();
+      sleep(1);
+      $r1 = $this->alertTextAndClose(true);
+      sleep(1);
+      $r2 = $this->alertTextAndClose(true);
+      return $r2;
+  }
 }

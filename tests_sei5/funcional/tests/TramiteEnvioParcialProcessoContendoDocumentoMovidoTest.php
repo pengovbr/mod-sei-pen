@@ -3,18 +3,6 @@
 use PHPUnit\Framework\Attributes\{Group,Large,Depends};
 use PHPUnit\Framework\AssertionFailedError;
 
-/* Resumo:
-Cria processo no org1
-    cria um doc externo
-    cria um doc interno
-    move o doc externo para outro processo
-    recebe de volta o doc externo enviado anteriormente
-    envia o processo para org2
-Org2 recebe o processo, não faz nada, e devolve pro org1;
-Org1 envia novamente pro Org2, sem anexar nada;
-*/
-
-
 /**
  * Testes de trâmite de processos contendo um documento movido
  *
@@ -24,7 +12,7 @@ Org1 envia novamente pro Org2, sem anexar nada;
  * Execution Groups
  * #[Group('execute_parallel_group1')]
  */
-class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenarioBaseTestCase
+class TramiteEnvioParcialProcessoContendoDocumentoMovidoTest extends FixtureCenarioBaseTestCase
 {
     public static $remetente;
     public static $destinatario;
@@ -37,18 +25,25 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
     public static $protocoloTesteFormatado;
 
 
+    public static $arrIdMapEnvioParcialOrgaoA;
+    public static $arrIdMapEnvioParcialOrgaoB;
+
     /**
      * Teste inicial de trâmite de um processo contendo um documento movido
      *
-     * #[Large]
      * #[Group('envio')]
+     * #[Large]
+     * 
      * #[Depends('CenarioBaseTestCase::setUpBeforeClass')]
+     *
      * @return void
      */
     public function test_tramitar_processo_contendo_documento_movido()
     {
         self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
         self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $this->criarCenarioTramiteEnvioParcialTest();
 
         // Definição de dados de teste do processo principal
         self::$processoTeste = $this->gerarDadosProcessoTeste(self::$remetente);
@@ -69,7 +64,6 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
-
 
         // Movendo documento do processo principal para o processo secundário
         $documentoParaMover = $this->paginaProcesso->listarDocumentos()[0];
@@ -100,7 +94,7 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
         
-        $this->waitUntil(function () {
+        $this->waitUntil(function() {
           sleep(5);
           $this->paginaBase->refresh();
         try {
@@ -111,7 +105,8 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         } catch (AssertionFailedError $e) {
             return false;
         }
-        }, PEN_WAIT_TIMEOUT);
+
+      }, PEN_WAIT_TIMEOUT);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
         $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTesteFormatado, $unidade);
@@ -121,13 +116,14 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
     }
 
-    
      /**
      * Teste de devolução do processo recebido no destinatário
      *
-     * #[Large]
      * #[Group('verificacao_envio')]
+     * #[Large]
+     *
      * #[Depends('test_tramitar_processo_contendo_documento_movido')]
+     *
      * @return void
      */
     public function test_somente_devolucao()
@@ -145,7 +141,7 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
-        $this->waitUntil(function () {
+        $this->waitUntil(function() {
           sleep(5);
           $this->paginaBase->refresh();
         try {
@@ -156,7 +152,8 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         } catch (AssertionFailedError $e) {
             return false;
         }
-        }, PEN_WAIT_TIMEOUT);       
+
+      }, PEN_WAIT_TIMEOUT);      
     }   
 
 
@@ -164,9 +161,11 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
  /**
      * Teste de trâmite secundário do processo para destinatário
      *
-     * #[Large]
      * #[Group('envio')]
+     * #[Large]
+     * 
      * #[Depends('test_somente_devolucao')]
+     *
      * @return void
      */
     public function test_tramite_novamente_para_org2()
@@ -184,7 +183,7 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
 
         $this->abrirProcesso(self::$protocoloTesteFormatado);
 
-        $this->waitUntil(function () {
+        $this->waitUntil(function() {
           sleep(5);
           $this->paginaBase->refresh();
         try {
@@ -195,7 +194,8 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         } catch (AssertionFailedError $e) {
             return false;
         }
-        }, PEN_WAIT_TIMEOUT);
+
+      }, PEN_WAIT_TIMEOUT);
 
         $unidade = mb_convert_encoding(self::$destinatario['NOME_UNIDADE'], "ISO-8859-1");
         $mensagemRecibo = sprintf("Trâmite externo do Processo %s para %s", self::$protocoloTesteFormatado, $unidade);
@@ -203,10 +203,10 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         $this->validarHistoricoTramite(self::$destinatario['NOME_UNIDADE'], true, true);
         $this->validarProcessosTramitados(self::$protocoloTesteFormatado, true);        
 
-    }    
+    }
 
     /**
-     * Teste de realizar reprodução de último tramite
+     * Teste de realizar reprodução de último tramite sem componentes digitais a serem reproduzidos
      *
      * #[Group('envio')]
      * #[Large]
@@ -214,7 +214,7 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
      * #[Depends('test_tramite_novamente_para_org2')]
      * @return void
      */
-    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    public function test_realizar_pedido_reproducao_ultimo_tramite_sem_componentes_digitais_a_serem_reproduzidos()
     {
         $strProtocoloTeste = self::$protocoloTesteFormatado;
 
@@ -223,89 +223,67 @@ class TramiteProcessoContendoDocumentoMovidoEnvioDuploTest extends FixtureCenari
         // 11 - Reproduzir último trâmite
         $this->abrirProcesso($strProtocoloTeste);
         $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
-        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
-
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
-
-        }, PEN_WAIT_TIMEOUT);
+        $this->assertStringContainsString(mb_convert_encoding("Não é possível executar o serviço de reprodução de trâmite do processo $strProtocoloTeste, pois não há componentes digitais válidos a serem reproduzidos", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
     }
 
-    /**
-     * Teste para verificar a reprodução de último tramite no destinatario
-     *
-     * #[Group('envio')]
-     * #[Large]
-     *
-     * #[Depends('test_realizar_pedido_reproducao_ultimo_tramite')]
-     *
-     * @return void
-     */
-    public function test_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$protocoloTesteFormatado;
+  /**
+   * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
+   * #[Group('mapeamento')]
+   */
+  public static function tearDownAfterClass(): void
+  {
+    $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
-
-        $this->abrirProcesso($strProtocoloTeste);
-
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
-
-        }, PEN_WAIT_TIMEOUT);
-
+    putenv("DATABASE_HOST=org1-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
     }
 
-    /**
-     * Teste para verificar a reprodução de último tramite no remetente
-     *
-     * #[Group('envio')]
-     * #[Large]
-     *
-     * #[Depends('test_reproducao_ultimo_tramite')]
-     *
-     * @return void
-     */
-    public function test_reproducao_ultimo_tramite_remetente_finalizado()
-    {
-        $strProtocoloTeste = self::$protocoloTesteFormatado;
-
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-
-        // 11 - Abrir protocolo na tela de controle de processos
-        $this->abrirProcesso($strProtocoloTeste);
-        
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
-
-        }, PEN_WAIT_TIMEOUT);
+    putenv("DATABASE_HOST=org2-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
     }
+    putenv("DATABASE_HOST=org1-database");
+    parent::tearDownAfterClass();
+  }
 
+
+  /*
+  * Criar processo e mapear Envio Parcial no Remetente e Destinatário
+  * #[Group('mapeamento')]
+  * @return void
+  */
+  private function criarCenarioTramiteEnvioParcialTest()
+  {
+
+    // Mapear Envio Parcial no Remetente
+    self::$arrIdMapEnvioParcialOrgaoA = array();
+    putenv("DATABASE_HOST=org1-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE']
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
+
+    // Mapear Envio Parcial no Destinatário
+    self::$arrIdMapEnvioParcialOrgaoB = array();
+    putenv("DATABASE_HOST=org2-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$remetente['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$remetente['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$remetente['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$remetente['NOME_UNIDADE']
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
+
+    putenv("DATABASE_HOST=org1-database");
+  }
 }

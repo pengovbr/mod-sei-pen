@@ -1,10 +1,11 @@
 <?php
 
-use \utilphp\util;
+use PHPUnit\Framework\Attributes\{Group,Large,Depends};
+use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * Execution Groups
- * @group execute_alone_group1
+ * #[Group('execute_alone_group1')]
  */
 class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends FixtureCenarioBaseTestCase
 {
@@ -21,6 +22,8 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
     public static $protocoloTeste;
     public static $servicoPEN;
     public static $documentoZip;
+    public static $remetente;
+    public static $destinatario;
 
     public static $conteudoCompoonenteDigital;
 
@@ -85,8 +88,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
     /**
      * Teste mover documento com múltiplos componentes digitais para outro processo
      *
-     * @depends test_recebimento_processo_com_multiplos_componentes_digitais
-     *
+     * #[Depends('test_recebimento_processo_com_multiplos_componentes_digitais')]
      * @return void
      */
     public function test_mover_documento_com_multiplos_componentes_digitais_para_outro_processo()
@@ -123,8 +125,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
     /**
      * Testa envio processo com múltiplos componentes digitais movido
      *
-     * @depends test_mover_documento_com_multiplos_componentes_digitais_para_outro_processo
-     *
+     * #[Depends('test_mover_documento_com_multiplos_componentes_digitais_para_outro_processo')]
      * @return void
      */
     public function test_envio_processo_com_multiplos_componentes_digitais_movido()
@@ -140,6 +141,115 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
         
         $this->sairSistema();
     }
+
+    /**
+     * Teste de realizar reprodução de último tramite
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_devolucao_processo_para_destino_2')]
+     * @return void
+     */
+    public function test_realizar_pedido_reproducao_ultimo_tramite()
+    {
+        self::$protocoloTeste = self::$processoTeste["PROTOCOLO"];
+        self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+        self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+        $strProtocoloTeste = self::$protocoloTeste;
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Reproduzir último trâmite
+        $this->abrirProcesso($strProtocoloTeste);
+        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
+
+        }, PEN_WAIT_TIMEOUT);
+    }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no destinatario
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_realizar_pedido_reproducao_ultimo_tramite')]
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite()
+    {
+        $strProtocoloTeste = self::$protocoloTeste;
+
+        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+
+        $this->abrirProcesso($strProtocoloTeste);
+
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
+
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
+    /**
+     * Teste para verificar a reprodução de último tramite no remetente
+     *
+     * #[Group('envio')]
+     * #[Large]
+     *
+     * #[Depends('test_reproducao_ultimo_tramite')]
+     *
+     * @return void
+     */
+    public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    {
+        $strProtocoloTeste = self::$protocoloTeste;
+
+        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+
+        // 11 - Abrir protocolo na tela de controle de processos
+        $this->abrirProcesso($strProtocoloTeste);
+        
+        $this->waitUntil(function() {
+            sleep(5);
+            $this->paginaBase->refresh();
+            $this->paginaProcesso->navegarParaConsultarAndamentos();
+            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+          try {
+              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+              return true;
+          } catch (AssertionFailedError $e) {
+              return false;
+          }
+
+        }, PEN_WAIT_TIMEOUT);
+
+    }
+
 
     private function receberReciboTramite($novoTramite)
     {
@@ -370,20 +480,20 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
         }
 
         $documentoDoProcesso = array(
-            'protocolo' => util::random_string(5),
+            'protocolo' => randomString(5),
             'nivelDeSigilo' => 1,
             'descricao' => $documentoTeste['DESCRICAO'],
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'ordem' => $ordemDocumento,
             'produtor' => array(
-                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
                 "tipo" => "orgaopublico"
             ),
 
             'especie' => array(
                 'codigo' => 42,
-                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
+                'nomeNoProdutor' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1')
             ),
 
             'interessados' => array(
@@ -428,7 +538,7 @@ class TramiteRecebimentoMultiplosComponentesDigitaisArquivoMovidoTest extends Fi
             'dataHoraDeProducao' => '2017-05-15T03:41:13',
             'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
             'produtor' => array(
-                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
                 'tipo' => "orgaopublico",
             ),
             'interessados' => array(

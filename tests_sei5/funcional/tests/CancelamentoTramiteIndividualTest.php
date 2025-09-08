@@ -109,11 +109,16 @@ class CancelamentoTramiteIndividualTest extends FixtureCenarioBaseTestCase
         sleep(5);
 
         $this->paginaBase->navegarParaControleProcesso();
-        $this->waitUntil(function ($testCase) use ($strProtocoloTeste) {
+        $this->waitUntil(function() use ($strProtocoloTeste) {
             sleep(5);
-            $testCase->refresh();
-            $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
-            return true;
+            try {
+                $this->paginaBase->refresh();
+                $this->paginaControleProcesso->abrirProcesso($strProtocoloTeste);
+                return true;
+            } catch (\Exception $e) {
+                return false;
+            }
+
         }, PEN_WAIT_TIMEOUT);
 
         // Esperar o processo tramitar

@@ -1,5 +1,8 @@
 <?php
 
+use Facebook\WebDriver\WebDriverBy;
+use PHPUnit\Framework\AssertionFailedError;
+
 class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioBaseTestCase
 {
   public static $remetente;
@@ -60,17 +63,17 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
       self::$destinatario['NOME_UNIDADE'],
       self::$destinatario['SIGLA_UNIDADE_HIERARQUIA'],
       false,
-      function ($testCase) {
+      function () {
         try {
-          $testCase->frame('ifrEnvioProcesso');
+          $this->paginaBase->frame('ifrEnvioProcesso');
           $mensagemSucesso = mb_convert_encoding('Processo(s) aguardando envio. Favor acompanhar a tramitação por meio do bloco, na funcionalidade \'Blocos de Trâmite Externo\'', 'UTF-8', 'ISO-8859-1');
-          $testCase->assertStringContainsString($mensagemSucesso, $testCase->byCssSelector('body')->text());
-          $btnFechar = $testCase->byXPath("//input[@id='btnFechar']");
+          $this->assertStringContainsString($mensagemSucesso, $this->paginaBase->elByCss('body')->getText());
+          $btnFechar = $this->paginaBase->elByXPath("//input[@id='btnFechar']");
           $btnFechar->click();
         } finally {
           try {
-            $testCase->frame(null);
-            $testCase->frame("ifrVisualizacao");
+            $this->paginaBase->frame(null);
+            $this->paginaBase->frame("ifrVisualizacao");
           } catch (Exception $e) {
           }
         }
@@ -90,16 +93,20 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     $this->paginaCadastrarProcessoEmBloco->navegarListagemBlocoDeTramite();
     $this->paginaCadastrarProcessoEmBloco->bntVisualizarProcessos();
 
-    $this->waitUntil(function ($testCase) {
+    $this->waitUntil(function () {
       sleep(5);
-      $testCase->refresh();
-      $linhasDaTabela = $testCase->elements($testCase->using('xpath')->value('//table[@id="tblBlocos"]/tbody/tr'));
+      $this->paginaBase->refresh();
+      $linhasDaTabela = $this->paginaBase->elementsByXPath('//table[@id="tblBlocos"]/tbody/tr');
 
       $totalEmProcessamento = 0;
       foreach ($linhasDaTabela as $linha) {
-        $statusTd = $linha->byXPath('./td[7]');
+        $statusTd = $linha->findElement(
+          WebDriverBy::xpath('./td[7]')
+        );
         try {
-            $statusImg = $statusTd->byXPath(mb_convert_encoding(".//img[@title='Aguardando Processamento']", 'UTF-8', 'ISO-8859-1'));
+          $statusImg = $statusTd->findElement(
+          WebDriverBy::xpath(mb_convert_encoding(".//img[@title='Aguardando Processamento']", 'UTF-8', 'ISO-8859-1'))
+          );
             if ($statusImg){
                 $totalEmProcessamento++;
             }
@@ -107,11 +114,21 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
             // Ignora a exceção se a imagem não for encontrada
         }
       }
-      $this->assertEquals($totalEmProcessamento,0); // Todos processos enviados
-      return true;
+      try { 
+          $this->assertEquals($totalEmProcessamento,0); // Todos processos enviados
+          return true;
+      } catch (AssertionFailedError $e) {
+          return false;
+      }
+
     }, PEN_WAIT_TIMEOUT);
 
-    sleep(5);
+    // após o wait, garante de fato que não existem mais elementos
+    $imgs = $this->paginaBase->elementsByCss(
+      '#tblBlocos tbody tr td:nth-child(7) img[title="Aguardando Processamento"]'
+    );
+    $this->assertCount(0, $imgs, 'Ainda existem processos em processamento');
+
   }
 
   public function test_verificar_envio_tramite_em_bloco()
@@ -158,9 +175,9 @@ class TramiteBlocoExternoComProcessoNaoMapeadoRecusaTest extends FixtureCenarioB
     $this->paginaTramiteEmBloco->selecionarTramiteEmBloco();
 
     // Verificação do título da página
-    $titulo = mb_convert_encoding("Incluir Processo(s) no Bloco de Trâmite", 'UTF-8', 'ISO-8859-1');
+    $titulo ="Incluir Processo(s) no Bloco de Trâmite";
     $tituloRetorno = $this->paginaTramiteEmBloco->verificarTituloDaPagina($titulo);
-    $this->assertEquals($titulo, $tituloRetorno);
+    $this->assertTrue($tituloRetorno, mb_convert_encoding('Título não encontrado na página.', 'UTF-8', 'ISO-8859-1'));
 
     // Inclusão do processo no bloco de trâmite
     $this->paginaTramiteEmBloco->selecionarBloco(self::$objBlocoDeTramiteDTO2->getNumId());
