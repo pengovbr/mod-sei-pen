@@ -1,7 +1,7 @@
 <?php
 
 // Identificação da versão do módulo mod-sei-pen. Este deve estar sempre sincronizado com a versão definida em PENIntegracao.php
-define("VERSAO_MODULO_PEN", "4.0.2");
+define("VERSAO_MODULO_PEN", "4.0.3");
 
 $dirSipWeb = !defined("DIR_SIP_WEB") ? getenv("DIR_SIP_WEB") ?: __DIR__ . "/../../web" : DIR_SIP_WEB;
 require_once $dirSipWeb . '/Sip.php';
