@@ -93,14 +93,11 @@ class ProcessoExpedidoRN extends InfraRN
       ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO);
       $objProtocoloDTO->getStrStaEstado();
 
-      $objPaginacao = $this->getObjInfraIBanco()->paginarSql($sql, $numOffset, $numLimit);
-      $total = $objPaginacao['totalRegistros'];
+      $objPaginacao = $this->getObjInfraIBanco()->consultarSql($sql);
 
       $arrProcessosExpedidos = [];
-      $objProtocoloDTO->setNumTotalRegistros($total);
-      $objProtocoloDTO->setNumRegistrosPaginaAtual($total);
 
-    foreach ($objPaginacao['registrosPagina'] as $res) {
+    foreach ($objPaginacao as $res) {
         $data = BancoSEI::getInstance()->formatarLeituraDth($res['dth_abertura']);
         $objProcessoExpedidoDTO = new ProcessoExpedidoDTO();
         $objProcessoExpedidoDTO->setDblIdProtocolo($res['id_protocolo']);
