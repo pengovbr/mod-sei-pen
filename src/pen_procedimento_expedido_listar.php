@@ -26,7 +26,7 @@ try {
   if(get_parent_class(BancoSEI::getInstance()) != 'InfraMySqli') {
       $objFiltroDTO->retDthConclusaoAtividade();
   }
-    $objPaginaSEI->prepararPaginacao($objFiltroDTO, 50);
+    $objPaginaSEI->prepararPaginacao($objFiltroDTO);
 
     $objProcessoExpedidoRN = new ProcessoExpedidoRN();
     $arrObjProcessoExpedidoDTO = $objProcessoExpedidoRN->listarProcessoExpedido($objFiltroDTO);
@@ -106,6 +106,7 @@ try {
         $numIndice++;
     }
       $strResultado .= '</table>';
+      $strResultado .= '<div id="spinner" class="loader"></div>';
   }
 }
 catch (Exception $e) {
@@ -217,7 +218,76 @@ a.processoNaoVisualizado{
   
   #frmProcedimentoExpedido #tblBlocos_wrapper label:first-of-type{font-size: 12px;}
   #frmProcedimentoExpedido #tblBlocos_wrapper select:first-of-type{font-size: 11px;}
-  
+
+  /* Spinner effect */
+#spinner {
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 18px;
+    color: #333;
+}
+
+.loader {
+    width: 200px;
+    height: 140px;
+    background: #155F9B;
+    box-sizing: border-box;
+    position: relative;
+    border-radius: 8px;
+    perspective: 1000px;
+}
+
+.loader:before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    top: 10px;
+    bottom: 10px;
+    border-radius: 8px;
+    background: #f5f5f5 no-repeat;
+    background-size: 60px 10px;
+    background-image: linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0);
+
+    background-position: 15px 30px, 15px 60px, 15px 90px,
+        105px 30px, 105px 60px, 105px 90px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.25);
+}
+
+.loader:after {
+    content: '';
+    position: absolute;
+    width: calc(50% - 10px);
+    right: 10px;
+    top: 10px;
+    bottom: 10px;
+    border-radius: 8px;
+    background: #fff no-repeat;
+    background-size: 60px 10px;
+    background-image: linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0),
+        linear-gradient(#0494C7 100px, transparent 0);
+    background-position: 50% 30px, 50% 60px, 50% 90px;
+    transform: rotateY(0deg);
+    transform-origin: left center;
+    animation: paging 1s linear infinite;
+}
+
+@keyframes paging {
+    to {
+        transform: rotateY(-180deg);
+    }
+}
+
+/* End spinner effect */
 </style>
 <?php $objPaginaSEI->montarJavaScript(); ?>
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
@@ -238,6 +308,7 @@ function abrirProcesso(link){
 
 $(document).ready(function() {
     $('#tblBlocos').dataTable({
+      "processing": true, // Exibe o spinner nativo do DataTables
       "searching": false,
       "columnDefs": [{
         targets: [0, 4],
@@ -252,7 +323,13 @@ $(document).ready(function() {
           "previous": "Anterior",
           "next": "Próximo"
         },
-      }
+      },
+      "preDrawCallback": function() {
+         document.getElementById('spinner').style.visibility = 'visible';
+       },
+       "drawCallback": function() {
+         document.getElementById('spinner').style.visibility = 'hidden';
+       }
     });
 });
 </script>
