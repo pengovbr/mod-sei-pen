@@ -33,6 +33,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
                     //'UtilidadesIntegracao' => 'utilidades',
                     //'MdJulgarIntegracao' => 'trf4/julgamento',
                     //'MdWsSeiRest' => 'wssei',
+                    //'AssinaturaEletronicaIntegracao' => 'assinatura-eletronica',
                     'PENIntegracao' => 'pen',
                 ),
 			),
