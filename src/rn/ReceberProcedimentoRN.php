@@ -2003,8 +2003,8 @@ class ReceberProcedimentoRN extends InfraRN
               $objAssinaturaDTO->setStrProtocoloDocumentoFormatado($objProtocoloDTO->getStrProtocoloFormatado());
               $objAssinaturaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
               $objAssinaturaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-              $objAssinaturaDTO->setStrNome($assinaturasDigital->nome, 'UTF-8', 'ISO-8859-1');
-              $objAssinaturaDTO->setStrTratamento($assinaturasDigital->cargo, 'UTF-8', 'ISO-8859-1');
+              $objAssinaturaDTO->setStrNome($assinaturasDigital->nome);
+              $objAssinaturaDTO->setStrTratamento($assinaturasDigital->cargo);
               $objAssinaturaDTO->setNumIdTarjaAssinatura(1);
               $objAssinaturaDTO->setStrStaFormaAutenticacao($formaAutenticacao);
               $objAssinaturaDTO->setStrNumeroSerieCertificado($numeroSerie);
