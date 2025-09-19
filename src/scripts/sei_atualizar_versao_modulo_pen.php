@@ -2623,6 +2623,17 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
   protected function instalarV4030()
     {
+
+      $objDTO = new TipoConferenciaDTO();
+      $objBD = new TipoConferenciaBD(BancoSEI::getInstance());
+      
+      $objDTO->setStrDescricao('Recebido de outro órgão/entidade');
+      $objDTO->retStrDescricao();
+
+      if ($objBD->contar($objDTO) == 0) {
+          BancoSEI::getInstance()->executarSql("INSERT INTO tipo_conferencia (id_tipo_conferencia, descricao, sin_ativo) VALUES(999, 'Recebido de outro órgão/entidade', 'S')");
+      }
+
       $this->atualizarNumeroVersao("4.0.3");
     }
 

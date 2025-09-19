@@ -882,7 +882,6 @@ class ExpedirProcedimentoRN extends InfraRN
         
         $documento['retirado'] = ($documentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO) ? true : false;
         $documento['nivelDeSigilo'] = $this->obterNivelSigiloPEN($documentoDTO->getStrStaNivelAcessoLocalProtocolo());
-        
 
         //Verifica se o documento faz parte de outro processo devido à sua anexação ou à sua movimentação
       if($staAssociacao != RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO) {
@@ -930,6 +929,11 @@ class ExpedirProcedimentoRN extends InfraRN
         $this->atribuirDataHoraDeRegistroREST($documento, $documentoDTO->getDblIdProcedimento(), $documentoDTO->getDblIdDocumento());
         $documento = $this->atribuirEspecieDocumentalREST($documento, $documentoDTO, $parObjMetadadosTramiteAnterior);
         $documento = $this->atribuirNumeracaoDocumentoREST($documento, $documentoDTO);
+        if ($documentoDTO->getNumIdTipoConferencia() != null) {
+          $documento['identificacao']['complemento'] = json_encode([
+            'tipo_conferencia' => mb_convert_encoding($documentoDTO->getStrDescricaoTipoConferencia(), 'UTF-8', 'ISO-8859-1')
+          ]);
+        }
         
       if($documento['retirado'] === true) {
           $objComponenteDigitalDTO = new ComponenteDigitalDTO();
@@ -1211,12 +1215,24 @@ class ExpedirProcedimentoRN extends InfraRN
       $objAssinaturaDTO->retNumIdAtividade();
       $objAssinaturaDTO->retStrStaFormaAutenticacao();
       $objAssinaturaDTO->retStrP7sBase64();
+      $objAssinaturaDTO->retDblCpf();
+      $objAssinaturaDTO->retStrNome();
+      $objAssinaturaDTO->retStrTratamento();
+      $objAssinaturaDTO->retStrNumeroSerieCertificado();
+      $objAssinaturaDTO->retStrModuloOrigem();
       $resAssinatura = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
+
+      $objAssinEletronicaControladorRN = new AssinEletronicaControladorRN();
+      $tarefa_assinatura = $objAssinEletronicaControladorRN->obterIdTarefaModulo(AssinEletronicaControladorRN::$TI_ASSINATURA_ELETRONICA_DESTACADA_DOCUMENTO);
 
     foreach ($resAssinatura as $keyOrder => $assinatura) {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade()); //7
-        $objAtividadeDTO->setNumIdTarefa([TarefaRN::$TI_ASSINATURA_DOCUMENTO, TarefaRN::$TI_AUTENTICACAO_DOCUMENTO], InfraDTO::$OPER_IN); // 5, 115
+        $objAtividadeDTO->setNumIdTarefa([
+          TarefaRN::$TI_ASSINATURA_DOCUMENTO,
+          TarefaRN::$TI_AUTENTICACAO_DOCUMENTO,
+          $tarefa_assinatura
+        ], InfraDTO::$OPER_IN); // 5, 115
         $objAtividadeDTO->retDthAbertura();
         $objAtividadeDTO->retNumIdAtividade();
         $objAtividadeRN = new AtividadeRN();
@@ -1224,9 +1240,8 @@ class ExpedirProcedimentoRN extends InfraRN
 
         $objAssinaturaDigital = [];
         $objAssinaturaDigital['razao'] = mb_convert_encoding($dataTarjas[$keyOrder], 'UTF-8', 'ISO-8859-1');
-        $objAssinaturaDigital['observacao'] = mb_convert_encoding($dataTarjas[count($dataTarjas) - 1], 'UTF-8', 'ISO-8859-1');
-        $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura());      
-
+        $objAssinaturaDigital['dataHora'] = $this->objProcessoEletronicoRN->converterDataWebService($objAtividade->getDthAbertura()); 
+        
        $objAssinaturaDigital['hash'] = [
         'algoritmo' => self::ALGORITMO_HASH_ASSINATURA,
         'conteudo' => $assinatura->getStrP7sBase64() ? $strHashDocumento : 'vazio'
@@ -1235,8 +1250,51 @@ class ExpedirProcedimentoRN extends InfraRN
          'formato' => 'PKCS7',
          'conteudo' => $assinatura->getStrP7sBase64() ?: 'vazio'
        ]; 
+
+        $observacaoAssintaruras = [];
+        if (class_exists(AssinaturaEletronicaIntegracao::class)){
+          $objValidarAssinaturaDTO = new ValidarAssinaturaDTO();
+          $objValidarAssinaturaDTO->setNumIdDocumento($objDocumentoDTO->getDblIdDocumento());
+          $objValidarAssinaturaDTO->retTodos();
+          $objValidarAssinaturaRN = new ValidarAssinaturaRN();
+          if ($objValidarAssinaturaRN->contar($objValidarAssinaturaDTO)) {
+            $arrObjValidarAssinaturaDTO = $objValidarAssinaturaRN->listar($objValidarAssinaturaDTO);
+            $objValidarAssinaturaDTO = $arrObjValidarAssinaturaDTO[0];
+
+            $cpf = preg_replace('/[^0-9]/', '', $objValidarAssinaturaDTO->getStrIdentificadorAssinante());
+            $observacaoAssintaruras[] = [
+              'cpf' => (strlen($cpf) == 11) ? $cpf : null,
+              'nome' => $objValidarAssinaturaDTO->getStrNomeAssinante(),
+              'cargo' => $assinatura->getStrTratamento(),
+              'observacao' => [
+                'forma_autenticacao' => 'M',
+                'numero_serie' => $objValidarAssinaturaDTO->getStrSerieCertificado(),
+                'modulo_origem' => $assinatura->getStrModuloOrigem()
+              ]
+            ];
+          }
+        }
+        if (count($observacaoAssintaruras) == 0) {
+            $observacaoAssintaruras[] = [
+              'cpf' => $assinatura->getDblCpf() ?: null,
+              'nome' => $assinatura->getStrNome(), 
+              'cargo' => $assinatura->getStrTratamento(),
+              'observacao' => [
+                'forma_autenticacao' => $assinatura->getStrStaFormaAutenticacao(),
+                'numero_serie' => $assinatura->getStrNumeroSerieCertificado(),
+                'modulo_origem' => null
+              ]
+            ];
+        }
+  
+       foreach($observacaoAssintaruras as $observacaoAssintarura) {
+          $objAssinaturaDigital['cpf'] = $observacaoAssintarura['cpf'];
+          $objAssinaturaDigital['nome'] = mb_convert_encoding($observacaoAssintarura['nome'], 'UTF-8', 'ISO-8859-1');
+          $objAssinaturaDigital['cargo'] = mb_convert_encoding($observacaoAssintarura['cargo'], 'UTF-8', 'ISO-8859-1');
+          $objAssinaturaDigital['observacao'] = json_encode($observacaoAssintarura['observacao']);
        
-       $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital;
+          $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital; 
+       }
     }
 
       return $objComponenteDigital;
@@ -1702,22 +1760,22 @@ class ExpedirProcedimentoRN extends InfraRN
     if ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
-        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
+        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
-        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
+        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE) {
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
-        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
+        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
-        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
+        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     }
     
@@ -1904,6 +1962,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objDocumentoDTO->retNumIdSerie();
         $objDocumentoDTO->retStrNumero();
         $objDocumentoDTO->retNumIdTipoConferencia();
+        $objDocumentoDTO->retStrDescricaoTipoConferencia();
         $objDocumentoDTO->retStrStaDocumento();
         $objDocumentoDTO->retNumIdHipoteseLegalProtocolo();
         $objDocumentoDTO->setDblIdDocumento($arrIdDocumentos, InfraDTO::$OPER_IN);
