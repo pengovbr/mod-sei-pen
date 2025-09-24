@@ -86,7 +86,7 @@ class ReceberProcedimentoRN extends InfraRN
 
           // Processa o recebimento do processo em uma transação isolada
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
-          $this->receberProcedimentoInternoControlado($objMetadadosProcedimento, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
+          $this->receberProcedimentoInterno($objMetadadosProcedimento);
       }
     } catch(Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -97,9 +97,10 @@ class ReceberProcedimentoRN extends InfraRN
   }
 
   
-  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento, $bolReproducaoUltimoTramite)
+  protected function receberProcedimentoInternoControlado($parObjMetadadosProcedimento)
     {
     try {
+        $bolReproducaoUltimoTramite = $parObjMetadadosProcedimento->metadados->reproducaoDeTramite;
         $numIdTramite = $parObjMetadadosProcedimento->IDT;
         $strNumeroRegistro = $parObjMetadadosProcedimento->metadados->NRE;
         $arrHashComponenteBaixados = $parObjMetadadosProcedimento->arrHashComponenteBaixados;
