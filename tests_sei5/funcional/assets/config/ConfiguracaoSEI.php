@@ -36,7 +36,7 @@ class ConfiguracaoSEI extends InfraConfiguracao  {
                         'PENIntegracao' => 'pen',
                         //'MdGestaoDocumentalIntegracao' => 'gestao-documental',
                         //'ProtocoloIntegradoIntegracao' => 'protocolo-integrado',
-                        //'AssinaturaAvancadaIntegracao' => 'assinatura-avancada',
+                        //'AssinaturaEletronicaIntegracao' => 'assinatura-eletronica',
                         //'LoginUnicoIntegracao' => 'loginunico',
                         //'MdRespostaIntegracao' => 'mod-sei-resposta',
                         //'MdIncomIntegracao' => 'incom',

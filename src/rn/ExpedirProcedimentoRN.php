@@ -1222,17 +1222,20 @@ class ExpedirProcedimentoRN extends InfraRN
       $objAssinaturaDTO->retStrModuloOrigem();
       $resAssinatura = $this->objAssinaturaRN->listarRN1323($objAssinaturaDTO);
 
-      $objAssinEletronicaControladorRN = new AssinEletronicaControladorRN();
-      $tarefa_assinatura = $objAssinEletronicaControladorRN->obterIdTarefaModulo(AssinEletronicaControladorRN::$TI_ASSINATURA_ELETRONICA_DESTACADA_DOCUMENTO);
+      $arrayTarefas = [
+          TarefaRN::$TI_ASSINATURA_DOCUMENTO,
+          TarefaRN::$TI_AUTENTICACAO_DOCUMENTO
+      ];
+      if (class_exists(AssinaturaEletronicaIntegracao::class)){
+        $objAssinEletronicaControladorRN = new AssinEletronicaControladorRN();
+        $arrayTarefas[] = $objAssinEletronicaControladorRN->obterIdTarefaModulo(AssinEletronicaControladorRN::$TI_ASSINATURA_ELETRONICA_DESTACADA_DOCUMENTO);
+        $arrayTarefas[] = $objAssinEletronicaControladorRN->obterIdTarefaModulo(AssinEletronicaControladorRN::$TI_ASSINATURA_ELETRONICA_ASSINAR_EXTERNO);
+      }
 
     foreach ($resAssinatura as $keyOrder => $assinatura) {
         $objAtividadeDTO = new AtividadeDTO();
         $objAtividadeDTO->setNumIdAtividade($assinatura->getNumIdAtividade()); //7
-        $objAtividadeDTO->setNumIdTarefa([
-          TarefaRN::$TI_ASSINATURA_DOCUMENTO,
-          TarefaRN::$TI_AUTENTICACAO_DOCUMENTO,
-          $tarefa_assinatura
-        ], InfraDTO::$OPER_IN); // 5, 115
+        $objAtividadeDTO->setNumIdTarefa($arrayTarefas, InfraDTO::$OPER_IN); // 5, 115
         $objAtividadeDTO->retDthAbertura();
         $objAtividadeDTO->retNumIdAtividade();
         $objAtividadeRN = new AtividadeRN();
@@ -1259,19 +1262,19 @@ class ExpedirProcedimentoRN extends InfraRN
           $objValidarAssinaturaRN = new ValidarAssinaturaRN();
           if ($objValidarAssinaturaRN->contar($objValidarAssinaturaDTO)) {
             $arrObjValidarAssinaturaDTO = $objValidarAssinaturaRN->listar($objValidarAssinaturaDTO);
-            $objValidarAssinaturaDTO = $arrObjValidarAssinaturaDTO[0];
-
-            $cpf = preg_replace('/[^0-9]/', '', $objValidarAssinaturaDTO->getStrIdentificadorAssinante());
-            $observacaoAssintaruras[] = [
-              'cpf' => (strlen($cpf) == 11) ? $cpf : null,
-              'nome' => $objValidarAssinaturaDTO->getStrNomeAssinante(),
-              'cargo' => $assinatura->getStrTratamento(),
-              'observacao' => [
-                'forma_autenticacao' => 'M',
-                'numero_serie' => $objValidarAssinaturaDTO->getStrSerieCertificado(),
-                'modulo_origem' => $assinatura->getStrModuloOrigem()
-              ]
-            ];
+            foreach ($arrObjValidarAssinaturaDTO as $objValidarAssinaturaDTO) {
+              $cpf = preg_replace('/[^0-9]/', '', $objValidarAssinaturaDTO->getStrIdentificadorAssinante());
+              $observacaoAssintaruras[] = [
+                'cpf' => (strlen($cpf) == 11) ? $cpf : null,
+                'nome' => $assinatura->getStrNome(),
+                'cargo' => $assinatura->getStrTratamento(),
+                'observacao' => [
+                  'forma_autenticacao' => 'M',
+                  'numero_serie' => $objValidarAssinaturaDTO->getStrSerieCertificado(),
+                  'modulo_origem' => $assinatura->getStrModuloOrigem()
+                ]
+              ];
+            }
           }
         }
         if (count($observacaoAssintaruras) == 0) {
@@ -1286,13 +1289,13 @@ class ExpedirProcedimentoRN extends InfraRN
               ]
             ];
         }
-  
+
        foreach($observacaoAssintaruras as $observacaoAssintarura) {
           $objAssinaturaDigital['cpf'] = $observacaoAssintarura['cpf'];
           $objAssinaturaDigital['nome'] = mb_convert_encoding($observacaoAssintarura['nome'], 'UTF-8', 'ISO-8859-1');
           $objAssinaturaDigital['cargo'] = mb_convert_encoding($observacaoAssintarura['cargo'], 'UTF-8', 'ISO-8859-1');
           $objAssinaturaDigital['observacao'] = json_encode($observacaoAssintarura['observacao']);
-       
+
           $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital; 
        }
     }
