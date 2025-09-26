@@ -1763,22 +1763,22 @@ class ExpedirProcedimentoRN extends InfraRN
     if ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_UNIDADE) {
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
-        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
-        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_UNIDADE) {
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($parObjDocumentoDTO->getStrSiglaUnidadeGeradoraProtocolo(), 'UTF-8', 'ISO-8859-1');
-        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($parObjDocumentoDTO->getStrDescricaoUnidadeGeradoraProtocolo(), 100), 'UTF-8', 'ISO-8859-1');
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     } elseif ($strStaNumeracao == SerieRN::$TN_SEQUENCIAL_ANUAL_ORGAO) {
         $objOrgaoDTO = $this->consultarOrgao($parObjDocumentoDTO->getNumIdOrgaoUnidadeGeradoraProtocolo());
         $objDocumento['identificacao']['numero'] = intval(mb_convert_encoding($parObjDocumentoDTO->getStrNumero(), 'UTF-8', 'ISO-8859-1'));
         $objDocumento['identificacao']['siglaDaUnidadeProdutora'] = mb_convert_encoding($objOrgaoDTO->getStrSigla(), 'UTF-8', 'ISO-8859-1');
-        // $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
+        $objDocumento['identificacao']['complemento'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($objOrgaoDTO->getStrDescricao(), 100), 'UTF-8', 'ISO-8859-1');
         $objDocumento['identificacao']['ano'] = substr($parObjDocumentoDTO->getDtaGeracaoProtocolo(), 6, 4);
     }
     
