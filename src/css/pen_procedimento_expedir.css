@@ -4,11 +4,29 @@
 }
 
 #divBarraProgresso {
-    background-color: white;
-    width: 550px;
-    height: 180px;
+    background-color: rgba(252, 252, 252);
+    width: 620px;
+    height: 220px;
     margin-top: 100px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.5);
+    position:absolute;
+    left:28%;
+    top:17%;
+    border-radius: 20px;
+    padding-left: 12px;
+}
+
+#divInfraAreaGlobal{
+    margin-top: 15px;
+}
+
+#btnInfraTopo{
+    visibility: hidden;
+}
+
+div.infraBarraComandos{
+    border-top:0px !important; 
+    border-bottom: 0px !important;
 }
 
 @keyframes move{
@@ -53,9 +71,18 @@ div.infraBarraProgresso div.infraBarraProgressoMiolo:after {
 
 .acaoBarraProgresso{
     width: 100px;
-    position: absolute;
+    /* position: absolute; */
     bottom: 0px;
-    right: 0px;
+    right: 2px;
     margin-right: 5px;
     margin-bottom: 25px;
+    margin-top: 12px;
+}
+
+#divInfraBarraLocalizacao{
+    font-size: 1.2rem !important; ;
+}
+
+.infraDetalhesExcecao{
+    
 }
