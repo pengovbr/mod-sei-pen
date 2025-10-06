@@ -1649,6 +1649,33 @@ class ExpedirProcedimentoRN extends InfraRN
       $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
       $arrSiglaOrgaoLegado = $objConfiguracaoModPEN->getValor("PEN", "SiglaOrgaoLegado", false);
 
+      $objDocumentoDTO2 = new DocumentoDTO();
+      $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+      $objDocumentoDTO2->retStrCrcAssinatura();
+      $objDocumentoDTO2->retStrProtocoloDocumentoFormatado();
+      $objDocumentoDTO2->retStrNomeSerie();
+      $objDocumentoDTO2->retStrNumero();
+      $objDocumentoDTO2->retStrStaProtocoloProtocolo();
+      $objDocumentoDTO2->retDblIdDocumento();
+      $objDocumentoDTO2->retDblIdProcedimento();
+
+      $objDocumentoRN = new DocumentoRN();
+      $objDocumentoDTO2 = $objDocumentoRN->consultarRN0005($objDocumentoDTO2);
+
+      $objDocumentoDTO2->setStrCodigoVerificador($objDocumentoDTO2->getStrProtocoloDocumentoFormatado());
+      $objDocumentoDTO2 = $objDocumentoRN->obterDocumentoAutenticidade($objDocumentoDTO2);
+      $arrObjAssinaturaDTO = $objDocumentoDTO2->getArrObjAssinaturaDTO();
+      $bolContemP7s = false;
+      foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
+        if ($objAssinaturaDTO->getStrP7sBase64() != null) {
+          $bolContemP7s = true;
+          break;
+        }
+      }
+      if ($bolContemP7s) {
+        return $objDocumentoDTO2->getStrConteudoAssinatura();
+      }
+
       $objEditorDTO = new EditorDTO();
       $objEditorDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
       $objEditorDTO->setNumIdBaseConhecimento(null);
