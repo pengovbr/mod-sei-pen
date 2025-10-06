@@ -218,31 +218,7 @@ class ProcessoEletronicoINT extends InfraINT
 
       return $relPath . $imagem;
   }
-
-  public static function getCssCompatibilidadeSEI4($arquivo)
-    {
-    if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "4.0.0") && InfraUtil::compararVersoes(SEI_VERSAO, "<=", "4.0.1")) {
-
-      switch ($arquivo) {
-        case 'pen_procedimento_expedir.css':
-            return 'pen_procedimento_expedir_sei4.css';
-
-        default:
-            return $arquivo;
-      }
-    }elseif (InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1")) {
-
-      switch ($arquivo) {
-        case 'pen_procedimento_expedir.css':
-            return 'pen_procedimento_expedir_sei402.css';
-
-        default:
-            return $arquivo;
-      }
-    }
-
-      return $arquivo;
-  }
+ 
 
     /**
      * Monta a regra de restrição do tramite.gov.br

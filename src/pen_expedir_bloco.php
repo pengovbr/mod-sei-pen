@@ -135,7 +135,7 @@ try {
 
       if (isset($_POST['sbmExpedir'])) {
           $numVersao = $objPaginaSEI->getNumVersao();
-          echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+          echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
           echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
 
           $strTituloPagina = "Cadastro de processos em Bloco";
@@ -215,7 +215,7 @@ $objPaginaSEI->abrirHead();
 $objPaginaSEI->montarMeta();
 $objPaginaSEI->montarTitle(':: ' . $objPaginaSEI->getStrNomeSistema() . ' - ' . $strTitulo . ' ::');
 $objPaginaSEI->montarStyle();
-echo "<link href='$strDiretorioModulo/css/" . ProcessoEletronicoINT::getCssCompatibilidadeSEI4("pen_procedimento_expedir.css") . "' rel='stylesheet' type='text/css' media='all' />\n";
+echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
 
 $objPaginaSEI->abrirStyle();
 ?>
