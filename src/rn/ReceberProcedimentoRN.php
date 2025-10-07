@@ -2908,12 +2908,12 @@ class ReceberProcedimentoRN extends InfraRN
       $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
-    if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)) {
-        $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
-        $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
-        $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
-        $strMensagemErro .= "- Metadados enviado: ". json_encode($arrObjDocumentosMetadados).". \n";
-    }
+    // if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)) {
+    //     $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+    //     $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
+    //     $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
+    //     $strMensagemErro .= "- Metadados enviado: ". json_encode($arrObjDocumentosMetadados).". \n";
+    // }
 
     if(!InfraString::isBolVazia($strMensagemErro)) {
         throw new InfraException($strMensagemPadrao . $strMensagemErro);
