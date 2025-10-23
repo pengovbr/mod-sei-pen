@@ -84,8 +84,9 @@ class ReceberProcedimentoRN extends InfraRN
 
           // Processa o recebimento do processo em uma transação isolada
           $objMetadadosProcedimento->arrHashComponenteBaixados = $arrHashComponenteBaixados;
-          $this->receberProcedimentoInterno($objMetadadosProcedimento);
-
+          $objProcedimentoDTO = $this->receberProcedimentoInterno($objMetadadosProcedimento);
+          // Verificar se precisa reordenar processo
+          $this->validarReordenacaoProcesso($objMetadadosProcedimento, $objProcedimentoDTO);
       }
     } catch(Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -197,6 +198,21 @@ class ReceberProcedimentoRN extends InfraRN
         $this->objEnviarReciboTramiteRN->enviarReciboTramiteProcesso($numIdTramite, $arrHashComponenteBaixados);
 
         $this->gravarLogDebug("Registrando a conclusão do recebimento do trâmite $numIdTramite", 2);
+
+        // Aqui atualiza quando for muiltiplos orgãos
+        $propriedadesAdicionais = isset($parObjMetadadosProcedimento->metadados->propriedadesAdicionais)
+              ? ($parObjMetadadosProcedimento->metadados->propriedadesAdicionais ?: [])
+              : [];
+          if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+            foreach ($propriedadesAdicionais as $key => $valor) {
+              if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+                $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+                break;
+              }
+            }
+          }
+
+        return $objProcedimentoDTO;
     } catch (Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
         $this->gravarLogDebug($mensagemErro);
@@ -204,6 +220,7 @@ class ReceberProcedimentoRN extends InfraRN
         throw $e;
     }
   }
+  
 
     /**
      * Validação preliminar dos metadados do protocolo
@@ -493,7 +510,7 @@ class ReceberProcedimentoRN extends InfraRN
             $objReabrirProcessoDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
             $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
             $objProcedimentoRN = new ProcedimentoRN();
-            $objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
+            //$objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
         }
 
           //Realiza o desbloqueio do processo
@@ -2908,7 +2925,8 @@ class ReceberProcedimentoRN extends InfraRN
       $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
-    if(count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)) {
+      $multiplosOrgaos = true;
+    if(!$multiplosOrgaos && count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)) {
         $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
         $strMensagemErro = "- Quantidade de documentos do processo [$strProtocoloFormatado]:" . count($arrDblIdDocumentosProcesso) . " não confere com a registrada nos dados do processo enviado externamente: ".count($arrObjDocumentosMetadados).". \n";
         $strMensagemErro .= "- IDs de Documentos do Processo: ". json_encode($arrDblIdDocumentosProcesso).". \n";
@@ -2917,6 +2935,92 @@ class ReceberProcedimentoRN extends InfraRN
 
     if(!InfraString::isBolVazia($strMensagemErro)) {
         throw new InfraException($strMensagemPadrao . $strMensagemErro);
+    }
+  }
+
+  private function validarReordenacaoProcesso($parObjMetadadosProcedimento, $parObjProcedimentoDTO)
+  {
+      // Valida se a quantidade de documentos registrados confere com a quantidade informada nos metadados
+      $arrDblIdDocumentosProcesso = $this->objProcessoEletronicoRN->listarAssociacoesDocumentos($parObjProcedimentoDTO->getDblIdProcedimento());
+      $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
+      $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
+      
+      $this->atualizarOrdenDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados);
+  }
+
+  private function atualizarOrdenDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados)
+  {
+    $objProcedimentoDTO = new ProcedimentoDTO();
+     $objProcedimentoDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
+
+    $arrObjRelProtocoloProtocoloDTO = array();
+    $arrColocarNoFinal = array();
+    $numIdOrdem = 0;
+    foreach ($arrDblIdDocumentosProcesso as $idDocumentosProcesso) {
+      $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+      $objRelProtocoloProtocoloDTO->setDblIdRelProtocoloProtocolo($idDocumentosProcesso['IdProtocolo']);
+
+      $semOrdem = true;
+      foreach ($arrObjDocumentosMetadados as $key2 => $objDocumentoMetadado) {
+        if ($idDocumentosProcesso['IdProtocolo'] == $objDocumentoMetadado->idProtocoloSEI) {
+          $objRelProtocoloProtocoloDTO->setNumSequencia($objDocumentoMetadado->ordem - 1);
+          $semOrdem = false;
+          break;
+        }
+      }
+      
+      if ($semOrdem) {
+        $arrColocarNoFinal[] = $objRelProtocoloProtocoloDTO;
+        continue;
+      }
+
+      $arrObjRelProtocoloProtocoloDTO[] = $objRelProtocoloProtocoloDTO;
+      $numIdOrdem++;
+    }
+
+    foreach ($arrColocarNoFinal as $objRelProtocoloProtocoloDTO) {
+      $objRelProtocoloProtocoloDTO->setNumSequencia($numIdOrdem);
+      $arrObjRelProtocoloProtocoloDTO[] = $objRelProtocoloProtocoloDTO;
+      $numIdOrdem++;
+    }
+
+    $objProcedimentoDTO->setArrObjRelProtocoloProtocoloDTO($arrObjRelProtocoloProtocoloDTO);
+    
+    $this->alterarOrdem($objProcedimentoDTO);
+  }
+
+  private function alterarOrdem(ProcedimentoDTO $objProcedimentoDTO) {
+    try {
+      $arrOrdemNova = InfraArray::converterArrInfraDTO($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO(), 'IdRelProtocoloProtocolo');
+
+      $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+      $objRelProtocoloProtocoloDTO->retDblIdRelProtocoloProtocolo();
+      $objRelProtocoloProtocoloDTO->retNumSequencia();
+      $objRelProtocoloProtocoloDTO->setDblIdRelProtocoloProtocolo($arrOrdemNova, InfraDTO::$OPER_IN);
+      $objRelProtocoloProtocoloDTO->setOrdNumSequencia(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+      $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+
+      $arrOrdemBanco = InfraArray::converterArrInfraDTO($objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO), 'IdRelProtocoloProtocolo');
+
+      if ($arrOrdemBanco !== $arrOrdemNova) {
+        foreach ($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO() as $objRelProtocoloProtocoloDTO) {
+          $dto = new RelProtocoloProtocoloDTO();
+          $dto->setDblIdProtocolo2($objRelProtocoloProtocoloDTO->getDblIdRelProtocoloProtocolo());
+          $dto->retTodos();
+
+          $objRelProtocoloProtocoloBD = new RelProtocoloProtocoloBD($this->getObjInfraIBanco());
+          $dto = $objRelProtocoloProtocoloBD->consultar($dto);
+
+          if ($dto && $objRelProtocoloProtocoloDTO->getNumSequencia() != $dto->getNumSequencia()) {
+            $dto->setNumSequencia($objRelProtocoloProtocoloDTO->getNumSequencia());
+            $objRelProtocoloProtocoloBD->alterar($dto);
+          }
+        }
+      }
+    } catch (Exception $e) {
+      // throw new InfraException('Erro alterando ordem dos protocolos.', $e);
+      $this->gravarLogDebug("Erro alterando ordem dos protocolos." . $e->getMessage(), 2);
     }
   }
 

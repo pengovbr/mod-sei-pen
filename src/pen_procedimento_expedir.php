@@ -124,6 +124,7 @@ try {
       }
 
       if(isset($_POST['sbmExpedir'])) {
+          $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
           $numVersao = $objPaginaSEI->getNumVersao();
           echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
           echo "<script type='text/javascript' charset='iso-8859-1' src='$strDiretorioModulo/js/expedir_processo/pen_procedimento_expedir.js?$numVersao'></script>";
@@ -147,6 +148,7 @@ try {
           $objExpedirProcedimentoDTO->setNumIdBloco(null);
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
+          $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
 
         try {
             $objExpedirProcedimentosRN->setEventoEnvioMetadados(
@@ -168,6 +170,23 @@ try {
 
           $objPaginaSEI->finalizarBarraProgresso(null, false);
       }
+
+      $bolProcessoFicaraAberto = false;
+      $objPenParametroRN = new PenParametroRN();
+      $numIdRepositorioOrigem = $objPenParametroRN->getParametro('PEN_ID_PROCESSO_FICARA_ABERTO');
+      if (!is_null($numIdRepositorioOrigem)) {
+        $objUnidadeDTO = new PenUnidadeDTO();
+        $objUnidadeDTO->retNumIdUnidadeRH();
+        $objUnidadeDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+
+        $objPenUnidadeRN = new PenUnidadeRN();
+        $objUnidadeDTO = $objPenUnidadeRN->consultar($objUnidadeDTO);
+
+        $numIdUnidadeRH = $objUnidadeDTO->getNumIdUnidadeRH();
+        if (!is_null($numIdUnidadeRH) && $numIdUnidadeRH == $numIdRepositorioOrigem) {
+            $bolProcessoFicaraAberto = true;
+        }
+      } 
 
         break;
     default:
@@ -559,6 +578,17 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     <input type="hidden" id="hdnErrosValidacao" name="hdnErrosValidacao" value="<?php echo $bolErrosValidacao ?>" />
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?php echo htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
+    
+    <?php if ($bolProcessoFicaraAberto) { ?>
+      <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 10px;">
+        <input type="checkbox" id="multiplosOrgaos" name="multiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" />
+        <label id="lblSinMultiplosOrgaos" for="multiplosOrgaos" class="infraLabelCheckbox">
+          Manter o processo aberto na unidade atual?
+          <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
+          <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getDiretorioImagensGlobal() ?>/ajuda.gif" class='infraImg'/></a>
+        </label>
+      </div>
+    <?php } ?>
 
 </form>
 <?php

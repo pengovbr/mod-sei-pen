@@ -365,9 +365,14 @@ class PendenciasTramiteRN extends InfraRN
             $objProcessarPendenciaRN->receberTramitesRecusados($numIDT);
             break;
 
-          case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
-              $strStatus = $objPendencia->getStrStatus();
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO:
+            $strStatus = $objPendencia->getStrStatus();
             $objProcessarPendenciaRN->enviarComponenteDigital($numIDT);
+            break;
+        
+        case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA:
+            $strStatus = $objPendencia->getStrStatus();
+            $objProcessarPendenciaRN->enviarSincronizacaoTramite($numIDT);
             break;
             
         default:

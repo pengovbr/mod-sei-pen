@@ -1,5 +1,7 @@
 <?php
 
+use TRF4\UI\Renderer\Infra;
+
 require_once DIR_SEI_WEB.'/SEI.php';
 
 class ExpedirProcedimentoRN extends InfraRN
@@ -162,16 +164,28 @@ class ExpedirProcedimentoRN extends InfraRN
 
         //Busca metadados do processo registrado em trâmite anterior
         $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
-
+        
         //Construção do cabeçalho para envio do processo
         $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
         $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
+        $solicitarSincronizarTramite = false;
       if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
           $strNumeroRegistro = null;
       }else{
           $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
+          $propriedadesAdicionais = isset($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais)
+              ? ($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais ?: [])
+              : [];
+          if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+            foreach ($propriedadesAdicionais as $key => $valor) {
+              if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+                $solicitarSincronizarTramite = true;
+                break;
+              }
+            }
+          }
       }
 
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
@@ -181,6 +195,16 @@ class ExpedirProcedimentoRN extends InfraRN
 
         //Obtém o tamanho total da barra de progreso
         $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgressoREST($arrProcesso);
+
+        if ($solicitarSincronizarTramite) {
+            // Solicitar sincronização do documentos pendentes
+            $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
+
+            $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
+            $this->barraProgresso->mover($this->barraProgresso->getNumMax());
+            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+            return true;
+        }
 
       if(!$bolSinProcessamentoEmBloco) {
           //Atribui o tamanho máximo da barra de progresso
@@ -282,6 +306,10 @@ class ExpedirProcedimentoRN extends InfraRN
 
               $this->receberReciboDeEnvio($objTramite->IDT);
 
+              if ($objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+                  $this->desbloquearProcessoExpedicao($arrProcesso['idProcedimentoSEI']);
+              }
+
               $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
 
               $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
@@ -315,6 +343,134 @@ class ExpedirProcedimentoRN extends InfraRN
       } else {
           throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
       }
+    }
+  }
+
+  protected function expedirSincronizarProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+    {
+      $numIdTramite = 0;
+      $numTempoInicialRecebimento = microtime(true);
+    try {
+        //Valida Permissão
+        SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
+        $dblIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $numIdAtividade = $objExpedirProcedimentoDTO->getNumIdAtividade();
+        $numIdUnidade = $objExpedirProcedimentoDTO->getNumIdUnidade();
+
+        $objInfraException = new InfraException();
+        //Carregamento dos dados de processo e documento para validação e envio externo
+        $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
+        $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
+        $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
+
+        //Busca metadados do processo registrado em trâmite anterior
+        $objMetadadosProcessoTramiteAnterior = $objExpedirProcedimentoDTO->getObjMetadadosProcedimento();
+        
+        //Construção do cabeçalho para envio do processo
+        $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
+
+      if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
+          $strNumeroRegistro = null;
+      }else{
+          $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
+          $propriedadesAdicionais = isset($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais)
+              ? ($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais ?: [])
+              : [];
+      }
+
+        $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
+        //Construção do processo para envio
+        $arrProcesso = $this->construirProcessoREST($dblIdProcedimento, $objExpedirProcedimentoDTO->getArrIdProcessoApensado(), $objMetadadosProcessoTramiteAnterior);
+
+        //Obtém o tamanho total da barra de progreso
+        $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgressoREST($arrProcesso);
+
+        //Exibe a barra de progresso após definir o seu tamanho
+        // $this->barraProgresso->mover(ProcessoEletronicoINT::NEE_EXPEDICAO_ETAPA_PROCEDIMENTO);
+        // $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_PROCEDIMENTO, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()));
+
+        //Cancela trâmite anterior caso este esteja travado em status inconsistente 1 - STA_SITUACAO_TRAMITE_INICIADO
+        $objTramitesAnteriores = $this->consultarTramitesAnteriores($strNumeroRegistro);
+      if($objTramiteInconsistente = $this->necessitaCancelamentoTramiteAnterior($objTramitesAnteriores)) {
+          $this->objProcessoEletronicoRN->cancelarTramite($objTramiteInconsistente->IDT);
+      }
+
+        $param = [
+        'novoTramiteDeProcesso' => [
+            'cabecalho' => $objCabecalho,
+            'processo' => $arrProcesso
+        ],
+        'dblIdProcedimento' => $dblIdProcedimento
+        ];
+
+        $novoTramite = $this->objProcessoEletronicoRN->enviarProcessoREST($param);
+
+        $numIdTramite = $novoTramite->IDT;
+        $this->lancarEventoEnvioMetadados($numIdTramite);
+
+        $this->atualizarPenProtocolo($dblIdProcedimento);
+
+        if (isset($novoTramite)) {
+            $objTramite = $novoTramite;
+            $this->objProcedimentoAndamentoRN->setOpts($objTramite->NRE, $objTramite->IDT, ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO), $dblIdProcedimento);
+
+          try {
+              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Envio do metadados do processo', 'S'));
+
+              $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
+                  $arrProcesso['idProcedimentoSEI'],
+                  $objTramite->NRE,
+                  $objTramite->IDT,
+                  ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO,
+                  $objTramite->dataHoraDeRegistroDoTramite,
+                  $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
+                  $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
+                  $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+                  $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
+                  $arrProcesso,
+                  $objTramite->ticketParaEnvioDeComponentesDigitais,
+                  $objTramite->processosComComponentesDigitaisSolicitados,
+                  false,
+                  $numIdUnidade
+              );
+
+
+              $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
+
+              $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $arrProcesso['protocolo'], false);
+
+              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
+
+              $this->receberReciboDeEnvio($objTramite->IDT);
+
+              $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
+
+              $numTempoTotalRecebimento = round(microtime(true) - $numTempoInicialRecebimento, 2);
+              $this->gravarLogDebug("Finalizado o envio de protocolo número " . $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado() . " (Tempo total: {$numTempoTotalRecebimento}s)", 0, true);
+          }
+          catch (\Exception $e) {
+              //Realiza o cancelamento do tramite
+            try{
+              if($numIdTramite != 0) {
+                  $this->objProcessoEletronicoRN->cancelarTramite($numIdTramite);
+              }
+            } catch (InfraException) { 
+            }
+
+              $this->registrarAndamentoExpedicaoAbortada($arrProcesso['idProcedimentoSEI']);
+
+              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'N'));
+              throw $e;
+          }
+        }
+
+    } catch (\Exception $e) {
+        $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
+        throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
     }
   }
 
@@ -436,7 +592,8 @@ class ExpedirProcedimentoRN extends InfraRN
           $objExpedirProcedimentoDTO->getBolSinUrgente(),
           $objExpedirProcedimentoDTO->getNumIdMotivoUrgencia(),
           $bolObrigarEnvioDeTodosOsComponentesDigitais,
-          $dblIdProcedimento
+          $dblIdProcedimento,
+          $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
       );
   }
 
