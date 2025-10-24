@@ -224,6 +224,17 @@ class PENIntegracao extends SeiIntegracao
     $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
     $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
+    $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+    if ($bolFlagAberto && !is_null($objTramiteDTO)) {
+      $objTramiteDTO = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
+      if ($objTramiteDTO) {
+        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/refresh_icon_no_background.svg", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
+        $strAcoesProcedimento .= '</a>';
+      }
+    }
+
     $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
 
     if ($bolFlagAberto && !is_null($objTramiteDTO)){
@@ -486,6 +497,18 @@ class PENIntegracao extends SeiIntegracao
       }
     }
 
+      $objPenProtocoloDTO = new PenProtocoloDTO();
+      $objPenProtocoloDTO->setDblIdProtocolo($dblIdProcedimento);
+      $objPenProtocoloDTO->retStrSinSincronizarProcesso();
+      $objPenProtocoloDTO->setNumMaxRegistrosRetorno(1);
+
+      $objProtocoloBD = new ProtocoloBD(BancoSEI::getInstance());
+      $objPenProtocoloDTO = $objProtocoloBD->consultar($objPenProtocoloDTO);
+
+      if ($objPenProtocoloDTO && $objPenProtocoloDTO->getStrSinSincronizarProcesso() == 'S') {
+          $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizado($dblIdProcedimento);
+      }
+
       return $arrObjArvoreAcaoItemAPI;
   }
 
@@ -517,6 +540,23 @@ class PENIntegracao extends SeiIntegracao
 
       $objArvoreAcaoItemAPI->setTarget(null);
       $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi enviado\');');
+
+      $objArvoreAcaoItemAPI->setSinHabilitado('S');
+
+      return $objArvoreAcaoItemAPI;
+  }
+
+  private function getObjArvoreAcaoSincronizado($dblIdProcedimento)
+    {
+      $objArvoreAcaoItemAPI = new ArvoreAcaoItemAPI();
+      $objArvoreAcaoItemAPI->setTipo('MD_TRAMITE_PROCESSO');
+      $objArvoreAcaoItemAPI->setId('MD_TRAMITE_PROC_' . $dblIdProcedimento);
+      $objArvoreAcaoItemAPI->setIdPai($dblIdProcedimento);
+      $objArvoreAcaoItemAPI->setTitle('Processo sincronizado');
+      $objArvoreAcaoItemAPI->setIcone($this->getDiretorioImagens() . '/refresh_icon_no_background.png');
+
+      $objArvoreAcaoItemAPI->setTarget(null);
+      $objArvoreAcaoItemAPI->setHref('javascript:alert(\'Um trâmite para esse processo foi sincronizado\');');
 
       $objArvoreAcaoItemAPI->setSinHabilitado('S');
 
@@ -789,6 +829,10 @@ class PENIntegracao extends SeiIntegracao
 
       case 'pen_procedimento_cancelar_expedir':
           include_once __DIR__ . '/pen_procedimento_cancelar_expedir.php';
+          break;
+      
+      case 'pen_procedimento_sincronizar':
+          include_once __DIR__ . '/pen_procedimento_sincronizar.php';
           break;
 
       case 'pen_procedimento_expedido_listar':

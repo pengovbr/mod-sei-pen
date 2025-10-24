@@ -1697,7 +1697,7 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null)
+  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null)
     {
       $endpoint = 'tramites';
     try
@@ -1723,6 +1723,10 @@ class ProcessoEletronicoRN extends InfraRN
 
         if (!is_null($parProtocolo)) {
             $parametros['protocolo'] = $parProtocolo;
+        }
+
+        if (!is_null($situacaoAtual)) {
+            $parametros['situacaoAtual'] = $situacaoAtual;
         }
 
         $arrResultado = $this->get($endpoint, $parametros);
