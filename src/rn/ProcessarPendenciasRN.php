@@ -138,6 +138,66 @@ class ProcessarPendenciasRN extends InfraRN
   }
 
 
+  /**
+     * Processa a mensagem de pendência de Envio de Componentes Digitais
+     *
+     * @param  object $idTramite Contexto com informações para processamento da tarefa
+     * @return void
+     */
+  public function enviarSincronizacaoTramite($idTramite)
+    {
+      $this->gravarLogDebug("Processando envio de sincronização de tramite [enviarSincronizacaoTramite] com IDT $idTramite", 0, true);
+      $numTempoInicialEnvio = microtime(true);
+
+      $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
+      $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+
+      $nre = $objMetadadosProcedimento->NRE;
+      $novoIDT = $objMetadadosProcedimento->IDT;
+      $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
+      $ticketComponentesDigitais = $objMetadadosProcedimento->metadados->ticketParaReenvioDeComponentesDigitais;
+      $remetente = $objMetadadosProcedimento->remetente;
+      $destinatario = $objMetadadosProcedimento->destinatario;
+
+      try {
+        $objProtocoloDTO = new ProtocoloDTO();
+        $objProtocoloDTO->setStrProtocoloFormatado($protocolo);
+        $objProtocoloDTO->retTodos();
+
+        $objProtocoloRN = new ProtocoloRN();
+        $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+        $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+        $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
+        $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+
+        $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($destinatario->identificacaoDoRepositorioDeEstruturas);
+        $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+        $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+        $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+        $objExpedirProcedimentoDTO->setDblIdProcedimento($objProtocoloDTO->getDblIdProtocolo());
+        $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+        $objExpedirProcedimentoDTO->setNumIdBloco(null);
+        $objExpedirProcedimentoDTO->setNumIdAtividade(null);
+        $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+        $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+        $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
+        $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objMetadadosProcedimento);
+
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objExpedirProcedimentoRN->expedirSincronizarProcedimento($objExpedirProcedimentoDTO);
+
+        $numIDT = $objProtocoloDTO->getDblIdProtocolo();
+        $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
+        $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
+        
+      } catch (\Exception $e) {
+        $this->gravarLogDebug("Erro processando envio de sincronização de tramite: $e", 0, true);
+        throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
+      }
+      
+  }
+
     /**
      * Processa a mensagem de pendência de Envio de Componentes Digitais
      *

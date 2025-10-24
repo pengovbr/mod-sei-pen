@@ -40,6 +40,7 @@ class ProcessoEletronicoRN extends InfraRN
   public static $STA_SIGILO_SIGILOSO = '3';
 
     /* RELAÇÃO DE SITUAÇÕES POSSÍVEIS EM UM TRÂMITE */
+  public static $STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA = 0;
   public static $STA_SITUACAO_TRAMITE_NAO_INICIADO = 0;                       // Não Iniciado - Aguardando envio de Metadados pela solução
   public static $STA_SITUACAO_TRAMITE_INICIADO = 1;                           // Iniciado - Metadados recebidos pela solução
   public static $STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE = 2;     // Componentes digitais recebidos pela solução
@@ -840,7 +841,8 @@ class ProcessoEletronicoRN extends InfraRN
 
 
   public function construirCabecalho($strNumeroRegistro, $idRepositorioOrigem, $idUnidadeOrigem, $idRepositorioDestino,
-        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false, $dblIdProcedimento = null
+        $idUnidadeDestino, $urgente = false, $motivoUrgencia = 0, $enviarTodosDocumentos = false, $dblIdProcedimento = null,
+        $multiplosOrgaos = true
     ) {
 
       $cabecalho = [
@@ -872,6 +874,13 @@ class ProcessoEletronicoRN extends InfraRN
       $atribuirInfoModulo = $this->atribuirInformacoesModuloREST();
 
       $cabecalho['propriedadesAdicionais'] = array_merge($atribuirInformacoes, $atribuirInfoModulo);
+
+      if ($multiplosOrgaos) {
+        $cabecalho['propriedadesAdicionais'][] = [
+          'chave' => 'multiplosOrgaos',
+          'valor' => "true"
+        ];
+      }
 
       return $cabecalho;
   }
@@ -1207,6 +1216,23 @@ class ProcessoEletronicoRN extends InfraRN
 
     } catch (\Exception $e) {
         $mensagem = "Falha na solicitação de metadados do processo";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
+  public function solicitarSincronizarTramite($parNumIdentificacaoTramite)
+    {
+      $endpoint = "sincroniza-tramite/{$parNumIdentificacaoTramite}";
+    try {
+        $parametros = [
+        'IDT' => $parNumIdentificacaoTramite
+        ];
+            
+        return $this->get($endpoint, $parametros);
+
+    } catch (\Exception $e) {
+        $mensagem = "Falha na solicitação de sincronização do trâmite";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }
@@ -2230,6 +2256,18 @@ class ProcessoEletronicoRN extends InfraRN
     try {
         $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
         return $objProcessoEletronicoBD->contar($objProcessoEletronicoDTO);
+    }catch(Exception $e){
+        $mensagem = "Falha na contagem de processos eletrônicos registrados";
+        $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
+        throw new InfraException($mensagem, $e, $detalhes);
+    }
+  }
+
+  protected function consultarConectado(ProcessoEletronicoDTO $objProcessoEletronicoDTO)
+    {
+    try {
+        $objProcessoEletronicoBD = new ProcessoEletronicoBD($this->getObjInfraIBanco());
+        return $objProcessoEletronicoBD->consultar($objProcessoEletronicoDTO);
     }catch(Exception $e){
         $mensagem = "Falha na contagem de processos eletrônicos registrados";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));

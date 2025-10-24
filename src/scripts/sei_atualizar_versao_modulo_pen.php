@@ -292,6 +292,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV4020();
         case '4.0.2':
           $this->instalarV4030();
+        case '4.0.3':
+          $this->instalarV4100();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -314,12 +316,15 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
      *
      * @return int Código do Parametro gerado
      */
-  protected function criarParametro($strNome, $strValor, $strDescricao)
+  protected function criarParametro($strNome, $strValor, $strDescricao, $sequencia = null)
     {
       $objDTO = new PenParametroDTO();
       $objDTO->setStrNome($strNome);
       $objDTO->setStrValor($strValor);
       $objDTO->setStrDescricao($strDescricao);
+      if (!is_null($sequencia)) {
+          $objDTO->setNumSequencia($sequencia);
+      }
       $objDTO->retStrNome();
 
       $objBD = new PenParametroBD(BancoSEI::getInstance());
@@ -2637,6 +2642,26 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $this->atualizarNumeroVersao("4.0.3");
     }
 
+    protected function instalarV4100()
+    {
+      // Criar parâmetro PEN_ID_PROCESSO_FICARA_ABERTO
+      $this->criarParametro('PEN_ID_PROCESSO_FICARA_ABERTO', NULL, 'Id da unidade AGU', '9');
+
+      /* ---------- antigo método (instalarV002R003S001US035) ---------- */
+      $objMetaBanco = $this->inicializarObjMetaBanco();
+
+      if (!$objMetaBanco->isColunaExiste('md_pen_protocolo', 'sin_multiplos_orgaos')) {
+          $objMetaBanco->adicionarColuna('md_pen_protocolo', 'sin_multiplos_orgaos', 'CHAR(1)', PenMetaBD::NNULLO);
+          $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_protocolo', 'sin_multiplos_orgaos', 'N');
+      }
+
+      if (!$objMetaBanco->isColunaExiste('md_pen_protocolo', 'sin_sincronizar_processo')) {
+          $objMetaBanco->adicionarColuna('md_pen_protocolo', 'sin_sincronizar_processo', 'CHAR(1)', PenMetaBD::NNULLO);
+          $objMetaBanco->adicionarValorPadraoParaColuna('md_pen_protocolo', 'sin_sincronizar_processo', 'N');
+      }
+
+      $this->atualizarNumeroVersao("4.1.0");
+    }
 
     /**
      * Remover blocos legados
