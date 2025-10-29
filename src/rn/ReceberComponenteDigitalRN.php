@@ -271,7 +271,7 @@ class ReceberComponenteDigitalRN extends InfraRN
       $objAnexoDTO->setDthInclusao(InfraData::getStrDataHoraAtual());
       $objAnexoDTO->setNumTamanho(filesize(DIR_SEI_TEMP.'/'.$strNomeArquivoUpload));
       $objAnexoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-      $objAnexoDTO->setStrNome($parObjComponenteDigital->nome);
+      $objAnexoDTO->setStrNome(mb_convert_encoding($parObjComponenteDigital->nome, 'ISO-8859-1', 'UTF-8'));
       return $objAnexoDTO;
   }
 
