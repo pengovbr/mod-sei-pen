@@ -6,14 +6,6 @@ labels: questão
 assignees: ''
 
 ---
----
-name: 📄 Tarefa, Dúvida ou Outra Questão
-about: Para tarefas gerais, melhorias de documentação ou perguntas.
-title: ""
-labels: "task, question"
-assignees: ''
-
----
 
 **Objetivo Principal:**
 
