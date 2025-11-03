@@ -771,6 +771,10 @@ class ProcessoEletronicoRN extends InfraRN
     {       
       $endpoint = "tramites/processo";
     try {
+        $parametros['novoTramiteDeProcesso']['cabecalho']['propriedadesAdicionais'][] = [
+          'chave' => 'multiplosOrgaos',
+          'valor' => "true"
+        ];
         return $this->post($endpoint, $parametros['novoTramiteDeProcesso']);
 
     } catch (Exception $e) {
