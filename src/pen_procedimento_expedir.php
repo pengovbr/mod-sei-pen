@@ -149,16 +149,79 @@ try {
           $objExpedirProcedimentoDTO->setNumIdAtividade(null);
           $objExpedirProcedimentoDTO->setNumIdUnidade(null);
           $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos($multiplosOrgaos);
+          $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
+
+          $arrTiProcessoEletronico = [
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_DOCUMENTO_AVULSO_RECEBIDO),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)
+          ];
+    
+          $objAtividadeDTO = new AtividadeDTO();
+          $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+          $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+          $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+          $objAtividadeDTO->retNumIdAtividade();
+          $objAtividadeDTO->retNumIdTarefa();
+          $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+        
+          $objAtividadeRN = new AtividadeRN();
+          $ObjAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+        
+          $processoDestinatario = false;
+          if (!empty($ObjAtividadeDTO) && in_array($ObjAtividadeDTO->getNumIdTarefa(), $arrTiProcessoEletronico)) {
+              $processoDestinatario = true;
+          }
+          if ($multiplosOrgaos && $processoDestinatario) {
+              $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(true);
+          }
+
+          $arrTiProcessoEletronico = [
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS),
+          ];
+
+          $objAtividadeDTO = new AtividadeDTO();
+          $objAtividadeDTO->setDblIdProtocolo($numIdProcedimento);
+          $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+          $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+          $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+          $objAtividadeDTO->retNumIdAtividade();
+          $objAtividadeDTO->retNumIdTarefa();
+          $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+        
+          $objAtividadeRN = new AtividadeRN();
+          $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+          $enviarDireto = false;
+          $arrIdTarefaPedisoSincronizacao = [
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_ENVIO_MULTIPLOS_ORGAOS)
+          ];
+          if ($objAtividadeDTO !== null && in_array($objAtividadeDTO->getNumIdTarefa(), $arrIdTarefaPedisoSincronizacao)) {
+            $enviarDireto = true;
+          }
 
         try {
-            $objExpedirProcedimentosRN->setEventoEnvioMetadados(
-                function ($parNumIdTramite) use ($strLinkProcedimento): void {
-                    $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
-                    echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
-                }
-            );
+            $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+            if ($processoDestinatario && $objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($numIdProcedimento) && !$enviarDireto) {
+               $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
+               $objSincronizacaoExpedirProcedimentoRN->sincronizar($objExpedirProcedimentoDTO);
+            } else {
+              $objExpedirProcedimentosRN->setEventoEnvioMetadados(
+                  function ($parNumIdTramite) use ($strLinkProcedimento): void {
+                      $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
+                      echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
+                  }
+              );
+              $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
+            }
 
-            $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
             $bolBotaoFecharCss = InfraUtil::compararVersoes(SEI_VERSAO, ">", "4.0.1");
 
             // Muda situação da barra de progresso para Concluído

@@ -41,6 +41,63 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
                     $this->gravarLogDebug(InfraException::inspecionar($e));
             }
           }
+
+          $pendenciasAutomaticas = $this->obterPendenciasAutomaticasMultiplosOrgaos();
+          foreach ($pendenciasAutomaticas as $objProcedimentoDTO) {
+            $idProtocolo = $objProcedimentoDTO->getDblIdProcedimento();
+            $mensagemLog = ">>> Enviando pendência do protocolo $idProtocolo para fila de processamento";
+            $this->gravarLogDebug($mensagemLog, 3);
+
+            try {
+              $objProtocoloDTO = new ProtocoloDTO();
+              $objProtocoloDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+              $objProtocoloDTO->retTodos();
+
+              $objProtocoloRN = new ProtocoloRN();
+              $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+              $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+              $objProcessoEletronicoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+              $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+              $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+              $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+              $objTramite = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+
+              $strNumeroRegistro = $objTramite->NRE;
+              $remetente = $objTramite->destinatario; // destinatário por motivo de aqui ser o recebimento
+              $destinatario = $objTramite->remetente; // remnetente por motivo de aqui ser o recebimento
+
+
+              $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+              $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
+
+              $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+
+              $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($destinatario->identificacaoDoRepositorioDeEstruturas);
+              $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+              $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+              $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+              $objExpedirProcedimentoDTO->setDblIdProcedimento($objProtocoloDTO->getDblIdProtocolo());
+              $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+              $objExpedirProcedimentoDTO->setNumIdBloco(null);
+              $objExpedirProcedimentoDTO->setNumIdAtividade(null);
+              $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+              $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+              $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
+              $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(true);
+              $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objTramite);
+
+              $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
+              $objSincronizacaoExpedirProcedimentoRN->expedirAuto($objExpedirProcedimentoDTO);
+
+            } catch (\Exception $e) {
+              $this->gravarAmostraErroLogSEI($e);
+              $this->gravarLogDebug(InfraException::inspecionar($e));
+            }
+
+          }
         } catch (ModuloIncompativelException $e) {
             // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
             throw $e;
@@ -108,6 +165,36 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
         $arrPendenciasRetornadas[] = sprintf("%d-%s", $objPendenciaDTO->getNumIdentificacaoTramite(), $objPendenciaDTO->getStrStatus());
         yield $objPendenciaDTO;
     }
+  }
+
+  private function obterPendenciasAutomaticasMultiplosOrgaos()
+  {
+    $pendendciasAutomaticas = [];
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDthConclusao(null);
+    $objAtividadeDTO->setDistinct(true);
+    $objAtividadeDTO->setNumIdTarefa(
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)
+    );
+    $objAtividadeDTO->retTodos();
+
+    $objAtividadeRN = new AtividadeRN();
+    $arrAtividadeDTO = (array)$objAtividadeRN->listarRN0036($objAtividadeDTO);
+
+    if (count($arrAtividadeDTO) > 0) {
+      $this->gravarLogDebug(count($arrAtividadeDTO) . " pendências de envio automático identificadas", 2);
+      foreach ($arrAtividadeDTO as $objAtividadeDTO) {
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($objAtividadeDTO->getDblIdProtocolo());
+        $pendendciasAutomaticas[] = $objProcedimentoDTO;
+        
+        $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
+        
+        yield $objProcedimentoDTO;
+      }
+    }
+
   }
 
     /**

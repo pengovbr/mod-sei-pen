@@ -2694,10 +2694,13 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         }
       };
 
-      $fnCadastrar('Envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Recebimento de processo para múltiplos órgãos - @UNIDADE_DESTINO@ - @UNIDADE_DESTINO_HIRARQUIA@ - @REPOSITORIO_DESTINO@', 'S', 'S', 'N', 'S', 'N', 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Pedido de sincronização para múltiplos órgãos - @UNIDADE_ORIGEM@ - @UNIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
-      $fnCadastrar('Sincronização para múltiplos órgãos finalizada - @UNIDADE_ORIGEM@ - @UNIDADE_ORIGEM_HIRARQUIA@ - @REPOSITORIO_ORIGEM@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido envio automatico de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido envio automatico de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Envio de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Recebimento de processo múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_RECEBIMENTO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização manual múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS');
 
       $this->atualizarNumeroVersao("4.1.0");
     }

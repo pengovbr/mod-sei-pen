@@ -40,6 +40,30 @@ try {
       $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, $numNRE, null, null, null, null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA);
       
       if (count($tramitePendencia) == 0) {
+        $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS);
+
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($idProcedimento);
+        $objAtividadeDTO->setDthConclusao(null);
+        $objAtividadeDTO->setDistinct(true);
+        $objAtividadeDTO->setNumIdTarefa($idTarefa);
+        $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+        $objAtividadeDTO->retTodos();
+
+        $objAtividadeRN = new AtividadeRN();
+        $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+        if($objAtividadeDTO) {
+          $objAtividadeRN = new AtividadeRN();
+          $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
+        }
+
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProcedimento);
+
+        $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS);
+
+        
         $objProcessoEletronicoRN->solicitarSincronizarTramite($objTramiteDTO->getNumIdTramite());
       }
     } 
