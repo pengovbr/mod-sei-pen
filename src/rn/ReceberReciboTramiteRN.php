@@ -42,6 +42,10 @@ class ReceberReciboTramiteRN extends InfraRN
 
       if ($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)) {
           $this->receberReciboDeTramiteInterno($objReciboTramite);
+          // if ($this->validarManterProcessoAbertoMultiplosOrgaos($objReciboTramite->recibo->IDT)) {
+          //     $this->objPenDebug->gravar("Desbloqueando o processo com múltiplos órgãos...");
+          //     ProcessoEletronicoRN::desbloquearProcesso($objProtocoloDTO->getDblIdProtocolo());
+          // }
       }
     } catch (Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
@@ -171,6 +175,24 @@ class ReceberReciboTramiteRN extends InfraRN
         }
       }
     }
+  }
+
+  private function validarManterProcessoAbertoMultiplosOrgaos($numIdTramite)
+  {
+      $objMetadados = $this->objProcessoEletronicoRN->solicitarMetadados($numIdTramite);
+      $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais)
+              ? ($objMetadados->propriedadesAdicionais ?: [])
+              : [];
+      if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+        foreach ($propriedadesAdicionais as $key => $valor) {
+          if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+            return true;
+            break;
+          }
+        }
+      }
+        
+      return false;
   }
 
   private function registrarRecebimentoRecibo($numIdProcedimento, $strProtocoloFormatado, $numIdTramite)
