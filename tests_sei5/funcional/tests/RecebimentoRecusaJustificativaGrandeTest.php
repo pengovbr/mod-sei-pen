@@ -1,6 +1,5 @@
 <?php
 
-use \utilphp\util;
 
 /**
  * Execution Groups
