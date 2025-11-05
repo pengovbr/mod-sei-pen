@@ -165,7 +165,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
           try {
             $objProcessoEletronicoRN = new ProcessoEletronicoRN();
             if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($objProcedimentoDTO->getDblIdProcedimento())) {
-              $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS);
+              $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
 
               $objAtividadeDTO = new AtividadeDTO();
               $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -183,7 +183,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
                 $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
               }
 
-              $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS);
+              $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
             }
           } catch (\Exception $e) {
             $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
@@ -231,6 +231,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProcedimentoDTO = $this->consultarProcedimento($dblIdProcedimento);
       $objProcedimentoDTO->setArrObjDocumentoDTO($this->listarDocumentos($dblIdProcedimento));
       $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
+      
+      $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
 
       //Busca metadados do processo registrado em trâmite anterior
       $objMetadadosProcessoTramiteAnterior = $objExpedirProcedimentoDTO->getObjMetadadosProcedimento();

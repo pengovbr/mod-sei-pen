@@ -317,10 +317,12 @@ class ExpedirProcedimentoRN extends InfraRN
               $this->gravarLogDebug(sprintf('Trâmite do processo %s foi concluído', $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado()), 2);
 
               // Gravar atividae de envio multiplos orgaos
+              if ($objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+                $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS);
+              }
               try {
-                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-                if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($objProcedimentoDTO->getDblIdProcedimento())) {
-                  $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS);
+                if ($this->objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($objProcedimentoDTO->getDblIdProcedimento())) {
+                  $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
 
                   $objAtividadeDTO = new AtividadeDTO();
                   $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
@@ -338,7 +340,9 @@ class ExpedirProcedimentoRN extends InfraRN
                     $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
                   }
 
-                  $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS);
+                  $this->objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
+                } else {
+                  
                 }
               } catch (\Exception $e) {
                 $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
