@@ -2,6 +2,8 @@
 
 use TRF4\UI\Renderer\Infra;
 
+use TRF4\UI\Renderer\Infra;
+
 require_once DIR_SEI_WEB.'/SEI.php';
 
 class ExpedirProcedimentoRN extends InfraRN
@@ -56,10 +58,31 @@ class ExpedirProcedimentoRN extends InfraRN
     protected $fnEventoEnvioMetadados;
     protected $objPenDebug;
     protected $objCacheMetadadosProtocolo=[];
+    protected $objProcessoEletronicoRN;
+    protected $objParticipanteRN;
+    protected $objProcedimentoRN;
+    protected $objProtocoloRN;
+    protected $objDocumentoRN;
+    protected $objAtividadeRN;
+    protected $objUsuarioRN;
+    protected $objUnidadeRN;
+    protected $objOrgaoRN;
+    protected $objSerieRN;
+    protected $objAnexoRN;
+    protected $objPenParametroRN;
+    protected $objPenRelTipoDocMapEnviadoRN;
+    protected $objAssinaturaRN;
+    protected $barraProgresso;
+    protected $objProcedimentoAndamentoRN;
+    protected $fnEventoEnvioMetadados;
+    protected $objPenDebug;
+    protected $objCacheMetadadosProtocolo=[];
 
+    protected $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
     protected $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
 
 
+    protected $contadorDaBarraDeProgresso;
     protected $contadorDaBarraDeProgresso;
 
   public function __construct()
@@ -93,6 +116,7 @@ class ExpedirProcedimentoRN extends InfraRN
       return BancoSEI::getInstance();
   }
 
+  protected function gravarLogDebug($parStrMensagem, $parNumIdentacao = 0, $parBolLogTempoProcessamento = true)
   protected function gravarLogDebug($parStrMensagem, $parNumIdentacao = 0, $parBolLogTempoProcessamento = true)
     {
       $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
@@ -165,11 +189,13 @@ class ExpedirProcedimentoRN extends InfraRN
         //Busca metadados do processo registrado em trâmite anterior
         $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
         
+        
         //Construção do cabeçalho para envio do processo
         $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
         $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
+        $solicitarSincronizarTramite = false;
         $solicitarSincronizarTramite = false;
       if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
           $strNumeroRegistro = null;
@@ -199,6 +225,16 @@ class ExpedirProcedimentoRN extends InfraRN
 
         //Obtém o tamanho total da barra de progreso
         $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgressoREST($arrProcesso);
+
+        if ($solicitarSincronizarTramite) {
+            // Solicitar sincronização do documentos pendentes
+            $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
+
+            $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
+            $this->barraProgresso->mover($this->barraProgresso->getNumMax());
+            $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
+            return true;
+        }
 
         if ($solicitarSincronizarTramite) {
             // Solicitar sincronização do documentos pendentes
@@ -309,6 +345,10 @@ class ExpedirProcedimentoRN extends InfraRN
               $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
               $this->receberReciboDeEnvio($objTramite->IDT);
+
+              if ($objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
+                  $this->desbloquearProcessoExpedicao($arrProcesso['idProcedimentoSEI']);
+              }
 
               if ($objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos()) {
                   $this->desbloquearProcessoExpedicao($arrProcesso['idProcedimentoSEI']);
@@ -549,6 +589,7 @@ class ExpedirProcedimentoRN extends InfraRN
      * @return stdClass Metadados do Processo
      */
   protected function consultarMetadadosPEN($parDblIdProcedimento)
+  protected function consultarMetadadosPEN($parDblIdProcedimento)
     {
       $objMetadadosProtocolo = null;
     if(array_key_exists($parDblIdProcedimento, $this->objCacheMetadadosProtocolo)) {
@@ -640,6 +681,7 @@ class ExpedirProcedimentoRN extends InfraRN
   }
 
   protected function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null)
+  protected function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null)
     {
     if(!isset($objExpedirProcedimentoDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $objExpedirProcedimentoDTO não informado.');
@@ -661,6 +703,8 @@ class ExpedirProcedimentoRN extends InfraRN
           $objExpedirProcedimentoDTO->getBolSinUrgente(),
           $objExpedirProcedimentoDTO->getNumIdMotivoUrgencia(),
           $bolObrigarEnvioDeTodosOsComponentesDigitais,
+          $dblIdProcedimento,
+          $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
           $dblIdProcedimento,
           $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
       );
@@ -1874,7 +1918,7 @@ class ExpedirProcedimentoRN extends InfraRN
     {
       $objConfiguracaoModPEN = ConfiguracaoModPEN::getInstance();
       $arrSiglaOrgaoLegado = $objConfiguracaoModPEN->getValor("PEN", "SiglaOrgaoLegado", false);
-
+      
       $objDocumentoDTO2 = new DocumentoDTO();
       $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
       $objDocumentoDTO2->retStrCrcAssinatura();
@@ -1888,19 +1932,51 @@ class ExpedirProcedimentoRN extends InfraRN
       $objDocumentoRN = new DocumentoRN();
       $objDocumentoDTO2 = $objDocumentoRN->consultarRN0005($objDocumentoDTO2);
 
-      $objDocumentoDTO2->setStrCodigoVerificador($objDocumentoDTO2->getStrProtocoloDocumentoFormatado());
-      $objDocumentoDTO2 = $objDocumentoRN->obterDocumentoAutenticidade($objDocumentoDTO2);
-      $arrObjAssinaturaDTO = $objDocumentoDTO2->getArrObjAssinaturaDTO();
-      $bolContemP7s = false;
-      foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
-        if ($objAssinaturaDTO->getStrP7sBase64() != null) {
-          $bolContemP7s = true;
-          break;
+      $objProtocoloDTO = new ProtocoloDTO();
+      $objProtocoloDTO->retDblIdProtocolo();
+      $objProtocoloDTO->retStrStaEstado();
+      $objProtocoloDTO->setDblIdProtocolo($objDocumentoDTO->getDblIdDocumento());
+
+      $objProtocoloRN = new ProtocoloRN();
+      $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+
+      $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+      $objRelProtocoloProtocoloDTO->retNumSequencia();
+      $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+      $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($objDocumentoDTO2->getDblIdProcedimento());
+      $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($objDocumentoDTO2->getDblIdDocumento());
+      $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+      $bolDocumentoMovidoProcesso = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+
+      if( !$bolDocumentoMovidoProcesso && 
+          ($objProtocoloDTO->getStrStaEstado() != ProtocoloRN::$TE_DOCUMENTO_CANCELADO)) {
+         $objDocumentoDTO2 = new DocumentoDTO();
+         $objDocumentoDTO2->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
+         $objDocumentoDTO2->retStrCrcAssinatura();
+         $objDocumentoDTO2->retStrProtocoloDocumentoFormatado();
+         $objDocumentoDTO2->retStrNomeSerie();
+         $objDocumentoDTO2->retStrNumero();
+         $objDocumentoDTO2->retStrStaProtocoloProtocolo();
+         $objDocumentoDTO2->retDblIdDocumento();
+         $objDocumentoDTO2->retDblIdProcedimento();
+
+         $objDocumentoRN = new DocumentoRN();
+         $objDocumentoDTO2 = $objDocumentoRN->consultarRN0005($objDocumentoDTO2);
+
+         $objDocumentoDTO2->setStrCodigoVerificador($objDocumentoDTO2->getStrProtocoloDocumentoFormatado());
+         $objDocumentoDTO2 = $objDocumentoRN->obterDocumentoAutenticidade($objDocumentoDTO2);
+         $arrObjAssinaturaDTO = $objDocumentoDTO2->getArrObjAssinaturaDTO();
+         $bolContemP7s = false;
+         foreach ($arrObjAssinaturaDTO as $objAssinaturaDTO) {
+           if ($objAssinaturaDTO->getStrP7sBase64() != null) {
+             $bolContemP7s = true;
+            break;
+           }
         }
-      }
-      if ($bolContemP7s) {
-        return $objDocumentoDTO2->getStrConteudoAssinatura();
-      }
+         if ($bolContemP7s) {
+           return $objDocumentoDTO2->getStrConteudoAssinatura();
+         }
+       }
 
       $objEditorDTO = new EditorDTO();
       $objEditorDTO->setDblIdDocumento($objDocumentoDTO->getDblIdDocumento());
@@ -2529,6 +2605,7 @@ class ExpedirProcedimentoRN extends InfraRN
   }
 
 
+  protected function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   protected function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
     if(!isset($objExpedirProcedimentoDTO)) {
@@ -3257,6 +3334,7 @@ class ExpedirProcedimentoRN extends InfraRN
      * @param int $dblIdProtocolo
      */
   protected function atualizarPenProtocolo($dblIdProtocolo = 0)
+  protected function atualizarPenProtocolo($dblIdProtocolo = 0)
     {
 
       $objProtocoloDTO = new PenProtocoloDTO();
@@ -3541,10 +3619,12 @@ class ExpedirProcedimentoRN extends InfraRN
 
 
   protected function consultarTramitesAnteriores($parStrNumeroRegistro)
+  protected function consultarTramitesAnteriores($parStrNumeroRegistro)
     {
       return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramites(null, $parStrNumeroRegistro) : null;
   }
 
+  protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
   protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
     {
     if(!empty($parArrTramitesAnteriores) && is_array($parArrTramitesAnteriores)) {
@@ -3649,6 +3729,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $this->fnEventoEnvioMetadados = $callback;
   }
 
+  protected function lancarEventoEnvioMetadados($parNumIdTramite)
   protected function lancarEventoEnvioMetadados($parNumIdTramite)
     {
     if(isset($this->fnEventoEnvioMetadados)) {
