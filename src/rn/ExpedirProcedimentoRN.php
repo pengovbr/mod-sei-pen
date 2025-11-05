@@ -188,6 +188,10 @@ class ExpedirProcedimentoRN extends InfraRN
           }
       }
 
+        if (is_null($strNumeroRegistro)) {
+            $strNumeroRegistro = $this->buscarNRETramitadoAnteriormenteConcluido($objProcedimentoDTO, $objExpedirProcedimentoDTO);
+        }
+
         $objCabecalho = $this->construirCabecalho($objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento);
 
         //Construção do processo para envio
@@ -372,6 +376,39 @@ class ExpedirProcedimentoRN extends InfraRN
           throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
       }
     }
+  }
+
+  /**
+   * Busca o NRE do processo que foi tramitado anteriormente e que se encontra com status concluído
+   *
+   * @param ProcedimentoDTO $objProcedimentoDTO
+   * @param ExpedirProcedimentoDTO $objExpedirProcedimentoDTO
+   * @return string|null
+   */
+  protected function buscarNRETramitadoAnteriormenteConcluido(ProcedimentoDTO $objProcedimentoDTO, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO): ?string
+  {
+      $strNumeroRegistro = null;
+
+      $objTramiteDTO = new TramiteDTO();
+      $objTramiteDTO->retTodos();
+      $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+      $objTramiteDTO->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
+      $objTramiteDTO->setNumIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+      $objTramiteDTO->setStrStaTipoProtocolo(
+          [ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_PROCESSO, ProcessoEletronicoRN::$STA_TIPO_PROTOCOLO_DOCUMENTO_AVULSO],
+          InfraDTO::$OPER_IN
+      );
+      
+      $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+      $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+      if ($objTramiteDTO) {
+        $arrTramite = $this->objProcessoEletronicoRN->consultarTramites(null, null, null, $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(), $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(), null, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE, 1);
+        if ($arrTramite && count($arrTramite) > 0) {
+            $strNumeroRegistro = $arrTramite[0]->NRE;
+        }
+      }
+
+      return $strNumeroRegistro;
   }
 
   protected function expedirSincronizarProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)

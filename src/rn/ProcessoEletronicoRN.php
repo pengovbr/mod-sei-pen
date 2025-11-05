@@ -1706,7 +1706,21 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
-  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null)
+  /**
+   * Consulta trâmites de processo
+   *
+   * @param  null|integer $parNumIdTramite
+   * @param  null|string  $parNumeroRegistro
+   * @param  null|integer $parNumeroUnidadeRemetente
+   * @param  null|integer $parNumeroUnidadeDestino 
+   * @param  null|string  $parProtocolo
+   * @param  null|integer $parNumeroRepositorioEstruturas
+   * @param  null|string  $situacaoAtual
+   * @param  null|integer $limit
+   * @return null|array   Array de objetos TramiteDTO
+   * @throws InfraException
+   */
+  public function consultarTramites($parNumIdTramite = null, $parNumeroRegistro = null, $parNumeroUnidadeRemetente = null, $parNumeroUnidadeDestino = null, $parProtocolo = null, $parNumeroRepositorioEstruturas = null, $situacaoAtual = null, $limit = null)
     {
       $endpoint = 'tramites';
     try
@@ -1736,6 +1750,10 @@ class ProcessoEletronicoRN extends InfraRN
 
         if (!is_null($situacaoAtual)) {
             $parametros['situacaoAtual'] = $situacaoAtual;
+        }
+
+        if (!is_null($limit)) {
+            $parametros['quantidadeDeRegistros'] = $limit;
         }
 
         $arrResultado = $this->get($endpoint, $parametros);
