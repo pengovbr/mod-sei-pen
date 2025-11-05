@@ -2,6 +2,8 @@
 
 use TRF4\UI\Renderer\Infra;
 
+use TRF4\UI\Renderer\Infra;
+
 require_once DIR_SEI_WEB.'/SEI.php';
 
 class ExpedirProcedimentoRN extends InfraRN
@@ -56,10 +58,31 @@ class ExpedirProcedimentoRN extends InfraRN
     protected $fnEventoEnvioMetadados;
     protected $objPenDebug;
     protected $objCacheMetadadosProtocolo=[];
+    protected $objProcessoEletronicoRN;
+    protected $objParticipanteRN;
+    protected $objProcedimentoRN;
+    protected $objProtocoloRN;
+    protected $objDocumentoRN;
+    protected $objAtividadeRN;
+    protected $objUsuarioRN;
+    protected $objUnidadeRN;
+    protected $objOrgaoRN;
+    protected $objSerieRN;
+    protected $objAnexoRN;
+    protected $objPenParametroRN;
+    protected $objPenRelTipoDocMapEnviadoRN;
+    protected $objAssinaturaRN;
+    protected $barraProgresso;
+    protected $objProcedimentoAndamentoRN;
+    protected $fnEventoEnvioMetadados;
+    protected $objPenDebug;
+    protected $objCacheMetadadosProtocolo=[];
 
+    protected $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
     protected $arrPenMimeTypes = ["application/pdf", "application/vnd.oasis.opendocument.text", "application/vnd.oasis.opendocument.formula", "application/vnd.oasis.opendocument.spreadsheet", "application/vnd.oasis.opendocument.presentation", "text/xml", "text/rtf", "text/html", "text/plain", "text/csv", "image/gif", "image/jpeg", "image/png", "image/svg+xml", "image/tiff", "image/bmp", "audio/mp4", "audio/midi", "audio/ogg", "audio/vnd.wave", "video/avi", "video/mpeg", "video/mp4", "video/ogg", "video/webm"];
 
 
+    protected $contadorDaBarraDeProgresso;
     protected $contadorDaBarraDeProgresso;
 
   public function __construct()
@@ -93,6 +116,7 @@ class ExpedirProcedimentoRN extends InfraRN
       return BancoSEI::getInstance();
   }
 
+  protected function gravarLogDebug($parStrMensagem, $parNumIdentacao = 0, $parBolLogTempoProcessamento = true)
   protected function gravarLogDebug($parStrMensagem, $parNumIdentacao = 0, $parBolLogTempoProcessamento = true)
     {
       $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
@@ -171,6 +195,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
+        $solicitarSincronizarTramite = false;
         $solicitarSincronizarTramite = false;
       if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
           $strNumeroRegistro = null;
@@ -564,6 +589,7 @@ class ExpedirProcedimentoRN extends InfraRN
      * @return stdClass Metadados do Processo
      */
   protected function consultarMetadadosPEN($parDblIdProcedimento)
+  protected function consultarMetadadosPEN($parDblIdProcedimento)
     {
       $objMetadadosProtocolo = null;
     if(array_key_exists($parDblIdProcedimento, $this->objCacheMetadadosProtocolo)) {
@@ -655,6 +681,7 @@ class ExpedirProcedimentoRN extends InfraRN
   }
 
   protected function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null)
+  protected function construirCabecalho(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO, $strNumeroRegistro, $dblIdProcedimento = null)
     {
     if(!isset($objExpedirProcedimentoDTO)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $objExpedirProcedimentoDTO não informado.');
@@ -676,6 +703,8 @@ class ExpedirProcedimentoRN extends InfraRN
           $objExpedirProcedimentoDTO->getBolSinUrgente(),
           $objExpedirProcedimentoDTO->getNumIdMotivoUrgencia(),
           $bolObrigarEnvioDeTodosOsComponentesDigitais,
+          $dblIdProcedimento,
+          $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
           $dblIdProcedimento,
           $objExpedirProcedimentoDTO->getBolSinMultiplosOrgaos() ?: false
       );
@@ -2577,6 +2606,7 @@ class ExpedirProcedimentoRN extends InfraRN
 
 
   protected function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
+  protected function validarParametrosExpedicao(InfraException $objInfraException, ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
     if(!isset($objExpedirProcedimentoDTO)) {
         $objInfraException->adicionarValidacao('Parâmetro $objExpedirProcedimentoDTO não informado.');
@@ -3304,6 +3334,7 @@ class ExpedirProcedimentoRN extends InfraRN
      * @param int $dblIdProtocolo
      */
   protected function atualizarPenProtocolo($dblIdProtocolo = 0)
+  protected function atualizarPenProtocolo($dblIdProtocolo = 0)
     {
 
       $objProtocoloDTO = new PenProtocoloDTO();
@@ -3588,10 +3619,12 @@ class ExpedirProcedimentoRN extends InfraRN
 
 
   protected function consultarTramitesAnteriores($parStrNumeroRegistro)
+  protected function consultarTramitesAnteriores($parStrNumeroRegistro)
     {
       return isset($parStrNumeroRegistro) ? $this->objProcessoEletronicoRN->consultarTramites(null, $parStrNumeroRegistro) : null;
   }
 
+  protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
   protected function necessitaCancelamentoTramiteAnterior($parArrTramitesAnteriores)
     {
     if(!empty($parArrTramitesAnteriores) && is_array($parArrTramitesAnteriores)) {
@@ -3696,6 +3729,7 @@ class ExpedirProcedimentoRN extends InfraRN
       $this->fnEventoEnvioMetadados = $callback;
   }
 
+  protected function lancarEventoEnvioMetadados($parNumIdTramite)
   protected function lancarEventoEnvioMetadados($parNumIdTramite)
     {
     if(isset($this->fnEventoEnvioMetadados)) {
