@@ -679,11 +679,13 @@ class ReceberProcedimentoRN extends InfraRN
                       $objComponenteDigitalPDTO = new ComponenteDigitalDTO();
                       $objComponenteDigitalPDTO->retTodos();
                       $objComponenteDigitalPDTO->setNumIdAnexo($objAnexoDTO->getNumIdAnexo());
-                      $objComponenteDigitalPDTO->setNumMaxRegistrosRetorno(1);
+                      
                       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-                      $objComponenteDigitalPDTO = $objComponenteDigitalBD->consultar($objComponenteDigitalPDTO);
-                      if ($objComponenteDigitalPDTO != null) {
-                        $objComponenteDigitalBD->excluir($objComponenteDigitalPDTO);
+                      $arrObjComponenteDigitalPDTO = $objComponenteDigitalBD->listar($objComponenteDigitalPDTO);
+                      if (count($arrObjComponenteDigitalPDTO) > 0) {
+                        foreach ($arrObjComponenteDigitalPDTO as $objComponenteDigitalPDTO) {
+                            $objComponenteDigitalBD->excluir($objComponenteDigitalPDTO);
+                        }
                       }
                       $objAnexoRN->excluirRN0226([$objAnexoDTO]); // precisa excluir componente digital primeiro
                       $bolEnviarComponentesDigitais = true;

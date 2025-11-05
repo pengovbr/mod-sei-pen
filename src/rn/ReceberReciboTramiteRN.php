@@ -42,10 +42,6 @@ class ReceberReciboTramiteRN extends InfraRN
 
       if ($this->objProcedimentoAndamentoRN->sinalizarInicioRecebimento($arrChavesSincronizacao)) {
           $this->receberReciboDeTramiteInterno($objReciboTramite);
-          // if ($this->validarManterProcessoAbertoMultiplosOrgaos($objReciboTramite->recibo->IDT)) {
-          //     $this->objPenDebug->gravar("Desbloqueando o processo com múltiplos órgãos...");
-          //     ProcessoEletronicoRN::desbloquearProcesso($objProtocoloDTO->getDblIdProtocolo());
-          // }
       }
     } catch (Exception $e) {
         $mensagemErro = InfraException::inspecionar($e);
