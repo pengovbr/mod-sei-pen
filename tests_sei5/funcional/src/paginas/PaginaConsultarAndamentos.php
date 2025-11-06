@@ -37,7 +37,7 @@ class PaginaConsultarAndamentos extends PaginaTeste
       $this->test->frame(null);
       $this->test->frame("ifrConteudoVisualizacao");
       $this->test->frame("ifrVisualizacao");
-      $mensagemTramite = "O processo foi recusado pelo orgÃ£o $strUnidadeDestino pelo seguinte motivo: $strMotivo";
+      $mensagemTramite = mb_convert_encoding("O processo foi recusado pelo orgão $strUnidadeDestino pelo seguinte motivo: $strMotivo", 'UTF-8', 'ISO-8859-1');
       return strpos($this->test->byCssSelector('body')->text(), $mensagemTramite) !== false;
   }
 }
