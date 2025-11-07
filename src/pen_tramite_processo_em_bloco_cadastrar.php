@@ -66,8 +66,8 @@ try {
            
             $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
             $objPenBlocoProcessoRN->atualizarEstadoDoBloco($objPenBlocoProcessoDTO->getNumIdBloco());
-          }          
-        }       
+          }
+        }
 
         $strMensagem = 'O processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" foi removido com sucesso do bloco de trâmite externo';
       } catch (Exception $e) {
@@ -77,7 +77,7 @@ try {
       ?>
       <script type="text/javascript">
         alert('<?= $strMensagem ?>');
-        parent.parent.location.reload();
+        parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
       </script>
       <?php
         exit(0);
@@ -147,7 +147,7 @@ try {
             $objPaginaSEI->adicionarMensagem($mensagemDeErro, InfraPagina::$TIPO_MSG_ERRO);
             header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
             exit(0);
-          }          
+          }
 
           $objPenBlocoProcessoDTO = $objPenBlocoProcessoRN->cadastrar($objPenBlocoProcessoDTO);
           $strMensagem = 'Processo "' . $procedimento->getStrProtocoloProcedimentoFormatado() . '" adicionado ao bloco';
@@ -158,7 +158,7 @@ try {
         ?>
         <script type="text/javascript">
           alert('<?= $strMensagem ?>');
-          parent.parent.location.reload();
+          parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
         </script>
         <?php
         exit(0);
@@ -268,7 +268,7 @@ try {
   $arrMapIdBloco = array();
 
   $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-  $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO); //($objSessaoSEI->getNumIdUnidadeAtual());
+  $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
   $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
   $objTramiteEmBlocoDTO->retNumId();
   $objTramiteEmBlocoDTO->retNumOrdem();
