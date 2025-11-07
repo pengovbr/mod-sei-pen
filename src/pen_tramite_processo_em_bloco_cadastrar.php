@@ -72,7 +72,7 @@ try {
       ?>
       <script type="text/javascript">
         alert('<?php echo $strMensagem ?>');
-        parent.parent.location.reload();
+        parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
       </script>
         <?php
         exit(0);
@@ -152,7 +152,7 @@ try {
         ?>
         <script type="text/javascript">
           alert('<?php echo $strMensagem ?>');
-          parent.parent.location.reload();
+          parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
         </script>
             <?php
             exit(0);
