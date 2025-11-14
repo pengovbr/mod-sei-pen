@@ -91,7 +91,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       ]);
 
       // precisa ter ao menos um resultado e o numIdAndamento ser 6
-      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== 6) {
+      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() != 6) {
           return false;
       }
       return true;
@@ -261,7 +261,7 @@ class TramiteBlocoDeTramiteSituacaoProcessoConcluidoTest extends FixtureCenarioB
       ]);
 
       // precisa ter ao menos um resultado e o numIdAndamento ser 9
-      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() !== 9) {
+      if (empty($objBlocoDeTramiteProtocolo) || $objBlocoDeTramiteProtocolo[0]->getNumIdAndamento() != 9) {
           return false;
       }
 
