@@ -172,6 +172,51 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  /**
+   * Verifica se pode solicitar a reprodução do último trâmite de um processo eletrônico
+   *
+   * @param  int  $dblIdProcedimento
+   * @return bool
+   */
+  public static function podeSolicitarReproducaoUltimoTramite($dblIdProcedimento)
+  {
+    $processoExpedido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO);
+    $processoRecebido = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_RECEBIDO);
+    $processoTramiteCancelado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_CANCELADO);
+    $processoTramiteRecusado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO);
+    $processoAbortado = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_ABORTADO);
+
+    $arrTiProcessoEletronico = [
+      $processoExpedido,
+      $processoRecebido,
+      $processoTramiteCancelado,
+      $processoTramiteRecusado,
+      $processoAbortado,
+    ];
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($dblIdProcedimento);
+    $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+  
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    if ($objAtividadeDTO !== null) {
+      $naoPodeSolicitarReproducaoUltimoTramite = [
+        $processoExpedido, $processoTramiteCancelado, $processoTramiteRecusado, $processoAbortado
+      ];
+      if (in_array($objAtividadeDTO->getNumIdTarefa(), $naoPodeSolicitarReproducaoUltimoTramite)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
     /**
      * Consulta a lista de repositório de estruturas disponíveis no Barramento de Serviços do PEN
