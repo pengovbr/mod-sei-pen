@@ -6,7 +6,7 @@ As melhorias entregues em cada uma das versões são cumulativas, ou seja, cont�
 
 ## Compatibilidade de versões
 * O módulo é compatível com a seguinte versão do **SEI**:
-  * SEI 5.0.0
+  * SEI 5.0.0, 5.0.1, 5.0.2, 5.0.3
     
 Para maiores informações sobre os procedimentos de instalação ou atualização, acesse os seguintes documentos localizados no pacote de distribuição mod-sei-pen-VERSAO.zip:
 > Atenção: É impreterível seguir rigorosamente o disposto no README.md do Módulo para instalação ou atualização com sucesso.
@@ -31,6 +31,7 @@ Todas as atualizações podem incluir itens referentes à segurança, requisito 
 
 * **Erro: Módulo do Tramita: Falha identificada na definição da ordem dos componentes digitais do documento** Correção de erro ao tentar reenviar um processo com documento externo removido apresenta o erro: Módulo do Tramita: Falha identificada na definição da ordem dos componentes digitais. [#836](https://github.com/pengovbr/mod-sei-pen/issues/836);
 
+* **Erro: Mensagem de inclusão ou remoção continua sendo exibida mesmo após conclusão da box** Correção de erro ao adicionar ou remover um processo de um bloco, a mensagem de adição ou remoção do processo no bloco é exibida, mas não para de ser exibida, mesmo após clicar no botão "ok". Fica em loop infinito  [#991](https://github.com/pengovbr/mod-sei-pen/issues/991);
 
 
 #### Instruções

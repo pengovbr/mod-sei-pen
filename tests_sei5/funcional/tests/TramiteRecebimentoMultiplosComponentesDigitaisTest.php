@@ -476,22 +476,22 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
       }
     }
 
-      $documentoDoProcesso = array(
-          'protocolo' => randomString(5),
-          'nivelDeSigilo' => 1,
-          'descricao' => $documentoTeste['DESCRICAO'],
-          'dataHoraDeProducao' => '2017-05-15T03:41:13',
-          'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
-          'ordem' => $ordemDocumento,
-          'produtor' => array(
-              'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
-              "tipo" => "orgaopublico"
-          ),
+        $documentoDoProcesso = array(
+            'protocolo' => util::random_string(5),
+            'nivelDeSigilo' => 1,
+            'descricao' => $documentoTeste['DESCRICAO'],
+            'dataHoraDeProducao' => '2017-05-15T03:41:13',
+            'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
+            'ordem' => $ordemDocumento,
+            'produtor' => array(
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                "tipo" => "orgaopublico"
+            ),
 
-          'especie' => array(
-              'codigo' => 42,
-              'nomeNoProdutor' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1')
-          ),
+            'especie' => array(
+                'codigo' => 42,
+                'nomeNoProdutor' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1')
+            ),
 
           'interessados' => array(
               [
@@ -527,25 +527,25 @@ class TramiteRecebimentoMultiplosComponentesDigitaisTest extends FixtureCenarioB
         $metadadosDocumentos[] = $documentos['documentoDoProcesso'];
     }
 
-      return array(
-          'protocolo' => $processoTeste['PROTOCOLO'],
-          'nivelDeSigilo' => 1,
-          'processoDeNegocio' => $processoTeste['TIPO_PROCESSO'],
-          'descricao' => $processoTeste['DESCRICAO'],
-          'dataHoraDeProducao' => '2017-05-15T03:41:13',
-          'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
-          'produtor' => array(
-              'nome' => mb_convert_encoding(randomString(20), 'UTF-8', 'ISO-8859-1'),
-              'tipo' => "orgaopublico",
-          ),
-          'interessados' => array(
-              [
-                  "nome" => $processoTeste['INTERESSADOS'],
-              ]
-          ),
-          'documentos' => $metadadosDocumentos,
-      );
-  }
+        return array(
+            'protocolo' => $processoTeste['PROTOCOLO'],
+            'nivelDeSigilo' => 1,
+            'processoDeNegocio' => $processoTeste['TIPO_PROCESSO'],
+            'descricao' => $processoTeste['DESCRICAO'],
+            'dataHoraDeProducao' => '2017-05-15T03:41:13',
+            'dataHoraDeRegistro' => '2013-12-21T09:32:42-02:00',
+            'produtor' => array(
+                'nome' => mb_convert_encoding(util::random_string(20), 'UTF-8', 'ISO-8859-1'),
+                'tipo' => "orgaopublico",
+            ),
+            'interessados' => array(
+                [
+                    "nome" => $processoTeste['INTERESSADOS'],
+                ]
+            ),
+            'documentos' => $metadadosDocumentos,
+        );
+    }
 
 
   public function enviarComponenteDigitalAPI($parametros) 
