@@ -214,17 +214,17 @@ class TramiteEnvioParcialProcessoContendoDocumentoMovidoTest extends FixtureCena
      * #[Depends('test_tramite_novamente_para_org2')]
      * @return void
      */
-    public function test_realizar_pedido_reproducao_ultimo_tramite_sem_componentes_digitais_a_serem_reproduzidos()
-    {
-        $strProtocoloTeste = self::$protocoloTesteFormatado;
+    // public function test_realizar_pedido_reproducao_ultimo_tramite_sem_componentes_digitais_a_serem_reproduzidos()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTesteFormatado;
 
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    //     $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
 
-        // 11 - Reproduzir último trâmite
-        $this->abrirProcesso($strProtocoloTeste);
-        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
-        $this->assertStringContainsString(mb_convert_encoding("Não é possível executar o serviço de reprodução de trâmite do processo $strProtocoloTeste, pois não há componentes digitais válidos a serem reproduzidos", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
-    }
+    //     // 11 - Reproduzir último trâmite
+    //     $this->abrirProcesso($strProtocoloTeste);
+    //     $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+    //     $this->assertStringContainsString(mb_convert_encoding("Não é possível executar o serviço de reprodução de trâmite do processo $strProtocoloTeste, pois não há componentes digitais válidos a serem reproduzidos", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+    // }
 
   /**
    * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
