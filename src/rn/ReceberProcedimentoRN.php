@@ -3157,6 +3157,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objComponenteDigitalDTO->retTodos();
       $objComponenteDigitalDTO->setStrHashConteudo($objDocumentosMetadados->componentesDigitais[0]->hash->conteudo);
       $objComponenteDigitalDTO->setStrNome($objDocumentosMetadados->componentesDigitais[0]->nome);
+      $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumentosMetadados->ordem ?: 1);
       $objComponenteDigitalDTO->setNumMaxRegistrosRetorno(1);
       $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
 
