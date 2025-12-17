@@ -187,7 +187,15 @@ try {
             . '&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1'
         );
 
-        $podeEnvioMultiplosOrgaos = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnvioMultiplosOrgaos", []);
+        try {
+          $podeEnvioMultiplosOrgaos = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnvioMultiplosOrgaos", null);
+          // Garantir que seja um array
+          if (!is_null($podeEnvioMultiplosOrgaos) && !is_array($podeEnvioMultiplosOrgaos)) {
+            $podeEnvioMultiplosOrgaos = explode(',', $podeEnvioMultiplosOrgaos);
+          }
+        } catch (Throwable $e) {
+          $podeEnvioMultiplosOrgaos = null;
+        }
         break;
     default:
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");
@@ -367,8 +375,8 @@ $objPaginaSEI->montarJavaScript();
     objAutoCompletarEstrutura.processarResultado = function(id, descricao, complemento) {
       window.infraAvisoCancelar();
       $('#divSinMultiplosOrgaos').css('display', 'none');
-      if (id!=''){
-          $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $podeEnvioMultiplosOrgaos); ?>').split(',');
+      if (id!='' && '<?php echo !is_null($podeEnvioMultiplosOrgaos) && is_array($podeEnvioMultiplosOrgaos) ? '1' : '0'; ?>'=='1') {
+          $arrIdsMultiplosOrgaos = ('<?php echo is_array($podeEnvioMultiplosOrgaos) ? implode(',', $podeEnvioMultiplosOrgaos) : $podeEnvioMultiplosOrgaos; ?>').split(',');
           if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
             $('#divSinMultiplosOrgaos').css('display', 'block');
           }
@@ -510,7 +518,7 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
   </div>
 
   <?php
-    $displayNone = in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos) ? '' : 'display: none;';
+    $displayNone = (is_array($podeEnvioMultiplosOrgaos) && in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos)) ? '' : 'display: none;';
   ?>
   <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; <?php echo $displayNone; ?>">
     <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $sinMultiplosOrgaos === 'S' ? 'checked' : '' ?> />
