@@ -366,11 +366,10 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
       $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
       // ou caso reprodução de ultimo tramite
-      $bolDeveRecusarTramite = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
-        
-      if($bolDeveRecusarTramite) {
-          $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
-          $objProcessoEletronicoRN->recusarTramite($idTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
+      $bolDeveCancelar = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
+      
+      if($bolDeveCancelar) {
+        $objProcessoEletronicoRN->cancelarTramite($idTramite);
       }
 
       $this->gravarLogDebug("Erro processando envio de sincronização de tramite: $e", 0, true);

@@ -26,6 +26,9 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
 
   public static $arrIdMapEnvioParcialOrgaoA;
   public static $arrIdMapEnvioParcialOrgaoB;
+  public static $documentoTeste3;
+  public static $documentoTeste4;
+  public static $documentoTeste5;
 
   /**
    * Teste preparatório (setUp()). Definição de contextos e instanciação da api de integração
@@ -141,6 +144,23 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $documentos = array(self::$documentoTeste1);
     $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     $this->sairSistema();
+      // Acessar sistema do destinatário do processo
+      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+      $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
+
+      // Verificar se o botão de sincronizar existe
+      $btnSincronizar = $this->paginaProcesso->validarBotaoExiste("Sincronizar Processo");
+      $this->assertNotNull($btnSincronizar, "Botão 'Sincronizar Processo' não foi encontrado");
+
+      // Clicar no botão de sincronizar
+      $this->paginaProcesso->solicitarSincronizacao("Sincronizar Processo");
+
+      // Capturar a mensagem do alert
+      $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
+
+      // Verificar se a mensagem esperada aparece
+      $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
+      $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
   }
 
   private function receberReciboEnvio($novoTramite)
