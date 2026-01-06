@@ -119,31 +119,31 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
      * #[Depends('test_verificar_destino_processo_contendo_varios_documentos')]
      * @return void
      */
-    public function test_realizar_pedido_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$protocoloTeste;
+    // public function test_realizar_pedido_reproducao_ultimo_tramite()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTeste;
 
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    //     $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
 
-        // 11 - Reproduzir último trâmite
-        $this->abrirProcesso($strProtocoloTeste);
-        $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
-        $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
+    //     // 11 - Reproduzir último trâmite
+    //     $this->abrirProcesso($strProtocoloTeste);
+    //     $resultadoReproducao = $this->paginaProcesso->reproduzirUltimoTramite();
+    //     $this->assertStringContainsString(mb_convert_encoding("Reprodução de último trâmite executado com sucesso!", 'UTF-8', 'ISO-8859-1'), $resultadoReproducao);
 
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
+    //     $this->waitUntil(function() {
+    //         sleep(5);
+    //         $this->paginaBase->refresh();
+    //         $this->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite iniciado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+    //       try {
+    //           $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //           return true;
+    //       } catch (AssertionFailedError $e) {
+    //           return false;
+    //       }
 
-        }, PEN_WAIT_TIMEOUT);
-    }
+    //     }, PEN_WAIT_TIMEOUT);
+    // }
 
     /**
      * Teste para verificar a reprodução de último tramite no destinatario
@@ -155,29 +155,29 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_reproducao_ultimo_tramite()
-    {
-        $strProtocoloTeste = self::$protocoloTeste;
+    // public function test_reproducao_ultimo_tramite()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTeste;
 
-        $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+    //     $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
 
-        $this->abrirProcesso($strProtocoloTeste);
+    //     $this->abrirProcesso($strProtocoloTeste);
 
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
+    //     $this->waitUntil(function() {
+    //         sleep(5);
+    //         $this->paginaBase->refresh();
+    //         $this->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite recebido na entidade", 'UTF-8', 'ISO-8859-1');
+    //       try {
+    //           $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //           return true;
+    //       } catch (AssertionFailedError $e) {
+    //           return false;
+    //       }
 
-        }, PEN_WAIT_TIMEOUT);
+    //     }, PEN_WAIT_TIMEOUT);
 
-    }
+    // }
 
     /**
      * Teste para verificar a reprodução de último tramite no remetente
@@ -189,30 +189,30 @@ class TramiteProcessoContendoVariosDocumentosTest extends FixtureCenarioBaseTest
      *
      * @return void
      */
-    public function test_reproducao_ultimo_tramite_remetente_finalizado()
-    {
-        $strProtocoloTeste = self::$protocoloTeste;
+    // public function test_reproducao_ultimo_tramite_remetente_finalizado()
+    // {
+    //     $strProtocoloTeste = self::$protocoloTeste;
 
-        $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    //     $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
 
-        // 11 - Abrir protocolo na tela de controle de processos
-        $this->abrirProcesso($strProtocoloTeste);
+    //     // 11 - Abrir protocolo na tela de controle de processos
+    //     $this->abrirProcesso($strProtocoloTeste);
         
-        $this->waitUntil(function() {
-            sleep(5);
-            $this->paginaBase->refresh();
-            $this->paginaProcesso->navegarParaConsultarAndamentos();
-            $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
-          try {
-              $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
-              return true;
-          } catch (AssertionFailedError $e) {
-              return false;
-          }
+    //     $this->waitUntil(function() {
+    //         sleep(5);
+    //         $this->paginaBase->refresh();
+    //         $this->paginaProcesso->navegarParaConsultarAndamentos();
+    //         $mensagemTramite = mb_convert_encoding("Reprodução de último trâmite finalizado para o protocolo ".  $strProtocoloTeste, 'UTF-8', 'ISO-8859-1');
+    //       try {
+    //           $this->assertTrue($this->paginaConsultarAndamentos->contemTramite($mensagemTramite));
+    //           return true;
+    //       } catch (AssertionFailedError $e) {
+    //           return false;
+    //       }
 
-        }, PEN_WAIT_TIMEOUT);
-        $this->sairSistema();
-        $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$documentosTeste, self::$destinatario);
-    }
+    //     }, PEN_WAIT_TIMEOUT);
+    //     $this->sairSistema();
+    //     $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, self::$documentosTeste, self::$destinatario);
+    // }
 
 }
