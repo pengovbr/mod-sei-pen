@@ -1295,7 +1295,7 @@ class ProcessoEletronicoRN extends InfraRN
         return $this->get($endpoint, $parametros);
 
     } catch (\Exception $e) {
-        $mensagem = "Falha na solicitação de sincronização do trâmite";
+        $mensagem = "Falha ao solicitar a sincronização do trâmite";
         $detalhes = InfraString::formatarJavaScript($this->tratarFalhaWebService($e));
         throw new InfraException($mensagem, $e, $detalhes);
     }

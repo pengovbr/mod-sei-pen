@@ -23,6 +23,9 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
   public static $processoTeste;
   public static $documentoTeste1;
   public static $documentoTeste2;
+
+  public static $arrIdMapEnvioParcialOrgaoA;
+  public static $arrIdMapEnvioParcialOrgaoB;
   public static $documentoTeste3;
   public static $documentoTeste4;
   public static $documentoTeste5;
@@ -50,6 +53,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
    */
   public function test_recebimento_metadados_documento_avulso()
   {
+    $this->criarCenarioTramiteEnvioParcialTest();
 
     $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
     $senhaCertificado = self::$remetente['SENHA_CERTIFICADO_DIGITAL'];
@@ -67,8 +71,10 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     //Verificar recebimento de novo processo administrativo contendo documento avulso enviado
     $this->assertNotNull($novoTramite);
     $this->assertNotNull($reciboTramite);
-    
+
     self::$processoTeste = $this->realizarValidacaoRecebimentoDocumentoAvulsoNoDestinatario(self::$documentoTeste1, self::$destinatario);
+
+    $this->sairSistema();
   }
 
   /**
@@ -80,6 +86,64 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
    */
   public function test_validar_pedido_de_sincronizacao_sem_permissao()
   {
+    // Acessar sistema do destinatário do processo
+    $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
+    $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
+
+    // Verificar se o botão de sincronizar existe
+    $btnSincronizar = $this->paginaProcesso->validarBotaoExiste("Sincronizar Processo");
+    $this->assertNotNull($btnSincronizar, "Botão 'Sincronizar Processo' não foi encontrado");
+
+    // Clicar no botão de sincronizar
+    $this->paginaProcesso->solicitarSincronizacao("Sincronizar Processo");
+
+    // Capturar a mensagem do alert
+    $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
+
+    // Verificar se a mensagem esperada aparece
+    $mensagemEsperada = mb_convert_encoding("solicitar a sincronização", 'UTF-8', 'ISO-8859-1');
+    $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
+
+    $this->sairSistema();
+  }
+
+  /**
+   * Teste de trâmite externo de processo com devolução para a mesma unidade de origem
+   *
+   * #[Group('envio')]
+   * #[Large]
+   *
+   * #[Depends('test_validar_pedido_de_sincronizacao_sem_permissao')]
+   *
+   * @return void
+   */
+  public function test_devolver_processo_para_origem()
+  {
+    // Configuração dos dados para teste do cenário
+    self::$remetente = $this->definirContextoTeste(CONTEXTO_ORGAO_A);
+    self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+
+    $documentos = array();
+    putenv("DATABASE_HOST=org1-database");
+    $this->realizarTramiteExternoSemValidacaoNoRemetenteFixture(self::$processoTeste, $documentos, self::$remetente, self::$destinatario);
+  }
+
+  /**
+   * Teste de verificação do correto recebimento do processo no destino
+   *
+   * #[Group('verificacao_recebimento')]
+   * #[Large]
+   *
+   * #[Depends('test_devolver_processo_para_origem')]
+   *
+   * @return void
+   */
+  public function test_verificar_recebimento_processo_destino()
+  {
+    self::$destinatario = $this->definirContextoTeste(CONTEXTO_ORGAO_B);
+    $documentos = array(self::$documentoTeste1);
+    $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
+    $this->sairSistema();
       // Acessar sistema do destinatário do processo
       $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
       $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
@@ -95,18 +159,8 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
       $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
 
       // Verificar se a mensagem esperada aparece
-      $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
+      $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
       $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
-  }
-
-  public function test_devolver_processo_para_origem()
-  {
-    $this->assertTrue(true);
-  }
-
-  public function test_validar_pedido_de_sincronizacao_com_permissao()
-  {
-    $this->assertTrue(true);
   }
 
   private function receberReciboEnvio($novoTramite)
@@ -325,5 +379,64 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     ]);
 
     return $strClientGuzzle;
+  }
+
+  /**
+   * Excluir mapeamentos de Envio Parcial no Remetente e Destinatário 
+   * #[Group('mapeamento')]
+   */
+  public static function tearDownAfterClass(): void
+  {
+    $penMapEnvioParcialFixture = new \PenMapEnvioParcialFixture();
+
+    putenv("DATABASE_HOST=org2-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoA as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+
+    putenv("DATABASE_HOST=org1-database");
+    foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
+      $penMapEnvioParcialFixture->remover([
+        'Id' => $idMapEnvioParcial
+      ]);
+    }
+    putenv("DATABASE_HOST=org1-database");
+    parent::tearDownAfterClass();
+  }
+
+  /*
+  * Criar processo e mapear Envio Parcial no Remetente e Destinatário
+  * #[Group('mapeamento')]
+  * @return void
+  */
+  private function criarCenarioTramiteEnvioParcialTest()
+  {
+    // Mapear Envio Parcial no Remetente
+    self::$arrIdMapEnvioParcialOrgaoA = array();
+    putenv("DATABASE_HOST=org2-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$destinatario['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$destinatario['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$destinatario['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$destinatario['NOME_UNIDADE']
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
+
+    // Mapear Envio Parcial no Destinatário
+    self::$arrIdMapEnvioParcialOrgaoB = array();
+    putenv("DATABASE_HOST=org1-database");
+    $objPenMapEnvioParcialFixture = new PenMapEnvioParcialFixture();
+    $objMapEnvioParcial = $objPenMapEnvioParcialFixture->carregar([
+      'IdEstrutura' => self::$remetente['ID_REP_ESTRUTURAS'],
+      'StrEstrutura' => self::$remetente['REP_ESTRUTURAS'],
+      'IdUnidadePen' => self::$remetente['ID_ESTRUTURA'],
+      'StrUnidadePen' => self::$remetente['NOME_UNIDADE'],
+      'SinMultiplosOrgaos' => 'S'
+    ]);
+    self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
+
   }
 }
