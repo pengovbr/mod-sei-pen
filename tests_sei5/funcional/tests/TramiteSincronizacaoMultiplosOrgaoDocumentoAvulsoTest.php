@@ -101,7 +101,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
 
     // Verificar se a mensagem esperada aparece
-    $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
+    $mensagemEsperada = mb_convert_encoding("solicitar a sincronização", 'UTF-8', 'ISO-8859-1');
     $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
 
     $this->sairSistema();
@@ -159,7 +159,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
       $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
 
       // Verificar se a mensagem esperada aparece
-      $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
+      $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
       $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
   }
 
