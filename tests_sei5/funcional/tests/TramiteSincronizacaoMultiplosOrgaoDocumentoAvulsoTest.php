@@ -413,7 +413,8 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
       'IdEstrutura' => self::$remetente['ID_REP_ESTRUTURAS'],
       'StrEstrutura' => self::$remetente['REP_ESTRUTURAS'],
       'IdUnidadePen' => self::$remetente['ID_ESTRUTURA'],
-      'StrUnidadePen' => self::$remetente['NOME_UNIDADE']
+      'StrUnidadePen' => self::$remetente['NOME_UNIDADE'],
+      'SinMultiplosOrgaos' => 'S'
     ]);
     self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
 

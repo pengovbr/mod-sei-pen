@@ -264,6 +264,13 @@ class PaginaProcesso extends PaginaTeste
     }
   }
 
+  public function solicitarSincronizacao(string $botao): void
+    {
+      $this->frame(null);
+      $this->frame('ifrConteudoVisualizacao');
+      $this->elByXPath("//img[@alt='{$botao}']")->click();
+  }
+
   public function reproduzirUltimoTramite()
     {
       sleep(5);
