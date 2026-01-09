@@ -414,6 +414,97 @@ class CenarioBaseTestCase extends TestCase
       sleep(1);
   }
 
+  /**
+   * Realiza tramitação externa de processo esperando um erro específico
+   * 
+   * Este método é uma variação do tramitarProcessoExternamente() que, ao invés de
+   * validar o sucesso da tramitação, valida que um erro específico foi retornado
+   * pelo sistema. É utilizado em testes que precisam validar comportamentos de rejeição,
+   * como tentativa de tramitar documentos sigilosos ou com restrições de segurança.
+   * 
+   * Fluxo de execução:
+   * 1. Navega para a tela de tramitação externa
+   * 2. Preenche os dados do trâmite (repositório, unidade, múltiplos órgãos)
+   * 3. Envia o trâmite
+   * 4. Aguarda a janela de feedback do sistema
+   * 5. Valida que a mensagem de erro esperada está presente
+   * 6. Fecha a janela de feedback
+   * 
+   * @param string|object $protocolo Número do processo a ser tramitado
+   * @param string $repositorio Nome do repositório de estruturas destino
+   * @param string $unidadeDestino Nome da unidade de destino
+   * @param string $unidadeDestinoHierarquia Hierarquia da unidade (opcional)
+   * @param string $erroEsperado Texto do erro que deve ser retornado pelo sistema
+   * @param bool $urgente Define se o trâmite é urgente (padrão: false)
+   * @param bool $multiplosOrgaos Define se deve marcar opção de múltiplos órgãos (padrão: false)
+   * @param int $timeout Tempo máximo de espera em segundos (padrão: PEN_WAIT_TIMEOUT)
+   * 
+   * @throws Exception Se houver um alert antes do processamento
+   * @throws AssertionFailedError Se o erro esperado não for encontrado
+   * 
+   * @return void
+   */
+  protected function tramitarProcessoExternamenteErroEsperado(
+    $protocolo,
+    $repositorio,
+    $unidadeDestino,
+    $unidadeDestinoHierarquia,
+    $erroEsperado,
+    $urgente = false,
+    $multiplosOrgaos = false,
+    $timeout = PEN_WAIT_TIMEOUT
+  )
+    {
+      $this->paginaProcesso->navegarParaTramitarProcesso();
+    
+      // Preencher parâmetros do trâmite
+      $this->paginaTramitar->repositorio($repositorio);
+      $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
+      if ($multiplosOrgaos) { $this->paginaTramitar->selecionarMultiplosOrgaos(); }
+      $this->paginaTramitar->tramitar();
+
+    try {
+        $mensagemAlerta = $this->paginaTramitar->alertTextAndClose(true);
+    } catch (Exception $e) {
+    }
+
+    if (isset($mensagemAlerta)) {
+        throw new Exception($mensagemAlerta);
+    }
+
+      $callbackValidacaoErro = function () use ($erroEsperado) {
+        try {
+            $this->paginaTramitar->frame('ifrEnvioProcesso');
+            $conteudoBody = $this->paginaTramitar->elByCss('body')->getText();
+            $erroEsperadoConvertido = mb_convert_encoding($erroEsperado, 'UTF-8', 'ISO-8859-1');
+            $this->assertStringContainsString($erroEsperadoConvertido, $conteudoBody);
+            $btnFechar = $this->paginaTramitar->elByXPath("//input[@id='btnFechar']");
+            $btnFechar->click();
+        } finally {
+          try {
+              $this->paginaTramitar->frame(null);
+              $this->paginaTramitar->frame("ifrConteudoVisualizacao");
+              $this->paginaTramitar->frame("ifrVisualizacao");
+          } catch (Exception $e) {
+          }
+        }
+
+          return true;
+      };
+
+    try {
+        $this->waitUntil($callbackValidacaoErro, $timeout);
+    } finally {
+      try {
+          $this->paginaTramitar->frame(null);
+          $this->paginaTramitar->frame("ifrVisualizacao");
+      } catch (Exception $e) {
+      }
+    }
+
+      sleep(1);
+  }
+
   protected function tramitarProcessoExternamenteComValidacaoRemetente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
     {
       $this->tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente, $callbackEnvio, $timeout);

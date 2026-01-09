@@ -24,27 +24,7 @@ use PHPUnit\Framework\AssertionFailedError;
  */
 class TramiteSincronizacaoMultiplosOrgaoProcessoGrandeTest extends FixtureCenarioBaseTestCase
 {
-  /** @const string Algoritmo de hash utilizado para documentos */
-  const ALGORITMO_HASH_DOCUMENTO = 'SHA256';
-  
-  /** @const string Algoritmo de hash utilizado para assinaturas */
-  const ALGORITMO_HASH_ASSINATURA = 'SHA256withRSA';
 
-  /** @const string Arquivo de teste A */
-  const CONTEUDO_DOCUMENTO_A = "arquivo_pequeno_A.pdf";
-  
-  /** @const string Arquivo de teste B */
-  const CONTEUDO_DOCUMENTO_B = "arquivo_pequeno_B.pdf";
-  
-  /** @const string Arquivo de teste C */
-  const CONTEUDO_DOCUMENTO_C = "arquivo_pequeno_C.pdf";
-
-  /** @var mixed Serviço PEN do órgão remetente */
-  protected $servicoPEN;
-  
-  /** @var mixed Serviço PEN do órgão destinatário */
-  protected $servicoPEN2;
-  
   /** @var array Dados do contexto do órgão remetente */
   public static $remetente;
   
