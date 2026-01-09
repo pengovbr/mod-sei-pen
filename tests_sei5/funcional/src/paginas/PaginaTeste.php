@@ -280,4 +280,30 @@ class PaginaTeste
 
       return $result;
   }
+
+    /**
+     * Troca para a última janela aberta
+     */
+  public function switchToLastWindow(): void
+    {
+      $handles = $this->driver->getWindowHandles();
+      $this->driver->switchTo()->window(end($handles));
+  }
+
+    /**
+     * Troca para a primeira janela (principal)
+     */
+  public function switchToFirstWindow(): void
+    {
+      $handles = $this->driver->getWindowHandles();
+      $this->driver->switchTo()->window($handles[0]);
+  }
+
+    /**
+     * Encontra elemento por name
+     */
+  public function elByName(string $name)
+    {
+      return $this->driver->findElement(WebDriverBy::name($name));
+  }
 }

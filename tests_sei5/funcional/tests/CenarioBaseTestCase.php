@@ -60,6 +60,7 @@ class CenarioBaseTestCase extends TestCase
     protected $paginaPenHipoteseLegalListar = null;
     protected $paginaMapUnidades = null;
     protected $paginaAgendamentos = null;
+    protected $paginaEnviarEmail = null;
 
   public function setUpPage(): void
     {
@@ -86,6 +87,7 @@ class CenarioBaseTestCase extends TestCase
       $this->paginaPenHipoteseLegalListar = new PaginaPenHipoteseLegalListar(self::$driver, $this);
       $this->paginaMapUnidades = new PaginaMapUnidades(self::$driver, $this);
       $this->paginaAgendamentos = new PaginaAgendamentos(self::$driver, $this);
+      $this->paginaEnviarEmail = new PaginaEnviarEmail(self::$driver, $this);
 
   }
 
@@ -352,13 +354,23 @@ class CenarioBaseTestCase extends TestCase
       return $protocolo;
   }
 
-  protected function tramitarProcessoExternamente($protocolo, $repositorio, $unidadeDestino, $unidadeDestinoHierarquia, $urgente = false, $callbackEnvio = null, $timeout = PEN_WAIT_TIMEOUT)
+  protected function tramitarProcessoExternamente(
+    $protocolo,
+    $repositorio,
+    $unidadeDestino,
+    $unidadeDestinoHierarquia,
+    $urgente = false,
+    $callbackEnvio = null,
+    $timeout = PEN_WAIT_TIMEOUT,
+    $multiplosOrgaos = false
+  )
     {
       $this->paginaProcesso->navegarParaTramitarProcesso();
     
       // Preencher parâmetros do trâmite
       $this->paginaTramitar->repositorio($repositorio);
       $this->paginaTramitar->unidade($unidadeDestino, $unidadeDestinoHierarquia);
+      if ($multiplosOrgaos) { $this->paginaTramitar->selecionarMultiplosOrgaos(); }
       $this->paginaTramitar->tramitar();
 
     try {
