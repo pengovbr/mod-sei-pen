@@ -271,6 +271,22 @@ class PaginaProcesso extends PaginaTeste
       $this->elByXPath("//img[@alt='{$botao}']")->click();
   }
 
+  /**
+   * Valida se uma mensagem específica existe no histórico de sincronização do processo
+   * 
+   * Verifica se o texto informado está presente no corpo da visualização do processo.
+   * Realiza a conversão de encoding da mensagem de UTF-8 para ISO-8859-1 antes da comparação.
+   * 
+   * @param string $mensagem Texto da mensagem a ser procurada no histórico
+   * @return bool Retorna true se a mensagem foi encontrada, false caso contrário
+   */
+  public function validarHistorioSincronizacao(string $mensagem): bool
+  {
+    $texto = $this->getVisualizacaoBody();
+    $mensagem = mb_convert_encoding($mensagem, 'UTF-8', 'ISO-8859-1');
+    return strpos($texto, $mensagem) !== false;
+  }
+
   public function reproduzirUltimoTramite()
     {
       sleep(5);
@@ -283,5 +299,32 @@ class PaginaProcesso extends PaginaTeste
       sleep(1);
       $r2 = $this->alertTextAndClose(true);
       return $r2;
+  }
+
+  /**
+   * Navega para a funcionalidade de envio de correspondência eletrônica (e-mail)
+   * 
+   * Este método executa as seguintes ações:
+   * 1. Seleciona o processo na árvore
+   * 2. Alterna para o frame de conteúdo de visualização
+   * 3. Clica no botão "Enviar Correspondência Eletrônica"
+   * 4. Aguarda a abertura do formulário de envio
+   * 5. Alterna para o frame de visualização
+   * 
+   * Utiliza waitUntil com timeout configurado para garantir que a ação seja concluída.
+   * 
+   * @return void
+   */
+  public function navegarSelecionarEnviarEmail(): void
+    {
+      $this->waitUntil(function() {
+          $this->selecionarProcesso();
+          $this->frame(null);
+          $this->frame('ifrConteudoVisualizacao');
+          $this->elByXPath("//img[@alt='Enviar Correspondência Eletrônica']")->click();
+          sleep(2);
+          $this->frame('ifrVisualizacao');
+          return true;
+      }, PEN_WAIT_TIMEOUT);
   }
 }
