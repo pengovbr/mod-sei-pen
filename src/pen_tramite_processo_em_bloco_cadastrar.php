@@ -19,8 +19,10 @@ try {
       $strParametros .= '&arvore=' . $_GET['arvore'];
   }
 
+  $id_procedimento = null;
   if (isset($_GET['id_procedimento'])) {
       $strParametros .= "&id_procedimento=" . $_GET['id_procedimento'];
+      $id_procedimento = $_GET['id_procedimento'];
   }
 
   if (isset($strIdItensSelecionados)) {
@@ -30,6 +32,8 @@ try {
   if (isset($_GET['processos']) && !empty($_GET['processos'])) {
       $strParametros .= "&processos=" . $_GET['processos'];
   }
+
+  $acao = $_GET['acao'];
 
     $arrComandos = [];
     $arrComandos[] = '<button type="submit" accesskey="S" name="sbmCadastrarProcessoEmBloco" value="Salvar" class="infraButton"><span class="infraTeclaAtalho">S</span>alvar</button>';
@@ -72,7 +76,7 @@ try {
       ?>
       <script type="text/javascript">
         alert('<?php echo $strMensagem ?>');
-        parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
+        parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$id_procedimento.'&acao_origem='.$acao.'&montar_visualizacao=1')?>';
       </script>
         <?php
         exit(0);
@@ -152,7 +156,7 @@ try {
         ?>
         <script type="text/javascript">
           alert('<?php echo $strMensagem ?>');
-          parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$_GET['id_procedimento'].'&acao_origem='.$_GET['acao'].'&montar_visualizacao=1')?>';
+          parent.parent.document.getElementById('ifrArvore').src = '<?=SessaoSEI::getInstance()->assinarLink('controlador.php?acao=procedimento_visualizar&id_procedimento='.$id_procedimento.'&acao_origem='.$acao.'&montar_visualizacao=1')?>';
         </script>
             <?php
             exit(0);

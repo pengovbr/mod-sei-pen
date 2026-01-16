@@ -155,76 +155,76 @@ class ProcessarPendenciasRN extends InfraRN
       $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
       $ticketComponentesDigitais = $objMetadadosProcedimento->metadados->ticketParaReenvioDeComponentesDigitais;
 
-      if ($objMetadadosProcedimento->metadados->reproducaoDeTramite || $objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
-        $tipoReproducao = $objMetadadosProcedimento->metadados->reproducaoDeTramite ? "Reprodução de último trâmite" : "Reprodução de processo";
-        $this->gravarLogDebug("{$tipoReproducao} sendo executado para o IDT $idTramite.");
+    if ($objMetadadosProcedimento->metadados->reproducaoDeTramite || $objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
+      $tipoReproducao = $objMetadadosProcedimento->metadados->reproducaoDeTramite ? "Reprodução de último trâmite" : "Reprodução de processo";
+      $this->gravarLogDebug("{$tipoReproducao} sendo executado para o IDT $idTramite.");
 
-        $objProcedimentoDTO = new ProcedimentoDTO();
-        $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($protocolo);
-        $objProcedimentoDTO->retTodos();
+      $objProcedimentoDTO = new ProcedimentoDTO();
+      $objProcedimentoDTO->setStrProtocoloProcedimentoFormatado($protocolo);
+      $objProcedimentoDTO->retTodos();
 
-        $objProcedimentoRN = new ProcedimentoRN();
-        $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
-        if ($objProcedimentoDTO != null) {
-          $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
-          $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-          $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+      if ($objProcedimentoDTO != null) {
+        $dblIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
 
-          $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-          $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
-          if ($objTramiteDTO != null) {
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO);
+        if ($objTramiteDTO != null) {
 
-              $idUltimoTramite = $objTramiteDTO->getNumIdTramite();
+            $idUltimoTramite = $objTramiteDTO->getNumIdTramite();
 
-            if ($novoIDT != $objTramiteDTO->getNumIdTramite()) {
-              $objTramiteDTO = new TramiteDTO();
-              $objTramiteDTO->setStrNumeroRegistro($nre);
-              $objTramiteDTO->setNumIdTramite($idUltimoTramite);
-              $objTramiteDTO->retTodos();
+          if ($novoIDT != $objTramiteDTO->getNumIdTramite()) {
+            $objTramiteDTO = new TramiteDTO();
+            $objTramiteDTO->setStrNumeroRegistro($nre);
+            $objTramiteDTO->setNumIdTramite($idUltimoTramite);
+            $objTramiteDTO->retTodos();
 
-              $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-              $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+            $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+            $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
 
-              $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
-              $objTramiteDTO->setNumIdTramite($novoIDT);
-              $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
-              $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
+            $objTramiteDTO->setDthRegistro(date("d/m/Y H:i:s"));
+            $objTramiteDTO->setNumIdTramite($novoIDT);
+            $objTramiteDTO->setNumTicketEnvioComponentes($ticketComponentesDigitais);
+            $objTramiteDTO = $objTramiteBD->cadastrar($objTramiteDTO);
                 
-              $objComponenteDigitalDTO = new ComponenteDigitalDTO();
-              $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
-              $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
-              $objComponenteDigitalDTO->retTodos();
-              $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
-              $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
-              $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
+            $objComponenteDigitalDTO = new ComponenteDigitalDTO();
+            $objComponenteDigitalDTO->setStrNumeroRegistro($nre);
+            $objComponenteDigitalDTO->setNumIdTramite($idUltimoTramite);
+            $objComponenteDigitalDTO->retTodos();
+            $objComponenteDigitalDTO->retStrStaEstadoProtocolo();
+            $objComponenteDigitalBD = new ComponenteDigitalBD(BancoSEI::getInstance());
+            $arrObjComponenteDigitalDTO = $objComponenteDigitalBD->listar($objComponenteDigitalDTO);
 
-              foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
+            foreach($arrObjComponenteDigitalDTO as $componenteDigital) {
                 
-                $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
-                $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($componenteDigital->getDblIdProcedimento());
-                $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($componenteDigital->getDblIdDocumento());
-                $objRelProtocoloProtocoloDTO->setNumSequencia($componenteDigital->getNumOrdemDocumento() - 1);
-                $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
-                $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
-                $bolDocumentoMovido = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
-                $componenteDigital->setNumIdTramite($novoIDT);
-                if ($objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
-                  $componenteDigital->setStrSinEnviar('S');
-                }
-                if ($componenteDigital->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $bolDocumentoMovido) {
-                  $componenteDigital->setStrSinEnviar('N');
-                }
-                $objComponenteDigitalBD->cadastrar($componenteDigital);
+              $objRelProtocoloProtocoloDTO = new RelProtocoloProtocoloDTO();
+              $objRelProtocoloProtocoloDTO->setDblIdProtocolo1($componenteDigital->getDblIdProcedimento());
+              $objRelProtocoloProtocoloDTO->setDblIdProtocolo2($componenteDigital->getDblIdDocumento());
+              $objRelProtocoloProtocoloDTO->setNumSequencia($componenteDigital->getNumOrdemDocumento() - 1);
+              $objRelProtocoloProtocoloDTO->setStrStaAssociacao(RelProtocoloProtocoloRN::$TA_DOCUMENTO_MOVIDO);
+              $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
+              $bolDocumentoMovido = $objRelProtocoloProtocoloRN->contarRN0843($objRelProtocoloProtocoloDTO) > 0;
+              $componenteDigital->setNumIdTramite($novoIDT);
+              if ($objMetadadosProcedimento->metadados->reproducaoDeProcesso) {
+                $componenteDigital->setStrSinEnviar('S');
               }
+              if ($componenteDigital->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_DOCUMENTO_CANCELADO || $bolDocumentoMovido) {
+                $componenteDigital->setStrSinEnviar('N');
+              }
+              $objComponenteDigitalBD->cadastrar($componenteDigital);
             }
           }
-            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
-            $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
-        } else {
-          $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
-          $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
-        }        
-      }
+        }
+          $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();    
+          $objExpedirProcedimentoRN->enviarComponentesDigitais($objMetadadosProcedimento->NRE, $objMetadadosProcedimento->IDT, $objMetadadosProcedimento->metadados->processo->protocolo, false, $objMetadadosProcedimento->metadados->reproducaoDeTramite);
+      } else {
+        $this->gravarLogDebug("Erro ao processar envio de componentes digitais [enviarComponenteDigital] com IDT $idTramite", 0, true);
+        $this->gravarLogDebug("IDT $idTramite não encontrado", 0, true);
+      }        
+    }
   }
 
 
@@ -275,19 +275,19 @@ class ProcessarPendenciasRN extends InfraRN
           $strMensagem = ($e instanceof InfraException) ? $e->__toString() : $e->getMessage();
           $objProcessoEletronicoRN->recusarTramite($idTramite, $strMensagem, ProcessoEletronicoRN::MTV_RCSR_TRAM_CD_OUTROU);
           
-          try {
-            $objProtocoloDTO = new ProtocoloDTO();
-            $objProtocoloDTO->setStrProtocoloFormatado($objMetadadosProcedimento->processo->protocolo);
-            $objProtocoloDTO->retTodos();
+        try {
+          $objProtocoloDTO = new ProtocoloDTO();
+          $objProtocoloDTO->setStrProtocoloFormatado($objMetadadosProcedimento->processo->protocolo);
+          $objProtocoloDTO->retTodos();
 
-            $objProtocoloRN = new ProtocoloRN();
-            $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
-            if ($objProtocoloDTO) {
-              $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($objProtocoloDTO->getDblIdProtocolo(), $strMensagem);
-            }
-          } catch (Exception $ex) {
-            //throw $ex;
+          $objProtocoloRN = new ProtocoloRN();
+          $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+          if ($objProtocoloDTO) {
+            $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($objProtocoloDTO->getDblIdProtocolo(), $strMensagem);
           }
+        } catch (Exception $ex) {
+          //throw $ex;
+        }
       }
 
         throw $e;

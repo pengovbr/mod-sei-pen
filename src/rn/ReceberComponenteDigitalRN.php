@@ -267,9 +267,9 @@ class ReceberComponenteDigitalRN extends InfraRN
 
       $nomeISO88591 = mb_convert_encoding($parObjComponenteDigital->nome, 'ISO-8859-1', 'UTF-8');
       $nomeISO88591Compare = mb_convert_encoding($nomeISO88591, 'UTF-8', 'ISO-8859-1');
-      if($parObjComponenteDigital->nome !== $nomeISO88591Compare) {
-          throw new InfraException('Módulo do Tramita: Nome do arquivo com codificação inválida.');
-      }
+    if($parObjComponenteDigital->nome !== $nomeISO88591Compare) {
+        throw new InfraException('Módulo do Tramita: Nome do arquivo com codificação inválida.');
+    }
 
       //Atribui informações do arquivo anexo
       $objAnexoDTO = new AnexoDTO();

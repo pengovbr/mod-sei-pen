@@ -190,9 +190,9 @@ class ReceberProcedimentoRN extends InfraRN
 
         $this->enviarProcedimentoUnidade($objProcedimentoDTO, null, $bolProcedimentoExistente);
 
-        if ($bolReproducaoUltimoTramite) {
-          $this->adicionarAtividadeReproducaoUltimoTramite($objProcedimentoDTO);
-        }
+      if ($bolReproducaoUltimoTramite) {
+        $this->adicionarAtividadeReproducaoUltimoTramite($objProcedimentoDTO);
+      }
 
         $this->validarPosCondicoesTramite($parObjMetadadosProcedimento, $objProcedimentoDTO);
 
@@ -264,9 +264,9 @@ class ReceberProcedimentoRN extends InfraRN
 
       $arrComponentesDigitaisPresentes = array_diff_key($arrHashComponentesProtocolo, $arrHashPendentesRecebimento);
       $numQtdComponentesPresentes = count($arrComponentesDigitaisPresentes);
-      if ($numQtdComponentesPresentes > 0) {
-        $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
-      }
+    if ($numQtdComponentesPresentes > 0) {
+      $this->gravarLogDebug("{$numQtdComponentesPresentes} Componente(s) digital(is) já presente(s) no processo", 2);
+    }
   
       $qtdComponentesEnviadosRecebidos = $numQtdComponentes - $numQtdComponentesPresentes;
       $this->gravarLogDebug("Serão enviado(s)/recebido(s) {$qtdComponentesEnviadosRecebidos} Componente(s) digital(is)", 2);
@@ -1787,10 +1787,10 @@ class ReceberProcedimentoRN extends InfraRN
 
           $identificacao = is_array($objDocumento->identificacao) ? json_decode($objDocumento->identificacao['complemento'], true) : json_decode($objDocumento->identificacao->complemento, true);
           $bolAutenticacao = false;
-          if (is_array($identificacao) && array_key_exists('tipo_conferencia', $identificacao)) {
-              $bolAutenticacao = true;
-              $objDocumentoDTO->setNumIdTipoConferencia(999);
-          }
+        if (is_array($identificacao) && array_key_exists('tipo_conferencia', $identificacao)) {
+            $bolAutenticacao = true;
+            $objDocumentoDTO->setNumIdTipoConferencia(999);
+        }
 
           $objProtocoloDTO = new ProtocoloDTO();
           $objDocumentoDTO->setObjProtocoloDTO($objProtocoloDTO);
@@ -3064,14 +3064,14 @@ class ReceberProcedimentoRN extends InfraRN
       $propriedadesAdicionais = isset($parObjMetadadosProcedimento->propriedadesAdicionais)
           ? ($parObjMetadadosProcedimento->propriedadesAdicionais ?: [])
           : [];
-      if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
-        foreach ($propriedadesAdicionais as $key => $valor) {
-          if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
-            $multiplosOrgaos = true;
-            break;
-          }
+    if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+      foreach ($propriedadesAdicionais as $key => $valor) {
+        if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+          $multiplosOrgaos = true;
+          break;
         }
       }
+    }
 
     if(!$multiplosOrgaos && count($arrDblIdDocumentosProcesso) <> count($arrObjDocumentosMetadados)) {
         $strProtocoloFormatado = $parObjProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
