@@ -3048,12 +3048,12 @@ class ProcessoEletronicoRN extends InfraRN
         $msg_esperada = "NRE, '$nre', já possui trâmite em andamento para este destinatário";
         // Expressão regular para buscar o texto com o número do processo como coringa
         $regex = '/Não é possível executar o serviço de reprodução de trâmite do processo \d{5}\.\d{6}\/\d{4}-\d{2}, pois não há componentes digitais válidos a serem reproduzidos/';
-        if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
-          return $arrayException;
-        } else {
-          $detalhes = $this->tratarFalhaWebService($e);
-          throw new InfraException($mensagem, $e, $detalhes);
-        }
+      if (mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8') == $msg_esperada || preg_match($regex, mb_convert_encoding($arrayException['message'], 'ISO-8859-1', 'UTF-8'))) {
+        return $arrayException;
+      } else {
+        $detalhes = $this->tratarFalhaWebService($e);
+        throw new InfraException($mensagem, $e, $detalhes);
+      }
     }
   }
 
@@ -3064,9 +3064,9 @@ class ProcessoEletronicoRN extends InfraRN
       $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
       $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
-      if ($objTramiteDTO === null) {
-        return false;
-      }
+    if ($objTramiteDTO === null) {
+      return false;
+    }
 
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
       $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
@@ -3077,22 +3077,22 @@ class ProcessoEletronicoRN extends InfraRN
       $objUnidadeDTO->retNumIdUnidade();
 
       $objPenUnidadeRN = new PenUnidadeRN();
-      if ($objPenUnidadeRN->contar($objUnidadeDTO) == 0) {
-        return false;
-      }
+    if ($objPenUnidadeRN->contar($objUnidadeDTO) == 0) {
+      return false;
+    }
 
       // Verificar se o processo é de múltiplos órgãos
       $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais)
               ? ($objMetadados->propriedadesAdicionais ?: [])
               : [];
-      if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
-        foreach ($propriedadesAdicionais as $valor) {
-          if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
-            return true;
-            break;
-          }
+    if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+      foreach ($propriedadesAdicionais as $valor) {
+        if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+          return true;
+          break;
         }
       }
+    }
         
       return false;
   }
@@ -3151,14 +3151,14 @@ class ProcessoEletronicoRN extends InfraRN
             switch ($tramiteRecusa) {
               case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO:
                 $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO;
-                break;
+                  break;
               case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO:
               case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA:
                 $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA;
-                break;
+                  break;
               case ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE:
                 $idTarefaRecusa = ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO;
-                break;
+                  break;
             }
             
             $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProcedimento);
@@ -3262,84 +3262,84 @@ class ProcessoEletronicoRN extends InfraRN
 
   public function cadastrarAtividadePedidoSincronizacao(ProcedimentoDTO $objProcedimentoDTO, string $tarefa)
     {
-      try {
-          $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo($tarefa);
+    try {
+        $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo($tarefa);
 
-          $objTarefaDTO = new TarefaDTO();
-          $objTarefaDTO->retNumIdTarefa();
-          $objTarefaDTO->retStrSinLancarAndamentoFechado();
-          $objTarefaDTO->setNumIdTarefa($idTarefa);
+        $objTarefaDTO = new TarefaDTO();
+        $objTarefaDTO->retNumIdTarefa();
+        $objTarefaDTO->retStrSinLancarAndamentoFechado();
+        $objTarefaDTO->setNumIdTarefa($idTarefa);
 
-          $objTarefaRN = new TarefaRN();
-          $objTarefaDTO = $objTarefaRN->consultar($objTarefaDTO);
+        $objTarefaRN = new TarefaRN();
+        $objTarefaDTO = $objTarefaRN->consultar($objTarefaDTO);
 
-          if($objTarefaDTO === null) {
-            return false;
-          }
-
-          $idTarefa = $objTarefaDTO->getNumIdTarefa();
-          $strDataHoraAtual = InfraData::getStrDataHoraAtual();
-          $objAtividadeDTO = new AtividadeDTO();
-          $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
-          $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-          $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-          $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
-          $objAtividadeDTO->setNumIdUsuarioAtribuicao(SessaoSEI::getInstance()->getNumIdUsuario());
-          $objAtividadeDTO->setNumIdTarefa($idTarefa);
-          $objAtividadeDTO->setStrSinInicial('N');
-          $objAtividadeDTO->setDtaPrazo(null);
-          $objAtividadeDTO->setNumIdUsuarioAtribuicao(null);
-          $objAtividadeDTO->setNumIdUsuarioVisualizacao(null);
-          $objAtividadeDTO->setDthAbertura($strDataHoraAtual);
-          $objAtividadeDTO->setNumTipoVisualizacao(AtividadeRN::$TV_VISUALIZADO);
-
-          if ($objTarefaDTO->getStrSinLancarAndamentoFechado() == 'S') {
-            //lança andamento fechado
-            $objAtividadeDTO->setNumIdUsuarioConclusao(SessaoSEI::getInstance()->getNumIdUsuario());
-            $objAtividadeDTO->setDthConclusao($strDataHoraAtual);
-          } else {
-            $objAtividadeDTO->setNumIdUsuarioConclusao(null);
-            $objAtividadeDTO->setDthConclusao(null);
-          }
-
-          $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
-          $objAtividadeDTO = $objAtividadeBD->cadastrar($objAtividadeDTO);
-
-          $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
-          $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
-          $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
-          $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
-          $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-          $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-          $objAtributoAndamentoRN = new AtributoAndamentoRN();
-          $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
-      } catch (\Exception $e) {
-          $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
+      if($objTarefaDTO === null) {
+        return false;
       }
+
+        $idTarefa = $objTarefaDTO->getNumIdTarefa();
+        $strDataHoraAtual = InfraData::getStrDataHoraAtual();
+        $objAtividadeDTO = new AtividadeDTO();
+        $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdUnidadeOrigem(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+        $objAtividadeDTO->setNumIdUsuarioOrigem(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdUsuarioAtribuicao(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setNumIdTarefa($idTarefa);
+        $objAtividadeDTO->setStrSinInicial('N');
+        $objAtividadeDTO->setDtaPrazo(null);
+        $objAtividadeDTO->setNumIdUsuarioAtribuicao(null);
+        $objAtividadeDTO->setNumIdUsuarioVisualizacao(null);
+        $objAtividadeDTO->setDthAbertura($strDataHoraAtual);
+        $objAtividadeDTO->setNumTipoVisualizacao(AtividadeRN::$TV_VISUALIZADO);
+
+      if ($objTarefaDTO->getStrSinLancarAndamentoFechado() == 'S') {
+        //lança andamento fechado
+        $objAtividadeDTO->setNumIdUsuarioConclusao(SessaoSEI::getInstance()->getNumIdUsuario());
+        $objAtividadeDTO->setDthConclusao($strDataHoraAtual);
+      } else {
+        $objAtividadeDTO->setNumIdUsuarioConclusao(null);
+        $objAtividadeDTO->setDthConclusao(null);
+      }
+
+        $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
+        $objAtividadeDTO = $objAtividadeBD->cadastrar($objAtividadeDTO);
+
+        $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
+        $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
+        $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+        $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+        $objAtributoAndamentoRN = new AtributoAndamentoRN();
+        $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
+    } catch (\Exception $e) {
+        $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
+    }
   }
   
   public function tratarCodigoErro($idRepositorioEstrutura, $stringJson, $mensagem)
     {
-      try {
-        // Agora volta para UTF-8
-        $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
-        // Decodifica para array
-        $json = json_decode($messageUtf8, true);
-        if (isset($json['codigoErro']) && isset($json['message'])) {
-          switch ($json['codigoErro']) {
-            case '0055':
-              $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
-              $nome = $objRepositorioDTO->getStrNome();
-              $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
-                . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
+    try {
+      // Agora volta para UTF-8
+      $messageUtf8 = mb_convert_encoding($stringJson, 'UTF-8', 'ISO-8859-1');
+      // Decodifica para array
+      $json = json_decode($messageUtf8, true);
+      if (isset($json['codigoErro']) && isset($json['message'])) {
+        switch ($json['codigoErro']) {
+          case '0055':
+            $objRepositorioDTO = $this->consultarRepositoriosDeEstruturas($idRepositorioEstrutura);
+            $nome = $objRepositorioDTO->getStrNome();
+            $mensagem = "A unidade pesquisada não está vinculada à estrutura organizacional selecionada: "
+              . $nome . ". Por favor, verifique se a unidade pertence a outra estrutura.";
               break;
-          }
-
         }
-      } catch (Exception $e) {
-        // Não faz nada, pois a mensagem já está definida
+
       }
+    } catch (Exception $e) {
+      // Não faz nada, pois a mensagem já está definida
+    }
 
       return $mensagem;
   }

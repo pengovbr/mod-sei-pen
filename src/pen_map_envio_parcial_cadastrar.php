@@ -187,15 +187,15 @@ try {
             . '&tipo_pesquisa=1&id_object=objLupaUnidadesAdministrativas&idRepositorioEstrutura=1'
         );
 
-        try {
-          $podeEnvioMultiplosOrgaos = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnvioMultiplosOrgaos", null);
-          // Garantir que seja um array
-          if (!is_null($podeEnvioMultiplosOrgaos) && !is_array($podeEnvioMultiplosOrgaos)) {
-            $podeEnvioMultiplosOrgaos = explode(',', $podeEnvioMultiplosOrgaos);
-          }
-        } catch (Throwable $e) {
-          $podeEnvioMultiplosOrgaos = null;
+      try {
+        $podeEnvioMultiplosOrgaos = ConfiguracaoModPEN::getInstance()->getValor("PEN", "EnvioMultiplosOrgaos", null);
+        // Garantir que seja um array
+        if (!is_null($podeEnvioMultiplosOrgaos) && !is_array($podeEnvioMultiplosOrgaos)) {
+          $podeEnvioMultiplosOrgaos = explode(',', $podeEnvioMultiplosOrgaos);
         }
+      } catch (Throwable $e) {
+        $podeEnvioMultiplosOrgaos = null;
+      }
         break;
     default:
         throw new InfraException("Módulo do Tramita: Ação '" . $_GET['acao'] . "' não reconhecida.");

@@ -240,16 +240,16 @@ try {
             }
           }
 
-        try {
+          try {
             if ($processoDestinatario && $objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($numIdProcedimento) && !$enviarDireto) {
                $objSincronizacaoExpedirProcedimentoRN = new SincronizacaoExpedirProcedimentoRN();
                $objSincronizacaoExpedirProcedimentoRN->sincronizar($objExpedirProcedimentoDTO);
             } else {
               $objExpedirProcedimentosRN->setEventoEnvioMetadados(
-                  function ($parNumIdTramite) use ($strLinkProcedimento): void {
-                      $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
-                      echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
-                  }
+              function ($parNumIdTramite) use ($strLinkProcedimento): void {
+                  $strLinkCancelarAjax = SessaoSEI::getInstance()->assinarLink('controlador_ajax.php?acao_ajax=pen_procedimento_expedir_cancelar&id_tramite='.$parNumIdTramite);
+                  echo "<script type='text/javascript'>adicionarBotaoCancelarEnvio('$parNumIdTramite', '$strLinkCancelarAjax', '$strLinkProcedimento');</script> ";
+              }
               );
               $respostaExpedir = $objExpedirProcedimentosRN->expedirProcedimento($objExpedirProcedimentoDTO);
             }
@@ -258,10 +258,10 @@ try {
 
             // Muda situação da barra de progresso para Concluído
             echo "<script type='text/javascript'>sinalizarStatusConclusao('$strLinkProcedimento','$bolBotaoFecharCss');</script> ";
-        } catch(\Exception $e) {
+          } catch(\Exception $e) {
             $objPaginaSEI->processarExcecao($e);
             echo "<script type='text/javascript'>adicionarBotaoFecharErro('$strLinkProcedimento');</script> ";
-        }
+          }
 
           $objPaginaSEI->finalizarBarraProgresso(null, false);
       }
@@ -274,9 +274,9 @@ try {
       $objPenEnvioParcialDTO = $objPenEnvioParcialRN->listar($objPenEnvioParcialDTO);
 
       if (count($objPenEnvioParcialDTO) > 0) {
-          foreach ($objPenEnvioParcialDTO as $dto) {
-              $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
-          }
+        foreach ($objPenEnvioParcialDTO as $dto) {
+            $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
+        }
       }
 
         break;
