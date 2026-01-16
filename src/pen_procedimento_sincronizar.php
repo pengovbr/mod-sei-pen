@@ -44,7 +44,12 @@ try {
       $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProcedimento);
 
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-      $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, null, null, null, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
+      $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(
+        null, null, null,
+        $objTramiteDTO->getNumIdEstruturaDestino(),
+        $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado(),
+        $objTramiteDTO->getNumIdRepositorioDestino()
+      );
       if (count($tramitePendencia) == 0) {
         throw new InfraException('Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.');
       }

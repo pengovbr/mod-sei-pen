@@ -326,6 +326,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
     $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
     $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+    $nre = $objMetadadosProcedimento->NRE;
+    $this->gravarLogDebug("NRE do tramite realizado: $nre", 0, true);
 
     $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
     $remetente = $objMetadadosProcedimento->remetente;
