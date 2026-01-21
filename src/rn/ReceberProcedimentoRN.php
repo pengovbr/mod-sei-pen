@@ -1975,6 +1975,11 @@ class ReceberProcedimentoRN extends InfraRN
             $objAssinaturaDTO->setStrModuloOrigem($moduloOrigem);
             $objAssinaturaDTO->setStrP7sBase64($assinaturaPorSenha ? null : $assinaturasDigital['cadeiaDoCertificado']['conteudo']);
 
+            if (InfraString::isBolVazia($objAssinaturaDTO->getStrNome()) || InfraString::isBolVazia($objAssinaturaDTO->getStrTratamento())) { 
+              throw new InfraException('Módulo do Tramita: Não foi adicionado o nome e/ou tratamento/cargo do assinante no documento ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' de ordem '. $arrObjComponentesDigital['ordem'] .'. 
+              Por favor, corrija e realize uma nova tentativa de envio. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.');
+            }
+
             $objAssinaturaRN = new AssinaturaRN();
             $objAssinaturaRN->cadastrarRN1319($objAssinaturaDTO);
           }
