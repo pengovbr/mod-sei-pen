@@ -338,30 +338,34 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
       $objProtocoloRN = new ProtocoloRN();
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
+      if (!empty($objProtocoloDTO)){
+        $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
+        $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
+        $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
 
-      $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
-      $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
-      $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
+        $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($destinatario->identificacaoDoRepositorioDeEstruturas);
+        $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
+        $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
+        $objExpedirProcedimentoDTO->setBolSinUrgente(false);
+        $objExpedirProcedimentoDTO->setDblIdProcedimento($objProtocoloDTO->getDblIdProtocolo());
+        $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
+        $objExpedirProcedimentoDTO->setNumIdBloco(null);
+        $objExpedirProcedimentoDTO->setNumIdAtividade(null);
+        $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
+        $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+        $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
+        $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objMetadadosProcedimento);
+        $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
-      $objExpedirProcedimentoDTO->setNumIdRepositorioDestino($destinatario->identificacaoDoRepositorioDeEstruturas);
-      $objExpedirProcedimentoDTO->setNumIdUnidadeDestino($destinatario->numeroDeIdentificacaoDaEstrutura);
-      $objExpedirProcedimentoDTO->setArrIdProcessoApensado(null);
-      $objExpedirProcedimentoDTO->setBolSinUrgente(false);
-      $objExpedirProcedimentoDTO->setDblIdProcedimento($objProtocoloDTO->getDblIdProtocolo());
-      $objExpedirProcedimentoDTO->setNumIdMotivoUrgencia(null);
-      $objExpedirProcedimentoDTO->setNumIdBloco(null);
-      $objExpedirProcedimentoDTO->setNumIdAtividade(null);
-      $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
-      $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
-      $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
-      $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objMetadadosProcedimento);
-      $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
+        $this->expedirSincronizar($objExpedirProcedimentoDTO);
 
-      $this->expedirSincronizar($objExpedirProcedimentoDTO);
-
-      $numIDT = $objProtocoloDTO->getDblIdProtocolo();
-      $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
-      $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
+        $numIDT = $objProtocoloDTO->getDblIdProtocolo();
+        $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
+        $this->gravarLogDebug("Finalizado o envio de protocolo com IDProcedimento $numIDT(Tempo total: {$numTempoTotalEnvio}s)", 0, true);
+      } else {
+        $objProcessoEletronicoRN->cancelarTramite($idTramite);
+        $this->gravarLogDebug("Sincronismo do $protocolo: Protocolo não encontrado. Tramite $idTramite cancelado", 0, true);
+      }
     } catch (\Exception $e) {
       //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
       $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
