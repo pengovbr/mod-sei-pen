@@ -521,11 +521,11 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="infraEfeitoTabelas(); inicializar(
     $displayNone = (is_array($podeEnvioMultiplosOrgaos) && in_array($hdnIdUnidade, $podeEnvioMultiplosOrgaos)) ? '' : 'display: none;';
   ?>
   <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; <?php echo $displayNone; ?>">
-    <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $sinMultiplosOrgaos === 'S' ? 'checked' : '' ?> />
+    <input type="checkbox" id="sinMultiplosOrgaos" name="sinMultiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" <?php echo $sinMultiplosOrgaos === 'S' || !empty($displayNone) ? 'checked' : '' ?> />
     <label id="lblSinMultiplosOrgaos" for="sinMultiplosOrgaos" class="infraLabelCheckbox">
-      Manter o processo aberto na unidade selecionada?
+      Habilitar a opção de manter o processo aberto na unidade selecionada.
       <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
-      <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getDiretorioImagensGlobal() ?>/ajuda.gif" class='infraImg'/></a>
+      <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?=PaginaSEI::getInstance()->getIconeAjuda()?>" class='infraImg'/></a>
     </label>
   </div>
 
