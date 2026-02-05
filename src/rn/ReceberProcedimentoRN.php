@@ -3188,7 +3188,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
 
       $arrOrdemBanco = InfraArray::converterArrInfraDTO($objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO), 'IdRelProtocoloProtocolo');
-
+      $ocorreuAlteracaoDeOrdem = false;
       if ($arrOrdemBanco !== $arrOrdemNova) {
         foreach ($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO() as $objRelProtocoloProtocoloDTO) {
           $dto = new RelProtocoloProtocoloDTO();
@@ -3201,8 +3201,15 @@ class ReceberProcedimentoRN extends InfraRN
           if ($dto && $objRelProtocoloProtocoloDTO->getNumSequencia() != $dto->getNumSequencia()) {
             $dto->setNumSequencia($objRelProtocoloProtocoloDTO->getNumSequencia());
             $objRelProtocoloProtocoloBD->alterar($dto);
+            $ocorreuAlteracaoDeOrdem = true;
           }
         }
+      }
+
+      if ($ocorreuAlteracaoDeOrdem) {
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REORDENACAO_AUTOMATICA_PROCESSO);
       }
     } catch (Exception $e) {
       // throw new InfraException('Erro alterando ordem dos protocolos.', $e);
