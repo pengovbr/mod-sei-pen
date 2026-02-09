@@ -38,11 +38,12 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       //Busca metadados do processo registrado em trâmite anterior
       $objMetadadosProcessoTramiteAnterior = $this->consultarMetadadosPEN($dblIdProcedimento);
 
-      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-      $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objMetadadosProcessoTramiteAnterior->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS);
-
       // Solicitar sincronização do documentos pendentes
       $numIdTramite = $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
+      
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      $objProcessoEletronicoRN->bloquearProcesso($dblIdProcedimento);
+      $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objMetadadosProcessoTramiteAnterior->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS);
 
       $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
       $this->barraProgresso->mover($this->barraProgresso->getNumMax());
@@ -173,7 +174,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
                 $objAtividadeRN->concluirRN0726([$objAtividadeDTO]);
               }
 
-              $objProcessoEletronicoRN->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
+              $objProcessoEletronicoRN->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramite->IDT, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
             }
           } catch (\Exception $e) {
             $this->gravarLogDebug("Erro ao gravar atividade múltiplos órgãos: $e", 0, true);
@@ -220,7 +221,6 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProcedimentoDTO->setArrObjParticipanteDTO($this->listarInteressados($dblIdProcedimento));
       
       $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO);
-
       $this->validarSincronizacaoProcessoSigiloso($dblIdProcedimento);
 
       //Busca metadados do processo registrado em trâmite anterior

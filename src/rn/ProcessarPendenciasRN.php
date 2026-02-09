@@ -266,9 +266,14 @@ class ProcessarPendenciasRN extends InfraRN
         //Não recusa trâmite caso o processo atual não possa ser desbloqueado, evitando que o processo fique aberto em dois sistemas ao mesmo tempo
         $bolDeveRecusarTramite = !($e instanceof InfraException && $e->getObjException() != null && $e->getObjException() instanceof ProcessoNaoPodeSerDesbloqueadoException);
         // ou caso reprodução de ultimo tramite
-        $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
-        $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
-        $bolDeveRecusarTramite = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
+        try {
+          $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
+          $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+          $bolDeveRecusarTramite = $bolDeveRecusarTramite && !$objMetadadosProcedimento->metadados->reproducaoDeTramite;
+        } catch (Exception $ex) {
+            //throw $ex;
+        }
+
         
       if($bolDeveRecusarTramite) {
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
