@@ -622,6 +622,7 @@ class PENIntegracao extends SeiIntegracao
                 if (isset($objTramitesAnteriores) && count($objTramitesAnteriores) > 0 && in_array($objTramitesAnteriores[count($objTramitesAnteriores)-1]->situacaoAtual, $arrayRecusa)) {
                   $objProcessoEletronicoRN->desbloquearProcesso($dblIdProcedimento);
                   $motivo = isset($objTramitesAnteriores[count($objTramitesAnteriores)-1]->justificativaDaRecusa) ? mb_convert_encoding($objTramitesAnteriores[count($objTramitesAnteriores)-1]->justificativaDaRecusa, 'iso-8859-1', 'utf-8') : 'Cancelado pelo usuário ou pelo administrador da plataforma';
+                  $motivo = str_replace('. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', '', $motivo); // Remove duplicidade de mensagem
                   $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $motivo);
                   echo "<script>window.location.reload();</script>";
                 }
