@@ -2,6 +2,7 @@
 
 use PHPUnit\Framework\Attributes\{Group, Large, Depends};
 use PHPUnit\Framework\AssertionFailedError;
+use Tests\Funcional\Sei\Fixtures\OrgaoFixture;
 
 /**
  * Execution Groups
@@ -16,6 +17,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
   const CONTEUDO_DOCUMENTO_B = "arquivo_pequeno_B.pdf";
   const CONTEUDO_DOCUMENTO_C = "arquivo_pequeno_C.pdf";
 
+  public static $replace;
   protected $servicoPEN;
   protected $servicoPEN2;
   public static $remetente;
@@ -53,6 +55,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
    */
   public function test_recebimento_metadados_documento_avulso()
   {
+    self::$replace = 'TF' . round(rand(0, 99));
     $this->criarCenarioTramiteEnvioParcialTest();
 
     $localCertificado = self::$remetente['LOCALIZACAO_CERTIFICADO_DIGITAL'];
@@ -101,7 +104,7 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
 
     // Verificar se a mensagem esperada aparece
-    $mensagemEsperada = mb_convert_encoding("solicitar a sincronização", 'UTF-8', 'ISO-8859-1');
+    $mensagemEsperada = mb_convert_encoding("Ainda não e possível solicitar a sincronização para esse processo. É necessário realizar o envio do processo para outro órgão primeiro.", 'UTF-8', 'ISO-8859-1');
     $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
 
     $this->sairSistema();
@@ -144,23 +147,34 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     $documentos = array(self::$documentoTeste1);
     $this->realizarValidacaoRecebimentoProcessoNoDestinatario(self::$processoTeste, $documentos, self::$destinatario);
     $this->sairSistema();
-      // Acessar sistema do destinatário do processo
-      $this->acessarSistema(self::$destinatario['URL'], self::$destinatario['SIGLA_UNIDADE'], self::$destinatario['LOGIN'], self::$destinatario['SENHA']);
-      $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
+  }
 
-      // Verificar se o botão de sincronizar existe
-      $btnSincronizar = $this->paginaProcesso->validarBotaoExiste("Sincronizar Processo");
-      $this->assertNotNull($btnSincronizar, "Botão 'Sincronizar Processo' não foi encontrado");
+  /**
+   * Teste de validação de pedido de sincronização com permissão
+   * 
+   * #[Depends('test_verificar_recebimento_processo_destino')]
+   *
+   * @return void
+   */
+  public function test_validar_pedido_de_sincronizacao_com_permissao()
+  {
+    // Acessar sistema do destinatário do processo
+    $this->acessarSistema(self::$remetente['URL'], self::$remetente['SIGLA_UNIDADE'], self::$remetente['LOGIN'], self::$remetente['SENHA']);
+    $this->abrirProcesso(self::$processoTeste["PROTOCOLO"]);
 
-      // Clicar no botão de sincronizar
-      $this->paginaProcesso->solicitarSincronizacao("Sincronizar Processo");
+    // Verificar se o botão de sincronizar existe
+    $btnSincronizar = $this->paginaProcesso->validarBotaoExiste("Sincronizar Processo");
+    $this->assertNotNull($btnSincronizar, "Botão 'Sincronizar Processo' não foi encontrado");
 
-      // Capturar a mensagem do alert
-      $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
+    // Clicar no botão de sincronizar
+    $this->paginaProcesso->solicitarSincronizacao("Sincronizar Processo");
 
-      // Verificar se a mensagem esperada aparece
-      $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
-      $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
+    // Capturar a mensagem do alert
+    $mensagemAlerta = $this->paginaBase->alertTextAndClose(true);
+
+    // Verificar se a mensagem esperada aparece
+    $mensagemEsperada = mb_convert_encoding("Solicitação de sincronização realizada com sucesso", 'UTF-8', 'ISO-8859-1');
+    $this->assertStringContainsString($mensagemEsperada, $mensagemAlerta, mb_convert_encoding("A mensagem de alerta não corresponde à esperada", 'UTF-8', 'ISO-8859-1'));
   }
 
   private function receberReciboEnvio($novoTramite)
@@ -395,6 +409,14 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
         'Id' => $idMapEnvioParcial
       ]);
     }
+    // Restaurar numeração do órgão alterado para evitar conflito de NUPs
+    $objOrgaoFixture = new OrgaoFixture();
+    $parametros = ['IdOrgao' => 0];
+    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
+    $objOrgaoDTO = $arrObjOrgaoDTO[0];
+
+    $parametros['Numeracao'] = str_replace(self::$replace, '@ano_4d@', $objOrgaoDTO->getStrNumeracao());
+    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
 
     putenv("DATABASE_HOST=org1-database");
     foreach (self::$arrIdMapEnvioParcialOrgaoB as $idMapEnvioParcial) {
@@ -402,6 +424,15 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
         'Id' => $idMapEnvioParcial
       ]);
     }
+    // Restaurar numeração do órgão alterado para evitar conflito de NUPs
+    $objOrgaoFixture = new OrgaoFixture();
+    $parametros = ['IdOrgao' => 0];
+    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
+    $objOrgaoDTO = $arrObjOrgaoDTO[0];
+
+    $parametros['Numeracao'] = str_replace(self::$replace, '@ano_4d@', $objOrgaoDTO->getStrNumeracao());
+    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
+    
     putenv("DATABASE_HOST=org1-database");
     parent::tearDownAfterClass();
   }
@@ -425,6 +456,15 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     ]);
     self::$arrIdMapEnvioParcialOrgaoA[] = $objMapEnvioParcial->getDblId();
 
+    // Alterar numeração do órgão para evitar conflito de NUPs
+    $objOrgaoFixture = new OrgaoFixture();
+    $parametros = ['IdOrgao' => 0];
+    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
+    $objOrgaoDTO = $arrObjOrgaoDTO[0];
+
+    $parametros['Numeracao'] = str_replace('@ano_4d@', self::$replace, $objOrgaoDTO->getStrNumeracao());
+    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
+
     // Mapear Envio Parcial no Destinatário
     self::$arrIdMapEnvioParcialOrgaoB = array();
     putenv("DATABASE_HOST=org1-database");
@@ -438,5 +478,13 @@ class TramiteSincronizacaoMultiplosOrgaoDocumentoAvulsoTest extends FixtureCenar
     ]);
     self::$arrIdMapEnvioParcialOrgaoB[] = $objMapEnvioParcial->getDblId();
 
+    // Alterar numeração do órgão para evitar conflito de NUPs
+    $objOrgaoFixture = new OrgaoFixture();
+    $parametros = ['IdOrgao' => 0];
+    $arrObjOrgaoDTO = $objOrgaoFixture->buscar($parametros);
+    $objOrgaoDTO = $arrObjOrgaoDTO[0];
+
+    $parametros['Numeracao'] = str_replace('@ano_4d@', self::$replace, $objOrgaoDTO->getStrNumeracao());
+    $objOrgaoDTO = $objOrgaoFixture->atualizar($parametros);
   }
 }
