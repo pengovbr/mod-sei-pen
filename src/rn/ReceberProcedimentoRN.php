@@ -1925,67 +1925,66 @@ class ReceberProcedimentoRN extends InfraRN
             $objAtividadeRN = new AtividadeRN();
             $objAtividadeDTO = $objAtividadeRN->gerarInternaRN0727($objAtividadeDTO);
 
-            $formaAutenticacao = $assinaturaPorSenha ? 'S' : 'C';
-            $numeroSerie = null;
-            $moduloOrigem = '';
-            $arrayObservacao = !is_null($assinaturasDigital['observacao']) ? json_decode($assinaturasDigital['observacao'], true) : null;
-            if (is_array($arrayObservacao)) {
-              if (isset($arrayObservacao['forma_autenticacao'])) {
-                $formaAutenticacao = $arrayObservacao['forma_autenticacao'];
+            $formaAutenticacao = $assinaturaPorSenha ? TarjaAssinaturaRN::$TT_ASSINATURA_SENHA : TarjaAssinaturaRN::$TT_ASSINATURA_CERTIFICADO_DIGITAL;
+            // Salvar por senha ou se for P7S somente na versão 5.1.0 ou superior do SEI
+            if ($formaAutenticacao == TarjaAssinaturaRN::$TT_ASSINATURA_SENHA || InfraUtil::compararVersoes(SEI_VERSAO, ">=", "5.1.0")) {
+              $numeroSerie = null;
+              $moduloOrigem = '';
+              $arrayObservacao = !is_null($assinaturasDigital['observacao']) ? json_decode($assinaturasDigital['observacao'], true) : null;
+              if (is_array($arrayObservacao)) {
+                if (isset($arrayObservacao['forma_autenticacao'])) {
+                  $formaAutenticacao = $arrayObservacao['forma_autenticacao'];
+                }
+                if (isset($arrayObservacao['numero_serie'])) {
+                  $numeroSerie = $arrayObservacao['numero_serie'];
+                }
+                if (isset($arrayObservacao['modulo_origem'])) {
+                  $moduloOrigem = $arrayObservacao['modulo_origem'];
+                }
               }
-              if (isset($arrayObservacao['numero_serie'])) {
-                $numeroSerie = $arrayObservacao['numero_serie'];
+              if ($bolAutenticacao) {
+                $tarjaAssinatura = $assinaturaPorSenha ? TarjaAssinaturaRN::$TT_AUTENTICACAO_SENHA : TarjaAssinaturaRN::$TT_AUTENTICACAO_CERTIFICADO_DIGITAL;
+              } else {
+                $tarjaAssinatura = $assinaturaPorSenha ? TarjaAssinaturaRN::$TT_ASSINATURA_SENHA : TarjaAssinaturaRN::$TT_ASSINATURA_CERTIFICADO_DIGITAL;
               }
-              if (isset($arrayObservacao['modulo_origem'])) {
-                $moduloOrigem = $arrayObservacao['modulo_origem'];
+
+              $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
+              $objTarjaAssinaturaDTO->setNumMaxRegistrosRetorno(1);
+              $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura($tarjaAssinatura);
+              $objTarjaAssinaturaDTO->retNumIdTarjaAssinatura();
+              $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
+              $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+
+              if ($objTarjaAssinaturaDTO == null) { 
+                throw new InfraException('Módulo do Tramita: Tarja de Assinatura de "ASSINATURA_CERTIFICADO_DIGITAL" não pode ser localizado.');
               }
-            }
-            if ($bolAutenticacao) {
-              $tarjaAssinatura = $assinaturaPorSenha ? TarjaAssinaturaRN::$TT_AUTENTICACAO_SENHA : TarjaAssinaturaRN::$TT_AUTENTICACAO_CERTIFICADO_DIGITAL;
-            } else {
-              $tarjaAssinatura = $assinaturaPorSenha ? TarjaAssinaturaRN::$TT_ASSINATURA_SENHA : TarjaAssinaturaRN::$TT_ASSINATURA_CERTIFICADO_DIGITAL;
-            }
 
-            $objTarjaAssinaturaDTO = new TarjaAssinaturaDTO();
-            $objTarjaAssinaturaDTO->setNumMaxRegistrosRetorno(1);
-            $objTarjaAssinaturaDTO->setStrStaTarjaAssinatura($tarjaAssinatura);
-            $objTarjaAssinaturaDTO->retNumIdTarjaAssinatura();
-            $objTarjaAssinaturaRN = new TarjaAssinaturaRN();
-            $objTarjaAssinaturaDTO = $objTarjaAssinaturaRN->consultar($objTarjaAssinaturaDTO);
+              $idTarja = $objTarjaAssinaturaDTO->getNumIdTarjaAssinatura();
 
-            if ($objTarjaAssinaturaDTO == null) { 
-              throw new InfraException('Módulo do Tramita: Tarja de Assinatura de "ASSINATURA_CERTIFICADO_DIGITAL" não pode ser localizado.');
-            }
-
-            $idTarja = $objTarjaAssinaturaDTO->getNumIdTarjaAssinatura();
-
-            $objAssinaturaDTO = new AssinaturaDTO();
-            $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTOGerado->getDblIdDocumento());
-            $objAssinaturaDTO->setStrProtocoloDocumentoFormatado($objProtocoloDTO->getStrProtocoloFormatado());
-            $objAssinaturaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
-            $objAssinaturaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
-            $objAssinaturaDTO->setStrNome(mb_convert_encoding($assinaturasDigital['nome'], 'ISO-8859-1', 'UTF-8'));
-            $objAssinaturaDTO->setDblCpf($assinaturasDigital['cpf']);
-            $objAssinaturaDTO->setStrTratamento(mb_convert_encoding($assinaturasDigital['cargo'], 'ISO-8859-1', 'UTF-8'));
-            $objAssinaturaDTO->setNumIdTarjaAssinatura($idTarja);
-            $objAssinaturaDTO->setStrStaFormaAutenticacao($formaAutenticacao);
-            $objAssinaturaDTO->setStrNumeroSerieCertificado($numeroSerie);
-            $objAssinaturaDTO->setStrSinAtivo('S');
-            $objAssinaturaDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
-            $objAssinaturaDTO->setStrModuloOrigem($moduloOrigem);
-            
-            // Salvar P7S somente na versão 5.1.0 ou superior do SEI
-            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "5.1.0")) {
+              $objAssinaturaDTO = new AssinaturaDTO();
+              $objAssinaturaDTO->setDblIdDocumento($objDocumentoDTOGerado->getDblIdDocumento());
+              $objAssinaturaDTO->setStrProtocoloDocumentoFormatado($objProtocoloDTO->getStrProtocoloFormatado());
+              $objAssinaturaDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
+              $objAssinaturaDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
+              $objAssinaturaDTO->setStrNome(mb_convert_encoding($assinaturasDigital['nome'], 'ISO-8859-1', 'UTF-8'));
+              $objAssinaturaDTO->setDblCpf($assinaturasDigital['cpf']);
+              $objAssinaturaDTO->setStrTratamento(mb_convert_encoding($assinaturasDigital['cargo'], 'ISO-8859-1', 'UTF-8'));
+              $objAssinaturaDTO->setNumIdTarjaAssinatura($idTarja);
+              $objAssinaturaDTO->setStrStaFormaAutenticacao($formaAutenticacao);
+              $objAssinaturaDTO->setStrNumeroSerieCertificado($numeroSerie);
+              $objAssinaturaDTO->setStrSinAtivo('S');
+              $objAssinaturaDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
+              $objAssinaturaDTO->setStrModuloOrigem($moduloOrigem);
               $objAssinaturaDTO->setStrP7sBase64($assinaturaPorSenha ? null : $assinaturasDigital['cadeiaDoCertificado']['conteudo']);
-            }
 
-            if (InfraString::isBolVazia($objAssinaturaDTO->getStrNome()) || InfraString::isBolVazia($objAssinaturaDTO->getStrTratamento())) { 
-              throw new InfraException('Módulo do Tramita: Não foi adicionado o nome e/ou tratamento/cargo do assinante no documento ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' de ordem '. $arrObjComponentesDigital['ordem'] .'. 
-              Por favor, corrija e realize uma nova tentativa de envio. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.');
-            }
+              if (InfraString::isBolVazia($objAssinaturaDTO->getStrNome()) || InfraString::isBolVazia($objAssinaturaDTO->getStrTratamento())) { 
+                throw new InfraException('Módulo do Tramita: Não foi adicionado o nome e/ou tratamento/cargo do assinante no documento ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' de ordem '. $arrObjComponentesDigital['ordem'] .'. 
+                Por favor, corrija e realize uma nova tentativa de envio. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.');
+              }
 
-            $objAssinaturaRN = new AssinaturaRN();
-            $objAssinaturaRN->cadastrarRN1319($objAssinaturaDTO);
+              $objAssinaturaRN = new AssinaturaRN();
+              $objAssinaturaRN->cadastrarRN1319($objAssinaturaDTO);
+            }
           }
         }
 
