@@ -1973,7 +1973,11 @@ class ReceberProcedimentoRN extends InfraRN
             $objAssinaturaDTO->setStrSinAtivo('S');
             $objAssinaturaDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
             $objAssinaturaDTO->setStrModuloOrigem($moduloOrigem);
-            $objAssinaturaDTO->setStrP7sBase64($assinaturaPorSenha ? null : $assinaturasDigital['cadeiaDoCertificado']['conteudo']);
+            
+            // Salvar P7S somente na versão 5.1.0 ou superior do SEI
+            if (InfraUtil::compararVersoes(SEI_VERSAO, ">=", "5.1.0")) {
+              $objAssinaturaDTO->setStrP7sBase64($assinaturaPorSenha ? null : $assinaturasDigital['cadeiaDoCertificado']['conteudo']);
+            }
 
             if (InfraString::isBolVazia($objAssinaturaDTO->getStrNome()) || InfraString::isBolVazia($objAssinaturaDTO->getStrTratamento())) { 
               throw new InfraException('Módulo do Tramita: Não foi adicionado o nome e/ou tratamento/cargo do assinante no documento ' . $objProtocoloDTO->getStrProtocoloFormatado() . ' de ordem '. $arrObjComponentesDigital['ordem'] .'. 
