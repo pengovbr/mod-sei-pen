@@ -171,22 +171,10 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
-        $solicitarSincronizarTramite = false;
       if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
           $strNumeroRegistro = null;
       }else{
           $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
-          $propriedadesAdicionais = isset($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais)
-              ? ($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais ?: [])
-              : [];
-        if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
-          foreach ($propriedadesAdicionais as $key => $valor) {
-            if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
-              $solicitarSincronizarTramite = true;
-              break;
-            }
-          }
-        }
       }
 
       if (is_null($strNumeroRegistro)) {
@@ -200,37 +188,6 @@ class ExpedirProcedimentoRN extends InfraRN
 
         //Obtém o tamanho total da barra de progreso
         $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgressoREST($arrProcesso);
-
-      if ($solicitarSincronizarTramite && $this->objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($objProcedimentoDTO->getDblIdProcedimento())) {
-          // Solicitar sincronização do documentos pendentes
-          $objTramite = $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
-
-          $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $arrProcesso['idProcedimentoSEI']);
-
-          $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
-              $arrProcesso['idProcedimentoSEI'],
-              $objTramite->NRE,
-              $objTramite->IDT,
-              ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO,
-              $objTramite->dataHoraDeRegistroDoTramite,
-              $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
-              $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
-              $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
-              $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
-              $arrProcesso,
-              $objTramite->ticketParaEnvioDeComponentesDigitais,
-              $objTramite->processosComComponentesDigitaisSolicitados,
-              $bolSinProcessamentoEmBloco,
-              $numIdUnidade
-          );
-
-          $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
-
-          $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
-          $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-          $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
-          return true;
-      }
 
       if(!$bolSinProcessamentoEmBloco) {
           //Atribui o tamanho máximo da barra de progresso

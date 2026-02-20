@@ -266,16 +266,26 @@ try {
           $objPaginaSEI->finalizarBarraProgresso(null, false);
       }
 
-      $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
-      $objPenEnvioParcialDTO->retNumIdUnidadePen();
-      $objPenEnvioParcialDTO->setStrSinMultiplosOrgaos('S');
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
-      $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
-      $objPenEnvioParcialDTO = $objPenEnvioParcialRN->listar($objPenEnvioParcialDTO);
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
-      if (count($objPenEnvioParcialDTO) > 0) {
-        foreach ($objPenEnvioParcialDTO as $dto) {
-            $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
+      $podeManterProcessoAberto = false;
+      if (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+        $podeManterProcessoAberto = true;
+        $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objPenEnvioParcialDTO->retNumIdUnidadePen();
+        $objPenEnvioParcialDTO->setStrSinMultiplosOrgaos('S');
+
+        $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+        $objPenEnvioParcialDTO = $objPenEnvioParcialRN->listar($objPenEnvioParcialDTO);
+
+        if (count($objPenEnvioParcialDTO) > 0) {
+          foreach ($objPenEnvioParcialDTO as $dto) {
+              $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
+          }
         }
       }
 
@@ -373,10 +383,12 @@ function inicializar() {
         window.infraAvisoCancelar();
         $('#divSinMultiplosOrgaos').css('display', 'none');
         if (id!=''){
+          <?php if ($podeManterProcessoAberto) { ?>
             $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $arrIdsMultiplosOrgaos); ?>').split(',');
             if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
               $('#divSinMultiplosOrgaos').css('display', 'block');
             }
+          <?php } ?>
         }
     };
 
@@ -676,14 +688,16 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     <input type="hidden" id="hdnProcedimentosApensados" name="hdnProcedimentosApensados" value="<?php echo htmlspecialchars($_POST['hdnProcedimentosApensados'])?>" />
     <input type="hidden" id="hdnUnidadesAdministrativas" name="hdnUnidadesAdministrativas" value="" />
     
-    <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; display: none;">
-      <input type="checkbox" id="multiplosOrgaos" name="multiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" />
-      <label id="lblSinMultiplosOrgaos" for="multiplosOrgaos" class="infraLabelCheckbox">
-        Manter o processo aberto na unidade atual?
-        <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
-        <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getDiretorioImagensGlobal() ?>/ajuda.gif" class='infraImg'/></a>
-      </label>
-    </div>
+    <?php if ($podeManterProcessoAberto) { ?>
+      <div id="divSinMultiplosOrgaos" class="infraDivCheckbox" style="padding-top: 20px; display: none;">
+        <input type="checkbox" id="multiplosOrgaos" name="multiplosOrgaos" class="infraCheckbox" tabindex="<?php echo PaginaSEI::getInstance()->getProxTabDados() ?>" />
+        <label id="lblSinMultiplosOrgaos" for="multiplosOrgaos" class="infraLabelCheckbox">
+          Manter o processo aberto na unidade atual?
+          <?php $mensagemAjuda = 'O processo permanecerá aberto para que possa ser enviada para múltiplos órgãos'; ?>
+          <a class='pen_ajuda' id='ajuda_processo_aberto' <?php echo PaginaSEI::montarTitleTooltip($mensagemAjuda); ?>><img src="<?php echo PaginaSEI::getInstance()->getDiretorioImagensGlobal() ?>/ajuda.gif" class='infraImg'/></a>
+        </label>
+      </div>
+    <?php } ?>
 
 </form>
 <?php
