@@ -118,6 +118,32 @@ try {
         $boolSinUrgente = $objPaginaSEI->getCheckbox($_POST['chkSinUrgente'], true, false);
         $arrIdProcedimentosApensados = $objPaginaSEI->getArrValuesSelect($_POST['hdnProcedimentosApensados']);
 
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $repositorioMultiplosOrgaos = false;
+        $unidadeDestinatarioMultiplosOrgaos = false;
+        $nomeUnidadeDestinatarioMultiplosOrgaos = false;
+        if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
+            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+            $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
+            $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+            $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+            if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+              $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+              $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
+              $numIdRepositorio = $repositorioMultiplosOrgaos;
+              $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+              $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
+              $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
+              $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
+              $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
+
+              $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
+              $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
+              $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
+            }
+        }
+
         //Carregar dados do procedimento na primeiro acesso à página
       if (!isset($_POST['hdnIdProcedimento'])) {
             $objProcedimentoRN = new ProcedimentoRN();
@@ -600,7 +626,14 @@ function enviarForm(event){
 
     jQuery.each(['txtProtocoloExibir', 'selRepositorioEstruturas', 'hdnIdUnidade'], function(index, name){
         var objInput = jQuery('#' + name);
-        objData[name] = objInput.val();
+        // Se o campo estiver desabilitado, habilitar temporariamente para pegar o valor
+        if (objInput.prop('disabled')) {
+            objInput.prop('disabled', false);
+            objData[name] = objInput.val();
+            objInput.prop('disabled', true);
+        } else {
+            objData[name] = objInput.val();
+        }
     });
 
     jQuery('option', 'select#selProcedimentosApensados').each(function(index, element){
@@ -629,6 +662,17 @@ $objPaginaSEI->abrirBody($strTitulo, 'onload="inicializar();"');
 <?php
 $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
 ?>
+    <br />
+    <!-- Aqui mostrar uma targa amarela informando que o procedimento será enviado para o orgão de origem que manteve o processo aberto -->
+    <?php if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) { ?>
+    <div class="infraAreaAviso" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+        <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Aviso" class="infraImg" />
+        <span style="color: #856404; font-weight: bold;">
+            Processo compartilhado com múltiplos órgãos: o destinatário deve ser o órgão de origem <strong><?php echo PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos); ?></strong> que criou o processo.
+        </span>
+    </div>
+    <?php } ?>
+
     <div id="divProtocoloExibir" class="infraAreaDados" style="height: 4.5em;">
         <label id="lblProtocoloExibir" for="txtProtocoloExibir" accesskey="" class="infraLabelObrigatorio">Protocolo:</label>
         <input type="text" id="txtProtocoloExibir" name="txtProtocoloExibir" class="infraText infraReadOnly" readonly="readonly" value="<?php echo $strProtocoloProcedimentoFormatado; ?>" tabindex="<?php echo $objPaginaSEI->getProxTabDados() ?>" />
@@ -686,6 +730,21 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
     </div>
 
 </form>
+<script type="text/javascript">
+  $(document).ready(function() {
+    $repositorioMultiplosOrgaos = '<?php echo $repositorioMultiplosOrgaos ?: ''; ?>';
+    $unidadeDestinatarioMultiplosOrgaos = '<?php echo $unidadeDestinatarioMultiplosOrgaos ?: ''; ?>';
+    $nomeUnidadeDestinatarioMultiplosOrgaos = '<?php echo $nomeUnidadeDestinatarioMultiplosOrgaos ?: ''; ?>';
+    
+    if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos) {
+        $('#selRepositorioEstruturas').val($repositorioMultiplosOrgaos).change().prop('disabled', true).addClass('infraReadOnly');
+        $('#hdnIdUnidade').val($unidadeDestinatarioMultiplosOrgaos);
+        $('#txtUnidade').val($nomeUnidadeDestinatarioMultiplosOrgaos).prop('disabled', true).addClass('infraReadOnly');
+        $('#btnIdUnidade').prop('disabled', true).css('display', 'none');
+        $('#imgPesquisaAvancada').css('display', 'none');
+    }
+  });
+</script>
 <?php
 $objPaginaSEI->montarAreaDebug();
 $objPaginaSEI->fecharBody();
