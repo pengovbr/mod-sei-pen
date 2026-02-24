@@ -2310,7 +2310,7 @@ class ExpedirProcedimentoRN extends InfraRN
       return $strNome;
   }
 
-  public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false)
+  public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false, $semBarraProgresso = false)
     {
     if (!isset($strNumeroRegistro)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $strNumeroRegistro não informado.');
@@ -2353,8 +2353,10 @@ class ExpedirProcedimentoRN extends InfraRN
           $this->corrigirNumeroOrdemComponentes($arrComponentesDigitaisDTO, $arrComponentesDigitaisDTO[0]->getStrProtocoloDocumentoFormatado());
         foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
 
-          if(!$bolSinProcessamentoEmBloco) {
-                $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+          if(!$bolSinProcessamentoEmBloco) { 
+            if ($semBarraProgresso == false) {
+              $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+            }
           }else{
                   $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 2);
           }
@@ -2440,7 +2442,7 @@ class ExpedirProcedimentoRN extends InfraRN
                           $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                           $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite) {
+                if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite && !$semBarraProgresso) {
                   $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                   $this->contadorDaBarraDeProgresso++;
                 }
