@@ -61,19 +61,23 @@ class PENIntegracao extends SeiIntegracao
       $strAcoesProcedimento = "";
 
       $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
+      $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
 
-      $bolBlocoAbertoUnidade = false; 
-      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objTramiteEmBlocoDTO->retNumId();
-      $objTramiteEmBlocoDTO->retNumIdUnidade();
-      $objTramiteEmBlocoDTO->retStrDescricao();
-  
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-        $bolBlocoAbertoUnidade = true;
-    }
+      $bolBlocoAbertoUnidade = false; 
+      if ($bolAcaoAcessarTramiteEmBloco) {
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objTramiteEmBlocoDTO->retNumId();
+        $objTramiteEmBlocoDTO->retNumIdUnidade();
+        $objTramiteEmBlocoDTO->retStrDescricao();
+    
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+            $bolBlocoAbertoUnidade = true;
+        }
+      }
 
     if ($bolAcaoIncluirProcessoEmBloco && $bolBlocoAbertoUnidade) {
         $objPaginaSEI = PaginaSEI::getInstance();
