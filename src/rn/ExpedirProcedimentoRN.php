@@ -1086,6 +1086,7 @@ class ExpedirProcedimentoRN extends InfraRN
     }
       
       $objProcesso['documentos'] = [];
+      $ordemDocumento = 1;
     foreach ($arrDocumentosRelacionados as $ordem => $objDocumentosRelacionados) {
         $documentoDTO = $objDocumentosRelacionados["Documento"];
         $staAssociacao = $objDocumentosRelacionados["StaAssociacao"];
@@ -1110,7 +1111,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
 
         $documento = []; // Inicializando $documento como um array
-        $documento['ordem'] = $ordem + 1;
+        $documento['ordem'] = $ordemDocumento;
         $documento['descricao'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strDescricaoDocumento, 100), 'UTF-8', 'ISO-8859-1');
         
         
@@ -1212,6 +1213,8 @@ class ExpedirProcedimentoRN extends InfraRN
         //- historico
         $documento['idDocumentoSEI'] = $documentoDTO->getDblIdDocumento();
         $objProcesso['documentos'][] = $documento;
+
+        $ordemDocumento++;
     }
       return $objProcesso;
   }
@@ -2922,6 +2925,27 @@ class ExpedirProcedimentoRN extends InfraRN
   private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false) {
 
     $bolAssinaturaCorretas = true;
+
+    $arrTiProcessoEletronico = [
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
+    ];
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+  
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    if (!empty($objAtividadeDTO) && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS)) {
+        return;
+    }
 
     $objDocumentoDTO = new DocumentoDTO();
     $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());
