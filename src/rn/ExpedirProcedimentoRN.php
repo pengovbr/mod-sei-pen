@@ -1443,50 +1443,38 @@ class ExpedirProcedimentoRN extends InfraRN
          'conteudo' => $assinatura->getStrP7sBase64() ?: 'vazio'
          ]; 
 
-          $observacaoAssintaruras = [];
-         if (class_exists(AssinaturaEletronicaIntegracao::class)){
-           $objValidarAssinaturaDTO = new ValidarAssinaturaDTO();
-           $objValidarAssinaturaDTO->setNumIdDocumento($objDocumentoDTO->getDblIdDocumento());
-           $objValidarAssinaturaDTO->retTodos();
-           $objValidarAssinaturaRN = new ValidarAssinaturaRN();
-           if ($objValidarAssinaturaRN->contar($objValidarAssinaturaDTO)) {
-             $arrObjValidarAssinaturaDTO = $objValidarAssinaturaRN->listar($objValidarAssinaturaDTO);
-             foreach ($arrObjValidarAssinaturaDTO as $objValidarAssinaturaDTO) {
-               $cpf = preg_replace('/[^0-9]/', '', $objValidarAssinaturaDTO->getStrIdentificadorAssinante());
-               $observacaoAssintaruras[] = [
-                'cpf' => (strlen($cpf) == 11) ? $cpf : null,
-                'nome' => $assinatura->getStrNome(),
-                'cargo' => $assinatura->getStrTratamento(),
-                'observacao' => [
-                  'forma_autenticacao' => 'M',
-                  'numero_serie' => $objValidarAssinaturaDTO->getStrSerieCertificado(),
-                  'modulo_origem' => $assinatura->getStrModuloOrigem()
-                ]
-               ];
-             }
-           }
-         }
-         if (count($observacaoAssintaruras) == 0) {
-           $observacaoAssintaruras[] = [
-             'cpf' => $assinatura->getDblCpf() ?: null,
-             'nome' => $assinatura->getStrNome(), 
-             'cargo' => $assinatura->getStrTratamento(),
-             'observacao' => [
-               'forma_autenticacao' => $assinatura->getStrStaFormaAutenticacao(),
-               'numero_serie' => $assinatura->getStrNumeroSerieCertificado(),
-               'modulo_origem' => null
-             ]
-           ];
-         }
+          $observacaoAssinaturas = [
+            'cpf' => $assinatura->getDblCpf() ?: null,
+            'nome' => $assinatura->getStrNome(), 
+            'cargo' => $assinatura->getStrTratamento(),
+            'observacao' => [
+              'forma_autenticacao' => $assinatura->getStrStaFormaAutenticacao(),
+              'numero_serie' => $assinatura->getStrNumeroSerieCertificado(),
+              'modulo_origem' => $assinatura->getStrModuloOrigem() ?: null
+            ]
+          ];
+            
+          if (class_exists(AssinaturaEletronicaIntegracao::class) && (is_null($observacaoAssinaturas['cpf']) || is_null($observacaoAssinaturas['observacao']['numero_serie']))) {
+            $objValidarAssinaturaDTO = new ValidarAssinaturaDTO();
+            $objValidarAssinaturaDTO->setNumIdDocumento($objDocumentoDTO->getDblIdDocumento());
+            $objValidarAssinaturaDTO->retTodos();
+            $objValidarAssinaturaRN = new ValidarAssinaturaRN();
+            $arrObjValidarAssinaturaDTO = $objValidarAssinaturaRN->listar($objValidarAssinaturaDTO);
+            foreach ($arrObjValidarAssinaturaDTO as $objValidarAssinaturaDTO) {
+              if ((strtoupper($assinatura->getStrNumeroSerieCertificado()) == strtoupper($objValidarAssinaturaDTO->getStrSerieCertificado())) || 
+              preg_replace('/^[^_]*_|\.p7s$/i', '', $objValidarAssinaturaDTO->getStrNomeArquivo()) == trim(strtoupper($assinatura->getStrNome()))) {
+                $observacaoAssinaturas['cpf'] = preg_replace('/[^0-9]/', '', $objValidarAssinaturaDTO->getStrIdentificadorAssinante());
+                $observacaoAssinaturas['observacao']['numero_serie'] = $objValidarAssinaturaDTO->getStrSerieCertificado();
+              }
+            }
+          }
 
-         foreach($observacaoAssintaruras as $observacaoAssintarura) {
-            $objAssinaturaDigital['cpf'] = $observacaoAssintarura['cpf'];
-            $objAssinaturaDigital['nome'] = mb_convert_encoding($observacaoAssintarura['nome'], 'UTF-8', 'ISO-8859-1');
-            $objAssinaturaDigital['cargo'] = mb_convert_encoding($observacaoAssintarura['cargo'], 'UTF-8', 'ISO-8859-1');
-            $objAssinaturaDigital['observacao'] = json_encode($observacaoAssintarura['observacao']);
+          $objAssinaturaDigital['cpf'] = $observacaoAssinaturas['cpf'];
+          $objAssinaturaDigital['nome'] = mb_convert_encoding($observacaoAssinaturas['nome'], 'UTF-8', 'ISO-8859-1');
+          $objAssinaturaDigital['cargo'] = mb_convert_encoding($observacaoAssinaturas['cargo'], 'UTF-8', 'ISO-8859-1');
+          $objAssinaturaDigital['observacao'] = json_encode($observacaoAssinaturas['observacao']);
 
-            $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital; 
-         }
+          $objComponenteDigital['assinaturasDigitais'][] = $objAssinaturaDigital; 
       }
 
       return $objComponenteDigital;

@@ -508,7 +508,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
           $objAtividadeDTO->setDthConclusao(null);
           $objAtividadeRN = new AtividadeRN();
-        if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
+          if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
             $this->gravarLogDebug("Reabrindo automaticamente o processo", 2);
             $objReabrirProcessoDTO = new ReabrirProcessoDTO();
             $objReabrirProcessoDTO->setDblIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
@@ -516,18 +516,18 @@ class ReceberProcedimentoRN extends InfraRN
             $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
             $objProcedimentoRN = new ProcedimentoRN();
             //$objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
-        }
+          }
 
           //Realiza o desbloqueio do processo
           $this->gravarLogDebug("Realizando o desbloqueio do processo", 2);
           $objProtocoloDTO = new ProtocoloDTO();
           $objProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
           $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
-        if($this->objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
+          if($this->objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
             ProcessoEletronicoRN::desbloquearProcesso($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-        } else {
+          } else {
             $this->gravarLogDebug("Processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . " já se encontra desbloqueado!", 2);
-        }
+          }
 
           //Adiciona um andamento para o trâmite recusado
           $this->gravarLogDebug("Adicionando andamento para registro da recusa do trâmite", 2);
@@ -1950,7 +1950,7 @@ class ReceberProcedimentoRN extends InfraRN
                   $formaAutenticacao = $arrayObservacao['forma_autenticacao'];
                 }
                 if (isset($arrayObservacao['numero_serie'])) {
-                  $numeroSerie = $arrayObservacao['numero_serie'];
+                  $numeroSerie = strtoupper($arrayObservacao['numero_serie']);
                 }
                 if (isset($arrayObservacao['modulo_origem'])) {
                   $moduloOrigem = $arrayObservacao['modulo_origem'];
