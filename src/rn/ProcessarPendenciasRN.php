@@ -404,6 +404,7 @@ class ProcessarPendenciasRN extends InfraRN
             $objExpedirProcedimentoDTO->setNumIdBloco($objPenBlocoProcedimentoDTO->getNumIdBlocoProcesso());
             $objExpedirProcedimentoDTO->setNumIdAtividade($objPenBlocoProcedimentoDTO->getNumIdAtividade());
             $objExpedirProcedimentoDTO->setNumIdUnidade($objPenBlocoProcedimentoDTO->getNumIdUnidade());
+            $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(false);
             $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
             $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
