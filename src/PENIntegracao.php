@@ -61,19 +61,23 @@ class PENIntegracao extends SeiIntegracao
       $strAcoesProcedimento = "";
 
       $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
+      $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
 
-      $bolBlocoAbertoUnidade = false; 
-      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objTramiteEmBlocoDTO->retNumId();
-      $objTramiteEmBlocoDTO->retNumIdUnidade();
-      $objTramiteEmBlocoDTO->retStrDescricao();
-  
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-        $bolBlocoAbertoUnidade = true;
-    }
+      $bolBlocoAbertoUnidade = false; 
+      if ($bolAcaoAcessarTramiteEmBloco) {
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objTramiteEmBlocoDTO->retNumId();
+        $objTramiteEmBlocoDTO->retNumIdUnidade();
+        $objTramiteEmBlocoDTO->retStrDescricao();
+    
+        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+            $bolBlocoAbertoUnidade = true;
+        }
+      }
 
     if ($bolAcaoIncluirProcessoEmBloco && $bolBlocoAbertoUnidade) {
         $objPaginaSEI = PaginaSEI::getInstance();
@@ -215,9 +219,12 @@ class PENIntegracao extends SeiIntegracao
     if ($bolFlagAberto && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
       $objTramiteDTO = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
       if ($objTramiteDTO) {
-        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-        $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
-        $strAcoesProcedimento .= '</a>';
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
+          $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+          $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
+          $strAcoesProcedimento .= '</a>';
+        }
       }
     }
 

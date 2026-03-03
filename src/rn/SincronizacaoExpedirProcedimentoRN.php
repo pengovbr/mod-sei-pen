@@ -146,7 +146,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
           $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
 
-          $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $arrProcesso['protocolo'], false);
+          $this->enviarComponentesDigitais($objTramite->NRE, $objTramite->IDT, $arrProcesso['protocolo'], false, false, true);
 
           $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Concluído envio dos componentes do processo', 'S'));
 
@@ -326,6 +326,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
 
     $objProcessoEletronicoRN =  new ProcessoEletronicoRN();
     $objMetadadosProcedimento = $objProcessoEletronicoRN->solicitarMetadados($idTramite);
+    $nre = $objMetadadosProcedimento->NRE;
+    $this->gravarLogDebug("NRE do tramite realizado: $nre", 0, true);
 
     $protocolo = $objMetadadosProcedimento->metadados->processo->protocolo;
     $remetente = $objMetadadosProcedimento->remetente;
@@ -334,7 +336,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     try {
       $objProtocoloDTO = new ProtocoloDTO();
       $objProtocoloDTO->setStrProtocoloFormatado($protocolo);
-      $objProtocoloDTO->retTodos();
+      $objProtocoloDTO->retDblIdProtocolo();
+      $objProtocoloDTO->retNumIdUnidadeGeradora();
 
       $objProtocoloRN = new ProtocoloRN();
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);

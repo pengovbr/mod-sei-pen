@@ -171,22 +171,10 @@ class ExpedirProcedimentoRN extends InfraRN
         $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
         $objUltimoTramiteRecebidoDTO = $this->objProcessoEletronicoRN->consultarUltimoTramiteRecebido($objProcessoEletronicoPesquisaDTO);
 
-        $solicitarSincronizarTramite = false;
       if(isset($objMetadadosProcessoTramiteAnterior->documento)) {
           $strNumeroRegistro = null;
       }else{
           $strNumeroRegistro = isset($objUltimoTramiteRecebidoDTO) ? $objUltimoTramiteRecebidoDTO->getStrNumeroRegistro() : $objMetadadosProcessoTramiteAnterior?->NRE;
-          $propriedadesAdicionais = isset($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais)
-              ? ($objMetadadosProcessoTramiteAnterior->propriedadesAdicionais ?: [])
-              : [];
-        if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
-          foreach ($propriedadesAdicionais as $key => $valor) {
-            if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
-              $solicitarSincronizarTramite = true;
-              break;
-            }
-          }
-        }
       }
 
       if (is_null($strNumeroRegistro)) {
@@ -200,37 +188,6 @@ class ExpedirProcedimentoRN extends InfraRN
 
         //Obtém o tamanho total da barra de progreso
         $nrTamanhoTotalBarraProgresso = $this->obterTamanhoTotalDaBarraDeProgressoREST($arrProcesso);
-
-      if ($solicitarSincronizarTramite && $this->objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($objProcedimentoDTO->getDblIdProcedimento())) {
-          // Solicitar sincronização do documentos pendentes
-          $objTramite = $this->objProcessoEletronicoRN->solicitarSincronizarTramite($objMetadadosProcessoTramiteAnterior->IDT);
-
-          $idAtividadeExpedicao = $this->bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $arrProcesso['idProcedimentoSEI']);
-
-          $this->objProcessoEletronicoRN->cadastrarTramiteDeProcesso(
-              $arrProcesso['idProcedimentoSEI'],
-              $objTramite->NRE,
-              $objTramite->IDT,
-              ProcessoEletronicoRN::$STA_TIPO_TRAMITE_ENVIO,
-              $objTramite->dataHoraDeRegistroDoTramite,
-              $objExpedirProcedimentoDTO->getNumIdRepositorioOrigem(),
-              $objExpedirProcedimentoDTO->getNumIdUnidadeOrigem(),
-              $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
-              $objExpedirProcedimentoDTO->getNumIdUnidadeDestino(),
-              $arrProcesso,
-              $objTramite->ticketParaEnvioDeComponentesDigitais,
-              $objTramite->processosComComponentesDigitaisSolicitados,
-              $bolSinProcessamentoEmBloco,
-              $numIdUnidade
-          );
-
-          $this->objProcessoEletronicoRN->cadastrarTramitePendente($objTramite->IDT, $idAtividadeExpedicao);
-
-          $this->gravarLogDebug("Solicitação de sincronização de trâmite para o processo {$objMetadadosProcessoTramiteAnterior->IDT} foi realizada.", 0, true);
-          $this->barraProgresso->mover($this->barraProgresso->getNumMax());
-          $this->barraProgresso->setStrRotulo(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_CONCLUSAO);
-          return true;
-      }
 
       if(!$bolSinProcessamentoEmBloco) {
           //Atribui o tamanho máximo da barra de progresso
@@ -1086,6 +1043,7 @@ class ExpedirProcedimentoRN extends InfraRN
     }
       
       $objProcesso['documentos'] = [];
+      $ordemDocumento = 1;
     foreach ($arrDocumentosRelacionados as $ordem => $objDocumentosRelacionados) {
         $documentoDTO = $objDocumentosRelacionados["Documento"];
         $staAssociacao = $objDocumentosRelacionados["StaAssociacao"];
@@ -1110,7 +1068,7 @@ class ExpedirProcedimentoRN extends InfraRN
         $strDescricaoDocumento = ($boolDocumentoRecebidoComNumero) ? $documentoDTO->getStrNumero() : "***";
 
         $documento = []; // Inicializando $documento como um array
-        $documento['ordem'] = $ordem + 1;
+        $documento['ordem'] = $ordemDocumento;
         $documento['descricao'] = mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($strDescricaoDocumento, 100), 'UTF-8', 'ISO-8859-1');
         
         
@@ -1212,6 +1170,8 @@ class ExpedirProcedimentoRN extends InfraRN
         //- historico
         $documento['idDocumentoSEI'] = $documentoDTO->getDblIdDocumento();
         $objProcesso['documentos'][] = $documento;
+
+        $ordemDocumento++;
     }
       return $objProcesso;
   }
@@ -2310,7 +2270,7 @@ class ExpedirProcedimentoRN extends InfraRN
       return $strNome;
   }
 
-  public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false)
+  public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false, $semBarraProgresso = false)
     {
     if (!isset($strNumeroRegistro)) {
         throw new InfraException('Módulo do Tramita: Parâmetro $strNumeroRegistro não informado.');
@@ -2353,8 +2313,10 @@ class ExpedirProcedimentoRN extends InfraRN
           $this->corrigirNumeroOrdemComponentes($arrComponentesDigitaisDTO, $arrComponentesDigitaisDTO[0]->getStrProtocoloDocumentoFormatado());
         foreach ($arrComponentesDigitaisDTO as $objComponenteDigitalDTO) {
 
-          if(!$bolSinProcessamentoEmBloco) {
-                $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+          if(!$bolSinProcessamentoEmBloco) { 
+            if ($semBarraProgresso == false) {
+              $this->barraProgresso->setStrRotulo(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()));
+            }
           }else{
                   $this->gravarLogDebug(sprintf(ProcessoEletronicoINT::TEE_EXPEDICAO_ETAPA_DOCUMENTO, $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado()), 2);
           }
@@ -2440,7 +2402,7 @@ class ExpedirProcedimentoRN extends InfraRN
                           $parametros->dadosDoComponenteDigital = $dadosDoComponenteDigital;
                           $this->objProcessoEletronicoRN->enviarComponenteDigital($parametros);
 
-                if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite) {
+                if(!$bolSinProcessamentoEmBloco && !$bolReproducaoUltimoTramite && !$semBarraProgresso) {
                   $this->barraProgresso->mover($this->contadorDaBarraDeProgresso);
                   $this->contadorDaBarraDeProgresso++;
                 }
@@ -2920,6 +2882,27 @@ class ExpedirProcedimentoRN extends InfraRN
   private function validarAssinaturas(InfraException $objInfraException, $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false) {
 
     $bolAssinaturaCorretas = true;
+
+    $arrTiProcessoEletronico = [
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS),
+    ];
+
+    $objAtividadeDTO = new AtividadeDTO();
+    $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
+    $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
+    $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
+    $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
+    $objAtividadeDTO->retNumIdAtividade();
+    $objAtividadeDTO->retNumIdTarefa();
+    $objAtividadeDTO->retDblIdProcedimentoProtocolo();
+  
+    $objAtividadeRN = new AtividadeRN();
+    $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
+
+    if (!empty($objAtividadeDTO) && $objAtividadeDTO->getNumIdTarefa() == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_RECEBIMENTO_MULTIPLOS_ORGAOS)) {
+        return;
+    }
 
     $objDocumentoDTO = new DocumentoDTO();
     $objDocumentoDTO->setDblIdProcedimento($objProcedimentoDTO->getDblIdProcedimento());

@@ -457,12 +457,20 @@ class ReceberProcedimentoRN extends InfraRN
 
           //Busca a última atividade de trâmite externo
           $this->gravarLogDebug("Buscando última atividade de trâmite externo do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento(), 2);
+          
+          $idTipoProcessoEletonicoEnvioMultiplosOrgaos = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_ENVIO_MULTIPLOS_ORGAOS_REMETENTE);
+          $arrTiProcessoEletronico = [
+            ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO),
+            $idTipoProcessoEletonicoEnvioMultiplosOrgaos,
+          ];
+
           $objAtividadeDTO = new AtividadeDTO();
           $objAtividadeDTO->setDblIdProtocolo($objProcessoEletronicoDTO->getDblIdProcedimento());
-          $objAtividadeDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_EXPEDIDO));
+          $objAtividadeDTO->setNumIdTarefa($arrTiProcessoEletronico, InfraDTO::$OPER_IN);
           $objAtividadeDTO->setNumMaxRegistrosRetorno(1);
           $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_DESC);
           $objAtividadeDTO->retNumIdAtividade();
+          $objAtividadeDTO->retNumIdTarefa();
           $objAtividadeBD = new AtividadeBD($this->getObjInfraIBanco());
           $objAtividadeDTO = $objAtividadeBD->consultar($objAtividadeDTO);
 
@@ -475,6 +483,8 @@ class ReceberProcedimentoRN extends InfraRN
           $objAtributoAndamentoBD = new AtributoAndamentoBD($this->getObjInfraIBanco());
           $objAtributoAndamentoDTO = $objAtributoAndamentoBD->consultar($objAtributoAndamentoDTO);
 
+          $unidadeDestino = $objAtividadeDTO->getNumIdTarefa() == $idTipoProcessoEletonicoEnvioMultiplosOrgaos
+            ? null : $objAtributoAndamentoDTO->getStrValor();
           //Monta o DTO de receber tramite recusado
           $this->gravarLogDebug("Preparando recebimento de trâmite " . $numIdTramite . " recusado", 2);
           $objReceberTramiteRecusadoDTO = new ReceberTramiteRecusadoDTO();
@@ -483,7 +493,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objReceberTramiteRecusadoDTO->setNumIdUnidadeOrigem(null);
           $objReceberTramiteRecusadoDTO->setNumIdTarefa(ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PROCESSO_TRAMITE_RECUSADO));
           $objReceberTramiteRecusadoDTO->setStrMotivoRecusa(mb_convert_encoding($this->objProcessoEletronicoRN->reduzirCampoTexto($tramite->justificativaDaRecusa, 500), 'ISO-8859-1', 'UTF-8'));
-          $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($objAtributoAndamentoDTO->getStrValor());
+          $objReceberTramiteRecusadoDTO->setStrNomeUnidadeDestino($unidadeDestino);
 
           //Faz o tratamento do processo e do trâmite recusado
           $this->gravarLogDebug("Atualizando dados do processo " . $objProcessoEletronicoDTO->getDblIdProcedimento() ." e do trâmite recusado " . $numIdTramite, 1);
@@ -3188,7 +3198,7 @@ class ReceberProcedimentoRN extends InfraRN
       $objRelProtocoloProtocoloRN = new RelProtocoloProtocoloRN();
 
       $arrOrdemBanco = InfraArray::converterArrInfraDTO($objRelProtocoloProtocoloRN->listarRN0187($objRelProtocoloProtocoloDTO), 'IdRelProtocoloProtocolo');
-
+      $ocorreuAlteracaoDeOrdem = false;
       if ($arrOrdemBanco !== $arrOrdemNova) {
         foreach ($objProcedimentoDTO->getArrObjRelProtocoloProtocoloDTO() as $objRelProtocoloProtocoloDTO) {
           $dto = new RelProtocoloProtocoloDTO();
@@ -3201,8 +3211,15 @@ class ReceberProcedimentoRN extends InfraRN
           if ($dto && $objRelProtocoloProtocoloDTO->getNumSequencia() != $dto->getNumSequencia()) {
             $dto->setNumSequencia($objRelProtocoloProtocoloDTO->getNumSequencia());
             $objRelProtocoloProtocoloBD->alterar($dto);
+            $ocorreuAlteracaoDeOrdem = true;
           }
         }
+      }
+
+      if ($ocorreuAlteracaoDeOrdem) {
+        $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+        $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($objProcedimentoDTO->getDblIdProcedimento());
+        $this->objProcessoEletronicoRN->cadastrarAtividadePedidoSincronizacao($objProcedimentoDTO, ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_REORDENACAO_AUTOMATICA_PROCESSO);
       }
     } catch (Exception $e) {
       // throw new InfraException('Erro alterando ordem dos protocolos.', $e);

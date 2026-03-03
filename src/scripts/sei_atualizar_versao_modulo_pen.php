@@ -2705,6 +2705,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
       $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
 
+      $fnCadastrar('A ordem dos documentos foi alterada automaticamente para a ordem original devido a sincronização de processo para múltiplos órgãos', 'N', 'S', 'N', 'N', 'N', 'PEN_REORDENACAO_AUTOMATICA_PROCESSO');
+      
       $this->atualizarNumeroVersao("4.1.0");
   }
 
