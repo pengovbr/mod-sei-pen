@@ -3003,15 +3003,15 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $objResposta;
     } catch (RequestException $e) {
-        $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
+        $erroResposta = $e->hasResponse() ? json_decode($e->getResponse()->getBody()->getContents()) : null;
         
         // Lança uma nova exceção com os detalhes do RequestException
         throw new Exception(
             json_encode(
                 [
                 'error' => true,
-                'codigoErro' => $erroResposta->codigoErro,
-                'message' => $erroResposta->mensagem,
+                'codigoErro' => $e->hasResponse() ? $erroResposta->codigoErro : null,
+                'message' => $e->hasResponse() ? $erroResposta->mensagem : $e->getMessage(),
                 'exception' => $e->getMessage(),
                 'details' => $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'No response body'
                 ]
