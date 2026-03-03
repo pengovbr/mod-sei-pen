@@ -65,19 +65,19 @@ class PENIntegracao extends SeiIntegracao
 
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
       $bolBlocoAbertoUnidade = false; 
-      if ($bolAcaoAcessarTramiteEmBloco) {
-        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-        $objTramiteEmBlocoDTO->retNumId();
-        $objTramiteEmBlocoDTO->retNumIdUnidade();
-        $objTramiteEmBlocoDTO->retStrDescricao();
+    if ($bolAcaoAcessarTramiteEmBloco) {
+      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+      $objTramiteEmBlocoDTO->retNumId();
+      $objTramiteEmBlocoDTO->retNumIdUnidade();
+      $objTramiteEmBlocoDTO->retStrDescricao();
     
-        $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-            $bolBlocoAbertoUnidade = true;
-        }
+      $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
+      if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+          $bolBlocoAbertoUnidade = true;
       }
+    }
 
     if ($bolAcaoIncluirProcessoEmBloco && $bolBlocoAbertoUnidade) {
         $objPaginaSEI = PaginaSEI::getInstance();
@@ -542,7 +542,8 @@ class PENIntegracao extends SeiIntegracao
 
       return $arrObjArvoreAcaoItemAPI;
   }
-
+  // TODO: Diminuir complexidade deste método, extraindo parte de sua lógica para métodos auxiliares
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function getObjArvoreAcao($dblIdProcedimento, $arrObjArvoreAcaoItemAPI)
     {
 
@@ -619,7 +620,7 @@ class PENIntegracao extends SeiIntegracao
                 $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
                 $objProcessoEletronicoRN = new ProcessoEletronicoRN();
                 $objTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
-                $objTramitesAnteriores = $objProcessoEletronicoRN->consultarTramitesTodos(null,$objTramiteDTO->getStrNumeroRegistro());
+                $objTramitesAnteriores = $objProcessoEletronicoRN->consultarTramitesTodos(null, $objTramiteDTO->getStrNumeroRegistro());
                 $arrayRecusa = [
                   ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
                   ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,

@@ -97,7 +97,9 @@ class ExpedirProcedimentoRN extends InfraRN
     {
       $this->objPenDebug->gravar($parStrMensagem, $parNumIdentacao, $parBolLogTempoProcessamento);
   }
-
+  
+  // TODO: Diminuir complexidade deste método, extraindo parte de sua lógica para métodos auxiliares
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded  
   protected function expedirProcedimentoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
     {
       $numIdTramite = 0;
@@ -1012,6 +1014,8 @@ class ExpedirProcedimentoRN extends InfraRN
       return $objProcesso;
   }
 
+  // TODO: Diminuir complexidade deste método, extraindo parte de sua lógica para métodos auxiliares, como por exemplo a construção do array de documentos e a verificação de documentos não assinados
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   private function atribuirDocumentosREST($objProcesso, $dblIdProcedimento, $parObjMetadadosTramiteAnterior, $removerDocumentosNaoAssinados = false)
     {
 
@@ -2253,6 +2257,8 @@ class ExpedirProcedimentoRN extends InfraRN
       return $strNome;
   }
 
+  // TODO: Diminuir complexidade deste método, extraindo parte de sua lógica para métodos auxiliares
+  // phpcs:ignore Generic.Metrics.CyclomaticComplexity.MaxExceeded
   public function enviarComponentesDigitais($strNumeroRegistro, $numIdTramite, $strProtocolo, $bolSinProcessamentoEmBloco = false, $bolReproducaoUltimoTramite = false, $semBarraProgresso = false)
     {
     if (!isset($strNumeroRegistro)) {
