@@ -408,11 +408,13 @@ function inicializar() {
     objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
         window.infraAvisoCancelar();
         $('#divSinMultiplosOrgaos').css('display', 'none');
+        $('#multiplosOrgaos').prop('checked', false);
         if (id!=''){
           <?php if ($podeManterProcessoAberto) { ?>
             $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $arrIdsMultiplosOrgaos); ?>').split(',');
             if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
               $('#divSinMultiplosOrgaos').css('display', 'block');
+              $('#multiplosOrgaos').prop('checked', true);
             }
           <?php } ?>
         }
