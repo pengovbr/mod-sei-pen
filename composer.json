@@ -11,8 +11,7 @@
     }
   }, 
   "require": {
-    "guzzlehttp/guzzle": "^7.0",
-    "symfony/event-dispatcher": "^7.4"
+    "guzzlehttp/guzzle": "^7.0"
   },
       
   "require-dev": {
