@@ -227,15 +227,15 @@ class ReceberProcedimentoRN extends InfraRN
       // Validação dos dados do processo recebido
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
-      try {
-        $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
-        $this->validarDadosDestinatario($parObjMetadadosProcedimento);
-        $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
-        $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
-        $this->verificarPermissoesDiretorios($numIdTramite);
-      } catch (InfraException $e) {
-        throw new InfraException("Módulo do Tramita: Erro na validação dos metadados do protocolo do trâmite $numIdTramite. " . $e->getMessage(), $e);  
-      }
+    try {
+      $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
+      $this->validarDadosDestinatario($parObjMetadadosProcedimento);
+      $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
+      $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
+      $this->verificarPermissoesDiretorios($numIdTramite);
+    } catch (InfraException $e) {
+      throw new InfraException("Módulo do Tramita: Erro na validação dos metadados do protocolo do trâmite $numIdTramite. " . $e->getMessage(), $e);  
+    }
 
   }
 
@@ -508,7 +508,7 @@ class ReceberProcedimentoRN extends InfraRN
           $objAtividadeDTO->setNumIdUnidade(SessaoSEI::getInstance()->getNumIdUnidadeAtual());
           $objAtividadeDTO->setDthConclusao(null);
           $objAtividadeRN = new AtividadeRN();
-        if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
+          if ($objAtividadeRN->contarRN0035($objAtividadeDTO) == 0) {
             $this->gravarLogDebug("Reabrindo automaticamente o processo", 2);
             $objReabrirProcessoDTO = new ReabrirProcessoDTO();
             $objReabrirProcessoDTO->setDblIdProcedimento($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
@@ -516,18 +516,18 @@ class ReceberProcedimentoRN extends InfraRN
             $objReabrirProcessoDTO->setNumIdUsuario(SessaoSEI::getInstance()->getNumIdUsuario());
             $objProcedimentoRN = new ProcedimentoRN();
             //$objProcedimentoRN->reabrirRN0966($objReabrirProcessoDTO);
-        }
+          }
 
           //Realiza o desbloqueio do processo
           $this->gravarLogDebug("Realizando o desbloqueio do processo", 2);
           $objProtocoloDTO = new ProtocoloDTO();
           $objProtocoloDTO->setDblIdProtocolo($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
           $objProtocoloDTO->setStrStaEstado(ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO);
-        if($this->objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
+          if($this->objProtocoloRN->contarRN0667($objProtocoloDTO) != 0) {
             ProcessoEletronicoRN::desbloquearProcesso($objReceberTramiteRecusadoDTO->getNumIdProtocolo());
-        } else {
+          } else {
             $this->gravarLogDebug("Processo " . $objReceberTramiteRecusadoDTO->getNumIdProtocolo() . " já se encontra desbloqueado!", 2);
-        }
+          }
 
           //Adiciona um andamento para o trâmite recusado
           $this->gravarLogDebug("Adicionando andamento para registro da recusa do trâmite", 2);
@@ -641,84 +641,85 @@ class ReceberProcedimentoRN extends InfraRN
         $arrCompenentesDigitaisIndexados = InfraArray::indexarArrInfraDTO($arrObjComponentesDigitaisDTO, 'IdDocumento', true);
 
         foreach ($arrCompenentesDigitaisIndexados as $numIdDocumento => $arrObjComponenteDigitalDTO){
-          if(!empty($arrObjComponenteDigitalDTO)) {
+          if (empty($arrObjComponenteDigitalDTO)) {
+            continue;
+          }
 
-            foreach ($arrObjComponenteDigitalDTO as $objComponenteDigitalDTO) {
+          foreach ($arrObjComponenteDigitalDTO as $objComponenteDigitalDTO) {
                   $dblIdProcedimento = $objComponenteDigitalDTO->getDblIdProcedimento();
                   $dblIdDocumento = $numIdDocumento;
                   $strHash = $objComponenteDigitalDTO->getStrHashConteudo();
 
                   $bolEnviarComponentesDigitais = false;
                   //Verificar se documento já foi recebido anteriormente para poder registrar
-              if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)) {
-                $bolEnviarComponentesDigitais = true;
-              } else if($bolReproducaoUltimoTramite){
-                if (!isset($idUltimoTramiteRecebimento)) { // busca apenas na primeira vez qual o valor do id de ultimo tramite
-                  $objTramiteDTO = new TramiteDTO();
-                  $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
-                  $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
-                  $objTramiteDTO->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
-                  $objTramiteDTO->setNumMaxRegistrosRetorno(1);
-                  $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite, InfraDTO::$OPER_DIFERENTE);
-                  $objTramiteDTO->retNumIdTramite();
-                  $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
-                  $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
-                  $idUltimoTramiteRecebimento = $objTramiteDTO->getNumIdTramite();
-                }
+            if($this->documentosPendenteRegistro($dblIdProcedimento, $dblIdDocumento, $strHash)) {
+              $bolEnviarComponentesDigitais = true;
+            } else if($bolReproducaoUltimoTramite){
+              if (!isset($idUltimoTramiteRecebimento)) { // busca apenas na primeira vez qual o valor do id de ultimo tramite
+                $objTramiteDTO = new TramiteDTO();
+                $objTramiteDTO->setNumIdProcedimento($dblIdProcedimento);
+                $objTramiteDTO->setStrStaTipoTramite(ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+                $objTramiteDTO->setOrdNumIdTramite(InfraDTO::$TIPO_ORDENACAO_DESC);
+                $objTramiteDTO->setNumMaxRegistrosRetorno(1);
+                $objTramiteDTO->setNumIdTramite($parNumIdentificacaoTramite, InfraDTO::$OPER_DIFERENTE);
+                $objTramiteDTO->retNumIdTramite();
+                $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+                $objTramiteDTO = $objTramiteBD->consultar($objTramiteDTO);
+                $idUltimoTramiteRecebimento = $objTramiteDTO->getNumIdTramite();
+              }
 
-                $objComponenteDigital = new ComponenteDigitalDTO();
-                $objComponenteDigital->setDblIdProcedimento($dblIdProcedimento);
-                $objComponenteDigital->setDblIdDocumento($dblIdDocumento);
-                $objComponenteDigital->setStrNumeroRegistro($parStrNumeroRegistro);
-                $objComponenteDigital->setNumIdTramite($idUltimoTramiteRecebimento);
-                $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE); // garante apenas docs com anexo
-                $objComponenteDigital->retTodos();
-                $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+              $objComponenteDigital = new ComponenteDigitalDTO();
+              $objComponenteDigital->setDblIdProcedimento($dblIdProcedimento);
+              $objComponenteDigital->setDblIdDocumento($dblIdDocumento);
+              $objComponenteDigital->setStrNumeroRegistro($parStrNumeroRegistro);
+              $objComponenteDigital->setNumIdTramite($idUltimoTramiteRecebimento);
+              $objComponenteDigital->setNumIdAnexo(null, InfraDTO::$OPER_DIFERENTE); // garante apenas docs com anexo
+              $objComponenteDigital->retTodos();
+              $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
 
-                if ($objComponenteDigitalBD->contar($objComponenteDigital)) {
-                  $objDocumentoDTO = new DocumentoDTO();
-                  $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
-                  $objDocumentoDTO->retTodos();
-                  $objDocumentoRN = new DocumentoRN();
-                  $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
+              if ($objComponenteDigitalBD->contar($objComponenteDigital)) {
+                $objDocumentoDTO = new DocumentoDTO();
+                $objDocumentoDTO->setDblIdDocumento($dblIdDocumento);
+                $objDocumentoDTO->retTodos();
+                $objDocumentoRN = new DocumentoRN();
+                $objDocumentoDTO = $objDocumentoRN->consultarRN0005($objDocumentoDTO);
 
-                  if ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
-                    $objDocumentoDTO->setStrSinBloqueado('N');
-                    $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
-                    $objDocumentoBD->alterar($objDocumentoDTO);
+                if ($objDocumentoDTO->getStrStaDocumento() == DocumentoRN::$TD_EXTERNO) {
+                  $objDocumentoDTO->setStrSinBloqueado('N');
+                  $objDocumentoBD = new DocumentoBD($this->getObjInfraIBanco());
+                  $objDocumentoBD->alterar($objDocumentoDTO);
 
-                    $objAnexoDTO = new AnexoDTO();
-                    $objAnexoDTO->retTodos();
-                    $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
-                    $objAnexoRN = new AnexoRN();
-                    $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
-                    if ($objAnexoDTO != null) {
-                      $objComponenteDigitalPDTO = new ComponenteDigitalDTO();
-                      $objComponenteDigitalPDTO->retTodos();
-                      $objComponenteDigitalPDTO->setNumIdAnexo($objAnexoDTO->getNumIdAnexo());
+                  $objAnexoDTO = new AnexoDTO();
+                  $objAnexoDTO->retTodos();
+                  $objAnexoDTO->setDblIdProtocolo($dblIdDocumento);
+                  $objAnexoRN = new AnexoRN();
+                  $objAnexoDTO = $objAnexoRN->consultarRN0736($objAnexoDTO);
+                  if ($objAnexoDTO != null) {
+                    $objComponenteDigitalPDTO = new ComponenteDigitalDTO();
+                    $objComponenteDigitalPDTO->retTodos();
+                    $objComponenteDigitalPDTO->setNumIdAnexo($objAnexoDTO->getNumIdAnexo());
                       
-                      $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
-                      $arrObjComponenteDigitalPDTO = $objComponenteDigitalBD->listar($objComponenteDigitalPDTO);
-                      if (count($arrObjComponenteDigitalPDTO) > 0) {
-                        foreach ($arrObjComponenteDigitalPDTO as $objComponenteDigitalPDTO) {
-                            $objComponenteDigitalBD->excluir($objComponenteDigitalPDTO);
-                        }
+                    $objComponenteDigitalBD = new ComponenteDigitalBD($this->getObjInfraIBanco());
+                    $arrObjComponenteDigitalPDTO = $objComponenteDigitalBD->listar($objComponenteDigitalPDTO);
+                    if (count($arrObjComponenteDigitalPDTO) > 0) {
+                      foreach ($arrObjComponenteDigitalPDTO as $objComponenteDigitalPDTO) {
+                          $objComponenteDigitalBD->excluir($objComponenteDigitalPDTO);
                       }
-                      $objAnexoRN->excluirRN0226([$objAnexoDTO]); // precisa excluir componente digital primeiro
-                      $bolEnviarComponentesDigitais = true;
                     }
+                    $objAnexoRN->excluirRN0226([$objAnexoDTO]); // precisa excluir componente digital primeiro
+                    $bolEnviarComponentesDigitais = true;
                   }
                 }
               }
-              if ($bolEnviarComponentesDigitais){
-                  $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO, $bolReproducaoUltimoTramite);
-                  $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
-                  $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
-                  $this->gravarLogDebug($strMensagemRecebimento, 3);
-                  $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Todos os componentes digitais foram recebidos', 'S'));
-              } else {
-                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Nenhum componente digital para receber', 'S'));
-              }
+            }
+            if ($bolEnviarComponentesDigitais){
+                $this->objReceberComponenteDigitalRN->atribuirComponentesDigitaisAoDocumento($numIdDocumento, $arrObjComponenteDigitalDTO, $bolReproducaoUltimoTramite);
+                $strMensagemRecebimento = sprintf('Armazenando componente do documento %s', $objComponenteDigitalDTO->getStrProtocoloDocumentoFormatado());
+                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento($strMensagemRecebimento, 'S'));
+                $this->gravarLogDebug($strMensagemRecebimento, 3);
+                $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Todos os componentes digitais foram recebidos', 'S'));
+            } else {
+              $this->objProcedimentoAndamentoRN->cadastrar(ProcedimentoAndamentoDTO::criarAndamento('Nenhum componente digital para receber', 'S'));
             }
           }
         }
@@ -1950,7 +1951,7 @@ class ReceberProcedimentoRN extends InfraRN
                   $formaAutenticacao = $arrayObservacao['forma_autenticacao'];
                 }
                 if (isset($arrayObservacao['numero_serie'])) {
-                  $numeroSerie = $arrayObservacao['numero_serie'];
+                  $numeroSerie = strtoupper($arrayObservacao['numero_serie']);
                 }
                 if (isset($arrayObservacao['modulo_origem'])) {
                   $moduloOrigem = $arrayObservacao['modulo_origem'];
