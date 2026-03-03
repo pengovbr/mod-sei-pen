@@ -227,12 +227,16 @@ class ReceberProcedimentoRN extends InfraRN
       // Validação dos dados do processo recebido
       $objProtocolo = ProcessoEletronicoRN::obterProtocoloDosMetadados($parObjMetadadosProcedimento);
       $numIdTramite = $parObjMetadadosProcedimento->IDT;
+      try {
+        $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
+        $this->validarDadosDestinatario($parObjMetadadosProcedimento);
+        $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
+        $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
+        $this->verificarPermissoesDiretorios($numIdTramite);
+      } catch (InfraException $e) {
+        throw new InfraException("Módulo do Tramita: Erro na validação dos metadados do protocolo do trâmite $numIdTramite. " . $e->getMessage(), $e);  
+      }
 
-      $this->validarHipoteseLegalPadrao($objProtocolo, $numIdTramite);
-      $this->validarDadosDestinatario($parObjMetadadosProcedimento);
-      $this->validarComponentesDigitais($objProtocolo, $numIdTramite);
-      $this->validarExtensaoComponentesDigitais($numIdTramite, $objProtocolo);
-      $this->verificarPermissoesDiretorios($numIdTramite);
   }
 
     /**
@@ -2612,7 +2616,7 @@ class ReceberProcedimentoRN extends InfraRN
     if ($objAtividadeDTO !== null) {
       switch ($objAtividadeDTO->getNumIdTarefa()) {
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS):
-          $idTarefa =ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS);
+          $idTarefa = ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS);
             break;
 
         case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS):
@@ -2674,7 +2678,6 @@ class ReceberProcedimentoRN extends InfraRN
     $objAtributoAndamentoDTO->setStrNome('PROTOCOLO_FORMATADO');
     $objAtributoAndamentoDTO->setStrValor($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
     $objAtributoAndamentoDTO->setStrIdOrigem($objProcedimentoDTO->getDblIdProcedimento());
-    $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
     $objAtributoAndamentoDTO->setNumIdAtividade($objAtividadeDTO->getNumIdAtividade());
     $objAtributoAndamentoRN = new AtributoAndamentoRN();
     $objAtributoAndamentoRN->cadastrarRN1363($objAtributoAndamentoDTO);
@@ -3121,13 +3124,13 @@ class ReceberProcedimentoRN extends InfraRN
       $arrObjDocumentosMetadados = ProcessoEletronicoRN::obterDocumentosProtocolo($objProtocolo);
       $arrObjDocumentosMetadados = $this->adicionarIdDocumentoPorComponenteDigital($arrObjDocumentosMetadados);
       
-      $this->atualizarOrdenDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados);
+      $this->atualizarOrdemDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados);
   }
 
-  protected function atualizarOrdenDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados)
+  protected function atualizarOrdemDocumentosRecebidos($parObjProcedimentoDTO, $arrDblIdDocumentosProcesso, $arrObjDocumentosMetadados)
   {
     $objProcedimentoDTO = new ProcedimentoDTO();
-     $objProcedimentoDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
+    $objProcedimentoDTO->setDblIdProcedimento($parObjProcedimentoDTO->getDblIdProcedimento());
 
     $arrObjRelProtocoloProtocoloDTO = array();
     $arrColocarNoFinal = array();
@@ -3170,6 +3173,7 @@ class ReceberProcedimentoRN extends InfraRN
     foreach ($arrObjDocumentosMetadados as $key => $objDocumentosMetadados) {
       $objComponenteDigitalDTO = new ComponenteDigitalDTO();
       $objComponenteDigitalDTO->retTodos();
+      $objComponenteDigitalDTO->setDblIdProcedimento($objDocumentosMetadados->idProcedimentoSEI);
       $objComponenteDigitalDTO->setStrHashConteudo($objDocumentosMetadados->componentesDigitais[0]->hash->conteudo);
       $objComponenteDigitalDTO->setStrNome(mb_convert_encoding($objDocumentosMetadados->componentesDigitais[0]->nome, 'ISO-8859-1', 'UTF-8'));
       $objComponenteDigitalDTO->setNumOrdemDocumento($objDocumentosMetadados->ordem ?: 1);

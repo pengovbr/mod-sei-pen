@@ -603,10 +603,40 @@ class PENIntegracao extends SeiIntegracao
       $objAtividadeRN = new AtividadeRN();
       $objAtividadeDTO = $objAtividadeRN->consultarRN0033($objAtividadeDTO);
 
+      $objProcedimentoDTO = new ProcedimentoDTO();
+      $objProcedimentoDTO->setDblIdProcedimento($dblIdProcedimento);
+      $objProcedimentoDTO->retStrStaEstadoProtocolo();
+      $objProcedimentoRN = new ProcedimentoRN();
+      $objProcedimentoDTO = $objProcedimentoRN->consultarRN0201($objProcedimentoDTO);
+
       if ($objAtividadeDTO !== null) {
         switch ($objAtividadeDTO->getNumIdTarefa()) {
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS):
+            try {
+              if ($objProcedimentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO && is_null($objAtividadeDTO->getDthConclusao())) {
+                $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+                $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+                $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+                $objTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoDTO);
+                $objTramitesAnteriores = $objProcessoEletronicoRN->consultarTramitesTodos(null,$objTramiteDTO->getStrNumeroRegistro());
+                $arrayRecusa = [
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+                  ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
+                ];
+                if (isset($objTramitesAnteriores) && count($objTramitesAnteriores) > 0 && in_array($objTramitesAnteriores[count($objTramitesAnteriores)-1]->situacaoAtual, $arrayRecusa)) {
+                  $objProcessoEletronicoRN->desbloquearProcesso($dblIdProcedimento);
+                  $motivo = isset($objTramitesAnteriores[count($objTramitesAnteriores)-1]->justificativaDaRecusa) ? mb_convert_encoding($objTramitesAnteriores[count($objTramitesAnteriores)-1]->justificativaDaRecusa, 'iso-8859-1', 'utf-8') : 'Cancelado pelo usuário ou pelo administrador da plataforma';
+                  $motivo = str_replace('. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', '', $motivo); // Remove duplicidade de mensagem
+                  $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $motivo);
+                  echo "<script>window.location.reload();</script>";
+                }
+              }
+            } catch (Exception $e) {
+              // gravar log de erro caso necessário
+            }
             $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizadoPendente($dblIdProcedimento, $objAtividadeDTO->getDthAbertura());
               break;
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS):
@@ -618,6 +648,10 @@ class PENIntegracao extends SeiIntegracao
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA):
           case ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO):
+            if ($objProcedimentoDTO->getStrStaEstadoProtocolo() == ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
+              ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+              echo "<script>window.location.reload();</script>";
+            }
             $arrObjArvoreAcaoItemAPI[] = $this->getObjArvoreAcaoSincronizacaoFalha($dblIdProcedimento, $objAtividadeDTO->getDthConclusao());
               break;
           default:

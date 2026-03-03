@@ -808,17 +808,12 @@ class ExpedirProcedimentoRN extends InfraRN
 
   public function bloquearProcedimentoExpedicao($objExpedirProcedimentoDTO, $numIdProcedimento)
     {
-      //Instancia a API do SEI para bloquei do processo
-      $objEntradaBloquearProcessoAPI = new EntradaBloquearProcessoAPI();
-      $objEntradaBloquearProcessoAPI->setIdProcedimento($numIdProcedimento);
 
-      //Realiza o bloquei do processo
-      $objSeiRN = new SeiRN();
-      $objSeiRN->bloquearProcesso($objEntradaBloquearProcessoAPI);
+      $this->objProcessoEletronicoRN->bloquearProcesso($numIdProcedimento);
 
       $arrObjAtributoAndamentoDTO = [];
 
-      //Seta o repositrio de destino para constar no histrico
+      //Seta o repositrio de destino para constar no histórico
       $objAtributoAndamentoDTO = new AtributoAndamentoDTO();
       $objAtributoAndamentoDTO->setStrNome('REPOSITORIO_DESTINO');
       $objAtributoAndamentoDTO->setStrValor($objExpedirProcedimentoDTO->getStrRepositorioDestino());
