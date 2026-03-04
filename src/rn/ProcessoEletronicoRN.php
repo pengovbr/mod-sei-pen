@@ -3081,8 +3081,13 @@ class ProcessoEletronicoRN extends InfraRN
       return false;
     }
 
-      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-      $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+    try {
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+    } catch (Exception $e) {
+      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      return false;
+    }
 
       // Validar se unidade destino do multiplos órgãos existe na base de unidades do SEI
       $objUnidadeDTO = new PenUnidadeDTO();
