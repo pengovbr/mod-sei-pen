@@ -29,6 +29,9 @@ services:
     image: ${SOLR_IMAGE}:${ENVIRONMENT_VERSION}
     ports:
       - "8983:8983"
+    environment:
+      - SOLR_HEAP=256m    
+      
   selenium:
     image: selenium/standalone-chrome-debug
     links:
@@ -162,6 +165,8 @@ services:
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
       # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-eletronica/composer.phar:/opt/sei/web/modulos/assinatura-eletronica/composer.phar
+      - ../../../mod-sei-assinatura-eletronica/composer.json:/opt/sei/web/modulos/assinatura-eletronica/composer.json
       - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
@@ -230,6 +235,8 @@ services:
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
       # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-eletronica/composer.phar:/opt/sei/web/modulos/assinatura-eletronica/composer.phar
+      - ../../../mod-sei-assinatura-eletronica/composer.json:/opt/sei/web/modulos/assinatura-eletronica/composer.json
       - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
