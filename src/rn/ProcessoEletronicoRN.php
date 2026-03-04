@@ -36,7 +36,6 @@ class ProcessoEletronicoRN extends InfraRN
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS';
   public static $TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS = 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS';
 
-  public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_SUCESSO = 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_RECUSA = 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA';
   public static $TI_PROCESSO_ELETRONICO_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO = 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO';
@@ -2458,6 +2457,19 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  public static function bloquearProcesso($parDblIdProcedimento)
+    {
+    try{
+      $objEntradaBloquearProcessoAPI = new EntradaBloquearProcessoAPI();
+      $objEntradaBloquearProcessoAPI->setIdProcedimento($parDblIdProcedimento);
+
+      $objSeiRN = new SeiRN();
+      $objSeiRN->bloquearProcesso($objEntradaBloquearProcessoAPI);
+    } catch (InfraException $e) {
+        throw new InfraException("Erro ao bloquear processo", $e);
+    }
+  }
+
   public static function desbloquearProcesso($parDblIdProcedimento)
     {
     try{
@@ -2991,15 +3003,15 @@ class ProcessoEletronicoRN extends InfraRN
 
         return $objResposta;
     } catch (RequestException $e) {
-        $erroResposta = json_decode($e->getResponse()->getBody()->getContents());
+        $erroResposta = $e->hasResponse() ? json_decode($e->getResponse()->getBody()->getContents()) : null;
         
         // Lança uma nova exceção com os detalhes do RequestException
         throw new Exception(
             json_encode(
                 [
                 'error' => true,
-                'codigoErro' => $erroResposta->codigoErro,
-                'message' => $erroResposta->mensagem,
+                'codigoErro' => $e->hasResponse() ? $erroResposta->codigoErro : null,
+                'message' => $e->hasResponse() ? $erroResposta->mensagem : $e->getMessage(),
                 'exception' => $e->getMessage(),
                 'details' => $e->hasResponse() ? (string) $e->getResponse()->getBody() : 'No response body'
                 ]
@@ -3151,7 +3163,8 @@ class ProcessoEletronicoRN extends InfraRN
           $arrayRecusa = [
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
             ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
-            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE,
+            ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
           ];
           if (in_array($tramiteRecusa, $arrayRecusa)) {
             switch ($tramiteRecusa) {
@@ -3168,14 +3181,14 @@ class ProcessoEletronicoRN extends InfraRN
             }
             
             $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($idProcedimento);
-            $this->gravarAtividadeMuiltiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), $idTarefaRecusa, null, $motivoRecusa);
+            $this->gravarAtividadeMultiplosOrgaos($objProcedimentoDTO, $objTramiteDTO->getNumIdTramite(), $idTarefaRecusa, null, $motivoRecusa);
           }
         }
       }
     }
   }
 
-  public function gravarAtividadeMuiltiplosOrgaos(ProcedimentoDTO $objProcedimentoDTO, $numIdTramite, $penTarefa, $numIdUnidade = null, $motivoRecusa = '')
+  public function gravarAtividadeMultiplosOrgaos(ProcedimentoDTO $objProcedimentoDTO, $numIdTramite, $penTarefa, $numIdUnidade = null, $motivoRecusa = '')
   {
     $objTarefaDTO = new TarefaDTO();
     $objTarefaDTO->retNumIdTarefa();

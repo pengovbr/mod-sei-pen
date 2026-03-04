@@ -122,27 +122,27 @@ try {
         $repositorioMultiplosOrgaos = false;
         $unidadeDestinatarioMultiplosOrgaos = false;
         $nomeUnidadeDestinatarioMultiplosOrgaos = false;
-        if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
-            $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
-            $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
-            $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+      if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProcedimento)) {
+          $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+          $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
+          $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
 
-            $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
-            if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
-              $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
-              $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
-              $numIdRepositorio = $repositorioMultiplosOrgaos;
-              $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
-              $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
-              $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
-              $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
-              $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
+          $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+        if ($objTramiteDTO && $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
+          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+          $repositorioMultiplosOrgaos = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas;
+          $numIdRepositorio = $repositorioMultiplosOrgaos;
+          $strRepositorio = (array_key_exists($numIdRepositorio, $repositorios) ? $repositorios[$numIdRepositorio] : '');
+          $unidadeDestinatarioMultiplosOrgaos = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura;
+          $numIdUnidadeDestino = $unidadeDestinatarioMultiplosOrgaos;
+          $repositorioMultiplosOrgaosNome = $repositorios[$repositorioMultiplosOrgaos];
+          $repositorios = [$repositorioMultiplosOrgaos => $repositorioMultiplosOrgaosNome];
 
-              $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
-              $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
-              $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
-            }
+          $unidade = $objProcessoEletronicoRN->buscarEstruturaRest($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos);
+          $nomeUnidadeDestinatarioMultiplosOrgaos = $unidade->nome . ' - ' . $unidade->sigla;
+          $strNomeUnidadeDestino = $nomeUnidadeDestinatarioMultiplosOrgaos;
         }
+      }
 
         //Carregar dados do procedimento na primeiro acesso à página
       if (!isset($_POST['hdnIdProcedimento'])) {
@@ -408,11 +408,13 @@ function inicializar() {
     objAutoCompletarEstrutura.processarResultado = function(id,descricao,complemento){
         window.infraAvisoCancelar();
         $('#divSinMultiplosOrgaos').css('display', 'none');
+        $('#multiplosOrgaos').prop('checked', false);
         if (id!=''){
           <?php if ($podeManterProcessoAberto) { ?>
             $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $arrIdsMultiplosOrgaos); ?>').split(',');
             if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
               $('#divSinMultiplosOrgaos').css('display', 'block');
+              $('#multiplosOrgaos').prop('checked', true);
             }
           <?php } ?>
         }

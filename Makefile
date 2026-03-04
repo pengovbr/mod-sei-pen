@@ -334,6 +334,9 @@ install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados
 	@echo ""
 	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
 	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	docker exec funcional-solr-1 mkdir -p /opt/solr/server/solr/mod-sei-assinatura
+	docker cp ../mod-sei-assinatura-eletronica/solr funcional-solr-1:/opt/solr/server/solr/mod-sei-assinatura/conf
+	docker exec -e SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=admin:SolrAdmin123\$$" funcional-solr-1 /opt/solr/bin/solr create -c mod-sei-assinatura -d /opt/solr/server/solr/mod-sei-assinatura/conf
 	@echo ""
 	@echo "==================================================================================================="
 	@echo ""
