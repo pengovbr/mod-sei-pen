@@ -217,8 +217,16 @@ class PENIntegracao extends SeiIntegracao
     $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
     if ($bolFlagAberto && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-      $objTramiteDTO = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
-      if ($objTramiteDTO) {
+      $objPenUnidadeDTO = new PenUnidadeDTO();
+      $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+      $objPenUnidadeDTO->retNumIdUnidadeRH();
+      $objPenUnidadeRN = new PenUnidadeRN();
+      $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
+      $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
+      
+      $bolUnidadeAtualEhDestinoRecebimento = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
+      $bolTramiteRecebimento = $objTramiteDTO->getStrStaTipoTramite() == ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO;
+      if ($bolTramiteRecebimento && $bolUnidadeAtualEhDestinoRecebimento) {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
           $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
