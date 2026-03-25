@@ -216,7 +216,7 @@ class PENIntegracao extends SeiIntegracao
 
     $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
-    if ($bolFlagAberto && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+    if ($bolFlagAberto && $bolProcessoEstadoNormal && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
       $objPenUnidadeDTO->retNumIdUnidadeRH();
