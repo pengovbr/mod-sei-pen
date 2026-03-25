@@ -342,6 +342,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloRN = new ProtocoloRN();
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
+        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+
         $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
         $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
         $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
@@ -355,12 +357,18 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
         $objExpedirProcedimentoDTO->setNumIdBloco(null);
         $objExpedirProcedimentoDTO->setNumIdAtividade(null);
         $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
-        $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+        $objExpedirProcedimentoDTO->setNumIdUnidade($numIdUnidadeProcesso);
         $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
         $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objMetadadosProcedimento);
         $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
-        $this->expedirSincronizar($objExpedirProcedimentoDTO);
+        $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeProcesso);
+        try {
+          $this->expedirSincronizar($objExpedirProcedimentoDTO);
+        } finally {
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
+        }
 
         $numIDT = $objProtocoloDTO->getDblIdProtocolo();
         $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
