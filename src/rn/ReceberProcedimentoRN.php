@@ -2650,6 +2650,38 @@ class ReceberProcedimentoRN extends InfraRN
     }
 
     $idTarefa = $objTarefaDTO->getNumIdTarefa();
+    if ($idTarefa == ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)) {
+      $idProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
+      $numIdUnidadeRecebimento = ModPenUtilsRN::obterUnidadeRecebimento();
+
+      $numIdUnidadeBloqueio = null;
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($idProcedimento);
+      $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+      $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+
+      if (!is_null($objTramiteDTO)) {
+        $objUnidadeDestinoDTO = $this->obterUnidadeMapeada($objTramiteDTO->getNumIdEstruturaDestino());
+        if (!is_null($objUnidadeDestinoDTO)) {
+          $numIdUnidadeBloqueio = $objUnidadeDestinoDTO->getNumIdUnidade();
+        }
+      }
+
+      if (is_null($numIdUnidadeBloqueio)) {
+        $numIdUnidadeBloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($idProcedimento);
+      }
+
+      // Gravar um log aqui
+      $this->gravarLogDebug(">>> Bloqueando processo $idProcedimento para envio automático para unidade $numIdUnidadeBloqueio", 3);
+
+      SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeBloqueio);
+      try {
+        ProcessoEletronicoRN::bloquearProcesso($idProcedimento);
+      } finally {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeRecebimento);
+      }
+    }
+
     $strDataHoraAtual = InfraData::getStrDataHoraAtual();
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->setDblIdProtocolo($objProcedimentoDTO->getDblIdProcedimento());
