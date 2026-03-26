@@ -59,6 +59,7 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
   protected function expedirAutoControlado(ExpedirProcedimentoDTO $objExpedirProcedimentoDTO)
   {
     $numIdTramite = 0;
+    $dblIdProcedimento = null;
     try {
       //Valida Permissão
       SessaoSEI::getInstance()->validarAuditarPermissao('pen_procedimento_expedir', __METHOD__, $objExpedirProcedimentoDTO);
@@ -201,6 +202,43 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
     } catch (\Exception $e) {
       $this->gravarLogDebug("Erro processando envio de processo: $e", 0, true);
       throw new InfraException('Módulo do Tramita: Falha de comunicação com o serviços de integração. Por favor, tente novamente mais tarde.', $e);
+    } finally {
+      if (!is_null($dblIdProcedimento)) {
+        $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        $numIdUnidadeDesbloqueio = null;
+
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+        $objTramiteBD = new TramiteBD($this->getObjInfraIBanco());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+
+        if (!is_null($objTramiteDTO)) {
+          $objUnidadeDTO = new PenUnidadeDTO();
+          $objUnidadeDTO->setNumIdUnidadeRH($objTramiteDTO->getNumIdEstruturaDestino());
+          $objUnidadeDTO->setStrSinAtivo('S');
+          $objUnidadeDTO->retNumIdUnidade();
+
+          $objUnidadeRN = new UnidadeRN();
+          $objUnidadeDTO = $objUnidadeRN->consultarRN0125($objUnidadeDTO);
+
+          if (!is_null($objUnidadeDTO)) {
+            $numIdUnidadeDesbloqueio = $objUnidadeDTO->getNumIdUnidade();
+          }
+        }
+
+        if (is_null($numIdUnidadeDesbloqueio)) {
+          $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
+        }
+
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
+        try {
+          ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+        } catch (\Exception $e) {
+          $this->gravarLogDebug("Processo $dblIdProcedimento não pode ser desbloqueado automaticamente", 2);
+        } finally {
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoOriginal);
+        }
+      }
     }
   }
 
@@ -342,6 +380,8 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
       $objProtocoloRN = new ProtocoloRN();
       $objProtocoloDTO = $objProtocoloRN->consultarRN0186($objProtocoloDTO);
       if (!empty($objProtocoloDTO)){
+        $numIdUnidadeProcesso = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($objProtocoloDTO->getDblIdProtocolo());
+
         $objExpedirProcedimentoDTO = new ExpedirProcedimentoDTO();
         $objExpedirProcedimentoDTO->setNumIdRepositorioOrigem($remetente->identificacaoDoRepositorioDeEstruturas);
         $objExpedirProcedimentoDTO->setNumIdUnidadeOrigem($remetente->numeroDeIdentificacaoDaEstrutura);
@@ -355,12 +395,18 @@ class SincronizacaoExpedirProcedimentoRN extends ExpedirProcedimentoRN
         $objExpedirProcedimentoDTO->setNumIdBloco(null);
         $objExpedirProcedimentoDTO->setNumIdAtividade(null);
         $objExpedirProcedimentoDTO->setBolSinProcessamentoEmBloco(false);
-        $objExpedirProcedimentoDTO->setNumIdUnidade($objProtocoloDTO->getNumIdUnidadeGeradora());
+        $objExpedirProcedimentoDTO->setNumIdUnidade($numIdUnidadeProcesso);
         $objExpedirProcedimentoDTO->setBolSinMultiplosOrgaos(true);
         $objExpedirProcedimentoDTO->setObjMetadadosProcedimento($objMetadadosProcedimento);
         $objExpedirProcedimentoDTO->setBolSinEnvioAutoMultiplosOrgaos(false);
 
-        $this->expedirSincronizar($objExpedirProcedimentoDTO);
+        $numIdUnidadeSessaoAtual = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeProcesso);
+        try {
+          $this->expedirSincronizar($objExpedirProcedimentoDTO);
+        } finally {
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoAtual);
+        }
 
         $numIDT = $objProtocoloDTO->getDblIdProtocolo();
         $numTempoTotalEnvio = round(microtime(true) - $numTempoInicialEnvio, 2);
