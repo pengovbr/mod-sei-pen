@@ -143,37 +143,43 @@ class PENIntegracao extends SeiIntegracao
 
       $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), [ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO]);
 
+      $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
       $bolBlocoAbertoUnidade = false;
-      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objTramiteEmBlocoDTO->retNumId();
-      $objTramiteEmBlocoDTO->retNumIdUnidade();
-      $objTramiteEmBlocoDTO->retStrDescricao();
-      PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
-  
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-        $bolBlocoAbertoUnidade = true;
-    }
-
-      $bolProcessoEmBloco = false;
-      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-      $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-      $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objPenBlocoProcessoDTO->retNumIdAndamento();
-      $objPenBlocoProcessoDTO->retNumIdBloco();
-
-      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-    if (count($arrObjPenBlocoProcessoDTO) > 0) {
-        $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
-      foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
-        if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
-          $bolProcessoEmBloco = true;
+      if ($bolAcaoAcessarTramiteEmBloco) {
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objTramiteEmBlocoDTO->retNumId();
+        $objTramiteEmBlocoDTO->retNumIdUnidade();
+        $objTramiteEmBlocoDTO->retStrDescricao();
+        PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+    
+        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+            $bolBlocoAbertoUnidade = true;
         }
       }
-    }
+
+      $bolAcaoAcessarTramiteEmBlocoProtocoloListar = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_listar');
+      $bolProcessoEmBloco = false;
+      if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objPenBlocoProcessoDTO->retNumIdAndamento();
+        $objPenBlocoProcessoDTO->retNumIdBloco();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        if (count($arrObjPenBlocoProcessoDTO) > 0) {
+            $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
+          foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+            if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+              $bolProcessoEmBloco = true;
+            }
+          }
+        }
+      }
 
       // Verifica se existe uma unidade mapeada
       $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
