@@ -19,6 +19,8 @@ try {
     $strParametros = '';
     $bolErrosValidacao = false;
     $executarExpedicao = false;
+    $bloquearEnvioSemMapeamentoParcial = false;
+    $strMensagemBloqueioEnvio = null;
     $arrComandos = [];
     $objExpedirProcedimentosRN = new ExpedirProcedimentoRN();
 
@@ -52,7 +54,6 @@ try {
 
     case 'pen_procedimento_expedir':
         $strTitulo = 'Envio Externo de Processo';
-        $arrComandos[] = '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>';
         $arrComandos[] = '<button type="button" accesskey="C" name="btnCancelar" value="Cancelar" onclick="location.href=\'' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $objPaginaSEI->getAcaoRetorno() . '&acao_origem=' . $_GET['acao'] . '&acao_destino=' . $_GET['acao'] . $strParametros)) . '\';" class="infraButton"><span class="infraTeclaAtalho">C</span>ancelar</button>';
 
         //Obter dados do repositório em que o SEI está registrado (Repositório de Origem)
@@ -144,12 +145,23 @@ try {
         }
       }
 
+      $objPenEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      if ($repositorioMultiplosOrgaos && $unidadeDestinatarioMultiplosOrgaos &&
+          !$objPenEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($repositorioMultiplosOrgaos, $unidadeDestinatarioMultiplosOrgaos)) {
+          $bloquearEnvioSemMapeamentoParcial = true;
+          $strMensagemBloqueioEnvio = 'O processo <strong>'.PaginaSEI::tratarHTML($strProtocoloProcedimentoFormatado).'</strong>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem <strong>'.PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos).'</strong>: é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.';
+      }
+
         //Carregar dados do procedimento na primeiro acesso à página
       if (!isset($_POST['hdnIdProcedimento'])) {
             $objProcedimentoRN = new ProcedimentoRN();
             $objProcedimentoDTO = $objExpedirProcedimentosRN->consultarProcedimento($idProcedimento);
             $numIdProcedimento = $objProcedimentoDTO->getDblIdProcedimento();
             $strProtocoloProcedimentoFormatado = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+      }
+
+      if ($bloquearEnvioSemMapeamentoParcial) {
+          $strMensagemBloqueioEnvio = 'O processo <strong>'.PaginaSEI::tratarHTML($strProtocoloProcedimentoFormatado).'</strong>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem <strong>'.PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos).'</strong>: é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.';
       }
 
       $arrTiProcessoEletronico = [
@@ -175,6 +187,10 @@ try {
       }
 
       if(isset($_POST['sbmExpedir'])) {
+          if ($bloquearEnvioSemMapeamentoParcial) {
+            throw new InfraException(strip_tags($strMensagemBloqueioEnvio));
+          }
+
           $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
           $numVersao = $objPaginaSEI->getNumVersao();
           echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
@@ -313,6 +329,10 @@ try {
               $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
           }
         }
+      }
+
+      if (!$bloquearEnvioSemMapeamentoParcial) {
+        array_unshift($arrComandos, '<button type="button" accesskey="E" onclick="enviarForm(event)" value="Enviar" class="infraButton" style="width:8%;"><span class="infraTeclaAtalho">E</span>nviar</button>');
       }
 
         break;
@@ -683,6 +703,15 @@ $objPaginaSEI->montarBarraComandosSuperior($arrComandos);
         <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Aviso" class="infraImg" />
         <span style="color: #856404; font-weight: bold;">
             Processo compartilhado com múltiplos órgãos: o destinatário deve ser o órgão de origem <strong><?php echo PaginaSEI::tratarHTML($nomeUnidadeDestinatarioMultiplosOrgaos); ?></strong> que criou o processo.
+        </span>
+    </div>
+    <?php } ?>
+
+    <?php if ($bloquearEnvioSemMapeamentoParcial) { ?>
+    <div class="infraAreaAviso" style="background-color: #f8d7da; border: 1px solid #f5c2c7; padding: 10px; margin-bottom: 15px; border-radius: 4px;">
+        <img style="vertical-align: middle; margin-right: 8px; width: 25px;" src="<?php echo PENIntegracao::getDiretorioImagens() . '/icone-recusa.svg'; ?>" alt="Erro" class="infraImg" />
+        <span style="color: #842029; font-weight: bold;">
+            <?php echo $strMensagemBloqueioEnvio; ?>
         </span>
     </div>
     <?php } ?>
