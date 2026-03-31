@@ -2702,6 +2702,29 @@ class ExpedirProcedimentoRN extends InfraRN
     if ($objExpedirProcedimentoDTO->getBolSinUrgente() && InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdMotivoUrgencia())) {
         $objInfraException->adicionarValidacao('Motivo de urgência não informado. ID do processo: '.$objExpedirProcedimentoDTO->getDblIdProcedimento().". ");
     }
+
+      $numIdProcedimento = $objExpedirProcedimentoDTO->getDblIdProcedimento();
+    if (!InfraString::isBolVazia($numIdProcedimento) &&
+        !InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdRepositorioDestino()) &&
+        !InfraString::isBolVazia($objExpedirProcedimentoDTO->getNumIdUnidadeDestino()) &&
+        $this->objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($numIdProcedimento)) {
+
+        $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+      if (!$objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos(
+          $objExpedirProcedimentoDTO->getNumIdRepositorioDestino(),
+          $objExpedirProcedimentoDTO->getNumIdUnidadeDestino()
+      )) {
+          $strNomeUnidadeDestino = $objExpedirProcedimentoDTO->getStrUnidadeDestino();
+          $strComplementoUnidade = InfraString::isBolVazia($strNomeUnidadeDestino) ? '' : ' <b>'.$strNomeUnidadeDestino.'</b>';
+          $objInfraException->adicionarValidacao(
+              'O processo <b>'
+              .$numIdProcedimento
+              .'</b>, compartilhado com múltiplos órgãos, não pode ser devolvido para a unidade de origem'
+              .$strComplementoUnidade
+              .': é necessário que o Mapeamento de Envio Parcial esteja ativo, para a referida unidade, no seu órgão.'
+          );
+      }
+    }
   }
 
   private function validarDocumentacaoExistende(InfraException $objInfraException, ProcedimentoDTO $objProcedimentoDTO, $strAtributoValidacao, $sinProcessoEmBloco = false)
