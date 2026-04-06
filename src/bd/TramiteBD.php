@@ -52,7 +52,8 @@ class TramiteBD extends InfraBD
   /**
      * Recupera os dados do primeiro trâmite válido realizado para determinado número de processo eletrônico
      *
-     * @return void
+     * @return TramiteDTO|null
+     * @throws InfraException
      */
   public function consultarPrimeiroTramite(ProcessoEletronicoDTO $parObjProcessoEletronicoDTO, $parStrStaTipoTramite = null)
     {
