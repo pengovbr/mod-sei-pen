@@ -274,10 +274,9 @@ $acaoOrigem=$_GET['acao_origem']; ?>
 
   function onCLickLinkDelete(url, link) {
     var row = jQuery(link).parents('tr:first');
-    var strEspecieDocumental = row.find('td:eq(1)').text();
-    var strTipoDocumento = row.find('td:eq(2)').text();
+    var strTipoDocumento = row.find('td:eq(4)').text();
 
-    if (confirm('Confirma a exclusão do mapeamento "' + strEspecieDocumental + ' x ' + strTipoDocumento + '"?')) {
+    if (confirm('Confirma a exclusão do mapeamento de envio parcial para "' + strTipoDocumento + '"?')) {
       window.location = url;
     }
   }
