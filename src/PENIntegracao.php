@@ -1605,7 +1605,8 @@ class PENIntegracao extends SeiIntegracao
       $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
 
       if (!is_null($objUltimoTramiteDTO)) {
-        $mensagem = "Não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocolo . " já foi tramitado via Tramita GOV.BR.";
+        $nomeModulo = $this->getNome();
+        $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocolo . " já foi tramitado via Tramita GOV.BR.";
         $objInfraException = new InfraException();
         $objInfraException->adicionarValidacao($mensagem);
         $objInfraException->lancarValidacoes();
