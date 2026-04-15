@@ -1731,6 +1731,41 @@ class PENIntegracao extends SeiIntegracao
       }
     }
   }
+
+  /**
+   * Verifica se os processos estão anexados e se já foram tramitados via Tramita GOV.BR para permitir o desanexar
+   *  - Se o processo estiver anexado e tiver sido tramitado, não é permitido desanexar e é lançada uma exceção
+   *  - Se o processo não tiver sido tramitado, é permitido desanexar
+   *  - Se o processo não estiver anexado, é permitido desanexar
+   * 
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal - Processo principal do qual o outro processo está anexado
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado - Processo que está anexado ao processo principal
+   * @return void
+   * @throws InfraException - Exceção lançada quando o processo anexado já tiver sido tramitado via Tramita GOV.BR, impossibilitando o desanexar
+   */
+  public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+    $arrProcessos = [
+      $objProcedimentoAPIPrincipal->getIdProcedimento() => $objProcedimentoAPIPrincipal->getNumeroProtocolo(),
+      $objProcedimentoAPIAnexado->getIdProcedimento() => $objProcedimentoAPIAnexado->getNumeroProtocolo(),
+    ];
+
+    foreach ($arrProcessos as $dblIdProcedimento => $strNumeroProtocolo) {
+      $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+      $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
+
+      if (!is_null($objUltimoTramiteDTO)) {
+        $nomeModulo = $this->getNome();
+        $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocolo . " já foi tramitado via Tramita GOV.BR.";
+        $objInfraException = new InfraException();
+        $objInfraException->adicionarValidacao($mensagem);
+        $objInfraException->lancarValidacoes();
+      }
+    }
+  }
 }
 class ModuloIncompativelException extends InfraException
 {
