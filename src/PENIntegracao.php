@@ -42,6 +42,155 @@ class PENIntegracao extends SeiIntegracao
       return self::getDiretorioImagens() . '/menu/';
   }
 
+  /**
+   * Valida se o processo anexado pode participar da anexacao quando houver tramite no Tramita GOV.BR.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @return null
+   */
+  public function anexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+    {
+      $numIdAndamento = $this->consultarStatusTramitaGovBrProcesso($objProcedimentoAPIAnexado->getIdProcedimento());
+
+      if ($this->possuiTramitacaoEmAndamento($numIdAndamento)) {
+        $this->lancarValidacaoImpedimentoAnexacao(
+          $objProcedimentoAPIPrincipal,
+          $objProcedimentoAPIAnexado,
+          'andamento'
+        );
+      }
+
+      if ($this->possuiTramitacaoConcluidaComSucesso($numIdAndamento)) {
+        $this->lancarValidacaoImpedimentoAnexacao(
+          $objProcedimentoAPIPrincipal,
+          $objProcedimentoAPIAnexado,
+          'sucesso'
+        );
+      }
+
+      return null;
+  }
+
+  /**
+   * Consulta a situacao atual do ultimo tramite do processo no Tramita GOV.BR.
+   *
+   * @param int $dblIdProcedimento
+   * @return int|null
+   */
+  private function consultarStatusTramitaGovBrProcesso($dblIdProcedimento)
+    {
+      if (empty($dblIdProcedimento)) {
+        return null;
+      }
+
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+      $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
+
+      if ($objTramiteDTO == null) {
+        return null;
+      }
+
+      $numIdTramite = $objTramiteDTO->getNumIdTramite();
+      if (empty($numIdTramite)) {
+        return null;
+      }
+
+      // aqui consulta o tramite
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      $objTramiteTramitaGovBr = $objProcessoEletronicoRN->consultarTramites($numIdTramite);
+
+      if (empty($objTramiteTramitaGovBr) || !isset($objTramiteTramitaGovBr[0])) {
+        return null;
+      }
+
+      if (!isset($objTramiteTramitaGovBr[0]->situacaoAtual)) {
+        return null;
+      }
+
+      return $objTramiteTramitaGovBr[0]->situacaoAtual;
+  }
+
+  /**
+   * Indica se o status informado representa tramite em andamento.
+   *
+   * @param int|null $numIdAndamento
+   * @return bool
+   */
+  private function possuiTramitacaoEmAndamento($numIdAndamento)
+    {
+      return in_array($numIdAndamento, $this->getStatusTramitacaoEmAndamento());
+  }
+
+  /**
+   * Indica se o status informado representa tramite concluido com sucesso.
+   *
+   * @param int|null $numIdAndamento
+   * @return bool
+   */
+  private function possuiTramitacaoConcluidaComSucesso($numIdAndamento)
+    {
+      return $numIdAndamento == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+  }
+
+  /**
+   * Retorna os status do Tramita GOV.BR que impedem anexacao por tramite em andamento.
+   *
+   * @return array
+   */
+  private function getStatusTramitacaoEmAndamento()
+    {
+      return [
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ];
+  }
+
+  /**
+   * Lanca a validacao de impedimento de anexacao com a mensagem apropriada para a tela.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @param string $strTipoImpedimento
+   * @return void
+   */
+  private function lancarValidacaoImpedimentoAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado, $strTipoImpedimento)
+    {
+      $objInfraException = new InfraException();
+      $objInfraException->lancarValidacao($this->montarMensagemImpedimentoAnexacao(
+        $objProcedimentoAPIPrincipal,
+        $objProcedimentoAPIAnexado,
+        $strTipoImpedimento
+      ));
+  }
+
+  /**
+   * Monta a mensagem apresentada quando a anexacao e impedida pelo Tramita GOV.BR.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @param string $strTipoImpedimento
+   * @return string
+   */
+  private function montarMensagemImpedimentoAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado, $strTipoImpedimento)
+    {
+      $strMensagem = 'Tramita GOV.BR: O processo ' . $objProcedimentoAPIAnexado->getNumeroProtocolo()
+        . ' não pode ser anexado ao processo ' . $objProcedimentoAPIPrincipal->getNumeroProtocolo();
+
+      if ($strTipoImpedimento == 'andamento') {
+        return $strMensagem . ' pois encontra-se com tramitação em andamento para outro órgão.';
+      }
+
+      return $strMensagem . ' pois já foi tramitado, com sucesso, para outro órgão.';
+  }
+
   public function inicializar($strVersaoSEI)
     {
     if (!defined('DIR_SEI_WEB')) {
@@ -1579,6 +1728,41 @@ class PENIntegracao extends SeiIntegracao
             }
           }
         }
+      }
+    }
+  }
+
+  /**
+   * Verifica se os processos estão anexados e se já foram tramitados via Tramita GOV.BR para permitir o desanexar
+   *  - Se o processo estiver anexado e tiver sido tramitado, não é permitido desanexar e é lançada uma exceção
+   *  - Se o processo não tiver sido tramitado, é permitido desanexar
+   *  - Se o processo não estiver anexado, é permitido desanexar
+   * 
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal - Processo principal do qual o outro processo está anexado
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado - Processo que está anexado ao processo principal
+   * @return void
+   * @throws InfraException - Exceção lançada quando o processo anexado já tiver sido tramitado via Tramita GOV.BR, impossibilitando o desanexar
+   */
+  public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  {
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+    $arrProcessos = [
+      $objProcedimentoAPIPrincipal->getIdProcedimento() => $objProcedimentoAPIPrincipal->getNumeroProtocolo(),
+      $objProcedimentoAPIAnexado->getIdProcedimento() => $objProcedimentoAPIAnexado->getNumeroProtocolo(),
+    ];
+
+    foreach ($arrProcessos as $dblIdProcedimento => $strNumeroProtocolo) {
+      $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
+      $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
+
+      if (!is_null($objUltimoTramiteDTO)) {
+        $nomeModulo = $this->getNome();
+        $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocolo . " já foi tramitado via Tramita GOV.BR.";
+        $objInfraException = new InfraException();
+        $objInfraException->adicionarValidacao($mensagem);
+        $objInfraException->lancarValidacoes();
       }
     }
   }
