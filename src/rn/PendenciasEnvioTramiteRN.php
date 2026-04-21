@@ -93,6 +93,7 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
               $objSincronizacaoExpedirProcedimentoRN->expedirAuto($objExpedirProcedimentoDTO);
 
             } catch (\Exception $e) {
+              $this->reabrirProcessoSeBloqueado($objProtocoloDTO->getDblIdProtocolo());
               $this->gravarAmostraErroLogSEI($e);
               $this->gravarLogDebug(InfraException::inspecionar($e));
             }
@@ -195,6 +196,49 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
       }
     }
 
+  }
+
+  /**
+   * Reabre de forma defensiva um processo que tenha permanecido bloqueado apos
+   * falha no envio automatico de sincronizacao entre multiplos orgaos.
+   *
+   * O metodo apenas tenta o desbloqueio quando o processo ainda estiver em
+   * estado bloqueado e sempre restaura a unidade original da sessao.
+   *
+   * @param mixed $dblIdProcedimento
+   * @return void
+   */
+  private function reabrirProcessoSeBloqueado($dblIdProcedimento)
+  {
+    if (empty($dblIdProcedimento)) {
+      return;
+    }
+
+    try {
+      $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+      $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
+
+      if ($objProcedimentoDTO->getStrStaEstadoProtocolo() != ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO) {
+        return;
+      }
+
+      $numIdUnidadeSessaoOriginal = SessaoSEI::getInstance()->getNumIdUnidadeAtual();
+
+      try {
+        $numIdUnidadeDesbloqueio = ProcessoEletronicoRN::obterUnidadeParaRegistroDocumento($dblIdProcedimento);
+
+        if (!empty($numIdUnidadeDesbloqueio)) {
+          SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeDesbloqueio);
+        }
+
+        ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+        $this->gravarLogDebug("Processo $dblIdProcedimento reaberto automaticamente apos falha no envio automatico", 2, true);
+      } finally {
+        SessaoSEI::getInstance()->setNumIdUnidadeAtual($numIdUnidadeSessaoOriginal);
+      }
+    } catch (\Exception $e) {
+      $this->gravarLogDebug("Falha ao reabrir automaticamente o processo $dblIdProcedimento apos erro no envio automatico: $e", 2, true);
+    }
   }
 
     /**
