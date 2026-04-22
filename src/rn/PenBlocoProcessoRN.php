@@ -423,7 +423,7 @@ class PenBlocoProcessoRN extends InfraRN
   public function validarProcessoMultiplosOrgaosParaBloco($idProtocolo)
     {
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-    if (!$objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($idProtocolo)) {
+    if (!$objProcessoEletronicoRN->validarProcessoBlocoMultiplosOrgaos($idProtocolo)) {
         return false;
     }
 

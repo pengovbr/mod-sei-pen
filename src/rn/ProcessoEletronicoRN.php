@@ -3070,6 +3070,11 @@ class ProcessoEletronicoRN extends InfraRN
     }
   }
 
+  /**
+   * Valida se o processo é de múltiplos órgãos, verificando a existência da propriedade adicional 'multiplosOrgaos' nos metadados do processo
+   * @param int $numIdProcedimento
+   * @return bool
+   */
   public function validarProcessoMultiplosOrgaos($numIdProcedimento)
   {
       $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
@@ -3096,6 +3101,46 @@ class ProcessoEletronicoRN extends InfraRN
 
       $objPenUnidadeRN = new PenUnidadeRN();
     if ($objPenUnidadeRN->contar($objUnidadeDTO) == 0) {
+      return false;
+    }
+
+      // Verificar se o processo é de múltiplos órgãos
+      $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais)
+              ? ($objMetadados->propriedadesAdicionais ?: [])
+              : [];
+    if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+      foreach ($propriedadesAdicionais as $valor) {
+        if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+          return true;
+          break;
+        }
+      }
+    }
+        
+      return false;
+  }
+
+  /**
+   * Valida se o processo é de múltiplos órgãos, verificando a existência da propriedade adicional 'multiplosOrgaos' nos metadados do processo
+   * @param int $numIdProcedimento
+   * @return bool
+   */
+  public function validarProcessoBlocoMultiplosOrgaos($numIdProcedimento)
+  {
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+
+      $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
+    if ($objTramiteDTO === null) {
+      return false;
+    }
+
+    try {
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+    } catch (Exception $e) {
+      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
       return false;
     }
 
