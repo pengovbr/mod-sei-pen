@@ -45,7 +45,68 @@ try {
   }
 
   
-    $arrIdsMultiplosOrgaos = [];
+    $arrDestinosMultiplosOrgaos = [];
+
+    $filtrarDestinosMultiplosOrgaosDisponiveis = function ($strProtocoloProcedimentoFormatado, array $arrDestinosMultiplosOrgaos): array {
+      if (empty($strProtocoloProcedimentoFormatado) || empty($arrDestinosMultiplosOrgaos)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+      try {
+        $arrObjTramite = $objProcessoEletronicoRN->consultarTramitesTodos(
+          null,
+          null,
+          null,
+          null,
+          $strProtocoloProcedimentoFormatado,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrObjTramite)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      foreach ($arrObjTramite as $objTramite) {
+        if (!isset($objTramite->destinatario->identificacaoDoRepositorioDeEstruturas) || !isset($objTramite->destinatario->numeroDeIdentificacaoDaEstrutura)) {
+          continue;
+        }
+
+        $strChaveDestino = $objTramite->destinatario->identificacaoDoRepositorioDeEstruturas . ':' . $objTramite->destinatario->numeroDeIdentificacaoDaEstrutura;
+        if (!isset($arrDestinosMultiplosOrgaos[$strChaveDestino]) || !isset($objTramite->IDT)) {
+          continue;
+        }
+
+        $bolManterProcessoAberto = false;
+
+        try {
+          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramite->IDT);
+          $propriedadesAdicionais = isset($objMetadados->propriedadesAdicionais) ? ($objMetadados->propriedadesAdicionais ?: []) : [];
+
+          if (in_array('multiplosOrgaos', array_column($propriedadesAdicionais, 'chave'))) {
+            foreach ($propriedadesAdicionais as $valor) {
+              if ($valor->chave === 'multiplosOrgaos' && $valor->valor === 'true') {
+                $bolManterProcessoAberto = true;
+                break;
+              }
+            }
+          }
+        } catch (Exception $e) {
+          continue;
+        }
+
+        if (!$bolManterProcessoAberto) {
+          unset($arrDestinosMultiplosOrgaos[$strChaveDestino]);
+        }
+      }
+
+      return $arrDestinosMultiplosOrgaos;
+    };
 
     $strLinkValidacao = $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao'] . $strParametros));
     $strLinkProcedimento = $objSessaoSEI->assinarLink('controlador.php?acao=procedimento_trabalhar&acao_origem=procedimento_controlar&acao_retorno=procedimento_controlar&id_procedimento='.$idProcedimento);
@@ -319,6 +380,7 @@ try {
       if (is_null($objTramiteDTO) || $objTramiteDTO->getStrStaTipoTramite() != ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO) {
         $podeManterProcessoAberto = true;
         $objPenEnvioParcialDTO = new PenRestricaoEnvioComponentesDigitaisDTO();
+        $objPenEnvioParcialDTO->retNumIdEstrutura();
         $objPenEnvioParcialDTO->retNumIdUnidadePen();
         $objPenEnvioParcialDTO->setStrSinMultiplosOrgaos('S');
 
@@ -327,8 +389,11 @@ try {
 
         if (count($objPenEnvioParcialDTO) > 0) {
           foreach ($objPenEnvioParcialDTO as $dto) {
-              $arrIdsMultiplosOrgaos[] = $dto->getNumIdUnidadePen();
+              $strChaveDestino = $dto->getNumIdEstrutura() . ':' . $dto->getNumIdUnidadePen();
+              $arrDestinosMultiplosOrgaos[$strChaveDestino] = true;
           }
+
+          $arrDestinosMultiplosOrgaos = $filtrarDestinosMultiplosOrgaosDisponiveis($strProtocoloProcedimentoFormatado, $arrDestinosMultiplosOrgaos);
         }
       }
 
@@ -432,8 +497,9 @@ function inicializar() {
         $('#multiplosOrgaos').prop('checked', false);
         if (id!=''){
           <?php if ($podeManterProcessoAberto) { ?>
-            $arrIdsMultiplosOrgaos = ('<?php echo implode(',', $arrIdsMultiplosOrgaos); ?>').split(',');
-            if ($arrIdsMultiplosOrgaos.indexOf(id) !== -1) {
+            $arrDestinosMultiplosOrgaos = <?php echo json_encode(array_keys($arrDestinosMultiplosOrgaos)); ?>;
+            $strChaveDestino = $('#selRepositorioEstruturas').val() + ':' + id;
+            if ($arrDestinosMultiplosOrgaos.indexOf($strChaveDestino) !== -1) {
               $('#divSinMultiplosOrgaos').css('display', 'block');
               $('#multiplosOrgaos').prop('checked', true);
             }
