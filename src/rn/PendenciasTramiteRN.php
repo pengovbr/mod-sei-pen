@@ -105,6 +105,8 @@ class PendenciasTramiteRN extends InfraRN
             }
           }
 
+          $this->processarSolicitacoesSincronizacaoPendentes();
+
         } catch(ModuloIncompativelException $e) {
             // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
             throw $e;
@@ -141,6 +143,133 @@ class PendenciasTramiteRN extends InfraRN
     }
 
       return self::CODIGO_EXECUCAO_SUCESSO;
+  }
+
+  /**
+   * Lista os processos que possuem atividades de solicitação de sincronização pendente 
+   * e que estão conectados ao PEN, ou seja, que já tiveram algum trâmite recebido 
+   * pelo serviço de monitoramento de pendências do PEN
+   *
+   * @return array Array de objetos AtividadeDTO organizados por ID de procedimento, contendo as atividades de solicitação de sincronização pendente
+   */
+  protected function listarProcessosComSolicitacaoSincronizacaoPendenteConectado()
+    {
+      $arrIdTarefaSincronizacaoPendente = array_filter([
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS)
+      ]);
+
+    if (empty($arrIdTarefaSincronizacaoPendente)) {
+        return [];
+    }
+
+      $objAtividadeDTO = new AtividadeDTO();
+      $objAtividadeDTO->setDthConclusao(null);
+      $objAtividadeDTO->setNumIdTarefa($arrIdTarefaSincronizacaoPendente, InfraDTO::$OPER_IN);
+      $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
+      $objAtividadeDTO->retNumIdAtividade();
+      $objAtividadeDTO->retNumIdTarefa();
+      $objAtividadeDTO->retDthAbertura();
+      $objAtividadeDTO->retDblIdProtocolo();
+      $objAtividadeDTO->retNumIdUnidade();
+
+      $objAtividadeRN = new AtividadeRN();
+      $arrObjAtividadeDTO = $objAtividadeRN->listarRN0036($objAtividadeDTO);
+      $arrProcessosPendentes = [];
+
+    foreach ($arrObjAtividadeDTO as $objAtividadePendenciaDTO) {
+        $dblIdProcedimento = $objAtividadePendenciaDTO->getDblIdProtocolo();
+
+      if (!isset($arrProcessosPendentes[$dblIdProcedimento])) {
+          $arrProcessosPendentes[$dblIdProcedimento] = [];
+      }
+
+        $arrProcessosPendentes[$dblIdProcedimento][] = $objAtividadePendenciaDTO;
+    }
+
+      return $arrProcessosPendentes;
+  }
+
+  /**
+   * Processa as atividades de solicitação de sincronização pendente dos processos que estão conectados ao PEN, 
+   * ou seja, que já tiveram algum trâmite recebido pelo serviço de monitoramento de pendências do PEN
+   * 
+   * @return void
+   * @throws Exception Lança exceção caso o processo de sincronização seja cancelado ou rejeitado na plataforma de tramitação
+   */
+  protected function processarSolicitacoesSincronizacaoPendentesConectado()
+    {
+      $arrProcessosPendentes = $this->listarProcessosComSolicitacaoSincronizacaoPendente();
+
+    if (count($arrProcessosPendentes) === 0) {
+        $this->gravarLogDebug('Nenhum processo com solicitação de sincronização pendente foi localizado.', 2);
+        return [];
+    }
+
+      $this->gravarLogDebug(count($arrProcessosPendentes) . ' processo(s) com solicitação de sincronização pendente localizado(s).', 2);
+
+    foreach ($arrProcessosPendentes as $dblIdProcedimento => $arrObjAtividadePendenciaDTO) {
+        $objAtividadeReferenciaDTO = reset($arrObjAtividadePendenciaDTO);
+        $numIdUnidadeAtividade = $objAtividadeReferenciaDTO instanceof AtividadeDTO ? $objAtividadeReferenciaDTO->getNumIdUnidade() : null;
+
+      if (!empty($numIdUnidadeAtividade)) {
+          SessaoSEI::getInstance(false)->simularLogin('SEI', null, null, $numIdUnidadeAtividade);
+      }
+
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+        $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO, ProcessoEletronicoRN::$STA_TIPO_TRAMITE_RECEBIMENTO);
+
+        $this->gravarLogDebug(
+            sprintf(
+                'Processo %s com %d atividade(s) de solicitação de sincronização pendente na unidade %s.',
+                $dblIdProcedimento,
+                count($arrObjAtividadePendenciaDTO),
+                $numIdUnidadeAtividade ?: 'não identificada'
+            ),
+            2
+        );
+
+      if ($objTramiteDTO === null) {
+          continue;
+      }
+
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramitesTodos(null, $objTramiteDTO->getStrNumeroRegistro());
+      if (empty($arrObjTramites)) {
+          continue;
+      }
+
+        $objUltimoTramite = $arrObjTramites[count($arrObjTramites) - 1];
+        $arrSituacoesRejeicao = [
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA
+        ];
+
+      if (!in_array($objUltimoTramite->situacaoAtual, $arrSituacoesRejeicao)) {
+          continue;
+      }
+
+        $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
+            ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
+            : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
+
+        $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+
+        $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $strMotivo);
+
+      try {
+          ProcessoEletronicoRN::desbloquearProcesso($dblIdProcedimento);
+          $this->gravarLogDebug(sprintf('Processo %s desbloqueado após rejeição/cancelamento da sincronização.', $dblIdProcedimento), 2);
+      } catch (Exception $e) {
+          $this->gravarLogDebug(InfraException::inspecionar($e), 2);
+      }
+    }
+
+      return $arrProcessosPendentes;
   }
 
     /**

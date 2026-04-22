@@ -109,6 +109,15 @@ try {
               exit(0);
           }
 
+            $validar = $objPenBlocoProcessoRN->validarProcessoMultiplosOrgaosParaBloco($_GET['id_procedimento']);
+
+          if ($validar !== false) {
+              $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
+
+              header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . PaginaSEI::getInstance()->getAcaoRetorno() . '&acao_origem=' . $_GET['acao']));
+              exit(0);
+          }
+
             // Esse quem vai ficar
             $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
             $objPenBlocoProcessoDTO->setNumIdBlocoProcesso(null);
@@ -185,8 +194,25 @@ try {
           if ($validar !== false) {
             $objPaginaSEI->adicionarMensagem($validar, InfraPagina::$TIPO_MSG_ERRO);
 
-            header('Location: '.SessaoSEI::getInstance()->assinarLink('controlador.php?acao='.$_GET['acao'].'&acao_origem='.$_GET['acao']));
+            header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao']));
             exit(0);
+          }
+
+          foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {
+              $validar = $objPenBlocoProcessoRN->validarProcessoMultiplosOrgaosParaBloco($idItensSelecionados);
+
+            if ($validar !== false) {
+              $arrMensagensErros[] = $validar;
+            }
+          }
+
+          if (count($arrMensagensErros) === count($arrProtocolosOrigemProtocolo)) {
+              foreach ($arrMensagensErros as $mensagemErro) {
+                  $objPaginaSEI->adicionarMensagem($mensagemErro, InfraPagina::$TIPO_MSG_ERRO);
+              }
+
+              header('Location: ' . SessaoSEI::getInstance()->assinarLink('controlador.php?acao=' . $_GET['acao'] . '&acao_origem=' . $_GET['acao']));
+              exit(0);
           }
 
           foreach ($arrProtocolosOrigemProtocolo as $idItensSelecionados) {

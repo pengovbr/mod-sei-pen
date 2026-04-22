@@ -42,6 +42,155 @@ class PENIntegracao extends SeiIntegracao
       return self::getDiretorioImagens() . '/menu/';
   }
 
+  /**
+   * Valida se o processo anexado pode participar da anexacao quando houver tramite no Tramita GOV.BR.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @return null
+   */
+  public function anexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+    {
+      $numIdAndamento = $this->consultarStatusTramitaGovBrProcesso($objProcedimentoAPIAnexado->getIdProcedimento());
+
+      if ($this->possuiTramitacaoEmAndamento($numIdAndamento)) {
+        $this->lancarValidacaoImpedimentoAnexacao(
+          $objProcedimentoAPIPrincipal,
+          $objProcedimentoAPIAnexado,
+          'andamento'
+        );
+      }
+
+      if ($this->possuiTramitacaoConcluidaComSucesso($numIdAndamento)) {
+        $this->lancarValidacaoImpedimentoAnexacao(
+          $objProcedimentoAPIPrincipal,
+          $objProcedimentoAPIAnexado,
+          'sucesso'
+        );
+      }
+
+      return null;
+  }
+
+  /**
+   * Consulta a situacao atual do ultimo tramite do processo no Tramita GOV.BR.
+   *
+   * @param int $dblIdProcedimento
+   * @return int|null
+   */
+  private function consultarStatusTramitaGovBrProcesso($dblIdProcedimento)
+    {
+      if (empty($dblIdProcedimento)) {
+        return null;
+      }
+
+      $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+      $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+      $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+      $objTramiteDTO = $objTramiteBD->consultarUltimoTramite($objProcessoEletronicoDTO);
+
+      if ($objTramiteDTO == null) {
+        return null;
+      }
+
+      $numIdTramite = $objTramiteDTO->getNumIdTramite();
+      if (empty($numIdTramite)) {
+        return null;
+      }
+
+      // aqui consulta o tramite
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      $objTramiteTramitaGovBr = $objProcessoEletronicoRN->consultarTramites($numIdTramite);
+
+      if (empty($objTramiteTramitaGovBr) || !isset($objTramiteTramitaGovBr[0])) {
+        return null;
+      }
+
+      if (!isset($objTramiteTramitaGovBr[0]->situacaoAtual)) {
+        return null;
+      }
+
+      return $objTramiteTramitaGovBr[0]->situacaoAtual;
+  }
+
+  /**
+   * Indica se o status informado representa tramite em andamento.
+   *
+   * @param int|null $numIdAndamento
+   * @return bool
+   */
+  private function possuiTramitacaoEmAndamento($numIdAndamento)
+    {
+      return in_array($numIdAndamento, $this->getStatusTramitacaoEmAndamento());
+  }
+
+  /**
+   * Indica se o status informado representa tramite concluido com sucesso.
+   *
+   * @param int|null $numIdAndamento
+   * @return bool
+   */
+  private function possuiTramitacaoConcluidaComSucesso($numIdAndamento)
+    {
+      return $numIdAndamento == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE;
+  }
+
+  /**
+   * Retorna os status do Tramita GOV.BR que impedem anexacao por tramite em andamento.
+   *
+   * @return array
+   */
+  private function getStatusTramitacaoEmAndamento()
+    {
+      return [
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+        ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECUSADO,
+      ];
+  }
+
+  /**
+   * Lanca a validacao de impedimento de anexacao com a mensagem apropriada para a tela.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @param string $strTipoImpedimento
+   * @return void
+   */
+  private function lancarValidacaoImpedimentoAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado, $strTipoImpedimento)
+    {
+      $objInfraException = new InfraException();
+      $objInfraException->lancarValidacao($this->montarMensagemImpedimentoAnexacao(
+        $objProcedimentoAPIPrincipal,
+        $objProcedimentoAPIAnexado,
+        $strTipoImpedimento
+      ));
+  }
+
+  /**
+   * Monta a mensagem apresentada quando a anexacao e impedida pelo Tramita GOV.BR.
+   *
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado
+   * @param string $strTipoImpedimento
+   * @return string
+   */
+  private function montarMensagemImpedimentoAnexacao(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado, $strTipoImpedimento)
+    {
+      $strMensagem = 'Tramita GOV.BR: O processo ' . $objProcedimentoAPIAnexado->getNumeroProtocolo()
+        . ' não pode ser anexado ao processo ' . $objProcedimentoAPIPrincipal->getNumeroProtocolo();
+
+      if ($strTipoImpedimento == 'andamento') {
+        return $strMensagem . ' pois encontra-se com tramitação em andamento para outro órgão.';
+      }
+
+      return $strMensagem . ' pois já foi tramitado, com sucesso, para outro órgão.';
+  }
+
   public function inicializar($strVersaoSEI)
     {
     if (!defined('DIR_SEI_WEB')) {
@@ -143,37 +292,43 @@ class PENIntegracao extends SeiIntegracao
 
       $bolProcessoEstadoNormal = !in_array($objProcedimentoDTO->getStrStaEstadoProtocolo(), [ProtocoloRN::$TE_PROCEDIMENTO_SOBRESTADO, ProtocoloRN::$TE_PROCEDIMENTO_BLOQUEADO]);
 
+      $bolAcaoAcessarTramiteEmBloco = $objSessaoSEI->verificarPermissao('md_pen_tramita_em_bloco');
       $bolBlocoAbertoUnidade = false;
-      $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
-      $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
-      $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objTramiteEmBlocoDTO->retNumId();
-      $objTramiteEmBlocoDTO->retNumIdUnidade();
-      $objTramiteEmBlocoDTO->retStrDescricao();
-      PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
-  
       $objTramiteEmBlocoRN = new TramiteEmBlocoRN();
-    if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
-        $bolBlocoAbertoUnidade = true;
-    }
-
-      $bolProcessoEmBloco = false;
-      $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
-      $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
-      $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
-      $objPenBlocoProcessoDTO->retNumIdAndamento();
-      $objPenBlocoProcessoDTO->retNumIdBloco();
-
-      $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-      $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
-    if (count($arrObjPenBlocoProcessoDTO) > 0) {
-        $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
-      foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
-        if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
-          $bolProcessoEmBloco = true;
+      if ($bolAcaoAcessarTramiteEmBloco) {
+        $objTramiteEmBlocoDTO = new TramiteEmBlocoDTO();
+        $objTramiteEmBlocoDTO->setStrStaEstado(TramiteEmBlocoRN::$TE_ABERTO);
+        $objTramiteEmBlocoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objTramiteEmBlocoDTO->retNumId();
+        $objTramiteEmBlocoDTO->retNumIdUnidade();
+        $objTramiteEmBlocoDTO->retStrDescricao();
+        PaginaSEI::getInstance()->prepararOrdenacao($objTramiteEmBlocoDTO, 'Id', InfraDTO::$TIPO_ORDENACAO_DESC);
+    
+        if (count($objTramiteEmBlocoRN->listar($objTramiteEmBlocoDTO)) > 0) {
+            $bolBlocoAbertoUnidade = true;
         }
       }
-    }
+
+      $bolAcaoAcessarTramiteEmBlocoProtocoloListar = $objSessaoSEI->verificarPermissao('pen_tramita_em_bloco_protocolo_listar');
+      $bolProcessoEmBloco = false;
+      if ($bolAcaoAcessarTramiteEmBlocoProtocoloListar) {
+        $objPenBlocoProcessoDTO = new PenBlocoProcessoDTO();
+        $objPenBlocoProcessoDTO->setDblIdProtocolo($dblIdProcedimento);
+        $objPenBlocoProcessoDTO->setNumIdUnidade($objSessaoSEI->getNumIdUnidadeAtual());
+        $objPenBlocoProcessoDTO->retNumIdAndamento();
+        $objPenBlocoProcessoDTO->retNumIdBloco();
+
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $arrObjPenBlocoProcessoDTO = $objPenBlocoProcessoRN->listar($objPenBlocoProcessoDTO);
+        if (count($arrObjPenBlocoProcessoDTO) > 0) {
+            $concluido = [ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CIENCIA_RECUSA, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO_AUTOMATICAMENTE, ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE];
+          foreach ($arrObjPenBlocoProcessoDTO as $objBlocoProcessoDTO) {
+            if (!in_array($objBlocoProcessoDTO->getNumIdAndamento(), $concluido)) {
+              $bolProcessoEmBloco = true;
+            }
+          }
+        }
+      }
 
       // Verifica se existe uma unidade mapeada
       $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
@@ -199,8 +354,12 @@ class PENIntegracao extends SeiIntegracao
       //Apresenta o botão de incluir processo no bloco de trâmite
       $bolAcaoIncluirProcessoEmBloco = $objSessaoSEI->verificarPermissao('pen_incluir_processo_em_bloco_tramite');
     if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolBlocoAbertoUnidade && $bolFlagAberto && $bolAcaoIncluirProcessoEmBloco && $bolProcessoEstadoNormal && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
-        $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
-        $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="'.ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) .'" title="Incluir Processo no Bloco de Trâmite" alt="Incluir Processo no Bloco de Trâmite"/></a>';
+        $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
+        $bolProcessoMultiplosOrgaos = $objPenBlocoProcessoRN->validarProcessoMultiplosOrgaosParaBloco($dblIdProcedimento) !== false;
+      if (!$bolProcessoMultiplosOrgaos) {
+          $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
+          $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_incluir_processo_em_bloco_tramite&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"> <img src="' . ProcessoEletronicoINT::getCaminhoIcone("/pen_processo_bloco.svg", $this->getDiretorioImagens()) . '" title="Incluir Processo no Bloco de Tramite" alt="Incluir Processo no Bloco de Tramite"/></a>';
+      }
     }
 
       //Apresenta o botão de excluir processo no bloco de trâmite
@@ -216,7 +375,7 @@ class PENIntegracao extends SeiIntegracao
 
     $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
 
-    if ($bolFlagAberto && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
+    if ($bolFlagAberto && $bolProcessoEstadoNormal && !is_null($objTramiteDTO) && $objProcedimentoDTO->getStrStaNivelAcessoGlobalProtocolo() != ProtocoloRN::$NA_SIGILOSO) {
       $objPenUnidadeDTO = new PenUnidadeDTO();
       $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
       $objPenUnidadeDTO->retNumIdUnidadeRH();
@@ -229,9 +388,16 @@ class PENIntegracao extends SeiIntegracao
       if ($bolTramiteRecebimento && $bolUnidadeAtualEhDestinoRecebimento) {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
         if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
-          $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
-          $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
-          $strAcoesProcedimento .= '</a>';
+          $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+          $numIdRepositorioOrigem = $objMetadados->remetente->identificacaoDoRepositorioDeEstruturas ?? null;
+          $numIdUnidadeOrigem = $objMetadados->remetente->numeroDeIdentificacaoDaEstrutura ?? null;
+          $objEnvioParcialRN = new PenRestricaoEnvioComponentesDigitaisRN();
+
+          if ($objEnvioParcialRN->possuiMapeamentoEnvioParcialAtivoMultiplosOrgaos($numIdRepositorioOrigem, $numIdUnidadeOrigem)) {
+            $strAcoesProcedimento .= '<a href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_sincronizar&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI">';
+            $strAcoesProcedimento .= '<img class="infraCorBarraSistema" style="padding: 3px 6px 0px 6px" src=' . ProcessoEletronicoINT::getCaminhoIcone("/sincronizar_processo.png", $this->getDiretorioImagens()) . '  alt="Sincronizar Processo" title="Sincronizar Processo" />';
+            $strAcoesProcedimento .= '</a>';
+          }
         }
       }
     }
@@ -1560,6 +1726,59 @@ class PENIntegracao extends SeiIntegracao
                   $objInfraException->adicionarValidacao($mensagem);
                   $objInfraException->lancarValidacoes();
             }
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Verifica se os processos estão anexados e se já foram tramitados via Tramita GOV.BR para permitir o desanexar
+   *  - Se o processo estiver anexado e tiver sido tramitado, não é permitido desanexar e é lançada uma exceção
+   *  - Se o processo não tiver sido tramitado, é permitido desanexar
+   *  - Se o processo não estiver anexado, é permitido desanexar
+   * 
+   * @param ProcedimentoAPI $objProcedimentoAPIPrincipal - Processo principal do qual o outro processo está anexado
+   * @param ProcedimentoAPI $objProcedimentoAPIAnexado - Processo que está anexado ao processo principal
+   * @return void
+   * @throws InfraException - Exceção lançada quando o processo anexado já tiver sido tramitado via Tramita GOV.BR, impossibilitando o desanexar
+   */
+  public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
+  {
+    // Status permitidos para desanexar
+    $statusPermitidos = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+    ];
+
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+    // 1. Verifica se o processo principal já foi tramitado com sucesso
+    $objProcessoEletronicoPesquisaPaiDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoPesquisaPaiDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
+    $objTramitePaiDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaPaiDTO);
+
+    $paiTramitado = false;
+    if ($objTramitePaiDTO != null) {
+      $numIdTramitePai = $objTramitePaiDTO->getNumIdTramite();
+      if (!empty($numIdTramitePai)) {
+        $arrTramitesPai = $objProcessoEletronicoRN->consultarTramites($numIdTramitePai);
+        if (is_array($arrTramitesPai) && count($arrTramitesPai) > 0) {
+          $statusTramitesPai = array_column($arrTramitesPai, 'situacaoAtual');
+          // Se algum status do pai for permitido, considera tramitado com sucesso
+          $paiTramitado = count(array_intersect($statusTramitesPai, $statusPermitidos)) > 0;
+          if ($paiTramitado) {
+            $nomeModulo = $this->getNome();
+            $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocoloAnexado . " já foi tramitado via Tramita GOV.BR.";
+            $objInfraException = new InfraException();
+            $objInfraException->adicionarValidacao($mensagem);
+            $objInfraException->lancarValidacoes();
           }
         }
       }
