@@ -1745,24 +1745,42 @@ class PENIntegracao extends SeiIntegracao
    */
   public function desanexarProcesso(ProcedimentoAPI $objProcedimentoAPIPrincipal, ProcedimentoAPI $objProcedimentoAPIAnexado)
   {
-    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-
-    $arrProcessos = [
-      $objProcedimentoAPIPrincipal->getIdProcedimento() => $objProcedimentoAPIPrincipal->getNumeroProtocolo(),
-      $objProcedimentoAPIAnexado->getIdProcedimento() => $objProcedimentoAPIAnexado->getNumeroProtocolo(),
+    // Status permitidos para desanexar
+    $statusPermitidos = [
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_SOLICITACAO_PENDENCIA,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_NAO_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_INICIADO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_ENVIADOS_REMETENTE,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_METADADOS_RECEBIDO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_COMPONENTES_RECEBIDOS_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_ENVIADO_DESTINATARIO,
+      ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
     ];
 
-    foreach ($arrProcessos as $dblIdProcedimento => $strNumeroProtocolo) {
-      $objProcessoEletronicoPesquisaDTO = new ProcessoEletronicoDTO();
-      $objProcessoEletronicoPesquisaDTO->setDblIdProcedimento($dblIdProcedimento);
-      $objUltimoTramiteDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaDTO);
+    $objProcessoEletronicoRN = new ProcessoEletronicoRN();
 
-      if (!is_null($objUltimoTramiteDTO)) {
-        $nomeModulo = $this->getNome();
-        $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocolo . " já foi tramitado via Tramita GOV.BR.";
-        $objInfraException = new InfraException();
-        $objInfraException->adicionarValidacao($mensagem);
-        $objInfraException->lancarValidacoes();
+    // 1. Verifica se o processo principal já foi tramitado com sucesso
+    $objProcessoEletronicoPesquisaPaiDTO = new ProcessoEletronicoDTO();
+    $objProcessoEletronicoPesquisaPaiDTO->setDblIdProcedimento($objProcedimentoAPIPrincipal->getIdProcedimento());
+    $objTramitePaiDTO = $objProcessoEletronicoRN->consultarUltimoTramite($objProcessoEletronicoPesquisaPaiDTO);
+
+    $paiTramitado = false;
+    if ($objTramitePaiDTO != null) {
+      $numIdTramitePai = $objTramitePaiDTO->getNumIdTramite();
+      if (!empty($numIdTramitePai)) {
+        $arrTramitesPai = $objProcessoEletronicoRN->consultarTramites($numIdTramitePai);
+        if (is_array($arrTramitesPai) && count($arrTramitesPai) > 0) {
+          $statusTramitesPai = array_column($arrTramitesPai, 'situacaoAtual');
+          // Se algum status do pai for permitido, considera tramitado com sucesso
+          $paiTramitado = count(array_intersect($statusTramitesPai, $statusPermitidos)) > 0;
+          if ($paiTramitado) {
+            $nomeModulo = $this->getNome();
+            $mensagem = "$nomeModulo: Prezado(a) usuário(a), não é possível desanexar o processo " . $objProcedimentoAPIAnexado->getNumeroProtocolo() . " do processo " . $objProcedimentoAPIPrincipal->getNumeroProtocolo() . ", pois o processo " . $strNumeroProtocoloAnexado . " já foi tramitado via Tramita GOV.BR.";
+            $objInfraException = new InfraException();
+            $objInfraException->adicionarValidacao($mensagem);
+            $objInfraException->lancarValidacoes();
+          }
+        }
       }
     }
   }
