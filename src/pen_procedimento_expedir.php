@@ -192,11 +192,6 @@ try {
           }
 
           $multiplosOrgaos = filter_var($_POST['multiplosOrgaos'], FILTER_VALIDATE_BOOLEAN);
-          $objPenBlocoProcessoRN = new PenBlocoProcessoRN();
-          $processoEmBloco = $objPenBlocoProcessoRN->validarBlocoDeTramite($numIdProcedimento);
-          if (($multiplosOrgaos || $processoRecebidoMultiplosOrgaos) && $processoEmBloco !== false) {
-            throw new InfraException("Prezado(a) usuario(a), o processo nao pode ser enviado para multiplos orgaos enquanto estiver incluido em bloco de tramite externo. Remova-o do bloco e tente novamente.");
-          }
 
           $numVersao = $objPaginaSEI->getNumVersao();
           echo "<link href='$strDiretorioModulo/css/pen_procedimento_expedir.css' rel='stylesheet' type='text/css' media='all' />\n";
