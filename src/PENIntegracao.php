@@ -725,19 +725,21 @@ class PENIntegracao extends SeiIntegracao
     $objPenParametroRN->validarAcaoTipoProcessoPadrao($arrObjTipoProcedimentoDTO, $mensagem);
 
     $exception = new InfraException();
+    $objPenParametroRN = new PenParametroRN();
+    $strTipoProcessoExternoConfigurado = $objPenParametroRN->getParametro('PEN_TIPO_PROCESSO_EXTERNO');
+
     foreach ($arrObjTipoProcedimentoDTO as $objProcedimento) {
-        $objPenParametroDTO = new PenParametroDTO();
-        $objPenParametroDTO->setStrNome('PEN_TIPO_PROCESSO_EXTERNO');
-        $objPenParametroDTO->setStrValor($objProcedimento->getIdTipoProcedimento());
-        $objPenParametroRN = new PenParametroRN();
-        $objPenParametroDTO = $objPenParametroRN->contar($objPenParametroDTO);
+        $sinTipoProcessoExternoEmUso =
+            !is_null($strTipoProcessoExternoConfigurado)
+            && $strTipoProcessoExternoConfigurado !== ''
+            && (string)$strTipoProcessoExternoConfigurado === (string)$objProcedimento->getIdTipoProcedimento();
 
         $objProcedimentoDTO = new ProcedimentoDTO();
         $objProcedimentoDTO->setNumIdTipoProcedimento($objProcedimento->getIdTipoProcedimento());
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
 
-      if ($objPenParametroDTO > 0 || $objProcedimentoDTO > 0) {
+      if ($sinTipoProcessoExternoEmUso > 0 || $objProcedimentoDTO > 0) {
           $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
       }
     }
