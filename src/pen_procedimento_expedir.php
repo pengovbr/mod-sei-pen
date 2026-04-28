@@ -47,12 +47,46 @@ try {
   
     $arrDestinosMultiplosOrgaos = [];
 
-    $filtrarDestinosMultiplosOrgaosDisponiveis = function ($strProtocoloProcedimentoFormatado, array $arrDestinosMultiplosOrgaos): array {
-      if (empty($strProtocoloProcedimentoFormatado) || empty($arrDestinosMultiplosOrgaos)) {
+    $filtrarDestinosMultiplosOrgaosDisponiveis = function ($numIdProcedimento, $strProtocoloProcedimentoFormatado, array $arrDestinosMultiplosOrgaos): array {
+      if (empty($numIdProcedimento) || empty($strProtocoloProcedimentoFormatado) || empty($arrDestinosMultiplosOrgaos)) {
         return $arrDestinosMultiplosOrgaos;
       }
 
+      try {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($numIdProcedimento);
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (is_null($objTramiteDTO)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      $strNumeroRegistro = $objTramiteDTO->getStrNumeroRegistro();
+
       $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+
+      try {
+        $arrTramiteSucesso = $objProcessoEletronicoRN->consultarTramites(
+          null,
+          $strNumeroRegistro,
+          null,
+          null,
+          empty($strNumeroRegistro) ? $strProtocoloProcedimentoFormatado : null,
+          null,
+          ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_RECIBO_RECEBIDO_REMETENTE,
+          1
+        );
+      } catch (Exception $e) {
+        return $arrDestinosMultiplosOrgaos;
+      }
+
+      if (empty($arrTramiteSucesso)) {
+        return $arrDestinosMultiplosOrgaos;
+      }
 
       try {
         $arrObjTramite = $objProcessoEletronicoRN->consultarTramitesTodos(
@@ -393,7 +427,7 @@ try {
               $arrDestinosMultiplosOrgaos[$strChaveDestino] = true;
           }
 
-          $arrDestinosMultiplosOrgaos = $filtrarDestinosMultiplosOrgaosDisponiveis($strProtocoloProcedimentoFormatado, $arrDestinosMultiplosOrgaos);
+          $arrDestinosMultiplosOrgaos = $filtrarDestinosMultiplosOrgaosDisponiveis($numIdProcedimento, $strProtocoloProcedimentoFormatado, $arrDestinosMultiplosOrgaos);
         }
       }
 
