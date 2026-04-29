@@ -739,7 +739,7 @@ class PENIntegracao extends SeiIntegracao
         $objProcedimentoRN = new ProcedimentoRN();
         $objProcedimentoDTO = $objProcedimentoRN->contarRN0279($objProcedimentoDTO);
 
-      if ($sinTipoProcessoExternoEmUso > 0 || $objProcedimentoDTO > 0) {
+      if ($sinTipoProcessoExternoEmUso || $objProcedimentoDTO > 0) {
           $exception->lancarValidacao('Existem processos utilizando o tipo de processo "'. $objProcedimento->getNome().'".');
       }
     }
