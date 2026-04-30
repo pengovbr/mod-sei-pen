@@ -2693,6 +2693,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
 
       $fnCadastrar('Pedido de sincronização manual múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS');
       $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido de sincronização múltiplos órgãos - @UNIDADE@ - @REPOSITORIO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_CONCLUIR');
       $fnCadastrar('A sincronização foi concluída com sucesso - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_SUCESSO');
 
       $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
@@ -2702,6 +2703,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
       $fnCadastrar('Pedido envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');
       $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
+      $fnCadastrar('Pedido envio automático de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR');
       $fnCadastrar('Processo de envio automático realizado para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PROCESSO_AUTO_ENVIO_MULTIPLOS_ORGAOS');
       $fnCadastrar('Envio de processo múltiplos órgãos para o remetente - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_ENVIO_MULTIPLOS_ORGAOS_REMETENTE');
 

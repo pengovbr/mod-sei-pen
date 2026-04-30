@@ -175,9 +175,10 @@ class PendenciasEnvioTramiteRN extends PendenciasTramiteRN
     $objAtividadeDTO = new AtividadeDTO();
     $objAtividadeDTO->setDthConclusao(null);
     $objAtividadeDTO->setDistinct(true);
-    $objAtividadeDTO->setNumIdTarefa(
-      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS)
-    );
+    $objAtividadeDTO->setNumIdTarefa([
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS),
+      ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_AUTO_ENVIO_MULTIPLOS_ORGAOS_CONCLUIR)
+    ], InfraDTO::$OPER_IN);
     $objAtividadeDTO->retTodos();
 
     $objAtividadeRN = new AtividadeRN();
