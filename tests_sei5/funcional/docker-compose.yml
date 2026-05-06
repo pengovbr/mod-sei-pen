@@ -29,6 +29,8 @@ services:
     image: ${SOLR_IMAGE}:${ENVIRONMENT_VERSION}
     ports:
       - "8983:8983"
+    environment:
+      - SOLR_HEAP=256m 
   selenium:
     image: selenium/standalone-chrome-debug
     links:
@@ -66,6 +68,9 @@ services:
       - ./assets/config/ConfiguracaoSEI.php:/tests/sei/src/sei/config/ConfiguracaoSEI.php:ro
       - ../../src:/tests/sei/src/sei/web/modulos/pen
       - ./assets/config:/tests/sei/src/sei/config/mod-pen
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-eletronica/src:/tests/sei/src/sei/web/modulos/assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/config:/tests/sei/src/sei/config/mod-assinatura-eletronica
     environment:
       - XDEBUG_CONFIG=client_host=host.docker.internal client_port=9003 start_with_request=0
       - XDEBUG_SESSION=default
@@ -156,6 +161,13 @@ services:
       - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-eletronica/composer.phar:/opt/sei/web/modulos/assinatura-eletronica/composer.phar
+      - ../../../mod-sei-assinatura-eletronica/composer.json:/opt/sei/web/modulos/assinatura-eletronica/composer.json
+      - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -217,6 +229,13 @@ services:
       - ./assets/config/composer.json:/opt/sei/web/modulos/pen/composer.json
       - ./composer.phar:/opt/sei/web/modulos/pen/composer.phar
       - ../../vendor:/opt/sei/web/modulos/pen/vendor
+      # ASSINATURA ELETRONICA
+      - ../../../mod-sei-assinatura-eletronica/composer.phar:/opt/sei/web/modulos/assinatura-eletronica/composer.phar
+      - ../../../mod-sei-assinatura-eletronica/composer.json:/opt/sei/web/modulos/assinatura-eletronica/composer.json
+      - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}

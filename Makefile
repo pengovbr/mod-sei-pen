@@ -1,4 +1,4 @@
-.PHONY: .env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
+.PHONY: .env .modulo.env help clean dist all install destroy up update down test test-functional test-functional-parallel test-unit bash_org1 bash_org2 verify-config
 
 # Parâmetros de execução do comando MAKE
 # Opções possíveis para spe (sistema de proc eletronico): sei5
@@ -148,10 +148,10 @@ install: check-isalive
 	$(CMD_COMPOSE_FUNC) exec org1-http chown -R root:root /etc/cron.d/
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sei
 	$(CMD_COMPOSE_FUNC) exec org1-http chmod 0644 /etc/cron.d/sip
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar update'
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar update'
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar install'
-	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar install'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar update --no-dev'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar update --no-dev'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org1-http bash -c './composer.phar install --no-dev'
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/pen org2-http bash -c './composer.phar install --no-dev'
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO)"
 	$(CMD_COMPOSE_FUNC) exec -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO)" 
 
@@ -167,6 +167,9 @@ install: check-isalive
 
 .env:
 	@if [ ! -f "$(PEN_TEST_FUNC)/.env" ]; then cp $(PEN_TEST_FUNC)/env_$(base) $(PEN_TEST_FUNC)/.env; fi
+
+.modulo.env:
+	@if [ ! -f "$(PEN_TEST_FUNC)/.modulo.env" ]; then cp $(PEN_TEST_FUNC)/env_modulo $(PEN_TEST_FUNC)/.modulo.env; fi
 
 up: .env prepare-upload-tmp 
 # Em alguns BDs os containers demoram alguns segundos para ficarem estáveis.
@@ -320,3 +323,24 @@ vendor: composer.json
 
 cria_json_compatibilidade:
 	$(shell ./gerar_json_compatibilidade.sh)
+
+install-assinatura: ## Instala e atualiza as tabelas do módulo na base de dados do sistema
+	@echo ">>>>>>Executando instalação assinatura eletrénica no ORG1 e Org2<<<<<<"
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/assinatura-eletronica org1-http ./composer.phar install --no-dev
+	$(CMD_COMPOSE_FUNC) exec -w /opt/sei/web/modulos/assinatura-eletronica org2-http ./composer.phar install --no-dev
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org1-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	@echo ""
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sei/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SEI_MODULO_ASSINATURA)";
+	$(CMD_COMPOSE_FUNC) exec -T -w /opt/sip/scripts/$(MODULO_PASTAS_CONFIG_ASSINATURA) org2-http bash -c "$(CMD_INSTALACAO_SIP_MODULO_ASSINATURA)";
+	
+	@docker exec funcional-solr-1 mkdir -p /opt/solr/server/solr/mod-sei-assinatura
+	@docker cp ../mod-sei-assinatura-eletronica/solr funcional-solr-1:/opt/solr/server/solr/mod-sei-assinatura/conf	
+	@docker exec -u 0 funcional-solr-1 chown -R solr:solr /opt/solr/server/solr/mod-sei-assinatura
+	@docker exec -u 0 funcional-solr-1 chmod -R u+rwX /opt/solr/server/solr/mod-sei-assinatura
+	@docker exec -e SOLR_AUTH_TYPE="basic" -e SOLR_AUTHENTICATION_OPTS="-Dbasicauth=admin:SolrAdmin123\$$" funcional-solr-1 /opt/solr/bin/solr create -c mod-sei-assinatura -d /opt/solr/server/solr/mod-sei-assinatura/conf
+	@echo ""
+	@echo "==================================================================================================="
+	@echo ""
+	@echo "Fim da instalação do módulo"
