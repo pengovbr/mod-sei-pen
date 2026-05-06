@@ -171,7 +171,7 @@ services:
       - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
-      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica      
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG1_HOSTNAME}:${ORG1_PORT}
@@ -239,7 +239,7 @@ services:
       - ../../../mod-sei-assinatura-eletronica/src:/opt/sei/web/modulos/assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/config:/opt/sei/config/mod-assinatura-eletronica
       - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sei/scripts/mod-assinatura-eletronica
-      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica      
+      - ../../../mod-sei-assinatura-eletronica/src/scripts:/opt/sip/scripts/mod-assinatura-eletronica
     environment:
       - LANG=pt_BR.ISO-8859-1
       - HOST_URL=http://${ORG2_HOSTNAME}:${ORG2_PORT}
