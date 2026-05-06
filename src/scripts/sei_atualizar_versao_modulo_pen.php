@@ -2698,6 +2698,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
       $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO');
       $fnCadastrar('A sincronização foi interrompida, após o sistema de destino rejeitar a tramitação. @MOTIVO_RECUSA@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_RECUSA');
       $fnCadastrar('A sincronização foi interrompida, após o sistema de origem cancelar a tramitação - @PROTOCOLO_FORMATADO@. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_AUTO');
+      $fnCadastrar('Tramitação externa do processo @PROTOCOLO_FORMATADO@ cancelada. Não é possível sincronizar processos com documentos internos gerados e não assinados.', 'S', 'S', 'N', 'S', 'N', 'PEN_SINC_MULTIPLOS_ORGAOS_CANCELADO_NAO_ASSINADO');
 
       $fnCadastrar('Pedido de sincronização múltiplos órgãos recebida - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'N', 'N', 'PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS_RECEBIDO');
       $fnCadastrar('Pedido envio de processo para múltiplos órgãos - @PROTOCOLO_FORMATADO@', 'S', 'S', 'N', 'S', 'N', 'PEN_PEDIDO_ENVIO_MULTIPLOS_ORGAOS');

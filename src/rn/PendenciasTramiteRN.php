@@ -105,7 +105,7 @@ class PendenciasTramiteRN extends InfraRN
             }
           }
 
-          $this->processarSolicitacoesSincronizacaoPendentes();
+          $this->processarSolicitacoesSincronizacaoPendentesConectado();
 
         } catch(ModuloIncompativelException $e) {
             // Sai loop de eventos para finalizar o script e subir uma nova versão atualizada
@@ -199,7 +199,7 @@ class PendenciasTramiteRN extends InfraRN
    */
   protected function processarSolicitacoesSincronizacaoPendentesConectado()
     {
-      $arrProcessosPendentes = $this->listarProcessosComSolicitacaoSincronizacaoPendente();
+      $arrProcessosPendentes = $this->listarProcessosComSolicitacaoSincronizacaoPendenteConectado();
 
     if (count($arrProcessosPendentes) === 0) {
         $this->gravarLogDebug('Nenhum processo com solicitação de sincronização pendente foi localizado.', 2);
@@ -253,11 +253,26 @@ class PendenciasTramiteRN extends InfraRN
           continue;
       }
 
-        $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
-            ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
-            : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
+        if ($objUltimoTramite->situacaoAtual == ProcessoEletronicoRN::$STA_SITUACAO_TRAMITE_CANCELADO) {
+          $strNumeroProcesso = $dblIdProcedimento;
+          try {
+            $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
+            $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
+            if (!empty($objProcedimentoDTO) && !empty($objProcedimentoDTO->getStrProtocoloProcedimentoFormatado())) {
+              $strNumeroProcesso = $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado();
+            }
+          } catch (Exception $e) {
+            $this->gravarLogDebug(InfraException::inspecionar($e), 2);
+          }
 
-        $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+          $strMotivo = "Tramitação externa do processo $strNumeroProcesso cancelada. O órgão de origem possui documentos internos gerados e não assinados, e por isso a sincronização não pode ser iniciada.";
+        } else {
+          $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
+              ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
+              : 'Pedido de sincronização não concluído, pois foi cancelado ou recusado na plataforma de tramitação.';
+
+          $strMotivo .= '. OBS: A recusa é uma das três formas de conclusão de trâmite. Portanto, não é um erro.';
+        }
 
         $objProcessoEletronicoRN->validarProcessoRecusaCancelamento($dblIdProcedimento, $strMotivo);
 

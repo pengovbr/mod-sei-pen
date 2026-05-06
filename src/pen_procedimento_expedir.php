@@ -344,6 +344,10 @@ try {
           $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($numIdProcedimento);
 
           $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+          if ($objProcessoEletronicoRN->possuiDocumentoInternoNaoAssinado($numIdProcedimento)) {
+            throw new InfraException('Não é possível tramitar um processos com documentos gerados e não assinados');
+          }
+
           $tramitePendencia = $objProcessoEletronicoRN->consultarTramites(null, null, null, null, $objProcedimentoDTO->getStrProtocoloProcedimentoFormatado());
           $enviarDireto = true;
           if (count($tramitePendencia) > 0) {
