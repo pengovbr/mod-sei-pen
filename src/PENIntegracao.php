@@ -286,6 +286,29 @@ class PENIntegracao extends SeiIntegracao
 
       //Verificação da Restrição de Acesso a Funcionalidade
       $bolAcaoExpedirProcesso = $objSessaoSEI->verificarPermissao('pen_procedimento_expedir');
+
+      // Em processo de múltiplos órgãos, somente a unidade que recebeu o processo pode expedir.
+      $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos = true;
+      $objProcessoEletronicoRN = new ProcessoEletronicoRN();
+      if ($objProcessoEletronicoRN->validarProcessoMultiplosOrgaos($dblIdProcedimento)) {
+        $objProcessoEletronicoDTO = new ProcessoEletronicoDTO();
+        $objProcessoEletronicoDTO->setDblIdProcedimento($dblIdProcedimento);
+
+        $objTramiteBD = new TramiteBD(BancoSEI::getInstance());
+        $objTramiteDTO = $objTramiteBD->consultarPrimeiroTramite($objProcessoEletronicoDTO);
+
+        if (!is_null($objTramiteDTO)) {
+          $objPenUnidadeDTO = new PenUnidadeDTO();
+          $objPenUnidadeDTO->setNumIdUnidade($numIdUnidadeAtual);
+          $objPenUnidadeDTO->retNumIdUnidadeRH();
+
+          $objPenUnidadeRN = new PenUnidadeRN();
+          $objPenUnidadeDTO = $objPenUnidadeRN->consultar($objPenUnidadeDTO);
+
+          $numIdUnidadeRHAtual = !empty($objPenUnidadeDTO) ? $objPenUnidadeDTO->getNumIdUnidadeRH() : null;
+          $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos = !is_null($numIdUnidadeRHAtual) && $objTramiteDTO->getNumIdEstruturaDestino() == $numIdUnidadeRHAtual;
+        }
+      }
     
       $objExpedirProcedimentoRN = new ExpedirProcedimentoRN();
       $objProcedimentoDTO = $objExpedirProcedimentoRN->consultarProcedimento($dblIdProcedimento);
@@ -334,7 +357,7 @@ class PENIntegracao extends SeiIntegracao
       $bolUnidadeMapeada = $objTramiteEmBlocoRN->existeUnidadeMapeadaParaUnidadeLogada();
 
       //Apresenta o botão de expedir processo
-    if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal) {
+    if ($bolUnidadeMapeada && !$bolProcessoEmBloco && $bolFlagAberto && $bolAcaoExpedirProcesso && $bolProcessoEstadoNormal && $bolUnidadeAtualPodeExpedirProcessoMultiplosOrgaos) {
         $numTabBotao = $objPaginaSEI->getProxTabBarraComandosSuperior();
         $strAcoesProcedimento .= '<a id="validar_expedir_processo" href="' . $objPaginaSEI->formatarXHTML($objSessaoSEI->assinarLink('controlador.php?acao=pen_procedimento_expedir&acao_origem=procedimento_visualizar&acao_retorno=arvore_visualizar&id_procedimento=' . $dblIdProcedimento . '&arvore=1')) . '" tabindex="' . $numTabBotao . '" class="botaoSEI"><img class="infraCorBarraSistema" src=' . ProcessoEletronicoINT::getCaminhoIcone("/pen_expedir_procedimento.gif", $this->getDiretorioImagens()) . ' alt="Envio Externo de Processo" title="Envio Externo de Processo" /></a>';
     }
