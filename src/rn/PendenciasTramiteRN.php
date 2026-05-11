@@ -156,7 +156,7 @@ class PendenciasTramiteRN extends InfraRN
     {
       $arrIdTarefaSincronizacaoPendente = array_filter([
         ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MULTIPLOS_ORGAOS),
-        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS)
+        ProcessoEletronicoRN::obterIdTarefaModulo(ProcessoEletronicoRN::$TI_PROCESSO_ELETRONICO_PEDIDO_SINC_MANUAL_MULTIPLOS_ORGAOS) //PEN_PEDIDO_SINC_MULTIPLOS_ORGAOS
       ]);
 
     if (empty($arrIdTarefaSincronizacaoPendente)) {
@@ -164,7 +164,6 @@ class PendenciasTramiteRN extends InfraRN
     }
 
       $objAtividadeDTO = new AtividadeDTO();
-      $objAtividadeDTO->setDthConclusao(null);
       $objAtividadeDTO->setNumIdTarefa($arrIdTarefaSincronizacaoPendente, InfraDTO::$OPER_IN);
       $objAtividadeDTO->setOrdDthAbertura(InfraDTO::$TIPO_ORDENACAO_ASC);
       $objAtividadeDTO->retNumIdAtividade();
@@ -265,7 +264,7 @@ class PendenciasTramiteRN extends InfraRN
             $this->gravarLogDebug(InfraException::inspecionar($e), 2);
           }
 
-          $strMotivo = "Tramitação externa do processo $strNumeroProcesso cancelada. O órgão de origem possui documentos internos gerados e não assinados, e por isso a sincronização não pode ser iniciada.";
+          $strMotivo = "A sincronização do processo $strNumeroProcesso foi cancelada pelo sistema de origem. Por favor, entre em contato com a equipe gestora desse sistema para entender o que motivou o encerramento da sincronia.";
         } else {
           $strMotivo = isset($objUltimoTramite->justificativaDaRecusa)
               ? mb_convert_encoding($objUltimoTramite->justificativaDaRecusa, 'ISO-8859-1', 'UTF-8')
