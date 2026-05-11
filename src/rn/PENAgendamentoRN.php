@@ -281,4 +281,230 @@ class PENAgendamentoRN extends InfraRN
     {
       return (!isset($_SERVER['SERVER_SOFTWARE']) && (php_sapi_name() == 'cli' || (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0)));
   }
+
+  /**
+    * Rotina para remoção física dos arquivos do módulo PEN que estão marcados como isolados ou desativados e que foram incluídos há mais de 24 horas, 
+    * garantindo a limpeza de arquivos que não estão mais vinculados a nenhum anexo ativo ou que foram marcados para exclusão lógica
+    *
+    * @return void
+    * @throws InfraException
+    *
+    */
+   public function removerArquivosExcluidosModSeiPen(){
+    try{
+
+      LimiteSEI::getInstance()->configurarNivel3();
+
+      InfraDebug::getInstance()->setBolLigado(true);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+      InfraDebug::getInstance()->limpar();
+
+      $numSeg = InfraUtil::verificarTempoProcessamento();
+
+      $dtaInicioExecucao = InfraData::getStrDataAtual();
+
+      InfraDebug::getInstance()->gravar('REMOVENDO ARQUIVOS EXCLUIDOS MOD SEI PEN');
+
+      $objAnexoRN = new PenAnexoDocumentoRN();
+
+      $diretorioAno = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/');
+      $arrAno = array();
+      while($ano = $diretorioAno -> read()){
+        if (is_numeric($ano)){
+          $arrAno[] = $ano;
+        }
+      }
+      $diretorioAno->close();
+
+      $numArquivosRemovidos = 0;
+      $numBytesTotal = 0;
+      if (count($arrAno)){
+
+        sort($arrAno);
+
+        foreach($arrAno as $ano){
+
+          $arrMes = array();
+          $diretorioMes = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano);
+          while($mes = $diretorioMes -> read()){
+            if (is_numeric($mes)){
+              $arrMes[] = $mes;
+            }
+          }
+          $diretorioMes->close();
+
+          if (count($arrMes)){
+            sort($arrMes);
+
+            foreach($arrMes as $mes){
+              $arrDia = array();
+              $diretorioDia = dir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes);
+              while($dia = $diretorioDia -> read()){
+                if (is_numeric($dia)){
+                  $arrDia[] = $dia;
+                }
+              }
+              $diretorioDia->close();
+
+              if (count($arrDia)){
+
+                sort($arrDia);
+
+                $objAnexoDTO = new PenAnexoDocumentoDTO();
+                $objAnexoDTO->retNumIdAnexo();
+                $objAnexoDTO->adicionarCriterio(array('Inclusao','Inclusao'),
+                    array(InfraDTO::$OPER_MAIOR_IGUAL,InfraDTO::$OPER_MENOR_IGUAL),
+                    array($arrDia[0].'/'.$mes.'/'.$ano.' 00:00:00',$arrDia[count($arrDia)-1].'/'.$mes.'/'.$ano.' 23:59:59'),
+                    InfraDTO::$OPER_LOGICO_AND);
+                $objAnexoDTO->setOrdNumIdAnexo(InfraDTO::$TIPO_ORDENACAO_ASC);
+
+                $arrIdAnexosMes = InfraArray::indexarArrInfraDTO($objAnexoRN->listar($objAnexoDTO),'IdAnexo');
+
+                foreach($arrDia as $dia){
+
+                  if ($dtaInicioExecucao == $dia.'/'.$mes.'/'.$ano){
+                    break 3;
+                  }
+
+                  $diretorioArquivos = opendir(ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia);
+
+                  if ($diretorioArquivos){
+
+                    while (($arquivo = readdir($diretorioArquivos)) !== false) {
+                      if (is_numeric($arquivo) && !isset($arrIdAnexosMes[$arquivo])){
+                        $strCaminhoArquivo = ConfiguracaoSEI::getInstance()->getValor('SEI','RepositorioArquivos'). '/mod-pen/' .'/'.$ano.'/'.$mes.'/'.$dia.'/'.$arquivo;
+                        $numBytesArquivo = filesize($strCaminhoArquivo);
+                        unlink($strCaminhoArquivo);
+                        InfraDebug::getInstance()->gravar($strCaminhoArquivo.' ('.InfraUtil::formatarTamanhoBytes($numBytesArquivo).')');
+                        $numBytesTotal += $numBytesArquivo;
+                        $numArquivosRemovidos++;
+                      }
+                    }
+                    closedir($diretorioArquivos);
+                  }
+                }
+
+                unset($arrIdAnexosMes);
+              }
+            }
+          }
+        }
+      }
+
+      InfraDebug::getInstance()->gravar($numArquivosRemovidos.' ARQUIVOS REMOVIDOS ('.InfraUtil::formatarTamanhoBytes($numBytesTotal).')');
+
+      $numSeg = InfraUtil::verificarTempoProcessamento($numSeg);
+      InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
+      InfraDebug::getInstance()->gravar('FIM');
+
+      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(),InfraLog::$INFORMACAO);
+
+
+    }catch(Throwable $e){
+      InfraDebug::getInstance()->setBolLigado(false);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+
+      throw new InfraException('Erro removendo arquivos mod-sei-pen excluídos.',$e);
+    }
+  }
+
+  /**
+   * Rotina para remoção física dos arquivos do módulo PEN que estão marcados como isolados ou desativados e que foram incluídos há mais de 24 horas, 
+   * garantindo a limpeza de arquivos que não estão mais vinculados a nenhum anexo ativo ou que foram marcados para exclusão lógica
+   */
+    public function removerArquivosNaoUtilizadosModSeiPen(){
+    try{
+
+      LimiteSEI::getInstance()->configurarNivel3();
+
+
+      InfraDebug::getInstance()->setBolLigado(true);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+      InfraDebug::getInstance()->limpar();
+  
+      $numSeg = InfraUtil::verificarTempoProcessamento();
+
+      InfraDebug::getInstance()->gravar('REMOVENDO ARQUIVOS NÃO UTILIZADOS MOD SEI PEN');
+
+      $objAnexoRN = new PenAnexoDocumentoRN();
+
+      $objAnexoDTO = new PenAnexoDocumentoDTO();
+      $objAnexoDTO->setBolExclusaoLogica(false);
+      $objAnexoDTO->retNumIdAnexo();
+      $objAnexoDTO->retDthInclusao();
+
+      $objAnexoDTO->adicionarCriterio(array('IdProtocolo','IdBaseConhecimento','IdProjeto'),
+                                     array(InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL,InfraDTO::$OPER_IGUAL),
+                                     array(null,null,null),
+                                     array(InfraDTO::$OPER_LOGICO_AND,InfraDTO::$OPER_LOGICO_AND),
+                                     'cIsolado');
+
+      $objAnexoDTO->adicionarCriterio(array('SinAtivo'),
+                                       array(InfraDTO::$OPER_IGUAL),
+                                       array('N'),
+                                       null,
+                                       'cDesativado');
+
+      $objAnexoDTO->agruparCriterios(array('cIsolado','cDesativado'),InfraDTO::$OPER_LOGICO_OR);
+
+      $objAnexoDTO->setDthInclusao(InfraData::calcularData(1, InfraData::$UNIDADE_DIAS, InfraData::$SENTIDO_ATRAS, InfraData::getStrDataHoraAtual()),InfraDTO::$OPER_MENOR_IGUAL);
+
+      $arrObjAnexoDTO = $objAnexoRN->listar($objAnexoDTO);
+
+      $numArquivosRemovidos = 0;
+      $numBytesTotal = 0;
+
+      if (count($arrObjAnexoDTO)) {
+
+        $objLixeiraDTO = new LixeiraDTO();
+        $objLixeiraDTO->retNumIdAnexo();
+        $objLixeiraDTO->setNumIdAnexo(InfraArray::converterArrInfraDTO($arrObjAnexoDTO, 'IdAnexo'), InfraDTO::$OPER_IN);
+
+        $objLixeiraRN = new LixeiraRN();
+        $arrObjLixeiraDTO = InfraArray::indexarArrInfraDTO($objLixeiraRN->listar($objLixeiraDTO), 'IdAnexo');
+
+
+        foreach ($arrObjAnexoDTO as $objAnexoDTO) {
+          $strCaminhoArquivo = $objAnexoRN->obterLocalizacaoAnexoModuloPen($objAnexoDTO);
+
+          $bolExclusaoOk = false;
+
+          if (!isset($arrObjLixeiraDTO[$objAnexoDTO->getNumIdAnexo()])) {
+            try {
+              $objAnexoRN->excluir($objAnexoDTO);
+              $bolExclusaoOk = true;
+            } catch (Exception $e) {
+              InfraDebug::getInstance()->gravar('ERRO EXCLUINDO ANEXO ' . $objAnexoDTO->getNumIdAnexo() . ': ' . $e->__toString());
+            }
+          }
+
+          if ($bolExclusaoOk && file_exists($strCaminhoArquivo)) {
+            $numBytesArquivo = filesize($strCaminhoArquivo);
+            unlink($strCaminhoArquivo);
+            InfraDebug::getInstance()->gravar($strCaminhoArquivo . ' (' . InfraUtil::formatarTamanhoBytes($numBytesArquivo) . ')');
+            $numBytesTotal += $numBytesArquivo;
+            $numArquivosRemovidos++;
+          }
+        }
+      }
+
+      InfraDebug::getInstance()->gravar($numArquivosRemovidos.' ARQUIVOS REMOVIDOS ('.InfraUtil::formatarTamanhoBytes($numBytesTotal).')');
+      
+      $numSeg = InfraUtil::verificarTempoProcessamento($numSeg);
+      InfraDebug::getInstance()->gravar('TEMPO TOTAL DE EXECUCAO: '.$numSeg.' s');
+      InfraDebug::getInstance()->gravar('FIM');
+      
+      LogSEI::getInstance()->gravar(InfraDebug::getInstance()->getStrDebug(),InfraLog::$INFORMACAO);
+
+    }catch(Throwable $e){
+      InfraDebug::getInstance()->setBolLigado(false);
+      InfraDebug::getInstance()->setBolDebugInfra(false);
+      InfraDebug::getInstance()->setBolEcho(false);
+      
+      throw new InfraException('Erro removendo arquivos não utilizados.',$e);
+    }
+  }
 }
