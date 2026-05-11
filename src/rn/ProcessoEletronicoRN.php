@@ -3089,9 +3089,13 @@ class ProcessoEletronicoRN extends InfraRN
 
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+        if (empty($arrObjTramites)) {
+            return false;
+        }
+        $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
-      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
       return false;
     }
 
@@ -3139,9 +3143,13 @@ class ProcessoEletronicoRN extends InfraRN
 
     try {
         $objProcessoEletronicoRN = new ProcessoEletronicoRN();
-        $objMetadados = $objProcessoEletronicoRN->solicitarMetadados($objTramiteDTO->getNumIdTramite());
+        $arrObjTramites = $objProcessoEletronicoRN->consultarTramites($objTramiteDTO->getNumIdTramite());
+        if (empty($arrObjTramites)) {
+            return false;
+        }
+        $objMetadados = $arrObjTramites[0];
     } catch (Exception $e) {
-      LogSEI::getInstance()->gravar("Erro ao solicitar metadados para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
+      LogSEI::getInstance()->gravar("Erro ao consultar trâmite para o processo $numIdProcedimento: " . $e->getMessage(), InfraLog::$ERRO);
       return false;
     }
 
