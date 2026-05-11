@@ -294,6 +294,8 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
           $this->instalarV4030();
         case '4.0.3':
           $this->instalarV4100();
+        case '4.1.0':
+          $this->instalarV4200_Beta();
 
             break; // Ausência de [break;] proposital para realizar a atualização incremental de versões
         default:
@@ -2645,7 +2647,12 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
   }
 
   protected function instalarV4100()
-    {
+  {
+      $this->atualizarNumeroVersao("4.1.0");
+  }
+
+  protected function instalarV4200_Beta()
+  {
     $objMetaBanco = $this->inicializarObjMetaBanco();
 
     // Adicionar coluna para controle de múltiplos órgãos
@@ -2721,7 +2728,7 @@ class PenAtualizarSeiRN extends PenAtualizadorRN
         $objBD->alterar($objTarefaOrdemArvoreDTO);
       }
       
-      $this->atualizarNumeroVersao("4.1.0");
+      $this->atualizarNumeroVersao("4.2.0-Beta");
   }
 
     /**
